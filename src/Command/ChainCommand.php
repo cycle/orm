@@ -27,7 +27,7 @@ class ChainCommand implements \IteratorAggregate, MutableCommandInterface
     /**
      * {@inheritdoc}
      */
-    public function pushCommand(CommandInterface $command)
+    public function addCommand(CommandInterface $command)
     {
         if ($command instanceof NullCommand) {
             return;
@@ -39,7 +39,7 @@ class ChainCommand implements \IteratorAggregate, MutableCommandInterface
     /**
      * @param MutableCommandInterface $command
      */
-    public function pushTargetCommand(MutableCommandInterface $command)
+    public function addTargetCommand(MutableCommandInterface $command)
     {
         $this->commands[] = $command;
         $this->target = $command;

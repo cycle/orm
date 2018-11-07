@@ -23,7 +23,7 @@ use Spiral\Treap\Command\MutableCommandInterface;
  * This creates ability to create postponed delete command which where statement will be resolved
  * only later in transactions.
  */
-class PromisedDeleteCommand extends DatabaseCommand implements MutableCommandInterface
+class DeletePromiseCommand extends DatabaseCommand implements MutableCommandInterface
 {
     use PrimaryKeyTrait, ContextTrait, WhereTrait;
 

@@ -11,16 +11,17 @@ namespace Spiral\Treap\Tests\Treap\Command;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Query\InsertQuery;
-use Spiral\Treap\Command\Database\InsertCommand;
+use Spiral\Database\Query\UpdateQuery;
+use Spiral\Treap\Command\Database\UpdateCommand;
 
-class InsertCommandTest extends TestCase
+class UpdateCommandTest extends TestCase
 {
     public function testIsEmpty()
     {
-        $cmd = new InsertCommand(
+        $cmd = new UpdateCommand(
             m::mock(DatabaseInterface::class),
             'table',
+            [],
             []
         );
 
@@ -29,10 +30,11 @@ class InsertCommandTest extends TestCase
 
     public function testIsEmptyData()
     {
-        $cmd = new InsertCommand(
+        $cmd = new UpdateCommand(
             m::mock(DatabaseInterface::class),
             'table',
-            ['name' => 'value']
+            ['name' => 'value'],
+            ['where' => 'value']
         );
 
         $this->assertFalse($cmd->isEmpty());
@@ -41,38 +43,40 @@ class InsertCommandTest extends TestCase
 
     public function testIsEmptyContext()
     {
-        $cmd = new InsertCommand(
+        $cmd = new UpdateCommand(
             m::mock(DatabaseInterface::class),
             'table',
-            []
+            ['name' => 'value'],
+            ['where' => 'value']
         );
 
-        $this->assertTrue($cmd->isEmpty());
-
-        $cmd->addContext('name', 'value');
         $this->assertFalse($cmd->isEmpty());
+
+        $cmd->addContext('key', 'value');
+        $this->assertSame(['key' => 'value'], $cmd->getContext());
     }
 
     public function testExecute()
     {
-        $cmd = new InsertCommand(
+        $cmd = new UpdateCommand(
             $m = m::mock(DatabaseInterface::class),
             'table',
-            ['key' => 'value']
+            ['key' => 'value'],
+            ['where' => 'value']
         );
 
         $cmd->addContext('name', 'value');
         $this->assertSame(null, $cmd->getPrimaryKey());
 
-        $m->expects('insert')->with('table')->andReturn(
-            $i = m::mock(InsertQuery::class)
+        $m->expects('update')->with('table',
+            ['name' => 'value', 'key' => 'value'],
+            ['where' => 'value']
+        )->andReturn(
+            $i = m::mock(UpdateQuery::class)
         );
 
-        $i->expects('values')->with(['name' => 'value', 'key' => 'value'])->andReturnSelf();
-        $i->expects('run')->andReturn(1);
+        $i->expects('run');
 
         $cmd->execute();
-
-        $this->assertSame(1, $cmd->getPrimaryKey());
     }
 }

@@ -13,7 +13,7 @@ use Spiral\Treap\Command\Database\DatabaseCommand;
 use Spiral\Treap\Command\Database\Traits\ContextTrait;
 use Spiral\Treap\Command\Database\Traits\PrimaryKeyTrait;
 use Spiral\Treap\Command\Database\Traits\WhereTrait;
-use Spiral\Treap\Command\MutableCommandInterface;
+use Spiral\Treap\Command\CommandPromiseInterface;
 
 /**
  * Promised delete is a command which delete based on where statement directly linked to it's
@@ -23,7 +23,7 @@ use Spiral\Treap\Command\MutableCommandInterface;
  * This creates ability to create postponed delete command which where statement will be resolved
  * only later in transactions.
  */
-class DeletePromiseCommand extends DatabaseCommand implements MutableCommandInterface
+class DeletePromise extends DatabaseCommand implements CommandPromiseInterface
 {
     use PrimaryKeyTrait, ContextTrait, WhereTrait;
 

@@ -12,7 +12,7 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Treap\Command\Database\Traits\ContextTrait;
 use Spiral\Treap\Command\Database\Traits\PrimaryKeyTrait;
 use Spiral\Treap\Command\Database\Traits\WhereTrait;
-use Spiral\Treap\Command\MutableCommandInterface;
+use Spiral\Treap\Command\CommandPromiseInterface;
 
 
 /**
@@ -20,7 +20,7 @@ use Spiral\Treap\Command\MutableCommandInterface;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class UpdateCommand extends DatabaseCommand implements MutableCommandInterface
+class UpdateCommand extends DatabaseCommand implements CommandPromiseInterface
 {
     use PrimaryKeyTrait, ContextTrait, WhereTrait;
 

@@ -11,7 +11,7 @@ namespace Spiral\Treap\Event;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\Treap\Command\CommandInterface;
-use Spiral\Treap\Command\MutableCommandInterface;
+use Spiral\Treap\Command\CommandPromiseInterface;
 
 class RecordEvent extends EntityEvent
 {
@@ -35,7 +35,7 @@ class RecordEvent extends EntityEvent
      */
     public function isMutable(): bool
     {
-        return $this->command instanceof MutableCommandInterface;
+        return $this->command instanceof CommandPromiseInterface;
     }
 
     /**

@@ -8,10 +8,10 @@
 namespace Spiral\Treap\Command;
 
 /**
- * Contextual commands used to carry FK and PK values across commands pipeline, other commands are
+ * Promise commands used to carry FK and PK values across commands pipeline, other commands are
  * able to mount it's values into parent context or read from it.
  */
-interface MutableCommandInterface extends CommandInterface
+interface CommandPromiseInterface extends CommandInterface
 {
     /**
      * Returns associated primary key, can be NULL. Promised for `onExecute`!

@@ -10,12 +10,12 @@ namespace Spiral\Treap\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Treap\Command\Database\Traits\ContextTrait;
-use Spiral\Treap\Command\MutableCommandInterface;
+use Spiral\Treap\Command\CommandPromiseInterface;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class InsertCommand extends DatabaseCommand implements MutableCommandInterface
+class InsertCommand extends DatabaseCommand implements CommandPromiseInterface
 {
     use ContextTrait;
 

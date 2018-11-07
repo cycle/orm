@@ -16,9 +16,9 @@ use Spiral\Treap\Exception\CommandException;
  *
  * Leading command can be in a middle of the chain!
  */
-class ChainCommand implements \IteratorAggregate, MutableCommandInterface
+class ChainCommand implements \IteratorAggregate, CommandPromiseInterface
 {
-    /** @var MutableCommandInterface */
+    /** @var CommandPromiseInterface */
     private $target;
 
     /** @var CommandInterface[] */
@@ -37,9 +37,9 @@ class ChainCommand implements \IteratorAggregate, MutableCommandInterface
     }
 
     /**
-     * @param MutableCommandInterface $command
+     * @param CommandPromiseInterface $command
      */
-    public function addTargetCommand(MutableCommandInterface $command)
+    public function addTargetCommand(CommandPromiseInterface $command)
     {
         $this->commands[] = $command;
         $this->target = $command;
@@ -146,9 +146,9 @@ class ChainCommand implements \IteratorAggregate, MutableCommandInterface
     }
 
     /**
-     * @return MutableCommandInterface
+     * @return CommandPromiseInterface
      */
-    protected function getTarget(): MutableCommandInterface
+    protected function getTarget(): CommandPromiseInterface
     {
         if (empty($this->target)) {
             throw new CommandException("Chain target command is not set.");

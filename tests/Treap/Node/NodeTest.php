@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Tests;
+namespace Spiral\Treap\Tests\Node;
 
 use PHPUnit\Framework\TestCase;
 use Spiral\Treap\Node\ArrayNode;

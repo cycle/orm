@@ -1,0 +1,21 @@
+{
+  "name": "spiral/reap",
+  "type": "library",
+  "require": {
+    "php": "^7.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~7.0",
+    "mockery/mockery": "^1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Spiral\\Treap\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Spiral\\Treap\\Tests\\": "tests/"
+    }
+  }
+}

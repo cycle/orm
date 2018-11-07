@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Exception;
+namespace Spiral\Treap\Mapper;
 
-class NodeException extends ORMException
+class MapperFactory
 {
 
 }

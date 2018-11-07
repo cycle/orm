@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Exception;
+namespace Spiral\Treap\Traits;
 
-class NodeException extends ORMException
+trait SourceTrait
 {
 
 }

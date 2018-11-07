@@ -8,7 +8,7 @@
 
 namespace Spiral\Treap\Exception;
 
-class NodeException extends ORMException
+class MapperException extends ORMException
 {
 
 }

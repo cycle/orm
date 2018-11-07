@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Exception;
+namespace App\Schema;
 
-class NodeException extends ORMException
+interface DeclarationInterface
 {
 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Exception;
+namespace Spiral\Treap\Column;
 
-class NodeException extends ORMException
+interface ColumnInterface
 {
 
 }

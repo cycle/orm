@@ -1,8 +1,12 @@
 {
-  "name": "spiral/reap",
+  "name": "spiral/treap",
   "type": "library",
+  "description": "AR and DM",
   "require": {
-    "php": "^7.1"
+    "php": "^7.1",
+    "spiral/database": "^2.1",
+    "spiral/models": "^2.0",
+    "zendframework/zend-hydrator": "^2.4"
   },
   "require-dev": {
     "phpunit/phpunit": "~7.0",

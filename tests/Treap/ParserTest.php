@@ -136,4 +136,41 @@ class ParserTest extends TestCase
             $node->parseRow(0, $row);
         }
     }
+
+    public function testGetNode()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->joinNode('balance', $child = new SingularNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        ));
+
+        $this->assertInstanceOf(SingularNode::class, $node->getNode('balance'));
+    }
+
+    /**
+     * @expectedException \Spiral\Treap\Exception\NodeException
+     */
+    public function testGetUndefinedNode()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->getNode('balance');
+    }
+
+    /**
+     * @expectedException \Spiral\Treap\Exception\NodeException
+     */
+    public function testSingularParseWithoutParent()
+    {
+        $node = new SingularNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        );
+
+        $node->parseRow(0, []);
+    }
 }

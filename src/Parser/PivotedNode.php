@@ -12,7 +12,7 @@ use Spiral\Treap\Exception\NodeException;
 /**
  * Provides ability to parse columns of target table and map table all together.
  */
-class PivotNode extends AbstractNode implements ArrayInterface
+class PivotedNode extends AbstractNode implements ArrayInterface
 {
     // Stores information about associated context data
     public const PIVOT_DATA = '@pivot';

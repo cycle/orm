@@ -11,7 +11,7 @@ namespace Spiral\Treap\Parser;
 /**
  * Similar to normal pivot node but does not require parent!
  */
-class PivotRootNode extends OutputNode
+class PivotedRootNode extends OutputNode
 {
     /** @var int */
     private $countPivot = 0;
@@ -49,7 +49,7 @@ class PivotRootNode extends OutputNode
      */
     protected function push(array &$data)
     {
-        if (is_null($data[PivotNode::PIVOT_DATA][$this->outerPivotKey])) {
+        if (is_null($data[PivotedNode::PIVOT_DATA][$this->outerPivotKey])) {
             return;
         }
 
@@ -67,7 +67,7 @@ class PivotRootNode extends OutputNode
 
         //Forming pivot data presence
         return array_merge(
-            [PivotNode::PIVOT_DATA => array_slice($data, 0, $this->countPivot)],
+            [PivotedNode::PIVOT_DATA => array_slice($data, 0, $this->countPivot)],
             array_slice($data, $this->countPivot)
         );
     }
@@ -80,7 +80,7 @@ class PivotRootNode extends OutputNode
      */
     protected function duplicateCriteria(array &$data)
     {
-        $pivotData = $data[PivotNode::PIVOT_DATA];
+        $pivotData = $data[PivotedNode::PIVOT_DATA];
 
         return $pivotData[$this->innerPivotKey] . '.' . $pivotData[$this->outerPivotKey];
     }

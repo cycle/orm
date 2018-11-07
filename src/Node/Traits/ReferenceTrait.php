@@ -121,7 +121,7 @@ trait ReferenceTrait
     {
         if (!in_array($key, $this->columns)) {
             throw new NodeException(
-                "Unable to create reference, key {$key} does not exist."
+                "Unable to create reference, key `{$key}` does not exist."
             );
         }
 

@@ -78,7 +78,7 @@ class PivotedRootNode extends OutputNode
      * @param array $data
      * @return string
      */
-    protected function duplicateCriteria(array &$data)
+    protected function duplicateCriteria(array &$data): string
     {
         $pivotData = $data[PivotedNode::PIVOT_DATA];
 

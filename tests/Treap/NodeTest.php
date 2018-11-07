@@ -326,4 +326,19 @@ class NodeTest extends TestCase
             ],
         ], $node->getResult());
     }
+
+    /**
+     * @expectedException \Spiral\Treap\Exception\NodeException
+     */
+    public function testArrayWithoutParent()
+    {
+        $node = new ArrayNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        );
+
+        $node->parseRow(0, [1, 10, 10]);
+    }
 }

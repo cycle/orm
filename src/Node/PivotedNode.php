@@ -92,7 +92,7 @@ class PivotedNode extends AbstractNode implements ArrayInterface
      * @param array $data
      * @return string
      */
-    protected function duplicateCriteria(array &$data)
+    protected function duplicateCriteria(array &$data): string
     {
         $pivotData = $data[self::PIVOT_DATA];
 

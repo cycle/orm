@@ -5,22 +5,26 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Parser;
+namespace Spiral\Treap\Node;
 
+use Spiral\Treap\Exception\NodeException;
 
 /**
- * Similar to normal pivot node but does not require parent!
+ * Provides ability to parse columns of target table and map table all together.
  */
-class PivotedRootNode extends OutputNode
+class PivotedNode extends AbstractNode implements ArrayInterface
 {
+    // Stores information about associated context data
+    public const PIVOT_DATA = '@pivot';
+
     /** @var int */
     private $countPivot = 0;
 
     /** @var string */
-    protected $innerPivotKey;
+    private $innerPivotKey;
 
     /** @var string */
-    protected $outerPivotKey;
+    private $outerPivotKey;
 
     /**
      * @param array  $columns
@@ -36,7 +40,7 @@ class PivotedRootNode extends OutputNode
         string $innerPivotKey,
         string $outerPivotKey
     ) {
-        //Pivot columns are always prior to table columns
+        // pivot columns are always prior to table columns
         parent::__construct(array_merge($pivotColumns, $columns), $outerKey);
         $this->countPivot = count($pivotColumns);
 
@@ -49,11 +53,21 @@ class PivotedRootNode extends OutputNode
      */
     protected function push(array &$data)
     {
-        if (is_null($data[PivotedNode::PIVOT_DATA][$this->outerPivotKey])) {
+        if (empty($this->parent)) {
+            throw new NodeException("Unable to register data tree, parent is missing.");
+        }
+
+        if (is_null($data[$this->outerKey])) {
+            //No data was loaded
             return;
         }
 
-        $this->result[] = &$data;
+        $this->parent->mountArray(
+            $this->container,
+            $this->outerKey,
+            $data[self::PIVOT_DATA][$this->innerPivotKey],
+            $data
+        );
     }
 
     /**
@@ -65,9 +79,9 @@ class PivotedRootNode extends OutputNode
     {
         $data = parent::fetchData($dataOffset, $line);
 
-        //Forming pivot data presence
+        // forming pivot data presence
         return array_merge(
-            [PivotedNode::PIVOT_DATA => array_slice($data, 0, $this->countPivot)],
+            [self::PIVOT_DATA => array_slice($data, 0, $this->countPivot)],
             array_slice($data, $this->countPivot)
         );
     }
@@ -80,8 +94,9 @@ class PivotedRootNode extends OutputNode
      */
     protected function duplicateCriteria(array &$data)
     {
-        $pivotData = $data[PivotedNode::PIVOT_DATA];
+        $pivotData = $data[self::PIVOT_DATA];
 
+        // unique row criteria
         return $pivotData[$this->innerPivotKey] . '.' . $pivotData[$this->outerPivotKey];
     }
 }

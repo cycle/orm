@@ -9,10 +9,11 @@
 namespace Spiral\Treap\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\Treap\Parser\RootNode;
-use Spiral\Treap\Parser\SingularNode;
+use Spiral\Treap\Node\ArrayNode;
+use Spiral\Treap\Node\RootNode;
+use Spiral\Treap\Node\SingularNode;
 
-class ParserTest extends TestCase
+class NodeTest extends TestCase
 {
     public function testRoot()
     {
@@ -266,5 +267,63 @@ class ParserTest extends TestCase
         );
 
         $node->parseRow(0, [1, 10, 10]);
+    }
+
+    public function testArray()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->joinNode('lines', new ArrayNode(
+            ['id', 'user_id', 'value'],
+            'id',
+            'user_id',
+            'id'
+        ));
+
+        $data = [
+            [1, 'email@gmail.com', 1, 1, 100],
+            [2, 'other@gmail.com', 2, 2, 200],
+            [2, 'other@gmail.com', 3, 2, 300],
+            [3, 'third@gmail.com', null, null, null],
+            [3, 'third@gmail.com', null, null, null],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+
+        $this->assertSame([
+            [
+                'id'    => 1,
+                'email' => 'email@gmail.com',
+                'lines' => [
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'value'   => 100
+                    ]
+                ]
+            ],
+            [
+                'id'    => 2,
+                'email' => 'other@gmail.com',
+                'lines' => [
+                    [
+                        'id'      => 2,
+                        'user_id' => 2,
+                        'value'   => 200
+                    ],
+                    [
+                        'id'      => 3,
+                        'user_id' => 2,
+                        'value'   => 300
+                    ]
+                ]
+            ],
+            [
+                'id'    => 3,
+                'email' => 'third@gmail.com',
+                'lines' => []
+            ],
+        ], $node->getResult());
     }
 }

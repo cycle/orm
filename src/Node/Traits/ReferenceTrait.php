@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Parser\Traits;
+namespace Spiral\Treap\Node\Traits;
 
 use Spiral\Treap\Exception\NodeException;
 

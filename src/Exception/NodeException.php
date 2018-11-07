@@ -8,7 +8,7 @@
 
 namespace Spiral\Treap\Exception;
 
-class NodeException extends ParserException
+class NodeException extends \RuntimeException
 {
 
 }

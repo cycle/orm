@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Parser;
+namespace Spiral\Treap\Node;
 
 /**
  * Node without specified parent.

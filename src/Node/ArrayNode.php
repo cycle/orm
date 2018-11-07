@@ -5,14 +5,14 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Parser;
+namespace Spiral\Treap\Node;
 
 use Spiral\Treap\Exception\NodeException;
 
 /**
- * Node with ability to push it's data into referenced tree location.
+ * Parses multiple sub children and mount them under parent node.
  */
-class SingularNode extends AbstractNode
+class ArrayNode extends AbstractNode implements ArrayInterface
 {
     /** @var string */
     protected $innerKey;
@@ -45,11 +45,11 @@ class SingularNode extends AbstractNode
         }
 
         if (is_null($data[$this->innerKey])) {
-            //No data was loaded
+            // no data was parsed
             return;
         }
 
-        $this->parent->mount(
+        $this->parent->mountArray(
             $this->container,
             $this->outerKey,
             $data[$this->innerKey],

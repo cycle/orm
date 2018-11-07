@@ -5,11 +5,11 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Parser;
+namespace Spiral\Treap\Node;
 
 use Spiral\Treap\Exception\NodeException;
-use Spiral\Treap\Parser\Traits\DuplicateTrait;
-use Spiral\Treap\Parser\Traits\ReferenceTrait;
+use Spiral\Treap\Node\Traits\DuplicateTrait;
+use Spiral\Treap\Node\Traits\ReferenceTrait;
 
 /**
  * Represents data node in a tree with ability to parse line of results, split it into sub
@@ -233,10 +233,6 @@ abstract class AbstractNode
      */
     protected function fetchData(int $dataOffset, array $line): array
     {
-        if (empty($this->columns)) {
-            return $line;
-        }
-
         try {
             //Combine column names with sliced piece of row
             return array_combine(

@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Parser;
+namespace Spiral\Treap\Node;
 
 /**
  * Provides ability to fetch node context.

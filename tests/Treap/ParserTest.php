@@ -113,6 +113,100 @@ class ParserTest extends TestCase
         ], $node->getResult());
     }
 
+    public function testGetReferences()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->linkNode('balance', $child = new SingularNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        ));
+
+        $data = [
+            [1, 'email@gmail.com'],
+            [2, 'other@gmail.com'],
+            [3, 'third@gmail.com'],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+
+        $this->assertSame([1, 2, 3], $child->getReferences());
+    }
+
+    /**
+     * @expectedException \Spiral\Treap\Exception\NodeException
+     */
+    public function testGetReferencesWithoutParent()
+    {
+        $child = new SingularNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        );
+
+        $child->getReferences();
+    }
+
+    public function testSingularOverExternal()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->linkNode('balance', $child = new SingularNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        ));
+
+        $data = [
+            [1, 'email@gmail.com'],
+            [2, 'other@gmail.com'],
+            [3, 'third@gmail.com'],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+
+        $childData = [
+            [1, 1, 100],
+            [2, 2, 200]
+        ];
+
+        foreach ($childData as $row) {
+            $child->parseRow(0, $row);
+        }
+
+        $this->assertSame([
+            [
+                'id'      => 1,
+                'email'   => 'email@gmail.com',
+                'balance' => [
+                    'id'      => 1,
+                    'user_id' => 1,
+                    'balance' => 100
+                ]
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'other@gmail.com',
+                'balance' => [
+                    'id'      => 2,
+                    'user_id' => 2,
+                    'balance' => 200
+                ]
+            ],
+            [
+                'id'      => 3,
+                'email'   => 'third@gmail.com',
+                'balance' => null
+            ],
+        ], $node->getResult());
+    }
+
     /**
      * @expectedException \Spiral\Treap\Exception\NodeException
      */

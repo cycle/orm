@@ -265,6 +265,6 @@ class ParserTest extends TestCase
             'id'
         );
 
-        $node->parseRow(0, []);
+        $node->parseRow(0, [1, 10, 10]);
     }
 }

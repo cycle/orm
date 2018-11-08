@@ -6,9 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Declaration;
+namespace Spiral\Treap\Schema\Relation\Util;
 
-final class IndexDeclaration
+
+class OptionBag
 {
 
 }

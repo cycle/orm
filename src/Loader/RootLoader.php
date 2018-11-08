@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\Treap\Loader;
 
-interface SchemaInterface
+class RootLoader extends AbstractLoader
 {
 
 }

@@ -39,53 +39,13 @@ abstract class AbstractLoader
 {
     use ColumnsTrait;
 
-    /**
-     * Loading methods for data loaders.
-     */
-    const INLOAD    = 1;
-    const POSTLOAD  = 2;
-    const JOIN      = 3;
-    const LEFT_JOIN = 4;
 
-    /**
-     * Nested loaders.
-     *
-     * @var LoaderInterface[]
-     */
-    protected $loaders = [];
-
-    /**
-     * Set of loaders with ability to JOIN it's data into parent SelectQuery.
-     *
-     * @var AbstractLoader[]
-     */
-    protected $joiners = [];
 
     /**
      * @var string
      */
     protected $class;
 
-    /**
-     * @invisible
-     * @var ORMInterface
-     */
-    protected $orm;
-
-    /**
-     * Parent loader if any.
-     *
-     * @invisible
-     * @var AbstractLoader
-     */
-    protected $parent;
-
-    /**
-     * Loader options, can be altered on RecordSelector level.
-     *
-     * @var array
-     */
-    protected $options = [];
 
     /**
      * Relation schema.
@@ -94,25 +54,6 @@ abstract class AbstractLoader
      */
     protected $schema = [];
 
-    /**
-     * @param string       $class
-     * @param array        $schema Relation schema.
-     * @param ORMInterface $orm
-     */
-    public function __construct(string $class, array $schema, ORMInterface $orm)
-    {
-        $this->class = $class;
-        $this->schema = $schema;
-        $this->orm = $orm;
-    }
-
-    /**
-     * @return string
-     */
-    public function getClass(): string
-    {
-        return $this->class;
-    }
 
     /**
      * {@inheritdoc}
@@ -221,41 +162,7 @@ abstract class AbstractLoader
         return $node;
     }
 
-    /**
-     * @param AbstractNode $node
-     */
-    public function loadData(AbstractNode $node)
-    {
-        //Loading data thought child loaders
-        foreach ($this->loaders as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation));
-        }
-    }
 
-    /**
-     * Ensure state of every nested loader.
-     */
-    public function __clone()
-    {
-        foreach ($this->loaders as $name => $loader) {
-            //Will automatically ensure nested change parents
-            $this->loaders[$name] = $loader->withContext($this);
-        }
-
-        foreach ($this->joiners as $name => $loader) {
-            //Will automatically ensure nested change parents
-            $this->joiners[$name] = $loader->withContext($this);
-        }
-    }
-
-    /**
-     * Destruct loader.
-     */
-    final public function __destruct()
-    {
-        $this->loaders = [];
-        $this->joiners = [];
-    }
 
     /**
      * @param SelectQuery $query

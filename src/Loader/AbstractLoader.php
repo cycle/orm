@@ -93,6 +93,66 @@ class AbstractLoader implements LoaderInterface
     }
 
     /**
+     * Pre-load data on inner relation or relation chain. Method automatically called by Selector,
+     * see load() method.
+     *
+     * Method support chain initiation via dot notation. Method will return already exists loader if
+     * such presented.
+     *
+     * @see RecordSelector::load()
+     *
+     * @param string $relation Relation name, or chain of relations separated by.
+     * @param array  $options  Loader options (to be applied to last chain element only).
+     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
+     *
+     * @return LoaderInterface Must return loader for a requested relation.
+     *
+     * @throws LoaderException
+     */
+    final public function loadRelation(
+        string $relation,
+        array $options,
+        bool $join = false
+    ): LoaderInterface {
+        //Check if relation contain dot, i.e. relation chain
+        if ($this->isChain($relation)) {
+            return $this->loadChain($relation, $options, $join);
+        }
+
+        /*
+         * Joined loaders must be isolated from normal loaders due they would not load any data
+         * and will only modify SelectQuery.
+         */
+        if (!$join) {
+            $loaders = &$this->load;
+        } else {
+            $loaders = &$this->join;
+        }
+
+        if ($join) {
+            if (empty($options['method']) || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])) {
+                //Let's tell our loaded that it's method is JOIN (forced)
+                $options['method'] = self::JOIN;
+            }
+        }
+
+        if (isset($loaders[$relation])) {
+            //Overwriting existed loader options
+            return $loaders[$relation] = $loaders[$relation]->withContext($this, $options);
+        }
+
+        try {
+            //Creating new loader.
+            $loader = $this->orm->makeLoader($this->class, $relation);
+        } catch (ORMException $e) {
+            throw new LoaderException("Unable to create loader", $e->getCode(), $e);
+        }
+
+        //Configuring loader scope
+        return $loaders[$relation] = $loader->withContext($this, $options);
+    }
+
+    /**
      * {@inheritdoc}
      */
     final public function createNode(): AbstractNode

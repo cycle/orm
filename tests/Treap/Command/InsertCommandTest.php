@@ -16,10 +16,21 @@ use Spiral\Treap\Command\Database\InsertCommand;
 
 class InsertCommandTest extends TestCase
 {
+    public function testDatabase()
+    {
+        $cmd = new InsertCommand(
+            $db = m::mock(DatabaseInterface::class),
+            'table',
+            []
+        );
+
+        $this->assertSame($db, $cmd->getDatabase());
+    }
+
     public function testIsEmpty()
     {
         $cmd = new InsertCommand(
-            m::mock(DatabaseInterface::class),
+            $db = m::mock(DatabaseInterface::class),
             'table',
             []
         );

@@ -9,11 +9,33 @@
 namespace Spiral\Treap;
 
 use Spiral\Treap\Exception\MapperException;
+use Spiral\Treap\Exception\ORMException;
 
 interface ORMInterface
 {
     /**
-     * Instantiate and hydrate entity based on given class and input data-set.
+     * Return schema declaration associated with given class.
+     *
+     * @param string $class
+     * @return SchemaInterface
+     *
+     * @throws ORMException
+     */
+    public function getSchema(string $class): SchemaInterface;
+
+    /**
+     * Return mapper associated with given class.
+     *
+     * @param string $class
+     * @return MapperInterface
+     *
+     * @throws ORMException
+     */
+    public function getMapper(string $class): MapperInterface;
+
+    /**
+     * Instantiate and hydrate entity based on given class and input data-set. Method will return cached object
+     * if any found.
      *
      * @param string $class
      * @param array  $data
@@ -22,6 +44,7 @@ interface ORMInterface
      * @return object
      *
      * @throws MapperException
+     * @throws ORMException
      */
     public function make(
         string $class,

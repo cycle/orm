@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\Treap\Schema\Relation\Traits;
 
-interface LazyLoaderInterface
+trait TableTrait
 {
-    public function __resolveTarget();
+
 }

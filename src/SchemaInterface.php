@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace App\Schema;
+namespace Spiral\Treap;
 
-interface DeclarationInterface
+interface SchemaInterface
 {
 
 }

@@ -17,21 +17,21 @@ interface ORMInterface
      * Return schema declaration associated with given class.
      *
      * @param string $class
-     * @return SchemaInterface
+     * @return Schema
      *
      * @throws ORMException
      */
-    public function getSchema(string $class): SchemaInterface;
+    public function getSchema(string $class): Schema;
 
-    /**
-     * Return mapper associated with given class.
-     *
-     * @param string $class
-     * @return MapperInterface
-     *
-     * @throws ORMException
-     */
-    public function getMapper(string $class): MapperInterface;
+    //    /**
+    //     * Return mapper associated with given class.
+    //     *
+    //     * @param string $class
+    //     * @return MapperInterface
+    //     *
+    //     * @throws ORMException
+    //     */
+    //    public function getMapper(string $class): MapperInterface;
 
     /**
      * Instantiate and hydrate entity based on given class and input data-set. Method will return cached object

@@ -10,9 +10,16 @@ namespace Spiral\Treap;
 
 class ORM implements ORMInterface
 {
-    public function getSchema(string $class): SchemaInterface
+    private $schema = [];
+
+    public function setSchema(string $class, Schema $schema)
     {
-        // TODO: Implement getSchema() method.
+        $this->schema[$class] = $schema;
+    }
+
+    public function getSchema(string $class): Schema
+    {
+        return $this->schema[$class];
     }
 
     public function make(

@@ -35,7 +35,7 @@ final class ColumnRenderer
      *      ],
      *      [
      *          'status' => 'active',
-     *          'time'   => null, //idential as if define column as null
+     *          'time'   => null,
      *      ]
      * );
      *

@@ -6,27 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-if (!function_exists('lazyload')) {
-    function lazyload(&$object)
+if (!function_exists('promise')) {
+    function promise(&$object)
     {
-        if ($object instanceof \Spiral\Treap\LazyloadableInterface) {
-            $object = $object->__resolveTarget();
+        if ($object instanceof \Spiral\Treap\PromiseInterface) {
+            $object = $object->resolvePromise();
         }
 
         return $object;
     }
-}
-
-class User
-{
-    private $profile;
-
-    public function getProfile(): Profile
-    {
-        return lazyload($this->profile);
-    }
-}
-
-class Profile
-{
 }

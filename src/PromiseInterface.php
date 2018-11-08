@@ -9,7 +9,7 @@
 namespace Spiral\Treap;
 
 // name: TBD
-interface LazyloadableInterface
+interface PromiseInterface
 {
-    public function __resolveTarget();
+    public function resolvePromise();
 }

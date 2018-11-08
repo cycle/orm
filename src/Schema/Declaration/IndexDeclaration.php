@@ -6,10 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Exception;
+namespace Spiral\Treap\Schema\Declaration;
 
-
-class LocatorException extends ORMException
+final class IndexDeclaration
 {
 
 }

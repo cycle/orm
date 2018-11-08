@@ -18,5 +18,5 @@ interface LocatorInterface
      *
      * @return EntityInterface[]
      */
-    public function locateDeclarations(): array;
+    public function getDeclarations(): array;
 }

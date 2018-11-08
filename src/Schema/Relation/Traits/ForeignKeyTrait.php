@@ -14,7 +14,7 @@ use Spiral\Database\Schema\AbstractTable;
 /**
  * Simplified functionality to create foreign for a given schema.
  */
-class ForeignKeyTrait
+trait ForeignKeyTrait
 {
     /**
      * @param AbstractTable  $table

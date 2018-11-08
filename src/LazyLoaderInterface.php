@@ -10,5 +10,5 @@ namespace Spiral\Treap;
 
 interface LazyLoaderInterface
 {
-    public function __resolveRelation();
+    public function __resolveTarget();
 }

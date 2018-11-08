@@ -9,6 +9,7 @@
 namespace Spiral\Treap;
 
 use Spiral\Models\EntityInterface;
+use Spiral\Treap\Relation\RelationMap;
 
 interface RecordInterface extends EntityInterface
 {

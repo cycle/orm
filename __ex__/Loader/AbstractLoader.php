@@ -32,10 +32,10 @@ use Spiral\Treap\Loader\Traits\ColumnsTrait;
  * is USER_ID. Post loader must request User data loader to create references based on ID field
  * values. Once Post data were parsed we can mount it under parent user using mount method:
  *
- * @see RecordSelector::load()
- * @see RecordSelector::with()
+ * @see Selector::load()
+ * @see Selector::with()
  */
-abstract class AbstractLoader implements LoaderInterface
+abstract class AbstractLoader
 {
     use ColumnsTrait;
 

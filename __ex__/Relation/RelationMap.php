@@ -8,7 +8,7 @@
 
 namespace Spiral\Treap\Relation;
 
-final class RelationMap
+final class RelationMapx
 {
 //    /**
 //     * @var array|RelationInterface[]

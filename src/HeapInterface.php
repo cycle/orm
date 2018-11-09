@@ -31,5 +31,7 @@ interface HeapInterface
 
     public function getState($entity): int;
 
+    public function getRelmap($entity): ?RelationMap;
+
     public function reset();
 }

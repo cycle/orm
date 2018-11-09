@@ -29,17 +29,6 @@ use Spiral\ORM\Schemas\SchemaBuilder;
 class ORM2 extends Component implements ORMInterface, SingletonInterface
 {
     /**
-     * Memory section to store ORM schema.
-     */
-    const MEMORY = 'orm.schema';
-
-    /**
-     * @invisible
-     * @var EntityMap|null
-     */
-    private $map = null;
-
-    /**
      * @var LocatorInterface
      */
     private $locator;
@@ -238,59 +227,6 @@ class ORM2 extends Component implements ORMInterface, SingletonInterface
             'class' => $handles,
             'orm'   => $this
         ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param bool $isolated Set to true (by default) to create new isolated entity map for
-     *                       selection.
-     */
-    public function selector(string $class, bool $isolated = true): RecordSelector
-    {
-        //ORM is cloned in order to isolate cache scope.
-        return new RecordSelector($class, $isolated ? clone $this : $this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function make(
-        string $class,
-        $fields = [],
-        int $state = self::STATE_NEW,
-        bool $cache = true
-    ): RecordInterface {
-        $instantiator = $this->instantiator($class);
-
-        if ($state == self::STATE_NEW) {
-            //No caching for entities created with user input
-            $cache = false;
-        }
-
-        if ($fields instanceof \Traversable) {
-            $fields = iterator_to_array($fields);
-        }
-
-        if (!$cache || !$this->hasMap()) {
-            return $instantiator->make($fields, $state);
-        }
-
-        //Always expect PK in our records
-        if (
-            !isset($fields[$this->define($class, self::R_PRIMARY_KEY)])
-            || empty($identity = $fields[$this->define($class, self::R_PRIMARY_KEY)])
-        ) {
-            //Unable to cache non identified instance
-            return $instantiator->make($fields, $state);
-        }
-
-        if ($this->map->has($class, $identity)) {
-            return $this->map->get($class, $identity);
-        }
-
-        //Storing entity in a cache right after creating it
-        return $this->map->remember($instantiator->make($fields, $state));
     }
 
     /**

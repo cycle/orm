@@ -229,7 +229,7 @@ class Selector implements \IteratorAggregate
             return null;
         }
 
-        return $this->orm->makeEntity($this->class, $data[0], MapperInterface::STATE_LOADED, true);
+        return $this->orm->makeEntity($this->loader->getClass(), $data[0], Heap::STATE_LOADED);
     }
 
     /**

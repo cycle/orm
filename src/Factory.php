@@ -17,6 +17,9 @@ class Factory implements FactoryInterface
     /** @var CoreFactory */
     private $factory;
 
+    /** @var ORMInterface */
+    private $orm;
+
     /** @var SchemaInterface */
     private $schema;
 
@@ -31,15 +34,16 @@ class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function withSchema(SchemaInterface $schema): FactoryInterface
+    public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface
     {
         $factory = clone $this;
+        $factory->orm = $orm;
         $factory->schema = $schema;
 
         return $factory;
     }
 
-    public function mapper()
+    public function mapper(string $class): MapperInterface
     {
         // TODO: Implement mapper() method.
     }
@@ -49,9 +53,12 @@ class Factory implements FactoryInterface
         // TODO: Implement source() method.
     }
 
-    public function selector()
+    /**
+     * @inheritdoc
+     */
+    public function selector(string $class)
     {
-        // TODO: Implement selector() method.
+        return new Selector($this->orm, $class);
     }
 
     public function loader(): LoaderInterface

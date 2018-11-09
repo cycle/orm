@@ -20,5 +20,5 @@ interface ORMInterface
 
     public function getHeap(): ?HeapInterface;
 
-    public function makeEntity(string $class);
+    public function makeEntity(string $class, array $data, int $state = Heap::STATE_NEW);
 }

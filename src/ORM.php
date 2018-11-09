@@ -56,7 +56,7 @@ class ORM implements ORMInterface
     {
         $orm = clone $this;
         $orm->schema = $schema;
-        $orm->factory = $orm->factory->withSchema($orm->schema);
+        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
 
         return $orm;
     }
@@ -68,7 +68,7 @@ class ORM implements ORMInterface
     {
         if (empty($this->schema)) {
             $this->schema = $this->loadSchema();
-            $this->factory = $this->factory->withSchema($this->schema);
+            $this->factory = $this->factory->withContext($this, $this->schema);
         }
 
         return $this->schema;
@@ -80,7 +80,7 @@ class ORM implements ORMInterface
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
-        $orm->factory = $factory->withSchema($orm->schema);
+        $orm->factory = $factory->withContext($orm, $orm->schema);
 
         return $orm;
     }
@@ -100,6 +100,7 @@ class ORM implements ORMInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
+        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
 
         return $orm;
     }
@@ -125,9 +126,53 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function makeEntity(string $class)
+    public function makeEntity(string $class, array $data, int $state = HeapInterface::STATE_NEW)
     {
+        if ($data instanceof \Traversable) {
+            $data = iterator_to_array($data);
+        }
 
+        // locate already loaded entity reference
+        if ($this->heap !== null && $state !== HeapInterface::STATE_NEW) {
+            $entityID = $this->identify($class, $data);
+
+            if (!empty($entityID) && $this->heap->has($class, $entityID)) {
+                return $this->heap->get($class, $entityID);
+            }
+        }
+
+        // construct the entity
+        $relmap = $this->fetchRelations($class, $data);
+        $entity = $this->getFactory()->mapper($class)->make($data, $relmap);
+
+        if (!empty($entityID)) {
+            $this->heap->set($entity, $entityID, $relmap);
+        }
+
+        return $entity;
+    }
+
+    /**
+     * Return value to uniquely identify given entity data. Most likely PrimaryKey value.
+     *
+     * @param string $class
+     * @param array  $data
+     * @return string|int|null
+     */
+    protected function identify(string $class, array $data)
+    {
+        $pk = $this->getSchema()->define($class, Schema::PRIMARY_KEY);
+        if (isset($data[$pk])) {
+            return $data[$pk];
+        }
+
+        return null;
+    }
+
+    // fetch relations
+    protected function fetchRelations(string $class, array &$data): ?RelationMap
+    {
+        return new RelationMap();
     }
 
     protected function loadSchema(): SchemaInterface

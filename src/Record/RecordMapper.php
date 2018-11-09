@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Mapper;
+namespace Spiral\Treap\Record;
 
 use Spiral\Treap\MapperInterface;
 
-class RecordMapper implements MapperInterface
+abstract class RecordMapper implements MapperInterface
 {
 
 }

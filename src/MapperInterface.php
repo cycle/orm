@@ -22,4 +22,7 @@ interface MapperInterface
      * @throws MapperException
      */
     public function make(array $data, RelationMap $relmap = null);
+
+    //queueStore
+    //queueDelete
 }

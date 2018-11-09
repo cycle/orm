@@ -8,20 +8,43 @@
 
 namespace Spiral\Treap\Loader;
 
-
+use Spiral\Database\Query\SelectQuery;
+use Spiral\Treap\Exception\FactoryException;
 use Spiral\Treap\Exception\LoaderException;
+use Spiral\Treap\Loader\Traits\ChainTrait;
 use Spiral\Treap\Node\AbstractNode;
 use Spiral\Treap\ORMInterface;
 
-class AbstractLoader implements LoaderInterface
+/**
+ * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
+ * loaders can communicate with parent selector by providing it's own set of conditions, columns
+ * joins and etc. In some cases loader may create additional selector to load data using information
+ * fetched from previous query.
+ *
+ * Attention, AbstractLoader can only work with ORM Records, you must implement LoaderInterface
+ * in order to support external references (MongoDB and etc).
+ *
+ * Loaders can be used for both - loading and filtering of record data.
+ *
+ * Reference tree generation logic example:
+ *  User has many Posts (relation "posts"), user primary is ID, post inner key pointing to user
+ *  is USER_ID. Post loader must request User data loader to create references based on ID field
+ *  values. Once Post data were parsed we can mount it under parent user using mount method:
+ *
+ * @see Selector::load()
+ * @see Selector::with()
+ */
+abstract class AbstractLoader implements LoaderInterface
 {
+    use ChainTrait;
+
     // Loading methods for data loaders.
     public const INLOAD    = 1;
     public const POSTLOAD  = 2;
     public const JOIN      = 3;
     public const LEFT_JOIN = 4;
 
-    /** @var ORMInterface */
+    /** @var ORMInterface @invisible */
     protected $orm;
 
     /** @var string */
@@ -33,17 +56,10 @@ class AbstractLoader implements LoaderInterface
     /** @var LoaderInterface[] */
     protected $load = [];
 
-    /**
-     * Set of loaders with ability to JOIN it's data into parent SelectQuery.
-     *
-     * @var AbstractLoader[]
-     */
+    /** @var AbstractLoader[] */
     protected $join = [];
 
-    /**
-     * @invisible
-     * @var AbstractLoader
-     */
+    /** @var AbstractLoader @invisible */
     protected $parent;
 
     /**
@@ -143,12 +159,11 @@ class AbstractLoader implements LoaderInterface
 
         try {
             //Creating new loader.
-            $loader = $this->orm->makeLoader($this->class, $relation);
-        } catch (ORMException $e) {
-            throw new LoaderException("Unable to create loader", $e->getCode(), $e);
+            $loader = $this->orm->getFactory()->loader($this->class, $relation);
+        } catch (FactoryException $e) {
+            throw new LoaderException("Unable to create loader: %s" . $e->getMessage(), $e->getCode(), $e);
         }
 
-        //Configuring loader scope
         return $loaders[$relation] = $loader->withContext($this, $options);
     }
 
@@ -159,9 +174,9 @@ class AbstractLoader implements LoaderInterface
     {
         $node = $this->initNode();
 
-        //Working with nested relation loaders
         foreach ($this->load as $relation => $loader) {
-            $node->registerNode($relation, $loader->createNode());
+            // linking up all nested loaders
+            $node->linkNode($relation, $loader->createNode());
         }
 
         return $node;
@@ -172,9 +187,9 @@ class AbstractLoader implements LoaderInterface
      */
     public function loadData(AbstractNode $node)
     {
-        //Loading data thought child loaders
+        // loading data thought child loaders
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation));
+            $loader->loadData($node->getNode($relation));
         }
     }
 
@@ -199,5 +214,56 @@ class AbstractLoader implements LoaderInterface
     {
         $this->load = [];
         $this->join = [];
+    }
+
+    /**
+     * Table alias of the loader.
+     *
+     * @return string
+     */
+    abstract protected function getAlias(): string;
+
+    /**
+     * List of columns associated with the loader.
+     *
+     * @return array
+     */
+    abstract protected function getColumns(): array;
+
+    /**
+     * Create input node for the loader.
+     *
+     * @return AbstractNode
+     */
+    abstract protected function initNode(): AbstractNode;
+
+    /**
+     * @param SelectQuery $query
+     * @return SelectQuery
+     */
+    protected function configureQuery(SelectQuery $query): SelectQuery
+    {
+        foreach ($this->load as $loader) {
+            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
+                $query = $loader->configureQuery(clone $query);
+            }
+        }
+
+        foreach ($this->join as $loader) {
+            $query = $loader->configureQuery(clone $query);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Define schema option associated with the entity.
+     *
+     * @param int $property
+     * @return mixed
+     */
+    protected function define(int $property)
+    {
+        return $this->orm->getSchema()->define($this->class, $property);
     }
 }

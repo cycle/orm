@@ -15,7 +15,7 @@ use Spiral\Treap\Exception\SchemaException;
  */
 final class Schema implements SchemaInterface
 {
-    public const ROLE        = 0;
+    public const ALIAS       = 0;
     public const MAPPER      = 1;
     public const SOURCE      = 2;
     public const DATABASE    = 3;

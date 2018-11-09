@@ -9,16 +9,18 @@
 namespace Spiral\Treap\Loader\Traits;
 
 
+use Spiral\Treap\Exception\LoaderException;
+use Spiral\Treap\Loader\LoaderInterface;
+
 trait ChainTrait
 {
     /**
-     * Check if given relation is actually chain of relations.
+     * Check if given relation points to the relation chain.
      *
      * @param string $relation
-     *
      * @return bool
      */
-    private function isChain(string $relation): bool
+    protected function isChain(string $relation): bool
     {
         return strpos($relation, '.') !== false;
     }
@@ -30,35 +32,29 @@ trait ChainTrait
      * @param string $chain
      * @param array  $options Final loader options.
      * @param bool   $join    See loadRelation().
-     *
      * @return LoaderInterface
      *
-     * @throws LoaderException When one of chain elements is not actually chainable (let's say ODM
-     *                         loader).
+     * @throws LoaderException When one of the elements can not be chained.
      */
-    private function loadChain(string $chain, array $options, bool $join): LoaderInterface
+    protected function loadChain(string $chain, array $options, bool $join): LoaderInterface
     {
         $position = strpos($chain, '.');
 
-        //Chain of relations provided (relation.nestedRelation)
-        $child = $this->loadRelation(
-            substr($chain, 0, $position),
-            [],
-            $join
-        );
+        // chain of relations provided (relation.nestedRelation)
+        $child = $this->loadRelation(substr($chain, 0, $position), [], $join);
 
-        if (!$child instanceof AbstractLoader) {
-            throw new LoaderException(sprintf(
-                "Loader '%s' does not support chain relation loading",
-                get_class($child)
-            ));
+        if (!$child instanceof self) {
+            throw new LoaderException(
+                sprintf("Loader '%s' does not support chain relation loading", get_class($child))
+            );
         }
 
-        //Loading nested relation thought chain (chainOptions prior to user options)
-        return $child->loadRelation(
-            substr($chain, $position + 1),
-            $options,
-            $join
-        );
+        // load nested relation thought chain (chainOptions prior to user options)
+        return $child->loadRelation(substr($chain, $position + 1), $options, $join);
     }
+
+    /**
+     * @inheritdoc
+     */
+    abstract public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface;
 }

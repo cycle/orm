@@ -43,6 +43,8 @@ final class Iterator implements \IteratorAggregate
      */
     public function getIterator(): \Generator
     {
+        $factory = $this->orm->getFactory();
+
         foreach ($this->source as $index => $data) {
             if (isset($data[PivotedNode::PIVOT_DATA])) {
                 // when pivot data is provided we are going to use it as array key.
@@ -50,12 +52,7 @@ final class Iterator implements \IteratorAggregate
                 unset($data[PivotedNode::PIVOT_DATA]);
             }
 
-            yield $index => $this->orm->make(
-                $this->class,
-                $data,
-                MapperInterface::STATE_LOADED,
-                true
-            );
+            yield $index => $factory->entity($this->class, $data, MapperInterface::STATE_LOADED, true);
         }
     }
 }

@@ -12,14 +12,14 @@ use Spiral\Treap\Exception\SchemaException;
 
 interface SchemaInterface
 {
-    public const ROLE        = 0;
+    public const ALIAS       = 0;
     public const MAPPER      = 1;
     public const SOURCE      = 2;
     public const DATABASE    = 3;
     public const TABLE       = 4;
     public const PRIMARY_KEY = 5;
-    public const SCHEMA      = 6;
-    public const RELATIONS   = 7;
+    public const COLUMNS     = 6;
+    public const RELATIONS   = 8;
 
     /**
      * Define schema value.

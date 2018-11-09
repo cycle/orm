@@ -7,7 +7,8 @@
 
 namespace Spiral\Treap\Loader\Traits;
 
-use Spiral\Database\Builders\SelectQuery;
+
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Provides ability to add aliased columns into SelectQuery.
@@ -18,21 +19,20 @@ trait ColumnsTrait
      * Set columns into SelectQuery.
      *
      * @param SelectQuery $query
-     * @param bool        $minify    Minify column names (will work in case when query parsed in
-     *                               FETCH_NUM mode).
+     * @param bool        $minify    Minify column names (will work in case when query parsed in FETCH_NUM mode).
      * @param string      $prefix    Prefix to be added for each column name.
      * @param bool        $overwrite When set to true existed columns will be removed.
+     * @return SelectQuery
      */
     protected function mountColumns(
         SelectQuery $query,
         bool $minify = false,
         string $prefix = '',
         bool $overwrite = false
-    ) {
-        //Column source alias
+    ): SelectQuery {
         $alias = $this->getAlias();
-
         $columns = $overwrite ? [] : $query->getColumns();
+
         foreach ($this->getColumns() as $name) {
             $column = $name;
 
@@ -44,19 +44,18 @@ trait ColumnsTrait
             $columns[] = "{$alias}.{$name} AS {$prefix}{$column}";
         }
 
-        //Updating column set
-        $query->columns($columns);
+        return $query->columns($columns);
     }
 
     /**
-     * Joined table alias.
+     * Table alias of the loader.
      *
      * @return string
      */
     abstract protected function getAlias(): string;
 
     /**
-     * list of columns to be loaded.
+     * List of columns associated with the loader.
      *
      * @return array
      */

@@ -108,13 +108,15 @@ class Factory implements FactoryInterface
     public function relation(string $class, string $relation): RelationInterface
     {
         $schema = $this->getSchema()->defineRelation($class, $relation);
-        $type = $schema[RelationInterface::TYPE];
 
-        if (isset($this->relations[$type])) {
-            return $this->relations[$type];
+        // pre-cache all relation branches (context is set later)
+        $uniqueID = sprintf("%s.%s.%s", $class, $relation, $schema[RelationInterface::TYPE]);
+
+        if (isset($this->relations[$uniqueID])) {
+            return $this->relations[$uniqueID];
         }
 
-        return $this->relations[$type] = $this->config->getRelation($type)->resolve(
+        return $this->relations[$uniqueID] = $this->config->getRelation($schema[RelationInterface::TYPE])->resolve(
             $this->factory,
             [
                 'orm'      => $this->orm,

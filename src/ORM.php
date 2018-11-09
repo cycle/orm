@@ -146,7 +146,7 @@ class ORM implements ORMInterface
         $entity = $this->getFactory()->mapper($class)->make($data, $relmap);
 
         if (!empty($entityID)) {
-            $this->heap->set($entity, $entityID, $relmap);
+            $this->heap->register($entity, $entityID, $data, $relmap);
         }
 
         return $entity;

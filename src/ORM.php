@@ -38,7 +38,7 @@ class ORM implements ORMInterface
     public function __construct(DatabaseManager $dbal, FactoryInterface $factory = null)
     {
         $this->dbal = $dbal;
-        $this->factory = $factory ?? new Factory();
+        $this->factory = $factory;
     }
 
     /**

@@ -8,7 +8,6 @@
 
 namespace Spiral\Treap;
 
-
 abstract class Heap implements HeapInterface
 {
 

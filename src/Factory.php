@@ -11,6 +11,7 @@ namespace Spiral\Treap;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Treap\Config\RelationConfig;
+use Spiral\Treap\Exception\FactoryException;
 
 class Factory implements FactoryInterface
 {
@@ -26,8 +27,11 @@ class Factory implements FactoryInterface
     /** @var SchemaInterface */
     private $schema;
 
-    /** @var array */
+    /** @var MapperInterface[] */
     private $mappers = [];
+
+    /** @var RelationInterface[] */
+    private $relations = [];
 
     /**
      * @param RelationConfig   $config
@@ -48,6 +52,7 @@ class Factory implements FactoryInterface
         $factory->orm = $orm;
         $factory->schema = $schema;
         $factory->mappers = [];
+        $factory->relations = [];
 
         return $factory;
     }
@@ -71,11 +76,6 @@ class Factory implements FactoryInterface
         );
     }
 
-    public function source()
-    {
-        // TODO: Implement source() method.
-    }
-
     /**
      * @inheritdoc
      */
@@ -91,12 +91,15 @@ class Factory implements FactoryInterface
     {
         $schema = $this->getSchema()->defineRelation($class, $relation);
 
-        return $this->config->getLoader($schema[RelationInterface::TYPE])->resolve($this->factory, [
-            'orm'      => $this->orm,
-            'relation' => $relation,
-            'class'    => $schema[RelationInterface::TARGET],
-            'schema'   => $schema[RelationInterface::SCHEMA]
-        ]);
+        return $this->config->getLoader($schema[RelationInterface::TYPE])->resolve(
+            $this->factory,
+            [
+                'orm'      => $this->orm,
+                'relation' => $relation,
+                'class'    => $schema[RelationInterface::TARGET],
+                'schema'   => $schema[RelationInterface::SCHEMA]
+            ]
+        );
     }
 
     /**
@@ -105,17 +108,34 @@ class Factory implements FactoryInterface
     public function relation(string $class, string $relation): RelationInterface
     {
         $schema = $this->getSchema()->defineRelation($class, $relation);
+        $type = $schema[RelationInterface::TYPE];
 
-        return $this->config->getRelation($schema[RelationInterface::TYPE])->resolve($this->factory, [
-            'orm'      => $this->orm,
-            'relation' => $relation,
-            'class'    => $schema[RelationInterface::TARGET],
-            'schema'   => $schema[RelationInterface::SCHEMA]
-        ]);
+        if (isset($this->relations[$type])) {
+            return $this->relations[$type];
+        }
+
+        return $this->relations[$type] = $this->config->getRelation($type)->resolve(
+            $this->factory,
+            [
+                'orm'      => $this->orm,
+                'relation' => $relation,
+                'class'    => $schema[RelationInterface::TARGET],
+                'schema'   => $schema[RelationInterface::SCHEMA]
+            ]
+        );
     }
 
+    /**
+     * @return SchemaInterface
+     *
+     * @throws FactoryException
+     */
     protected function getSchema(): SchemaInterface
     {
+        if (empty($this->schema)) {
+            throw new FactoryException("Factory does not have associated schema");
+        }
+
         return $this->schema;
     }
 }

@@ -12,11 +12,13 @@ use Spiral\Database\DatabaseInterface;
 
 interface ORMInterface
 {
-    public function getHeap(): HeapInterface;
-
-    public function getFactory(): FactoryInterface;
+    public function getDatabase(string $database): DatabaseInterface;
 
     public function getSchema(): SchemaInterface;
 
-    public function getDatabase(string $database): DatabaseInterface;
+    public function getFactory(): FactoryInterface;
+
+    public function getHeap(): ?HeapInterface;
+
+    public function makeEntity(string $class);
 }

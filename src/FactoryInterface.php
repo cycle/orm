@@ -12,7 +12,7 @@ use Spiral\Treap\Loader\LoaderInterface;
 
 interface FactoryInterface
 {
-    public function entity();
+    public function withSchema(SchemaInterface $schema): FactoryInterface;
 
     public function mapper();
 

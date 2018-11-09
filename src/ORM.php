@@ -8,67 +8,132 @@
 
 namespace Spiral\Treap;
 
-use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Driver\SQLite\SQLiteDriver;
-use Spiral\Treap\Exception\SchemaException;
 
+/**
+ * Central class ORM, provides access to various pieces of the system and manages schema state.
+ */
 class ORM implements ORMInterface
 {
+    // Memory section to store ORM schema.
+    const MEMORY = 'orm.schema';
+
+    /** @var DatabaseManager */
     private $dbal;
 
-    /** @var array */
-    private $schema = [];
+    /** @var SchemaInterface */
+    private $schema;
 
-    public function __construct()
+    /** @var FactoryInterface */
+    private $factory;
+
+    /** @var null|HeapInterface */
+    private $heap = null;
+
+    /**
+     * @param DatabaseManager       $dbal
+     * @param FactoryInterface|null $factory
+     */
+    public function __construct(DatabaseManager $dbal, FactoryInterface $factory = null)
     {
-        $cfg = new DatabaseConfig([
-            'default'   => 'default',
-            'databases' => [
-                'default' => ['driver' => 'runtime']
-            ],
-            'drivers'   => [
-                'runtime' => [
-                    'driver'     => SQLiteDriver::class,
-                    'connection' => 'sqlite::memory:',
-                    'username'   => 'sqlite',
-                ],
-            ]
-        ]);
-
-        $this->dbal = new DatabaseManager($cfg);
-        $this->schema = [];
-
+        $this->dbal = $dbal;
+        $this->factory = $factory ?? new Factory();
     }
 
     /**
      * @inheritdoc
      */
-    public function define(string $class, int $property)
+    public function getDatabase(string $database): DatabaseInterface
     {
-        //Check value
-        if (!isset($this->schema[$class])) {
-            throw new SchemaException("Undefined schema '{$class}', schema not found.");
-        }
-
-        if (!array_key_exists($property, $this->schema[$class])) {
-            throw new SchemaException("Undefined schema property '{$class}'.'{$property}', property not found.");
-        }
-
-        return $this->schema[$class][$property];
+        return $this->dbal->database($database);
     }
 
-
-    public function database(string $class): DatabaseInterface
+    /**
+     * @inheritdoc
+     */
+    public function withSchema(SchemaInterface $schema): ORMInterface
     {
-        return $this->dbal->database(
-        //    $this->getSchema()->define($class, Schema::DATABASE)
-        );
+        $orm = clone $this;
+        $orm->schema = $schema;
+        $orm->factory = $orm->factory->withSchema($orm->schema);
+
+        return $orm;
     }
 
-    public function selector(string $class): Selector
+    /**
+     * @inheritdoc
+     */
+    public function getSchema(): SchemaInterface
     {
-        return new Selector($this, $class);
+        if (empty($this->schema)) {
+            $this->schema = $this->loadSchema();
+            $this->factory = $this->factory->withSchema($this->schema);
+        }
+
+        return $this->schema;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withFactory(FactoryInterface $factory): ORMInterface
+    {
+        $orm = clone $this;
+        $orm->factory = $factory->withSchema($orm->schema);
+
+        return $orm;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFactory(): FactoryInterface
+    {
+        return $this->factory;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withHeap(HeapInterface $heap = null): ORMInterface
+    {
+        $orm = clone $this;
+        $orm->heap = $heap;
+
+        return $orm;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getHeap(): ?HeapInterface
+    {
+        return $this->heap;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function resetHeap()
+    {
+        if ($this->heap != null) {
+            $this->heap->reset();
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function makeEntity(string $class)
+    {
+
+    }
+
+    protected function loadSchema(): SchemaInterface
+    {
+        return new Schema([
+            // hahahaha
+        ]);
     }
 }

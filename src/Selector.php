@@ -8,13 +8,18 @@
 
 namespace Spiral\Treap;
 
-
 use Spiral\Treap\Loader\LoaderInterface;
 use Spiral\Treap\Loader\RootLoader;
 use Spiral\Treap\Node\OutputNode;
+use Spiral\Treap\Traits\SelectTrait;
 
+/**
+ * Query builder and entity selector. Mocks SelectQuery.
+ */
 class Selector implements \IteratorAggregate
 {
+    use SelectTrait;
+
     /** @var ORMInterface */
     private $orm;
 
@@ -209,19 +214,6 @@ class Selector implements \IteratorAggregate
     }
 
     /**
-     * Shortcut to where method to set AND condition for entity primary key.
-     *
-     * @param string|int $id
-     * @return $this|self
-     */
-    public function wherePrimaryKey($id): self
-    {
-        $this->getLoader()->getQuery()->where($this->loader->getPrimaryKey(), $id);
-
-        return $this;
-    }
-
-    /**
      * Find one entity or return null. Method provides the ability to configure custom query parameters.
      * Attention, method does not set a limit on selection (to avoid underselection of joined tables), make sure to set
      * the constrain in the query.
@@ -237,7 +229,7 @@ class Selector implements \IteratorAggregate
             return null;
         }
 
-        return $this->orm->getFactory()->entity($this->class, $data[0], MapperInterface::STATE_LOADED, true);
+        return $this->orm->makeEntity($this->class, $data[0], MapperInterface::STATE_LOADED, true);
     }
 
     /**
@@ -268,7 +260,6 @@ class Selector implements \IteratorAggregate
     public function fetchData(OutputNode $node = null): array
     {
         $node = $node ?? $this->loader->createNode();
-
         $this->loader->loadData($node);
 
         return $node->getResult();

@@ -11,5 +11,5 @@ namespace Spiral\Treap;
 
 interface HeapInterface
 {
-
+    public function reset();
 }

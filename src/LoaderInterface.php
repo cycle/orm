@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Loader;
+namespace Spiral\Treap;
 
 use Spiral\Treap\Exception\LoaderException;
 use Spiral\Treap\Node\AbstractNode;
@@ -17,6 +17,8 @@ use Spiral\Treap\Node\AbstractNode;
  */
 interface LoaderInterface
 {
+
+
     /**
      * Loader specific entity class.
      *

@@ -8,8 +8,6 @@
 
 namespace Spiral\Treap;
 
-use Spiral\Treap\Loader\LoaderInterface;
-
 interface FactoryInterface
 {
     public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
@@ -20,7 +18,7 @@ interface FactoryInterface
 
     public function selector(string $class);
 
-    public function loader(): LoaderInterface;
+    public function loader(string $class, string $relation): LoaderInterface;
 
-    public function relation();
+    public function relation(string $class, string $relation): RelationInterface;
 }

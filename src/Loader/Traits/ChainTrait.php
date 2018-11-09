@@ -10,7 +10,7 @@ namespace Spiral\Treap\Loader\Traits;
 
 
 use Spiral\Treap\Exception\LoaderException;
-use Spiral\Treap\Loader\LoaderInterface;
+use Spiral\Treap\LoaderInterface;
 
 trait ChainTrait
 {

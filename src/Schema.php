@@ -41,13 +41,12 @@ final class Schema implements SchemaInterface
      */
     public function define(string $class, int $property)
     {
-        //Check value
         if (!isset($this->schema[$class])) {
-            throw new SchemaException("Undefined schema '{$class}', schema not found.");
+            throw new SchemaException("Undefined schema `{$class}`, not found.");
         }
 
         if (!array_key_exists($property, $this->schema[$class])) {
-            throw new SchemaException("Undefined schema property '{$class}'.'{$property}', property not found.");
+            throw new SchemaException("Undefined schema property `{$class}`.`{$property}`, not found.");
         }
 
         return $this->schema[$class][$property];
@@ -56,14 +55,14 @@ final class Schema implements SchemaInterface
     /**
      * @inheritdoc
      */
-    public function export(string $class, array $properties): array
+    public function defineRelation(string $class, string $relation): array
     {
-        $result = [];
+        $relations = $this->define($class, $relation);
 
-        foreach ($properties as $property) {
-            $result[$property] = $this->define($class, $property);
+        if (!isset($relations[$relation])) {
+            throw new SchemaException("Undefined relation schema `{$class}`.`{$relation}`, not found.");
         }
 
-        return $result;
+        return $relations[$relation];
     }
 }

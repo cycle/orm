@@ -7,7 +7,6 @@
 
 namespace Spiral\Treap\Loader\Traits;
 
-
 use Spiral\Database\Query\SelectQuery;
 
 /**

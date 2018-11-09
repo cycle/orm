@@ -19,11 +19,17 @@ interface HeapInterface
     const STATE_SCHEDULED_UPDATE = self::STATE_SCHEDULED | 5;
     const STATE_SCHEDULED_DELETE = self::STATE_SCHEDULED | 6;
 
+    public function hasInstance($entity);
+
     public function has(string $class, $entityID);
 
     public function get(string $class, $entityID);
 
     public function set($entity, $entityID, RelationMap $relmap = null);
+
+    public function setState($entity, int $state);
+
+    public function getState($entity): int;
 
     public function reset();
 }

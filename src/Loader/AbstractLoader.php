@@ -12,6 +12,7 @@ use Spiral\Database\Query\SelectQuery;
 use Spiral\Treap\Exception\FactoryException;
 use Spiral\Treap\Exception\LoaderException;
 use Spiral\Treap\Loader\Traits\ChainTrait;
+use Spiral\Treap\LoaderInterface;
 use Spiral\Treap\Node\AbstractNode;
 use Spiral\Treap\ORMInterface;
 

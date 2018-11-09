@@ -8,7 +8,6 @@
 
 namespace Spiral\Treap;
 
-use Spiral\Treap\Loader\LoaderInterface;
 use Spiral\Treap\Loader\RootLoader;
 use Spiral\Treap\Node\OutputNode;
 use Spiral\Treap\Traits\SelectTrait;

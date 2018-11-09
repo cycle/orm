@@ -35,13 +35,13 @@ interface SchemaInterface
     public function define(string $class, int $property);
 
     /**
-     * Define multiple schema properties.
+     * Define options associated with specific entity relation.
      *
      * @param string $class
-     * @param array  $properties
+     * @param string $relation
      * @return array
      *
      * @throws SchemaException
      */
-    public function export(string $class, array $properties): array;
+    public function defineRelation(string $class, string $relation): array;
 }

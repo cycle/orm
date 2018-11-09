@@ -10,10 +10,13 @@ namespace Spiral\Treap;
 
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Spiral\Treap\Loader\LoaderInterface;
+use Spiral\Treap\Config\RelationConfig;
 
 class Factory implements FactoryInterface
 {
+    /** @var RelationConfig */
+    private $config;
+
     /** @var CoreFactory */
     private $factory;
 
@@ -23,11 +26,16 @@ class Factory implements FactoryInterface
     /** @var SchemaInterface */
     private $schema;
 
+    /** @var array */
+    private $mappers = [];
+
     /**
+     * @param RelationConfig   $config
      * @param CoreFactory|null $factory
      */
-    public function __construct(CoreFactory $factory = null)
+    public function __construct(RelationConfig $config, CoreFactory $factory = null)
     {
+        $this->config = $config;
         $this->factory = $factory ?? new Container();
     }
 
@@ -39,13 +47,28 @@ class Factory implements FactoryInterface
         $factory = clone $this;
         $factory->orm = $orm;
         $factory->schema = $schema;
+        $factory->mappers = [];
 
         return $factory;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function mapper(string $class): MapperInterface
     {
-        // TODO: Implement mapper() method.
+        if (isset($this->mappers[$class])) {
+            return $this->mappers[$class];
+        }
+
+        return $this->mappers[$class] = $this->factory->make(
+            $this->getSchema()->define($class, Schema::MAPPER),
+            [
+                'orm'    => $this->orm,
+                'class'  => $class,
+                'schema' => $this->getSchema()->define($class, Schema::SCHEMA)
+            ]
+        );
     }
 
     public function source()
@@ -61,13 +84,38 @@ class Factory implements FactoryInterface
         return new Selector($this->orm, $class);
     }
 
-    public function loader(): LoaderInterface
+    /**
+     * @inheritdoc
+     */
+    public function loader(string $class, string $relation): LoaderInterface
     {
-        // TODO: Implement loader() method.
+        $schema = $this->getSchema()->defineRelation($class, $relation);
+
+        return $this->config->getLoader($schema[RelationInterface::TYPE])->resolve($this->factory, [
+            'orm'      => $this->orm,
+            'relation' => $relation,
+            'class'    => $schema[RelationInterface::TARGET],
+            'schema'   => $schema[RelationInterface::SCHEMA]
+        ]);
     }
 
-    public function relation()
+    /**
+     * @inheritdoc
+     */
+    public function relation(string $class, string $relation): RelationInterface
     {
-        // TODO: Implement relation() method.
+        $schema = $this->getSchema()->defineRelation($class, $relation);
+
+        return $this->config->getRelation($schema[RelationInterface::TYPE])->resolve($this->factory, [
+            'orm'      => $this->orm,
+            'relation' => $relation,
+            'class'    => $schema[RelationInterface::TARGET],
+            'schema'   => $schema[RelationInterface::SCHEMA]
+        ]);
+    }
+
+    protected function getSchema(): SchemaInterface
+    {
+        return $this->schema;
     }
 }

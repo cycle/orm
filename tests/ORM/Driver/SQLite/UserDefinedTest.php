@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests\Driver\SQLite;
 
-class SelectorTest extends \Spiral\ORM\Tests\SelectorTest
+class UserDefinedTest extends \Spiral\ORM\Tests\UserDefinedMapperTest
 {
     const DRIVER = 'sqlite';
 }

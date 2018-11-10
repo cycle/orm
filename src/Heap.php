@@ -10,16 +10,8 @@ namespace Spiral\ORM;
 
 class Heap implements HeapInterface
 {
-    private const ID     = 0;
-    private const DATA   = 1;
-    private const STATE  = 2;
-    private const RELMAP = 3;
-
     /** @var \SplObjectStorage */
     private $storage;
-
-    /** @var object[] */
-    private $hashmap;
 
     /**
      * Heap constructor.
@@ -32,15 +24,7 @@ class Heap implements HeapInterface
     /**
      * @inheritdoc
      */
-    public function has(string $class, $entityID): bool
-    {
-        return isset($this->hashmap["{$class}:{$entityID}"]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function hasInstance($entity): bool
+    public function has($entity): bool
     {
         return $this->storage->offsetExists($entity);
     }
@@ -48,95 +32,29 @@ class Heap implements HeapInterface
     /**
      * @inheritdoc
      */
-    public function get(string $class, $entityID)
+    public function get($entity): ?State
     {
-        return $this->hashmap["{$class}:{$entityID}"] ?? null;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function register(
-        $entity,
-        $entityID,
-        array $data,
-        int $state,
-        RelationMap $relmap = null
-    ) {
-        $this->storage->attach($entity, [$entityID, $data, $state, $relmap]);
-
-        $class = get_class($entity);
-        $this->hashmap["{$class}:{$entityID}"] = $entity;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function remove(string $class, $entityID)
-    {
-        $entity = $this->get($class, $entityID);
-        if ($entity === null) {
-            return;
+        try {
+            return $this->storage->offsetGet($entity);
+        } catch (\UnexpectedValueException $e) {
+            return null;
         }
-
-        unset($this->hashmap["{$class}:{$entityID}"]);
-        $this->storage->detach($entity);
     }
 
     /**
      * @inheritdoc
      */
-    public function removeInstance($entity)
+    public function attach($entity, State $state)
     {
-        if (!$this->hasInstance($entity)) {
-            return;
-        }
-
-        $class = get_class($entity);
-        $entityID = $this->fetchValue($entity, self::ID);
-
-        unset($this->hashmap["{$class}:{$entityID}"]);
-        $this->storage->detach($entity);
+        $this->storage->offsetSet($entity, $state);
     }
 
     /**
      * @inheritdoc
      */
-    public function setData($entity, array $data)
+    public function detach($entity)
     {
-        $this->updateValue($entity, self::DATA, $data);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getData($entity): array
-    {
-        return $this->fetchValue($entity, self::DATA);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setState($entity, int $state)
-    {
-        $this->updateValue($entity, self::STATE, $state);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getState($entity): int
-    {
-        return $this->fetchValue($entity, self::STATE);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getRelationMap($entity): ?RelationMap
-    {
-        return $this->fetchValue($entity, self::RELMAP);
+        $this->storage->offsetUnset($entity);
     }
 
     /**
@@ -145,7 +63,6 @@ class Heap implements HeapInterface
     public function reset()
     {
         $this->storage = new \SplObjectStorage();
-        $this->hashmap = [];
     }
 
     /**
@@ -154,17 +71,5 @@ class Heap implements HeapInterface
     public function __destruct()
     {
         $this->reset();
-    }
-
-    private function fetchValue($entity, int $section)
-    {
-        // todo: handle exception
-        return $this->storage->offsetGet($entity)[$section];
-    }
-
-    private function updateValue($entity, int $section, $value)
-    {
-        $data = $this->storage->offsetGet($entity);
-        $this->storage->offsetSet($entity, [$section => $value] + $data);
     }
 }

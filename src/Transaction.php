@@ -29,11 +29,12 @@ class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    public function persist($entity)
+    public function store($entity)
     {
         $mapper = $this->orm->getMapper(get_class($entity));
 
-        // todo: move state her?
+        // todo: manage modes here, manage relations here, OK for now
+
         $this->addCommand($mapper->queueStore($entity));
     }
 
@@ -43,7 +44,6 @@ class Transaction implements TransactionInterface
     public function delete($entity)
     {
         $mapper = $this->orm->getMapper(get_class($entity));
-
         $this->addCommand($mapper->queueDelete($entity));
     }
 

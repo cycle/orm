@@ -52,17 +52,18 @@ class Selector implements \IteratorAggregate
 
     /**
      * Request primary selector loader to pre-load relation name. Any type of loader can be used
-     * for data preloading. ORM loaders by default will select the most efficient way to load related
-     * data which might include additional select query or left join. Loaded data will automatically
-     * pre-populate record relations. You can specify nested relations using "." separator.
+     * for data preloading. ORM loaders by default will select the most efficient way to load
+     * related data which might include additional select query or left join. Loaded data will
+     * automatically pre-populate record relations. You can specify nested relations using "."
+     * separator.
      *
      * Examples:
      *
      * // Select users and load their comments (will cast 2 queries, HAS_MANY comments)
      * User::find()->with('comments');
      *
-     * // You can load chain of relations - select user and load their comments and post related to comment
-     * User::find()->with('comments.post');
+     * // You can load chain of relations - select user and load their comments and post related to
+     * comment User::find()->with('comments.post');
      *
      * // We can also specify custom where conditions on data loading, let's load only public
      * comments. User::find()->load('comments', [
@@ -72,15 +73,16 @@ class Selector implements \IteratorAggregate
      * Please note using "{@}" column name, this placeholder is required to prevent collisions and
      * it will be automatically replaced with valid table alias of pre-loaded comments table.
      *
-     * // In case where your loaded relation is MANY_TO_MANY you can also specify pivot table conditions,
+     * // In case where your loaded relation is MANY_TO_MANY you can also specify pivot table
+     * conditions,
      * // let's pre-load all approved user tags, we can use same placeholder for pivot table alias
      * User::find()->load('tags', [
      *      'wherePivot' => ['{@}.approved' => true]
      * ]);
      *
      * // In most of cases you don't need to worry about how data was loaded, using external query
-     * // or left join, however if you want to change such behaviour you can force load method to INLOAD
-     * User::find()->load('tags', [
+     * // or left join, however if you want to change such behaviour you can force load method to
+     * INLOAD User::find()->load('tags', [
      *      'method'     => Loader::INLOAD,
      *      'wherePivot' => ['{@}.approved' => true]
      * ]);
@@ -93,8 +95,8 @@ class Selector implements \IteratorAggregate
      * Example:
      * User::find()->load(['posts', 'comments', 'profile']);
      *
-     * Attention, consider disabling entity map if you want to use recursive loading (i.e post.tags.posts), but first
-     * think why you even need recursive relation loading.
+     * Attention, consider disabling entity map if you want to use recursive loading (i.e
+     * post.tags.posts), but first think why you even need recursive relation loading.
      *
      * @see with()
      * @param string|array $relation
@@ -127,22 +129,22 @@ class Selector implements \IteratorAggregate
      * parent query using INNER JOIN, this method can be applied only to ORM loaders and relations
      * using same database as parent record.
      *
-     * Method generally used to filter data based on some relation condition. Attention, with() method WILL NOT load
-     * relation data, it will only make it accessible in query.
+     * Method generally used to filter data based on some relation condition. Attention, with()
+     * method WILL NOT load relation data, it will only make it accessible in query.
      *
-     * By default joined tables will be available in query based on relation name, you can change joined table alias
-     * using relation option "alias".
+     * By default joined tables will be available in query based on relation name, you can change
+     * joined table alias using relation option "alias".
      *
-     * Do not forget to set DISTINCT flag while including HAS_MANY and MANY_TO_MANY relations. In other scenario you will
-     * not able to paginate data well.
+     * Do not forget to set DISTINCT flag while including HAS_MANY and MANY_TO_MANY relations. In
+     * other scenario you will not able to paginate data well.
      *
      * Examples:
      *
      * // Find all users who have comments comments
      * User::find()->with('comments');
      *
-     * // Find all users who have approved comments (we can use comments table alias in where statement).
-     * User::find()->with('comments')->where('comments.approved', true);
+     * // Find all users who have approved comments (we can use comments table alias in where
+     * statement). User::find()->with('comments')->where('comments.approved', true);
      *
      * // Find all users who have posts which have approved comments
      * User::find()->with('posts.comments')->where('posts_comments.approved', true);
@@ -152,7 +154,8 @@ class Selector implements \IteratorAggregate
      *      'alias' => 'comments'
      * ])->where('comments.approved', true);
      *
-     * // If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation name
+     * // If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation
+     * name
      * // plus "_pivot" postfix. Let's load all users with approved tags.
      * $user->with('tags')->where('tags_pivot.approved', true);
      *
@@ -167,20 +170,23 @@ class Selector implements \IteratorAggregate
      * // Load all users with approved comments and pre-load all their comments
      * User::find()->with('comments')->where('comments.approved', true)->load('comments');
      *
-     * // You can also use custom conditions in this case, let's find all users with approved comments and pre-load
+     * // You can also use custom conditions in this case, let's find all users with approved
+     * comments and pre-load
      * // such approved comments
      * User::find()->with('comments')->where('comments.approved', true)
      *             ->load('comments', [
      *                  'where' => ['{@}.approved' => true]
      *              ]);
      *
-     * // As you might notice previous construction will create 2 queries, however we can simplify this construction to
+     * // As you might notice previous construction will create 2 queries, however we can simplify
+     * this construction to
      * // use already joined table as source of data for relation via "using" keyword
      * User::find()->with('comments')
      *             ->where('comments.approved', true)
      *             ->load('comments', ['using' => 'comments']);
      *
-     * // You will get only one query with INNER JOIN, to better understand this example let's use custom alias for
+     * // You will get only one query with INNER JOIN, to better understand this example let's use
+     * custom alias for
      * // comments in with() method.
      * User::find()->with('comments', ['alias' => 'commentsR'])
      *             ->where('commentsR.approved', true)
@@ -213,9 +219,9 @@ class Selector implements \IteratorAggregate
     }
 
     /**
-     * Find one entity or return null. Method provides the ability to configure custom query parameters.
-     * Attention, method does not set a limit on selection (to avoid underselection of joined tables), make sure to set
-     * the constrain in the query.
+     * Find one entity or return null. Method provides the ability to configure custom query
+     * parameters. Attention, method does not set a limit on selection (to avoid underselection of
+     * joined tables), make sure to set the constrain in the query.
      *
      * @param array|null $query
      * @return object|null
@@ -228,7 +234,7 @@ class Selector implements \IteratorAggregate
             return null;
         }
 
-        return $this->orm->makeEntity($this->loader->getClass(), $data[0], Heap::STATE_LOADED);
+        return $this->orm->makeEntity($this->loader->getClass(), $data[0], State::LOADED);
     }
 
     /**
@@ -253,7 +259,8 @@ class Selector implements \IteratorAggregate
     /**
      * Load data tree from database and linked loaders in a form of array.
      *
-     * @param OutputNode $node When empty node will be created automatically by root relation loader.
+     * @param OutputNode $node When empty node will be created automatically by root relation
+     *                         loader.
      * @return array
      */
     public function fetchData(OutputNode $node = null): array

@@ -8,9 +8,9 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
+use Spiral\ORM\State;
 use Spiral\ORM\Tests\Fixtures\UserDefined\TestEntity;
 use Spiral\ORM\Tests\Fixtures\UserDefined\TestMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
@@ -110,17 +110,13 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testHeap()
     {
-        $heap = new Heap();
-        $this->orm = $this->orm->withHeap($heap);
-
         $selector = new Selector($this->orm, TestEntity::class);
         $result = $selector->fetchOne();
 
         $this->assertEquals(1, $result->id);
 
-        $this->assertTrue($heap->has(TestEntity::class, $result->id));
-        $this->assertTrue($heap->hasInstance($result));
-        $this->assertSame(Heap::STATE_LOADED, $heap->getState($result));
+        $this->assertTrue($this->orm->getHeap()->has($result));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($result)->getState());
 
         $this->assertEquals(
             [
@@ -128,11 +124,27 @@ abstract class UserDefinedTest extends BaseTest
                 'email'   => 'hello@world.com',
                 'balance' => 100.0,
             ],
-            $heap->getData($result)
+            $this->orm->getHeap()->get($result)->getData()
         );
     }
 
     public function testStore()
+    {
+        $e = new TestEntity();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $this->assertEquals(3, $e->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($e));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
+    }
+
+    public function testStoreWithUpdate()
     {
         $this->enableProfiling();
 
@@ -141,9 +153,19 @@ abstract class UserDefinedTest extends BaseTest
         $e->balance = 300;
 
         $tr = new Transaction($this->orm);
-        $tr->persist($e);
+        $tr->store($e);
+
+        $e->balance = 400;
+        $tr->store($e);
+
         $tr->run();
 
         $this->assertEquals(3, $e->id);
+        $this->assertTrue($this->orm->getHeap()->has($e));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
+
+        $selector = new Selector($this->orm, TestEntity::class);
+        $result = $selector->where('id', 3)->fetchOne();
+        $this->assertEquals(400, $result->balance);
     }
 }

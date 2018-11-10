@@ -159,19 +159,20 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function makeEntity(string $class, array $data, int $state = HeapInterface::STATE_NEW)
+    public function makeEntity(string $class, array $data, int $state = State::NEW)
     {
         if ($data instanceof \Traversable) {
             $data = iterator_to_array($data);
         }
 
         // locate already loaded entity reference
-        if ($this->heap !== null && $state !== HeapInterface::STATE_NEW) {
+        if ($this->heap !== null && $state !== State::NEW) {
             $entityID = $this->identify($class, $data);
 
-            if (!empty($entityID) && $this->heap->has($class, $entityID)) {
-                return $this->heap->get($class, $entityID);
-            }
+            // todo: cache it later with path
+            // if (!empty($entityID) && $this->heap->has($class, $entityID)) {
+            //     return $this->heap->get($class, $entityID);
+            // }
         }
 
         // fetch all the entity relations
@@ -181,7 +182,7 @@ class ORM implements ORMInterface
         $entity = $this->getMapper($class)->make($data, $relmap);
 
         if (!empty($entityID)) {
-            $this->heap->register($entity, $entityID, $data, $state, $relmap);
+            $this->heap->attach($entity, new State($entityID, $state, $data, $relmap));
         }
 
         return $entity;

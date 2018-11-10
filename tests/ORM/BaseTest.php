@@ -96,6 +96,14 @@ abstract class BaseTest extends TestCase
     }
 
     /**
+     * @return Database
+     */
+    protected function getDatabase(): Database
+    {
+        return $this->dbal->database('default');
+    }
+
+    /**
      * @param Database|null $database
      */
     protected function dropDatabase(Database $database = null)

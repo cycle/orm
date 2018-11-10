@@ -10,7 +10,6 @@ namespace Spiral\ORM\Schema\Util;
 
 use Spiral\Database\Schema\AbstractColumn;
 use Spiral\Database\Schema\AbstractTable;
-use Spiral\ORM\Column\ColumnInterface;
 use Spiral\ORM\Exception\Schema\DeclarationException;
 
 /**
@@ -47,7 +46,6 @@ final class ColumnRenderer
      */
     public function renderColumns(AbstractTable $table, array $columns, array $defaults)
     {
-        $table = clone $table;
         foreach ($columns as $name => $definition) {
             $this->renderColumn(
                 $table->column($name),
@@ -87,13 +85,13 @@ final class ColumnRenderer
      */
     public function renderColumn(AbstractColumn $column, string $definition, bool $hasDefault, $default = null)
     {
-        if (
-            class_exists($definition) && is_a($definition, ColumnInterface::class, true)
-        ) {
-            // dedicating column definition to our column class
-            call_user_func([$definition, 'describeColumn'], $column);
-            return;
-        }
+//        if (
+//            class_exists($definition) && is_a($definition, ColumnInterface::class, true)
+//        ) {
+//            // dedicating column definition to our column class
+//            call_user_func([$definition, 'describeColumn'], $column);
+//            return;
+//        }
 
         $pattern = '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i';
 

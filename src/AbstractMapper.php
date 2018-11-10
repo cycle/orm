@@ -24,7 +24,7 @@ abstract class AbstractMapper implements MapperInterface
         $this->orm = $orm;
     }
 
-    public function queueStore($entity): CommandInterface
+    public function queueStore($entity): CommandPromiseInterface
     {
         $state = $this->orm->getHeap()->get($entity);
 
@@ -47,9 +47,6 @@ abstract class AbstractMapper implements MapperInterface
 
     // todo: in the heap?
     abstract protected function setField($entity, $field, $value);
-
-    // todo: from the heap?
-    abstract protected function getField($entity, $field);
 
     protected function buildInsert($entity): CommandPromiseInterface
     {

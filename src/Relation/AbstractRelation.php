@@ -12,7 +12,7 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RelationInterface;
 use Spiral\ORM\State;
 
-class AbstractRelation implements RelationInterface
+abstract class AbstractRelation implements RelationInterface
 {
     /**
      * @invisible
@@ -32,8 +32,6 @@ class AbstractRelation implements RelationInterface
         $this->class = $class;
         $this->relation = $relation;
         $this->schema = $schema;
-
-        dump($this);
     }
 
     public function init($data)
@@ -43,5 +41,10 @@ class AbstractRelation implements RelationInterface
         }
 
         return $this->orm->makeEntity($this->class, $data, State::LOADED);
+    }
+
+    protected function getRelated($entity)
+    {
+        return $this->orm->getMapper($this->class)->getField($entity, $this->relation);
     }
 }

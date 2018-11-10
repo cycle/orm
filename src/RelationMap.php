@@ -8,6 +8,9 @@
 
 namespace Spiral\ORM;
 
+use Spiral\ORM\Command\ChainCommand;
+use Spiral\ORM\Command\CommandPromiseInterface;
+
 final class RelationMap
 {
     /**
@@ -34,6 +37,20 @@ final class RelationMap
         }
 
         return $data;
+    }
+
+    public function queueRelations(
+        $entity,
+        CommandPromiseInterface $command
+    ): CommandPromiseInterface {
+        $chain = new ChainCommand();
+        $chain->addTargetCommand($command);
+
+        foreach ($this->relations as $relation) {
+            $chain->addCommand($relation->queueStore($entity, $command));
+        }
+
+        return $chain;
     }
 
     public function getRelation(string $relation)

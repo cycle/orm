@@ -30,9 +30,6 @@ final class State
     /** @var array */
     private $data;
 
-    /** @var RelationMap */
-    private $relmap;
-
     private $command;
 
     /**

@@ -12,11 +12,13 @@ use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
+use Spiral\ORM\State;
 use Spiral\ORM\Tests\Fixtures\Mapper\ProfileEntity;
 use Spiral\ORM\Tests\Fixtures\Mapper\ProfileMapper;
 use Spiral\ORM\Tests\Fixtures\Mapper\UserEntity;
 use Spiral\ORM\Tests\Fixtures\Mapper\UserMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
 abstract class RelationTest extends BaseTest
 {
@@ -148,5 +150,28 @@ abstract class RelationTest extends BaseTest
 
         $this->assertInstanceOf(UserEntity::class, $result[1]);
         $this->assertEquals(null, $result[1]->profile);
+    }
+
+    public function testCreateWithRelations()
+    {
+        $this->enableProfiling();
+
+        $e = new UserEntity();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+        $e->profile = new ProfileEntity();
+        $e->profile->image = "magic.gif";
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $this->assertEquals(3, $e->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($e));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
+
+        $this->assertTrue($this->orm->getHeap()->has($e->profile));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e->profile)->getState());
     }
 }

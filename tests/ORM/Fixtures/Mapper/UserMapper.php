@@ -11,10 +11,14 @@ namespace Spiral\ORM\Tests\Fixtures\Mapper;
 use Spiral\ORM\AbstractMapper;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schema;
+use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 
 class UserMapper extends AbstractMapper
 {
+    /**
+     * @var HydratorInterface
+     */
     private $hydrator;
 
     public function __construct(ORMInterface $orm)
@@ -46,8 +50,10 @@ class UserMapper extends AbstractMapper
     }
 
     // todo: from the heap?
-    protected function getField($entity, $field)
+    public function getField($entity, $field)
     {
-        return $this->hydrator->extractName($field, $entity);
+        // todo: from the state as well
+
+        return $this->hydrator->extract($entity)[$field];
     }
 }

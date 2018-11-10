@@ -32,10 +32,11 @@ class Transaction implements TransactionInterface
     public function store($entity)
     {
         $mapper = $this->orm->getMapper(get_class($entity));
+        $store = $mapper->queueStore($entity);
 
-        // todo: manage modes here, manage relations here, OK for now
+        $relmap = $this->orm->getRelationMap(get_class($entity));
 
-        $this->addCommand($mapper->queueStore($entity));
+        $this->addCommand($relmap->queueRelations($entity, $store));
     }
 
     /**

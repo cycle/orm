@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Exception\Schema;
+namespace Spiral\ORM\Exception\Schema;
 
-use Spiral\Treap\Exception\SchemaException;
+use Spiral\ORM\Exception\SchemaException;
 
 class CollisionException extends SchemaException
 {

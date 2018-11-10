@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\ORM;
 
-use Spiral\Treap\Exception\SchemaException;
+use Spiral\ORM\Exception\SchemaException;
 
 interface SchemaInterface
 {

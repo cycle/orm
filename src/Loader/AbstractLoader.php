@@ -6,15 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Loader;
+namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\Treap\Exception\FactoryException;
-use Spiral\Treap\Exception\LoaderException;
-use Spiral\Treap\Loader\Traits\ChainTrait;
-use Spiral\Treap\LoaderInterface;
-use Spiral\Treap\Node\AbstractNode;
-use Spiral\Treap\ORMInterface;
+use Spiral\ORM\Exception\FactoryException;
+use Spiral\ORM\Exception\LoaderException;
+use Spiral\ORM\Loader\Traits\ChainTrait;
+use Spiral\ORM\LoaderInterface;
+use Spiral\ORM\Node\AbstractNode;
+use Spiral\ORM\ORMInterface;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,

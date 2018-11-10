@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Util;
+namespace Spiral\ORM\Schema\Util;
 
 use Spiral\Database\Schema\AbstractColumn;
 use Spiral\Database\Schema\AbstractTable;
-use Spiral\Treap\Column\ColumnInterface;
-use Spiral\Treap\Exception\Schema\DeclarationException;
+use Spiral\ORM\Column\ColumnInterface;
+use Spiral\ORM\Exception\Schema\DeclarationException;
 
 /**
  * Implements the ability to define column in AbstractSchema based on string representation and default

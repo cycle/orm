@@ -2,10 +2,10 @@
 /**
  * Spiral, Core Components
  *
- * @author Wolfy-J
+ * @author Wolfy-J2
  */
 
-namespace Spiral\ORM;
+namespace Spiral\ORM2;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;

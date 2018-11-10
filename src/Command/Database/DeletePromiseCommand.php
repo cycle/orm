@@ -9,11 +9,11 @@ namespace Spiral\ORM\Commands;
 
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\Treap\Command\Database\DatabaseCommand;
-use Spiral\Treap\Command\Database\Traits\ContextTrait;
-use Spiral\Treap\Command\Database\Traits\PrimaryKeyTrait;
-use Spiral\Treap\Command\Database\Traits\WhereTrait;
-use Spiral\Treap\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\Database\DatabaseCommand;
+use Spiral\ORM\Command\Database\Traits\ContextTrait;
+use Spiral\ORM\Command\Database\Traits\PrimaryKeyTrait;
+use Spiral\ORM\Command\Database\Traits\WhereTrait;
+use Spiral\ORM\Command\CommandPromiseInterface;
 
 /**
  * Promised delete is a command which delete based on where statement directly linked to it's

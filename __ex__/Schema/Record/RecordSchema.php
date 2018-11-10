@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Record;
+namespace Spiral\ORM\Schema\Record;
 
-use Spiral\Treap\Schema\EntityInterface;
-use Spiral\Treap\Schema\TableInterface;
+use Spiral\ORM\Schema\EntityInterface;
+use Spiral\ORM\Schema\TableInterface;
 
 class RecordSchema implements EntityInterface
 {

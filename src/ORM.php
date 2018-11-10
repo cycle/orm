@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
@@ -31,6 +31,12 @@ class ORM implements ORMInterface
     /** @var null|HeapInterface */
     private $heap = null;
 
+    /** @var MapperInterface[] */
+    private $mappers = [];
+
+    /** @var RelationMap[] */
+    private $relmaps = [];
+
     /**
      * @param DatabaseManager       $dbal
      * @param FactoryInterface|null $factory
@@ -44,9 +50,45 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function getDatabase(string $database): DatabaseInterface
+    public function getDatabase(string $class): DatabaseInterface
     {
-        return $this->dbal->database($database);
+        return $this->dbal->database(
+            $this->getSchema()->define($class, Schema::DATABASE)
+        );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMapper(string $class): MapperInterface
+    {
+        if (isset($this->mappers[$class])) {
+            return $this->mappers[$class];
+        }
+
+        return $this->mappers[$class] = $this->getFactory()->mapper($class);
+    }
+
+    /**
+     * Get relation map associated with the given class.
+     *
+     * @param string $class
+     * @return RelationMap
+     */
+    public function getRelationMap(string $class): RelationMap
+    {
+        if (isset($this->relmaps[$class])) {
+            return $this->relmaps[$class];
+        }
+
+        $relations = [];
+
+        $names = array_keys($this->getSchema()->define($class, Schema::RELATIONS));
+        foreach ($names as $relation) {
+            $relations[$relation] = $this->getFactory()->relation($class, $relation);
+        }
+
+        return $this->relmaps[$class] = new RelationMap($this, $relations);
     }
 
     /**
@@ -141,8 +183,10 @@ class ORM implements ORMInterface
             }
         }
 
-        // construct the entity
-        $relmap = $this->fetchRelations($class, $data);
+        // fetch all the entity relations
+        $relmap = $this->getRelationMap($class)->withContext($data);
+
+        // init the entity
         $entity = $this->getFactory()->mapper($class)->make($data, $relmap);
 
         if (!empty($entityID)) {
@@ -150,6 +194,15 @@ class ORM implements ORMInterface
         }
 
         return $entity;
+    }
+
+    /**
+     * Reset related objects cache.
+     */
+    public function __clone()
+    {
+        $this->mappers = [];
+        $this->relmaps = [];
     }
 
     /**
@@ -169,11 +222,6 @@ class ORM implements ORMInterface
         return null;
     }
 
-    // fetch relations
-    protected function fetchRelations(string $class, array &$data): ?RelationMap
-    {
-        return new RelationMap();
-    }
 
     protected function loadSchema(): SchemaInterface
     {

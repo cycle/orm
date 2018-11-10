@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Node;
+namespace Spiral\ORM\Node;
 
 /**
  * Indicates that node represent array sub-set. This interface would only change the default

@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Command;
+namespace Spiral\ORM\Command;
 
 /**
  * Promise commands used to carry FK and PK values across commands pipeline, other commands are

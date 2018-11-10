@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Record;
+namespace Spiral\ORM\Schema\Record;
 
-use Spiral\Treap\Schema\LocatorInterface;
+use Spiral\ORM\Schema\LocatorInterface;
 
 class RecordLocator implements LocatorInterface
 {

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Command;
+namespace Spiral\ORM\Command;
 
-use Spiral\Treap\Exception\CommandException;
+use Spiral\ORM\Exception\CommandException;
 
 /**
  * Manages chain of nested commands with one "leading" command. Provide ability to change

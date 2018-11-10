@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Relation;
+namespace Spiral\ORM\Schema\Relation;
 
-use Spiral\Treap\Schema\RelationInterface;
+use Spiral\ORM\Schema\RelationInterface;
 
 abstract class AbstractSchema implements RelationInterface
 {

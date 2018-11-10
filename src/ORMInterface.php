@@ -6,13 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
 
 interface ORMInterface
 {
-    public function getDatabase(string $database): DatabaseInterface;
+    public function getDatabase(string $class): DatabaseInterface;
+
+    public function getMapper(string $class): MapperInterface;
+
+    public function getRelationMap(string $class): RelationMap;
 
     public function getSchema(): SchemaInterface;
 

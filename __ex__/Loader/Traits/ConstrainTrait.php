@@ -5,7 +5,7 @@
  * @author    Wolfy-J
  */
 
-namespace Spiral\Treap\Loader\Traits;
+namespace Spiral\ORM\Loader\Traits;
 
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\ORM\Helpers\AliasDecorator;

@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Loader;
+namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\Treap\Loader\Traits\ColumnsTrait;
-use Spiral\Treap\Node\AbstractNode;
-use Spiral\Treap\Node\RootNode;
-use Spiral\Treap\ORMInterface;
-use Spiral\Treap\Schema;
+use Spiral\ORM\Loader\Traits\ColumnsTrait;
+use Spiral\ORM\Node\AbstractNode;
+use Spiral\ORM\Node\RootNode;
+use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Schema;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
@@ -37,7 +37,7 @@ class RootLoader extends AbstractLoader
     {
         parent::__construct($orm, $class);
 
-        $db = $this->orm->getDatabase($this->define(Schema::DATABASE));
+        $db = $this->orm->getDatabase($this->class);
 
         $this->query = $db->select()->from(sprintf(
             "%s AS %s",

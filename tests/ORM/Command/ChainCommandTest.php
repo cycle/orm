@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Tests\Treap\Command;
+namespace Spiral\ORM\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\Treap\Command\ChainCommand;
-use Spiral\Treap\Command\Database\InsertCommand;
-use Spiral\Treap\Command\NullCommand;
+use Spiral\ORM\Command\ChainCommand;
+use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\NullCommand;
 
 class ChainCommandTest extends TestCase
 {
@@ -50,7 +50,7 @@ class ChainCommandTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Treap\Exception\CommandException
+     * @expectedException \Spiral\ORM\Exception\CommandException
      */
     public function testGetLeadingBad()
     {

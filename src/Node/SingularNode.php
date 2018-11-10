@@ -5,9 +5,9 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Node;
+namespace Spiral\ORM\Node;
 
-use Spiral\Treap\Exception\NodeException;
+use Spiral\ORM\Exception\NodeException;
 
 /**
  * Node with ability to push it's data into referenced tree location.

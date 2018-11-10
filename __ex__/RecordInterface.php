@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\ORM;
 
 use Spiral\Models\EntityInterface;
-use Spiral\Treap\Relation\RelationMap;
+use Spiral\ORM\Relation\RelationMap;
 
 interface RecordInterface extends EntityInterface
 {

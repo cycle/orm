@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Command\Database;
+namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\Treap\Command\Database\Traits\ContextTrait;
-use Spiral\Treap\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\Database\Traits\ContextTrait;
+use Spiral\ORM\Command\CommandPromiseInterface;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.

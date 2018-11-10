@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Entities;
+namespace Spiral\ORM2\Entities;
 
 use Psr\SimpleCache\CacheInterface;
 use Spiral\Core\Component;

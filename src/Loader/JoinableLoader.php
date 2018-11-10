@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Loader;
+namespace Spiral\ORM\Loader;
 
 
 abstract class JoinableLoader extends AbstractLoader

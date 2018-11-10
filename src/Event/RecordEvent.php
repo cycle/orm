@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Event;
+namespace Spiral\ORM\Event;
 
 use Spiral\Models\EntityInterface;
 use Spiral\Models\Events\EntityEvent;
-use Spiral\Treap\Command\CommandInterface;
-use Spiral\Treap\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\CommandPromiseInterface;
 
 class RecordEvent extends EntityEvent
 {

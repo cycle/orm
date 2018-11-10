@@ -5,11 +5,11 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Loader;
+namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Injections\Parameter;
-use Spiral\Treap\Loader\Traits\WhereTrait;
+use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\Nodes\SingularNode;
 use Spiral\ORM\ORMInterface;

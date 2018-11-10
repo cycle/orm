@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\ORM;
 
-use Spiral\Treap\Loader\RootLoader;
-use Spiral\Treap\Node\OutputNode;
-use Spiral\Treap\Traits\SelectTrait;
+use Spiral\ORM\Loader\RootLoader;
+use Spiral\ORM\Node\OutputNode;
+use Spiral\ORM\Traits\SelectTrait;
 
 /**
  * Query builder and entity selector. Mocks SelectQuery.

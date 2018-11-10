@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Tests\Treap\Command;
+namespace Spiral\ORM\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Query\UpdateQuery;
-use Spiral\Treap\Command\Database\UpdateCommand;
+use Spiral\ORM\Command\Database\UpdateCommand;
 
 class UpdateCommandTest extends TestCase
 {

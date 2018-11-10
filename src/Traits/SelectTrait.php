@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Traits;
+namespace Spiral\ORM\Traits;
 
-use Spiral\Treap\Loader\RootLoader;
+use Spiral\ORM\Loader\RootLoader;
 
 /**
  * Trait provides the ability to transparently configure underlying loader query.

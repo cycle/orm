@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Tests\Treap\Schema;
+namespace Spiral\ORM\Tests\Schema;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\Treap\Schema\NullLocator;
+use Spiral\ORM\Schema\NullLocator;
 
 class NullLocatorTest extends TestCase
 {

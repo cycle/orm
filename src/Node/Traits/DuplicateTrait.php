@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Node\Traits;
+namespace Spiral\ORM\Node\Traits;
 
 /**
  * Trait provides ability for Node to ensure that given data is unique in selection. Primary key

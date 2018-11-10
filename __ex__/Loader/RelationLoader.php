@@ -5,10 +5,10 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Loader;
+namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Builders\SelectQuery;
-use Spiral\Treap\Loader\Traits\ColumnsTrait;
+use Spiral\ORM\Loader\Traits\ColumnsTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\LoaderInterface;

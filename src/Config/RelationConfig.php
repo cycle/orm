@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Config;
+namespace Spiral\ORM\Config;
 
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
@@ -19,6 +19,11 @@ class RelationConfig extends InjectableConfig
     }
 
     public function getRelation($type): Autowire
+    {
+
+    }
+
+    public function getSchema($type): Autowire
     {
 
     }

@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Loader\Traits;
+namespace Spiral\ORM\Loader\Traits;
 
 
-use Spiral\Treap\Exception\LoaderException;
-use Spiral\Treap\LoaderInterface;
+use Spiral\ORM\Exception\LoaderException;
+use Spiral\ORM\LoaderInterface;
 
 trait ChainTrait
 {

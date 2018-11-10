@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Loader;
+namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Injections\Parameter;

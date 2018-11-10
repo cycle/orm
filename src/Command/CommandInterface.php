@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Command;
+namespace Spiral\ORM\Command;
 
 /**
  * Represent one or multiple operations in transaction.

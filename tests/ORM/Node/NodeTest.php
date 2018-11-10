@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Tests\Node;
+namespace Spiral\ORM\Tests\Node;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\Treap\Node\ArrayNode;
-use Spiral\Treap\Node\RootNode;
-use Spiral\Treap\Node\SingularNode;
+use Spiral\ORM\Node\ArrayNode;
+use Spiral\ORM\Node\RootNode;
+use Spiral\ORM\Node\SingularNode;
 
 class NodeTest extends TestCase
 {
@@ -138,7 +138,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Treap\Exception\NodeException
+     * @expectedException \Spiral\ORM\Exception\NodeException
      */
     public function testGetReferencesWithoutParent()
     {
@@ -209,7 +209,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Treap\Exception\NodeException
+     * @expectedException \Spiral\ORM\Exception\NodeException
      */
     public function testInvalidColumnCount()
     {
@@ -246,7 +246,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Treap\Exception\NodeException
+     * @expectedException \Spiral\ORM\Exception\NodeException
      */
     public function testGetUndefinedNode()
     {
@@ -255,7 +255,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Treap\Exception\NodeException
+     * @expectedException \Spiral\ORM\Exception\NodeException
      */
     public function testSingularParseWithoutParent()
     {
@@ -328,7 +328,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Treap\Exception\NodeException
+     * @expectedException \Spiral\ORM\Exception\NodeException
      */
     public function testArrayWithoutParent()
     {

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Relation;
+namespace Spiral\ORM\Relation;
 
 final class RelationMapx
 {

@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Node;
+namespace Spiral\ORM\Node;
 
 
 /**

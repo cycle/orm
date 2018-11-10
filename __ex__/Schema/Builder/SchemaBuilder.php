@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Builder;
+namespace Spiral\ORM\Schema\Builder;
 
 class SchemaBuilder
 {

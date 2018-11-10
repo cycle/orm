@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Command\Database;
+namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\Treap\Command\AbstractCommand;
+use Spiral\ORM\Command\AbstractCommand;
 
 abstract class DatabaseCommand extends AbstractCommand
 {

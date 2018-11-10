@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\ORM;
 
-use Spiral\Treap\Exception\LoaderException;
-use Spiral\Treap\Node\AbstractNode;
+use Spiral\ORM\Exception\LoaderException;
+use Spiral\ORM\Node\AbstractNode;
 
 /**
  * Loaders provide the ability to create data tree based on set of nested queries or parse resulted

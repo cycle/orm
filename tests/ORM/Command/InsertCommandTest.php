@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Tests\Treap\Command;
+namespace Spiral\ORM\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Query\InsertQuery;
-use Spiral\Treap\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\InsertCommand;
 
 class InsertCommandTest extends TestCase
 {

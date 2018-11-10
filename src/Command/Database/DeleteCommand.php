@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Command\Database;
+namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\Treap\Command\Database\Traits\WhereTrait;
+use Spiral\ORM\Command\Database\Traits\WhereTrait;
 
 class DeleteCommand extends DatabaseCommand
 {

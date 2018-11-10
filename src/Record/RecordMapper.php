@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Record;
+namespace Spiral\ORM\Record;
 
-use Spiral\Treap\MapperInterface;
+use Spiral\ORM\MapperInterface;
 
 abstract class RecordMapper implements MapperInterface
 {

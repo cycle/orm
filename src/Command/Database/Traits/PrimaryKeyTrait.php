@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Command\Database\Traits;
+namespace Spiral\ORM\Command\Database\Traits;
 
 trait PrimaryKeyTrait
 {

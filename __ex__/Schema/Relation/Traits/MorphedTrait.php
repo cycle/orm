@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Relation\Traits;
+namespace Spiral\ORM\Schema\Relation\Traits;
 
 trait MorphedTrait
 {

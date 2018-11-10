@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema;
+namespace Spiral\ORM\Schema;
 
 use Spiral\Database\Schema\AbstractTable;
 

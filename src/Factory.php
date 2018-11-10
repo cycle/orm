@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap;
+namespace Spiral\ORM;
 
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Spiral\Treap\Config\RelationConfig;
-use Spiral\Treap\Exception\FactoryException;
+use Spiral\ORM\Config\RelationConfig;
+use Spiral\ORM\Exception\FactoryException;
 
 class Factory implements FactoryInterface
 {
@@ -26,12 +26,6 @@ class Factory implements FactoryInterface
 
     /** @var SchemaInterface */
     private $schema;
-
-    /** @var MapperInterface[] */
-    private $mappers = [];
-
-    /** @var RelationInterface[] */
-    private $relations = [];
 
     /**
      * @param RelationConfig   $config
@@ -51,8 +45,6 @@ class Factory implements FactoryInterface
         $factory = clone $this;
         $factory->orm = $orm;
         $factory->schema = $schema;
-        $factory->mappers = [];
-        $factory->relations = [];
 
         return $factory;
     }
@@ -62,18 +54,11 @@ class Factory implements FactoryInterface
      */
     public function mapper(string $class): MapperInterface
     {
-        if (isset($this->mappers[$class])) {
-            return $this->mappers[$class];
-        }
-
-        return $this->mappers[$class] = $this->factory->make(
-            $this->getSchema()->define($class, Schema::MAPPER),
-            [
-                'orm'    => $this->orm,
-                'class'  => $class,
-                'schema' => $this->getSchema()->define($class, Schema::SCHEMA)
-            ]
-        );
+        return $this->factory->make($this->getSchema()->define($class, Schema::MAPPER), [
+            'orm'    => $this->orm,
+            'class'  => $class,
+            'schema' => $this->getSchema()->define($class, Schema::SCHEMA)
+        ]);
     }
 
     /**
@@ -108,23 +93,14 @@ class Factory implements FactoryInterface
     public function relation(string $class, string $relation): RelationInterface
     {
         $schema = $this->getSchema()->defineRelation($class, $relation);
+        $type = $schema[RelationInterface::TYPE];
 
-        // pre-cache all relation branches (context is set later)
-        $uniqueID = sprintf("%s.%s.%s", $class, $relation, $schema[RelationInterface::TYPE]);
-
-        if (isset($this->relations[$uniqueID])) {
-            return $this->relations[$uniqueID];
-        }
-
-        return $this->relations[$uniqueID] = $this->config->getRelation($schema[RelationInterface::TYPE])->resolve(
-            $this->factory,
-            [
-                'orm'      => $this->orm,
-                'relation' => $relation,
-                'class'    => $schema[RelationInterface::TARGET],
-                'schema'   => $schema[RelationInterface::SCHEMA]
-            ]
-        );
+        return $this->config->getRelation($type)->resolve($this->factory, [
+            'orm'      => $this->orm,
+            'relation' => $relation,
+            'class'    => $schema[RelationInterface::TARGET],
+            'schema'   => $schema[RelationInterface::SCHEMA]
+        ]);
     }
 
     /**

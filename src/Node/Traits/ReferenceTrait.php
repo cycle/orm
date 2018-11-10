@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Node\Traits;
+namespace Spiral\ORM\Node\Traits;
 
-use Spiral\Treap\Exception\NodeException;
+use Spiral\ORM\Exception\NodeException;
 
 /**
  * Mounts given data piece into reference based data tree.

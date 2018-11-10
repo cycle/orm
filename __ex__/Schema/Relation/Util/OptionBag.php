@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Treap\Schema\Relation\Util;
+namespace Spiral\ORM\Schema\Relation\Util;
 
 
 class OptionBag

@@ -5,9 +5,9 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Treap\Node;
+namespace Spiral\ORM\Node;
 
-use Spiral\Treap\Exception\NodeException;
+use Spiral\ORM\Exception\NodeException;
 
 /**
  * Parses multiple sub children and mount them under parent node.

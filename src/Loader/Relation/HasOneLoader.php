@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Loader\Relation;
 
+use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Node\AbstractNode;
@@ -48,15 +49,14 @@ class HasOneLoader extends RelationLoader
                 $this->localKey(Relation::OUTER_KEY),
                 $this->parentKey(Relation::INNER_KEY)
             );
+        } else {
+            // relation is loaded using external query
+            $query->where(
+                $this->localKey(Relation::OUTER_KEY),
+                'IN',
+                new Parameter($outerKeys)
+            );
         }
-//        else {
-//            //This relation is loaded using external query
-//            $query->where(
-//                $this->localKey(Record::OUTER_KEY),
-//                'IN',
-//                new Parameter($outerKeys)
-//            );
-//        }
 
         //Morphed records
 //        if (!empty($this->schema[Record::MORPH_KEY])) {

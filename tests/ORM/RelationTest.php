@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
 use Spiral\ORM\Schema;
@@ -90,6 +91,31 @@ abstract class RelationTest extends BaseTest
     {
         $selector = new Selector($this->orm, UserEntity::class);
         $selector->load('profile');
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
+                    'id'      => 1,
+                    'user_id' => 1,
+                    'image'   => 'image.png'
+                ]
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'profile' => null
+            ]
+        ], $selector->fetchData());
+    }
+
+    public function testFetchRelationPostload()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        $selector->load('profile', ['method' => RelationLoader::POSTLOAD]);
 
         $this->assertEquals([
             [

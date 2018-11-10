@@ -127,6 +127,15 @@ abstract class BaseTest extends TestCase
             $schema->save();
         }
     }
+
+    /**
+     * For debug purposes only.
+     */
+    protected function enableProfiling()
+    {
+        $this->getDriver()->setProfiling(true);
+        $this->getDriver()->setLogger(new TestLogger());
+    }
 }
 
 class TestLogger implements LoggerInterface

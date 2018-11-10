@@ -28,12 +28,12 @@ class InsertCommand extends DatabaseCommand implements CommandPromiseInterface
     /**
      * @param DatabaseInterface $db
      * @param string            $table
-     * @param array             $update
+     * @param array             $insert
      */
-    public function __construct(DatabaseInterface $db, string $table, array $update)
+    public function __construct(DatabaseInterface $db, string $table, array $insert)
     {
         parent::__construct($db, $table);
-        $this->data = $update;
+        $this->data = $insert;
     }
 
     /**

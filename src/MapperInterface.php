@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM;
 
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Exception\MapperException;
 
 interface MapperInterface
@@ -21,26 +22,25 @@ interface MapperInterface
      *
      * @throws MapperException
      */
-    public function make(array $data, RelationMap $relmap = null);
+    public function make(array $data, RelationMap $relmap);
 
-    //    /**
-    //     * Initiate chain of commands require to store object and it's data into persistent storage.
-    //     *
-    //     * @param object      $object
-    //     * @param RelationMap $relmap @todo is it needed here?
-    //     * @return CommandPromiseInterface
-    //     *
-    //     * @throws MapperException
-    //     */
-    //    public function queueStore($object, RelationMap $relmap = null): CommandPromiseInterface;
-    //
-    //    /**
-    //     * Initiate sequence of of commands required to delete object from the persistent storage.
-    //     *
-    //     * @param object $object
-    //     * @return CommandInterface
-    //     *
-    //     * @throws MapperException
-    //     */
-    //    public function queueDelete($object): CommandInterface;
+    /**
+     * Initiate chain of commands require to store object and it's data into persistent storage.
+     *
+     * @param object $entity
+     * @return CommandInterface
+     *
+     * @throws MapperException
+     */
+    public function queueStore($entity): CommandInterface;
+
+    /**
+     * Initiate sequence of of commands required to delete object from the persistent storage.
+     *
+     * @param object $entity
+     * @return CommandInterface
+     *
+     * @throws MapperException
+     */
+    public function queueDelete($entity): CommandInterface;
 }

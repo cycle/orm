@@ -30,19 +30,19 @@ class UpdateCommand extends DatabaseCommand implements CommandPromiseInterface
     /**
      * @param DatabaseInterface $db
      * @param string            $table
-     * @param array             $update
+     * @param array             $insert
      * @param array             $where
      * @param null|mixed        $primaryKey
      */
     public function __construct(
         DatabaseInterface $db,
         string $table,
-        array $update,
+        array $insert,
         array $where,
         $primaryKey = null
     ) {
         parent::__construct($db, $table);
-        $this->data = $update;
+        $this->data = $insert;
         $this->where = $where;
         $this->primaryKey = $primaryKey;
     }

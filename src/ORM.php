@@ -45,6 +45,7 @@ class ORM implements ORMInterface
     {
         $this->dbal = $dbal;
         $this->factory = $factory;
+        $this->heap = new Heap();
     }
 
     /**
@@ -138,7 +139,7 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function withHeap(HeapInterface $heap = null): ORMInterface
+    public function withHeap(HeapInterface $heap): ORMInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
@@ -150,19 +151,9 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function getHeap(): ?HeapInterface
+    public function getHeap(): HeapInterface
     {
         return $this->heap;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function resetHeap()
-    {
-        if ($this->heap != null) {
-            $this->heap->reset();
-        }
     }
 
     /**

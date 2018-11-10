@@ -26,17 +26,25 @@ class Transaction implements TransactionInterface
         $this->orm = $orm;
     }
 
-    // todo: modes!!
-    public function store($entity)
+    /**
+     * {@inheritdoc}
+     */
+    public function persist($entity)
     {
-        // todo: what to do with relmap
-        $this->orm->getMapper(get_class($entity));
+        $mapper = $this->orm->getMapper(get_class($entity));
+
+        // todo: move state her?
+        $this->addCommand($mapper->queueStore($entity));
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delete($entity)
     {
-        // todo: what to do with relmap
-        $this->orm->getMapper(get_class($entity));
+        $mapper = $this->orm->getMapper(get_class($entity));
+
+        $this->addCommand($mapper->queueDelete($entity));
     }
 
     /**

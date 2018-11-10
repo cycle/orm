@@ -12,7 +12,6 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
 
 class HasOneRelation extends AbstractRelation
 {
@@ -36,23 +35,5 @@ class HasOneRelation extends AbstractRelation
         });
 
         return $inner;
-    }
-
-    // todo: optimize column access, state access
-    protected function lookupKey($key, $entity, CommandPromiseInterface $command = null)
-    {
-        if (!empty($command)) {
-            $context = $command->getContext();
-            if (!empty($context[$key])) {
-                //Key value found in a context
-                return $context[$key];
-            }
-
-            if ($key == $this->orm->getSchema()->define($this->class, Schema::PRIMARY_KEY)) {
-                return $command->getPrimaryKey();
-            }
-        }
-
-        return $this->orm->getMapper($this->class)->getField($entity, $key);
     }
 }

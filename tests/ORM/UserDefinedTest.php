@@ -109,11 +109,25 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testHeap()
     {
-        $this->orm = $this->orm->withHeap(new Heap());
+        $heap = new Heap();
+        $this->orm = $this->orm->withHeap($heap);
 
         $selector = new Selector($this->orm, 'test');
         $result = $selector->fetchOne();
 
         $this->assertEquals(1, $result->id);
+
+        $this->assertTrue($heap->has(TestEntity::class, $result->id));
+        $this->assertTrue($heap->hasInstance($result));
+        $this->assertSame(Heap::STATE_LOADED, $heap->getState($result));
+
+        $this->assertEquals(
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+            ],
+            $heap->getData($result)
+        );
     }
 }

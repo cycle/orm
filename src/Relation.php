@@ -17,4 +17,5 @@ class Relation
     public const HAS_ONE   = 1;
     public const OUTER_KEY = 2;
     public const INNER_KEY = 3;
+    public const NULLABLE  = 4;
 }

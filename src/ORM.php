@@ -183,6 +183,7 @@ class ORM implements ORMInterface
         // todo: recursive records are possible using secondary check
 
         if (!empty($entityID)) {
+            // todo: relation data?
             $this->heap->attach($entity, new State($entityID, $state, $data));
         }
 

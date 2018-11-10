@@ -35,6 +35,7 @@ jobs:
       - cd ..
     script:
       - vendor/bin/phpunit tests/ORM/Driver/SQLite
+      - vendor/bin/phpunit tests/ORM/Driver/MySQL
       - vendor/bin/phpunit tests/ORM/Driver/Postgres
 
   # Testing various PostgresSQL version

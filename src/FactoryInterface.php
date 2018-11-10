@@ -14,8 +14,6 @@ interface FactoryInterface
 
     public function mapper(string $class): MapperInterface;
 
-    public function selector(string $class);
-
     public function loader(string $class, string $relation): LoaderInterface;
 
     public function relation(string $class, string $relation): RelationInterface;

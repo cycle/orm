@@ -64,14 +64,6 @@ class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function selector(string $class)
-    {
-        return new Selector($this->orm, $class);
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function loader(string $class, string $relation): LoaderInterface
     {
         $schema = $this->getSchema()->defineRelation($class, $relation);

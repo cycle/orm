@@ -3,13 +3,15 @@ language: php
 php:
   - 7.1
   - 7.2
-  - nightly
 
 before_install:
-  - composer self-update
+  - cd tests
+  - docker-compose up -d
+  - cd ..
+# - bash ./tests/install-sqlsrv.sh
 
 install:
-  - composer install --no-interaction
+  - composer install --no-interaction --prefer-source
 
 script:
   - vendor/bin/phpunit --coverage-clover=coverage.xml

@@ -14,7 +14,7 @@ use Spiral\ORM\Tests\Fixtures\UserDefined\TestEntity;
 use Spiral\ORM\Tests\Fixtures\UserDefined\TestMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
 
-abstract class UserDefinedMapperTest extends BaseTest
+abstract class UserDefinedTest extends BaseTest
 {
     use TableTrait;
 

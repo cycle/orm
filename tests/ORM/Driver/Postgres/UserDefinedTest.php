@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Driver\SQLite;
+namespace Spiral\ORM\Tests\Driver\Postgres;
 
 class UserDefinedTest extends \Spiral\ORM\Tests\UserDefinedTest
 {
-    const DRIVER = 'sqlite';
+    const DRIVER = 'postgres';
 }

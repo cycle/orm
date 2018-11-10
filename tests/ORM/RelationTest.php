@@ -173,5 +173,7 @@ abstract class RelationTest extends BaseTest
 
         $this->assertTrue($this->orm->getHeap()->has($e->profile));
         $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e->profile)->getState());
+
+        $this->assertSame($e->id, $this->orm->getHeap()->get($e->profile)->getData()['user_id']);
     }
 }

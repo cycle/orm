@@ -23,3 +23,16 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -f coverage.xml
+
+jobs:
+  include:
+  # PHP Nightly builds does not support SQLServer yet
+  - stage: Test
+    php: nightly
+    before_install:
+    - cd tests
+    - docker-compose up -d
+    - cd ..
+    script:
+    - vendor/bin/phpunit tests/ORM/Driver/SQLite
+    - vendor/bin/phpunit tests/ORM/Driver/Postgres

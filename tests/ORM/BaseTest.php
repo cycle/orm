@@ -57,7 +57,8 @@ abstract class BaseTest extends TestCase
         $this->orm = new ORM($this->dbal, new Factory(
             new RelationConfig([
                 Relation::HAS_ONE => [
-                    RelationConfig::LOADER => HasOneLoader::class
+                    RelationConfig::LOADER   => HasOneLoader::class,
+                    RelationConfig::RELATION => Relation\HasOneRelation::class
                 ]
             ])
         ));

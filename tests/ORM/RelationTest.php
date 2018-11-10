@@ -10,7 +10,6 @@ namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
-use Spiral\ORM\RelationInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\Mapper\ProfileEntity;
@@ -65,9 +64,9 @@ abstract class RelationTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'profile' => [
-                        RelationInterface::TYPE   => Relation::HAS_ONE,
-                        RelationInterface::TARGET => ProfileEntity::class,
-                        RelationInterface::SCHEMA => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => ProfileEntity::class,
+                        Relation::SCHEMA => [
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -135,5 +134,19 @@ abstract class RelationTest extends BaseTest
                 'profile' => null
             ]
         ], $selector->fetchData());
+    }
+
+    public function testAccessEntities()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        $selector->load('profile');
+        $result = $selector->fetchAll();
+
+        $this->assertInstanceOf(UserEntity::class, $result[0]);
+        $this->assertInstanceOf(ProfileEntity::class, $result[0]->profile);
+        $this->assertEquals('image.png', $result[0]->profile->image);
+
+        $this->assertInstanceOf(UserEntity::class, $result[1]);
+        $this->assertEquals(null, $result[1]->profile);
     }
 }

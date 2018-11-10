@@ -175,14 +175,15 @@ class ORM implements ORMInterface
             // }
         }
 
-        // fetch all the entity relations
-        $relmap = $this->getRelationMap($class)->withContext($data);
-
         // init the entity
-        $entity = $this->getMapper($class)->make($data, $relmap);
+        $entity = $this->getMapper($class)->make(
+            $this->getRelationMap($class)->init($data)
+        );
+
+        // todo: recursive records are possible using secondary check
 
         if (!empty($entityID)) {
-            $this->heap->attach($entity, new State($entityID, $state, $data, $relmap));
+            $this->heap->attach($entity, new State($entityID, $state, $data));
         }
 
         return $entity;

@@ -10,7 +10,6 @@ namespace Spiral\ORM\Tests\Fixtures\Mapper;
 
 use Spiral\ORM\AbstractMapper;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\RelationMap;
 use Spiral\ORM\Schema;
 use Zend\Hydrator\Reflection;
 
@@ -24,7 +23,7 @@ class UserMapper extends AbstractMapper
         $this->hydrator = new Reflection();
     }
 
-    public function make(array $data, RelationMap $relmap = null)
+    public function make(array $data)
     {
         return $this->hydrator->hydrate($data, new UserEntity());
     }

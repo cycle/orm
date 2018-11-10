@@ -61,8 +61,7 @@ abstract class AbstractMapper implements MapperInterface
         $state = new State(
             $data[$primaryKey] ?? null,
             State::SCHEDULED,
-            $data,
-            null
+            $data
         );
 
         unset($data[$primaryKey]);

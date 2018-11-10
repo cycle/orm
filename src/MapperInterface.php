@@ -16,13 +16,12 @@ interface MapperInterface
     /**
      * Construct entity.
      *
-     * @param array       $data
-     * @param RelationMap $relmap
+     * @param array $data
      * @return object
      *
      * @throws MapperException
      */
-    public function make(array $data, RelationMap $relmap);
+    public function make(array $data);
 
     /**
      * Initiate chain of commands require to store object and it's data into persistent storage.

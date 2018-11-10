@@ -6,8 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\ORM\Relation;
 
-interface RelationInterface
+class HasOneRelation extends AbstractRelation
 {
+
 }

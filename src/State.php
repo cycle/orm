@@ -39,14 +39,12 @@ final class State
      * @param mixed       $primaryKey
      * @param int         $state
      * @param array       $data
-     * @param RelationMap $relmap
      */
-    public function __construct($primaryKey, int $state, array $data, RelationMap $relmap = null)
+    public function __construct($primaryKey, int $state, array $data)
     {
         $this->primaryKey = $primaryKey;
         $this->state = $state;
         $this->data = $data;
-        $this->relmap = $relmap;
     }
 
     /**
@@ -79,14 +77,6 @@ final class State
     public function getData(): array
     {
         return $this->data;
-    }
-
-    /**
-     * @return RelationMap
-     */
-    public function getRelmap(): ?RelationMap
-    {
-        return $this->relmap;
     }
 
     public function setField(string $name, $value)

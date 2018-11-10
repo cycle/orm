@@ -68,13 +68,13 @@ class Factory implements FactoryInterface
     {
         $schema = $this->getSchema()->defineRelation($class, $relation);
 
-        return $this->config->getLoader($schema[RelationInterface::TYPE])->resolve(
+        return $this->config->getLoader($schema[Relation::TYPE])->resolve(
             $this->factory,
             [
                 'orm'      => $this->orm,
+                'class'    => $schema[Relation::TARGET],
                 'relation' => $relation,
-                'class'    => $schema[RelationInterface::TARGET],
-                'schema'   => $schema[RelationInterface::SCHEMA]
+                'schema'   => $schema[Relation::SCHEMA]
             ]
         );
     }
@@ -85,13 +85,13 @@ class Factory implements FactoryInterface
     public function relation(string $class, string $relation): RelationInterface
     {
         $schema = $this->getSchema()->defineRelation($class, $relation);
-        $type = $schema[RelationInterface::TYPE];
+        $type = $schema[Relation::TYPE];
 
         return $this->config->getRelation($type)->resolve($this->factory, [
             'orm'      => $this->orm,
+            'class'    => $schema[Relation::TARGET],
             'relation' => $relation,
-            'class'    => $schema[RelationInterface::TARGET],
-            'schema'   => $schema[RelationInterface::SCHEMA]
+            'schema'   => $schema[Relation::SCHEMA]
         ]);
     }
 

@@ -25,9 +25,15 @@ final class RelationMap
         $this->relations = $relations;
     }
 
-    public function withContext(array &$data): self
+    public function init(array $data): array
     {
-        return clone $this;
+        foreach ($this->relations as $name => $relation) {
+            if (array_key_exists($name, $data)) {
+                $data[$name] = $relation->init($data[$name]);
+            }
+        }
+
+        return $data;
     }
 
     public function getRelation(string $relation)

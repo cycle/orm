@@ -8,7 +8,9 @@
 
 namespace Spiral\ORM;
 
+use Spiral\Database\Driver\DriverInterface;
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\Database\DatabaseCommand;
 
 class Transaction implements TransactionInterface
 {
@@ -66,76 +68,54 @@ class Transaction implements TransactionInterface
      */
     public function run()
     {
-        foreach ($this->getCommands() as $command) {
-            dump($command);
+        $executed = $drivers = [];
+
+        try {
+            foreach ($this->getCommands() as $command) {
+                $this->beginTransaction($command, $drivers);
+
+                $command->execute();
+                $executed[] = $command;
+            }
+        } catch (\Throwable $e) {
+            foreach (array_reverse($drivers) as $driver) {
+                /** @var DriverInterface $driver */
+                $driver->rollbackTransaction();
+            }
+
+            foreach (array_reverse($executed) as $command) {
+                /** @var CommandInterface $command */
+                $command->rollBack();
+            }
+
+            throw $e;
+        } finally {
+            $this->commands = [];
         }
 
-//        /**
-//         * @var Driver[]           $drivers
-//         * @var CommandInterface[] $commands
-//         */
-//        $drivers = $commands = [];
-//
-//        foreach ($this->getCommands() as $command) {
-//            if ($command instanceof SQLCommandInterface) {
-//                $driver = $command->getDriver();
-//                if (!empty($driver) && !in_array($driver, $drivers)) {
-//                    $drivers[] = $driver;
-//                }
-//            }
-//
-//            $commands[] = $command;
-//        }
-//
-//        if (empty($commands)) {
-//            return;
-//        }
-//
-//        //Commands we executed and drivers with started transactions
-//        $executedCommands = $wrappedDrivers = [];
-//
-//        try {
-//            if ($forceTransaction || count($commands) > 1) {
-//                //Starting transactions
-//                foreach ($drivers as $driver) {
-//                    $driver->beginTransaction();
-//                    $wrappedDrivers[] = $driver;
-//                }
-//            }
-//
-//            //Run commands
-//            foreach ($commands as $command) {
-//                $command->execute();
-//                $executedCommands[] = $command;
-//            }
-//        } catch (\Throwable $e) {
-//            foreach (array_reverse($wrappedDrivers) as $driver) {
-//                /** @var Driver $driver */
-//                $driver->rollbackTransaction();
-//            }
-//
-//            foreach (array_reverse($executedCommands) as $command) {
-//                /** @var CommandInterface $command */
-//                $command->rollBack();
-//            }
-//
-//            $this->commands = [];
-//            throw $e;
-//        }
-//
-//        foreach (array_reverse($wrappedDrivers) as $driver) {
-//            /** @var Driver $driver */
-//            $driver->commitTransaction();
-//        }
-//
-//        foreach ($executedCommands as $command) {
-//            //This is the point when record will get related PK and FKs filled
-//            $command->complete();
-//        }
-//
-//        //Clean transaction
-//        if ($clean) {
-//            $this->commands = [];
-//        }
+        foreach (array_reverse($drivers) as $driver) {
+            /** @var DriverInterface $driver */
+            $driver->commitTransaction();
+        }
+
+        foreach ($executed as $command) {
+            //This is the point when entity will get related PK and FKs filled
+            $command->complete();
+        }
+    }
+
+    /**
+     * @param CommandInterface $command
+     * @param array            $drivers
+     */
+    private function beginTransaction(CommandInterface $command, array &$drivers)
+    {
+        if ($command instanceof DatabaseCommand) {
+            $driver = $command->getDatabase()->getDriver();
+            if (!empty($driver) && !in_array($driver, $drivers)) {
+                $driver->beginTransaction();
+                $drivers[] = $driver;
+            }
+        }
     }
 }

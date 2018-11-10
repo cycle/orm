@@ -8,12 +8,9 @@
 
 namespace Spiral\ORM\Tests\Fixtures\UserDefined;
 
-use Spiral\Models\DataEntity;
-
-class TestEntity extends DataEntity
+class TestEntity
 {
-    public function __debugInfo()
-    {
-        return $this->getFields();
-    }
+    public $id;
+    public $email;
+    public $balance;
 }

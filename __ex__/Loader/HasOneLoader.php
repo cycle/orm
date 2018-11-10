@@ -22,22 +22,10 @@ use Spiral\ORM\Record;
  * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
  * purposes).
  */
-class HasOneLoader extends RelationLoader
+class HasOneLoader2 extends RelationLoader
 {
     use WhereTrait;
 
-    /**
-     * Default set of relation options. Child implementation might defined their of default options.
-     *
-     * @var array
-     */
-    protected $options = [
-        'method' => self::INLOAD,
-        'minify' => true,
-        'alias'  => null,
-        'using'  => null,
-        'where'  => null,
-    ];
 
     /**
      * {@inheritdoc}

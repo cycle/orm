@@ -47,10 +47,10 @@ final class Schema implements SchemaInterface
      */
     public function defineRelation(string $class, string $relation): array
     {
-        $relations = $this->define($class, $relation);
+        $relations = $this->define($class, self::RELATIONS);
 
         if (!isset($relations[$relation])) {
-            throw new SchemaException("Undefined relation schema `{$class}`.`{$relation}`, not found.");
+            throw new SchemaException("Undefined relation `{$class}`.`{$relation}`.");
         }
 
         return $relations[$relation];

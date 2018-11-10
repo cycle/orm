@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Loader;
 
+use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Exception\FactoryException;
 use Spiral\ORM\Exception\LoaderException;
@@ -82,14 +83,26 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
+     * Database associated with the loader.
+     *
+     * @return DatabaseInterface
+     */
+    public function getDatabase(): DatabaseInterface
+    {
+        return $this->orm->getDatabase($this->class);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
         if (!$parent instanceof AbstractLoader) {
-            throw new LoaderException(
-                sprintf("Loader of type '%s' can not accept parent '%s'", get_class($this), get_class($parent))
-            );
+            throw new LoaderException(sprintf(
+                "Loader of type '%s' can not accept parent '%s'",
+                get_class($this),
+                get_class($parent)
+            ));
         }
 
         /*
@@ -97,9 +110,11 @@ abstract class AbstractLoader implements LoaderInterface
          * current set of options (i.e. default options, i.e. current options).
          */
         if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
-            throw new LoaderException(
-                sprintf("Relation %s does not support option: %s", get_class($this), join(',', $wrong))
-            );
+            throw new LoaderException(sprintf(
+                "Relation %s does not support option: %s",
+                get_class($this),
+                join(',', $wrong)
+            ));
         }
 
         $loader = clone $this;
@@ -147,7 +162,10 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         if ($join) {
-            if (empty($options['method']) || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])) {
+            if (
+                empty($options['method'])
+                || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])
+            ) {
                 //Let's tell our loaded that it's method is JOIN (forced)
                 $options['method'] = self::JOIN;
             }
@@ -162,7 +180,11 @@ abstract class AbstractLoader implements LoaderInterface
             //Creating new loader.
             $loader = $this->orm->getFactory()->loader($this->class, $relation);
         } catch (FactoryException $e) {
-            throw new LoaderException("Unable to create loader: %s" . $e->getMessage(), $e->getCode(), $e);
+            throw new LoaderException(
+                "Unable to create loader: %s" . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
 
         return $loaders[$relation] = $loader->withContext($this, $options);
@@ -176,7 +198,11 @@ abstract class AbstractLoader implements LoaderInterface
         $node = $this->initNode();
 
         foreach ($this->load as $relation => $loader) {
-            // linking up all nested loaders
+            if ($loader instanceof RelationLoader && $loader->isJoined()) {
+                $node->joinNode($relation, $loader->createNode());
+                continue;
+            }
+
             $node->linkNode($relation, $loader->createNode());
         }
 
@@ -245,7 +271,7 @@ abstract class AbstractLoader implements LoaderInterface
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         foreach ($this->load as $loader) {
-            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
+            if ($loader instanceof RelationLoader && $loader->isJoined()) {
                 $query = $loader->configureQuery(clone $query);
             }
         }

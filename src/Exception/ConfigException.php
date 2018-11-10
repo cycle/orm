@@ -6,10 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Loader;
+namespace Spiral\ORM\Exception;
 
-
-abstract class JoinableLoader extends AbstractLoader
+class ConfigException extends ORMException
 {
 
 }

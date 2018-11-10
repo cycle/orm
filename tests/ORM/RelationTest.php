@@ -8,6 +8,8 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Relation;
+use Spiral\ORM\RelationInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\Mapper\ProfileEntity;
@@ -60,7 +62,16 @@ abstract class RelationTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [
+                    'profile' => [
+                        RelationInterface::TYPE   => Relation::HAS_ONE,
+                        RelationInterface::TARGET => ProfileEntity::class,
+                        RelationInterface::SCHEMA => [
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
             ],
             ProfileEntity::class => [
                 Schema::ALIAS       => 'profile',
@@ -75,15 +86,27 @@ abstract class RelationTest extends BaseTest
         ]));
     }
 
-    public function testFetchProfileData()
+    public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, ProfileEntity::class);
+        $selector = new Selector($this->orm, UserEntity::class);
+        $selector->load('profile');
 
         $this->assertEquals([
             [
                 'id'      => 1,
-                'user_id' => 1,
-                'image'   => 'image.png',
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
+                    'id'      => 1,
+                    'user_id' => 1,
+                    'image'   => 'image.png'
+                ]
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'profile' => null
             ]
         ], $selector->fetchData());
     }

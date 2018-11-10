@@ -19,7 +19,9 @@ use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
 use Spiral\ORM\Config\RelationConfig;
 use Spiral\ORM\Factory;
+use Spiral\ORM\Loader\Relation\HasOneLoader;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Relation;
 
 abstract class BaseTest extends TestCase
 {
@@ -52,7 +54,13 @@ abstract class BaseTest extends TestCase
         $this->dbal->addDriver('default', $this->getDriver());
         $this->dbal->addDatabase(new Database('default', '', $this->getDriver()));
 
-        $this->orm = new ORM($this->dbal, new Factory(new RelationConfig([])));
+        $this->orm = new ORM($this->dbal, new Factory(
+            new RelationConfig([
+                Relation::HAS_ONE => [
+                    RelationConfig::LOADER => HasOneLoader::class
+                ]
+            ])
+        ));
     }
 
     /**

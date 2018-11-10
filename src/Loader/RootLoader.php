@@ -37,9 +37,7 @@ class RootLoader extends AbstractLoader
     {
         parent::__construct($orm, $class);
 
-        $db = $this->orm->getDatabase($this->class);
-
-        $this->query = $db->select()->from(sprintf(
+        $this->query = $this->getDatabase()->select()->from(sprintf(
             "%s AS %s",
             $this->define(Schema::TABLE),
             $this->getAlias()

@@ -31,12 +31,16 @@ class Transaction implements TransactionInterface
      */
     public function store($entity)
     {
-        $mapper = $this->orm->getMapper(get_class($entity));
-        $store = $mapper->queueStore($entity);
+        $class = get_class($entity);
 
-        $relmap = $this->orm->getRelationMap(get_class($entity));
-
-        $this->addCommand($relmap->queueRelations($entity, $store));
+        // todo: skip cascade
+        // todo: dry
+        $this->addCommand(
+            $this->orm->getRelationMap($class)->queueRelations(
+                $entity,
+                $this->orm->getMapper($class)->queueStore($entity)
+            )
+        );
     }
 
     /**

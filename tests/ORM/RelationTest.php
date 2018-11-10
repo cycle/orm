@@ -154,8 +154,6 @@ abstract class RelationTest extends BaseTest
 
     public function testCreateWithRelations()
     {
-        $this->enableProfiling();
-
         $e = new UserEntity();
         $e->email = 'test@email.com';
         $e->balance = 300;
@@ -175,5 +173,44 @@ abstract class RelationTest extends BaseTest
         $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e->profile)->getState());
 
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->profile)->getData()['user_id']);
+    }
+
+    public function testMountRelation()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        $e = $selector->where('id', 2)->fetchOne();
+
+        $e->profile = new ProfileEntity();
+        $e->profile->image = "secondary.gif";
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $selector = new Selector($this->orm, UserEntity::class);
+        $selector->load('profile');
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
+                    'id'      => 1,
+                    'user_id' => 1,
+                    'image'   => 'image.png'
+                ]
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'profile' =>  [
+                    'id'      => 2,
+                    'user_id' => 2,
+                    'image'   => 'secondary.gif'
+                ]
+            ]
+        ], $selector->fetchData());
     }
 }

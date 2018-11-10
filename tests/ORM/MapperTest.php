@@ -11,12 +11,12 @@ namespace Spiral\ORM\Tests;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\Tests\Fixtures\UserDefined\TestEntity;
-use Spiral\ORM\Tests\Fixtures\UserDefined\TestMapper;
+use Spiral\ORM\Tests\Fixtures\Mapper\UserEntity;
+use Spiral\ORM\Tests\Fixtures\Mapper\UserMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-abstract class UserDefinedTest extends BaseTest
+abstract class MapperTest extends BaseTest
 {
     use TableTrait;
 
@@ -24,13 +24,13 @@ abstract class UserDefinedTest extends BaseTest
     {
         parent::setUp();
 
-        $this->makeTable('test', [
+        $this->makeTable('user', [
             'id'      => 'primary',
             'email'   => 'string',
             'balance' => 'float'
         ]);
 
-        $this->getDatabase()->table('test')->insertMultiple(
+        $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
             [
                 ['hello@world.com', 100],
@@ -39,11 +39,11 @@ abstract class UserDefinedTest extends BaseTest
         );
 
         $this->orm = $this->orm->withSchema(new Schema([
-            TestEntity::class => [
-                Schema::ALIAS       => 'test',
-                Schema::MAPPER      => TestMapper::class,
+            UserEntity::class => [
+                Schema::ALIAS       => 'user',
+                Schema::MAPPER      => UserMapper::class,
                 Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'test',
+                Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::SCHEMA      => [],
@@ -54,7 +54,7 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testFetchData()
     {
-        $selector = new Selector($this->orm, TestEntity::class);
+        $selector = new Selector($this->orm, UserEntity::class);
 
         $this->assertEquals([
             [
@@ -72,15 +72,15 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testFetchAll()
     {
-        $selector = new Selector($this->orm, TestEntity::class);
+        $selector = new Selector($this->orm, UserEntity::class);
         $result = $selector->fetchAll();
 
-        $this->assertInstanceOf(TestEntity::class, $result[0]);
+        $this->assertInstanceOf(UserEntity::class, $result[0]);
         $this->assertEquals(1, $result[0]->id);
         $this->assertEquals('hello@world.com', $result[0]->email);
         $this->assertEquals(100.0, $result[0]->balance);
 
-        $this->assertInstanceOf(TestEntity::class, $result[1]);
+        $this->assertInstanceOf(UserEntity::class, $result[1]);
         $this->assertEquals(2, $result[1]->id);
         $this->assertEquals('another@world.com', $result[1]->email);
         $this->assertEquals(200.0, $result[1]->balance);
@@ -88,10 +88,10 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testFetchOne()
     {
-        $selector = new Selector($this->orm, TestEntity::class);
+        $selector = new Selector($this->orm, UserEntity::class);
         $result = $selector->fetchOne();
 
-        $this->assertInstanceOf(TestEntity::class, $result);
+        $this->assertInstanceOf(UserEntity::class, $result);
         $this->assertEquals(1, $result->id);
         $this->assertEquals('hello@world.com', $result->email);
         $this->assertEquals(100.0, $result->balance);
@@ -99,10 +99,10 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testWhere()
     {
-        $selector = new Selector($this->orm, TestEntity::class);
+        $selector = new Selector($this->orm, UserEntity::class);
         $result = $selector->where('id', 2)->fetchOne();
 
-        $this->assertInstanceOf(TestEntity::class, $result);
+        $this->assertInstanceOf(UserEntity::class, $result);
         $this->assertEquals(2, $result->id);
         $this->assertEquals('another@world.com', $result->email);
         $this->assertEquals(200.0, $result->balance);
@@ -110,7 +110,7 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testHeap()
     {
-        $selector = new Selector($this->orm, TestEntity::class);
+        $selector = new Selector($this->orm, UserEntity::class);
         $result = $selector->fetchOne();
 
         $this->assertEquals(1, $result->id);
@@ -130,7 +130,7 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testStore()
     {
-        $e = new TestEntity();
+        $e = new UserEntity();
         $e->email = 'test@email.com';
         $e->balance = 300;
 
@@ -146,9 +146,7 @@ abstract class UserDefinedTest extends BaseTest
 
     public function testStoreWithUpdate()
     {
-        $this->enableProfiling();
-
-        $e = new TestEntity();
+        $e = new UserEntity();
         $e->email = 'test@email.com';
         $e->balance = 300;
 
@@ -164,7 +162,7 @@ abstract class UserDefinedTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
 
-        $selector = new Selector($this->orm, TestEntity::class);
+        $selector = new Selector($this->orm, UserEntity::class);
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);
     }

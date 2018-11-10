@@ -6,14 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures\UserDefined;
+namespace Spiral\ORM\Tests\Fixtures\Mapper;
 
 use Spiral\ORM\AbstractMapper;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RelationMap;
+use Spiral\ORM\Schema;
 use Zend\Hydrator\Reflection;
 
-class TestMapper extends AbstractMapper
+class ProfileMapper extends AbstractMapper
 {
     private $hydrator;
 
@@ -25,12 +26,18 @@ class TestMapper extends AbstractMapper
 
     public function make(array $data, RelationMap $relmap = null)
     {
-        return $this->hydrator->hydrate($data, new TestEntity());
+        return $this->hydrator->hydrate($data, new ProfileEntity());
     }
 
     protected function getFields($entity): array
     {
-        return $this->hydrator->extract($entity);
+        $values = $this->hydrator->extract($entity);
+        $columns = $this->orm->getSchema()->define(get_class($entity), Schema::COLUMNS);
+
+        return array_intersect_key(
+            $values,
+            array_flip($columns)
+        );
     }
 
     // todo: in the heap?

@@ -6,11 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures\UserDefined;
+namespace Spiral\ORM\Tests\Fixtures\Mapper;
 
-class TestEntity
+class ProfileEntity
 {
     public $id;
-    public $email;
-    public $balance;
+    public $image;
 }

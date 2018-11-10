@@ -29,6 +29,7 @@ abstract class AbstractMapper implements MapperInterface
         $state = $this->orm->getHeap()->get($entity);
 
         if ($state == null) {
+            // todo: make sure that no save can happen after the heap reset
             return $this->buildInsert($entity);
         }
 
@@ -109,7 +110,8 @@ abstract class AbstractMapper implements MapperInterface
 
         $data = $this->getFields($entity);
 
-        $uData = $data;
+        // todo: calc diff
+        $uData = $data + $state->getData();
         unset($uData[$primaryKey]);
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)

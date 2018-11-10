@@ -187,7 +187,7 @@ class ORM implements ORMInterface
         $relmap = $this->getRelationMap($class)->withContext($data);
 
         // init the entity
-        $entity = $this->getFactory()->mapper($class)->make($data, $relmap);
+        $entity = $this->getMapper($class)->make($data, $relmap);
 
         if (!empty($entityID)) {
             $this->heap->register($entity, $entityID, $data, $relmap);

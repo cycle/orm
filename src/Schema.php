@@ -15,16 +15,6 @@ use Spiral\ORM\Exception\SchemaException;
  */
 final class Schema implements SchemaInterface
 {
-    public const ALIAS       = 0;
-    public const MAPPER      = 1;
-    public const SOURCE      = 2;
-    public const DATABASE    = 3;
-    public const TABLE       = 4;
-    public const PRIMARY_KEY = 5;
-    public const SCHEMA      = 6;
-    public const RELATIONS   = 7;
-
-
     /** @var array */
     private $schema = [];
 

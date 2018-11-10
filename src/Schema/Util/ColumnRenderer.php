@@ -13,8 +13,8 @@ use Spiral\Database\Schema\AbstractTable;
 use Spiral\ORM\Exception\Schema\DeclarationException;
 
 /**
- * Implements the ability to define column in AbstractSchema based on string representation and default
- * value (if defined).
+ * Implements the ability to define column in AbstractSchema based on string representation and
+ * default value (if defined).
  *
  * Attention, this class will try to guess default value if column is NOT NULL and no default
  * value provided by user.
@@ -83,8 +83,12 @@ final class ColumnRenderer
      *
      * @throws DeclarationException
      */
-    public function renderColumn(AbstractColumn $column, string $definition, bool $hasDefault, $default = null)
-    {
+    protected function renderColumn(
+        AbstractColumn $column,
+        string $definition,
+        bool $hasDefault,
+        $default = null
+    ) {
 //        if (
 //            class_exists($definition) && is_a($definition, ColumnInterface::class, true)
 //        ) {
@@ -136,6 +140,7 @@ final class ColumnRenderer
         if (!$hasDefault && !$column->isNullable()) {
             // we have to come up with some default value
             $column->defaultValue($this->castDefault($column));
+
             return;
         }
 
@@ -155,7 +160,7 @@ final class ColumnRenderer
      *
      * @return mixed
      */
-    public function castDefault(AbstractColumn $column)
+    protected function castDefault(AbstractColumn $column)
     {
         if (in_array($column->getAbstractType(), ['timestamp', 'datetime', 'time', 'date'])) {
             return 0;

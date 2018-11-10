@@ -23,6 +23,12 @@ abstract class AbstractNode
 {
     use DuplicateTrait, ReferenceTrait;
 
+    // Typecasting types
+    public const STRING  = 1;
+    public const INTEGER = 2;
+    public const FLOAT   = 3;
+    public const BOOL    = 4;
+
     /**
      * Indicates that node data is joined to parent row and must receive part of incoming row
      * subset.
@@ -39,11 +45,11 @@ abstract class AbstractNode
     protected $columns = [];
 
     /**
-     * Number of columns associated with the node.
+     * Column types.
      *
-     * @var int
+     * @var array
      */
-    protected $countColumns = 0;
+    protected $types = [];
 
     /**
      * Declared column which must be aggregated in a parent node. i.e. Parent Key
@@ -78,7 +84,6 @@ abstract class AbstractNode
     public function __construct(array $columns, string $outerKey = null)
     {
         $this->columns = $columns;
-        $this->countColumns = count($columns);
         $this->outerKey = $outerKey;
     }
 
@@ -120,7 +125,7 @@ abstract class AbstractNode
              *
              * This means offset has to be calculated using all nested nodes
              */
-            $innerColumns = $node->parseRow($this->countColumns + $offset, $row);
+            $innerColumns = $node->parseRow(count($this->columns) + $offset, $row);
 
             //Counting next selection offset
             $offset += $innerColumns;
@@ -129,7 +134,7 @@ abstract class AbstractNode
             $innerOffset += $innerColumns;
         }
 
-        return $this->countColumns + $innerOffset;
+        return count($this->columns) + $innerOffset;
     }
 
     /**
@@ -237,7 +242,7 @@ abstract class AbstractNode
             //Combine column names with sliced piece of row
             return array_combine(
                 $this->columns,
-                array_slice($line, $dataOffset, $this->countColumns)
+                array_slice($line, $dataOffset, count($this->columns))
             );
         } catch (\Exception $e) {
             throw new NodeException(

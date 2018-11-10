@@ -20,7 +20,6 @@ use Spiral\Database\Driver\AbstractHandler;
 use Spiral\ORM\Config\RelationConfig;
 use Spiral\ORM\Factory;
 use Spiral\ORM\ORM;
-use Spiral\ORM\ORMInterface;
 
 abstract class BaseTest extends TestCase
 {
@@ -39,7 +38,7 @@ abstract class BaseTest extends TestCase
     /** @var DatabaseManager */
     protected $dbal;
 
-    /** @var ORMInterface */
+    /** @var ORM */
     protected $orm;
 
     /**

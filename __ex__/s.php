@@ -13,7 +13,6 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Entities\Nodes\OutputNode;
 use Spiral\ORM\Exceptions\SelectorException;
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
 use Spiral\Pagination\PaginatorAwareInterface;
 use Spiral\Pagination\PaginatorInterface;
@@ -23,7 +22,6 @@ use Spiral\Pagination\PaginatorInterface;
  */
 class RecordSelector2222 implements \IteratorAggregate, \Countable, PaginatorAwareInterface
 {
-
     /**
      * Get RecordIterator (entity iterator) for a requested data. Provide cache key and lifetime in
      * order to cache request data.

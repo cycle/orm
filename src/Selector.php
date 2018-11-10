@@ -15,7 +15,7 @@ use Spiral\ORM\Traits\SelectTrait;
 /**
  * Query builder and entity selector. Mocks SelectQuery.
  */
-class Selector implements \IteratorAggregate
+class Selector implements \IteratorAggregate, \Countable
 {
     use SelectTrait;
 

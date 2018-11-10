@@ -92,6 +92,8 @@ final class State
         $this->command = $commandPromise;
     }
 
+    // todo: store original set of relations (YEEEEAH BOYYYY)
+
     public function getCommandPromise(): ?CommandPromiseInterface
     {
         return $this->command;

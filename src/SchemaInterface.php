@@ -19,6 +19,7 @@ interface SchemaInterface
     public const TABLE       = 4;
     public const PRIMARY_KEY = 5;
     public const COLUMNS     = 6;
+    public const SCHEMA      = 7;
     public const RELATIONS   = 8;
 
     /**

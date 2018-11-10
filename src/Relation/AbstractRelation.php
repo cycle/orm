@@ -42,7 +42,12 @@ abstract class AbstractRelation implements RelationInterface
             return null;
         }
 
-        return $this->orm->makeEntity($this->class, $data, State::LOADED);
+
+        $related = $this->orm->makeEntity($this->class, $data, State::LOADED);
+
+        // todo: ref-count ++
+
+        return $related;
     }
 
     protected function getRelated($entity)

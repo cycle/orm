@@ -57,7 +57,7 @@ abstract class AbstractMapper implements MapperInterface
         $data = $this->getFields($entity);
         $state = new State(
             $data[$primaryKey] ?? null,
-            State::SCHEDULED,
+            State::SCHEDULED_INSERT,
             $data
         );
 

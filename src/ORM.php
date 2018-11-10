@@ -187,6 +187,8 @@ class ORM implements ORMInterface
             $this->heap->attach($entity, new State($entityID, $state, $data));
         }
 
+        // init relation binding ?
+
         return $entity;
     }
 

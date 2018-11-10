@@ -11,15 +11,18 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\CommandPromiseInterface;
 
 /**
- * Evil twin of every entity, contain meta information about entity data, primary key,
- * loaded relation and current heap state.
+ * State carries meta information about all load entities, including original set of data,
+ * relations, state, primary key value (you can handle entities without PK included), and number of
+ * active references (in cases when entity become unclaimed).
  */
 final class State
 {
+    // Different entity states in a pool
     public const NEW              = 0;
     public const LOADED           = 1;
-    public const SCHEDULED        = 2;
+    public const SCHEDULED_INSERT = 2;
     public const SCHEDULED_UPDATE = 3;
+    public const SCHEDULED_DELETE = 4;
 
     /** @var mixed */
     private $primaryKey;
@@ -33,9 +36,9 @@ final class State
     private $command;
 
     /**
-     * @param mixed       $primaryKey
-     * @param int         $state
-     * @param array       $data
+     * @param mixed $primaryKey
+     * @param int   $state
+     * @param array $data
      */
     public function __construct($primaryKey, int $state, array $data)
     {

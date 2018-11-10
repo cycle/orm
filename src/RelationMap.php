@@ -10,7 +10,13 @@ namespace Spiral\ORM;
 
 final class RelationMap
 {
+    /**
+     * @invisible
+     * @var ORMInterface
+     */
     private $orm;
+
+    /** @var RelationInterface[] */
     private $relations = [];
 
     public function __construct(ORMInterface $orm, array $relations)

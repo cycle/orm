@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\UserDefined\TestEntity;
@@ -104,5 +105,15 @@ abstract class UserDefinedTest extends BaseTest
         $this->assertEquals(2, $result->id);
         $this->assertEquals('another@world.com', $result->email);
         $this->assertEquals(200.0, $result->balance);
+    }
+
+    public function testHeap()
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $selector = new Selector($this->orm, 'test');
+        $result = $selector->fetchOne();
+
+        $this->assertEquals(1, $result->id);
     }
 }

@@ -8,21 +8,38 @@
 
 namespace Spiral\ORM\Relation;
 
+use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
+use Spiral\ORM\State;
 
 class HasOneRelation extends AbstractRelation
 {
-    public function queueStore($parent, CommandPromiseInterface $command): CommandInterface
-    {
+    public function queueChange(
+        $parent,
+        State $state,
+        CommandPromiseInterface $command
+    ): CommandInterface {
         $related = $this->getRelated($parent);
-        if (empty($related)) {
+        $orig = $state->getRelation($this->relation);
+
+        if ($orig === $related) {
             return new NullCommand();
         }
 
+        $chain = new ChainCommand();
+
+        // delete, we need to think about replace
+        if (!empty($orig) && empty($related)) {
+            // delete?
+            return $this->orm->getMapper(get_class($orig))->queueDelete($orig);
+        }
+
+
         $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
+        $chain->addTargetCommand($inner);
 
         // syncing (TODO: CHECK IF NOT SYNCED ALREADY)
         $command->onExecute(function (CommandPromiseInterface $command) use ($inner, $parent) {
@@ -34,6 +51,6 @@ class HasOneRelation extends AbstractRelation
             // todo: MORPH KEY
         });
 
-        return $inner;
+        return $chain;
     }
 }

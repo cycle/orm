@@ -248,4 +248,20 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertSame('updated.png', $e->profile->image);
     }
+
+    public function testDeleteChildrenByAssigningNull()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        $e = $selector->wherePK(1)->load('profile')->fetchOne();
+        $e->profile = null;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        $e = $selector->wherePK(1)->load('profile')->fetchOne();
+
+        $this->assertSame(null, $e->profile);
+    }
 }

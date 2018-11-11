@@ -10,9 +10,9 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\Database\UpdateCommand;
-use Spiral\ORM\Command\NullCommand;
 
 abstract class AbstractMapper implements MapperInterface
 {
@@ -47,15 +47,17 @@ abstract class AbstractMapper implements MapperInterface
 
     public function queueDelete($entity): CommandInterface
     {
-        echo 'delete';
+        $state = $this->orm->getHeap()->get($entity);
 
-        return new NullCommand();
+        // todo: check state
+        return $this->buildDelete($entity, $state);
     }
 
     abstract protected function getFields($entity): array;
 
     // todo: in the heap?
     abstract protected function setField($entity, $field, $value);
+
 
     protected function buildInsert($entity): CommandPromiseInterface
     {
@@ -157,5 +159,42 @@ abstract class AbstractMapper implements MapperInterface
         });
 
         return $update;
+    }
+
+    protected function buildDelete($entity, State $state): CommandInterface
+    {
+        $schema = $this->orm->getSchema();
+        $class = get_class($entity);
+        $primaryKey = $schema->define($class, Schema::PRIMARY_KEY);
+
+        // todo: better primary key fetch
+
+        $delete = new DeleteCommand(
+            $this->orm->getDatabase($class),
+            $schema->define($class, Schema::TABLE),
+            [$primaryKey => $state->getPrimaryKey() ?? $this->getFields($entity)[$primaryKey] ?? null]
+        );
+
+        $current = $state->getState();
+        $state->setState(State::SCHEDULED_DELETE);
+
+        if (!empty($state->getCommandPromise())) {
+            $state->getCommandPromise()->onExecute(function (
+                CommandPromiseInterface $command
+            ) use ($primaryKey, $delete) {
+                $delete->setWhere([$primaryKey => $command->getPrimaryKey()]);
+            });
+        }
+
+        $delete->onComplete(function (DeleteCommand $command) use ($entity) {
+            $this->orm->getHeap()->detach($entity);
+        });
+
+        $delete->onRollBack(function () use ($state, $current) {
+            $state->setState($current);
+        });
+
+
+        return $delete;
     }
 }

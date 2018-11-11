@@ -32,8 +32,8 @@ final class RelationMap
     {
         foreach ($this->relations as $name => $relation) {
             if (array_key_exists($name, $data)) {
-                $state->setRelation($name, $data[$name]);
                 $data[$name] = $relation->init($data[$name]);
+                $state->setRelation($name, $data[$name]);
             }
         }
 
@@ -44,11 +44,15 @@ final class RelationMap
         $entity,
         CommandPromiseInterface $command
     ): CommandPromiseInterface {
+        // todo: what if entity new?
+        $state = $this->orm->getHeap()->get($entity);
+
         $chain = new ChainCommand();
         $chain->addTargetCommand($command);
 
+
         foreach ($this->relations as $relation) {
-            $chain->addCommand($relation->queueStore($entity, $command));
+            $chain->addCommand($relation->queueChange($entity, $state, $command));
         }
 
         return $chain;

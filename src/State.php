@@ -112,6 +112,6 @@ final class State
 
     public function getRelation(string $name)
     {
-        return $this->relations[$name];
+        return $this->relations[$name] ?? null;
     }
 }

@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
@@ -106,6 +107,24 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(2, $result->id);
         $this->assertEquals('another@world.com', $result->email);
         $this->assertEquals(200.0, $result->balance);
+    }
+
+    public function testDelete()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        $result = $selector->where('id', 2)->fetchOne();
+
+        $tr = new Transaction($this->orm);
+        $tr->delete($result);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        $this->assertNull($selector->where('id', 2)->fetchOne());
+
+        $selector = new Selector($this->orm, UserEntity::class);
+        $this->assertNull($selector->where('id', 2)->fetchOne());
+
+        $this->assertFalse($this->orm->getHeap()->has($result));
     }
 
     public function testHeap()

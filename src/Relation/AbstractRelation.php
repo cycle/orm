@@ -42,19 +42,16 @@ abstract class AbstractRelation implements RelationInterface
             return null;
         }
 
+        // todo: array?
+        // todo: pretty easy?
 
-        $related = $this->orm->make($this->class, $data, State::LOADED);
-
-        // todo: ref-count ++
-
-        return $related;
+        return $this->orm->make($this->class, $data, State::LOADED);
     }
 
     protected function getRelated($entity)
     {
         return $this->orm->getMapper($this->class)->getField($entity, $this->relation);
     }
-
 
     // todo: optimize column access, state access
     protected function lookupKey($key, $entity, CommandPromiseInterface $command = null)

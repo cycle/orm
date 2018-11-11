@@ -11,7 +11,6 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
-use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -25,10 +24,6 @@ class HasOneRelation extends AbstractRelation
         $related = $this->getRelated($parent);
         $orig = $state->getRelation($this->relation);
 
-        if ($orig === $related) {
-            return new NullCommand();
-        }
-
         $chain = new ChainCommand();
 
         // delete, we need to think about replace
@@ -37,6 +32,9 @@ class HasOneRelation extends AbstractRelation
             return $this->orm->getMapper(get_class($orig))->queueDelete($orig);
         }
 
+        if (!empty($orig) && !empty($related) && $orig !== $related) {
+            $chain->addCommand($this->orm->getMapper(get_class($orig))->queueDelete($orig));
+        }
 
         $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
         $chain->addTargetCommand($inner);

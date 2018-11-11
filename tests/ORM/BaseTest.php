@@ -145,6 +145,14 @@ abstract class BaseTest extends TestCase
         $this->getDriver()->setProfiling(true);
         $this->getDriver()->setLogger(new TestLogger());
     }
+
+    /**
+     * For debug purposes only.
+     */
+    protected function disableProfiling()
+    {
+        $this->getDriver()->setProfiling(false);
+    }
 }
 
 class TestLogger implements LoggerInterface

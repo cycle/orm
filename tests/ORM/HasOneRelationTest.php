@@ -264,4 +264,26 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertSame(null, $e->profile);
     }
+
+    public function testAssignNewChild()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        $e = $selector->wherePK(1)->load('profile')->fetchOne();
+        $oP = $e->profile;
+        $e->profile = new ProfileEntity();
+        $e->profile->image = 'new.jpg';
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $this->assertFalse($this->orm->getHeap()->has($oP));
+        $this->assertTrue($this->orm->getHeap()->has($e->profile));
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        $e = $selector->wherePK(1)->load('profile')->fetchOne();
+
+        $this->assertNotEquals($oP, $e->profile->id);
+        $this->assertSame('new.jpg', $e->profile->image);
+    }
 }

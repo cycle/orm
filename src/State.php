@@ -33,9 +33,12 @@ final class State
     /** @var array */
     private $data;
 
+    private $refCount = 1;
+
     private $command;
 
     private $relations = [];
+
 
     /**
      * @param mixed $primaryKey
@@ -113,5 +116,21 @@ final class State
     public function getRelation(string $name)
     {
         return $this->relations[$name] ?? null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRefCount(): int
+    {
+        return $this->refCount;
+    }
+
+    /**
+     * @param int $refCount
+     */
+    public function setRefCount(int $refCount): void
+    {
+        $this->refCount = $refCount;
     }
 }

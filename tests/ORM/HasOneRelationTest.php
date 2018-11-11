@@ -288,32 +288,65 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('new.jpg', $e->profile->image);
     }
 
-//    public function testMoveToAnotherEntity()
-//    {
-//        $selector = new Selector($this->orm, UserEntity::class);
-//        list($a, $b) = $selector->load('profile')->fetchAll();
-//
-//        $this->assertNotNull($a->profile);
-//        $this->assertNull($b->profile);
-//
-//        $p = $a->profile;
-//        list($b->profile, $a->profile) = [$a->profile, null];
-//
-//        $this->enableProfiling();
-//        $tr = new Transaction($this->orm);
-//        $tr->store($a);
-//        $tr->store($b);
-//        $tr->run();
-//
-//        $this->disableProfiling();
-//
-//        $this->assertFalse($this->orm->getHeap()->has($b->profile));
-//
-//        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
-//        list($a, $b) = $selector->load('profile')->fetchAll();
-//
-//        $this->assertNull($a->profile);
-//        $this->assertNotNull($b->profile);
-//        $this->assertEquals($p->id, $b->profile->id);
-//    }
+    public function testMoveToAnotherEntity()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+
+        $this->assertNotNull($a->profile);
+        $this->assertNull($b->profile);
+
+        $p = $a->profile;
+        list($b->profile, $a->profile) = [$a->profile, null];
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        $this->assertTrue($this->orm->getHeap()->has($b->profile));
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+
+        $this->assertNull($a->profile);
+        $this->assertNotNull($b->profile);
+        $this->assertEquals($p->id, $b->profile->id);
+    }
+
+    public function testExchange()
+    {
+        $selector = new Selector($this->orm, UserEntity::class);
+        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+
+        $b->profile = new ProfileEntity();
+        $b->profile->image = "secondary.gif";
+
+        $tr = new Transaction($this->orm);
+        $tr->store($b);
+        $tr->run();
+
+        // reset state
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $selector = new Selector($this->orm, UserEntity::class);
+        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        $this->assertSame('image.png', $a->profile->image);
+        $this->assertSame('secondary.gif', $b->profile->image);
+
+        list($a->profile, $b->profile) = [$b->profile, $a->profile];
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        // reset state
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $selector = new Selector($this->orm, UserEntity::class);
+        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        $this->assertSame('image.png', $b->profile->image);
+        $this->assertSame('secondary.gif', $a->profile->image);
+    }
 }

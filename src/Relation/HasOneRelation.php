@@ -11,6 +11,7 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -28,12 +29,38 @@ class HasOneRelation extends AbstractRelation
 
         // delete, we need to think about replace
         if (!empty($orig) && empty($related)) {
-            // delete?
-            return $this->orm->getMapper(get_class($orig))->queueDelete($orig);
+            $origState = $this->orm->getHeap()->get($orig);
+            $origState->setRefCount(
+                $origState->getRefCount() - 1
+            );
+
+            return new ConditionalCommand(
+                $this->orm->getMapper(get_class($orig))->queueDelete($orig),
+                function () use ($origState) {
+                    return $origState->getRefCount() == 0;
+                }
+            );
         }
 
         if (!empty($orig) && !empty($related) && $orig !== $related) {
-            $chain->addCommand($this->orm->getMapper(get_class($orig))->queueDelete($orig));
+            $origState = $this->orm->getHeap()->get($orig);
+            $origState->setRefCount(
+                $origState->getRefCount() - 1
+            );
+
+            $chain->addCommand(
+                new ConditionalCommand(
+                    $this->orm->getMapper(get_class($orig))->queueDelete($orig),
+                    function () use ($origState) {
+                        return $origState->getRefCount() == 0;
+                    }
+                )
+            );
+        }
+
+        $relState = $this->orm->getHeap()->get($related);
+        if (!empty($relState)) {
+            $relState->setRefCount($relState->getRefCount() + 1);
         }
 
         $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
@@ -48,6 +75,8 @@ class HasOneRelation extends AbstractRelation
 
             // todo: MORPH KEY
         });
+
+        // todo: update relation state
 
         return $chain;
     }

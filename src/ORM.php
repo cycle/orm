@@ -157,6 +157,14 @@ class ORM implements ORMInterface
     }
 
     /**
+     * @return TransactionInterface
+     */
+    public function begin(): TransactionInterface
+    {
+        return new Transaction($this);
+    }
+
+    /**
      * @inheritdoc
      */
     public function make(string $class, array $data, int $state = State::NEW)

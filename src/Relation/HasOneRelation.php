@@ -30,9 +30,7 @@ class HasOneRelation extends AbstractRelation
         // delete, we need to think about replace
         if (!empty($orig) && empty($related)) {
             $origState = $this->orm->getHeap()->get($orig);
-            $origState->setRefCount(
-                $origState->getRefCount() - 1
-            );
+            $origState->delRef();
 
             return new ConditionalCommand(
                 $this->orm->getMapper(get_class($orig))->queueDelete($orig),
@@ -44,9 +42,7 @@ class HasOneRelation extends AbstractRelation
 
         if (!empty($orig) && !empty($related) && $orig !== $related) {
             $origState = $this->orm->getHeap()->get($orig);
-            $origState->setRefCount(
-                $origState->getRefCount() - 1
-            );
+            $origState->delRef();
 
             $chain->addCommand(
                 new ConditionalCommand(
@@ -60,9 +56,10 @@ class HasOneRelation extends AbstractRelation
 
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
-            $relState->setRefCount($relState->getRefCount() + 1);
+            $relState->addRef();
         }
 
+        // todo: dirty state [?]
         $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
         $chain->addTargetCommand($inner);
 

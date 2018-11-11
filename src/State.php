@@ -133,4 +133,14 @@ final class State
     {
         $this->refCount = $refCount;
     }
+
+    public function addRef()
+    {
+        $this->refCount++;
+    }
+
+    public function delRef()
+    {
+        $this->refCount--;
+    }
 }

@@ -159,7 +159,7 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function makeEntity(string $class, array $data, int $state = State::NEW)
+    public function make(string $class, array $data, int $state = State::NEW)
     {
         if ($data instanceof \Traversable) {
             $data = iterator_to_array($data);
@@ -175,21 +175,17 @@ class ORM implements ORMInterface
             // }
         }
 
-        // init the entity
-        $entity = $this->getMapper($class)->make(
-            $this->getRelationMap($class)->init($data)
-        );
-
-        // todo: recursive records are possible using secondary check
+        $entity = $this->getMapper($class)->init();
+        $state = new State($entityID ?? null, $state, $data);
 
         if (!empty($entityID)) {
-            // todo: relation data?
-            $this->heap->attach($entity, new State($entityID, $state, $data));
+            $this->heap->attach($entity, $state);
         }
 
-        // init relation binding ?
+        $data = $this->getRelationMap($class)->init($state, $data);
 
-        return $entity;
+        // ready to use
+        return $this->getMapper($class)->hydrate($entity, $data);
     }
 
     /**

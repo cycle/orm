@@ -14,6 +14,8 @@ use Spiral\ORM\Exception\MapperException;
 
 interface MapperInterface
 {
+    public function init();
+
     /**
      * Construct entity.
      *
@@ -23,6 +25,8 @@ interface MapperInterface
      * @throws MapperException
      */
     public function make(array $data);
+
+    public function hydrate($entity, array $data);
 
     // todo: from the heap?
     public function getField($entity, $field);

@@ -7,8 +7,8 @@
 
 namespace Spiral\ORM\Loader\Traits;
 
-use Spiral\Database\Builders\SelectQuery;
-use Spiral\ORM\Helpers\AliasDecorator;
+
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Provides ability to set LIMIT and ORDER BY in relation loaders.
@@ -16,10 +16,9 @@ use Spiral\ORM\Helpers\AliasDecorator;
 trait ConstrainTrait
 {
     /**
-     * @param \Spiral\Database\Builders\SelectQuery $query
-     *
-     * @param array                                 $orderBy
-     * @param int                                   $limit 0 when no selection.
+     * @param SelectQuery $query
+     * @param array       $orderBy
+     * @param int         $limit 0 when no selection.
      */
     private function configureWindow(SelectQuery $query, array $orderBy, int $limit = 0)
     {

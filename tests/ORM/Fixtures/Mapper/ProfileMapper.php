@@ -21,15 +21,20 @@ class ProfileMapper extends AbstractMapper
      */
     private $hydrator;
 
-    public function __construct(ORMInterface $orm)
+    public function __construct(ORMInterface $orm, $class)
     {
-        parent::__construct($orm);
+        parent::__construct($orm, $class);
         $this->hydrator = new Reflection();
     }
 
     public function make(array $data)
     {
         return $this->hydrator->hydrate($data, new ProfileEntity());
+    }
+
+    public function hydrate($entity, array $data)
+    {
+        return $this->hydrator->hydrate($data, $entity);
     }
 
     protected function getFields($entity): array

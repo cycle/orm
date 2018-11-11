@@ -41,21 +41,19 @@ class HasOneLoader extends RelationLoader
             return parent::configureQuery($query, $outerKeys);
         }
 
+        $localKey = $this->localKey(Relation::OUTER_KEY);
+
         if ($this->isJoined()) {
             $query->join(
                 $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
                 "{$this->define(Schema::TABLE)} AS {$this->getAlias()}"
             )->on(
-                $this->localKey(Relation::OUTER_KEY),
+                $localKey,
                 $this->parentKey(Relation::INNER_KEY)
             );
         } else {
             // relation is loaded using external query
-            $query->where(
-                $this->localKey(Relation::OUTER_KEY),
-                'IN',
-                new Parameter($outerKeys)
-            );
+            $query->where($localKey, 'IN', new Parameter($outerKeys));
         }
 
         //Morphed records

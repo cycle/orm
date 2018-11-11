@@ -18,10 +18,19 @@ abstract class AbstractMapper implements MapperInterface
 {
     protected $orm;
 
+    protected $class;
 
-    public function __construct(ORMInterface $orm)
+    public function __construct(ORMInterface $orm, $class)
     {
         $this->orm = $orm;
+        $this->class = $class;
+    }
+
+    public function init()
+    {
+        $class = $this->class;
+
+        return new $class;
     }
 
     public function queueStore($entity): CommandPromiseInterface

@@ -234,7 +234,7 @@ class Selector implements \IteratorAggregate, \Countable
             return null;
         }
 
-        return $this->orm->makeEntity($this->loader->getClass(), $data[0], State::LOADED);
+        return $this->orm->make($this->loader->getClass(), $data[0], State::LOADED);
     }
 
     /**

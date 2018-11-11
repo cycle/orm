@@ -43,7 +43,7 @@ abstract class AbstractRelation implements RelationInterface
         }
 
 
-        $related = $this->orm->makeEntity($this->class, $data, State::LOADED);
+        $related = $this->orm->make($this->class, $data, State::LOADED);
 
         // todo: ref-count ++
 

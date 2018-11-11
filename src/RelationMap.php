@@ -28,10 +28,11 @@ final class RelationMap
         $this->relations = $relations;
     }
 
-    public function init(array $data): array
+    public function init(State $state, array $data): array
     {
         foreach ($this->relations as $name => $relation) {
             if (array_key_exists($name, $data)) {
+                $state->setRelation($name, $data[$name]);
                 $data[$name] = $relation->init($data[$name]);
             }
         }

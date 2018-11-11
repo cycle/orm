@@ -35,6 +35,8 @@ final class State
 
     private $command;
 
+    private $relations = [];
+
     /**
      * @param mixed $primaryKey
      * @param int   $state
@@ -100,5 +102,16 @@ final class State
     public function getCommandPromise(): ?CommandPromiseInterface
     {
         return $this->command;
+    }
+
+    public function setRelation(string $name, $context)
+    {
+        $this->relations[$name] = $context;
+        unset($this->data[$name]);
+    }
+
+    public function getRelation(string $name)
+    {
+        return $this->relations[$name];
     }
 }

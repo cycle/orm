@@ -15,8 +15,10 @@ use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
+//todo: nullable
 class HasOneRelation extends AbstractRelation
 {
+    // todo: move to the strategy
     public function queueChange(
         $parent,
         State $state,

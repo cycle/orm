@@ -177,10 +177,9 @@ class ORM implements ORMInterface
         if ($this->heap !== null && $state !== State::NEW) {
             $entityID = $this->identify($class, $data);
 
-            // todo: cache it later with path
-            // if (!empty($entityID) && $this->heap->has($class, $entityID)) {
-            //     return $this->heap->get($class, $entityID);
-            // }
+            if (!empty($entityID) && $this->heap->hasPath($class, $entityID)) {
+                return $this->heap->getPath($class, $entityID);
+            }
         }
 
         $entity = $this->getMapper($class)->init();

@@ -50,7 +50,6 @@ final class RelationMap
         $chain = new ChainCommand();
         $chain->addTargetCommand($command);
 
-
         foreach ($this->relations as $relation) {
             $chain->addCommand($relation->queueChange($entity, $state, $command));
         }

@@ -13,6 +13,9 @@ class Heap implements HeapInterface
     /** @var \SplObjectStorage */
     private $storage;
 
+    /** @var array */
+    private $path = [];
+
     /**
      * Heap constructor.
      */
@@ -47,6 +50,9 @@ class Heap implements HeapInterface
     public function attach($entity, State $state)
     {
         $this->storage->offsetSet($entity, $state);
+        if (!empty($state->getPrimaryKey())) {
+            $this->path[get_class($entity) . ':' . $state->getPrimaryKey()] = $entity;
+        }
     }
 
     /**
@@ -63,6 +69,16 @@ class Heap implements HeapInterface
     public function reset()
     {
         $this->storage = new \SplObjectStorage();
+    }
+
+    public function hasPath(string $class, $entityID)
+    {
+        return isset($this->path["{$class}:{$entityID}"]);
+    }
+
+    public function getPath(string $class, $entityID)
+    {
+        return $this->path["{$class}:{$entityID}"];
     }
 
     /**

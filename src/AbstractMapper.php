@@ -197,7 +197,6 @@ abstract class AbstractMapper implements MapperInterface
             $state->setState($current);
         });
 
-
         return $delete;
     }
 }

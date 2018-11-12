@@ -418,8 +418,6 @@ abstract class HasOneRelationTest extends BaseTest
         $selector->load('profile', ['method' => RelationLoader::POSTLOAD]);
         $selector->load('profile.nested');
 
-        $this->enableProfiling();
-
         $this->assertEquals([
             [
                 'id'      => 1,
@@ -443,8 +441,6 @@ abstract class HasOneRelationTest extends BaseTest
                 'profile' => null
             ]
         ], $selector->fetchData());
-
-        $this->disableProfiling();
     }
 
     public function testUpdateNestedChild()
@@ -454,11 +450,9 @@ abstract class HasOneRelationTest extends BaseTest
 
         $e->profile->nested->label = 'new-label';
 
-        $this->enableProfiling();
         $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
-        $this->disableProfiling();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();

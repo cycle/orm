@@ -56,31 +56,34 @@ class HasOneRelation extends AbstractRelation
             );
         }
 
-        $relState = $this->orm->getHeap()->get($related);
-        if (!empty($relState)) {
-            $relState->addRef();
+        if (!empty($related)) {
+            $relState = $this->orm->getHeap()->get($related);
+            if (!empty($relState)) {
+                $relState->addRef();
+            }
+
+            // todo: dirty state [?]
+            $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
+
+            // todo: THIS MUST BE ASSOCIATED WITH THROWN COMMAND
+            $inner->onComplete(function () use ($state, $related) {
+                $state->setRelation($this->relation, $related);
+            });
+
+            $chain->addTargetCommand($inner);
+
+            // syncing (TODO: CHECK IF NOT SYNCED ALREADY)
+            $command->onExecute(function (CommandPromiseInterface $command) use ($inner, $parent) {
+                $inner->addContext(
+                    $this->schema[Relation::OUTER_KEY],
+                    $this->lookupKey($this->schema[Relation::INNER_KEY], $parent, $command)
+                );
+
+                // todo: MORPH KEY
+            });
+
+            // todo: update relation state
         }
-
-        // todo: dirty state [?]
-        $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
-
-        $inner->onComplete(function () use ($state, $related) {
-            $state->setRelation($this->relation, $related);
-        });
-
-        $chain->addTargetCommand($inner);
-
-        // syncing (TODO: CHECK IF NOT SYNCED ALREADY)
-        $command->onExecute(function (CommandPromiseInterface $command) use ($inner, $parent) {
-            $inner->addContext(
-                $this->schema[Relation::OUTER_KEY],
-                $this->lookupKey($this->schema[Relation::INNER_KEY], $parent, $command)
-            );
-
-            // todo: MORPH KEY
-        });
-
-        // todo: update relation state
 
         return $chain;
     }

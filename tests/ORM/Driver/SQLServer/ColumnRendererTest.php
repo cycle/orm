@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests\Driver\SQLServer;
 
-class ColumnRendererTest extends \Spiral\ORM\Tests\ColumnRendererTest
+abstract class ColumnRendererTest extends \Spiral\ORM\Tests\ColumnRendererTest
 {
     const DRIVER = 'sqlserver';
 }

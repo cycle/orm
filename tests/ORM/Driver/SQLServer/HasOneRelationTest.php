@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests\Driver\SQLServer;
 
-class HasOneRelationTest extends \Spiral\ORM\Tests\HasOneRelationTest
+abstract class HasOneRelationTest extends \Spiral\ORM\Tests\HasOneRelationTest
 {
     const DRIVER = 'sqlserver';
 }

@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures\Mapper;
+namespace Spiral\ORM\Tests\Fixtures\HasOne;
 
-class UserEntity
+class User
 {
     public $id;
     public $email;
     public $balance;
 
-    /** @var ProfileEntity */
+    /** @var Profile */
     public $profile;
 }

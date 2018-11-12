@@ -6,10 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures\Mapper;
+namespace Spiral\ORM\Tests\Fixtures\HasOne;
 
-class ProfileEntity
+class Profile
 {
     public $id;
     public $image;
+
+    /**
+     * @var Nested
+     */
+    public $nested;
 }

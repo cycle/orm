@@ -39,10 +39,12 @@ abstract class AbstractMapper implements MapperInterface
 
         if ($state == null) {
             // todo: make sure that no save can happen after the heap reset
-            return $this->buildInsert($entity);
+            $cmd = $this->buildInsert($entity);
+        } else {
+            $cmd = $this->buildUpdate($entity, $state);
         }
 
-        return $this->buildUpdate($entity, $state);
+        return $this->orm->getRelationMap(get_class($entity))->queueRelations($entity, $cmd);
     }
 
     public function queueDelete($entity): CommandInterface
@@ -115,10 +117,10 @@ abstract class AbstractMapper implements MapperInterface
         $class = get_class($entity);
         $primaryKey = $schema->define($class, Schema::PRIMARY_KEY);
 
-        $data = $this->getFields($entity);
 
         // todo: calc diff
-        $uData = $data + $state->getData();
+        $uData = $this->getFields($entity) + $state->getData();
+        $pK = $uData[$primaryKey] ?? null;
         unset($uData[$primaryKey]);
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
@@ -127,8 +129,8 @@ abstract class AbstractMapper implements MapperInterface
             $this->orm->getDatabase($class),
             $schema->define($class, Schema::TABLE),
             $uData,
-            [$primaryKey => $data[$primaryKey] ?? null],
-            $data[$primaryKey] ?? null
+            [$primaryKey => $pK],
+            $pK
         );
 
         $current = $state->getState();

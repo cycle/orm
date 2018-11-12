@@ -188,9 +188,7 @@ abstract class AbstractNode
      */
     final public function joinNode(string $container, AbstractNode $node)
     {
-        $node = clone $node;
         $node->joined = true;
-
         $this->linkNode($container, $node);
     }
 

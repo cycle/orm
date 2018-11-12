@@ -57,19 +57,19 @@ class HasOneLoader extends RelationLoader
         }
 
         //Morphed records
-//        if (!empty($this->schema[Record::MORPH_KEY])) {
-//            $this->setWhere(
-//                $query,
-//                $this->getAlias(),
-//                $this->isJoined() ? 'onWhere' : 'where',
-//                [
-//                    $this->localKey(Record::MORPH_KEY) => $this->orm->define(
-//                        $this->parent->getClass(),
-//                        ORMInterface::R_ROLE_NAME
-//                    )
-//                ]
-//            );
-//        }
+        //        if (!empty($this->schema[Record::MORPH_KEY])) {
+        //            $this->setWhere(
+        //                $query,
+        //                $this->getAlias(),
+        //                $this->isJoined() ? 'onWhere' : 'where',
+        //                [
+        //                    $this->localKey(Record::MORPH_KEY) => $this->orm->define(
+        //                        $this->parent->getClass(),
+        //                        ORMInterface::R_ROLE_NAME
+        //                    )
+        //                ]
+        //            );
+        //        }
 
         return parent::configureQuery($query);
     }

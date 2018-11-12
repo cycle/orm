@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures\Mapper;
+namespace Spiral\ORM\Tests\Fixtures\HasOne;
 
 use Spiral\ORM\AbstractMapper;
 use Spiral\ORM\ORMInterface;
@@ -14,7 +14,7 @@ use Spiral\ORM\Schema;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 
-class UserMapper extends AbstractMapper
+class EntityMapper extends AbstractMapper
 {
     /**
      * @var HydratorInterface
@@ -25,11 +25,6 @@ class UserMapper extends AbstractMapper
     {
         parent::__construct($orm, $class);
         $this->hydrator = new Reflection();
-    }
-
-    public function make(array $data)
-    {
-        return $this->hydrator->hydrate($data, new UserEntity());
     }
 
     public function hydrate($entity, array $data)

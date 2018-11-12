@@ -12,8 +12,8 @@ use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\Tests\Fixtures\Mapper\UserEntity;
-use Spiral\ORM\Tests\Fixtures\Mapper\UserMapper;
+use Spiral\ORM\Tests\Fixtures\HasOne\User;
+use Spiral\ORM\Tests\Fixtures\HasOne\EntityMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
@@ -40,9 +40,9 @@ abstract class MapperTest extends BaseTest
         );
 
         $this->orm = $this->orm->withSchema(new Schema([
-            UserEntity::class => [
+            User::class => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => UserMapper::class,
+                Schema::MAPPER      => EntityMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -55,7 +55,7 @@ abstract class MapperTest extends BaseTest
 
     public function testFetchData()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
 
         $this->assertEquals([
             [
@@ -73,15 +73,15 @@ abstract class MapperTest extends BaseTest
 
     public function testFetchAll()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $result = $selector->fetchAll();
 
-        $this->assertInstanceOf(UserEntity::class, $result[0]);
+        $this->assertInstanceOf(User::class, $result[0]);
         $this->assertEquals(1, $result[0]->id);
         $this->assertEquals('hello@world.com', $result[0]->email);
         $this->assertEquals(100.0, $result[0]->balance);
 
-        $this->assertInstanceOf(UserEntity::class, $result[1]);
+        $this->assertInstanceOf(User::class, $result[1]);
         $this->assertEquals(2, $result[1]->id);
         $this->assertEquals('another@world.com', $result[1]->email);
         $this->assertEquals(200.0, $result[1]->balance);
@@ -89,10 +89,10 @@ abstract class MapperTest extends BaseTest
 
     public function testFetchOne()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $result = $selector->fetchOne();
 
-        $this->assertInstanceOf(UserEntity::class, $result);
+        $this->assertInstanceOf(User::class, $result);
         $this->assertEquals(1, $result->id);
         $this->assertEquals('hello@world.com', $result->email);
         $this->assertEquals(100.0, $result->balance);
@@ -100,10 +100,10 @@ abstract class MapperTest extends BaseTest
 
     public function testWhere()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
 
-        $this->assertInstanceOf(UserEntity::class, $result);
+        $this->assertInstanceOf(User::class, $result);
         $this->assertEquals(2, $result->id);
         $this->assertEquals('another@world.com', $result->email);
         $this->assertEquals(200.0, $result->balance);
@@ -111,17 +111,17 @@ abstract class MapperTest extends BaseTest
 
     public function testDelete()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
 
         $tr = new Transaction($this->orm);
         $tr->delete($result);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         $this->assertNull($selector->where('id', 2)->fetchOne());
 
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $this->assertNull($selector->where('id', 2)->fetchOne());
 
         $this->assertFalse($this->orm->getHeap()->has($result));
@@ -129,7 +129,7 @@ abstract class MapperTest extends BaseTest
 
     public function testHeap()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $result = $selector->fetchOne();
 
         $this->assertEquals(1, $result->id);
@@ -149,7 +149,7 @@ abstract class MapperTest extends BaseTest
 
     public function testStore()
     {
-        $e = new UserEntity();
+        $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
 
@@ -165,7 +165,7 @@ abstract class MapperTest extends BaseTest
 
     public function testStoreWithUpdate()
     {
-        $e = new UserEntity();
+        $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
 
@@ -181,7 +181,7 @@ abstract class MapperTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
 
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);
     }

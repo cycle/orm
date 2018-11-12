@@ -14,10 +14,10 @@ use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\Tests\Fixtures\Mapper\ProfileEntity;
-use Spiral\ORM\Tests\Fixtures\Mapper\ProfileMapper;
-use Spiral\ORM\Tests\Fixtures\Mapper\UserEntity;
-use Spiral\ORM\Tests\Fixtures\Mapper\UserMapper;
+use Spiral\ORM\Tests\Fixtures\HasOne\EntityMapper;
+use Spiral\ORM\Tests\Fixtures\HasOne\Nested;
+use Spiral\ORM\Tests\Fixtures\HasOne\Profile;
+use Spiral\ORM\Tests\Fixtures\HasOne\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
@@ -56,10 +56,23 @@ abstract class HasOneRelationTest extends BaseTest
             ]
         );
 
+        $this->makeTable('nested', [
+            'id'         => 'primary',
+            'profile_id' => 'integer',
+            'label'      => 'string'
+        ]);
+
+        $this->getDatabase()->table('nested')->insertMultiple(
+            ['profile_id', 'label'],
+            [
+                [1, 'nested-label'],
+            ]
+        );
+
         $this->orm = $this->orm->withSchema(new Schema([
-            UserEntity::class    => [
+            User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => UserMapper::class,
+                Schema::MAPPER      => EntityMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -68,7 +81,7 @@ abstract class HasOneRelationTest extends BaseTest
                 Schema::RELATIONS   => [
                     'profile' => [
                         Relation::TYPE   => Relation::HAS_ONE,
-                        Relation::TARGET => ProfileEntity::class,
+                        Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
@@ -76,13 +89,32 @@ abstract class HasOneRelationTest extends BaseTest
                     ]
                 ]
             ],
-            ProfileEntity::class => [
+            Profile::class => [
                 Schema::ALIAS       => 'profile',
-                Schema::MAPPER      => ProfileMapper::class,
+                Schema::MAPPER      => EntityMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'profile',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'user_id', 'image'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'nested' => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Nested::class,
+                        Relation::SCHEMA => [
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'profile_id',
+                        ],
+                    ]
+                ]
+            ],
+            Nested::class  => [
+                Schema::ALIAS       => 'nested',
+                Schema::MAPPER      => EntityMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'nested',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'profile_id', 'label'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ],
@@ -91,7 +123,7 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $selector->load('profile');
 
         $this->assertEquals([
@@ -116,7 +148,7 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testFetchRelationPostload()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $selector->load('profile', ['method' => RelationLoader::POSTLOAD]);
 
         $this->assertEquals([
@@ -141,24 +173,24 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testAccessEntities()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $selector->load('profile');
         $result = $selector->fetchAll();
 
-        $this->assertInstanceOf(UserEntity::class, $result[0]);
-        $this->assertInstanceOf(ProfileEntity::class, $result[0]->profile);
+        $this->assertInstanceOf(User::class, $result[0]);
+        $this->assertInstanceOf(Profile::class, $result[0]->profile);
         $this->assertEquals('image.png', $result[0]->profile->image);
 
-        $this->assertInstanceOf(UserEntity::class, $result[1]);
+        $this->assertInstanceOf(User::class, $result[1]);
         $this->assertEquals(null, $result[1]->profile);
     }
 
     public function testCreateWithRelations()
     {
-        $e = new UserEntity();
+        $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
-        $e->profile = new ProfileEntity();
+        $e->profile = new Profile();
         $e->profile->image = "magic.gif";
 
         $tr = new Transaction($this->orm);
@@ -178,17 +210,17 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testMountRelation()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $e = $selector->where('id', 2)->fetchOne();
 
-        $e->profile = new ProfileEntity();
+        $e->profile = new Profile();
         $e->profile->image = "secondary.gif";
 
         $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $selector->load('profile');
 
         $this->assertEquals([
@@ -217,10 +249,10 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testCreateAndUpdateRelatedData()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $e = $selector->where('id', 2)->fetchOne();
 
-        $e->profile = new ProfileEntity();
+        $e->profile = new Profile();
         $e->profile->image = "secondary.gif";
 
         $tr = new Transaction($this->orm);
@@ -230,7 +262,7 @@ abstract class HasOneRelationTest extends BaseTest
         // Re-select
         $orm = $this->orm->withHeap(new Heap());
 
-        $selector = new Selector($orm, UserEntity::class);
+        $selector = new Selector($orm, User::class);
         $e = $selector->wherePK($e->id)->load('profile')->fetchOne();
 
         $this->assertSame('secondary.gif', $e->profile->image);
@@ -243,7 +275,7 @@ abstract class HasOneRelationTest extends BaseTest
         // Re-select
         $orm = $this->orm->withHeap(new Heap());
 
-        $selector = new Selector($orm, UserEntity::class);
+        $selector = new Selector($orm, User::class);
         $e = $selector->wherePK($e->id)->load('profile')->fetchOne();
 
         $this->assertSame('updated.png', $e->profile->image);
@@ -251,7 +283,7 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testDeleteChildrenByAssigningNull()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
         $e->profile = null;
 
@@ -259,7 +291,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->store($e);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
         $this->assertSame(null, $e->profile);
@@ -267,11 +299,11 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testAssignNewChild()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
         $oP = $e->profile;
-        $e->profile = new ProfileEntity();
+        $e->profile = new Profile();
         $e->profile->image = 'new.jpg';
 
         $tr = new Transaction($this->orm);
@@ -281,7 +313,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertFalse($this->orm->getHeap()->has($oP));
         $this->assertTrue($this->orm->getHeap()->has($e->profile));
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
         $this->assertNotEquals($oP, $e->profile->id);
@@ -290,7 +322,7 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testMoveToAnotherEntity()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
         $this->assertNotNull($a->profile);
@@ -306,7 +338,7 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertTrue($this->orm->getHeap()->has($b->profile));
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), UserEntity::class);
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
         $this->assertNull($a->profile);
@@ -316,10 +348,10 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testExchange()
     {
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
-        $b->profile = new ProfileEntity();
+        $b->profile = new Profile();
         $b->profile->image = "secondary.gif";
 
         $tr = new Transaction($this->orm);
@@ -329,7 +361,7 @@ abstract class HasOneRelationTest extends BaseTest
         // reset state
         $this->orm = $this->orm->withHeap(new Heap());
 
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
         $this->assertSame('image.png', $a->profile->image);
         $this->assertSame('secondary.gif', $b->profile->image);
@@ -344,9 +376,93 @@ abstract class HasOneRelationTest extends BaseTest
         // reset state
         $this->orm = $this->orm->withHeap(new Heap());
 
-        $selector = new Selector($this->orm, UserEntity::class);
+        $selector = new Selector($this->orm, User::class);
         list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
         $this->assertSame('image.png', $b->profile->image);
         $this->assertSame('secondary.gif', $a->profile->image);
+    }
+
+    public function testFetchNestedRelation()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $selector->load('profile.nested');
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
+                    'id'      => 1,
+                    'user_id' => 1,
+                    'image'   => 'image.png',
+                    'nested'  => [
+                        'id'         => 1,
+                        'profile_id' => 1,
+                        'label'      => 'nested-label',
+                    ]
+                ]
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'profile' => null
+            ]
+        ], $selector->fetchData());
+    }
+
+    public function testFetchNestedRelationPostload()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $selector->load('profile', ['method' => RelationLoader::POSTLOAD]);
+        $selector->load('profile.nested');
+
+        $this->enableProfiling();
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
+                    'id'      => 1,
+                    'user_id' => 1,
+                    'image'   => 'image.png',
+                    'nested'  => [
+                        'id'         => 1,
+                        'profile_id' => 1,
+                        'label'      => 'nested-label',
+                    ]
+                ]
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'profile' => null
+            ]
+        ], $selector->fetchData());
+
+        $this->disableProfiling();
+    }
+
+    public function testUpdateNestedChild()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
+
+        $e->profile->nested->label = 'new-label';
+
+        $this->enableProfiling();
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+        $this->disableProfiling();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
+
+        $this->assertSame('new-label', $e->profile->nested->label);
     }
 }

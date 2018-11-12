@@ -16,16 +16,6 @@ interface MapperInterface
 {
     public function init();
 
-    /**
-     * Construct entity.
-     *
-     * @param array $data
-     * @return object
-     *
-     * @throws MapperException
-     */
-    public function make(array $data);
-
     public function hydrate($entity, array $data);
 
     // todo: from the heap?

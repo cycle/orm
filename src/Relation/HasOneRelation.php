@@ -12,6 +12,7 @@ use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
 use Spiral\ORM\Command\ConditionalCommand;
+use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -63,6 +64,10 @@ class HasOneRelation extends AbstractRelation
             $relState = $this->orm->getHeap()->get($related);
             if (!empty($relState)) {
                 $relState->addReference();
+                if ($relState->getRefCount() > 2) {
+                    // todo: detect if it's the same parent over and over again?
+                    return new NullCommand();
+                }
             }
 
             // todo: dirty state [?]

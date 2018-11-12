@@ -117,7 +117,6 @@ abstract class AbstractMapper implements MapperInterface
         $class = get_class($entity);
         $primaryKey = $schema->define($class, Schema::PRIMARY_KEY);
 
-
         // todo: calc diff
         $uData = $this->getFields($entity) + $state->getData();
         $pK = $uData[$primaryKey] ?? null;
@@ -135,6 +134,7 @@ abstract class AbstractMapper implements MapperInterface
 
         $current = $state->getState();
         $state->setState(State::SCHEDULED_UPDATE);
+        $state->setData($uData);
 
         // todo: get from the state?
         if (!empty($state->getActiveCommand())) {
@@ -158,6 +158,7 @@ abstract class AbstractMapper implements MapperInterface
 
         $update->onRollBack(function () use ($state, $current) {
             $state->setState($current);
+            //todo: rollback
         });
 
         return $update;

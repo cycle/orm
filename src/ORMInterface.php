@@ -12,11 +12,11 @@ use Spiral\Database\DatabaseInterface;
 
 interface ORMInterface
 {
-    public function getDatabase(string $class): DatabaseInterface;
+    public function getDatabase($entity): DatabaseInterface;
 
-    public function getMapper(string $class): MapperInterface;
+    public function getMapper($entity): MapperInterface;
 
-    public function getRelationMap(string $class): RelationMap;
+    public function getRelationMap($entity): RelationMap;
 
     public function getSchema(): SchemaInterface;
 

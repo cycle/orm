@@ -51,45 +51,51 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function getDatabase(string $class): DatabaseInterface
+    public function getDatabase($entity): DatabaseInterface
     {
+        $entity = is_object($entity) ? get_class($entity) : $entity;
+
         return $this->dbal->database(
-            $this->getSchema()->define($class, Schema::DATABASE)
+            $this->getSchema()->define($entity, Schema::DATABASE)
         );
     }
 
     /**
      * @inheritdoc
      */
-    public function getMapper(string $class): MapperInterface
+    public function getMapper($entity): MapperInterface
     {
-        if (isset($this->mappers[$class])) {
-            return $this->mappers[$class];
+        $entity = is_object($entity) ? get_class($entity) : $entity;
+
+        if (isset($this->mappers[$entity])) {
+            return $this->mappers[$entity];
         }
 
-        return $this->mappers[$class] = $this->getFactory()->mapper($class);
+        return $this->mappers[$entity] = $this->getFactory()->mapper($entity);
     }
 
     /**
      * Get relation map associated with the given class.
      *
-     * @param string $class
+     * @param string $entity
      * @return RelationMap
      */
-    public function getRelationMap(string $class): RelationMap
+    public function getRelationMap($entity): RelationMap
     {
-        if (isset($this->relmaps[$class])) {
-            return $this->relmaps[$class];
+        $entity = is_object($entity) ? get_class($entity) : $entity;
+
+        if (isset($this->relmaps[$entity])) {
+            return $this->relmaps[$entity];
         }
 
         $relations = [];
 
-        $names = array_keys($this->getSchema()->define($class, Schema::RELATIONS));
+        $names = array_keys($this->getSchema()->define($entity, Schema::RELATIONS));
         foreach ($names as $relation) {
-            $relations[$relation] = $this->getFactory()->relation($class, $relation);
+            $relations[$relation] = $this->getFactory()->relation($entity, $relation);
         }
 
-        return $this->relmaps[$class] = new RelationMap($this, $relations);
+        return $this->relmaps[$entity] = new RelationMap($this, $relations);
     }
 
     /**

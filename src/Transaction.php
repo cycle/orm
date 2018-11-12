@@ -31,9 +31,7 @@ class Transaction implements TransactionInterface
      */
     public function store($entity)
     {
-        // todo: skip cascade
-        // todo: dry
-        $this->addCommand($this->orm->getMapper(get_class($entity))->queueStore($entity));
+        $this->addCommand($this->orm->getMapper($entity)->queueStore($entity));
     }
 
     /**
@@ -41,8 +39,7 @@ class Transaction implements TransactionInterface
      */
     public function delete($entity)
     {
-        $mapper = $this->orm->getMapper(get_class($entity));
-        $this->addCommand($mapper->queueDelete($entity));
+        $this->addCommand($this->orm->getMapper($entity)->queueDelete($entity));
     }
 
     /**
@@ -118,6 +115,7 @@ class Transaction implements TransactionInterface
     {
         if ($command instanceof DatabaseCommand) {
             $driver = $command->getDatabase()->getDriver();
+
             if (!empty($driver) && !in_array($driver, $drivers)) {
                 $driver->beginTransaction();
                 $drivers[] = $driver;

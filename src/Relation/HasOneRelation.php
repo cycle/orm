@@ -27,6 +27,9 @@ class HasOneRelation extends AbstractRelation
         $related = $this->getRelated($parent);
         $orig = $state->getRelation($this->relation);
 
+        // todo: need rollback
+        $state->setRelation($this->relation, $related);
+
         $chain = new ChainCommand();
 
         // delete, we need to think about replace

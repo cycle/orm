@@ -39,7 +39,6 @@ final class State
 
     private $relations = [];
 
-
     /**
      * @param mixed $primaryKey
      * @param int   $state
@@ -52,20 +51,18 @@ final class State
         $this->data = $data;
     }
 
+    public function setPrimaryKey(string $name, $value)
+    {
+        $this->primaryKey = $value;
+        $this->data[$name] = $value;
+    }
+
     /**
      * @return mixed
      */
     public function getPrimaryKey()
     {
         return $this->primaryKey;
-    }
-
-    /**
-     * @return int
-     */
-    public function getState(): int
-    {
-        return $this->state;
     }
 
     /**
@@ -77,6 +74,27 @@ final class State
     }
 
     /**
+     * @return int
+     */
+    public function getState(): int
+    {
+        return $this->state;
+    }
+
+    /**
+     * @deprecated
+     */
+    public function setField(string $name, $value)
+    {
+        $this->data[$name] = $value;
+    }
+
+    public function setData(array $data)
+    {
+        $this->data = $data + $this->data;
+    }
+
+    /**
      * @return array
      */
     public function getData(): array
@@ -84,29 +102,18 @@ final class State
         return $this->data;
     }
 
-    public function setField(string $name, $value)
-    {
-        $this->data[$name] = $value;
-    }
-
-    public function setPrimaryKey(string $name, $value)
-    {
-        $this->primaryKey = $value;
-        $this->data[$name] = $value;
-    }
-
-    public function setCommand(CommandPromiseInterface $commandPromise = null)
+    public function setActiveCommand(CommandPromiseInterface $commandPromise = null)
     {
         $this->command = $commandPromise;
     }
 
-    // todo: store original set of relations (YEEEEAH BOYYYY)
-
-    public function getCommandPromise(): ?CommandPromiseInterface
+    public function getActiveCommand(): ?CommandPromiseInterface
     {
         return $this->command;
     }
 
+
+    // todo: store original set of relations (YEEEEAH BOYYYY)
     public function setRelation(string $name, $context)
     {
         $this->relations[$name] = $context;
@@ -134,7 +141,7 @@ final class State
         $this->refCount = $refCount;
     }
 
-    public function addRef()
+    public function addReference()
     {
         $this->refCount++;
     }

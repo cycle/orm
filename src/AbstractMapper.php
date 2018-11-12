@@ -82,13 +82,13 @@ abstract class AbstractMapper implements MapperInterface
             $data
         );
 
-        $state->setCommand($insert);
+        $state->setActiveCommand($insert);
 
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
 
         $insert->onComplete(function (InsertCommand $command) use ($primaryKey, $entity, $state) {
-            $state->setCommand(null);
+            $state->setActiveCommand(null);
             $state->setState(State::LOADED);
 
             $this->setField($entity, $primaryKey, $command->getPrimaryKey());
@@ -104,7 +104,7 @@ abstract class AbstractMapper implements MapperInterface
         });
 
         $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
-            $state->setCommand(null);
+            $state->setActiveCommand(null);
             $this->orm->getHeap()->detach($entity);
         });
 
@@ -137,8 +137,8 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
 
         // todo: get from the state?
-        if (!empty($state->getCommandPromise())) {
-            $state->getCommandPromise()->onExecute(function (
+        if (!empty($state->getActiveCommand())) {
+            $state->getActiveCommand()->onExecute(function (
                 CommandPromiseInterface $command
             ) use ($primaryKey, $update) {
                 $update->setWhere([$primaryKey => $command->getPrimaryKey()]);
@@ -180,8 +180,8 @@ abstract class AbstractMapper implements MapperInterface
         $current = $state->getState();
         $state->setState(State::SCHEDULED_DELETE);
 
-        if (!empty($state->getCommandPromise())) {
-            $state->getCommandPromise()->onExecute(function (
+        if (!empty($state->getActiveCommand())) {
+            $state->getActiveCommand()->onExecute(function (
                 CommandPromiseInterface $command
             ) use ($primaryKey, $delete) {
                 $delete->setWhere([$primaryKey => $command->getPrimaryKey()]);

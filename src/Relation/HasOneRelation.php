@@ -62,7 +62,7 @@ class HasOneRelation extends AbstractRelation
         if (!empty($related)) {
             $relState = $this->orm->getHeap()->get($related);
             if (!empty($relState)) {
-                $relState->addRef();
+                $relState->addReference();
             }
 
             // todo: dirty state [?]

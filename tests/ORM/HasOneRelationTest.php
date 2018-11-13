@@ -477,4 +477,6 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertSame('another', $e->profile->nested->label);
     }
+
+    // todo: test nullable (!)
 }

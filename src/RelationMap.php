@@ -32,7 +32,10 @@ final class RelationMap
     {
         foreach ($this->relations as $name => $relation) {
             if (array_key_exists($name, $data)) {
-                $data[$name] = $relation->init($data[$name]);
+                if (!is_object($data[$name])) {
+                    $data[$name] = $relation->init($data[$name]);
+                }
+
                 $state->setRelation($name, $data[$name]);
             }
         }

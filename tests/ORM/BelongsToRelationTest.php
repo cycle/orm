@@ -51,6 +51,7 @@ abstract class BelongsToRelationTest extends BaseTest
             [
                 [1, 'image.png'],
                 [2, 'second.png'],
+                [2, 'third.png'],
             ]
         );
 
@@ -145,6 +146,16 @@ abstract class BelongsToRelationTest extends BaseTest
                     'balance' => 200.0,
                 ],
             ],
+            [
+                'id'      => 3,
+                'user_id' => 2,
+                'image'   => 'third.png',
+                'user'    => [
+                    'id'      => 2,
+                    'email'   => 'another@world.com',
+                    'balance' => 200.0,
+                ],
+            ],
         ], $selector->fetchData());
     }
 
@@ -174,6 +185,16 @@ abstract class BelongsToRelationTest extends BaseTest
                     'balance' => 200.0,
                 ],
             ],
+            [
+                'id'      => 3,
+                'user_id' => 2,
+                'image'   => 'third.png',
+                'user'    => [
+                    'id'      => 2,
+                    'email'   => 'another@world.com',
+                    'balance' => 200.0,
+                ],
+            ],
         ], $selector->fetchData());
     }
 
@@ -190,5 +211,11 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertInstanceOf(Profile::class, $result[1]);
         $this->assertInstanceOf(User::class, $result[1]->user);
         $this->assertEquals('another@world.com', $result[1]->user->email);
+
+        $this->assertInstanceOf(Profile::class, $result[2]);
+        $this->assertInstanceOf(User::class, $result[2]->user);
+        $this->assertEquals('another@world.com', $result[2]->user->email);
+
+        $this->assertSame($result[1]->user, $result[2]->user);
     }
 }

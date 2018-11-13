@@ -181,9 +181,7 @@ abstract class RelationLoader extends AbstractLoader
      */
     protected function initQuery(): SelectQuery
     {
-        return $this->getDatabase()->select()->from(
-            "{$this->define(Schema::TABLE)} AS {$this->getAlias()}"
-        );
+        return $this->getDatabase()->select()->from($this->getJoinedTable());
     }
 
     /**
@@ -235,6 +233,16 @@ abstract class RelationLoader extends AbstractLoader
     protected function parentKey($key): string
     {
         return $this->parent->getAlias() . '.' . $this->schema[$key];
+    }
+
+    /**
+     * Joined table name and alias.
+     *
+     * @return string
+     */
+    protected function getJoinedTable(): string
+    {
+        return "{$this->define(Schema::TABLE)} AS {$this->getAlias()}";
     }
 
     /**

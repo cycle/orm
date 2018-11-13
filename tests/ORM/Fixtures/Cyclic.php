@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures\HasOne;
+namespace Spiral\ORM\Tests\Fixtures;
 
 class Cyclic
 {

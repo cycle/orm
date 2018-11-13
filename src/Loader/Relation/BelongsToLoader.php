@@ -17,13 +17,9 @@ use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 
 /**
- * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
- * Loader support MORPH_KEY.
- *
- * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
- * purposes).
+ * Load parent data. Similar to HasOne but use POSTLOAD as default method.
  */
-class HasOneLoader extends RelationLoader
+class BelongsToLoader extends RelationLoader
 {
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -31,7 +27,7 @@ class HasOneLoader extends RelationLoader
      * @var array
      */
     protected $options = [
-        'method' => self::INLOAD,
+        'method' => self::POSTLOAD,
         'minify' => true,
         'alias'  => null,
         'using'  => null,
@@ -62,21 +58,6 @@ class HasOneLoader extends RelationLoader
             // relation is loaded using external query
             $query->where($localKey, 'IN', new Parameter($outerKeys));
         }
-
-        //Morphed records
-        //        if (!empty($this->schema[Record::MORPH_KEY])) {
-        //            $this->setWhere(
-        //                $query,
-        //                $this->getAlias(),
-        //                $this->isJoined() ? 'onWhere' : 'where',
-        //                [
-        //                    $this->localKey(Record::MORPH_KEY) => $this->orm->define(
-        //                        $this->parent->getClass(),
-        //                        ORMInterface::R_ROLE_NAME
-        //                    )
-        //                ]
-        //            );
-        //        }
 
         return parent::configureQuery($query);
     }

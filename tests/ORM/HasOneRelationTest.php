@@ -14,10 +14,10 @@ use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\Tests\Fixtures\HasOne\EntityMapper;
-use Spiral\ORM\Tests\Fixtures\HasOne\Nested;
-use Spiral\ORM\Tests\Fixtures\HasOne\Profile;
-use Spiral\ORM\Tests\Fixtures\HasOne\User;
+use Spiral\ORM\Tests\Fixtures\EntityMapper;
+use Spiral\ORM\Tests\Fixtures\Nested;
+use Spiral\ORM\Tests\Fixtures\Profile;
+use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 

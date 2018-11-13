@@ -12,8 +12,8 @@ use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\Tests\Fixtures\HasOne\User;
-use Spiral\ORM\Tests\Fixtures\HasOne\EntityMapper;
+use Spiral\ORM\Tests\Fixtures\User;
+use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 

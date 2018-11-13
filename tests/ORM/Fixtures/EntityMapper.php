@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures\HasOne;
+namespace Spiral\ORM\Tests\Fixtures;
 
 use Spiral\ORM\AbstractMapper;
 use Spiral\ORM\ORMInterface;
@@ -31,7 +31,6 @@ class EntityMapper extends AbstractMapper
     {
         return $this->hydrator->hydrate($data, $entity);
     }
-
 
     protected function getFields($entity): array
     {

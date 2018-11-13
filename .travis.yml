@@ -13,7 +13,7 @@ before_install:
   - cd tests
   - docker-compose up -d
   - cd ..
-  - bash ./tests/install-sqlsrv.sh
+  #- bash ./tests/install-sqlsrv.sh
 
 install:
   - composer install --no-interaction --prefer-source

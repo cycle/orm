@@ -1,7 +1,7 @@
 {
-  "name": "spiral/treap",
+  "name": "spiral/orm",
   "type": "library",
-  "description": "AR and DM",
+  "description": "DataMapper ORM with ActiveRecord capabilities designed for long-running processes",
   "require": {
     "php": "^7.1",
     "spiral/core": "^1.1",

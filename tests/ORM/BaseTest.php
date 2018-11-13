@@ -67,6 +67,10 @@ abstract class BaseTest extends TestCase
                 ],
             ])
         ));
+
+        if (self::$config['debug']) {
+            $this->enableProfiling();
+        }
     }
 
     /**
@@ -74,6 +78,7 @@ abstract class BaseTest extends TestCase
      */
     public function tearDown()
     {
+        $this->disableProfiling();
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
         $this->dbal = null;
@@ -100,10 +105,7 @@ abstract class BaseTest extends TestCase
             ]);
         }
 
-        if (self::$config['debug']) {
-            $this->driver->setProfiling(true);
-            $this->driver->setLogger(new TestLogger());
-        }
+        $this->driver->setLogger(new TestLogger());
 
         return static::$driverCache[static::DRIVER] = $this->driver;
     }

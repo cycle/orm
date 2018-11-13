@@ -10,6 +10,8 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\NullCommand;
+use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -23,8 +25,14 @@ class BelongsToRelation extends AbstractRelation
         State $state,
         CommandPromiseInterface $command
     ): CommandInterface {
-
         $related = $this->getRelated($parent);
+
+        if ($related === null && !$this->define(Relation::NULLABLE)) {
+            throw new NullException(
+                "Relation `{$this->class}`.`{$this->relation}` can not be null"
+            );
+        }
+
         //  $orig = $state->getRelation($this->relation);
 
         $state->setRelation($this->relation, $related);
@@ -38,15 +46,21 @@ class BelongsToRelation extends AbstractRelation
         //                }
         //            }
 
-        // todo: dirty state [?]
-        $inner = $this->orm->getMapper($related)->queueStore($related);
+        if (!is_null($related)) {
+            // todo: dirty state [?]
+            $inner = $this->orm->getMapper($related)->queueStore($related);
 
-        $inner->onExecute(function (CommandPromiseInterface $inner) use ($command, $related) {
-            $command->addContext(
-                $this->schema[Relation::INNER_KEY],
-                $this->lookupKey($this->schema[Relation::OUTER_KEY], $related, $inner)
-            );
-        });
+            $inner->onExecute(function (CommandPromiseInterface $inner) use ($command, $related) {
+                $command->setContext(
+                    $this->schema[Relation::INNER_KEY],
+                    $this->lookupKey($this->schema[Relation::OUTER_KEY], $related, $inner)
+                );
+            });
+        } else {
+            $command->setContext($this->schema[Relation::INNER_KEY], null);
+
+            return new NullCommand();
+        }
 
         return $inner;
     }

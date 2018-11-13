@@ -41,7 +41,7 @@ class SingularNode extends AbstractNode
     protected function push(array &$data)
     {
         if (empty($this->parent)) {
-            throw new NodeException("Unable to register data tree, parent is missing.");
+            throw new NodeException("Unable to register data tree, parent is missing");
         }
 
         if (is_null($data[$this->innerKey])) {

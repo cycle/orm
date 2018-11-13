@@ -14,10 +14,10 @@ namespace Spiral\ORM\Node\Traits;
 trait DuplicateTrait
 {
     /** @var string */
-    private $duplicateCriteria = '';
+    protected $duplicateCriteria = '';
 
     /** @var array */
-    private $duplicates = [];
+    protected $duplicates = [];
 
     /**
      * @param string $column

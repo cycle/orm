@@ -8,6 +8,8 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\Database\Injection\Parameter;
+use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -125,7 +127,7 @@ abstract class BelongsToRelationTest extends BaseTest
     public function testFetchRelation()
     {
         $selector = new Selector($this->orm, Profile::class);
-        $selector->load('user');
+        $selector->load('user')->orderBy('profile.id');
 
         $this->assertEquals([
             [
@@ -164,7 +166,8 @@ abstract class BelongsToRelationTest extends BaseTest
     public function testFetchRelationInload()
     {
         $selector = new Selector($this->orm, Profile::class);
-        $selector->load('user', ['method' => RelationLoader::INLOAD]);
+        $selector->load('user', ['method' => RelationLoader::INLOAD])
+            ->orderBy('profile.id');
 
         $this->assertEquals([
             [
@@ -203,7 +206,7 @@ abstract class BelongsToRelationTest extends BaseTest
     public function testAccessEntities()
     {
         $selector = new Selector($this->orm, Profile::class);
-        $selector->load('user');
+        $selector->load('user')->orderBy('profile.id');
         $result = $selector->fetchAll();
 
         $this->assertInstanceOf(Profile::class, $result[0]);
@@ -261,5 +264,182 @@ abstract class BelongsToRelationTest extends BaseTest
                 ],
             ]
         ], $selector->wherePK(4)->fetchData());
+    }
+
+    public function testSetExistedParent()
+    {
+        $s = new Selector($this->orm, User::class);
+        $u = $s->wherePK(1)->fetchOne();
+
+        $p = new Profile();
+        $p->image = 'magic.gif';
+        $p->user = $u;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+
+        $this->assertEquals(1, $u->id);
+        $this->assertEquals(4, $p->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($p));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($p)->getState());
+
+        $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
+
+        $selector = new Selector($this->orm, Profile::class);
+        $selector->load('user');
+
+        $this->assertEquals([
+            [
+                'id'      => 4,
+                'user_id' => 1,
+                'image'   => 'magic.gif',
+                'user'    => [
+                    'id'      => 1,
+                    'email'   => 'hello@world.com',
+                    'balance' => 100.0,
+                ],
+            ]
+        ], $selector->wherePK(4)->fetchData());
+    }
+
+    public function testChangeParent()
+    {
+        $s = new Selector($this->orm, Profile::class);
+        $p = $s->wherePK(1)->load('user')->fetchOne();
+
+        $s = new Selector($this->orm, User::class);
+        $u = $s->wherePK(2)->fetchOne();
+
+        $p->user = $u;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'user_id' => 2,
+                'image'   => 'image.png',
+                'user'    => [
+                    'id'      => 2,
+                    'email'   => 'another@world.com',
+                    'balance' => 200.0,
+                ],
+            ]
+        ], (new Selector($this->orm, Profile::class))->load('user')->wherePK(
+            1
+        )->fetchData());
+    }
+
+    public function testExchangeParents()
+    {
+        $s = new Selector($this->orm, Profile::class);
+        list($a, $b) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
+            ->load('user')->fetchAll();
+
+        list($a->user, $b->user) = [$b->user, $a->user];
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        $s = new Selector($this->orm->withHeap(new Heap()), Profile::class);
+        list($a2, $b2) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
+            ->load('user')->fetchAll();
+
+        $this->assertSame($a->user->id, $a2->user->id);
+        $this->assertSame($b->user->id, $b2->user->id);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exception\Relation\NullException
+     */
+    public function testSetNullException()
+    {
+        $s = new Selector($this->orm, Profile::class);
+        $p = $s->wherePK(1)->load('user')->fetchOne();
+        $p->user = null;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+    }
+
+    public function testSetNull()
+    {
+        $this->orm = $this->orm->withSchema(new Schema([
+            User::class    => [
+                Schema::ALIAS       => 'user',
+                Schema::MAPPER      => EntityMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ],
+            Profile::class => [
+                Schema::ALIAS       => 'profile',
+                Schema::MAPPER      => EntityMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'image'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'user' => [
+                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TARGET => User::class,
+                        Relation::SCHEMA => [
+                            Relation::INNER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::NULLABLE  => true
+                        ],
+                    ]
+                ]
+            ],
+            Nested::class  => [
+                Schema::ALIAS       => 'nested',
+                Schema::MAPPER      => EntityMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'nested',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'profile_id', 'label'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'profile' => [
+                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::INNER_KEY => 'profile_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ]
+                ]
+            ]
+        ]));
+
+        $this->makeTable('profile', [
+            'id'      => 'primary',
+            'user_id' => 'integer,nullable',
+            'image'   => 'string'
+        ]);
+
+        $s = new Selector($this->orm, Profile::class);
+        $p = $s->wherePK(1)->load('user')->fetchOne();
+        $p->user = null;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+
+        $s = new Selector($this->orm->withHeap(new Heap()), Profile::class);
+        $p = $s->wherePK(1)->load('user')->fetchOne();
+
+        $this->assertSame(null, $p->user);
     }
 }

@@ -64,9 +64,9 @@ class ChainCommand implements \IteratorAggregate, CommandPromiseInterface
     /**
      * {@inheritdoc}
      */
-    public function addContext(string $name, $value)
+    public function setContext(string $name, $value)
     {
-        $this->getTarget()->addContext($name, $value);
+        $this->getTarget()->setContext($name, $value);
     }
 
     /**

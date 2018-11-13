@@ -83,9 +83,9 @@ class ChainCommandTest extends TestCase
         $command = new ChainCommand();
         $command->addTargetCommand($lead = m::mock(InsertCommand::class));
 
-        $lead->shouldReceive('addContext')->with('name', 'value');
+        $lead->shouldReceive('setContext')->with('name', 'value');
 
-        $command->addContext('name', 'value');
+        $command->setContext('name', 'value');
         $this->assertTrue(true);
     }
 

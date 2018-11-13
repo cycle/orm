@@ -60,7 +60,7 @@ class InsertCommandTest extends TestCase
 
         $this->assertTrue($cmd->isEmpty());
 
-        $cmd->addContext('name', 'value');
+        $cmd->setContext('name', 'value');
         $this->assertFalse($cmd->isEmpty());
     }
 
@@ -72,7 +72,7 @@ class InsertCommandTest extends TestCase
             ['key' => 'value']
         );
 
-        $cmd->addContext('name', 'value');
+        $cmd->setContext('name', 'value');
         $this->assertSame(null, $cmd->getPrimaryKey());
 
         $m->expects('insert')->with('table')->andReturn(

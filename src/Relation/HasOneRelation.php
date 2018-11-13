@@ -77,7 +77,7 @@ class HasOneRelation extends AbstractRelation
 
             // syncing (TODO: CHECK IF NOT SYNCED ALREADY)
             $command->onExecute(function (CommandPromiseInterface $command) use ($inner, $parent) {
-                $inner->addContext(
+                $inner->setContext(
                     $this->schema[Relation::OUTER_KEY],
                     $this->lookupKey($this->schema[Relation::INNER_KEY], $parent, $command)
                 );

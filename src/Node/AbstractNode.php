@@ -35,7 +35,7 @@ abstract class AbstractNode
      *
      * @var bool
      */
-    private $joined = false;
+    protected $joined = false;
 
     /**
      * List of columns node must fetch from the row.

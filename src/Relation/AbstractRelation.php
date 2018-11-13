@@ -77,4 +77,9 @@ abstract class AbstractRelation implements RelationInterface
 
         return $this->orm->getMapper($this->class)->getField($entity, $key);
     }
+
+    protected function define(string $key)
+    {
+        return $this->schema[$key] ?? null;
+    }
 }

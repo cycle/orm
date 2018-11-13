@@ -21,14 +21,14 @@ trait ReferenceTrait
      *
      * @var array
      */
-    private $references = [];
+    protected $references = [];
 
     /**
      * Set of keys to be aggregated by Parser while parsing results.
      *
      * @var array
      */
-    private $trackReferences = [];
+    protected $trackReferences = [];
 
     /**
      * Mount record data into internal data storage under specified container using reference key
@@ -144,7 +144,9 @@ trait ReferenceTrait
     final protected function collectReferences(array &$data)
     {
         foreach ($this->trackReferences as $key) {
-            $this->references[$key][$data[$key]][] = &$data;
+            if (!empty($data[$key])) {
+                $this->references[$key][$data[$key]][] = &$data;
+            }
         }
     }
 }

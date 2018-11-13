@@ -52,7 +52,7 @@ class UpdateCommandTest extends TestCase
 
         $this->assertFalse($cmd->isEmpty());
 
-        $cmd->addContext('key', 'value');
+        $cmd->setContext('key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getContext());
     }
 
@@ -65,7 +65,7 @@ class UpdateCommandTest extends TestCase
             ['where' => 'value']
         );
 
-        $cmd->addContext('name', 'value');
+        $cmd->setContext('name', 'value');
         $this->assertSame(null, $cmd->getPrimaryKey());
 
         $m->expects('update')->with('table',

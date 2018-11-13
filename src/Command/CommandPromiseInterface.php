@@ -43,5 +43,5 @@ interface CommandPromiseInterface extends CommandInterface
      * @param string $name
      * @param mixed  $value
      */
-    public function addContext(string $name, $value);
+    public function setContext(string $name, $value);
 }

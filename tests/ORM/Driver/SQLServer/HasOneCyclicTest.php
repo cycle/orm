@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\SQLServer; 
 
-class MapperTest extends \Spiral\ORM\Tests\MapperTest 
+class HasOneCyclicTest extends \Spiral\ORM\Tests\HasOneCyclicTest 
 { 
     const DRIVER = "sqlserver"; 
 }

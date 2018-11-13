@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\SQLite; 
 
-class HasOneRelationTest extends \Spiral\ORM\Tests\HasOneRelationTest 
+class HasOneCyclicTest extends \Spiral\ORM\Tests\HasOneCyclicTest 
 { 
     const DRIVER = "sqlite"; 
 }

@@ -13,6 +13,8 @@ use Spiral\ORM\Command\CommandPromiseInterface;
 
 interface RelationInterface
 {
+    public function isLeading(): bool;
+
     public function queueChange(
         $parent,
         State $state,

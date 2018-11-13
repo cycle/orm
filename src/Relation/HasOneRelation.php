@@ -73,11 +73,6 @@ class HasOneRelation extends AbstractRelation
             // todo: dirty state [?]
             $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
 
-            // todo: THIS MUST BE ASSOCIATED WITH THROWN COMMAND
-            $inner->onComplete(function () use ($state, $related) {
-                $state->setRelation($this->relation, $related);
-            });
-
             $chain->addTargetCommand($inner);
 
             // syncing (TODO: CHECK IF NOT SYNCED ALREADY)

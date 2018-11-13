@@ -51,10 +51,19 @@ final class RelationMap
         $state = $this->orm->getHeap()->get($entity);
 
         $chain = new ChainCommand();
+
+        foreach ($this->relations as $relation) {
+            if ($relation->isLeading()) {
+                $chain->addCommand($relation->queueChange($entity, $state, $command));
+            }
+        }
+
         $chain->addTargetCommand($command);
 
         foreach ($this->relations as $relation) {
-            $chain->addCommand($relation->queueChange($entity, $state, $command));
+            if (!$relation->isLeading()) {
+                $chain->addCommand($relation->queueChange($entity, $state, $command));
+            }
         }
 
         return $chain;

@@ -12,11 +12,13 @@ use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
+use Spiral\ORM\State;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
 abstract class BelongsToRelationTest extends BaseTest
 {
@@ -217,5 +219,47 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertEquals('another@world.com', $result[2]->user->email);
 
         $this->assertSame($result[1]->user, $result[2]->user);
+    }
+
+    public function testCreateWithRelations()
+    {
+        $u = new User();
+        $u->email = 'test@email.com';
+        $u->balance = 300;
+
+        $p = new Profile();
+        $p->image = 'magic.gif';
+        $p->user = $u;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+
+        $this->assertEquals(3, $u->id);
+        $this->assertEquals(4, $p->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($u));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($u)->getState());
+
+        $this->assertTrue($this->orm->getHeap()->has($p));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($p)->getState());
+
+        $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
+
+        $selector = new Selector($this->orm, Profile::class);
+        $selector->load('user');
+
+        $this->assertEquals([
+            [
+                'id'      => 4,
+                'user_id' => 3,
+                'image'   => 'magic.gif',
+                'user'    => [
+                    'id'      => 3,
+                    'email'   => 'test@email.com',
+                    'balance' => 300.0,
+                ],
+            ]
+        ], $selector->wherePK(4)->fetchData());
     }
 }

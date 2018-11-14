@@ -50,10 +50,9 @@ class RefersToRelation extends AbstractRelation
             $command->onExecute(function () use ($related) {
                 $relState = $this->orm->getHeap()->get($related);
                 $relState->getActiveCommand()->onExecute(function (CommandPromiseInterface $c) {
-
-                    dump($c->getPrimaryKey());
-
                     // todo: activate command
+                    dump('READY TO ACTIVATE');
+                    dump($c->getPrimaryKey());
 
                 });
             });

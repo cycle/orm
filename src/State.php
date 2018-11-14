@@ -150,4 +150,11 @@ final class State
     {
         $this->refCount--;
     }
+
+    public function __destruct()
+    {
+        $this->data = [];
+        $this->command = null;
+        $this->relations = [];
+    }
 }

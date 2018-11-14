@@ -52,7 +52,7 @@ class HasOneRelation extends AbstractRelation
 
             $chain->addCommand(
                 new ConditionalCommand(
-                    $this->orm->getMapper(get_class($orig))->queueDelete($orig),
+                    $this->orm->getMapper($orig)->queueDelete($orig),
                     function () use ($origState) {
                         return $origState->getRefCount() == 0;
                     }
@@ -71,7 +71,7 @@ class HasOneRelation extends AbstractRelation
             }
 
             // todo: dirty state [?]
-            $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
+            $inner = $this->orm->getMapper($related)->queueStore($related);
 
             $chain->addTargetCommand($inner);
 

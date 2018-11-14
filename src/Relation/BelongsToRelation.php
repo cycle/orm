@@ -15,6 +15,7 @@ use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
+// do not throw save?
 class BelongsToRelation extends AbstractRelation
 {
     const LEADING = true;

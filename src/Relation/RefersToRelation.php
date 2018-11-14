@@ -56,6 +56,11 @@ class RefersToRelation extends AbstractRelation
 
                 });
             });
+        } else {
+            dump('READY TO ACTIVATE (RELSTATE IS READY)');
+
+            // todo: set immediately?
+            // todo: on resolved reference
         }
 
         // TODO: comment depends on user, user does not depends on comment ?

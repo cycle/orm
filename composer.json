@@ -6,7 +6,6 @@
     "php": "^7.1",
     "spiral/core": "^1.1",
     "spiral/debug": "^1.3",
-    "spiral/models": "^2.0",
     "spiral/database": "^2.1",
     "spiral/tokenizer": "^2.1",
     "doctrine/inflector": "^1.3",

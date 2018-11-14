@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Doctrine\Common\Collections\Collection;
+use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -184,7 +185,6 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals('msg 3', $a->comments[2]->message);
     }
 
-
     public function testCreateWithRelations()
     {
         $e = new User();
@@ -235,5 +235,62 @@ abstract class HasManyRelationTest extends BaseTest
                 ],
             ],
         ], $selector->wherePK(3)->fetchData());
+    }
+
+    public function testRemoveChildren()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $selector->load('comments');
+
+        /** @var User $e */
+        $e = $selector->wherePK(1)->fetchOne();
+
+        $e->comments->remove(1);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector->load('comments');
+
+        /** @var User $e */
+        $e = $selector->wherePK(1)->fetchOne();
+
+        $this->assertCount(2, $e->comments);
+
+        $this->assertSame('msg 1', $e->comments[0]->message);
+        $this->assertSame('msg 3', $e->comments[1]->message);
+    }
+
+    public function testAddAndRemoveChildren()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $selector->load('comments');
+
+        /** @var User $e */
+        $e = $selector->wherePK(1)->fetchOne();
+
+        $e->comments->remove(1);
+
+        $c = new Comment();
+        $c->message = "msg 4";
+        $e->comments->add($c);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector->load('comments');
+
+        /** @var User $e */
+        $e = $selector->wherePK(1)->fetchOne();
+
+        $this->assertCount(3, $e->comments);
+
+        $this->assertSame('msg 1', $e->comments[0]->message);
+        $this->assertSame('msg 3', $e->comments[1]->message);
+        $this->assertSame('msg 4', $e->comments[2]->message);
     }
 }

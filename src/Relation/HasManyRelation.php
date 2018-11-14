@@ -11,6 +11,7 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\GroupCommand;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
@@ -32,11 +33,20 @@ class HasManyRelation extends AbstractRelation
             $related = $related->toArray();
         }
 
+        // removed
+        $removed = array_udiff($orig ?? [], $related, function ($a, $b) {
+            return strcmp(spl_object_hash($a), spl_object_hash($b));
+        });
+
         $state->setRelation($this->relation, $related);
 
         $group = new GroupCommand();
         foreach ($related as $item) {
-            $group->addCommand($this->calculate($command, $parent, $item));
+            $group->addCommand($this->add($command, $parent, $item));
+        }
+
+        foreach ($removed as $item) {
+            $group->addCommand($this->remove($command, $parent, $item));
         }
 
         return $group;
@@ -44,7 +54,7 @@ class HasManyRelation extends AbstractRelation
 
 
     // todo: diff
-    protected function calculate(CommandPromiseInterface $command, $parent, $related): CommandInterface
+    protected function add(CommandPromiseInterface $command, $parent, $related): CommandInterface
     {
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
@@ -71,5 +81,18 @@ class HasManyRelation extends AbstractRelation
         // todo: update relation state
 
         return $inner;
+    }
+
+    protected function remove(CommandPromiseInterface $command, $parent, $related): CommandInterface
+    {
+        $origState = $this->orm->getHeap()->get($related);
+        $origState->delRef();
+
+        return new ConditionalCommand(
+            $this->orm->getMapper($related)->queueDelete($related),
+            function () use ($origState) {
+                return $origState->getRefCount() == 0;
+            }
+        );
     }
 }

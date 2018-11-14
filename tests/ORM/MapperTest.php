@@ -155,6 +155,9 @@ abstract class MapperTest extends BaseTest
 
         $tr = new Transaction($this->orm);
         $tr->store($e);
+
+        $this->assertSame(State::SCHEDULED_INSERT, $this->orm->getHeap()->get($e)->getState());
+
         $tr->run();
 
         $this->assertEquals(3, $e->id);
@@ -174,6 +177,8 @@ abstract class MapperTest extends BaseTest
 
         $e->balance = 400;
         $tr->store($e);
+
+        $this->assertSame(State::SCHEDULED_UPDATE, $this->orm->getHeap()->get($e)->getState());
 
         $tr->run();
 

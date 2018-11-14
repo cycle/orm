@@ -10,9 +10,11 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\Database\LinkCommand;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Relation;
+use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 
 class RefersToRelation extends AbstractRelation
@@ -34,51 +36,46 @@ class RefersToRelation extends AbstractRelation
             );
         }
 
-        // todo: super interesting use-case
-        // if related object is new,
-        // issue related command to be executed after parent command
-        // and after issued command ?
-        // but issued command can be issued after this one?
+        $state->setRelation($this->relation, $related);
 
-        //$cmd = new UpdateCommand();
-
-        // todo: depends on related state?
-        $relState = $this->orm->getHeap()->get($related);
-        dump($relState);
-
-        if (is_null($relState)) {
-            $command->onExecute(function () use ($related) {
-                $relState = $this->orm->getHeap()->get($related);
-                $relState->getActiveCommand()->onExecute(function (CommandPromiseInterface $c) {
-                    // todo: activate command
-                    dump('READY TO ACTIVATE');
-                    dump($c->getPrimaryKey());
-
-                });
-            });
-        } else {
-            dump('READY TO ACTIVATE (RELSTATE IS READY)');
-
-            // todo: set immediately?
-            // todo: on resolved reference
+        if (is_null($related)) {
+            // todo: reset value
+            return new NullCommand();
         }
+
+        $link = new LinkCommand(
+            $this->orm->getDatabase($parent),
+            $this->orm->getSchema()->define(get_class($parent), Schema::TABLE)
+        );
+
+        $pk = $this->orm->getSchema()->define(get_class($parent), Schema::PRIMARY_KEY);
+
+        $command->onExecute(function (CommandPromiseInterface $cmd) use ($related, $link, $pk) {
+            $link->setWhere([$pk => $cmd->getPrimaryKey()]);
+
+
+            $relState = $this->orm->getHeap()->get($related);
+
+            // todo: might not be found, use existed key
+            $relState->getActiveCommand()->onExecute(function (CommandPromiseInterface $outer) use ($link, $related) {
+
+                // todo: activate command
+
+                $link->setData([
+                    $this->schema[Relation::INNER_KEY] => $this->lookupKey(
+                        $this->schema[Relation::OUTER_KEY],
+                        $related,
+                        $outer
+                    )
+                ]);
+            });
+        });
 
         // TODO: comment depends on user, user does not depends on comment ?
         // todo: reset ?
 
         //  $orig = $state->getRelation($this->relation);
 
-        $state->setRelation($this->relation, $related);
-
-        //   $relState = $this->orm->getHeap()->get($related);
-        //            if (!empty($relState)) {
-        //                $relState->addReference();
-        //                if ($relState->getRefCount() > 2) {
-        //                    // todo: detect if it's the same parent over and over again?
-        //                    return new NullCommand();
-        //                }
-        //            }
-
-        return new NullCommand();
+        return $link;
     }
 }

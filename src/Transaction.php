@@ -12,6 +12,7 @@ use Spiral\Database\Driver\DriverInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Database\DatabaseCommand;
 use Spiral\ORM\Command\FloatingCommandInterface;
+use Spiral\ORM\Exception\CommandException;
 
 class Transaction implements TransactionInterface
 {
@@ -58,22 +59,7 @@ class Transaction implements TransactionInterface
      */
     public function getCommands()
     {
-        $delayed = [];
         foreach ($this->commands as $command) {
-            if ($command instanceof FloatingCommandInterface && $command->isDelayed()) {
-                $delayed[] = $command;
-                continue;
-            }
-
-            foreach ($delayed as $index => $inner) {
-                if (!$inner->isDelayed()) {
-                    unset($delayed[$index]);
-                    // todo: how?
-                }
-            }
-
-            // todo: delayed commands here as generator?
-
             if ($command instanceof \Traversable) {
                 yield from $command;
             }
@@ -88,9 +74,27 @@ class Transaction implements TransactionInterface
     public function run()
     {
         $executed = $drivers = [];
+        $delayed = [];
 
         try {
             foreach ($this->getCommands() as $command) {
+                if ($command instanceof FloatingCommandInterface && $command->isDelayed()) {
+                    $delayed[] = $command;
+                    continue;
+                }
+
+                $this->beginTransaction($command, $drivers);
+
+                $command->execute();
+                $executed[] = $command;
+            }
+
+            foreach ($delayed as $command) {
+                if ($command->isDelayed()) {
+                    // todo: format
+                    throw new CommandException("Command is still delayed");
+                }
+
                 $this->beginTransaction($command, $drivers);
 
                 $command->execute();

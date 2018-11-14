@@ -90,14 +90,11 @@ abstract class RefersToRelationTest extends BaseTest
         $u->email = "email@email.com";
         $u->balance = 100;
 
-        $this->enableProfiling();
-
         $c = new Comment();
         $c->message = "last comment";
 
         $u->addComment($c);
 
-        $this->enableProfiling();
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
@@ -108,4 +105,6 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertNotNull($u->lastComment);
         $this->assertSame($u->lastComment, $u->comments[0]);
     }
+
+    // todo: test when parent is defined
 }

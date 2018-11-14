@@ -49,7 +49,8 @@ class BelongsToRelation extends AbstractRelation
         //            }
 
         if (!is_null($related)) {
-            // todo: dirty state [?]
+            // todo: dirty state [?], TODO: DO WE NEED TO STORE PARENTS UP ??? -- what is the usecase?
+            // todo: NOPE??? --- ???
             $inner = $this->orm->getMapper($related)->queueStore($related);
 
             $inner->onExecute(function (CommandPromiseInterface $inner) use ($command, $related) {

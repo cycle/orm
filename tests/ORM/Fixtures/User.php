@@ -8,6 +8,9 @@
 
 namespace Spiral\ORM\Tests\Fixtures;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
 class User
 {
     public $id;
@@ -16,4 +19,12 @@ class User
 
     /** @var Profile */
     public $profile;
+
+    /** @var Comment[]|Collection */
+    public $comments;
+
+    public function __construct()
+    {
+        $this->comments = new ArrayCollection();
+    }
 }

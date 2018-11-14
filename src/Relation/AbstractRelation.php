@@ -16,7 +16,8 @@ use Spiral\ORM\State;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    public const LEADING = false;
+    public const LEADING    = false;
+    public const COLLECTION = false;
 
     /**
      * @invisible
@@ -41,6 +42,11 @@ abstract class AbstractRelation implements RelationInterface
     public function isLeading(): bool
     {
         return static::LEADING;
+    }
+
+    public function isCollection(): bool
+    {
+        return static::COLLECTION;
     }
 
     public function init($data)

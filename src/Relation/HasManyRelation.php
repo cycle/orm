@@ -6,20 +6,22 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\NullCommand;
+use Spiral\ORM\State;
 
-interface RelationInterface
+class HasManyRelation extends AbstractRelation
 {
-    public function isLeading(): bool;
-
-    public function isCollection(): bool;
+    public const COLLECTION = true;
 
     public function queueChange(
         $parent,
         State $state,
         CommandPromiseInterface $command
-    ): CommandInterface;
+    ): CommandInterface {
+        return new NullCommand();
+    }
 }

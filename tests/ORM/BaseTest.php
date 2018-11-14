@@ -20,6 +20,7 @@ use Spiral\Database\Driver\AbstractHandler;
 use Spiral\ORM\Config\RelationConfig;
 use Spiral\ORM\Factory;
 use Spiral\ORM\Loader\Relation\BelongsToLoader;
+use Spiral\ORM\Loader\Relation\HasManyLoader;
 use Spiral\ORM\Loader\Relation\HasOneLoader;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Relation;
@@ -65,6 +66,10 @@ abstract class BaseTest extends TestCase
                     RelationConfig::LOADER   => BelongsToLoader::class,
                     RelationConfig::RELATION => Relation\BelongsToRelation::class
                 ],
+                Relation::HAS_MANY   => [
+                    RelationConfig::LOADER   => HasManyLoader::class,
+                    RelationConfig::RELATION => Relation\HasManyRelation::class
+                ]
             ])
         ));
 

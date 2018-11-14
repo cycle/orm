@@ -12,20 +12,15 @@ use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Node\AbstractNode;
-use Spiral\ORM\Node\SingularNode;
+use Spiral\ORM\Node\ArrayNode;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 
-/**
- * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
- * Loader support MORPH_KEY.
- *
- * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
- * purposes).
- */
-class HasOneLoader extends RelationLoader
+class HasManyLoader extends RelationLoader
 {
     // todo: where trait
+    // todo: constrain trait
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -33,12 +28,23 @@ class HasOneLoader extends RelationLoader
      * @var array
      */
     protected $options = [
-        'method' => self::INLOAD,
-        'minify' => true,
-        'alias'  => null,
-        'using'  => null,
-        'where'  => null,
+        'method'  => self::INLOAD,
+        'minify'  => true,
+        'alias'   => null,
+        'using'   => null,
+        'where'   => null,
+        'orderBy' => [],
+        'limit'   => 0
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    {
+        parent::__construct($orm, $class, $relation, $schema);
+        $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
+    }
 
     /**
      * {@inheritdoc}
@@ -63,9 +69,13 @@ class HasOneLoader extends RelationLoader
         } else {
             // relation is loaded using external query
             $query->where($localKey, 'IN', new Parameter($outerKeys));
+
+            // todo: configureWindow
         }
 
-        //Morphed records
+        // todo: where configuration
+
+        //todo: Morphed records
         //        if (!empty($this->schema[Record::MORPH_KEY])) {
         //            $this->setWhere(
         //                $query,
@@ -88,7 +98,7 @@ class HasOneLoader extends RelationLoader
      */
     protected function initNode(): AbstractNode
     {
-        return new SingularNode(
+        return new ArrayNode(
             $this->getColumns(),
             $this->define(Schema::PRIMARY_KEY),
             $this->schema[Relation::OUTER_KEY],

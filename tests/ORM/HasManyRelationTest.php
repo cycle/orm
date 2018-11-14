@@ -312,6 +312,8 @@ abstract class HasManyRelationTest extends BaseTest
             $a->comments->removeElement($c);
         }
 
+        $b->comments[0]->message = "new b";
+
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);
 
@@ -320,13 +322,16 @@ abstract class HasManyRelationTest extends BaseTest
         $tr->store($b);
         $tr->run();
 
-
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+
         /**
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('comments')->orderBy('user.id')->fetchAll();
+        list($a, $b) = $selector->load('comments', [
+            'method' => RelationLoader::INLOAD,
+            'alias'  => 'comment'
+        ])->orderBy('user.id')->orderBy('comment.id')->fetchAll();
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -334,5 +339,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals(3, $a->comments[0]->id);
         $this->assertEquals(1, $b->comments[0]->id);
         $this->assertEquals(2, $b->comments[1]->id);
+
+        $this->assertEquals('new b', $b->comments[0]->message);
     }
 }

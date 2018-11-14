@@ -24,4 +24,6 @@ class Relation
     public const SCHEMA = 21;
 
     public const ORDER_BY = 1111;
+
+    public const CASCADE = 234214;
 }

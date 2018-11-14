@@ -96,6 +96,7 @@ abstract class BelongsToRelationTest extends BaseTest
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
@@ -115,6 +116,7 @@ abstract class BelongsToRelationTest extends BaseTest
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'profile_id',
                             Relation::OUTER_KEY => 'id',
                         ],
@@ -395,6 +397,7 @@ abstract class BelongsToRelationTest extends BaseTest
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                             Relation::NULLABLE  => true
@@ -415,6 +418,7 @@ abstract class BelongsToRelationTest extends BaseTest
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'profile_id',
                             Relation::OUTER_KEY => 'id',
                         ],

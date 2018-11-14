@@ -55,6 +55,7 @@ abstract class RefersToRelationTest extends BaseTest
                         Relation::TYPE   => Relation::REFERS_TO,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'comment_id',
                             Relation::OUTER_KEY => 'id',
                             Relation::NULLABLE  => true
@@ -64,6 +65,7 @@ abstract class RefersToRelationTest extends BaseTest
                         Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],

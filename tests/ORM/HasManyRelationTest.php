@@ -72,6 +72,7 @@ abstract class HasManyRelationTest extends BaseTest
                         Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],

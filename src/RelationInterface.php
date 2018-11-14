@@ -13,6 +13,8 @@ use Spiral\ORM\Command\CommandPromiseInterface;
 
 interface RelationInterface
 {
+    public function isCascade(): bool;
+
     public function isLeading(): bool;
 
     public function isCollection(): bool;

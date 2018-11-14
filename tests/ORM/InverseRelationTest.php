@@ -69,6 +69,7 @@ abstract class InverseRelationTest extends BaseTest
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -88,6 +89,8 @@ abstract class InverseRelationTest extends BaseTest
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],

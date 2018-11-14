@@ -10,6 +10,7 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandPromiseInterface;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
@@ -31,12 +32,22 @@ abstract class AbstractRelation implements RelationInterface
 
     protected $schema;
 
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
-    {
+
+    public function __construct(
+        ORMInterface $orm,
+        string $class,
+        string $relation,
+        array $schema
+    ) {
         $this->orm = $orm;
         $this->class = $class;
         $this->relation = $relation;
         $this->schema = $schema;
+    }
+
+    public function isCascade(): bool
+    {
+        return $this->schema[Relation::CASCADE] ?? false;
     }
 
     public function isLeading(): bool

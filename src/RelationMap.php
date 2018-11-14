@@ -65,7 +65,7 @@ final class RelationMap
         $chain = new ChainCommand();
 
         foreach ($this->relations as $relation) {
-            if ($relation->isLeading()) {
+            if ($relation->isCascade() && $relation->isLeading()) {
                 $chain->addCommand($relation->queueChange($entity, $state, $command));
             }
         }
@@ -73,16 +73,11 @@ final class RelationMap
         $chain->addTargetCommand($command);
 
         foreach ($this->relations as $relation) {
-            if (!$relation->isLeading()) {
+            if ($relation->isCascade() && !$relation->isLeading()) {
                 $chain->addCommand($relation->queueChange($entity, $state, $command));
             }
         }
 
         return $chain;
-    }
-
-    public function getRelation(string $relation)
-    {
-        // can be promise ?
     }
 }

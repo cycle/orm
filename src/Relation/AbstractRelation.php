@@ -74,6 +74,7 @@ abstract class AbstractRelation implements RelationInterface
 
     protected function getRelated($entity)
     {
+        // todo: move into RelationMap
         return $this->orm->getMapper($this->class)->getField($entity, $this->relation);
     }
 
@@ -92,7 +93,7 @@ abstract class AbstractRelation implements RelationInterface
             }
         }
 
-        return $this->orm->getMapper($this->class)->getField($entity, $key);
+        return $this->orm->getHeap()->get($entity)->getData()[$key] ?? null;
     }
 
     protected function define(string $key)

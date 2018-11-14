@@ -43,12 +43,6 @@ class EntityMapper extends AbstractMapper
         );
     }
 
-    // todo: in the heap?
-    protected function setField($entity, $field, $value)
-    {
-        $this->hydrator->hydrate([$field => $value], $entity);
-    }
-
     // todo: from the heap?
     public function getField($entity, $field)
     {

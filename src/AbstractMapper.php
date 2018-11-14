@@ -58,8 +58,7 @@ abstract class AbstractMapper implements MapperInterface
     abstract protected function getFields($entity): array;
 
     // todo: in the heap?
-    abstract protected function setField($entity, $field, $value);
-
+    //  abstract protected function setField($entity, $field, $value);
 
     protected function buildInsert($entity): CommandPromiseInterface
     {
@@ -91,16 +90,15 @@ abstract class AbstractMapper implements MapperInterface
             $state->setActiveCommand(null);
             $state->setState(State::LOADED);
 
-            $this->setField($entity, $primaryKey, $command->getPrimaryKey());
+            $this->hydrate($entity, [
+                $primaryKey => $command->getPrimaryKey()
+            ]);
 
             // todo: update entity path
             $state->setPrimaryKey($primaryKey, $command->getPrimaryKey());
 
-            // hydrate all context values
-            foreach ($command->getContext() as $name => $value) {
-                $this->setField($entity, $name, $value);
-                $state->setField($name, $value);
-            }
+            $this->hydrate($entity, $command->getContext());
+            $state->setData($command->getContext());
         });
 
         $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
@@ -152,11 +150,8 @@ abstract class AbstractMapper implements MapperInterface
         $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
-            // hydrate all context values
-            foreach ($command->getContext() as $name => $value) {
-                $this->setField($entity, $name, $value);
-                $state->setField($name, $value);
-            }
+            $this->hydrate($entity, $command->getContext());
+            $state->setData($command->getContext());
         });
 
         $update->onRollBack(function () use ($state, $current) {

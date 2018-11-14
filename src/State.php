@@ -81,14 +81,6 @@ final class State
         return $this->state;
     }
 
-    /**
-     * @deprecated
-     */
-    public function setField(string $name, $value)
-    {
-        $this->data[$name] = $value;
-    }
-
     public function setData(array $data)
     {
         $this->data = array_merge($data, $this->data);

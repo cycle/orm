@@ -117,6 +117,9 @@ abstract class AbstractMapper implements MapperInterface
         $class = get_class($entity);
         $primaryKey = $schema->define($class, Schema::PRIMARY_KEY);
 
+        $oData = $state->getData();
+        $eData = $this->getFields($entity);
+
         // todo: calc diff
         $uData = $this->getFields($entity) + $state->getData();
         $pK = $uData[$primaryKey] ?? null;
@@ -127,7 +130,7 @@ abstract class AbstractMapper implements MapperInterface
         $update = new UpdateCommand(
             $this->orm->getDatabase($class),
             $schema->define($class, Schema::TABLE),
-            $uData,
+            array_diff($eData, $oData), // todo: make it optional
             [$primaryKey => $pK],
             $pK
         );

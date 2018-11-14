@@ -26,6 +26,7 @@ class BelongsToRelation extends AbstractRelation
         CommandPromiseInterface $command
     ): CommandInterface {
         $related = $this->getRelated($parent);
+        $orig = $state->getRelation($this->relation);
 
         if ($related === null && !$this->define(Relation::NULLABLE)) {
             throw new NullException(

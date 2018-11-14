@@ -22,7 +22,8 @@ class UpdateCommandTest extends TestCase
             m::mock(DatabaseInterface::class),
             'table',
             [],
-            []
+            [],
+            null
         );
 
         $this->assertTrue($cmd->isEmpty());
@@ -34,11 +35,25 @@ class UpdateCommandTest extends TestCase
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],
-            ['where' => 'value']
+            ['where' => 'value'],
+            1
         );
 
         $this->assertFalse($cmd->isEmpty());
         $this->assertSame(['name' => 'value'], $cmd->getData());
+    }
+
+    public function testIsEmptyPK()
+    {
+        $cmd = new UpdateCommand(
+            m::mock(DatabaseInterface::class),
+            'table',
+            ['name' => 'value'],
+            ['where' => 'value'],
+            null
+        );
+
+        $this->assertTrue($cmd->isEmpty());
     }
 
     public function testIsEmptyContext()
@@ -47,7 +62,8 @@ class UpdateCommandTest extends TestCase
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],
-            ['where' => 'value']
+            ['where' => 'value'],
+            1
         );
 
         $this->assertFalse($cmd->isEmpty());

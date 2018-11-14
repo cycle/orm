@@ -52,7 +52,7 @@ class UpdateCommand extends DatabaseCommand implements CommandPromiseInterface
      */
     public function isEmpty(): bool
     {
-        return empty($this->data) && empty($this->context);
+        return (empty($this->data) && empty($this->context)) || empty($this->primaryKey);
     }
 
     /**

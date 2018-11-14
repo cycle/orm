@@ -91,7 +91,7 @@ final class State
 
     public function setData(array $data)
     {
-        $this->data = $data + $this->data;
+        $this->data = array_merge($data, $this->data);
     }
 
     /**

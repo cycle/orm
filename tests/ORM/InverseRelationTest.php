@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -15,6 +16,7 @@ use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
 abstract class InverseRelationTest extends BaseTest
 {
@@ -143,5 +145,29 @@ abstract class InverseRelationTest extends BaseTest
 
         $this->assertSame($a, $a->profile->user);
         $this->assertSame($b, $b->profile->user);
+    }
+
+    public function testCyclicThoughtInverse()
+    {
+        $u = new User();
+        $u->email = 'cyclic@email.com';
+        $u->balance = 700;
+        $u->profile = new Profile();
+        $u->profile->image = 'sample.gif';
+
+        // cyclic
+        $u->profile->user = $u;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->assertEquals(3, $u->id);
+        $this->assertEquals(4, $u->profile->id);
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
+
+        $this->assertSame($u, $u->profile->user);
     }
 }

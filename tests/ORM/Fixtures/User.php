@@ -20,11 +20,20 @@ class User
     /** @var Profile */
     public $profile;
 
+    /** @var Comment */
+    public $lastComment;
+
     /** @var Comment[]|Collection */
     public $comments;
 
     public function __construct()
     {
         $this->comments = new ArrayCollection();
+    }
+
+    public function addComment(Comment $c)
+    {
+        $this->lastComment = $c;
+        $this->comments->add($c);
     }
 }

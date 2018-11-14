@@ -13,6 +13,7 @@ class Relation
     public const HAS_ONE    = 1;
     public const HAS_MANY   = 3;
     public const BELONGS_TO = 2;
+    public const REFERS_TO  = 4;
 
     public const OUTER_KEY = 2;
     public const INNER_KEY = 3;

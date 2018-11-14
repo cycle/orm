@@ -10,6 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
+use Spiral\ORM\Config\RelationConfig;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -19,17 +20,17 @@ class ORM implements ORMInterface
     // Memory section to store ORM schema.
     const MEMORY = 'orm.schema';
 
+    /** @var HeapInterface */
+    private $heap;
+
     /** @var DatabaseManager */
     private $dbal;
-
-    /** @var SchemaInterface */
-    private $schema;
 
     /** @var FactoryInterface */
     private $factory;
 
-    /** @var null|HeapInterface */
-    private $heap = null;
+    /** @var SchemaInterface */
+    private $schema;
 
     /** @var MapperInterface[] */
     private $mappers = [];
@@ -43,9 +44,9 @@ class ORM implements ORMInterface
      */
     public function __construct(DatabaseManager $dbal, FactoryInterface $factory = null)
     {
-        $this->dbal = $dbal;
-        $this->factory = $factory;
         $this->heap = new Heap();
+        $this->dbal = $dbal;
+        $this->factory = $factory ?? new Factory(RelationConfig::createDefault());
     }
 
     /**

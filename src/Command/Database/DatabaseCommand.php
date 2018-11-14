@@ -13,7 +13,10 @@ use Spiral\ORM\Command\AbstractCommand;
 
 abstract class DatabaseCommand extends AbstractCommand
 {
-    /** @var DatabaseInterface */
+    /**
+     * @invisible
+     * @var DatabaseInterface
+     */
     protected $db;
 
     /** @var string|null */

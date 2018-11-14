@@ -293,4 +293,46 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSame('msg 3', $e->comments[1]->message);
         $this->assertSame('msg 4', $e->comments[2]->message);
     }
+
+    public function testSliceAndSaveToAnotherParent()
+    {
+        $selector = new Selector($this->orm, User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('comments')->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(3, $a->comments);
+        $this->assertCount(0, $b->comments);
+
+        $b->comments = $a->comments->slice(0, 2);
+
+        foreach ($b->comments as $c) {
+            $a->comments->removeElement($c);
+        }
+
+        $this->assertCount(1, $a->comments);
+        $this->assertCount(2, $b->comments);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('comments')->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(1, $a->comments);
+        $this->assertCount(2, $b->comments);
+
+        $this->assertEquals(3, $a->comments[0]->id);
+        $this->assertEquals(1, $b->comments[0]->id);
+        $this->assertEquals(2, $b->comments[1]->id);
+    }
 }

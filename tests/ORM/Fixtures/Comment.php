@@ -10,6 +10,8 @@ namespace Spiral\ORM\Tests\Fixtures;
 
 class Comment
 {
+    public $id;
+
     public $message;
 
     /** @var User */

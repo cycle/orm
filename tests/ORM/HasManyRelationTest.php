@@ -13,10 +13,12 @@ use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
+use Spiral\ORM\State;
 use Spiral\ORM\Tests\Fixtures\Comment;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
 abstract class HasManyRelationTest extends BaseTest
 {
@@ -180,5 +182,58 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals('msg 1', $a->comments[0]->message);
         $this->assertEquals('msg 2', $a->comments[1]->message);
         $this->assertEquals('msg 3', $a->comments[2]->message);
+    }
+
+
+    public function testCreateWithRelations()
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+        $e->comments->add(new Comment());
+        $e->comments->add(new Comment());
+
+        $e->comments[0]->message = 'msg A';
+        $e->comments[1]->message = 'msg B';
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $this->assertEquals(3, $e->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($e));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
+
+        $this->assertTrue($this->orm->getHeap()->has($e->comments[0]));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e->comments[0])->getState());
+        $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[0])->getData()['user_id']);
+
+        $this->assertTrue($this->orm->getHeap()->has($e->comments[1]));
+        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e->comments[1])->getState());
+        $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[1])->getData()['user_id']);
+
+        $selector = new Selector($this->orm, User::class);
+        $selector->load('comments');
+
+        $this->assertEquals([
+            [
+                'id'       => 3,
+                'email'    => 'test@email.com',
+                'balance'  => 300.0,
+                'comments' => [
+                    [
+                        'id'      => 4,
+                        'user_id' => 3,
+                        'message' => 'msg A',
+                    ],
+                    [
+                        'id'      => 5,
+                        'user_id' => 3,
+                        'message' => 'msg B',
+                    ],
+                ],
+            ],
+        ], $selector->wherePK(3)->fetchData());
     }
 }

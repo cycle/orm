@@ -106,5 +106,31 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertSame($u->lastComment, $u->comments[0]);
     }
 
+    public function testCreateWhenParentExists()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $c = new Comment();
+        $c->message = "last comment";
+
+        $u->addComment($c);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($u->lastComment);
+        $this->assertSame($u->lastComment, $u->comments[0]);
+    }
+
     // todo: test when parent is defined
 }

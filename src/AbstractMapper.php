@@ -20,10 +20,17 @@ abstract class AbstractMapper implements MapperInterface
 
     protected $class;
 
+    protected $table;
+
+    protected $primaryKey;
+
     public function __construct(ORMInterface $orm, $class)
     {
         $this->orm = $orm;
         $this->class = $class;
+
+        $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
+        $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
     }
 
     public function init()
@@ -62,41 +69,33 @@ abstract class AbstractMapper implements MapperInterface
 
     protected function buildInsert($entity): CommandPromiseInterface
     {
-        $schema = $this->orm->getSchema();
-        $class = get_class($entity);
-        $primaryKey = $schema->define($class, Schema::PRIMARY_KEY);
-
         $data = $this->getFields($entity);
         $state = new State(
-            $data[$primaryKey] ?? null,
+            $data[$this->primaryKey] ?? null,
             State::SCHEDULED_INSERT,
             $data
         );
 
-        unset($data[$primaryKey]);
+        unset($data[$this->primaryKey]);
 
-        $insert = new InsertCommand(
-            $this->orm->getDatabase($class),
-            $schema->define($class, Schema::TABLE),
-            $data
-        );
+        $insert = new InsertCommand($this->orm->getDatabase($entity), $this->table, $data);
 
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
 
-        $insert->onExecute(function (InsertCommand $command) use ($primaryKey, $entity, $state) {
-            $state->setPrimaryKey($primaryKey, $command->getPrimaryKey());
+        $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
+            $state->setPrimaryKey($this->primaryKey, $command->getPrimaryKey());
         });
 
-        $insert->onComplete(function (InsertCommand $command) use ($primaryKey, $entity, $state) {
+        $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, [
-                $primaryKey => $command->getPrimaryKey()
+                $this->primaryKey => $command->getPrimaryKey()
             ]);
 
             // todo: update entity path
-            $state->setPrimaryKey($primaryKey, $command->getPrimaryKey());
+            $state->setPrimaryKey($this->primaryKey, $command->getPrimaryKey());
 
             $this->hydrate($entity, $command->getContext());
             $state->setData($command->getContext());
@@ -111,25 +110,21 @@ abstract class AbstractMapper implements MapperInterface
 
     protected function buildUpdate($entity, State $state): CommandPromiseInterface
     {
-        $schema = $this->orm->getSchema();
-        $class = get_class($entity);
-        $primaryKey = $schema->define($class, Schema::PRIMARY_KEY);
-
         $oData = $state->getData();
         $eData = $this->getFields($entity);
 
         // todo: calc diff
         $uData = $this->getFields($entity) + $state->getData();
-        $pK = $uData[$primaryKey] ?? null;
-        unset($uData[$primaryKey]);
+        $pK = $uData[$this->primaryKey] ?? null;
+        unset($uData[$this->primaryKey]);
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
         $update = new UpdateCommand(
-            $this->orm->getDatabase($class),
-            $schema->define($class, Schema::TABLE),
+            $this->orm->getDatabase($entity),
+            $this->table,
             array_diff($eData, $oData), // todo: make it optional
-            [$primaryKey => $pK],
+            [$this->primaryKey => $pK],
             $pK
         );
 
@@ -137,8 +132,8 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($uData);
 
-        $state->onUpdate(function (State $state) use ($update, $primaryKey) {
-            $update->setWhere([$primaryKey => $state->getPrimaryKey()]);
+        $state->onUpdate(function (State $state) use ($update) {
+            $update->setWhere([$this->primaryKey => $state->getPrimaryKey()]);
             $update->setPrimaryKey($state->getPrimaryKey());
         });
 
@@ -159,23 +154,20 @@ abstract class AbstractMapper implements MapperInterface
 
     protected function buildDelete($entity, State $state): CommandInterface
     {
-        $schema = $this->orm->getSchema();
-        $class = get_class($entity);
-        $primaryKey = $schema->define($class, Schema::PRIMARY_KEY);
-
         // todo: better primary key fetch
 
         $delete = new DeleteCommand(
-            $this->orm->getDatabase($class),
-            $schema->define($class, Schema::TABLE),
-            [$primaryKey => $state->getPrimaryKey() ?? $this->getFields($entity)[$primaryKey] ?? null]
+            $this->orm->getDatabase($entity),
+            $this->table,
+            [$this->primaryKey => $state->getPrimaryKey() ?? $this->getFields($entity)[$this->primaryKey] ?? null]
         );
 
         $current = $state->getState();
+
         $state->setState(State::SCHEDULED_DELETE);
 
-        $state->onUpdate(function (State $state) use ($delete, $primaryKey) {
-            $delete->setWhere([$primaryKey => $state->getPrimaryKey()]);
+        $state->onUpdate(function (State $state) use ($delete) {
+            $delete->setWhere([$this->primaryKey => $state->getPrimaryKey()]);
         });
 
         $delete->onComplete(function (DeleteCommand $command) use ($entity) {

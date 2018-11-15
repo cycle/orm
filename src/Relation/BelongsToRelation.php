@@ -24,10 +24,9 @@ class BelongsToRelation extends AbstractRelation
     public function queueChange(
         $parent,
         State $state,
+        $related,
         ContextCommandInterface $command
     ): CommandInterface {
-        $related = $this->getRelated($parent);
-
         if ($related === null && !$this->define(Relation::NULLABLE)) {
             throw new NullException(
                 "Relation `{$this->class}`.`{$this->relation}` can not be null"

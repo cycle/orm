@@ -30,7 +30,6 @@ abstract class AbstractRelation implements RelationInterface
 
     protected $schema;
 
-
     public function __construct(
         ORMInterface $orm,
         string $class,

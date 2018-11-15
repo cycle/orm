@@ -18,6 +18,8 @@ interface MapperInterface
 
     public function hydrate($entity, array $data);
 
+    public function extract($entity): array;
+
     // todo: from the heap?
     public function getField($entity, $field);
 

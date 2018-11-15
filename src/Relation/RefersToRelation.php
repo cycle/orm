@@ -25,9 +25,9 @@ class RefersToRelation extends AbstractRelation
     public function queueChange(
         $parent,
         State $state,
+        $related,
         ContextCommandInterface $command
     ): CommandInterface {
-        $related = $this->getRelated($parent);
         $orig = $state->getRelation($this->relation);
 
         if ($related === null && !$this->define(Relation::NULLABLE)) {

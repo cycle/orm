@@ -45,7 +45,6 @@ abstract class AbstractMapper implements MapperInterface
         $state = $this->orm->getHeap()->get($entity);
 
         if ($state == null) {
-            // todo: make sure that no save can happen after the heap reset
             $cmd = $this->buildInsert($entity);
         } else {
             $cmd = $this->buildUpdate($entity, $state);
@@ -57,28 +56,35 @@ abstract class AbstractMapper implements MapperInterface
     public function queueDelete($entity): CommandInterface
     {
         $state = $this->orm->getHeap()->get($entity);
+        if ($state == null) {
+            // todo: an exception
+        }
 
-        // todo: check state
         return $this->buildDelete($entity, $state);
     }
-
-    abstract protected function getFields($entity): array;
 
     // todo: in the heap?
     //  abstract protected function setField($entity, $field, $value);
 
+    protected function getColumns($entity): array
+    {
+        $columns = array_flip($this->orm->getSchema()->define(get_class($entity), Schema::COLUMNS));
+        return array_intersect_key($this->extract($entity), $columns);
+    }
+
     protected function buildInsert($entity): ContextCommandInterface
     {
-        $data = $this->getFields($entity);
+        $columns = $this->getColumns($entity);
+
         $state = new State(
-            $data[$this->primaryKey] ?? null,
+            $columns[$this->primaryKey] ?? null,
             State::SCHEDULED_INSERT,
-            $data
+            $columns
         );
 
-        unset($data[$this->primaryKey]);
+        unset($columns[$this->primaryKey]);
 
-        $insert = new InsertContextCommand($this->orm->getDatabase($entity), $this->table, $data);
+        $insert = new InsertContextCommand($this->orm->getDatabase($entity), $this->table, $columns);
 
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
@@ -110,11 +116,11 @@ abstract class AbstractMapper implements MapperInterface
 
     protected function buildUpdate($entity, State $state): ContextCommandInterface
     {
+        $eData = $this->getColumns($entity);
         $oData = $state->getData();
-        $eData = $this->getFields($entity);
 
         // todo: calc diff
-        $uData = $this->getFields($entity) + $state->getData();
+        $uData = $this->extract($entity) + $state->getData();
         $pK = $uData[$this->primaryKey] ?? null;
         unset($uData[$this->primaryKey]);
 
@@ -158,7 +164,7 @@ abstract class AbstractMapper implements MapperInterface
             $this->orm->getDatabase($entity),
             $this->table,
             // todo: uuid?
-            [$this->primaryKey => $state->getPrimaryKey() ?? $this->getFields($entity)[$this->primaryKey] ?? null]
+            [$this->primaryKey => $state->getPrimaryKey() ?? $this->extract($entity)[$this->primaryKey] ?? null]
         );
 
         $current = $state->getState();

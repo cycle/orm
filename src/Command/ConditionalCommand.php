@@ -40,5 +40,4 @@ class ConditionalCommand extends AbstractCommand implements \IteratorAggregate
     {
         // nothing
     }
-
 }

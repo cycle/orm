@@ -22,6 +22,7 @@ interface RelationInterface
     public function queueChange(
         $parent,
         State $state,
+        $related,
         ContextCommandInterface $command
     ): CommandInterface;
 }

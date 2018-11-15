@@ -32,15 +32,9 @@ class EntityMapper extends AbstractMapper
         return $this->hydrator->hydrate($data, $entity);
     }
 
-    protected function getFields($entity): array
+    public function extract($entity): array
     {
-        $values = $this->hydrator->extract($entity);
-        $columns = $this->orm->getSchema()->define(get_class($entity), Schema::COLUMNS);
-
-        return array_intersect_key(
-            $values,
-            array_flip($columns)
-        );
+        return $this->hydrator->extract($entity);
     }
 
     // todo: from the heap?

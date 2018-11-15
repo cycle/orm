@@ -11,8 +11,8 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\Database\DeleteCommand;
-use Spiral\ORM\Command\Database\InsertContextCommand;
-use Spiral\ORM\Command\Database\UpdateContextCommand;
+use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\UpdateCommand;
 
 abstract class AbstractMapper implements MapperInterface
 {
@@ -84,16 +84,16 @@ abstract class AbstractMapper implements MapperInterface
 
         unset($columns[$this->primaryKey]);
 
-        $insert = new InsertContextCommand($this->orm->getDatabase($entity), $this->table, $columns);
+        $insert = new InsertCommand($this->orm->getDatabase($entity), $this->table, $columns);
 
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
 
-        $insert->onExecute(function (InsertContextCommand $command) use ($entity, $state) {
+        $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
             $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
         });
 
-        $insert->onComplete(function (InsertContextCommand $command) use ($entity, $state) {
+        $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, [
@@ -107,7 +107,7 @@ abstract class AbstractMapper implements MapperInterface
             $state->setData($command->getContext());
         });
 
-        $insert->onRollBack(function (InsertContextCommand $command) use ($entity, $state) {
+        $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
             $this->orm->getHeap()->detach($entity);
         });
 
@@ -127,7 +127,7 @@ abstract class AbstractMapper implements MapperInterface
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
-        $update = new UpdateContextCommand(
+        $update = new UpdateCommand(
             $this->orm->getDatabase($entity),
             $this->table,
             array_diff($eData, $oData), // todo: make it optional
@@ -142,7 +142,7 @@ abstract class AbstractMapper implements MapperInterface
             $update->setWhere([$this->primaryKey => $state->getPrimaryKey()]);
         });
 
-        $update->onComplete(function (UpdateContextCommand $command) use ($entity, $state) {
+        $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, $command->getContext());

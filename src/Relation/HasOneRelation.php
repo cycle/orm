@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\ChainContextCommand;
+use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\ContextCommandInterface;
@@ -31,7 +31,7 @@ class HasOneRelation extends AbstractRelation
         // todo: need rollback
         $state->setRelation($this->relation, $related);
 
-        $chain = new ChainContextCommand();
+        $chain = new ChainCommand();
 
         // delete, we need to think about replace
         if (!empty($orig) && empty($related)) {

@@ -16,7 +16,7 @@ use Spiral\ORM\Exception\CommandException;
  *
  * Leading command can be in a middle of the chain!
  */
-class ChainContextCommand implements \IteratorAggregate, ContextCommandInterface
+class ChainCommand implements \IteratorAggregate, ContextCommandInterface
 {
     /** @var ContextCommandInterface */
     private $target;

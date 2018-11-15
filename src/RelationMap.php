@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Command\ChainContextCommand;
+use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\ContextCommandInterface;
 
 final class RelationMap
@@ -61,7 +61,7 @@ final class RelationMap
         // todo: what if entity new?
         $state = $this->orm->getHeap()->get($entity);
 
-        $chain = new ChainContextCommand();
+        $chain = new ChainCommand();
 
         $data = $this->orm->getMapper($entity)->extract($entity);
 

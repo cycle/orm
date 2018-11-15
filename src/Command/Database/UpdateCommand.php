@@ -18,7 +18,7 @@ use Spiral\ORM\Command\Database\Traits\WhereTrait;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class UpdateContextCommand extends DatabaseCommand implements ContextCommandInterface
+class UpdateCommand extends DatabaseCommand implements ContextCommandInterface
 {
     use ContextTrait, WhereTrait;
 

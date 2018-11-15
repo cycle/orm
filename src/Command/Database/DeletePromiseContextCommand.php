@@ -9,11 +9,11 @@ namespace Spiral\ORM\Commands;
 
 
 use Spiral\Database\DatabaseInterface;
+use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\Database\DatabaseCommand;
 use Spiral\ORM\Command\Database\Traits\ContextTrait;
 use Spiral\ORM\Command\Database\Traits\PrimaryKeyTrait;
 use Spiral\ORM\Command\Database\Traits\WhereTrait;
-use Spiral\ORM\Command\CommandPromiseInterface;
 
 /**
  * Promised delete is a command which delete based on where statement directly linked to it's
@@ -23,7 +23,7 @@ use Spiral\ORM\Command\CommandPromiseInterface;
  * This creates ability to create postponed delete command which where statement will be resolved
  * only later in transactions.
  */
-class DeletePromiseCommand extends DatabaseCommand implements CommandPromiseInterface
+class DeletePromiseContextCommand extends DatabaseCommand implements ContextCommandInterface
 {
     use PrimaryKeyTrait, ContextTrait, WhereTrait;
 

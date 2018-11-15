@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Command;
 
-
 interface DelayedCommandInterface extends CommandInterface
 {
     //todo: phpdoc

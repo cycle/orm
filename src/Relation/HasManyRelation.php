@@ -10,8 +10,8 @@ namespace Spiral\ORM\Relation;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\CommandPromiseInterface;
 use Spiral\ORM\Command\ConditionalCommand;
+use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\GroupCommand;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
@@ -24,7 +24,7 @@ class HasManyRelation extends AbstractRelation
     public function queueChange(
         $parent,
         State $state,
-        CommandPromiseInterface $command
+        ContextCommandInterface $command
     ): CommandInterface {
         $related = $this->getRelated($parent);
         $orig = $state->getRelation($this->relation);
@@ -53,7 +53,7 @@ class HasManyRelation extends AbstractRelation
     }
 
     // todo: diff
-    protected function add(CommandPromiseInterface $command, $parent, State $state, $related): CommandInterface
+    protected function add(ContextCommandInterface $command, $parent, State $state, $related): CommandInterface
     {
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
@@ -90,7 +90,7 @@ class HasManyRelation extends AbstractRelation
         return $inner;
     }
 
-    protected function remove(CommandPromiseInterface $command, $parent, State $state, $related): CommandInterface
+    protected function remove(ContextCommandInterface $command, $parent, State $state, $related): CommandInterface
     {
         $origState = $this->orm->getHeap()->get($related);
         $origState->delRef();

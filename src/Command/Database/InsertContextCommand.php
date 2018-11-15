@@ -9,13 +9,13 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
+use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\Database\Traits\ContextTrait;
-use Spiral\ORM\Command\CommandPromiseInterface;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class InsertCommand extends DatabaseCommand implements CommandPromiseInterface
+class InsertContextCommand extends DatabaseCommand implements ContextCommandInterface
 {
     use ContextTrait;
 

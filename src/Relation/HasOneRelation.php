@@ -8,10 +8,10 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\ChainCommand;
+use Spiral\ORM\Command\ChainContextCommand;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\CommandPromiseInterface;
 use Spiral\ORM\Command\ConditionalCommand;
+use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
@@ -23,7 +23,7 @@ class HasOneRelation extends AbstractRelation
     public function queueChange(
         $parent,
         State $state,
-        CommandPromiseInterface $command
+        ContextCommandInterface $command
     ): CommandInterface {
         $related = $this->getRelated($parent);
         $orig = $state->getRelation($this->relation);
@@ -31,7 +31,7 @@ class HasOneRelation extends AbstractRelation
         // todo: need rollback
         $state->setRelation($this->relation, $related);
 
-        $chain = new ChainCommand();
+        $chain = new ChainContextCommand();
 
         // delete, we need to think about replace
         if (!empty($orig) && empty($related)) {

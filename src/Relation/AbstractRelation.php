@@ -8,11 +8,9 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\CommandPromiseInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
-use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 
 abstract class AbstractRelation implements RelationInterface

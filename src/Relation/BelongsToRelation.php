@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Relation;
@@ -24,7 +24,7 @@ class BelongsToRelation extends AbstractRelation
     public function queueChange(
         $parent,
         State $state,
-        CommandPromiseInterface $command
+        ContextCommandInterface $command
     ): CommandInterface {
         $related = $this->getRelated($parent);
 

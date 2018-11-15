@@ -80,10 +80,10 @@ abstract class HasOneRelationTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'profile' => [
-                        Relation::TYPE    => Relation::HAS_ONE,
-                        Relation::TARGET  => Profile::class,
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE => true,
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -100,10 +100,10 @@ abstract class HasOneRelationTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'nested' => [
-                        Relation::TYPE    => Relation::HAS_ONE,
-                        Relation::TARGET  => Nested::class,
-                        Relation::SCHEMA  => [
-                            Relation::CASCADE => true,
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Nested::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'profile_id',
                         ],

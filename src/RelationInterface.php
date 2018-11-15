@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\ContextCommandInterface;
 
 interface RelationInterface
 {
@@ -22,6 +22,6 @@ interface RelationInterface
     public function queueChange(
         $parent,
         State $state,
-        CommandPromiseInterface $command
+        ContextCommandInterface $command
     ): CommandInterface;
 }

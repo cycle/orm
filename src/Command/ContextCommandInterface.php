@@ -10,18 +10,9 @@ namespace Spiral\ORM\Command;
 /**
  * Promise commands used to carry FK and PK values across commands pipeline, other commands are
  * able to mount it's values into parent context or read from it.
- *
- * @todo: another name?
  */
-interface CommandPromiseInterface extends CommandInterface
+interface ContextCommandInterface extends CommandInterface
 {
-    /**
-     * Must be true when command does not carry any data.
-     *
-     * @return bool
-     */
-    public function isEmpty(): bool;
-
     /**
      * Get current command context.
      *

@@ -9,10 +9,10 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\Database\DeleteCommand;
-use Spiral\ORM\Command\Database\InsertCommand;
-use Spiral\ORM\Command\Database\UpdateCommand;
+use Spiral\ORM\Command\Database\InsertContextCommand;
+use Spiral\ORM\Command\Database\UpdateContextCommand;
 
 abstract class AbstractMapper implements MapperInterface
 {
@@ -40,7 +40,7 @@ abstract class AbstractMapper implements MapperInterface
         return new $class;
     }
 
-    public function queueStore($entity): CommandPromiseInterface
+    public function queueStore($entity): ContextCommandInterface
     {
         $state = $this->orm->getHeap()->get($entity);
 
@@ -67,7 +67,7 @@ abstract class AbstractMapper implements MapperInterface
     // todo: in the heap?
     //  abstract protected function setField($entity, $field, $value);
 
-    protected function buildInsert($entity): CommandPromiseInterface
+    protected function buildInsert($entity): ContextCommandInterface
     {
         $data = $this->getFields($entity);
         $state = new State(
@@ -78,16 +78,16 @@ abstract class AbstractMapper implements MapperInterface
 
         unset($data[$this->primaryKey]);
 
-        $insert = new InsertCommand($this->orm->getDatabase($entity), $this->table, $data);
+        $insert = new InsertContextCommand($this->orm->getDatabase($entity), $this->table, $data);
 
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
 
-        $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
+        $insert->onExecute(function (InsertContextCommand $command) use ($entity, $state) {
             $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
         });
 
-        $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
+        $insert->onComplete(function (InsertContextCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, [
@@ -101,14 +101,14 @@ abstract class AbstractMapper implements MapperInterface
             $state->setData($command->getContext());
         });
 
-        $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
+        $insert->onRollBack(function (InsertContextCommand $command) use ($entity, $state) {
             $this->orm->getHeap()->detach($entity);
         });
 
         return $insert;
     }
 
-    protected function buildUpdate($entity, State $state): CommandPromiseInterface
+    protected function buildUpdate($entity, State $state): ContextCommandInterface
     {
         $oData = $state->getData();
         $eData = $this->getFields($entity);
@@ -120,7 +120,7 @@ abstract class AbstractMapper implements MapperInterface
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
-        $update = new UpdateCommand(
+        $update = new UpdateContextCommand(
             $this->orm->getDatabase($entity),
             $this->table,
             array_diff($eData, $oData), // todo: make it optional
@@ -135,7 +135,7 @@ abstract class AbstractMapper implements MapperInterface
             $update->setWhere([$this->primaryKey => $state->getPrimaryKey()]);
         });
 
-        $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
+        $update->onComplete(function (UpdateContextCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, $command->getContext());

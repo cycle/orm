@@ -32,6 +32,7 @@ class DeleteCommand extends DatabaseCommand
     public function execute()
     {
         $this->db->delete($this->table, $this->where)->run();
+
         parent::execute();
     }
 }

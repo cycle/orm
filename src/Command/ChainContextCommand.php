@@ -16,9 +16,9 @@ use Spiral\ORM\Exception\CommandException;
  *
  * Leading command can be in a middle of the chain!
  */
-class ChainCommand implements \IteratorAggregate, CommandPromiseInterface
+class ChainContextCommand implements \IteratorAggregate, ContextCommandInterface
 {
-    /** @var CommandPromiseInterface */
+    /** @var ContextCommandInterface */
     private $target;
 
     /** @var CommandInterface[] */
@@ -37,20 +37,12 @@ class ChainCommand implements \IteratorAggregate, CommandPromiseInterface
     }
 
     /**
-     * @param CommandPromiseInterface $command
+     * @param ContextCommandInterface $command
      */
-    public function addTargetCommand(CommandPromiseInterface $command)
+    public function addTargetCommand(ContextCommandInterface $command)
     {
         $this->commands[] = $command;
         $this->target = $command;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isEmpty(): bool
-    {
-        return $this->getTarget()->isEmpty();
     }
 
     /**
@@ -146,9 +138,9 @@ class ChainCommand implements \IteratorAggregate, CommandPromiseInterface
     }
 
     /**
-     * @return CommandPromiseInterface
+     * @return ContextCommandInterface
      */
-    protected function getTarget(): CommandPromiseInterface
+    protected function getTarget(): ContextCommandInterface
     {
         if (empty($this->target)) {
             throw new CommandException("Chain target command is not set.");

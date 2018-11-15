@@ -10,24 +10,24 @@ namespace Spiral\ORM\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Command\ChainCommand;
-use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\ChainContextCommand;
+use Spiral\ORM\Command\Database\InsertContextCommand;
 use Spiral\ORM\Command\NullCommand;
 
 class ChainCommandTest extends TestCase
 {
     public function testNestedCommands()
     {
-        $command = new ChainCommand();
+        $command = new ChainContextCommand();
 
         $command->addCommand(new NullCommand());
         $command->addCommand(new NullCommand());
-        $command->addCommand(m::mock(InsertCommand::class));
-        $command->addCommand(m::mock(InsertCommand::class));
+        $command->addCommand(m::mock(InsertContextCommand::class));
+        $command->addCommand(m::mock(InsertContextCommand::class));
 
         $count = 0;
         foreach ($command as $sub) {
-            $this->assertInstanceOf(InsertCommand::class, $sub);
+            $this->assertInstanceOf(InsertContextCommand::class, $sub);
             $count++;
         }
 
@@ -41,8 +41,8 @@ class ChainCommandTest extends TestCase
 
     public function testGetPrimaryKey()
     {
-        $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command = new ChainContextCommand();
+        $command->addTargetCommand($lead = m::mock(InsertContextCommand::class));
 
         $lead->expects('getPrimaryKey')->andReturn(1);
 
@@ -54,24 +54,14 @@ class ChainCommandTest extends TestCase
      */
     public function testGetLeadingBad()
     {
-        $command = new ChainCommand();
+        $command = new ChainContextCommand();
         $command->getPrimaryKey();
-    }
-
-    public function testIsEmpty()
-    {
-        $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
-
-        $lead->shouldReceive('isEmpty')->andReturn(true);
-
-        $this->assertSame(true, $command->isEmpty());
     }
 
     public function testGetContext()
     {
-        $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command = new ChainContextCommand();
+        $command->addTargetCommand($lead = m::mock(InsertContextCommand::class));
 
         $lead->shouldReceive('getContext')->andReturn(['hi']);
 
@@ -80,8 +70,8 @@ class ChainCommandTest extends TestCase
 
     public function testAddContext()
     {
-        $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command = new ChainContextCommand();
+        $command->addTargetCommand($lead = m::mock(InsertContextCommand::class));
 
         $lead->shouldReceive('setContext')->with('name', 'value');
 
@@ -91,8 +81,8 @@ class ChainCommandTest extends TestCase
 
     public function testPassCallbackExecute()
     {
-        $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command = new ChainContextCommand();
+        $command->addTargetCommand($lead = m::mock(InsertContextCommand::class));
 
         $f = function () {
         };
@@ -104,8 +94,8 @@ class ChainCommandTest extends TestCase
 
     public function testPassCallbackComplete()
     {
-        $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command = new ChainContextCommand();
+        $command->addTargetCommand($lead = m::mock(InsertContextCommand::class));
 
         $f = function () {
         };
@@ -117,8 +107,8 @@ class ChainCommandTest extends TestCase
 
     public function testPassCallbackRollback()
     {
-        $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command = new ChainContextCommand();
+        $command->addTargetCommand($lead = m::mock(InsertContextCommand::class));
 
         $f = function () {
         };

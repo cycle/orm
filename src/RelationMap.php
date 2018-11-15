@@ -9,8 +9,8 @@
 namespace Spiral\ORM;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Command\ChainCommand;
-use Spiral\ORM\Command\CommandPromiseInterface;
+use Spiral\ORM\Command\ChainContextCommand;
+use Spiral\ORM\Command\ContextCommandInterface;
 
 final class RelationMap
 {
@@ -57,12 +57,12 @@ final class RelationMap
 
     public function queueRelations(
         $entity,
-        CommandPromiseInterface $command
-    ): CommandPromiseInterface {
+        ContextCommandInterface $command
+    ): ContextCommandInterface {
         // todo: what if entity new?
         $state = $this->orm->getHeap()->get($entity);
 
-        $chain = new ChainCommand();
+        $chain = new ChainContextCommand();
 
         foreach ($this->relations as $relation) {
             if ($relation->isCascade() && $relation->isLeading()) {

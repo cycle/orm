@@ -81,8 +81,6 @@ abstract class AbstractMapper implements MapperInterface
             $data
         );
 
-        $state->setActiveCommand($insert);
-
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
 
@@ -91,7 +89,6 @@ abstract class AbstractMapper implements MapperInterface
         });
 
         $insert->onComplete(function (InsertCommand $command) use ($primaryKey, $entity, $state) {
-            $state->setActiveCommand(null);
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, [
@@ -106,7 +103,6 @@ abstract class AbstractMapper implements MapperInterface
         });
 
         $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
-            $state->setActiveCommand(null);
             $this->orm->getHeap()->detach($entity);
         });
 
@@ -141,17 +137,10 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($uData);
 
-        // todo: get from the state?
-        if (!empty($state->getActiveCommand())) {
-            $state->getActiveCommand()->onExecute(function (
-                CommandPromiseInterface $command
-            ) use ($primaryKey, $update, $state) {
-                $update->setWhere([$primaryKey => $command->getPrimaryKey()]);
-                $update->setPrimaryKey($command->getPrimaryKey());
-
-                $state->setPrimaryKey($primaryKey, $command->getPrimaryKey());
-            });
-        }
+        $state->onUpdate(function (State $state) use ($update, $primaryKey) {
+            $update->setWhere([$primaryKey => $state->getPrimaryKey()]);
+            $update->setPrimaryKey($state->getPrimaryKey());
+        });
 
         $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
@@ -185,13 +174,9 @@ abstract class AbstractMapper implements MapperInterface
         $current = $state->getState();
         $state->setState(State::SCHEDULED_DELETE);
 
-        if (!empty($state->getActiveCommand())) {
-            $state->getActiveCommand()->onExecute(function (
-                CommandPromiseInterface $command
-            ) use ($primaryKey, $delete) {
-                $delete->setWhere([$primaryKey => $command->getPrimaryKey()]);
-            });
-        }
+        $state->onUpdate(function (State $state) use ($delete, $primaryKey) {
+            $delete->setWhere([$primaryKey => $state->getPrimaryKey()]);
+        });
 
         $delete->onComplete(function (DeleteCommand $command) use ($entity) {
             $this->orm->getHeap()->detach($entity);

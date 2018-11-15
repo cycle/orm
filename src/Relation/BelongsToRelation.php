@@ -48,10 +48,6 @@ class BelongsToRelation extends AbstractRelation
         //                }
         //            }
 
-        // todo: ref-count as part of relation (do not walk thought ref-link more than once)
-        // todo: but what if child has been added...
-        // todo: big subject to think about, make tests first
-
         if (!is_null($related)) {
             $inner = $this->orm->getMapper($related)->queueStore($related);
 

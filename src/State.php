@@ -35,8 +35,6 @@ final class State
 
     private $refCount = 1;
 
-    private $command;
-
     private $relations = [];
 
     /**
@@ -100,16 +98,6 @@ final class State
     public function getData(): array
     {
         return $this->data;
-    }
-
-    public function setActiveCommand(CommandPromiseInterface $commandPromise = null)
-    {
-        $this->command = $commandPromise;
-    }
-
-    public function getActiveCommand(): ?CommandPromiseInterface
-    {
-        return $this->command;
     }
 
 

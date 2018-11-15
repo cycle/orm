@@ -57,7 +57,7 @@ class UpdateCommand extends DatabaseCommand implements ContextCommandInterface
      */
     public function getData(): array
     {
-        return $this->data;
+        return array_merge($this->data, $this->context);
     }
 
     /**
@@ -66,11 +66,7 @@ class UpdateCommand extends DatabaseCommand implements ContextCommandInterface
     public function execute()
     {
         if (!$this->isEmpty()) {
-            $this->db->update(
-                $this->table,
-                $this->context + $this->data,
-                $this->where
-            )->run();
+            $this->db->update($this->table, $this->getData(), $this->where)->run();
         }
 
         parent::execute();

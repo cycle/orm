@@ -51,7 +51,7 @@ class InsertCommand extends DatabaseCommand implements ContextCommandInterface
      */
     public function getData(): array
     {
-        return $this->data;
+        return array_merge($this->data, $this->context);
     }
 
     /**
@@ -67,11 +67,7 @@ class InsertCommand extends DatabaseCommand implements ContextCommandInterface
      */
     public function execute()
     {
-        $this->insertID = $this->db
-            ->insert($this->table)
-            ->values($this->context + $this->data)
-            ->run();
-
+        $this->insertID = $this->db->insert($this->table)->values($this->getData())->run();
         parent::execute();
     }
 }

@@ -118,25 +118,20 @@ abstract class AbstractMapper implements MapperInterface
     {
         $eData = $this->getColumns($entity);
         $oData = $state->getData();
-
-        // todo: calc diff
-        $uData = $this->extract($entity) + $state->getData();
-        $pK = $uData[$this->primaryKey] ?? null;
-
-        unset($uData[$this->primaryKey]);
+        $cData = array_diff($eData, $oData);
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
         $update = new UpdateCommand(
             $this->orm->getDatabase($entity),
             $this->table,
-            array_diff($eData, $oData), // todo: make it optional
-            [$this->primaryKey => $pK]
+            $cData,
+            [$this->primaryKey => $state->getPrimaryKey() ?? $eData[$this->primaryKey] ?? null]
         );
 
         $current = $state->getState();
         $state->setState(State::SCHEDULED_UPDATE);
-        $state->setData($uData);
+        $state->setData($cData);
 
         $state->onUpdate(function (State $state) use ($update) {
             $update->setWhere([$this->primaryKey => $state->getPrimaryKey()]);

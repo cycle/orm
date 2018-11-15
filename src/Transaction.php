@@ -73,34 +73,29 @@ class Transaction implements TransactionInterface
      */
     public function run()
     {
-        $commands = [];
-        foreach ($this->getCommands() as $command) {
-            $commands[] = $command;
-        }
-
-        //$commands = iterator_to_array($this->getCommands());
+        $commands = $this->getCommands();
         $executed = $drivers = [];
 
         try {
-
             while (!empty($commands)) {
-                $delayed = [];
-                $wait = count($commands);
-                foreach ($this->execute($commands, $drivers) as $done => $delay) {
+                $pending = [];
+                $total = is_array($commands) ? count($commands) : null;
+
+                foreach ($this->execute($commands, $drivers) as $done => $skip) {
                     if ($done != null) {
                         $executed[] = $done;
                     }
 
-                    if ($delay != null) {
-                        $delayed[] = $delay;
+                    if ($skip != null) {
+                        $pending[] = $skip;
                     }
                 }
 
-                if (count($delayed) == $wait) {
-                    throw new TransactionException("Unable to complete: " . join(", ", $delayed));
+                if (count($pending) === $total) {
+                    throw new TransactionException("Unable to complete: " . join(", ", $pending));
                 }
 
-                $commands = $delayed;
+                $commands = $pending;
             }
 
         } catch (\Throwable $e) {
@@ -139,7 +134,7 @@ class Transaction implements TransactionInterface
         if ($command instanceof DatabaseCommand) {
             $driver = $command->getDatabase()->getDriver();
 
-            if (!empty($driver) && !in_array($driver, $drivers)) {
+            if (!empty($driver) && !in_array($driver, $drivers, true)) {
                 $driver->beginTransaction();
                 $drivers[] = $driver;
             }
@@ -149,11 +144,11 @@ class Transaction implements TransactionInterface
     /**
      * Execute and split array of commands into two subsets: executed and pending.
      *
-     * @param array $commands
-     * @param array $drivers
+     * @param iterable $commands
+     * @param array    $drivers
      * @return \Generator
      */
-    private function execute(array $commands, array &$drivers): \Generator
+    private function execute(iterable $commands, array &$drivers): \Generator
     {
         foreach ($commands as $command) {
             if ($command instanceof DelayedCommandInterface && $command->isDelayed()) {

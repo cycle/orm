@@ -69,5 +69,4 @@ class RefersToRelation extends AbstractRelation
 
         return $link;
     }
-
 }

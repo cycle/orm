@@ -13,6 +13,9 @@ class Heap implements HeapInterface
     /** @var \SplObjectStorage */
     private $storage;
 
+    /** @var \SplObjectStorage */
+    private $handlers;
+
     /** @var array */
     private $path = [];
 
@@ -44,12 +47,36 @@ class Heap implements HeapInterface
         }
     }
 
+    public function onUpdate($entity, callable $handler)
+    {
+        if (!$this->has($entity)) {
+            if ($this->handlers->offsetExists($entity)) {
+                $this->handlers->offsetSet(
+                    $entity,
+                    array_merge($this->handlers->offsetGet($entity), [$handler])
+                );
+            } else {
+                $this->handlers->offsetSet($entity, [$handler]);
+            }
+
+        } else {
+            $this->get($entity)->onUpdate($handler);
+        }
+    }
+
     /**
      * @inheritdoc
      */
     public function attach($entity, State $state)
     {
         $this->storage->offsetSet($entity, $state);
+        if ($this->handlers->offsetExists($entity)) {
+            foreach ($this->handlers->offsetGet($entity) as $handler) {
+                $state->onUpdate($handler);
+            }
+            $this->handlers->offsetUnset($entity);
+        }
+
         if (!empty($state->getPrimaryKey())) {
             $this->path[get_class($entity) . ':' . $state->getPrimaryKey()] = $entity;
         }
@@ -69,6 +96,7 @@ class Heap implements HeapInterface
     public function reset()
     {
         $this->storage = new \SplObjectStorage();
+        $this->handlers = new \SplObjectStorage();
     }
 
     public function hasPath(string $class, $entityID)

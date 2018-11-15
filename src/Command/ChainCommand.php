@@ -96,6 +96,16 @@ class ChainCommand implements \IteratorAggregate, CommandPromiseInterface
      *
      * @param callable $closure
      */
+    final public function onPrepare(callable $closure)
+    {
+        $this->getTarget()->onPrepare($closure);
+    }
+
+    /**
+     * Closure to be called after command executing.
+     *
+     * @param callable $closure
+     */
     final public function onExecute(callable $closure)
     {
         $this->getTarget()->onExecute($closure);
@@ -119,6 +129,14 @@ class ChainCommand implements \IteratorAggregate, CommandPromiseInterface
     final public function onRollBack(callable $closure)
     {
         $this->getTarget()->onRollBack($closure);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function prepare()
+    {
+        // nothing
     }
 
     /**

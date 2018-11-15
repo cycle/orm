@@ -73,33 +73,37 @@ class Transaction implements TransactionInterface
      */
     public function run()
     {
+        $commands = [];
+        foreach ($this->getCommands() as $command) {
+            $commands[] = $command;
+        }
+
+        //$commands = iterator_to_array($this->getCommands());
         $executed = $drivers = [];
-        $delayed = [];
 
         try {
-            foreach ($this->getCommands() as $command) {
-                if ($command instanceof FloatingCommandInterface && $command->isDelayed()) {
-                    $delayed[] = $command;
-                    continue;
+
+            while (!empty($commands)) {
+                $wait = count($commands);
+
+                $delayed = [];
+                foreach ($this->runCommands($commands, $drivers) as $done => $pending) {
+                    if ($done != null) {
+                        $executed[] = $done;
+                    }
+
+                    if ($pending != null) {
+                        $delayed[] = $pending;
+                    }
                 }
 
-                $this->beginTransaction($command, $drivers);
-
-                $command->execute();
-                $executed[] = $command;
-            }
-
-            foreach ($delayed as $command) {
-                if ($command->isDelayed()) {
-                    // todo: format
-                    throw new CommandException("Command is still delayed");
+                if (count($delayed) == $wait) {
+                    throw new CommandException("WOW, DEAD END!");
                 }
 
-                $this->beginTransaction($command, $drivers);
-
-                $command->execute();
-                $executed[] = $command;
+                $commands = $delayed;
             }
+
         } catch (\Throwable $e) {
             foreach (array_reverse($drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -140,6 +144,20 @@ class Transaction implements TransactionInterface
                 $driver->beginTransaction();
                 $drivers[] = $driver;
             }
+        }
+    }
+
+    private function runCommands(array $commands, array &$drivers): \Generator
+    {
+        foreach ($commands as $command) {
+            if ($command instanceof FloatingCommandInterface && $command->isDelayed()) {
+                yield null => $command;
+            }
+
+            $this->beginTransaction($command, $drivers);
+            $command->execute();
+
+            yield $command => null;
         }
     }
 }

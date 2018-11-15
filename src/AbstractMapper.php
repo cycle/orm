@@ -86,6 +86,10 @@ abstract class AbstractMapper implements MapperInterface
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
 
+        $insert->onExecute(function (InsertCommand $command) use ($primaryKey, $entity, $state) {
+            $state->setPrimaryKey($primaryKey, $command->getPrimaryKey());
+        });
+
         $insert->onComplete(function (InsertCommand $command) use ($primaryKey, $entity, $state) {
             $state->setActiveCommand(null);
             $state->setState(State::LOADED);
@@ -141,9 +145,11 @@ abstract class AbstractMapper implements MapperInterface
         if (!empty($state->getActiveCommand())) {
             $state->getActiveCommand()->onExecute(function (
                 CommandPromiseInterface $command
-            ) use ($primaryKey, $update) {
+            ) use ($primaryKey, $update, $state) {
                 $update->setWhere([$primaryKey => $command->getPrimaryKey()]);
                 $update->setPrimaryKey($command->getPrimaryKey());
+
+                $state->setPrimaryKey($primaryKey, $command->getPrimaryKey());
             });
         }
 

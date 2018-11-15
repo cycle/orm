@@ -13,6 +13,9 @@ namespace Spiral\ORM\Command;
 abstract class AbstractCommand implements CommandInterface
 {
     /** @var callable[] */
+    private $onPrepare = [];
+
+    /** @var callable[] */
     private $onExecute = [];
 
     /** @var callable[] */
@@ -20,6 +23,16 @@ abstract class AbstractCommand implements CommandInterface
 
     /** @var callable[] */
     private $onRollBack = [];
+
+    /**
+     * Closure to be called after command executing.
+     *
+     * @param callable $closure
+     */
+    final public function onPrepare(callable $closure)
+    {
+        $this->onPrepare[] = $closure;
+    }
 
     /**
      * Closure to be called after command executing.
@@ -49,6 +62,16 @@ abstract class AbstractCommand implements CommandInterface
     final public function onRollBack(callable $closure)
     {
         $this->onRollBack[] = $closure;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function prepare()
+    {
+        foreach ($this->onPrepare as $closure) {
+            call_user_func($closure, $this);
+        }
     }
 
     /**

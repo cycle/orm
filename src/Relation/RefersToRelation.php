@@ -50,31 +50,21 @@ class RefersToRelation extends AbstractRelation
 
         $pk = $this->orm->getSchema()->define(get_class($parent), Schema::PRIMARY_KEY);
 
-        $command->onExecute(function (CommandPromiseInterface $cmd) use ($related, $link, $pk) {
-            $link->setWhere([$pk => $cmd->getPrimaryKey()]);
-
-
-            $relState = $this->orm->getHeap()->get($related);
-
-            // todo: might not be found, use existed key
-            $relState->getActiveCommand()->onExecute(function (CommandPromiseInterface $outer) use ($link, $related) {
-
-                // todo: activate command
-
-                $link->setData([
-                    $this->schema[Relation::INNER_KEY] => $this->lookupKey(
-                        $this->schema[Relation::OUTER_KEY],
-                        $related,
-                        $outer
-                    )
-                ]);
+        if ($state->getPrimaryKey() != null) {
+            $link->setWhere([$pk => $state->getPrimaryKey()]);
+        } else {
+            // wait for PK
+            $state->onUpdate(function (State $state) use ($link, $pk) {
+                $link->setWhere([$pk => $state->getPrimaryKey()]);
             });
+        }
+
+        // or saved directly (need unification)
+        $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
+            $link->setData([
+                $this->schema[Relation::INNER_KEY] => $state->getData()[$this->schema[Relation::OUTER_KEY]]
+            ]);
         });
-
-        // TODO: comment depends on user, user does not depends on comment ?
-        // todo: reset ?
-
-        //  $orig = $state->getRelation($this->relation);
 
         return $link;
     }

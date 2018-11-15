@@ -17,6 +17,8 @@ interface HeapInterface
 
     public function attach($entity, State $state);
 
+    public function onUpdate($entity, callable $handler);
+
     public function detach($entity);
 
     public function reset();

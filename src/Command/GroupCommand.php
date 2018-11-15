@@ -39,6 +39,11 @@ class GroupCommand extends AbstractCommand implements \IteratorAggregate
         }
     }
 
+    public function prepare()
+    {
+        // nothing
+    }
+
     /**
      * {@inheritdoc}
      */

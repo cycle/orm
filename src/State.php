@@ -55,6 +55,10 @@ final class State
     {
         $this->primaryKey = $value;
         $this->data[$name] = $value;
+
+        foreach ($this->handlers as $handler) {
+            call_user_func($handler, $this);
+        }
     }
 
     /**
@@ -84,6 +88,10 @@ final class State
     public function setData(array $data)
     {
         $this->data = array_merge($data, $this->data);
+
+        foreach ($this->handlers as $handler) {
+            call_user_func($handler, $this);
+        }
     }
 
     /**
@@ -141,6 +149,13 @@ final class State
     public function delRef()
     {
         $this->refCount--;
+    }
+
+    private $handlers=[];
+
+    public function onUpdate(callable $handler)
+    {
+        $this->handlers[] = $handler;
     }
 
     public function __destruct()

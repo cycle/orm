@@ -117,7 +117,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 'id'      => 1,
                 'email'   => 'hello@world.com',
                 'balance' => 100.0,
-                'tags'     => [
+                'tags'    => [
                     [
                         '@pivot' => [
                             'user_id' => 1,
@@ -141,7 +141,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 'id'      => 2,
                 'email'   => 'another@world.com',
                 'balance' => 200.0,
-                'tags'     => [
+                'tags'    => [
                     [
                         '@pivot' => [
                             'user_id' => 2,
@@ -165,7 +165,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 'id'      => 1,
                 'email'   => 'hello@world.com',
                 'balance' => 100.0,
-                'tags'     => [
+                'tags'    => [
                     [
                         '@pivot' => [
                             'user_id' => 1,
@@ -189,7 +189,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 'id'      => 2,
                 'email'   => 'another@world.com',
                 'balance' => 200.0,
-                'tags'     => [
+                'tags'    => [
                     [
                         '@pivot' => [
                             'user_id' => 2,
@@ -208,7 +208,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         list($a, $b) = $selector->load('tags')->fetchAll();
 
-        dump($a);
-        dump($b);
+        $this->assertCount(2, $a->tags);
+        $this->assertCount(1, $b->tags);
     }
 }

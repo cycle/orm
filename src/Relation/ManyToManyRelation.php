@@ -25,10 +25,8 @@ class ManyToManyRelation extends AbstractRelation
         ContextCommandInterface $command
     ): CommandInterface {
 
-
         // store or not to store?
         // cascade can only update
-
 
         return new NullCommand();
     }

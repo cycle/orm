@@ -18,11 +18,6 @@ interface CommandInterface
     /**
      * Executes command.
      */
-    public function prepare();
-
-    /**
-     * Executes command.
-     */
     public function execute();
 
     /**
@@ -35,13 +30,6 @@ interface CommandInterface
      * Rollback command or declare that command been rolled back.
      */
     public function rollBack();
-
-    /**
-     * Closure to be called before command execution.
-     *
-     * @param callable $closure
-     */
-    public function onPrepare(callable $closure);
 
     /**
      * Closure to be called after command executing.

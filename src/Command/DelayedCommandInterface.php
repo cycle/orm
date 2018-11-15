@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Command;
 
 
-interface FloatingCommandInterface extends CommandInterface
+interface DelayedCommandInterface extends CommandInterface
 {
     //todo: phpdoc
     public function isDelayed(): bool;

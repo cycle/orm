@@ -11,8 +11,8 @@ namespace Spiral\ORM;
 use Spiral\Database\Driver\DriverInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Database\DatabaseCommand;
-use Spiral\ORM\Command\FloatingCommandInterface;
-use Spiral\ORM\Exception\CommandException;
+use Spiral\ORM\Command\DelayedCommandInterface;
+use Spiral\ORM\Exception\TransactionException;
 
 class Transaction implements TransactionInterface
 {
@@ -84,21 +84,20 @@ class Transaction implements TransactionInterface
         try {
 
             while (!empty($commands)) {
-                $wait = count($commands);
-
                 $delayed = [];
-                foreach ($this->runCommands($commands, $drivers) as $done => $pending) {
+                $wait = count($commands);
+                foreach ($this->execute($commands, $drivers) as $done => $delay) {
                     if ($done != null) {
                         $executed[] = $done;
                     }
 
-                    if ($pending != null) {
-                        $delayed[] = $pending;
+                    if ($delay != null) {
+                        $delayed[] = $delay;
                     }
                 }
 
                 if (count($delayed) == $wait) {
-                    throw new CommandException("WOW, DEAD END!");
+                    throw new TransactionException("Unable to complete: " . join(", ", $delayed));
                 }
 
                 $commands = $delayed;
@@ -147,10 +146,17 @@ class Transaction implements TransactionInterface
         }
     }
 
-    private function runCommands(array $commands, array &$drivers): \Generator
+    /**
+     * Execute and split array of commands into two subsets: executed and pending.
+     *
+     * @param array $commands
+     * @param array $drivers
+     * @return \Generator
+     */
+    private function execute(array $commands, array &$drivers): \Generator
     {
         foreach ($commands as $command) {
-            if ($command instanceof FloatingCommandInterface && $command->isDelayed()) {
+            if ($command instanceof DelayedCommandInterface && $command->isDelayed()) {
                 yield null => $command;
             }
 

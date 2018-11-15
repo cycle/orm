@@ -100,4 +100,9 @@ abstract class AbstractRelation implements RelationInterface
     {
         return $this->schema[$key] ?? null;
     }
+
+    public function __toString()
+    {
+        return sprintf("%s->%s", $this->class, $this->relation);
+    }
 }

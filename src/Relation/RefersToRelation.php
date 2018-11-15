@@ -47,6 +47,7 @@ class RefersToRelation extends AbstractRelation
             $this->orm->getDatabase($parent),
             $this->orm->getSchema()->define(get_class($parent), Schema::TABLE)
         );
+        $link->setDescription($this);
 
         $pk = $this->orm->getSchema()->define(get_class($parent), Schema::PRIMARY_KEY);
 

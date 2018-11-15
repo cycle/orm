@@ -10,10 +10,10 @@ namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\Database\Traits\WhereTrait;
-use Spiral\ORM\Command\FloatingCommandInterface;
+use Spiral\ORM\Command\DelayedCommandInterface;
 
 // wait until link is established
-class LinkCommand extends DatabaseCommand implements FloatingCommandInterface
+class LinkCommand extends DatabaseCommand implements DelayedCommandInterface
 {
     use  WhereTrait;
 
@@ -71,5 +71,17 @@ class LinkCommand extends DatabaseCommand implements FloatingCommandInterface
     public function isDelayed(): bool
     {
         return $this->isEmpty();
+    }
+
+    private $description = '';
+
+    public function setDescription(string $description)
+    {
+        $this->description = $description;
+    }
+
+    public function __toString(): string
+    {
+        return $this->description;
     }
 }

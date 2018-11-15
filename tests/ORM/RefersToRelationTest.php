@@ -86,27 +86,27 @@ abstract class RefersToRelationTest extends BaseTest
         ]));
     }
 
-//    public function testCreateUserWithDoubleReference()
-//    {
-//        $u = new User();
-//        $u->email = "email@email.com";
-//        $u->balance = 100;
-//
-//        $c = new Comment();
-//        $c->message = "last comment";
-//
-//        $u->addComment($c);
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
-//        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
-//
-//        $this->assertNotNull($u->lastComment);
-//        $this->assertSame($u->lastComment, $u->comments[0]);
-//    }
+    public function testCreateUserWithDoubleReference()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+
+        $u->addComment($c);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($u->lastComment);
+        $this->assertSame($u->lastComment, $u->comments[0]);
+    }
 
     public function testCreateWhenParentExists()
     {
@@ -132,6 +132,25 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->assertNotNull($u->lastComment);
         $this->assertSame($u->lastComment, $u->comments[0]);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exception\TransactionException
+     */
+    public function testCreateWithoutProperDependency()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+
+        $u->lastComment = $c;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
     }
 
     // todo: test when parent is defined

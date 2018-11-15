@@ -31,6 +31,7 @@ final class RelationMap
 
     public function init(State $state, array $data): array
     {
+        // easy to read huh?
         foreach ($this->relations as $name => $relation) {
             if (array_key_exists($name, $data)) {
                 if (!$relation->isCollection()) {

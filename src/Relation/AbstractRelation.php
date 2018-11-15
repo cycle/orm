@@ -68,13 +68,7 @@ abstract class AbstractRelation implements RelationInterface
 
         return $this->orm->make($this->class, $data, State::LOADED);
     }
-
-    protected function getRelated($entity)
-    {
-        // todo: move into RelationMap
-        return $this->orm->getMapper($this->class)->getField($entity, $this->relation);
-    }
-
+    
     protected function define(string $key)
     {
         return $this->schema[$key] ?? null;

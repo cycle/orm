@@ -122,6 +122,7 @@ abstract class AbstractMapper implements MapperInterface
         // todo: calc diff
         $uData = $this->extract($entity) + $state->getData();
         $pK = $uData[$this->primaryKey] ?? null;
+
         unset($uData[$this->primaryKey]);
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)

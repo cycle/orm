@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-class BelongsToRelationTest extends \Spiral\ORM\Tests\BelongsToRelationTest 
+class ManyToManyRelationTest extends \Spiral\ORM\Tests\ManyToManyRelationTest 
 { 
     const DRIVER = "mysql"; 
 }

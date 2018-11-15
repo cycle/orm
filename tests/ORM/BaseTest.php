@@ -19,6 +19,8 @@ use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
 use Spiral\ORM\ORM;
 
+// todo: TEST WITH FK
+// todo: TEST WITH
 abstract class BaseTest extends TestCase
 {
     // tests configuration

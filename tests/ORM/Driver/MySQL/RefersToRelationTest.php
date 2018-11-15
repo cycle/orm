@@ -5,10 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+ 
+namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-namespace Spiral\ORM\Tests\Driver\MySQL;
-
-class RefersToRelationTest extends \Spiral\ORM\Tests\RefersToRelationTest
-{
-    const DRIVER = "mysql";
+class RefersToRelationTest extends \Spiral\ORM\Tests\RefersToRelationTest 
+{ 
+    const DRIVER = "mysql"; 
 }

@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\Postgres; 
 
-class RefersToRelationTest extends \Spiral\ORM\Tests\RefersToRelationTest 
+class ManyToManyRelationTest extends \Spiral\ORM\Tests\ManyToManyRelationTest 
 { 
     const DRIVER = "postgres"; 
 }

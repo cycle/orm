@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\SQLite; 
 
-class InverseRelationTest extends \Spiral\ORM\Tests\InverseRelationTest 
+class ManyToManyRelationTest extends \Spiral\ORM\Tests\ManyToManyRelationTest 
 { 
     const DRIVER = "sqlite"; 
 }

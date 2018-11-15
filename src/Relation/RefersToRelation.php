@@ -63,10 +63,11 @@ class RefersToRelation extends AbstractRelation
         // or saved directly (need unification)
         $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
             $link->setData([
-                $this->schema[Relation::INNER_KEY] => $state->getData()[$this->schema[Relation::OUTER_KEY]]
+                $this->define(Relation::INNER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
             ]);
         });
 
         return $link;
     }
+
 }

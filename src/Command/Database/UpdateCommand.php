@@ -9,11 +9,9 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\Traits\ContextTrait;
-use Spiral\ORM\Command\Database\Traits\PrimaryKeyTrait;
-use Spiral\ORM\Command\Database\Traits\WhereTrait;
 use Spiral\ORM\Command\CommandPromiseInterface;
-
+use Spiral\ORM\Command\Database\Traits\ContextTrait;
+use Spiral\ORM\Command\Database\Traits\WhereTrait;
 
 /**
  * Update data CAN be modified by parent commands using context.
@@ -22,7 +20,7 @@ use Spiral\ORM\Command\CommandPromiseInterface;
  */
 class UpdateCommand extends DatabaseCommand implements CommandPromiseInterface
 {
-    use PrimaryKeyTrait, ContextTrait, WhereTrait;
+    use ContextTrait, WhereTrait;
 
     /** @var array */
     private $data;
@@ -32,19 +30,16 @@ class UpdateCommand extends DatabaseCommand implements CommandPromiseInterface
      * @param string            $table
      * @param array             $data
      * @param array             $where
-     * @param null|mixed        $primaryKey
      */
     public function __construct(
         DatabaseInterface $db,
         string $table,
         array $data,
-        array $where,
-        $primaryKey = null
+        array $where
     ) {
         parent::__construct($db, $table);
         $this->data = $data;
         $this->where = $where;
-        $this->primaryKey = $primaryKey;
     }
 
     /**
@@ -52,7 +47,7 @@ class UpdateCommand extends DatabaseCommand implements CommandPromiseInterface
      */
     public function isEmpty(): bool
     {
-        return (empty($this->data) && empty($this->context)) || empty($this->primaryKey);
+        return (empty($this->data) && empty($this->context)) || empty($this->where);
     }
 
     /**

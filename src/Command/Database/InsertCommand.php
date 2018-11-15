@@ -57,7 +57,7 @@ class InsertCommand extends DatabaseCommand implements CommandPromiseInterface
     /**
      * @return mixed|null
      */
-    public function getPrimaryKey()
+    public function getInsertID()
     {
         return $this->insertID;
     }

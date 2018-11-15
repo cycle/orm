@@ -42,19 +42,18 @@ class HasManyRelation extends AbstractRelation
 
         $group = new GroupCommand();
         foreach ($related as $item) {
-            $group->addCommand($this->add($command, $parent, $item));
+            $group->addCommand($this->add($command, $parent, $state, $item));
         }
 
         foreach ($removed as $item) {
-            $group->addCommand($this->remove($command, $parent, $item));
+            $group->addCommand($this->remove($command, $parent, $state, $item));
         }
 
         return $group;
     }
 
-
     // todo: diff
-    protected function add(CommandPromiseInterface $command, $parent, $related): CommandInterface
+    protected function add(CommandPromiseInterface $command, $parent, State $state, $related): CommandInterface
     {
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
@@ -68,22 +67,30 @@ class HasManyRelation extends AbstractRelation
         // todo: dirty state [?]
         $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
 
-        // syncing (TODO: CHECK IF NOT SYNCED ALREADY)
-        $command->onExecute(function (CommandPromiseInterface $command) use ($inner, $parent) {
+        if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {
             $inner->setContext(
-                $this->schema[Relation::OUTER_KEY],
-                $this->lookupKey($this->schema[Relation::INNER_KEY], $parent, $command)
+                $this->define(Relation::OUTER_KEY),
+                $state->getKey($this->define(Relation::INNER_KEY))
             );
+        } else {
+            // what if multiple keys set
+            $state->onUpdate(function (State $state) use ($inner) {
 
-            // todo: MORPH KEY
-        });
+                $inner->setContext(
+                    $this->define(Relation::OUTER_KEY),
+                    $state->getKey($this->define(Relation::INNER_KEY))
+                );
+
+                // todo: morph key
+            });
+        }
 
         // todo: update relation state
 
         return $inner;
     }
 
-    protected function remove(CommandPromiseInterface $command, $parent, $related): CommandInterface
+    protected function remove(CommandPromiseInterface $command, $parent, State $state, $related): CommandInterface
     {
         $origState = $this->orm->getHeap()->get($related);
         $origState->delRef();

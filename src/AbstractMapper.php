@@ -84,18 +84,18 @@ abstract class AbstractMapper implements MapperInterface
         $this->orm->getHeap()->attach($entity, $state);
 
         $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
-            $state->setPrimaryKey($this->primaryKey, $command->getPrimaryKey());
+            $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
         });
 
         $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, [
-                $this->primaryKey => $command->getPrimaryKey()
+                $this->primaryKey => $command->getInsertID()
             ]);
 
             // todo: update entity path
-            $state->setPrimaryKey($this->primaryKey, $command->getPrimaryKey());
+            $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
 
             $this->hydrate($entity, $command->getContext());
             $state->setData($command->getContext());
@@ -124,8 +124,7 @@ abstract class AbstractMapper implements MapperInterface
             $this->orm->getDatabase($entity),
             $this->table,
             array_diff($eData, $oData), // todo: make it optional
-            [$this->primaryKey => $pK],
-            $pK
+            [$this->primaryKey => $pK]
         );
 
         $current = $state->getState();
@@ -134,7 +133,6 @@ abstract class AbstractMapper implements MapperInterface
 
         $state->onUpdate(function (State $state) use ($update) {
             $update->setWhere([$this->primaryKey => $state->getPrimaryKey()]);
-            $update->setPrimaryKey($state->getPrimaryKey());
         });
 
         $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
@@ -159,6 +157,7 @@ abstract class AbstractMapper implements MapperInterface
         $delete = new DeleteCommand(
             $this->orm->getDatabase($entity),
             $this->table,
+            // todo: uuid?
             [$this->primaryKey => $state->getPrimaryKey() ?? $this->getFields($entity)[$this->primaryKey] ?? null]
         );
 

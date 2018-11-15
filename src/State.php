@@ -8,8 +8,6 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\CommandPromiseInterface;
-
 /**
  * State carries meta information about all load entities, including original set of data,
  * relations, state, primary key value (you can handle entities without PK included), and number of
@@ -92,6 +90,11 @@ final class State
         }
     }
 
+    public function getKey(string $key)
+    {
+        return $this->data[$key] ?? null;
+    }
+
     /**
      * @return array
      */
@@ -121,14 +124,6 @@ final class State
         return $this->refCount;
     }
 
-    /**
-     * @param int $refCount
-     */
-    public function setRefCount(int $refCount): void
-    {
-        $this->refCount = $refCount;
-    }
-
     public function addReference()
     {
         $this->refCount++;
@@ -139,7 +134,11 @@ final class State
         $this->refCount--;
     }
 
-    private $handlers=[];
+    /**
+     * @invisible
+     * @var array
+     */
+    private $handlers = [];
 
     public function onUpdate(callable $handler)
     {

@@ -73,7 +73,7 @@ class InsertCommandTest extends TestCase
         );
 
         $cmd->setContext('name', 'value');
-        $this->assertSame(null, $cmd->getPrimaryKey());
+        $this->assertSame(null, $cmd->getInsertID());
 
         $m->expects('insert')->with('table')->andReturn(
             $i = m::mock(InsertQuery::class)
@@ -83,7 +83,6 @@ class InsertCommandTest extends TestCase
         $i->expects('run')->andReturn(1);
 
         $cmd->execute();
-
-        $this->assertSame(1, $cmd->getPrimaryKey());
+        $this->assertSame(1, $cmd->getInsertID());
     }
 }

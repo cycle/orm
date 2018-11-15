@@ -27,7 +27,6 @@ class BelongsToRelation extends AbstractRelation
         CommandPromiseInterface $command
     ): CommandInterface {
         $related = $this->getRelated($parent);
-        $orig = $state->getRelation($this->relation);
 
         if ($related === null && !$this->define(Relation::NULLABLE)) {
             throw new NullException(
@@ -35,28 +34,27 @@ class BelongsToRelation extends AbstractRelation
             );
         }
 
-        //  $orig = $state->getRelation($this->relation);
-
         $state->setRelation($this->relation, $related);
-
-        //   $relState = $this->orm->getHeap()->get($related);
-        //            if (!empty($relState)) {
-        //                $relState->addReference();
-        //                if ($relState->getRefCount() > 2) {
-        //                    // todo: detect if it's the same parent over and over again?
-        //                    return new NullCommand();
-        //                }
-        //            }
 
         if (!is_null($related)) {
             $inner = $this->orm->getMapper($related)->queueStore($related);
 
-            $inner->onExecute(function (CommandPromiseInterface $inner) use ($command, $related) {
+            $innerState = $this->orm->getHeap()->get($related);
+
+            //dump($innerState);
+            if (!empty($innerState->getData()[$this->schema[Relation::OUTER_KEY]])) {
                 $command->setContext(
                     $this->schema[Relation::INNER_KEY],
-                    $this->lookupKey($this->schema[Relation::OUTER_KEY], $related, $inner)
+                    $innerState->getData()[$this->schema[Relation::OUTER_KEY]]
                 );
-            });
+            } else {
+                $innerState->onUpdate(function (State $state) use ($command) {
+                    $command->setContext(
+                        $this->schema[Relation::INNER_KEY],
+                        $state->getData()[$this->schema[Relation::OUTER_KEY]]
+                    );
+                });
+            }
         } else {
             $command->setContext($this->schema[Relation::INNER_KEY], null);
 

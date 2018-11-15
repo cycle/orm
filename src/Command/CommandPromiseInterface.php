@@ -16,13 +16,6 @@ namespace Spiral\ORM\Command;
 interface CommandPromiseInterface extends CommandInterface
 {
     /**
-     * Returns associated primary key, can be NULL. Promised for `onExecute`!
-     *
-     * @return mixed|null
-     */
-    public function getPrimaryKey();
-
-    /**
      * Must be true when command does not carry any data.
      *
      * @return bool

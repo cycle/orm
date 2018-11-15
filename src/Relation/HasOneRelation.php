@@ -75,15 +75,21 @@ class HasOneRelation extends AbstractRelation
 
             $chain->addTargetCommand($inner);
 
-            // syncing (TODO: CHECK IF NOT SYNCED ALREADY)
-            $command->onExecute(function (CommandPromiseInterface $command) use ($inner, $parent) {
+            if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {
                 $inner->setContext(
-                    $this->schema[Relation::OUTER_KEY],
-                    $this->lookupKey($this->schema[Relation::INNER_KEY], $parent, $command)
+                    $this->define(Relation::OUTER_KEY),
+                    $state->getKey($this->define(Relation::INNER_KEY))
                 );
+            } else {
+                $state->onUpdate(function (State $state) use ($inner) {
+                    $inner->setContext(
+                        $this->define(Relation::OUTER_KEY),
+                        $state->getKey($this->define(Relation::INNER_KEY))
+                    );
 
-                // todo: MORPH KEY
-            });
+                    // todo: morph key
+                });
+            }
 
             // todo: update relation state
         }

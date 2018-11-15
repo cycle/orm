@@ -69,7 +69,8 @@ class RelationConfig extends InjectableConfig
                 self::RELATION => Relation\HasManyRelation::class
             ],
             Relation::MANY_TO_MANY => [
-                self::LOADER => Loader\Relation\ManyToManyLoader::class
+                self::LOADER   => Loader\Relation\ManyToManyLoader::class,
+                self::RELATION => Relation\ManyToManyRelation::class
             ]
         ]);
     }

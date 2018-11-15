@@ -14,6 +14,7 @@ use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\Database\UpdateCommand;
 
+// todo: events
 abstract class AbstractMapper implements MapperInterface
 {
     protected $orm;

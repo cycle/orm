@@ -40,7 +40,10 @@ final class RelationMap
                     }
                     $state->setRelation($name, $data[$name]);
                 } else {
-                    foreach ($data[$name] as &$item) {
+                    // todo: pivot data
+                    foreach ($data[$name] as $p => &$item) {
+                        // todo: let item init the collection :)
+
                         if (!is_object($item)) {
                             $item = $relation->init($item);
                         }

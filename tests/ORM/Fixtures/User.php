@@ -26,6 +26,9 @@ class User
     /** @var Comment[]|Collection */
     public $comments;
 
+    /** @var Tag[]|Collection */
+    public $tags;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();

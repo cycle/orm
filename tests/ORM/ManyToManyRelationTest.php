@@ -78,7 +78,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
-                    'tag' => [
+                    'tags' => [
                         Relation::TYPE   => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
@@ -110,14 +110,14 @@ abstract class ManyToManyRelationTest extends BaseTest
     public function testLoadRelation()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('tag');
+        $selector->load('tags');
 
         $this->assertEquals([
             [
                 'id'      => 1,
                 'email'   => 'hello@world.com',
                 'balance' => 100.0,
-                'tag'     => [
+                'tags'     => [
                     [
                         '@pivot' => [
                             'user_id' => 1,
@@ -141,7 +141,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 'id'      => 2,
                 'email'   => 'another@world.com',
                 'balance' => 200.0,
-                'tag'     => [
+                'tags'     => [
                     [
                         '@pivot' => [
                             'user_id' => 2,
@@ -158,14 +158,14 @@ abstract class ManyToManyRelationTest extends BaseTest
     public function testLoadRelationInload()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('tag', ['method' => RelationLoader::INLOAD]);
+        $selector->load('tags', ['method' => RelationLoader::INLOAD]);
 
         $this->assertEquals([
             [
                 'id'      => 1,
                 'email'   => 'hello@world.com',
                 'balance' => 100.0,
-                'tag'     => [
+                'tags'     => [
                     [
                         '@pivot' => [
                             'user_id' => 1,
@@ -189,7 +189,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 'id'      => 2,
                 'email'   => 'another@world.com',
                 'balance' => 200.0,
-                'tag'     => [
+                'tags'     => [
                     [
                         '@pivot' => [
                             'user_id' => 2,
@@ -201,5 +201,14 @@ abstract class ManyToManyRelationTest extends BaseTest
                 ],
             ],
         ], $selector->fetchData());
+    }
+
+    public function testGetEntities()
+    {
+        $selector = new Selector($this->orm, User::class);
+        list($a, $b) = $selector->load('tags')->fetchAll();
+
+        dump($a);
+        dump($b);
     }
 }

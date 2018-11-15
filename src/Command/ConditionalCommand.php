@@ -26,11 +26,6 @@ class ConditionalCommand extends AbstractCommand implements \IteratorAggregate
         }
     }
 
-    public function prepare()
-    {
-        // nothing
-    }
-
     public function execute()
     {
         // nothing

@@ -172,5 +172,7 @@ abstract class InverseRelationTest extends BaseTest
         $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
 
         $this->assertSame($u, $u->profile->user);
+
+        $this->orm = $this->orm->withHeap(new Heap());
     }
 }

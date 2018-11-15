@@ -96,14 +96,14 @@ abstract class AbstractMapper implements MapperInterface
         $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
-            $this->hydrate($entity, [
-                $this->primaryKey => $command->getInsertID()
-            ]);
-
             // todo: update entity path
-            $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
 
-            $this->hydrate($entity, $command->getContext());
+            $this->hydrate(
+                $entity,
+                [$this->primaryKey => $command->getInsertID()] + $command->getContext()
+            );
+
+            $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
             $state->setData($command->getContext());
         });
 

@@ -148,7 +148,7 @@ final class State
     public function __destruct()
     {
         $this->data = [];
-        $this->command = null;
+        $this->handlers = [];
         $this->relations = [];
     }
 }

@@ -25,6 +25,7 @@ class Relation
     public const CASCADE      = 234214;
 
     const MORPH_KEY         = 903; //Morph key name (internal)
+    const PIVOT_ENTITY      = 9880;
     const PIVOT_TABLE       = 904; //Pivot table name
     const PIVOT_DATABASE    = 905; //Pivot database (internal)
     const PIVOT_COLUMNS     = 906; //Pre-defined pivot table columns

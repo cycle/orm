@@ -37,7 +37,10 @@ class ManyToManyRelation extends AbstractRelation
         foreach ($iterator as $pivot => $entity) {
             $entities[] = $entity;
 
-            // todo: pivot model? (WHY NOT)
+            // todo: move to the function
+            if (!empty($this->define(Relation::PIVOT_ENTITY))) {
+                $pivot = $this->orm->make($this->define(Relation::PIVOT_ENTITY), $pivot, State::LOADED);
+            }
 
             $pivotData->offsetSet($entity, $pivot);
         }
@@ -71,6 +74,7 @@ class ManyToManyRelation extends AbstractRelation
             $group->addCommand($this->store($state, $item, $related->getRelationContext()->get($item)));
         }
 
+
         // insert delayed
         // update delayed
 
@@ -94,7 +98,7 @@ class ManyToManyRelation extends AbstractRelation
             }
         }
 
-              // todo: dirty state [?]
+        // todo: dirty state [?]
 
 
         $chain = new ChainCommand();

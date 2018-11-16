@@ -17,8 +17,8 @@ class PivotedNode extends AbstractNode implements ArrayInterface
     // Stores information about associated context data
     public const PIVOT_DATA = '@pivot';
 
-    /** @var int */
-    private $countPivot = 0;
+    /** @var array */
+    private $pivotColumns = [];
 
     /** @var string */
     private $innerPivotKey;
@@ -41,9 +41,9 @@ class PivotedNode extends AbstractNode implements ArrayInterface
         string $outerPivotKey
     ) {
         // pivot columns are always prior to table columns
-        parent::__construct(array_merge($pivotColumns, $columns), $outerKey);
-        $this->countPivot = count($pivotColumns);
+        parent::__construct($columns, $outerKey);
 
+        $this->pivotColumns = $pivotColumns;
         $this->innerPivotKey = $innerPivotKey;
         $this->outerPivotKey = $outerPivotKey;
     }
@@ -77,13 +77,34 @@ class PivotedNode extends AbstractNode implements ArrayInterface
      */
     protected function fetchData(int $dataOffset, array $line): array
     {
-        $data = parent::fetchData($dataOffset, $line);
+        $data = parent::fetchData($dataOffset + count($this->pivotColumns), $line);
+        $data[self::PIVOT_DATA] = $this->pivotData($dataOffset, $line);
 
-        // forming pivot data presence
-        return array_merge(
-            [self::PIVOT_DATA => array_slice($data, 0, $this->countPivot)],
-            array_slice($data, $this->countPivot)
-        );
+        return $data;
+    }
+
+    /**
+     * Fetch record columns from query row, must use data offset to slice required part of query.
+     *
+     * @param int   $dataOffset
+     * @param array $line
+     * @return array
+     */
+    protected function pivotData(int $dataOffset, array $line): array
+    {
+        try {
+            //Combine column names with sliced piece of row
+            return array_combine(
+                $this->pivotColumns,
+                array_slice($line, $dataOffset, count($this->pivotColumns))
+            );
+        } catch (\Exception $e) {
+            throw new NodeException(
+                "Unable to parse incoming row: " . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 
     /**

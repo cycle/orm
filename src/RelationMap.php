@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\ContextCommandInterface;
 
@@ -34,25 +33,23 @@ final class RelationMap
         // easy to read huh?
         foreach ($this->relations as $name => $relation) {
             if (array_key_exists($name, $data)) {
-                if (!$relation->isCollection()) {
-                    if (!is_object($data[$name])) {
-                        $data[$name] = $relation->init($data[$name]);
-                    }
-                    $state->setRelation($name, $data[$name]);
-                } else {
-                    // todo: pivot data
-                    foreach ($data[$name] as $p => &$item) {
-                        // todo: let item init the collection :)
+                $item = $data[$name];
 
-                        if (!is_object($item)) {
-                            $item = $relation->init($item);
-                        }
-                        unset($item);
-                    }
-
-                    $state->setRelation($name, $data[$name]);
-                    $data[$name] = new ArrayCollection($data[$name]);
+                if (is_object($item) || is_null($item)) {
+                    $state->setRelation($name, $item);
+                    continue;
                 }
+
+                if (!$relation->isCollection()) {
+                    $data[$name] = $relation->init($item);
+                    $state->setRelation($name, $data[$name]);
+                    continue;
+                }
+
+                $relData = $relation->initArray($item);
+
+                $state->setRelation($name, $relData);
+                $data[$name] = $relation->wrapCollection($relData);
             }
         }
 

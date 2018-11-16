@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests\Traits;
 
 use Spiral\Database\Database;
-use Spiral\ORM\Schema\Util\ColumnRenderer;
+use Spiral\ORM\Util\ColumnRenderer;
 
 trait TableTrait
 {

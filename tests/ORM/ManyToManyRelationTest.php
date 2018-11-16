@@ -8,6 +8,8 @@
 
 namespace Spiral\ORM\Tests;
 
+use Doctrine\Common\Collections\Collection;
+use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -184,7 +186,6 @@ abstract class ManyToManyRelationTest extends BaseTest
                     ],
                 ],
             ],
-
             [
                 'id'      => 2,
                 'email'   => 'another@world.com',
@@ -203,12 +204,45 @@ abstract class ManyToManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testGetEntities()
+    public function testRelationContextAccess()
     {
         $selector = new Selector($this->orm, User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
         list($a, $b) = $selector->load('tags')->fetchAll();
 
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
+
+        $this->assertInstanceOf(Collection::class, $a->tags);
+        $this->assertInstanceOf(Collection::class, $b->tags);
+
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
+
+        $this->assertTrue($a->tags->getRelationContext()->has($a->tags[0]));
+        $this->assertTrue($a->tags->getRelationContext()->has($a->tags[1]));
+        $this->assertTrue($b->tags->getRelationContext()->has($b->tags[0]));
+
+        $this->assertFalse($b->tags->getRelationContext()->has($a->tags[0]));
+        $this->assertFalse($b->tags->getRelationContext()->has($a->tags[1]));
+        $this->assertFalse($a->tags->getRelationContext()->has($b->tags[0]));
+
+        $this->assertEquals([
+            'user_id' => 1,
+            'tag_id'  => 1,
+        ], $a->tags->getRelationContext()->get($a->tags[0]));
+
+        $this->assertEquals([
+            'user_id' => 1,
+            'tag_id'  => 2,
+        ], $a->tags->getRelationContext()->get($a->tags[1]));
+
+        $this->assertEquals([
+            'user_id' => 2,
+            'tag_id'  => 3,
+        ], $b->tags->getRelationContext()->get($b->tags[0]));
     }
 }

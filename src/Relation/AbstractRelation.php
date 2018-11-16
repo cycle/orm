@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Relation;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
@@ -59,16 +60,24 @@ abstract class AbstractRelation implements RelationInterface
 
     public function init($data)
     {
-        if (is_null($data)) {
-            return null;
-        }
-
-        // todo: array?
-        // todo: pretty easy?
-
         return $this->orm->make($this->class, $data, State::LOADED);
     }
-    
+
+    public function initArray(array $data)
+    {
+        $result = [];
+        foreach ($data as $item) {
+            $result[] = $this->init($item);
+        }
+
+        return $result;
+    }
+
+    public function wrapCollection($data)
+    {
+        return new ArrayCollection($data);
+    }
+
     protected function define(string $key)
     {
         return $this->schema[$key] ?? null;

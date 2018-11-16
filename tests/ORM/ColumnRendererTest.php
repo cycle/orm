@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\Database\Schema\AbstractTable;
-use Spiral\ORM\Schema\Util\ColumnRenderer;
+use Spiral\ORM\Util\ColumnRenderer;
 
 abstract class ColumnRendererTest extends BaseTest
 {

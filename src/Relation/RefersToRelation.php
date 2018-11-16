@@ -26,10 +26,9 @@ class RefersToRelation extends AbstractRelation
         $parent,
         State $state,
         $related,
+        $original,
         ContextCommandInterface $command
     ): CommandInterface {
-        $orig = $state->getRelation($this->relation);
-
         if ($related === null && !$this->define(Relation::NULLABLE)) {
             throw new NullException(
                 "Relation `{$this->class}`.`{$this->relation}` can not be null"

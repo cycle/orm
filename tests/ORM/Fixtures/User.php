@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Tests\Fixtures;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Spiral\ORM\Collection\PivotedCollection;
 use Spiral\ORM\Collection\PivotedCollectionInterface;
 
 class User
@@ -32,6 +33,7 @@ class User
     public function __construct()
     {
         $this->comments = new ArrayCollection();
+        $this->tags = new PivotedCollection();
     }
 
     public function addComment(Comment $c)

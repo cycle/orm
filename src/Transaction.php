@@ -153,6 +153,7 @@ class Transaction implements TransactionInterface
         foreach ($commands as $command) {
             if ($command instanceof DelayedCommandInterface && $command->isDelayed()) {
                 yield null => $command;
+                continue;
             }
 
             $this->beginTransaction($command, $drivers);

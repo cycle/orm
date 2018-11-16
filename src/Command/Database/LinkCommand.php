@@ -13,6 +13,7 @@ use Spiral\ORM\Command\Database\Traits\WhereTrait;
 use Spiral\ORM\Command\DelayedCommandInterface;
 
 // wait until link is established
+// todo: deprecate?
 class LinkCommand extends DatabaseCommand implements DelayedCommandInterface
 {
     use  WhereTrait;

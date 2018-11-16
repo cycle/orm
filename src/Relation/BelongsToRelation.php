@@ -25,6 +25,7 @@ class BelongsToRelation extends AbstractRelation
         $parent,
         State $state,
         $related,
+        $original,
         ContextCommandInterface $command
     ): CommandInterface {
         if ($related === null && !$this->define(Relation::NULLABLE)) {

@@ -24,35 +24,34 @@ class HasOneRelation extends AbstractRelation
         $parent,
         State $state,
         $related,
+        $original,
         ContextCommandInterface $command
     ): CommandInterface {
-        $orig = $state->getRelation($this->relation);
-
         // todo: need rollback
         $state->setRelation($this->relation, $related);
 
         $chain = new ChainCommand();
 
         // delete, we need to think about replace
-        if (!empty($orig) && empty($related)) {
-            $origState = $this->orm->getHeap()->get($orig);
+        if (!empty($original) && empty($related)) {
+            $origState = $this->orm->getHeap()->get($original);
             $origState->delRef();
 
             return new ConditionalCommand(
-                $this->orm->getMapper(get_class($orig))->queueDelete($orig),
+                $this->orm->getMapper(get_class($original))->queueDelete($original),
                 function () use ($origState) {
                     return $origState->getRefCount() == 0;
                 }
             );
         }
 
-        if (!empty($orig) && !empty($related) && $orig !== $related) {
-            $origState = $this->orm->getHeap()->get($orig);
+        if (!empty($original) && !empty($related) && $original !== $related) {
+            $origState = $this->orm->getHeap()->get($original);
             $origState->delRef();
 
             $chain->addCommand(
                 new ConditionalCommand(
-                    $this->orm->getMapper($orig)->queueDelete($orig),
+                    $this->orm->getMapper($original)->queueDelete($original),
                     function () use ($origState) {
                         return $origState->getRefCount() == 0;
                     }

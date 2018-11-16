@@ -71,6 +71,7 @@ final class RelationMap
                     $entity,
                     $state,
                     $data[$name] ?? null,
+                    $state->getRelation($name),
                     $command
                 ));
             }
@@ -84,6 +85,7 @@ final class RelationMap
                     $entity,
                     $state,
                     $data[$name] ?? null,
+                    $state->getRelation($name),
                     $command
                 ));
             }

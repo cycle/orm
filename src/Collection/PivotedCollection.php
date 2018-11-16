@@ -22,10 +22,10 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
      * @param array           $elements
      * @param RelationContext $relationContext
      */
-    public function __construct(array $elements, RelationContext $relationContext)
+    public function __construct(array $elements = [], RelationContext $relationContext = null)
     {
         parent::__construct($elements);
-        $this->relationContext = $relationContext;
+        $this->relationContext = $relationContext?? new RelationContext();
     }
 
     /**

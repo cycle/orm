@@ -16,9 +16,9 @@ class RelationContext implements RelationContextInterface
     /**
      * @param \SplObjectStorage $context
      */
-    public function __construct(\SplObjectStorage $context)
+    public function __construct(\SplObjectStorage $context = null)
     {
-        $this->context = $context;
+        $this->context = $context ?? new \SplObjectStorage();
     }
 
     /**

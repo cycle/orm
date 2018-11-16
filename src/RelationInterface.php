@@ -23,6 +23,7 @@ interface RelationInterface
         $parent,
         State $state,
         $related,
+        $original,
         ContextCommandInterface $command
     ): CommandInterface;
 }

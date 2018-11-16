@@ -25,16 +25,15 @@ class HasManyRelation extends AbstractRelation
         $parent,
         State $state,
         $related,
+        $original,
         ContextCommandInterface $command
     ): CommandInterface {
-        $orig = $state->getRelation($this->relation);
-
         if ($related instanceof Collection) {
             $related = $related->toArray();
         }
 
         // removed
-        $removed = array_udiff($orig ?? [], $related, function ($a, $b) {
+        $removed = array_udiff($original ?? [], $related, function ($a, $b) {
             return strcmp(spl_object_hash($a), spl_object_hash($b));
         });
 
@@ -42,18 +41,18 @@ class HasManyRelation extends AbstractRelation
 
         $group = new GroupCommand();
         foreach ($related as $item) {
-            $group->addCommand($this->add($command, $parent, $state, $item));
+            $group->addCommand($this->store($state, $item));
         }
 
         foreach ($removed as $item) {
-            $group->addCommand($this->remove($command, $parent, $state, $item));
+            $group->addCommand($this->remove($state, $item));
         }
 
         return $group;
     }
 
     // todo: diff
-    protected function add(ContextCommandInterface $command, $parent, State $state, $related): CommandInterface
+    protected function store(State $parentState, $related): CommandInterface
     {
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
@@ -67,14 +66,14 @@ class HasManyRelation extends AbstractRelation
         // todo: dirty state [?]
         $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
 
-        if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {
+        if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
             $inner->setContext(
                 $this->define(Relation::OUTER_KEY),
-                $state->getKey($this->define(Relation::INNER_KEY))
+                $parentState->getKey($this->define(Relation::INNER_KEY))
             );
         } else {
             // what if multiple keys set
-            $state->onUpdate(function (State $state) use ($inner) {
+            $parentState->onUpdate(function (State $state) use ($inner) {
 
                 $inner->setContext(
                     $this->define(Relation::OUTER_KEY),
@@ -90,7 +89,7 @@ class HasManyRelation extends AbstractRelation
         return $inner;
     }
 
-    protected function remove(ContextCommandInterface $command, $parent, State $state, $related): CommandInterface
+    protected function remove(State $parentState, $related): CommandInterface
     {
         $origState = $this->orm->getHeap()->get($related);
         $origState->delRef();

@@ -10,6 +10,7 @@ namespace Spiral\ORM\Tests;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Collection\PivotedCollectionInterface;
+use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -18,6 +19,7 @@ use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Tag;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
 // todo: pivot table with context
 abstract class ManyToManyRelationTest extends BaseTest
@@ -78,7 +80,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
+                Schema::SCHEMA      => [                ],
                 Schema::RELATIONS   => [
                     'tags' => [
                         Relation::TYPE   => Relation::MANY_TO_MANY,
@@ -244,5 +246,34 @@ abstract class ManyToManyRelationTest extends BaseTest
             'user_id' => 2,
             'tag_id'  => 3,
         ], $b->tags->getRelationContext()->get($b->tags[0]));
+    }
+
+    public function testCreateWithManyToMany()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags->add($t);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($t);
+        $tr->store($u);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $this->assertEquals([
+            'user_id' => 3,
+            'tag_id'  => 4,
+        ], $u->tags->getRelationContext()->get($u->tags[0]));
     }
 }

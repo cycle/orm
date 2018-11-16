@@ -16,6 +16,7 @@ interface PivotedCollectionInterface extends Collection
      * Return associated context between the values in collection
      * and parent entity.
      *
+     * @todo define better name?
      * @return RelationContextInterface
      */
     public function getRelationContext(): RelationContextInterface;

@@ -77,10 +77,9 @@ class PivotedNode extends AbstractNode implements ArrayInterface
      */
     protected function fetchData(int $dataOffset, array $line): array
     {
-        $data = parent::fetchData($dataOffset + count($this->pivotColumns), $line);
-        $data[self::PIVOT_DATA] = $this->pivotData($dataOffset, $line);
-
-        return $data;
+        return [
+                self::PIVOT_DATA => $this->pivotData($dataOffset, $line)
+            ] + parent::fetchData($dataOffset + count($this->pivotColumns), $line);
     }
 
     /**

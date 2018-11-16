@@ -20,9 +20,6 @@ interface MapperInterface
 
     public function extract($entity): array;
 
-    // todo: from the heap?
-    public function getField($entity, $field);
-
     /**
      * Initiate chain of commands require to store object and it's data into persistent storage.
      *

@@ -10,7 +10,6 @@ namespace Spiral\ORM\Tests\Fixtures;
 
 use Spiral\ORM\AbstractMapper;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Schema;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 
@@ -35,13 +34,5 @@ class EntityMapper extends AbstractMapper
     public function extract($entity): array
     {
         return $this->hydrator->extract($entity);
-    }
-
-    // todo: from the heap?
-    public function getField($entity, $field)
-    {
-        // todo: from the state as well
-
-        return $this->hydrator->extract($entity)[$field];
     }
 }

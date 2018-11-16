@@ -64,9 +64,6 @@ abstract class AbstractMapper implements MapperInterface
         return $this->buildDelete($entity, $state);
     }
 
-    // todo: in the heap?
-    //  abstract protected function setField($entity, $field, $value);
-
     protected function getColumns($entity): array
     {
         $columns = array_flip($this->orm->getSchema()->define(get_class($entity), Schema::COLUMNS));

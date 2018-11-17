@@ -54,7 +54,7 @@ class ManyToManyRelation extends AbstractRelation
             throw new RelationException("ManyToMany relation expects PivotData");
         }
 
-        return new PivotedCollection($data->getData(), new RelationContext($data->getContext()));
+        return new PivotedCollection($data->getElements(), new RelationContext($data->getContext()));
     }
 
     public function queueChange(

@@ -11,27 +11,27 @@ namespace Spiral\ORM\Util;
 class ContextStorage
 {
     /** @var array */
-    private $data;
+    private $elements;
 
     /** @var \SplObjectStorage */
     private $context;
 
     /**
-     * @param array             $data
+     * @param array             $elements
      * @param \SplObjectStorage $context
      */
-    public function __construct(array $data, \SplObjectStorage $context)
+    public function __construct(array $elements, \SplObjectStorage $context)
     {
-        $this->data = $data;
+        $this->elements = $elements;
         $this->context = $context;
     }
 
     /**
      * @return array
      */
-    public function getData(): array
+    public function getElements(): array
     {
-        return $this->data;
+        return $this->elements;
     }
 
     /**

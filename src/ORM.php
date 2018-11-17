@@ -172,26 +172,32 @@ class ORM implements ORMInterface
             $data = iterator_to_array($data);
         }
 
-        // locate already loaded entity reference
-        if ($this->heap !== null && $state !== State::NEW) {
+        // todo: deal with alias
+
+        if ($state !== State::NEW) {
+            // locate already loaded entity reference
             $entityID = $this->identify($class, $data);
 
             if (!empty($entityID) && $this->heap->hasPath($class, $entityID)) {
+                // entity already known and loaded
                 return $this->heap->getPath($class, $entityID);
             }
         }
 
-        $entity = $this->getMapper($class)->init();
+        $mapper = $this->getMapper($class);
+
         $state = new State($entityID ?? null, $state, $data);
+        $entity = $mapper->init($data);
 
         if (!empty($entityID)) {
             $this->heap->attach($entity, $state);
         }
 
-        $data = $this->getRelationMap($class)->init($state, $data);
-
-        // ready to use
-        return $this->getMapper($class)->hydrate($entity, $data);
+        // hydrate entity with it's data and relations
+        return $mapper->hydrate(
+            $entity,
+            $this->getRelationMap($entity)->init($state, $data)
+        );
     }
 
     /**
@@ -213,6 +219,7 @@ class ORM implements ORMInterface
     protected function identify(string $class, array $data)
     {
         $pk = $this->getSchema()->define($class, Schema::PRIMARY_KEY);
+
         if (isset($data[$pk])) {
             return $data[$pk];
         }

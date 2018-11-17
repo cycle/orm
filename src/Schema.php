@@ -36,7 +36,7 @@ final class Schema implements SchemaInterface
         }
 
         if (!array_key_exists($property, $this->schema[$class])) {
-            throw new SchemaException("Undefined schema property `{$class}`.`{$property}`, not found.");
+            return null;
         }
 
         return $this->schema[$class][$property];

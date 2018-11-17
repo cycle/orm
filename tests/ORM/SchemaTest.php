@@ -40,11 +40,7 @@ class SchemaTest extends TestCase
         $schema->define(Profile::class, 1);
     }
 
-
-    /**
-     * @expectedException \Spiral\ORM\Exception\SchemaException
-     */
-    public function testSchemaException2()
+    public function testSchemaNull()
     {
         $schema = new Schema([
             User::class => [
@@ -52,7 +48,7 @@ class SchemaTest extends TestCase
             ]
         ]);
 
-        $schema->define(User::class, 2);
+        $this->assertNull($schema->define(User::class, 2));
     }
 
     public function testRelationsSchema()

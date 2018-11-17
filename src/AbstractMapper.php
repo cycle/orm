@@ -25,6 +25,8 @@ abstract class AbstractMapper implements MapperInterface
 
     protected $primaryKey;
 
+    protected $children;
+
     public function __construct(ORMInterface $orm, $class)
     {
         $this->orm = $orm;
@@ -32,11 +34,21 @@ abstract class AbstractMapper implements MapperInterface
 
         $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
         $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
+        $this->children = $this->orm->getSchema()->define($class, Schema::CHILDREN) ?? [];
     }
 
-    public function init()
+    public function init(array $data = [])
     {
         $class = $this->class;
+
+        if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
+            foreach ($this->children as $alias => $target) {
+                if ($data[self::ENTITY_TYPE] == $alias) {
+                    $class = $target;
+                    break;
+                }
+            }
+        }
 
         return new $class;
     }
@@ -67,6 +79,7 @@ abstract class AbstractMapper implements MapperInterface
     protected function getColumns($entity): array
     {
         $columns = array_flip($this->orm->getSchema()->define(get_class($entity), Schema::COLUMNS));
+
         return array_intersect_key($this->extract($entity), $columns);
     }
 

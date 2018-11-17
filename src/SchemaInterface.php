@@ -21,6 +21,8 @@ interface SchemaInterface
     public const COLUMNS     = 6;
     public const SCHEMA      = 7;
     public const RELATIONS   = 8;
+    public const EXTENDS     = 10;
+    public const CHILDREN    = 11;
 
     /**
      * Define schema value.

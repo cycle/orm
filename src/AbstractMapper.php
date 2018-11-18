@@ -13,10 +13,14 @@ use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\Database\UpdateCommand;
+use Spiral\ORM\Command\NullCommand;
 
 // todo: events
 abstract class AbstractMapper implements MapperInterface
 {
+    // system column to store entity type
+    public const ENTITY_TYPE = '_type';
+
     protected $orm;
 
     protected $class;
@@ -27,31 +31,35 @@ abstract class AbstractMapper implements MapperInterface
 
     protected $children;
 
+    protected $columns;
+
     public function __construct(ORMInterface $orm, $class)
     {
         $this->orm = $orm;
         $this->class = $class;
 
+        // todo: mass export
+        $this->columns = $this->orm->getSchema()->define($class, Schema::COLUMNS);
         $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
         $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
         $this->children = $this->orm->getSchema()->define($class, Schema::CHILDREN) ?? [];
     }
 
-    public function init(array $data = [])
+    public function entityClass(array $data): string
     {
         $class = $this->class;
-
         if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
-            foreach ($this->children as $alias => $target) {
-                if ($data[self::ENTITY_TYPE] == $alias) {
-                    $class = $target;
-                    break;
-                }
-            }
+            $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
         }
 
+        return $class;
+    }
+
+    public function init(string $class)
+    {
         return new $class;
     }
+
 
     public function queueStore($entity): ContextCommandInterface
     {
@@ -70,7 +78,7 @@ abstract class AbstractMapper implements MapperInterface
     {
         $state = $this->orm->getHeap()->get($entity);
         if ($state == null) {
-            // todo: an exception
+            return new NullCommand();
         }
 
         return $this->buildDelete($entity, $state);
@@ -78,14 +86,25 @@ abstract class AbstractMapper implements MapperInterface
 
     protected function getColumns($entity): array
     {
-        $columns = array_flip($this->orm->getSchema()->define(get_class($entity), Schema::COLUMNS));
-
-        return array_intersect_key($this->extract($entity), $columns);
+        return array_intersect_key($this->extract($entity), array_flip($this->columns));
     }
 
     protected function buildInsert($entity): ContextCommandInterface
     {
         $columns = $this->getColumns($entity);
+
+        $class = get_class($entity);
+        if ($class != $this->class) {
+            // possibly children
+            foreach ($this->children as $alias => $childClass) {
+                if ($childClass == $class) {
+                    $columns[self::ENTITY_TYPE] = $alias;
+                }
+            }
+
+            // todo: exception
+        }
+
 
         $state = new State(
             $columns[$this->primaryKey] ?? null,

@@ -8,12 +8,14 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\Admin;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
 abstract class TableInheritanceTest extends BaseTest
 {
@@ -105,5 +107,31 @@ abstract class TableInheritanceTest extends BaseTest
         $this->assertNotInstanceOf(Admin::class, $c);
 
         $this->assertSame('*', $b->permissions);
+    }
+
+    public function testStoreNormalAndInherited()
+    {
+        $u = new User();
+        $u->email = 'user@email.com';
+        $u->balance = 100;
+
+        $a = new Admin();
+        $a->email = 'admin@email.com';
+        $a->balance = 400;
+        $a->permissions = '~';
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->store($a);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $this->assertInstanceOf(User::class, $selector->wherePK(4)->fetchOne());
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $this->assertNotInstanceOf(Admin::class, $selector->wherePK(4)->fetchOne());
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $this->assertInstanceOf(Admin::class, $selector->wherePK(5)->fetchOne());
     }
 }

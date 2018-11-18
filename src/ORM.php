@@ -18,7 +18,7 @@ use Spiral\ORM\Config\RelationConfig;
 class ORM implements ORMInterface
 {
     // Memory section to store ORM schema.
-    const MEMORY = 'orm.schema';
+    protected const MEMORY = 'orm.schema';
 
     /** @var HeapInterface */
     private $heap;
@@ -54,7 +54,7 @@ class ORM implements ORMInterface
      */
     public function getDatabase($entity): DatabaseInterface
     {
-        $entity = is_object($entity) ? get_class($entity) : $entity;
+        $entity = $this->resolveClass($entity);
 
         return $this->dbal->database(
             $this->getSchema()->define($entity, Schema::DATABASE)
@@ -66,7 +66,7 @@ class ORM implements ORMInterface
      */
     public function getMapper($entity): MapperInterface
     {
-        $entity = is_object($entity) ? get_class($entity) : $entity;
+        $entity = $this->resolveClass($entity);
 
         if (isset($this->mappers[$entity])) {
             return $this->mappers[$entity];
@@ -187,7 +187,7 @@ class ORM implements ORMInterface
         $mapper = $this->getMapper($class);
 
         $state = new State($entityID ?? null, $state, $data);
-        $entity = $mapper->init($data);
+        $entity = $mapper->init($mapper->entityClass($data));
 
         if (!empty($entityID)) {
             $this->heap->attach($entity, $state);
@@ -227,6 +227,12 @@ class ORM implements ORMInterface
         return null;
     }
 
+    protected function resolveClass($entity): string
+    {
+        $entity = is_object($entity) ? get_class($entity) : $entity;
+
+        return $this->getSchema()->define($entity, Schema::EXTENDS) ?? $entity;
+    }
 
     protected function loadSchema(): SchemaInterface
     {

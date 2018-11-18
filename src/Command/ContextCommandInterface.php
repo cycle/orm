@@ -29,3 +29,6 @@ interface ContextCommandInterface extends CommandInterface
      */
     public function setContext(string $name, $value);
 }
+
+
+// todo: UNIFY THE CONTEXT, ADD CONTEXT TO ALL THE COMMANDS < YOOOO

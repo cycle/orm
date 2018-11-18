@@ -78,6 +78,7 @@ abstract class AbstractMapper implements MapperInterface
     {
         $state = $this->orm->getHeap()->get($entity);
         if ($state == null) {
+            // todo: this should not happen, todo: need nullable delete
             return new NullCommand();
         }
 

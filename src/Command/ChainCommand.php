@@ -69,6 +69,12 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
         return $this->getTarget()->getPrimaryKey();
     }
 
+    // todo:??
+    public function isEmpty(): bool
+    {
+        return $this->getTarget()->isEmpty();
+    }
+
     /**
      * {@inheritdoc}
      */

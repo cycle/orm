@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Collection\PivotedCollectionInterface;
+use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -17,8 +18,9 @@ use Spiral\ORM\Tests\Fixtures\Tag;
 use Spiral\ORM\Tests\Fixtures\TagContext;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
-abstract class ManyToEntityToManyRelationTest extends BaseTest
+abstract class ManyToManyPivotEntityRelationTest extends BaseTest
 {
     use TableTrait;
 
@@ -197,14 +199,154 @@ abstract class ManyToEntityToManyRelationTest extends BaseTest
         $this->assertFalse($b->tags->getRelationContext()->has($a->tags[1]));
         $this->assertFalse($a->tags->getRelationContext()->has($b->tags[0]));
 
-        $this->assertInstanceOf(TagContext::class, $a->tags->getRelationContext()->get($a->tags[0]));
-        $this->assertInstanceOf(TagContext::class, $a->tags->getRelationContext()->get($a->tags[1]));
-        $this->assertInstanceOf(TagContext::class, $b->tags->getRelationContext()->get($b->tags[0]));
+        $this->assertInstanceOf(
+            TagContext::class,
+            $a->tags->getRelationContext()->get($a->tags[0])
+        );
+
+        $this->assertInstanceOf(
+            TagContext::class,
+            $a->tags->getRelationContext()->get($a->tags[1])
+        );
+
+        $this->assertInstanceOf(
+            TagContext::class,
+            $b->tags->getRelationContext()->get($b->tags[0])
+        );
 
         $this->assertEquals('primary', $a->tags->getRelationContext()->get($a->tags[0])->as);
         $this->assertEquals('secondary', $a->tags->getRelationContext()->get($a->tags[1])->as);
         $this->assertEquals('primary', $b->tags->getRelationContext()->get($b->tags[0])->as);
     }
 
+    public function testCreateWithManyToManyCascadeNoContext()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
 
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags->add($t);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $this->assertInstanceOf(
+            TagContext::class,
+            $u->tags->getRelationContext()->get($u->tags[0])
+        );
+    }
+
+    public function testCreateWithManyToManyPivotContextArray()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags->add($t);
+        $u->tags->getRelationContext()->set($t, ['as' => 'super']);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $this->assertInstanceOf(
+            TagContext::class,
+            $u->tags->getRelationContext()->get($u->tags[0])
+        );
+
+        $this->assertSame('super', $u->tags->getRelationContext()->get($u->tags[0])->as);
+    }
+
+    public function testCreateWithManyToManyPivotContext()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $pc = new TagContext();
+        $pc->as = 'super';
+
+        $u->tags->add($t);
+        $u->tags->getRelationContext()->set($t, $pc);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $this->assertInstanceOf(
+            TagContext::class,
+            $u->tags->getRelationContext()->get($u->tags[0])
+        );
+
+        $this->assertSame('super', $u->tags->getRelationContext()->get($u->tags[0])->as);
+    }
+
+//    public function testUnlinkManyToManyAndReplaceSome()
+//    {
+//        $tagSelector = new Selector($this->orm, Tag::class);
+//
+//        $selector = new Selector($this->orm, User::class);
+//        /**
+//         * @var User $a
+//         * @var User $b
+//         */
+//        list($a, $b) = $selector->load('tags')->fetchAll();
+//
+//        $a->tags->remove(0);
+//        $a->tags->add($tagSelector->wherePK(3)->fetchOne());
+//
+//        // remove all
+//        $b->tags->clear();
+//        $t = new Tag();
+//        $t->name = "new tag";
+//
+//        $b->tags->add($t);
+//
+//        $tr = new Transaction($this->orm);
+//        $tr->store($a);
+//        $tr->store($b);
+//        $tr->run();
+//
+//        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+//        /**
+//         * @var User $a
+//         * @var User $b
+//         */
+//        list($a, $b) = $selector->load('tags')->fetchAll();
+//
+//        $this->assertSame("tag b", $a->tags[0]->name);
+//        $this->assertSame("tag c", $a->tags[1]->name);
+//        $this->assertSame("new tag", $b->tags[0]->name);
+//    }
 }

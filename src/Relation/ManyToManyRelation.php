@@ -131,15 +131,25 @@ class ManyToManyRelation extends AbstractRelation
 
         $relState = $this->orm->getHeap()->get($related);
 
-        $insert = new DelayCommand(new InsertCommand(
-            $this->orm->getDatabase($this->class),
-            $this->define(Relation::PIVOT_TABLE),
-            []
-        ));
+        // todo: check if context instance of pivot entity
+
+        if (is_object($context)) {
+            // todo: validate
+            $insert = new DelayCommand(
+                $this->orm->getMapper($context)->queueStore($context)
+            );
+        } else {
+            // can be not empty (!!!), WAIT FOR SPECIFIC KEYS
+            $insert = new DelayCommand(new InsertCommand(
+                $this->orm->getDatabase($this->class),
+                $this->define(Relation::PIVOT_TABLE),
+                is_array($context) ? $context : []
+            ));
+        }
 
         // TODO: CONTEXT AND DATA IS THE SAME?
-
         // TODO: DRY!!!
+
         if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
             $insert->setContext(
                 $this->define(Relation::THOUGHT_INNER_KEY),

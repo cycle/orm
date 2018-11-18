@@ -47,6 +47,11 @@ class DelayCommand implements DelayedCommandInterface
         $this->parent->onRollBack($closure);
     }
 
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
     public function getContext(): array
     {
         return $this->parent->getContext();

@@ -11,12 +11,16 @@ namespace Spiral\ORM;
 use Spiral\Database\Driver\DriverInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Database\DatabaseCommand;
+use Spiral\ORM\Command\DelayCommand;
 use Spiral\ORM\Command\DelayedCommandInterface;
 use Spiral\ORM\Exception\TransactionException;
 
 class Transaction implements TransactionInterface
 {
-    /** @var ORMInterface */
+    /**
+     * @invisible
+     * @var ORMInterface
+     */
     private $orm;
 
     /*** @var CommandInterface[] */
@@ -59,6 +63,8 @@ class Transaction implements TransactionInterface
      */
     public function getCommands()
     {
+
+        // todo: BRANCHING MUST BE MOVED INTO THE RUNCOMMAND!!!!
         foreach ($this->commands as $command) {
             if ($command instanceof \Traversable) {
                 yield from $command;
@@ -91,6 +97,7 @@ class Transaction implements TransactionInterface
                     }
                 }
 
+                // todo: CHECK IT LIKE 100 times!!! especially with iterable
                 if (count($pending) === $total) {
                     throw new TransactionException("Unable to complete: " . join(", ", $pending));
                 }
@@ -151,9 +158,15 @@ class Transaction implements TransactionInterface
     private function execute(iterable $commands, array &$drivers): \Generator
     {
         foreach ($commands as $command) {
-            if ($command instanceof DelayedCommandInterface && $command->isDelayed()) {
-                yield null => $command;
-                continue;
+            if ($command instanceof DelayedCommandInterface) {
+                if ($command->isDelayed()) {
+                    yield null => $command;
+                    continue;
+                } elseif ($command instanceof DelayCommand && $command->getParent() instanceof \Traversable) {
+                    // todo: make it better
+                    yield from $this->execute($command->getParent(), $drivers);
+                    continue;
+                }
             }
 
             $this->beginTransaction($command, $drivers);

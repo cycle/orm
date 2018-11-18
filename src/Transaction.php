@@ -85,7 +85,7 @@ class Transaction implements TransactionInterface
         try {
             while (!empty($commands)) {
                 $pending = [];
-                $total = is_array($commands) ? count($commands) : null;
+                $countExecuted = count($executed);
 
                 foreach ($this->execute($commands, $drivers) as $done => $skip) {
                     if ($done != null) {
@@ -97,8 +97,7 @@ class Transaction implements TransactionInterface
                     }
                 }
 
-                // todo: CHECK IT LIKE 100 times!!! especially with iterable
-                if (count($pending) === $total) {
+                if (count($executed) === $countExecuted) {
                     throw new TransactionException("Unable to complete: " . join(", ", $pending));
                 }
 
@@ -162,7 +161,9 @@ class Transaction implements TransactionInterface
                 if ($command->isDelayed()) {
                     yield null => $command;
                     continue;
-                } elseif ($command instanceof DelayCommand && $command->getParent() instanceof \Traversable) {
+                }
+
+                if ($command instanceof DelayCommand && $command->getParent() instanceof \Traversable) {
                     // todo: make it better
                     yield from $this->execute($command->getParent(), $drivers);
                     continue;

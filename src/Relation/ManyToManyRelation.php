@@ -86,10 +86,8 @@ class ManyToManyRelation extends AbstractRelation
 
         $group = new GroupCommand();
         foreach ($related as $item) {
-            // todo: we also have to udpate
-            if (empty($original) || !$original->getContext()->offsetExists($item)) {
-                $group->addCommand($this->link($state, $item, $relContext->get($item)));
-            }
+            // todo: we also have to update
+            $group->addCommand($this->link($state, $item, $relContext->get($item)));
         }
 
         if (!empty($original)) {
@@ -117,6 +115,9 @@ class ManyToManyRelation extends AbstractRelation
         if (!empty($relState)) {
             // can be update
 
+            // todo: this must be controlled on relmap level (!)
+            // todo: chain ID is very important thing
+
             $relState->addReference();
             if ($relState->getRefCount() > 2) {
                 // todo: detect if it's the same parent over and over again?
@@ -139,6 +140,8 @@ class ManyToManyRelation extends AbstractRelation
                 $this->orm->getMapper($context)->queueStore($context)
             );
         } else {
+            // todo: THIS CAN BE UPDATE COMMAND AS WELL WHEN PARENT HAS CONTEXT (!!!!!)
+
             // can be not empty (!!!), WAIT FOR SPECIFIC KEYS
             $insert = new DelayCommand(new InsertCommand(
                 $this->orm->getDatabase($this->class),

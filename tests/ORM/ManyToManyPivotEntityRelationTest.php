@@ -312,41 +312,50 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $this->assertSame('super', $u->tags->getRelationContext()->get($u->tags[0])->as);
     }
 
-//    public function testUnlinkManyToManyAndReplaceSome()
-//    {
-//        $tagSelector = new Selector($this->orm, Tag::class);
-//
-//        $selector = new Selector($this->orm, User::class);
-//        /**
-//         * @var User $a
-//         * @var User $b
-//         */
-//        list($a, $b) = $selector->load('tags')->fetchAll();
-//
-//        $a->tags->remove(0);
-//        $a->tags->add($tagSelector->wherePK(3)->fetchOne());
-//
-//        // remove all
-//        $b->tags->clear();
-//        $t = new Tag();
-//        $t->name = "new tag";
-//
-//        $b->tags->add($t);
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($a);
-//        $tr->store($b);
-//        $tr->run();
-//
-//        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
-//        /**
-//         * @var User $a
-//         * @var User $b
-//         */
-//        list($a, $b) = $selector->load('tags')->fetchAll();
-//
-//        $this->assertSame("tag b", $a->tags[0]->name);
-//        $this->assertSame("tag c", $a->tags[1]->name);
-//        $this->assertSame("new tag", $b->tags[0]->name);
-//    }
+    public function testUnlinkManyToManyAndReplaceSome()
+    {
+        $tagSelector = new Selector($this->orm, Tag::class);
+
+        $selector = new Selector($this->orm, User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags')->fetchAll();
+
+        $a->tags->remove(0);
+        $a->tags->add($tagSelector->wherePK(3)->fetchOne());
+        $a->tags->getRelationContext()->get($a->tags[1])->as = "new";
+
+        // remove all
+        $b->tags->clear();
+
+        $t = new Tag();
+        $t->name = "new tag";
+
+        $pc = new TagContext();
+        $pc->as = 'super';
+
+        $b->tags->add($t);
+        $b->tags->getRelationContext()->set($t, $pc);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags')->fetchAll();
+
+        $this->assertSame("tag b", $a->tags[0]->name);
+        $this->assertSame('new', $a->tags->getRelationContext()->get($a->tags[0])->as);
+
+        $this->assertSame("new tag", $b->tags[0]->name);
+        $this->assertSame('super', $b->tags->getRelationContext()->get($b->tags[0])->as);
+
+    }
 }

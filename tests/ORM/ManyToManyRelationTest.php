@@ -80,7 +80,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [                ],
+                Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'tags' => [
                         Relation::TYPE   => Relation::MANY_TO_MANY,
@@ -275,5 +275,58 @@ abstract class ManyToManyRelationTest extends BaseTest
             'user_id' => 3,
             'tag_id'  => 4,
         ], $u->tags->getRelationContext()->get($u->tags[0]));
+    }
+
+    public function testUnlinkManyToManyAndReplaceSome()
+    {
+        $tagSelector = new Selector($this->orm, Tag::class);
+
+        $selector = new Selector($this->orm, User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags')->fetchAll();
+
+        $a->tags->remove(0);
+        $a->tags->add($tagSelector->wherePK(3)->fetchOne());
+
+        // remove all
+        $b->tags->clear();
+        $t = new Tag();
+        $t->name = "new tag";
+
+        $b->tags->add($t);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags')->fetchAll();
+
+        $this->assertSame("tag b", $a->tags[0]->name);
+        $this->assertSame("tag c", $a->tags[1]->name);
+        $this->assertSame("new tag", $b->tags[0]->name);
+
+        $this->assertEquals([
+            'user_id' => 1,
+            'tag_id'  => 2,
+        ], $a->tags->getRelationContext()->get($a->tags[0]));
+
+        $this->assertEquals([
+            'user_id' => 1,
+            'tag_id'  => 3,
+        ], $a->tags->getRelationContext()->get($a->tags[1]));
+
+        $this->assertEquals([
+            'user_id' => 2,
+            'tag_id'  => 4,
+        ], $b->tags->getRelationContext()->get($b->tags[0]));
     }
 }

@@ -10,10 +10,12 @@ namespace Spiral\ORM\Relation;
 
 
 use Spiral\ORM\Collection\PivotedCollection;
+use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Collection\RelationContext;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\DelayCommand;
 use Spiral\ORM\Command\GroupCommand;
@@ -39,12 +41,17 @@ class ManyToManyRelation extends AbstractRelation
 
             // todo: move to the function
             if (!empty($this->define(Relation::PIVOT_ENTITY))) {
-                $pivot = $this->orm->make($this->define(Relation::PIVOT_ENTITY), $pivot, State::LOADED);
+                $pivot = $this->orm->make(
+                    $this->define(Relation::PIVOT_ENTITY),
+                    $pivot,
+                    State::LOADED
+                );
             }
 
             $pivotData->offsetSet($entity, $pivot);
         }
 
+        // todo: merge with relationContext?
         return new ContextStorage($entities, $pivotData);
     }
 
@@ -54,7 +61,10 @@ class ManyToManyRelation extends AbstractRelation
             throw new RelationException("ManyToMany relation expects PivotData");
         }
 
-        return new PivotedCollection($data->getElements(), new RelationContext($data->getContext()));
+        return new PivotedCollection(
+            $data->getElements(),
+            new RelationContext($data->getContext())
+        );
     }
 
     public function queueChange(
@@ -68,12 +78,28 @@ class ManyToManyRelation extends AbstractRelation
 
         // schedule all
 
+        /**
+         * @var PivotedCollectionInterface $related
+         * @var ContextStorage             $original
+         */
+        $relContext = $related->getRelationContext();
+
         $group = new GroupCommand();
         foreach ($related as $item) {
             // todo: we also have to udpate
-            $group->addCommand($this->store($state, $item, $related->getRelationContext()->get($item)));
+            if (empty($original) || !$original->getContext()->offsetExists($item)) {
+                $group->addCommand($this->link($state, $item, $relContext->get($item)));
+            }
         }
 
+        if (!empty($original)) {
+            foreach ($original->getElements() as $item) {
+                if (!$related->contains($item)) {
+                    // todo: unlink!
+                    $group->addCommand($this->unlink($state, $item));
+                }
+            }
+        }
 
         // insert delayed
         // update delayed
@@ -85,7 +111,7 @@ class ManyToManyRelation extends AbstractRelation
     }
 
     // todo: diff
-    protected function store(State $parentState, $related, $context): CommandInterface
+    protected function link(State $parentState, $related, $context): CommandInterface
     {
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
@@ -100,7 +126,6 @@ class ManyToManyRelation extends AbstractRelation
 
         // todo: dirty state [?]
 
-
         $chain = new ChainCommand();
         $chain->addTargetCommand($this->orm->getMapper($related)->queueStore($related));
 
@@ -110,35 +135,96 @@ class ManyToManyRelation extends AbstractRelation
             $this->orm->getDatabase($this->class),
             $this->define(Relation::PIVOT_TABLE),
             []
-        // todo: what if both already saved, then no need to delay
-        //,
-        //   [
-        //        // todo: check proper key mapping
-        ///    $this->define(Relation::THOUGHT_INNER_KEY) => $parentState->getKey(Relation::INNER_KEY),
-        //      $this->define(Relation::THOUGHT_OUTER_KEY) => $relState->getKey(Relation::OUTER_KEY),
-        //  ]
         ));
 
-        // todo: make INSERT delayable?
+        // TODO: CONTEXT AND DATA IS THE SAME?
 
-        $parentState->onUpdate(function (State $state) use ($insert) {
+        // TODO: DRY!!!
+        if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
             $insert->setContext(
                 $this->define(Relation::THOUGHT_INNER_KEY),
-                $state->getKey($this->define(Relation::INNER_KEY))
+                $parentState->getKey($this->define(Relation::INNER_KEY))
             );
-        });
+        } else {
+            $parentState->onUpdate(function (State $state) use ($insert) {
+                $insert->setContext(
+                    $this->define(Relation::THOUGHT_INNER_KEY),
+                    $state->getKey($this->define(Relation::INNER_KEY))
+                );
+            });
+        }
 
-        $relState->onUpdate(function (State $state) use ($insert) {
+        // todo: DRY
+        if (!empty($relState->getKey($this->define(Relation::OUTER_KEY)))) {
             $insert->setContext(
                 $this->define(Relation::THOUGHT_OUTER_KEY),
-                $state->getKey($this->define(Relation::OUTER_KEY))
+                $relState->getKey($this->define(Relation::OUTER_KEY))
             );
-        });
+        } else {
+            $relState->onUpdate(function (State $state) use ($insert) {
+                $insert->setContext(
+                    $this->define(Relation::THOUGHT_OUTER_KEY),
+                    $state->getKey($this->define(Relation::OUTER_KEY))
+                );
+            });
+        }
 
-        $insert->setDescription('cant link');
+        $insert->setDescription("`{$this->class}`.`{$this->relation}` (ManyToMany)");
         $chain->addCommand($insert);
 
         // todo: update relation state
         return $chain;
+    }
+
+    protected function unlink(State $parentState, $related): CommandInterface
+    {
+        // todo: DO NOT RUN IF NULL
+        $delete = new DeleteCommand(
+            $this->orm->getDatabase($this->class),
+            $this->define(Relation::PIVOT_TABLE),
+            [
+                $this->define(Relation::THOUGHT_INNER_KEY) => null,
+                $this->define(Relation::THOUGHT_OUTER_KEY) => null,
+
+            ]
+        );
+
+        if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
+            $delete->setWhere(
+                [
+                    $this->define(Relation::THOUGHT_INNER_KEY) => $parentState->getKey($this->define(Relation::INNER_KEY))
+                ] + $delete->getWhere()
+            );
+        } else {
+            $parentState->onUpdate(function (State $state) use ($delete) {
+                $delete->setWhere(
+                    [
+                        $this->define(Relation::THOUGHT_INNER_KEY) => $state->getKey($this->define(Relation::INNER_KEY))
+                    ] + $delete->getWhere()
+                );
+            });
+        }
+
+        // todo: can rel state be null?
+        $relState = $this->orm->getHeap()->get($related);
+
+        // todo: DRY
+        if (!empty($relState->getKey($this->define(Relation::OUTER_KEY)))) {
+            $delete->setWhere(
+                [
+                    $this->define(Relation::THOUGHT_OUTER_KEY) => $relState->getKey($this->define(Relation::OUTER_KEY))
+                ] + $delete->getWhere()
+            );
+        } else {
+            $relState->onUpdate(function (State $state) use ($delete) {
+                $delete->setWhere(
+                    [
+                        $this->define(Relation::THOUGHT_OUTER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
+                    ] + $delete->getWhere()
+                );
+            });
+        }
+
+        return $delete;
     }
 }

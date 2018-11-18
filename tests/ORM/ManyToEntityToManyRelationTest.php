@@ -205,4 +205,6 @@ abstract class ManyToEntityToManyRelationTest extends BaseTest
         $this->assertEquals('secondary', $a->tags->getRelationContext()->get($a->tags[1])->as);
         $this->assertEquals('primary', $b->tags->getRelationContext()->get($b->tags[0])->as);
     }
+
+
 }

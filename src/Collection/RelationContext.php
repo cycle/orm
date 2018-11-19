@@ -48,4 +48,9 @@ class RelationContext implements RelationContextInterface
     {
         $this->context->offsetSet($entity, $context);
     }
+
+    public function getContext()
+    {
+        return $this->context;
+    }
 }

@@ -37,7 +37,8 @@ class Transaction implements TransactionInterface
      */
     public function store($entity)
     {
-        $this->addCommand($this->orm->getMapper($entity)->queueStore($entity));
+        $id = spl_object_id($this);
+        $this->addCommand($this->orm->getMapper($entity)->queueStore($entity, $id));
     }
 
     /**

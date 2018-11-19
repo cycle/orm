@@ -26,7 +26,8 @@ class BelongsToRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command
+        ContextCommandInterface $command,
+        $id = null
     ): CommandInterface {
         if ($related === null && !$this->define(Relation::NULLABLE)) {
             throw new NullException(
@@ -37,7 +38,7 @@ class BelongsToRelation extends AbstractRelation
         $state->setRelation($this->relation, $related);
 
         if (!is_null($related)) {
-            $inner = $this->orm->getMapper($related)->queueStore($related);
+            $inner = $this->orm->getMapper($related)->queueStore($related, $id);
 
             $innerState = $this->orm->getHeap()->get($related);
 

@@ -61,7 +61,7 @@ abstract class AbstractMapper implements MapperInterface
     }
 
 
-    public function queueStore($entity): ContextCommandInterface
+    public function queueStore($entity, $id = null): ContextCommandInterface
     {
         $state = $this->orm->getHeap()->get($entity);
 
@@ -71,7 +71,7 @@ abstract class AbstractMapper implements MapperInterface
             $cmd = $this->buildUpdate($entity, $state);
         }
 
-        return $this->orm->getRelationMap(get_class($entity))->queueRelations($entity, $cmd);
+        return $this->orm->getRelationMap(get_class($entity))->queueRelations($entity, $cmd, $id);
     }
 
     public function queueDelete($entity): CommandInterface

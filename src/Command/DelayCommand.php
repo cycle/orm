@@ -12,9 +12,12 @@ class DelayCommand implements DelayedCommandInterface
 {
     private $parent;
 
-    public function __construct(ContextCommandInterface $command)
+    private $need;
+
+    public function __construct(ContextCommandInterface $command, array $need = [])
     {
         $this->parent = $command;
+        $this->need = $need;
     }
 
     public function execute()
@@ -65,7 +68,15 @@ class DelayCommand implements DelayedCommandInterface
 
     public function isDelayed(): bool
     {
-        return $this->parent->isEmpty();
+        $data = $this->parent->getContext();
+
+        foreach ($this->need as $key) {
+            if (empty($data[$key])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private $description;

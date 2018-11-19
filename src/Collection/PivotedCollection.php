@@ -50,4 +50,9 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
     {
         return $this->relationContext;
     }
+
+    public function __debugInfo()
+    {
+        return $this->toArray();
+    }
 }

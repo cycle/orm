@@ -116,6 +116,11 @@ final class State
         return $this->relations[$name] ?? null;
     }
 
+    public function getRelations(): array
+    {
+        return array_keys($this->relations);
+    }
+
     /**
      * @return int
      */
@@ -143,6 +148,18 @@ final class State
     public function onUpdate(callable $handler)
     {
         $this->handlers[] = $handler;
+    }
+
+    private $refMap = [];
+
+    public function getRefMap($rel)
+    {
+        return $this->refMap[$rel] ?? null;
+    }
+
+    public function setRefMap($rel, $id)
+    {
+        $this->refMap[$rel] = $id;
     }
 
     public function __destruct()

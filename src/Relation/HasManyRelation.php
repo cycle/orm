@@ -13,7 +13,6 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\GroupCommand;
-use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -26,7 +25,8 @@ class HasManyRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command
+        ContextCommandInterface $command,
+        $id = null
     ): CommandInterface {
         if ($related instanceof Collection) {
             $related = $related->toArray();
@@ -41,30 +41,26 @@ class HasManyRelation extends AbstractRelation
 
         $group = new GroupCommand();
         foreach ($related as $item) {
-            $group->addCommand($this->store($state, $item));
+            $group->addCommand($this->store($state, $item, $id));
         }
 
         foreach ($removed as $item) {
-            $group->addCommand($this->remove($state, $item));
+            $group->addCommand($this->remove($state, $item, $id));
         }
 
         return $group;
     }
 
     // todo: diff
-    protected function store(State $parentState, $related): CommandInterface
+    protected function store(State $parentState, $related, $id): CommandInterface
     {
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
             $relState->addReference();
-            if ($relState->getRefCount() > 2) {
-                // todo: detect if it's the same parent over and over again?
-                return new NullCommand();
-            }
         }
 
         // todo: dirty state [?]
-        $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
+        $inner = $this->orm->getMapper(get_class($related))->queueStore($related, $id);
 
         if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
             $inner->setContext(

@@ -12,7 +12,6 @@ use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\ContextCommandInterface;
-use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -25,7 +24,8 @@ class HasOneRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command
+        ContextCommandInterface $command,
+        $id = null
     ): CommandInterface {
         // todo: need rollback
         $state->setRelation($this->relation, $related);
@@ -37,8 +37,10 @@ class HasOneRelation extends AbstractRelation
             $origState = $this->orm->getHeap()->get($original);
             $origState->delRef();
 
+            // TODO: THIS IS SEPARATE?
+
             return new ConditionalCommand(
-                $this->orm->getMapper(get_class($original))->queueDelete($original),
+                $this->orm->getMapper(get_class($original))->queueDelete($original, $id),
                 function () use ($origState) {
                     return $origState->getRefCount() == 0;
                 }
@@ -49,9 +51,11 @@ class HasOneRelation extends AbstractRelation
             $origState = $this->orm->getHeap()->get($original);
             $origState->delRef();
 
+            // TODO: THIS IS SEPARATE?
+
             $chain->addCommand(
                 new ConditionalCommand(
-                    $this->orm->getMapper($original)->queueDelete($original),
+                    $this->orm->getMapper($original)->queueDelete($original, $id),
                     function () use ($origState) {
                         return $origState->getRefCount() == 0;
                     }
@@ -65,12 +69,12 @@ class HasOneRelation extends AbstractRelation
                 $relState->addReference();
                 if ($relState->getRefCount() > 2) {
                     // todo: detect if it's the same parent over and over again?
-                    return new NullCommand();
+                    //     return new NullCommand();
                 }
             }
 
             // todo: dirty state [?]
-            $inner = $this->orm->getMapper($related)->queueStore($related);
+            $inner = $this->orm->getMapper($related)->queueStore($related, $id);
 
             $chain->addTargetCommand($inner);
 

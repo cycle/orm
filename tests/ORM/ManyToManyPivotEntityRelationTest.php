@@ -356,6 +356,5 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
 
         $this->assertSame("new tag", $b->tags[0]->name);
         $this->assertSame('super', $b->tags->getRelationContext()->get($b->tags[0])->as);
-
     }
 }

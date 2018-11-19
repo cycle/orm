@@ -56,7 +56,7 @@ final class RelationMap
         return $data;
     }
 
-    public function queueRelations($entity, ContextCommandInterface $command): ContextCommandInterface
+    public function queueRelations($entity, ContextCommandInterface $command, $id): ContextCommandInterface
     {
         // todo: what if entity new?
         $state = $this->orm->getHeap()->get($entity);
@@ -67,12 +67,18 @@ final class RelationMap
 
         foreach ($this->relations as $name => $relation) {
             if ($relation->isCascade() && $relation->isLeading()) {
+                if ($state->getRefMap($name) === $id) {
+                    continue;
+                }
+                $state->setRefMap($name, $id);
+
                 $chain->addCommand($relation->queueChange(
                     $entity,
                     $state,
                     $data[$name] ?? null,
                     $state->getRelation($name),
-                    $command
+                    $command,
+                    $id
                 ));
             }
         }
@@ -81,12 +87,18 @@ final class RelationMap
 
         foreach ($this->relations as $name => $relation) {
             if ($relation->isCascade() && !$relation->isLeading()) {
+                if ($state->getRefMap($name) === $id) {
+                    continue;
+                }
+                $state->setRefMap($name, $id);
+
                 $chain->addCommand($relation->queueChange(
                     $entity,
                     $state,
                     $data[$name] ?? null,
                     $state->getRelation($name),
-                    $command
+                    $command,
+                    $id
                 ));
             }
         }

@@ -30,10 +30,14 @@ class User
     /** @var Tag[]|PivotedCollectionInterface */
     public $tags;
 
+    /** @var Comment[]|PivotedCollectionInterface */
+    public $favorites;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->tags = new PivotedCollection();
+        $this->favorites = new PivotedCollection();
     }
 
     public function addComment(Comment $c)

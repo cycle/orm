@@ -179,8 +179,14 @@ class ORM implements ORMInterface
             $entityID = $this->identify($class, $data);
 
             if (!empty($entityID) && $this->heap->hasPath($class, $entityID)) {
-                // entity already known and loaded
-                return $this->heap->getPath($class, $entityID);
+                $existed = $this->heap->getPath($class, $entityID);
+
+                // todo: optimize, avoid cyclic initiation
+
+                return $this->getMapper($existed)->hydrate(
+                    $existed,
+                    $this->getRelationMap($existed)->init($this->getHeap()->get($existed), $data)
+                );
             }
         }
 

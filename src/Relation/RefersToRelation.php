@@ -55,15 +55,19 @@ class RefersToRelation extends AbstractRelation
         } else {
             // wait for PK
             $state->onUpdate(function (State $state) use ($link, $pk) {
-                $link->setWhere([$pk => $state->getPrimaryKey()]);
+                if (!empty($state->getPrimaryKey())) {
+                    $link->setWhere([$pk => $state->getPrimaryKey()]);
+                }
             });
         }
 
         // or saved directly (need unification)
         $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
-            $link->setData([
-                $this->define(Relation::INNER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
-            ]);
+            if (!empty($state->getKey($this->define(Relation::OUTER_KEY)))) {
+                $link->setData([
+                    $this->define(Relation::INNER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
+                ]);
+            }
         });
 
         return $link;

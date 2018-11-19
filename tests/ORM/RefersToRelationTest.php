@@ -16,7 +16,7 @@ use Spiral\ORM\Tests\Fixtures\Comment;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\ORM\UnitOfWork;
 
 abstract class RefersToRelationTest extends BaseTest
 {
@@ -97,7 +97,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->addComment($c);
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -114,7 +114,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->email = "email@email.com";
         $u->balance = 100;
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -123,7 +123,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->addComment($c);
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -148,7 +148,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->lastComment = $c;
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($u);
         $tr->run();
     }

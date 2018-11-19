@@ -15,7 +15,7 @@ use Spiral\ORM\Command\DelayCommand;
 use Spiral\ORM\Command\DelayedCommandInterface;
 use Spiral\ORM\Exception\TransactionException;
 
-class Transaction implements TransactionInterface
+class UnitOfWork implements TransactionInterface
 {
     /**
      * @invisible
@@ -23,13 +23,18 @@ class Transaction implements TransactionInterface
      */
     private $orm;
 
-    /*** @var CommandInterface[] */
-    private $commands = [];
+    private $managed;
+    // todo: do not store twice
+
+    private $store = [];
+
+    private $delete = [];
 
     /** @param ORMInterface $orm */
     public function __construct(ORMInterface $orm)
     {
         $this->orm = $orm;
+        $this->managed = new \SplObjectStorage();
     }
 
     /**
@@ -37,9 +42,15 @@ class Transaction implements TransactionInterface
      */
     public function store($entity)
     {
+        if ($this->managed->offsetExists($entity)) {
+            return;
+        }
+        $this->managed->offsetSet($entity, true);
+
+        $this->store[] = $entity;
+
         // todo: snapshotting
         $id = spl_object_hash($this);
-        $this->addCommand($this->orm->getMapper($entity)->queueStore($entity, $id));
     }
 
     /**
@@ -47,15 +58,12 @@ class Transaction implements TransactionInterface
      */
     public function delete($entity)
     {
-        $this->addCommand($this->orm->getMapper($entity)->queueDelete($entity));
-    }
+        if ($this->managed->offsetExists($entity)) {
+            return;
+        }
+        $this->managed->offsetSet($entity, true);
 
-    /**
-     * {@inheritdoc}
-     */
-    public function addCommand(CommandInterface $command)
-    {
-        $this->commands[] = $command;
+        $this->delete[] = $entity;
     }
 
     /**
@@ -63,11 +71,22 @@ class Transaction implements TransactionInterface
      *
      * @return \Generator
      */
-    public function getCommands()
+    protected function getCommands()
     {
+        $id = spl_object_hash($this);
+
+        $commands = [];
+        foreach ($this->store as $entity) {
+            $commands[] = $this->orm->getMapper($entity)->queueStore($entity, $id);
+
+        }
+
+        foreach ($this->delete as $entity) {
+            $commands[] = $this->orm->getMapper($entity)->queueDelete($entity);
+        }
 
         // todo: BRANCHING MUST BE MOVED INTO THE RUNCOMMAND!!!!
-        foreach ($this->commands as $command) {
+        foreach ($commands as $command) {
             if ($command instanceof \Traversable) {
                 yield from $command;
             }
@@ -118,8 +137,6 @@ class Transaction implements TransactionInterface
             }
 
             throw $e;
-        } finally {
-            $this->commands = [];
         }
 
         foreach (array_reverse($drivers) as $driver) {

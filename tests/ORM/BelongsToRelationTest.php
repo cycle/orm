@@ -20,7 +20,7 @@ use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\ORM\UnitOfWork;
 
 abstract class BelongsToRelationTest extends BaseTest
 {

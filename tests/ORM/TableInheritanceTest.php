@@ -15,7 +15,7 @@ use Spiral\ORM\Tests\Fixtures\Admin;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\ORM\UnitOfWork;
 
 abstract class TableInheritanceTest extends BaseTest
 {
@@ -120,7 +120,7 @@ abstract class TableInheritanceTest extends BaseTest
         $a->balance = 400;
         $a->permissions = '~';
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($u);
         $tr->store($a);
         $tr->run();

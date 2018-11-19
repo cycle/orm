@@ -19,7 +19,7 @@ use Spiral\ORM\Tests\Fixtures\Comment;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\ORM\UnitOfWork;
 
 abstract class HasManyRelationTest extends BaseTest
 {
@@ -197,7 +197,7 @@ abstract class HasManyRelationTest extends BaseTest
         $e->comments[0]->message = 'msg A';
         $e->comments[1]->message = 'msg B';
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -248,7 +248,7 @@ abstract class HasManyRelationTest extends BaseTest
 
         $e->comments->remove(1);
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -278,7 +278,7 @@ abstract class HasManyRelationTest extends BaseTest
         $c->message = "msg 4";
         $e->comments->add($c);
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -318,7 +318,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();

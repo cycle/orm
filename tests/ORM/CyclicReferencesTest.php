@@ -15,7 +15,7 @@ use Spiral\ORM\Tests\Fixtures\Comment;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\ORM\UnitOfWork;
 
 abstract class CyclicReferencesTest extends BaseTest
 {
@@ -140,7 +140,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $u->addComment($c);
         $u->favorites->add($c);
 
-        $tr = new Transaction($this->orm);
+        $tr = new UnitOfWork($this->orm);
         $tr->store($u);
         $tr->run();
 

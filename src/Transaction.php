@@ -37,7 +37,8 @@ class Transaction implements TransactionInterface
      */
     public function store($entity)
     {
-        $id = spl_object_id($this);
+        // todo: snapshotting
+        $id = spl_object_hash($this);
         $this->addCommand($this->orm->getMapper($entity)->queueStore($entity, $id));
     }
 

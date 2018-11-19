@@ -192,6 +192,7 @@ class ORM implements ORMInterface
 
         $mapper = $this->getMapper($class);
 
+        // todo: data must be filtered (!)
         $state = new State($entityID ?? null, $state, $data);
         $entity = $mapper->init($mapper->entityClass($data));
 

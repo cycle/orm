@@ -148,6 +148,9 @@ class UnitOfWork implements TransactionInterface
             //This is the point when entity will get related PK and FKs filled
             $command->complete();
         }
+
+        $this->store = [];
+        $this->delete = [];
     }
 
     /**

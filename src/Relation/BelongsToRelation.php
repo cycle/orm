@@ -44,10 +44,10 @@ class BelongsToRelation extends AbstractRelation
             //dump($innerState);
 
             // TODO: DRY
-            if (!empty($innerState->getData()[$this->schema[Relation::OUTER_KEY]])) {
+            if (!empty($innerState->getKey($this->define(Relation::OUTER_KEY)))) {
                 $command->setContext(
                     $this->define(Relation::INNER_KEY),
-                    $innerState->getData()[$this->schema[Relation::OUTER_KEY]]
+                    $innerState->getKey($this->define(Relation::OUTER_KEY))
                 );
             } else {
                 $innerState->onUpdate(function (State $state) use ($command) {
@@ -57,8 +57,6 @@ class BelongsToRelation extends AbstractRelation
                     );
                 });
             }
-
-
         } else {
             $command->setContext($this->schema[Relation::INNER_KEY], null);
             return new NullCommand();

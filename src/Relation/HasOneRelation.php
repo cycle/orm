@@ -67,10 +67,6 @@ class HasOneRelation extends AbstractRelation
             $relState = $this->orm->getHeap()->get($related);
             if (!empty($relState)) {
                 $relState->addReference();
-                if ($relState->getRefCount() > 2) {
-                    // todo: detect if it's the same parent over and over again?
-                    //     return new NullCommand();
-                }
             }
 
             // todo: dirty state [?]
@@ -80,10 +76,15 @@ class HasOneRelation extends AbstractRelation
 
             // TODO: DRY
             if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {
-                $inner->setContext(
-                    $this->define(Relation::OUTER_KEY),
-                    $state->getKey($this->define(Relation::INNER_KEY))
-                );
+                if (empty($relState) ||
+                    $relState->getKey($this->define(Relation::OUTER_KEY))
+                    != $state->getKey($this->define(Relation::INNER_KEY))
+                ) {
+                    $inner->setContext(
+                        $this->define(Relation::OUTER_KEY),
+                        $state->getKey($this->define(Relation::INNER_KEY))
+                    );
+                }
             } else {
                 $state->onUpdate(function (State $state) use ($inner) {
                     $inner->setContext(
@@ -93,7 +94,7 @@ class HasOneRelation extends AbstractRelation
 
                     // todo: morph key
                 });
-        }
+            }
 
             // todo: update relation state
         }

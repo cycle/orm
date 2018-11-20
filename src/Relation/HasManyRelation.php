@@ -63,10 +63,18 @@ class HasManyRelation extends AbstractRelation
 
         // todo: DRY
         if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
-            $inner->setContext(
-                $this->define(Relation::OUTER_KEY),
-                $parentState->getKey($this->define(Relation::INNER_KEY))
-            );
+            // todo: deal with optimizations later
+            if (
+                empty($relState)
+                ||
+                $relState->getKey($this->define(Relation::OUTER_KEY))
+                != $parentState->getKey($this->define(Relation::INNER_KEY))
+            ) {
+                $inner->setContext(
+                    $this->define(Relation::OUTER_KEY),
+                    $parentState->getKey($this->define(Relation::INNER_KEY))
+                );
+            }
         } else {
             // what if multiple keys set
             $parentState->onUpdate(function (State $state) use ($inner) {

@@ -152,7 +152,74 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->run();
     }
 
-    // todo: test when parent is defined
+    public function testAssignParentAsUpdate()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
 
-    // todo: set null
+        $c = new Comment();
+        $c->message = "last comment";
+        $u->comments->add($c);
+
+        $tr = new UnitOfWork($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+
+        $u->lastComment = $u->comments[0];
+
+        $tr = new UnitOfWork($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+        $this->assertSame($u->lastComment, $u->comments[0]);
+    }
+
+    public function testSetNull()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+        $u->addComment($c);
+
+        $tr = new UnitOfWork($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+        $this->assertSame($u->lastComment, $u->comments[0]);
+
+        $u->lastComment = null;
+
+        $tr = new UnitOfWork($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+    }
 }

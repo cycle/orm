@@ -35,7 +35,15 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new NullCommand();
         }
 
-        $relState = $this->orm->getHeap()->get($related);
+        $relState = $this->getState($related);
+//        $this->promiseContext(
+//            $command,
+//            $relState,
+//            $this->define(Relation::OUTER_KEY),
+//            $state,
+//            $this->define(Relation::INNER_KEY)
+//        );
+
         if (!empty($relState) && !empty($relState->getKey($this->define(Relation::OUTER_KEY)))) {
             $command->setContext(
                 $this->define(Relation::INNER_KEY),

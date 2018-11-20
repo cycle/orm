@@ -16,8 +16,6 @@ use Spiral\ORM\State;
 
 class HasOneRelation extends AbstractRelation
 {
-    use Relation\Traits\PromiseTrait;
-
     /**
      * @inheritdoc
      */
@@ -62,15 +60,15 @@ class HasOneRelation extends AbstractRelation
      */
     protected function deleteOriginal(ContextualSequence $sequence, $original)
     {
-        $oldState = $this->getState($original);
-        $oldState->decReference();
+        $oriState = $this->getState($original);
+        $oriState->decReference();
 
         // only delete original child when no other objects claim it
         $sequence->addCommand(
             new Condition(
                 $this->orm->getMapper($original)->queueDelete($original),
-                function () use ($oldState) {
-                    return !$oldState->hasReferences();
+                function () use ($oriState) {
+                    return !$oriState->hasReferences();
                 }
             )
         );

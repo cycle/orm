@@ -18,8 +18,6 @@ use Spiral\ORM\State;
 
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
-    use Relation\Traits\PromiseTrait;
-
     /**
      * @inheritdoc
      */

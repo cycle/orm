@@ -17,8 +17,6 @@ use Spiral\ORM\State;
 
 class HasManyRelation extends AbstractRelation
 {
-    use Relation\Traits\PromiseTrait;
-
     public const COLLECTION = true;
 
     public function extract($relData)

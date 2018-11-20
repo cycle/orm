@@ -25,8 +25,6 @@ use Spiral\ORM\Util\ContextStorage;
 
 class ManyToManyRelation extends AbstractRelation
 {
-    use Relation\Traits\PromiseTrait;
-
     public const COLLECTION = true;
 
     public function initArray(array $data)

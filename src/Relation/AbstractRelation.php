@@ -16,6 +16,8 @@ use Spiral\ORM\State;
 
 abstract class AbstractRelation implements RelationInterface
 {
+    use Relation\Traits\PromiseTrait;
+
     public const COLLECTION = false;
 
     /**

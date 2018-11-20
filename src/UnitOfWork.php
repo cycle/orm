@@ -117,6 +117,7 @@ class UnitOfWork implements TransactionInterface
 
         $this->store = [];
         $this->delete = [];
+        $this->managed = new \SplObjectStorage();
     }
 
     /**
@@ -155,7 +156,7 @@ class UnitOfWork implements TransactionInterface
     }
 
     /**
-     * Allocate commands ready for the execution. Generates ready commands as generated key and
+     * Fetch commands ready for the execution. Generate ready commands as generated key and
      * delayed commands as value.
      *
      * @param iterable $commands

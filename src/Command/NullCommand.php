@@ -9,6 +9,8 @@ namespace Spiral\ORM\Command;
 
 /**
  * Doing noting.
+ *
+ * @codeCoverageIgnore
  */
 final class NullCommand implements CommandInterface
 {

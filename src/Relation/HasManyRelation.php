@@ -38,11 +38,11 @@ class HasManyRelation extends AbstractRelation
         $sequence = new Sequence();
 
         foreach ($related as $item) {
-            $sequence->addCommand($this->store($state, $item));
+            $sequence->addCommand($this->queueStore($state, $item));
         }
 
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $sequence->addCommand($this->delete($state, $item));
+            $sequence->addCommand($this->queueDelete($state, $item));
         }
 
         return $sequence;
@@ -69,7 +69,7 @@ class HasManyRelation extends AbstractRelation
      * @param object $related
      * @return CommandInterface
      */
-    protected function store(State $parentState, $related): CommandInterface
+    protected function queueStore(State $parentState, $related): CommandInterface
     {
         $relStore = $this->orm->getMapper($related)->queueStore($related);
 
@@ -94,7 +94,7 @@ class HasManyRelation extends AbstractRelation
      * @param object $related
      * @return CommandInterface
      */
-    protected function delete(State $parentState, $related): CommandInterface
+    protected function queueDelete(State $parentState, $related): CommandInterface
     {
         $origState = $this->getState($related);
         $origState->decReference();

@@ -49,8 +49,11 @@ abstract class BaseTest extends TestCase
         parent::setUp();
 
         $this->dbal = new DatabaseManager(new DatabaseConfig());
-        $this->dbal->addDriver('default', $this->getDriver());
-        $this->dbal->addDatabase(new Database('default', '', $this->getDriver()));
+        $this->dbal->addDatabase(new Database(
+            'default',
+            '',
+            $this->getDriver()
+        ));
 
         $this->orm = new ORM($this->dbal);
 

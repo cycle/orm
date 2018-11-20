@@ -68,10 +68,6 @@ abstract class BaseTest extends TestCase
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
         $this->dbal = null;
-
-        if (function_exists('gc_collect_cycles')) {
-            gc_collect_cycles();
-        }
     }
 
     /**

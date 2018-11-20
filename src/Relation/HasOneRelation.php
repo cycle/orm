@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Control\Condition;

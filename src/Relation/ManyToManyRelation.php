@@ -106,7 +106,7 @@ class ManyToManyRelation extends AbstractRelation
     }
 
     // todo: diff
-    protected function link(State $parentState, $related, $context): CommandInterface
+    protected function link(State $parentState, $related, $context, $origContext): CommandInterface
     {
         $relStore = $this->orm->getMapper($related)->queueStore($related);
         $relState = $this->getState($related);
@@ -164,11 +164,22 @@ class ManyToManyRelation extends AbstractRelation
         return $chain;
     }
 
+    /**
+     * Remove the connection between two objects.
+     *
+     * @param State  $parentState
+     * @param object $related
+     * @return CommandInterface
+     */
     protected function unlink(State $parentState, $related): CommandInterface
     {
-        // todo: we should only remove it if related entity is not null!!
+        $relState = $this->getState($related);
+        if (empty($relState) || $relState->getState() == State::NEW) {
+            throw new RelationException(
+                "Invalid relation state, NEW entity scheduled for unlink"
+            );
+        }
 
-        // todo: DO NOT RUN IF NULL
         $delete = new DeleteCommand(
             $this->orm->getDatabase($this->class),
             $this->define(Relation::PIVOT_TABLE),
@@ -178,46 +189,21 @@ class ManyToManyRelation extends AbstractRelation
             ]
         );
 
-        // TODO: DRY
-        if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
-            $delete->setWhere(
-                [
-                    $this->define(Relation::THOUGHT_INNER_KEY) => $parentState->getKey($this->define(Relation::INNER_KEY))
-                ] + $delete->getWhere()
-            );
-        } else {
-            $parentState->onUpdate(function (State $state) use ($delete) {
-                if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {
-                    $delete->setWhere(
-                        [
-                            $this->define(Relation::THOUGHT_INNER_KEY) => $state->getKey($this->define(Relation::INNER_KEY))
-                        ] + $delete->getWhere()
-                    );
-                }
-            });
-        }
+        $this->promiseWhere(
+            $delete,
+            $parentState,
+            $this->define(Relation::INNER_KEY),
+            null,
+            $this->define(Relation::THOUGHT_INNER_KEY)
+        );
 
-        // todo: can rel state be null?
-        $relState = $this->orm->getHeap()->get($related);
-
-        // todo: DRY
-        if (!empty($relState->getKey($this->define(Relation::OUTER_KEY)))) {
-            $delete->setWhere(
-                [
-                    $this->define(Relation::THOUGHT_OUTER_KEY) => $relState->getKey($this->define(Relation::OUTER_KEY))
-                ] + $delete->getWhere()
-            );
-        } else {
-            $relState->onUpdate(function (State $state) use ($delete) {
-                if (!empty($state->getKey($this->define(Relation::OUTER_KEY)))) {
-                    $delete->setWhere(
-                        [
-                            $this->define(Relation::THOUGHT_OUTER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
-                        ] + $delete->getWhere()
-                    );
-                }
-            });
-        }
+        $this->promiseWhere(
+            $delete,
+            $relState,
+            $this->define(Relation::OUTER_KEY),
+            null,
+            $this->define(Relation::THOUGHT_OUTER_KEY)
+        );
 
         return $delete;
     }

@@ -9,7 +9,8 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\ChainCommand;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\GroupCommand;
 
 final class RelationMap
 {
@@ -56,10 +57,11 @@ final class RelationMap
         return $data;
     }
 
-    public function queueRelations($entity, ContextCommandInterface $command): ContextCommandInterface
+    public function queueRelations($entity, State $state, ContextualCommandInterface $command): ContextualCommandInterface
     {
-        // todo: what if entity new?
-        $state = $this->orm->getHeap()->get($entity);
+        if (empty($this->relations)) {
+            return $command;
+        }
 
         $chain = new ChainCommand();
 
@@ -82,7 +84,7 @@ final class RelationMap
             }
         }
 
-        $chain->addTargetCommand($command);
+        $chain->addParent($command);
 
         foreach ($this->relations as $name => $relation) {
             if ($relation->isCascade() && !$relation->isLeading()) {

@@ -51,6 +51,13 @@ abstract class AbstractCommand implements CommandInterface
         $this->onRollBack[] = $closure;
     }
 
+    public function isReady(): bool
+    {
+        // is it?
+        return false;
+    }
+
+
     /**
      * {@inheritdoc}
      */

@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Exception\MapperException;
 
 interface MapperInterface
@@ -26,11 +26,11 @@ interface MapperInterface
      * Initiate chain of commands require to store object and it's data into persistent storage.
      *
      * @param object $entity
-     * @return ContextCommandInterface
+     * @return ContextualCommandInterface
      *
      * @throws MapperException
      */
-    public function queueStore($entity): ContextCommandInterface;
+    public function queueStore($entity): ContextualCommandInterface;
 
     /**
      * Initiate sequence of of commands required to delete object from the persistent storage.

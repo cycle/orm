@@ -16,6 +16,14 @@ namespace Spiral\ORM\Command;
 interface CommandInterface
 {
     /**
+     * Must return true when command is ready for the execution. UnitOfWork will throw
+     * an exception if any of the command will stuck in non ready state.
+     *
+     * @return bool
+     */
+    public function isReady(): bool;
+
+    /**
      * Executes command.
      */
     public function execute();

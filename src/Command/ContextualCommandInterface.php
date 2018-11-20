@@ -11,7 +11,7 @@ namespace Spiral\ORM\Command;
  * Promise commands used to carry FK and PK values across commands pipeline, other commands are
  * able to mount it's values into parent context or read from it.
  */
-interface ContextCommandInterface extends CommandInterface
+interface ContextualCommandInterface extends CommandInterface
 {
     /**
      * Get current command context.
@@ -29,6 +29,3 @@ interface ContextCommandInterface extends CommandInterface
      */
     public function setContext(string $name, $value);
 }
-
-
-// todo: UNIFY THE CONTEXT, ADD CONTEXT TO ALL THE COMMANDS < YOOOO

@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
 
 interface RelationInterface
 {
@@ -24,6 +24,6 @@ interface RelationInterface
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command
+        ContextualCommandInterface $command
     ): CommandInterface;
 }

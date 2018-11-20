@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ConditionalCommand;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\GroupCommand;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
@@ -25,7 +25,7 @@ class HasManyRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command
+        ContextualCommandInterface $command
     ): CommandInterface {
         if ($related instanceof Collection) {
             $related = $related->toArray();

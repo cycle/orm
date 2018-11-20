@@ -14,7 +14,7 @@ use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Collection\RelationContext;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\DelayCommand;
@@ -71,7 +71,7 @@ class ManyToManyRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command
+        ContextualCommandInterface $command
     ): CommandInterface {
         /**
          * @var PivotedCollectionInterface $related
@@ -119,9 +119,10 @@ class ManyToManyRelation extends AbstractRelation
     {
 
         // todo: dirty state [?]
+        $cmd = $this->orm->getMapper($related)->queueStore($related);
 
         $chain = new ChainCommand();
-        $chain->addTargetCommand($this->orm->getMapper($related)->queueStore($related));
+        $chain->addParent($cmd);
 
         $relState = $this->orm->getHeap()->get($related);
 

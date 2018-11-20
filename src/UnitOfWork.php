@@ -11,23 +11,20 @@ namespace Spiral\ORM;
 use Spiral\Database\Driver\DriverInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Database\DatabaseCommand;
-use Spiral\ORM\Command\DelayCommand;
-use Spiral\ORM\Command\DelayedCommandInterface;
 use Spiral\ORM\Exception\TransactionException;
 
 class UnitOfWork implements TransactionInterface
 {
-    /**
-     * @invisible
-     * @var ORMInterface
-     */
+    /** @var ORMInterface */
     private $orm;
 
+    /** @var \SplObjectStorage */
     private $managed;
-    // todo: do not store twice
 
+    /** @var array */
     private $store = [];
 
+    /** @var array */
     private $delete = [];
 
     /** @param ORMInterface $orm */
@@ -48,9 +45,6 @@ class UnitOfWork implements TransactionInterface
         $this->managed->offsetSet($entity, true);
 
         $this->store[] = $entity;
-
-        // todo: snapshotting
-        $id = spl_object_hash($this);
     }
 
     /**
@@ -67,39 +61,11 @@ class UnitOfWork implements TransactionInterface
     }
 
     /**
-     * Return flattened list of commands.
-     *
-     * @return \Generator
-     */
-    protected function getCommands()
-    {
-        $id = spl_object_hash($this);
-
-        $commands = [];
-        foreach ($this->store as $entity) {
-            $commands[] = $this->orm->getMapper($entity)->queueStore($entity, $id);
-        }
-
-        foreach ($this->delete as $entity) {
-            $commands[] = $this->orm->getMapper($entity)->queueDelete($entity);
-        }
-
-        // todo: BRANCHING MUST BE MOVED INTO THE RUNCOMMAND!!!!
-        foreach ($commands as $command) {
-            if ($command instanceof \Traversable) {
-                yield from $command;
-            }
-
-            yield $command;
-        }
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function run()
     {
-        $commands = $this->getCommands();
+        $commands = $this->initCommands();
         $executed = $drivers = [];
 
         try {
@@ -107,14 +73,16 @@ class UnitOfWork implements TransactionInterface
                 $pending = [];
                 $countExecuted = count($executed);
 
-                foreach ($this->execute($commands, $drivers) as $done => $skip) {
-                    if ($done != null) {
-                        $executed[] = $done;
+                foreach ($this->reduce($commands) as $do => $wait) {
+                    if ($wait != null) {
+                        $pending[] = $wait;
+                        continue;
                     }
 
-                    if ($skip != null) {
-                        $pending[] = $skip;
-                    }
+                    $this->beginTransaction($do, $drivers);
+                    $do->execute();
+
+                    $executed[] = $do;
                 }
 
                 if (count($executed) === $countExecuted) {
@@ -123,7 +91,6 @@ class UnitOfWork implements TransactionInterface
 
                 $commands = $pending;
             }
-
         } catch (\Throwable $e) {
             foreach (array_reverse($drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -144,7 +111,7 @@ class UnitOfWork implements TransactionInterface
         }
 
         foreach ($executed as $command) {
-            //This is the point when entity will get related PK and FKs filled
+            // deliver all generated values to the linked entities
             $command->complete();
         }
 
@@ -169,30 +136,44 @@ class UnitOfWork implements TransactionInterface
     }
 
     /**
-     * Execute and split array of commands into two subsets: executed and pending.
+     * Return flattened list of commands required to store and delete associated entities.
+     *
+     * @return array
+     */
+    protected function initCommands(): array
+    {
+        $commands = [];
+        foreach ($this->store as $entity) {
+            $commands[] = $this->orm->getMapper($entity)->queueStore($entity);
+        }
+
+        foreach ($this->delete as $entity) {
+            $commands[] = $this->orm->getMapper($entity)->queueDelete($entity);
+        }
+
+        return $commands;
+    }
+
+    /**
+     * Allocate commands ready for the execution. Generates ready commands as generated key and
+     * delayed commands as value.
      *
      * @param iterable $commands
-     * @param array    $drivers
      * @return \Generator
      */
-    private function execute(iterable $commands, array &$drivers): \Generator
+    protected function reduce(iterable $commands): \Generator
     {
+        /** @var CommandInterface $command */
         foreach ($commands as $command) {
-            if ($command instanceof DelayedCommandInterface) {
-                if ($command->isDelayed()) {
-                    yield null => $command;
-                    continue;
-                }
-
-                if ($command instanceof DelayCommand && $command->getParent() instanceof \Traversable) {
-                    // todo: make it better
-                    yield from $this->execute($command->getParent(), $drivers);
-                    continue;
-                }
+            if ($command->isReady()) {
+                yield null => $command;
+                continue;
             }
 
-            $this->beginTransaction($command, $drivers);
-            $command->execute();
+            if ($command instanceof \Traversable) {
+                yield from $this->reduce($command);
+                // command will fall thought to handle execution/complete handler
+            }
 
             yield $command => null;
         }

@@ -42,7 +42,7 @@ abstract class ChainCommandTest extends TestCase
     public function testGetPrimaryKey()
     {
         $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(InsertCommand::class));
 
         $lead->expects('getPrimaryKey')->andReturn(1);
 
@@ -61,7 +61,7 @@ abstract class ChainCommandTest extends TestCase
     public function testGetContext()
     {
         $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(InsertCommand::class));
 
         $lead->shouldReceive('getContext')->andReturn(['hi']);
 
@@ -71,7 +71,7 @@ abstract class ChainCommandTest extends TestCase
     public function testAddContext()
     {
         $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(InsertCommand::class));
 
         $lead->shouldReceive('setContext')->with('name', 'value');
 
@@ -82,7 +82,7 @@ abstract class ChainCommandTest extends TestCase
     public function testPassCallbackExecute()
     {
         $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(InsertCommand::class));
 
         $f = function () {
         };
@@ -95,7 +95,7 @@ abstract class ChainCommandTest extends TestCase
     public function testPassCallbackComplete()
     {
         $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(InsertCommand::class));
 
         $f = function () {
         };
@@ -108,7 +108,7 @@ abstract class ChainCommandTest extends TestCase
     public function testPassCallbackRollback()
     {
         $command = new ChainCommand();
-        $command->addTargetCommand($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(InsertCommand::class));
 
         $f = function () {
         };

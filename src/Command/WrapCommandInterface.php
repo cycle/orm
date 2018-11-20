@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Command;
 
-interface DelayedCommandInterface extends CommandInterface
+
+interface WrapCommandInterface
 {
-    //todo: phpdoc
-    public function isDelayed(): bool;
+    public function getParent(): CommandInterface;
 }

@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Database\Traits\ContextTrait;
 use Spiral\ORM\Command\Database\Traits\WhereTrait;
 
@@ -18,7 +18,7 @@ use Spiral\ORM\Command\Database\Traits\WhereTrait;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class UpdateCommand extends DatabaseCommand implements ContextCommandInterface
+class UpdateCommand extends DatabaseCommand implements ContextualCommandInterface
 {
     use ContextTrait, WhereTrait;
 

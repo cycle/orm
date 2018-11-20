@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\Database\UpdateCommand;
@@ -60,19 +60,17 @@ abstract class AbstractMapper implements MapperInterface
         return new $class;
     }
 
-    public function queueStore($entity): ContextCommandInterface
+    public function queueStore($entity): ContextualCommandInterface
     {
-        // polish it
-
         $state = $this->orm->getHeap()->get($entity);
 
-        if ($state == null) {
-            $cmd = $this->buildInsert($entity);
+        if ($state == null || $state->getState() == State::NEW) {
+            $cmd = $this->queueCreate($entity, $state);
         } else {
-            $cmd = $this->buildUpdate($entity, $state);
+            $cmd = $this->queueUpdate($entity, $state);
         }
 
-        return $this->orm->getRelationMap(get_class($entity))->queueRelations($entity, $cmd);
+        return $this->orm->getRelationMap(get_class($entity))->queueRelations($entity, $state, $cmd);
     }
 
     public function queueDelete($entity): CommandInterface
@@ -93,7 +91,7 @@ abstract class AbstractMapper implements MapperInterface
         return array_intersect_key($this->extract($entity), array_flip($this->columns));
     }
 
-    protected function buildInsert($entity): ContextCommandInterface
+    protected function queueCreate($entity, State &$state = null): ContextualCommandInterface
     {
         $columns = $this->getColumns($entity);
 
@@ -109,12 +107,10 @@ abstract class AbstractMapper implements MapperInterface
             // todo: exception
         }
 
-
-        $state = new State(
-            $columns[$this->primaryKey] ?? null,
-            State::SCHEDULED_INSERT,
-            $columns
-        );
+        if (is_null($state)) {
+            // todo: do we need to track PK?
+            $state = new State($columns[$this->primaryKey] ?? null, State::SCHEDULED_INSERT, $columns);
+        }
 
         unset($columns[$this->primaryKey]);
 
@@ -148,7 +144,7 @@ abstract class AbstractMapper implements MapperInterface
         return $insert;
     }
 
-    protected function buildUpdate($entity, State $state): ContextCommandInterface
+    protected function queueUpdate($entity, State $state): ContextualCommandInterface
     {
         $eData = $this->getColumns($entity);
         $oData = $state->getData();

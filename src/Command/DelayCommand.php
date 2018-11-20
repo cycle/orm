@@ -8,16 +8,21 @@
 
 namespace Spiral\ORM\Command;
 
-class DelayCommand implements DelayedCommandInterface
+class DelayCommand implements CommandInterface, \IteratorAggregate
 {
     private $parent;
 
     private $need;
 
-    public function __construct(ContextCommandInterface $command, array $need = [])
+    public function __construct(ContextualCommandInterface $command, array $need = [])
     {
         $this->parent = $command;
         $this->need = $need;
+    }
+
+    public function getIterator()
+    {
+        yield $this->parent;
     }
 
     public function execute()
@@ -66,7 +71,7 @@ class DelayCommand implements DelayedCommandInterface
         return $this->parent->setContext($name, $value);
     }
 
-    public function isDelayed(): bool
+    public function isReady(): bool
     {
         $data = $this->parent->getContext();
 

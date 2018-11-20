@@ -11,15 +11,15 @@ namespace Spiral\ORM\Command;
 use Spiral\ORM\Exception\CommandException;
 
 /**
- * Manages chain of nested commands with one "leading" command. Provide ability to change
+ * Manages chain of nested commands with one "parent" command. Provide ability to change
  * context for the leading command.
  *
  * Leading command can be in a middle of the chain!
  */
-class ChainCommand implements \IteratorAggregate, ContextCommandInterface
+class ChainCommand implements \IteratorAggregate, ContextualCommandInterface
 {
-    /** @var ContextCommandInterface */
-    private $target;
+    /** @var ContextualCommandInterface */
+    private $parent;
 
     /** @var CommandInterface[] */
     private $commands = [];
@@ -37,12 +37,12 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
     }
 
     /**
-     * @param ContextCommandInterface $command
+     * @param ContextualCommandInterface $command
      */
-    public function addTargetCommand(ContextCommandInterface $command)
+    public function addParent(ContextualCommandInterface $command)
     {
         $this->commands[] = $command;
-        $this->target = $command;
+        $this->parent = $command;
     }
 
     /**
@@ -50,7 +50,7 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
      */
     public function getContext(): array
     {
-        return $this->getTarget()->getContext();
+        return $this->getParent()->getContext();
     }
 
     /**
@@ -58,21 +58,19 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
      */
     public function setContext(string $name, $value)
     {
-        $this->getTarget()->setContext($name, $value);
-    }
-
-    /**
-     * @return mixed|null
-     */
-    public function getPrimaryKey()
-    {
-        return $this->getTarget()->getPrimaryKey();
+        $this->getParent()->setContext($name, $value);
     }
 
     // todo:??
     public function isEmpty(): bool
     {
-        return $this->getTarget()->isEmpty();
+        return $this->getParent()->isEmpty();
+    }
+
+    public function isReady(): bool
+    {
+        // todo: BUT WHY?
+        return false;
     }
 
     /**
@@ -81,8 +79,9 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
     public function getIterator(): \Generator
     {
         foreach ($this->commands as $command) {
-            if ($command instanceof \Traversable) {
+            if (!$command->isReady() && $command instanceof \Traversable) {
                 yield from $command;
+                continue;
             }
 
             yield $command;
@@ -96,7 +95,7 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
      */
     final public function onExecute(callable $closure)
     {
-        $this->getTarget()->onExecute($closure);
+        $this->getParent()->onExecute($closure);
     }
 
     /**
@@ -106,7 +105,7 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
      */
     final public function onComplete(callable $closure)
     {
-        $this->getTarget()->onComplete($closure);
+        $this->getParent()->onComplete($closure);
     }
 
     /**
@@ -116,7 +115,7 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
      */
     final public function onRollBack(callable $closure)
     {
-        $this->getTarget()->onRollBack($closure);
+        $this->getParent()->onRollBack($closure);
     }
 
     /**
@@ -144,14 +143,14 @@ class ChainCommand implements \IteratorAggregate, ContextCommandInterface
     }
 
     /**
-     * @return ContextCommandInterface
+     * @return ContextualCommandInterface
      */
-    protected function getTarget(): ContextCommandInterface
+    protected function getParent(): ContextualCommandInterface
     {
-        if (empty($this->target)) {
+        if (empty($this->parent)) {
             throw new CommandException("Chain target command is not set.");
         }
 
-        return $this->target;
+        return $this->parent;
     }
 }

@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ConditionalCommand;
-use Spiral\ORM\Command\ContextCommandInterface;
+use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -24,7 +24,7 @@ class HasOneRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command
+        ContextualCommandInterface $command
     ): CommandInterface {
         // todo: need rollback
         $state->setRelation($this->relation, $related);
@@ -75,7 +75,7 @@ class HasOneRelation extends AbstractRelation
             // todo: dirty state [?]
             $inner = $this->orm->getMapper($related)->queueStore($related);
 
-            $chain->addTargetCommand($inner);
+            $chain->addParent($inner);
 
             // TODO: DRY
             if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {

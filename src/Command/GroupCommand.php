@@ -31,8 +31,9 @@ class GroupCommand extends AbstractCommand implements \IteratorAggregate
     public function getIterator(): \Generator
     {
         foreach ($this->commands as $command) {
-            if ($command instanceof \Traversable) {
+            if (!$command->isReady() && $command instanceof \Traversable) {
                 yield from $command;
+                continue;
             }
 
             yield $command;

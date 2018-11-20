@@ -172,7 +172,6 @@ class UnitOfWork implements TransactionInterface
 
             if ($command instanceof \Traversable) {
                 yield from $this->reduce($command);
-                continue;
             }
 
             yield $command => null;

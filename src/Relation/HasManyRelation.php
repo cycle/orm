@@ -10,7 +10,6 @@ namespace Spiral\ORM\Relation;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Relation;
@@ -25,13 +24,8 @@ class HasManyRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queueChange(
-        $parent,
-        State $state,
-        $related,
-        $original,
-        ContextualCommandInterface $command
-    ): CommandInterface {
+    public function queueRelation($entity, State $state, $related, $original): CommandInterface
+    {
         if ($related instanceof Collection) {
             // todo: unify (see ManyToMany)
             $related = $related->toArray();

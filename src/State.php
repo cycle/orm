@@ -158,14 +158,19 @@ final class State
 
     private $refMap = [];
 
-    public function getRefMap($rel)
+    public function visited($rel)
     {
         return $this->refMap[$rel] ?? null;
     }
 
-    public function setRefMap($rel, $id)
+    public function setVisited($rel, $id)
     {
         $this->refMap[$rel] = $id;
+    }
+
+    public function flushVisited()
+    {
+        $this->refMap = [];
     }
 
     public function __destruct()

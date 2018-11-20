@@ -13,7 +13,6 @@ use Spiral\ORM\Collection\PivotedCollection;
 use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Collection\RelationContext;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Control\ContextSequence;
 use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
@@ -66,12 +65,11 @@ class ManyToManyRelation extends AbstractRelation
         );
     }
 
-    public function queueChange(
-        $parent,
+    public function queueRelation(
+        $entity,
         State $state,
         $related,
-        $original,
-        ContextualCommandInterface $command
+        $original
     ): CommandInterface {
         /**
          * @var PivotedCollectionInterface $related

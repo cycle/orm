@@ -70,8 +70,15 @@ abstract class AbstractMapper implements MapperInterface
             $cmd = $this->queueUpdate($entity, $state);
         }
 
+        $data = $this->extract($entity);
+
         // todo: extract data only once (!)
-        return $this->orm->getRelationMap(get_class($entity))->queueRelations($entity, $state, $cmd);
+        return $this->orm->getRelationMap(get_class($entity))->queueRelations(
+            $entity,
+            $data,
+            $state,
+            $cmd
+        );
     }
 
     public function queueDelete($entity): CommandInterface
@@ -110,7 +117,8 @@ abstract class AbstractMapper implements MapperInterface
 
         if (is_null($state)) {
             // todo: do we need to track PK?
-            $state = new State($columns[$this->primaryKey] ?? null, State::SCHEDULED_INSERT, $columns);
+            $state = new State($columns[$this->primaryKey] ?? null, State::SCHEDULED_INSERT,
+                $columns);
         }
 
         unset($columns[$this->primaryKey]);

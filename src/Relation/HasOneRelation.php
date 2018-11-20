@@ -9,7 +9,6 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\ContextSequence;
 use Spiral\ORM\Relation;
@@ -22,13 +21,8 @@ class HasOneRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queueChange(
-        $parent,
-        State $state,
-        $related,
-        $original,
-        ContextualCommandInterface $command
-    ): CommandInterface {
+    public function queueRelation($entity, State $state, $related, $original): CommandInterface
+    {
         $state->setRelation($this->relation, $related);
 
         $sequence = new ContextSequence();
@@ -38,6 +32,7 @@ class HasOneRelation extends AbstractRelation
         }
 
         if (empty($related)) {
+            // nothing to persist
             return $sequence;
         }
 
@@ -71,11 +66,13 @@ class HasOneRelation extends AbstractRelation
         $oldState->decReference();
 
         // only delete original child when no other objects claim it
-        $sequence->addCommand(new Condition(
-            $this->orm->getMapper($original)->queueDelete($original),
-            function () use ($oldState) {
-                return !$oldState->hasReferences();
-            }
-        ));
+        $sequence->addCommand(
+            new Condition(
+                $this->orm->getMapper($original)->queueDelete($original),
+                function () use ($oldState) {
+                    return !$oldState->hasReferences();
+                }
+            )
+        );
     }
 }

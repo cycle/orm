@@ -25,14 +25,18 @@ final class RelationMap
     /** @var DependencyInterface[] */
     private $dependencies = [];
 
+    /**
+     * @param ORMInterface $orm
+     * @param array        $relations
+     */
     public function __construct(ORMInterface $orm, array $relations)
     {
         $this->orm = $orm;
         $this->relations = $relations;
 
-        foreach ($relations as $relation) {
+        foreach ($this->relations as $name => $relation) {
             if ($relation instanceof DependencyInterface) {
-                $this->dependencies[] = $relation;
+                $this->dependencies[$name] = $relation;
             }
         }
     }
@@ -67,45 +71,38 @@ final class RelationMap
 
     public function queueRelations(
         $entity,
+        array $data,
         State $state,
         ContextualCommandInterface $command
     ): ContextualCommandInterface {
-        if (empty($this->relations)) {
-            return $command;
-        }
-
-        $chain = new ContextSequence();
-
-        $data = $this->orm->getMapper($entity)->extract($entity);
+        $sequence = new ContextSequence();
 
         foreach ($this->dependencies as $name => $relation) {
-            if (!$relation->isCascade() || $state->getRefMap($name)) {
+            if (!$relation->isCascade()) {
                 continue;
             }
 
-            $state->setRefMap($name, true);
-
-            $chain->addCommand(
-                $relation->queueChange(
+            $sequence->addCommand(
+                $relation->queueDependency(
+                    $command,
                     $entity,
                     $state,
                     $data[$name] ?? null,
-                    $state->getRelation($name),
-                    $command
+                    $state->getRelation($name)
                 )
             );
         }
 
-        $chain->addPrimary($command);
+        $sequence->addPrimary($command);
 
         foreach ($this->relations as $name => $relation) {
-            if (!$relation->isCascade() || $state->getRefMap($name)) {
+            if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
+            $state->setVisited($name, true);
 
-            $state->setRefMap($name, true);
-            $chain->addCommand(
-                $relation->queueChange(
+            $sequence->addCommand(
+                $relation->queueRelation(
                     $entity,
                     $state,
                     $data[$name] ?? null,
@@ -115,14 +112,9 @@ final class RelationMap
             );
         }
 
-        $chain->onComplete(function () use ($state) {
-            foreach ($this->relations as $name => $relation) {
-                $state->setRefMap($name, false);
-            }
-        });
+        $sequence->onComplete([$state, 'flushVisited']);
+        $sequence->onRollBack([$state, 'flushVisited']);
 
-        // todo: rollback
-
-        return $chain;
+        return $sequence;
     }
 }

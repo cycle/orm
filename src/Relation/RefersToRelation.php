@@ -12,26 +12,28 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Database\LinkCommand;
 use Spiral\ORM\Command\NullCommand;
+use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 
-class RefersToRelation extends AbstractRelation
+class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
     /**
      * @inheritdoc
      */
-    public function queueChange(
-        $parent,
+    public function queueDependency(
+        ContextualCommandInterface $command,
+        $entity,
         State $state,
         $related,
-        $original,
-        ContextualCommandInterface $command
+        $original
     ): CommandInterface {
         $state->setRelation($this->relation, $related);
 
         if (is_null($related)) {
             $command->setContext($this->define(Relation::INNER_KEY), null);
+
             return new NullCommand();
         }
 
@@ -46,12 +48,12 @@ class RefersToRelation extends AbstractRelation
         }
 
         $link = new LinkCommand(
-            $this->orm->getDatabase($parent),
-            $this->orm->getSchema()->define(get_class($parent), Schema::TABLE)
+            $this->orm->getDatabase($entity),
+            $this->orm->getSchema()->define(get_class($entity), Schema::TABLE)
         );
         $link->setDescription($this);
 
-        $pk = $this->orm->getSchema()->define(get_class($parent), Schema::PRIMARY_KEY);
+        $pk = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
 
         // todo: NOT DRY
         // todo: PK is OUTER KEY, not really PK !!!
@@ -76,5 +78,13 @@ class RefersToRelation extends AbstractRelation
         });
 
         return $link;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function queueRelation($entity, State $state, $related, $original): CommandInterface
+    {
+        return new NullCommand();
     }
 }

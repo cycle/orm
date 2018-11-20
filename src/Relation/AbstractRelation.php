@@ -16,7 +16,6 @@ use Spiral\ORM\State;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    public const LEADING    = false;
     public const COLLECTION = false;
 
     /**
@@ -46,11 +45,6 @@ abstract class AbstractRelation implements RelationInterface
     public function isCascade(): bool
     {
         return $this->schema[Relation::CASCADE] ?? false;
-    }
-
-    public function isLeading(): bool
-    {
-        return static::LEADING;
     }
 
     public function isCollection(): bool

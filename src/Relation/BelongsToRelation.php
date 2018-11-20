@@ -20,12 +20,12 @@ use Spiral\ORM\State;
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
     // todo: move to the strategy
-    public function queueChange(
-        $parent,
+    public function queueDependency(
+        ContextualCommandInterface $command,
+        $entity,
         State $state,
         $related,
-        $original,
-        ContextualCommandInterface $command
+        $original
     ): CommandInterface {
         if ($related === null && !$this->define(Relation::NULLABLE)) {
             throw new NullException(
@@ -59,9 +59,18 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
             }
         } else {
             $command->setContext($this->schema[Relation::INNER_KEY], null);
+
             return new NullCommand();
         }
 
         return $inner;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function queueRelation($entity, State $state, $related, $original): CommandInterface
+    {
+        return new NullCommand();
     }
 }

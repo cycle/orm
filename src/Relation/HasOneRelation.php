@@ -24,8 +24,7 @@ class HasOneRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command,
-        $id = null
+        ContextCommandInterface $command
     ): CommandInterface {
         // todo: need rollback
         $state->setRelation($this->relation, $related);
@@ -40,7 +39,7 @@ class HasOneRelation extends AbstractRelation
             // TODO: THIS IS SEPARATE?
 
             return new ConditionalCommand(
-                $this->orm->getMapper(get_class($original))->queueDelete($original, $id),
+                $this->orm->getMapper(get_class($original))->queueDelete($original),
                 function () use ($origState) {
                     return $origState->getRefCount() == 0;
                 }
@@ -55,7 +54,7 @@ class HasOneRelation extends AbstractRelation
 
             $chain->addCommand(
                 new ConditionalCommand(
-                    $this->orm->getMapper($original)->queueDelete($original, $id),
+                    $this->orm->getMapper($original)->queueDelete($original),
                     function () use ($origState) {
                         return $origState->getRefCount() == 0;
                     }
@@ -74,10 +73,11 @@ class HasOneRelation extends AbstractRelation
             }
 
             // todo: dirty state [?]
-            $inner = $this->orm->getMapper($related)->queueStore($related, $id);
+            $inner = $this->orm->getMapper($related)->queueStore($related);
 
             $chain->addTargetCommand($inner);
 
+            // TODO: DRY
             if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {
                 $inner->setContext(
                     $this->define(Relation::OUTER_KEY),

@@ -14,7 +14,7 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Query\InsertQuery;
 use Spiral\ORM\Command\Database\InsertCommand;
 
-class InsertCommandTest extends TestCase
+abstract class InsertCommandTest extends TestCase
 {
     public function testDatabase()
     {

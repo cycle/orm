@@ -25,8 +25,7 @@ class HasManyRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command,
-        $id = null
+        ContextCommandInterface $command
     ): CommandInterface {
         if ($related instanceof Collection) {
             $related = $related->toArray();
@@ -41,18 +40,18 @@ class HasManyRelation extends AbstractRelation
 
         $group = new GroupCommand();
         foreach ($related as $item) {
-            $group->addCommand($this->store($state, $item, $id));
+            $group->addCommand($this->store($state, $item));
         }
 
         foreach ($removed as $item) {
-            $group->addCommand($this->remove($state, $item, $id));
+            $group->addCommand($this->remove($state, $item));
         }
 
         return $group;
     }
 
     // todo: diff
-    protected function store(State $parentState, $related, $id): CommandInterface
+    protected function store(State $parentState, $related): CommandInterface
     {
         $relState = $this->orm->getHeap()->get($related);
         if (!empty($relState)) {
@@ -60,8 +59,9 @@ class HasManyRelation extends AbstractRelation
         }
 
         // todo: dirty state [?]
-        $inner = $this->orm->getMapper(get_class($related))->queueStore($related, $id);
+        $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
 
+        // todo: DRY
         if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
             $inner->setContext(
                 $this->define(Relation::OUTER_KEY),

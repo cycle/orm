@@ -14,7 +14,7 @@ use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\NullCommand;
 
-class ChainCommandTest extends TestCase
+abstract class ChainCommandTest extends TestCase
 {
     public function testNestedCommands()
     {

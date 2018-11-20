@@ -12,14 +12,13 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCommandInterface;
 use Spiral\ORM\Command\Database\LinkCommand;
 use Spiral\ORM\Command\NullCommand;
-use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 
 class RefersToRelation extends AbstractRelation
 {
-    const LEADING = false;
+    const LEADING = true;
 
     // todo: move to the strategy
     public function queueChange(
@@ -29,13 +28,9 @@ class RefersToRelation extends AbstractRelation
         $original,
         ContextCommandInterface $command
     ): CommandInterface {
-        if ($related === null && !$this->define(Relation::NULLABLE)) {
-            throw new NullException(
-                "Relation `{$this->class}`.`{$this->relation}` can not be null"
-            );
-        }
-
         $state->setRelation($this->relation, $related);
+
+        // todo: if related exists we can update right in parent command context
 
         if (is_null($related)) {
             // todo: reset value
@@ -50,6 +45,8 @@ class RefersToRelation extends AbstractRelation
 
         $pk = $this->orm->getSchema()->define(get_class($parent), Schema::PRIMARY_KEY);
 
+        // todo: NOT DRY
+        // todo: PK is OUTER KEY, not really PK !!!
         if ($state->getPrimaryKey() != null) {
             $link->setWhere([$pk => $state->getPrimaryKey()]);
         } else {
@@ -62,13 +59,17 @@ class RefersToRelation extends AbstractRelation
         }
 
         // or saved directly (need unification)
-        $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
-            if (!empty($state->getKey($this->define(Relation::OUTER_KEY)))) {
-                $link->setData([
-                    $this->define(Relation::INNER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
-                ]);
-            }
-        });
+        // todo: can be existed
+        if (!empty($relState) && !empty($relState->getKey($this->define(Relation::OUTER_KEY)))) {
+        } else {
+            $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
+                if (!empty($state->getKey($this->define(Relation::OUTER_KEY)))) {
+                    $link->setData([
+                        $this->define(Relation::INNER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
+                    ]);
+                }
+            });
+        }
 
         return $link;
     }

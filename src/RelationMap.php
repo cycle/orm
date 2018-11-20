@@ -56,7 +56,7 @@ final class RelationMap
         return $data;
     }
 
-    public function queueRelations($entity, ContextCommandInterface $command, $id): ContextCommandInterface
+    public function queueRelations($entity, ContextCommandInterface $command): ContextCommandInterface
     {
         // todo: what if entity new?
         $state = $this->orm->getHeap()->get($entity);
@@ -67,18 +67,17 @@ final class RelationMap
 
         foreach ($this->relations as $name => $relation) {
             if ($relation->isCascade() && $relation->isLeading()) {
-                if ($state->getRefMap($name) === $id) {
+                if ($state->getRefMap($name)) {
                     continue;
                 }
-                $state->setRefMap($name, $id);
+                $state->setRefMap($name, true);
 
                 $chain->addCommand($relation->queueChange(
                     $entity,
                     $state,
                     $data[$name] ?? null,
                     $state->getRelation($name),
-                    $command,
-                    $id
+                    $command
                 ));
             }
         }
@@ -86,23 +85,27 @@ final class RelationMap
         $chain->addTargetCommand($command);
 
         foreach ($this->relations as $name => $relation) {
-            if ($relation->isCascade()) {
-                //} && !$relation->isLeading()) {
-                if ($state->getRefMap($name) === $id) {
+            if ($relation->isCascade() && !$relation->isLeading()) {
+                if ($state->getRefMap($name)) {
                     continue;
                 }
 
-                $state->setRefMap($name, $id);
+                $state->setRefMap($name, true);
                 $chain->addCommand($relation->queueChange(
                     $entity,
                     $state,
                     $data[$name] ?? null,
                     $state->getRelation($name),
-                    $command,
-                    $id
+                    $command
                 ));
             }
         }
+
+        $chain->onComplete(function () use ($state) {
+            foreach ($this->relations as $name => $relation) {
+                $state->setRefMap($name, false);
+            }
+        });
 
         return $chain;
     }

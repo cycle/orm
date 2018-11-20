@@ -71,8 +71,7 @@ class ManyToManyRelation extends AbstractRelation
         State $state,
         $related,
         $original,
-        ContextCommandInterface $command,
-        $id = null
+        ContextCommandInterface $command
     ): CommandInterface {
         /**
          * @var PivotedCollectionInterface $related
@@ -94,14 +93,14 @@ class ManyToManyRelation extends AbstractRelation
         $group = new GroupCommand();
         foreach ($related as $item) {
             // todo: we also have to update
-            $group->addCommand($this->link($state, $item, $relContext->get($item), $id));
+            $group->addCommand($this->link($state, $item, $relContext->get($item)));
         }
 
         if (!empty($original)) {
             foreach ($original->getElements() as $item) {
                 if (!$related->contains($item)) {
                     // todo: unlink!
-                    $group->addCommand($this->unlink($state, $item, $id));
+                    $group->addCommand($this->unlink($state, $item));
                 }
             }
         }
@@ -116,13 +115,13 @@ class ManyToManyRelation extends AbstractRelation
     }
 
     // todo: diff
-    protected function link(State $parentState, $related, $context, $id): CommandInterface
+    protected function link(State $parentState, $related, $context): CommandInterface
     {
 
         // todo: dirty state [?]
 
         $chain = new ChainCommand();
-        $chain->addTargetCommand($this->orm->getMapper($related)->queueStore($related, $id));
+        $chain->addTargetCommand($this->orm->getMapper($related)->queueStore($related));
 
         $relState = $this->orm->getHeap()->get($related);
 
@@ -131,7 +130,7 @@ class ManyToManyRelation extends AbstractRelation
         if (is_object($context)) {
             // todo: validate
             $insert = new DelayCommand(
-                $this->orm->getMapper($context)->queueStore($context, $id),
+                $this->orm->getMapper($context)->queueStore($context),
                 [
                     $this->define(Relation::THOUGHT_INNER_KEY),
                     $this->define(Relation::THOUGHT_OUTER_KEY)
@@ -196,7 +195,7 @@ class ManyToManyRelation extends AbstractRelation
         return $chain;
     }
 
-    protected function unlink(State $parentState, $related, $id): CommandInterface
+    protected function unlink(State $parentState, $related): CommandInterface
     {
         // todo: DO NOT RUN IF NULL
         $delete = new DeleteCommand(
@@ -208,6 +207,7 @@ class ManyToManyRelation extends AbstractRelation
             ]
         );
 
+        // TODO: DRY
         if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
             $delete->setWhere(
                 [

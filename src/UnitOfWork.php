@@ -78,7 +78,6 @@ class UnitOfWork implements TransactionInterface
         $commands = [];
         foreach ($this->store as $entity) {
             $commands[] = $this->orm->getMapper($entity)->queueStore($entity, $id);
-
         }
 
         foreach ($this->delete as $entity) {

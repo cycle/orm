@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\Database\UpdateCommand;
 
-class UpdateCommandTest extends TestCase
+abstract class UpdateCommandTest extends TestCase
 {
     public function testIsEmpty()
     {

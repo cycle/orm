@@ -57,8 +57,7 @@ abstract class RefersToRelationTest extends BaseTest
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'comment_id',
-                            Relation::OUTER_KEY => 'id',
-                            Relation::NULLABLE  => true
+                            Relation::OUTER_KEY => 'id'
                         ],
                     ],
                     'comments'    => [
@@ -154,4 +153,6 @@ abstract class RefersToRelationTest extends BaseTest
     }
 
     // todo: test when parent is defined
+
+    // todo: set null
 }

@@ -160,6 +160,4 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
         $this->assertEquals($u->id, $u1->favorites[0]->favorited_by[0]->id);
     }
-
-    // todo: SNAPSHOTTING (CHANGE MAP DATA)
 }

@@ -106,7 +106,7 @@ class ORM implements ORMInterface
     {
         $orm = clone $this;
         $orm->schema = $schema;
-        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
+        $orm->factory = $orm->factory->withConfigured($orm, $orm->schema);
 
         return $orm;
     }
@@ -118,7 +118,7 @@ class ORM implements ORMInterface
     {
         if (empty($this->schema)) {
             $this->schema = $this->loadSchema();
-            $this->factory = $this->factory->withContext($this, $this->schema);
+            $this->factory = $this->factory->withConfigured($this, $this->schema);
         }
 
         return $this->schema;
@@ -130,7 +130,7 @@ class ORM implements ORMInterface
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
-        $orm->factory = $factory->withContext($orm, $orm->schema);
+        $orm->factory = $factory->withConfigured($orm, $orm->schema);
 
         return $orm;
     }
@@ -150,7 +150,7 @@ class ORM implements ORMInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
-        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
+        $orm->factory = $orm->factory->withConfigured($orm, $orm->schema);
 
         return $orm;
     }

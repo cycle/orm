@@ -116,20 +116,6 @@ final class State
         return $this->relations[$name] ?? null;
     }
 
-    public function getRelations(): array
-    {
-        return array_keys($this->relations);
-    }
-
-    /**
-     * @return int
-     */
-    public function getRefCount(): int
-    {
-        return $this->refCount;
-    }
-
-
     public function addReference()
     {
         $this->refCount++;
@@ -156,21 +142,21 @@ final class State
         $this->handlers[] = $handler;
     }
 
-    private $refMap = [];
+    private $visited = [];
 
     public function visited($rel)
     {
-        return $this->refMap[$rel] ?? null;
+        return $this->visited[$rel] ?? null;
     }
 
     public function setVisited($rel, $id)
     {
-        $this->refMap[$rel] = $id;
+        $this->visited[$rel] = $id;
     }
 
     public function flushVisited()
     {
-        $this->refMap = [];
+        $this->visited = [];
     }
 
     public function __destruct()
@@ -178,5 +164,6 @@ final class State
         $this->data = [];
         $this->handlers = [];
         $this->relations = [];
+        $this->visited = [];
     }
 }

@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 interface FactoryInterface
 {
-    public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
+    public function withConfigured(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
 
     public function mapper(string $class): MapperInterface;
 

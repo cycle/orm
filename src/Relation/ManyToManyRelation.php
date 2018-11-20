@@ -16,10 +16,10 @@ use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Control\ContextSequence;
+use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
-use Spiral\ORM\Command\DelayCommand;
 use Spiral\ORM\Exception\RelationException;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Relation;
@@ -131,18 +131,19 @@ class ManyToManyRelation extends AbstractRelation
 
         if (is_object($context)) {
             // todo: validate
-            $insert = new DelayCommand(
+            $insert = new Defer(
                 $this->orm->getMapper($context)->queueStore($context),
                 [
                     $this->define(Relation::THOUGHT_INNER_KEY),
                     $this->define(Relation::THOUGHT_OUTER_KEY)
-                ]
+                ],
+                "`{$this->class}`.`{$this->relation}` (ManyToMany)"
             );
         } else {
             // todo: THIS CAN BE UPDATE COMMAND AS WELL WHEN PARENT HAS CONTEXT (!!!!!)
 
             // can be not empty (!!!), WAIT FOR SPECIFIC KEYS
-            $insert = new DelayCommand(new InsertCommand(
+            $insert = new Defer(new InsertCommand(
                 $this->orm->getDatabase($this->class),
                 $this->define(Relation::PIVOT_TABLE),
                 is_array($context) ? $context : []
@@ -150,7 +151,8 @@ class ManyToManyRelation extends AbstractRelation
                 [
                     $this->define(Relation::THOUGHT_INNER_KEY),
                     $this->define(Relation::THOUGHT_OUTER_KEY)
-                ]
+                ],
+                "`{$this->class}`.`{$this->relation}` (ManyToMany)"
             );
         }
 
@@ -190,7 +192,6 @@ class ManyToManyRelation extends AbstractRelation
             });
         }
 
-        $insert->setDescription("`{$this->class}`.`{$this->relation}` (ManyToMany)");
         $chain->addCommand($insert);
 
         // todo: update relation state

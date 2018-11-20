@@ -45,7 +45,7 @@ class BelongsToRelation extends AbstractRelation
             //dump($innerState);
             if (!empty($innerState->getData()[$this->schema[Relation::OUTER_KEY]])) {
                 $command->setContext(
-                    $this->schema[Relation::INNER_KEY],
+                    $this->define(Relation::INNER_KEY),
                     $innerState->getData()[$this->schema[Relation::OUTER_KEY]]
                 );
             } else {
@@ -58,7 +58,6 @@ class BelongsToRelation extends AbstractRelation
             }
         } else {
             $command->setContext($this->schema[Relation::INNER_KEY], null);
-
             return new NullCommand();
         }
 

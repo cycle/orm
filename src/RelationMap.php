@@ -86,12 +86,13 @@ final class RelationMap
         $chain->addTargetCommand($command);
 
         foreach ($this->relations as $name => $relation) {
-            if ($relation->isCascade() && !$relation->isLeading()) {
+            if ($relation->isCascade()) {
+                //} && !$relation->isLeading()) {
                 if ($state->getRefMap($name) === $id) {
                     continue;
                 }
-                $state->setRefMap($name, $id);
 
+                $state->setRefMap($name, $id);
                 $chain->addCommand($relation->queueChange(
                     $entity,
                     $state,

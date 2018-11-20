@@ -26,8 +26,12 @@ class LinkCommand extends DatabaseCommand
      * @param array             $data
      * @param array             $where
      */
-    public function __construct(DatabaseInterface $db, string $table, array $data = [], array $where = [])
-    {
+    public function __construct(
+        DatabaseInterface $db,
+        string $table,
+        array $data = [],
+        array $where = []
+    ) {
         parent::__construct($db, $table);
         $this->data = $data;
         $this->where = $where;

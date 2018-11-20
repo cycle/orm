@@ -56,5 +56,9 @@ trait ChainTrait
     /**
      * @inheritdoc
      */
-    abstract public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface;
+    abstract public function loadRelation(
+        string $relation,
+        array $options,
+        bool $join = false
+    ): LoaderInterface;
 }

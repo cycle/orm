@@ -10,8 +10,9 @@ namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\Database\Traits\WhereTrait;
+use Spiral\ORM\Command\ScopedInterface;
 
-class DeleteCommand extends DatabaseCommand
+class DeleteCommand extends DatabaseCommand implements ScopedInterface
 {
     use WhereTrait;
 

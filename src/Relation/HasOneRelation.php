@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Condition;
-use Spiral\ORM\Command\Control\ContextSequence;
+use Spiral\ORM\Command\Control\ContextualSequence;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -23,9 +23,10 @@ class HasOneRelation extends AbstractRelation
      */
     public function queueRelation($entity, State $state, $related, $original): CommandInterface
     {
+        // todo: extract
         $state->setRelation($this->relation, $related);
 
-        $sequence = new ContextSequence();
+        $sequence = new ContextualSequence();
 
         if (!empty($original) && $related !== $original) {
             $this->deleteOriginal($sequence, $original);
@@ -51,16 +52,18 @@ class HasOneRelation extends AbstractRelation
             $this->define(Relation::OUTER_KEY)
         );
 
+        // todo: morph key
+
         return $sequence;
     }
 
     /**
      * Delete original related entity of no other objects reference to it.
      *
-     * @param ContextSequence $sequence
-     * @param object          $original
+     * @param ContextualSequence $sequence
+     * @param object             $original
      */
-    protected function deleteOriginal(ContextSequence $sequence, $original)
+    protected function deleteOriginal(ContextualSequence $sequence, $original)
     {
         $oldState = $this->getState($original);
         $oldState->decReference();

@@ -8,26 +8,24 @@
 
 namespace Spiral\ORM\Relation\Traits;
 
-use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\State;
 
 trait PromiseTrait
 {
     protected function promiseContext(
-        ContextualCommandInterface $command,
+        ContextualInterface $command,
         State $parent,
         $parentKey,
         ?State $current,
         $localKey
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
-            if (!empty($current) && $current->getKey($localKey) == $value) {
+            if (empty($current) || $current->getKey($localKey) != $value) {
                 // no changes
-                return;
+                $command->setContext($localKey, $parent->getKey($parentKey));
             }
-
-            $command->setContext($localKey, $parent->getKey($parentKey));
-            return;
         }
 
         $parent->onUpdate(function (State $source) use ($command, $localKey, $parentKey) {
@@ -37,6 +35,34 @@ trait PromiseTrait
             }
 
             $command->setContext($localKey, $source->getKey($parentKey));
+        });
+    }
+
+    protected function promiseWhere(
+        ScopedInterface $command,
+        State $parent,
+        $parentKey,
+        ?State $current,
+        $localKey
+    ) {
+        if (!empty($value = $parent->getKey($parentKey))) {
+            if (empty($current) || $current->getKey($localKey) != $value) {
+                // no changes
+                $command->setWhere(
+                    [$localKey => $parent->getKey($parentKey)] + $command->getWhere()
+                );
+            }
+        }
+
+        $parent->onUpdate(function (State $source) use ($command, $localKey, $parentKey) {
+            if (empty($value = $source->getKey($parentKey))) {
+                // not ready
+                return;
+            }
+
+            $command->setWhere(
+                [$localKey => $source->getKey($parentKey)] + $command->getWhere()
+            );
         });
     }
 }

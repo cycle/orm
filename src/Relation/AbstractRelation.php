@@ -86,5 +86,4 @@ abstract class AbstractRelation implements RelationInterface
     {
         return sprintf("%s->%s", $this->class, $this->relation);
     }
-
 }

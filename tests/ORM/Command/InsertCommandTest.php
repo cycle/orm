@@ -12,13 +12,13 @@ use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Query\InsertQuery;
-use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\Insert;
 
 abstract class InsertCommandTest extends TestCase
 {
     public function testDatabase()
     {
-        $cmd = new InsertCommand(
+        $cmd = new Insert(
             $db = m::mock(DatabaseInterface::class),
             'table',
             []
@@ -29,7 +29,7 @@ abstract class InsertCommandTest extends TestCase
 
     public function testIsEmpty()
     {
-        $cmd = new InsertCommand(
+        $cmd = new Insert(
             $db = m::mock(DatabaseInterface::class),
             'table',
             []
@@ -40,7 +40,7 @@ abstract class InsertCommandTest extends TestCase
 
     public function testIsEmptyData()
     {
-        $cmd = new InsertCommand(
+        $cmd = new Insert(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value']
@@ -52,7 +52,7 @@ abstract class InsertCommandTest extends TestCase
 
     public function testIsEmptyContext()
     {
-        $cmd = new InsertCommand(
+        $cmd = new Insert(
             m::mock(DatabaseInterface::class),
             'table',
             []
@@ -66,7 +66,7 @@ abstract class InsertCommandTest extends TestCase
 
     public function testExecute()
     {
-        $cmd = new InsertCommand(
+        $cmd = new Insert(
             $m = m::mock(DatabaseInterface::class),
             'table',
             ['key' => 'value']

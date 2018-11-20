@@ -8,32 +8,32 @@
 
 namespace Spiral\ORM\Command\Control;
 
-use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Exception\CommandException;
 
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.
  */
-class ContextSequence extends Sequence implements ContextualCommandInterface
+class ContextualSequence extends Sequence implements ContextualInterface
 {
-    /** @var ContextualCommandInterface */
+    /** @var ContextualInterface */
     private $primary;
 
     /**
      * Add primary command to the sequence.
      *
-     * @param ContextualCommandInterface $command
+     * @param ContextualInterface $command
      */
-    public function addPrimary(ContextualCommandInterface $command)
+    public function addPrimary(ContextualInterface $command)
     {
         $this->addCommand($command);
         $this->primary = $command;
     }
 
     /**
-     * @return ContextualCommandInterface
+     * @return ContextualInterface
      */
-    public function getPrimary(): ContextualCommandInterface
+    public function getPrimary(): ContextualInterface
     {
         if (empty($this->primary)) {
             throw new CommandException("Primary sequence command is not set");

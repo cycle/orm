@@ -8,14 +8,14 @@
 
 namespace Spiral\ORM\Command\Control;
 
-use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 
 /**
  * Control command to defer execution of parent command until needed context values are set.
  */
-final class Defer implements ContextualCommandInterface, \IteratorAggregate
+final class Defer implements ContextualInterface, \IteratorAggregate
 {
-    /** @var ContextualCommandInterface */
+    /** @var ContextualInterface */
     private $command;
 
     /** @var array */
@@ -25,11 +25,11 @@ final class Defer implements ContextualCommandInterface, \IteratorAggregate
     private $description;
 
     /**
-     * @param ContextualCommandInterface $command
-     * @param array                      $require
-     * @param string                     $description
+     * @param ContextualInterface $command
+     * @param array               $require
+     * @param string              $description
      */
-    public function __construct(ContextualCommandInterface $command, array $require = [], string $description = '')
+    public function __construct(ContextualInterface $command, array $require = [], string $description = '')
     {
         $this->command = $command;
         $this->require = array_flip($require);

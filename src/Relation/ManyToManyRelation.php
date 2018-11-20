@@ -13,11 +13,11 @@ use Spiral\ORM\Collection\PivotedCollection;
 use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Collection\RelationContext;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\Control\ContextSequence;
+use Spiral\ORM\Command\Control\ContextualSequence;
 use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\DeleteCommand;
-use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Exception\RelationException;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Relation;
@@ -65,12 +65,11 @@ class ManyToManyRelation extends AbstractRelation
         );
     }
 
-    public function queueRelation(
-        $entity,
-        State $state,
-        $related,
-        $original
-    ): CommandInterface {
+    /**
+     * @inheritdoc
+     */
+    public function queueRelation($entity, State $state, $related, $original): CommandInterface
+    {
         /**
          * @var PivotedCollectionInterface $related
          * @var ContextStorage             $original
@@ -119,7 +118,7 @@ class ManyToManyRelation extends AbstractRelation
         // todo: dirty state [?]
         $cmd = $this->orm->getMapper($related)->queueStore($related);
 
-        $chain = new ContextSequence();
+        $chain = new ContextualSequence();
         $chain->addPrimary($cmd);
 
         $relState = $this->orm->getHeap()->get($related);
@@ -140,7 +139,7 @@ class ManyToManyRelation extends AbstractRelation
             // todo: THIS CAN BE UPDATE COMMAND AS WELL WHEN PARENT HAS CONTEXT (!!!!!)
 
             // can be not empty (!!!), WAIT FOR SPECIFIC KEYS
-            $insert = new Defer(new InsertCommand(
+            $insert = new Defer(new Insert(
                 $this->orm->getDatabase($this->class),
                 $this->define(Relation::PIVOT_TABLE),
                 is_array($context) ? $context : []

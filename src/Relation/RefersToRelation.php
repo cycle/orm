@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Database\LinkCommand;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\DependencyInterface;
@@ -23,7 +23,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
      * @inheritdoc
      */
     public function queueDependency(
-        ContextualCommandInterface $command,
+        ContextualInterface $command,
         $entity,
         State $state,
         $related,

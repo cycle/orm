@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\ContextualCommandInterface;
-use Spiral\ORM\Command\Control\ContextSequence;
+use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\Control\ContextualSequence;
 
 final class RelationMap
 {
@@ -73,9 +73,9 @@ final class RelationMap
         $entity,
         array $data,
         State $state,
-        ContextualCommandInterface $command
-    ): ContextualCommandInterface {
-        $sequence = new ContextSequence();
+        ContextualInterface $command
+    ): ContextualInterface {
+        $sequence = new ContextualSequence();
 
         foreach ($this->dependencies as $name => $relation) {
             if (!$relation->isCascade()) {

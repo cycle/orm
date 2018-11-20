@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests\Command;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\ORM\Command\ChainCommand;
-use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\NullCommand;
 
 abstract class ChainCommandTest extends TestCase
@@ -22,12 +22,12 @@ abstract class ChainCommandTest extends TestCase
 
         $command->addCommand(new NullCommand());
         $command->addCommand(new NullCommand());
-        $command->addCommand(m::mock(InsertCommand::class));
-        $command->addCommand(m::mock(InsertCommand::class));
+        $command->addCommand(m::mock(Insert::class));
+        $command->addCommand(m::mock(Insert::class));
 
         $count = 0;
         foreach ($command as $sub) {
-            $this->assertInstanceOf(InsertCommand::class, $sub);
+            $this->assertInstanceOf(Insert::class, $sub);
             $count++;
         }
 
@@ -42,7 +42,7 @@ abstract class ChainCommandTest extends TestCase
     public function testGetPrimaryKey()
     {
         $command = new ChainCommand();
-        $command->addParent($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(Insert::class));
 
         $lead->expects('getPrimaryKey')->andReturn(1);
 
@@ -61,7 +61,7 @@ abstract class ChainCommandTest extends TestCase
     public function testGetContext()
     {
         $command = new ChainCommand();
-        $command->addParent($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(Insert::class));
 
         $lead->shouldReceive('getContext')->andReturn(['hi']);
 
@@ -71,7 +71,7 @@ abstract class ChainCommandTest extends TestCase
     public function testAddContext()
     {
         $command = new ChainCommand();
-        $command->addParent($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(Insert::class));
 
         $lead->shouldReceive('setContext')->with('name', 'value');
 
@@ -82,7 +82,7 @@ abstract class ChainCommandTest extends TestCase
     public function testPassCallbackExecute()
     {
         $command = new ChainCommand();
-        $command->addParent($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(Insert::class));
 
         $f = function () {
         };
@@ -95,7 +95,7 @@ abstract class ChainCommandTest extends TestCase
     public function testPassCallbackComplete()
     {
         $command = new ChainCommand();
-        $command->addParent($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(Insert::class));
 
         $f = function () {
         };
@@ -108,7 +108,7 @@ abstract class ChainCommandTest extends TestCase
     public function testPassCallbackRollback()
     {
         $command = new ChainCommand();
-        $command->addParent($lead = m::mock(InsertCommand::class));
+        $command->addParent($lead = m::mock(Insert::class));
 
         $f = function () {
         };

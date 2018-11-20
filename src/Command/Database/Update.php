@@ -9,16 +9,17 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Database\Traits\ContextTrait;
 use Spiral\ORM\Command\Database\Traits\WhereTrait;
+use Spiral\ORM\Command\ScopedInterface;
 
 /**
  * Update data CAN be modified by parent commands using context.
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class UpdateCommand extends DatabaseCommand implements ContextualCommandInterface
+class Update extends DatabaseCommand implements ContextualInterface, ScopedInterface
 {
     use ContextTrait, WhereTrait;
 

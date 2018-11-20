@@ -129,14 +129,20 @@ final class State
         return $this->refCount;
     }
 
+
     public function addReference()
     {
         $this->refCount++;
     }
 
-    public function delRef()
+    public function decReference()
     {
         $this->refCount--;
+    }
+
+    public function hasReferences(): bool
+    {
+        return $this->refCount > 0;
     }
 
     /**

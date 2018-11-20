@@ -83,8 +83,14 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[$key] ?? null;
     }
 
+    protected function getState($entity): ?State
+    {
+        return $this->orm->getHeap()->get($entity);
+    }
+
     public function __toString()
     {
         return sprintf("%s->%s", $this->class, $this->relation);
     }
+
 }

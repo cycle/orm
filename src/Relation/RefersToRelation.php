@@ -20,7 +20,9 @@ class RefersToRelation extends AbstractRelation
 {
     const LEADING = true;
 
-    // todo: move to the strategy
+    /**
+     * @inheritdoc
+     */
     public function queueChange(
         $parent,
         State $state,

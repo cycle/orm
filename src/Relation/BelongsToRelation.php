@@ -34,6 +34,7 @@ class BelongsToRelation extends AbstractRelation
             );
         }
 
+        // todo: extract ?
         $state->setRelation($this->relation, $related);
 
         if (!is_null($related)) {

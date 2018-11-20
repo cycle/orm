@@ -18,8 +18,13 @@ use Spiral\ORM\State;
 
 class HasManyRelation extends AbstractRelation
 {
+    use Relation\Traits\PromiseTrait;
+
     public const COLLECTION = true;
 
+    /**
+     * @inheritdoc
+     */
     public function queueChange(
         $parent,
         State $state,
@@ -28,80 +33,80 @@ class HasManyRelation extends AbstractRelation
         ContextualCommandInterface $command
     ): CommandInterface {
         if ($related instanceof Collection) {
+            // todo: unify (see ManyToMany)
             $related = $related->toArray();
         }
 
-        // removed
-        $removed = array_udiff($original ?? [], $related, function ($a, $b) {
-            return strcmp(spl_object_hash($a), spl_object_hash($b));
-        });
-
         $state->setRelation($this->relation, $related);
 
-        $group = new Sequence();
+        $sequence = new Sequence();
+
         foreach ($related as $item) {
-            $group->addCommand($this->store($state, $item));
+            $sequence->addCommand($this->store($state, $item));
         }
 
-        foreach ($removed as $item) {
-            $group->addCommand($this->remove($state, $item));
+        foreach ($this->calcDeleted($related, $original ?? []) as $item) {
+            $sequence->addCommand($this->delete($state, $item));
         }
 
-        return $group;
+        return $sequence;
     }
 
-    // todo: diff
+    /**
+     * Return objects which are subject of removal.
+     *
+     * @param array $related
+     * @param array $original
+     * @return array
+     */
+    protected function calcDeleted(array $related, array $original)
+    {
+        return array_udiff($original ?? [], $related, function ($a, $b) {
+            return strcmp(spl_object_hash($a), spl_object_hash($b));
+        });
+    }
+
+    /**
+     * Persist related object.
+     *
+     * @param State  $parentState
+     * @param object $related
+     * @return CommandInterface
+     */
     protected function store(State $parentState, $related): CommandInterface
     {
-        $relState = $this->orm->getHeap()->get($related);
-        if (!empty($relState)) {
-            $relState->addReference();
-        }
+        $relStore = $this->orm->getMapper($related)->queueStore($related);
 
-        // todo: dirty state [?]
-        $inner = $this->orm->getMapper(get_class($related))->queueStore($related);
+        $relState = $this->getState($related);
+        $relState->addReference();
 
-        // todo: DRY
-        if (!empty($parentState->getKey($this->define(Relation::INNER_KEY)))) {
-            // todo: deal with optimizations later
-            if (
-                empty($relState)
-                ||
-                $relState->getKey($this->define(Relation::OUTER_KEY))
-                != $parentState->getKey($this->define(Relation::INNER_KEY))
-            ) {
-                $inner->setContext(
-                    $this->define(Relation::OUTER_KEY),
-                    $parentState->getKey($this->define(Relation::INNER_KEY))
-                );
-            }
-        } else {
-            // what if multiple keys set
-            $parentState->onUpdate(function (State $state) use ($inner) {
+        $this->promiseContext(
+            $relStore,
+            $parentState,
+            $this->define(Relation::INNER_KEY),
+            $relState,
+            $this->define(Relation::OUTER_KEY)
+        );
 
-                $inner->setContext(
-                    $this->define(Relation::OUTER_KEY),
-                    $state->getKey($this->define(Relation::INNER_KEY))
-                );
-
-                // todo: morph key
-            });
-        }
-
-        // todo: update relation state
-
-        return $inner;
+        return $relStore;
     }
 
-    protected function remove(State $parentState, $related): CommandInterface
+    /**
+     * Remove one of related objects.
+     *
+     * @param State  $parentState
+     * @param object $related
+     * @return CommandInterface
+     */
+    protected function delete(State $parentState, $related): CommandInterface
     {
-        $origState = $this->orm->getHeap()->get($related);
-        $origState->delRef();
+        $origState = $this->getState($related);
+        $origState->decReference();
 
         return new Condition(
             $this->orm->getMapper($related)->queueDelete($related),
             function () use ($origState) {
-                return $origState->getRefCount() == 0;
+                return !$origState->hasReferences();
             }
         );
     }

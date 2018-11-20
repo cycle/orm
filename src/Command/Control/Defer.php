@@ -13,7 +13,7 @@ use Spiral\ORM\Command\ContextualInterface;
 /**
  * Control command to defer execution of parent command until needed context values are set.
  */
-final class Defer implements ContextualInterface, \IteratorAggregate
+class Defer implements ContextualInterface, \IteratorAggregate
 {
     /** @var ContextualInterface */
     private $command;
@@ -29,8 +29,11 @@ final class Defer implements ContextualInterface, \IteratorAggregate
      * @param array               $require
      * @param string              $description
      */
-    public function __construct(ContextualInterface $command, array $require = [], string $description = '')
-    {
+    public function __construct(
+        ContextualInterface $command,
+        array $require = [],
+        string $description = ''
+    ) {
         $this->command = $command;
         $this->require = array_flip($require);
         $this->description = $description;
@@ -43,6 +46,7 @@ final class Defer implements ContextualInterface, \IteratorAggregate
     {
         if (!$this->isReady()) {
             yield $this;
+
             return;
         }
 

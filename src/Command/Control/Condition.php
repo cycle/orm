@@ -11,9 +11,10 @@ namespace Spiral\ORM\Command\Control;
 use Spiral\ORM\Command\CommandInterface;
 
 /**
- * Expose underlying command when condition is met. If condition not met - underlying command is skipped.
+ * Expose underlying command when condition is met. If condition not met - underlying command is
+ * skipped.
  */
-final class Condition implements CommandInterface, \IteratorAggregate
+class Condition implements CommandInterface, \IteratorAggregate
 {
     /** @var CommandInterface */
     private $parent;

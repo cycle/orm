@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-class ColumnRendererTest extends \Spiral\ORM\Tests\ColumnRendererTest 
+class TableRendererTest extends \Spiral\ORM\Tests\TableRendererTest
 { 
     const DRIVER = "mysql"; 
 }

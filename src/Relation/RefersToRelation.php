@@ -18,8 +18,6 @@ use Spiral\ORM\State;
 
 class RefersToRelation extends AbstractRelation
 {
-    const LEADING = true;
-
     /**
      * @inheritdoc
      */

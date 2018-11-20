@@ -11,15 +11,14 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\NullCommand;
+use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
 // do not throw save?
-class BelongsToRelation extends AbstractRelation
+class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
-    const LEADING = true;
-
     // todo: move to the strategy
     public function queueChange(
         $parent,

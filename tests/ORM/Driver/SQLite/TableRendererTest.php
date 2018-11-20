@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\SQLite; 
 
-class ColumnRendererTest extends \Spiral\ORM\Tests\ColumnRendererTest 
+class TableRendererTest extends \Spiral\ORM\Tests\TableRendererTest
 { 
     const DRIVER = "sqlite"; 
 }

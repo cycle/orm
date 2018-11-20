@@ -9,14 +9,14 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\Database\Schema\AbstractTable;
-use Spiral\ORM\Util\ColumnRenderer;
+use Spiral\ORM\Util\TableRenderer;
 
-abstract class ColumnRendererTest extends BaseTest
+abstract class TableRendererTest extends BaseTest
 {
     public function testRenderString()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -42,7 +42,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderStringNullDefault()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -67,7 +67,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderStringNullDeclared()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -90,7 +90,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderStringNullableDeclared()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -113,7 +113,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderEnum()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -139,7 +139,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderEnumNullDefault()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -167,7 +167,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderEnumNullSecond()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -198,7 +198,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderBadDeclaration()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -215,7 +215,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderBadDeclaration2()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,
@@ -232,7 +232,7 @@ abstract class ColumnRendererTest extends BaseTest
     public function testRenderBadDeclaration3()
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
-        $renderer = new ColumnRenderer();
+        $renderer = new TableRenderer();
 
         $renderer->renderColumns(
             $table,

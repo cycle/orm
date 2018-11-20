@@ -19,7 +19,7 @@ use Spiral\ORM\Exception\Schema\DeclarationException;
  * Attention, this class will try to guess default value if column is NOT NULL and no default
  * value provided by user.
  */
-final class ColumnRenderer
+final class TableRenderer
 {
     /**
      * Render columns in table based on string definition.

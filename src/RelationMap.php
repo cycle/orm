@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\ContextualCommandInterface;
 use Spiral\ORM\Command\Control\ContextSequence;
 
@@ -23,10 +22,19 @@ final class RelationMap
     /** @var RelationInterface[] */
     private $relations = [];
 
+    /** @var DependencyInterface[] */
+    private $dependencies = [];
+
     public function __construct(ORMInterface $orm, array $relations)
     {
         $this->orm = $orm;
         $this->relations = $relations;
+
+        foreach ($relations as $relation) {
+            if ($relation instanceof DependencyInterface) {
+                $this->dependencies[] = $relation;
+            }
+        }
     }
 
     public function init(State $state, array $data): array
@@ -70,40 +78,41 @@ final class RelationMap
 
         $data = $this->orm->getMapper($entity)->extract($entity);
 
-        foreach ($this->relations as $name => $relation) {
-            if ($relation->isCascade() && $relation->isLeading()) {
-                if ($state->getRefMap($name)) {
-                    continue;
-                }
-                $state->setRefMap($name, true);
+        foreach ($this->dependencies as $name => $relation) {
+            if (!$relation->isCascade() || $state->getRefMap($name)) {
+                continue;
+            }
 
-                $chain->addCommand($relation->queueChange(
+            $state->setRefMap($name, true);
+
+            $chain->addCommand(
+                $relation->queueChange(
                     $entity,
                     $state,
                     $data[$name] ?? null,
                     $state->getRelation($name),
                     $command
-                ));
-            }
+                )
+            );
         }
 
         $chain->addPrimary($command);
 
         foreach ($this->relations as $name => $relation) {
-            if ($relation->isCascade() && !$relation->isLeading()) {
-                if ($state->getRefMap($name)) {
-                    continue;
-                }
+            if (!$relation->isCascade() || $state->getRefMap($name)) {
+                continue;
+            }
 
-                $state->setRefMap($name, true);
-                $chain->addCommand($relation->queueChange(
+            $state->setRefMap($name, true);
+            $chain->addCommand(
+                $relation->queueChange(
                     $entity,
                     $state,
                     $data[$name] ?? null,
                     $state->getRelation($name),
                     $command
-                ));
-            }
+                )
+            );
         }
 
         $chain->onComplete(function () use ($state) {
@@ -111,6 +120,8 @@ final class RelationMap
                 $state->setRefMap($name, false);
             }
         });
+
+        // todo: rollback
 
         return $chain;
     }

@@ -23,9 +23,6 @@ class HasOneRelation extends AbstractRelation
      */
     public function queueRelation($entity, State $state, $related, $original): CommandInterface
     {
-        // todo: extract
-        $state->setRelation($this->relation, $related);
-
         $sequence = new ContextualSequence();
 
         if (!empty($original) && $related !== $original) {

@@ -10,7 +10,6 @@ namespace Spiral\ORM\Relation;
 
 
 use Spiral\ORM\Collection\PivotedCollection;
-use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Collection\RelationContext;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\ContextualSequence;
@@ -26,6 +25,8 @@ use Spiral\ORM\Util\ContextStorage;
 
 class ManyToManyRelation extends AbstractRelation
 {
+    use Relation\Traits\PromiseTrait;
+
     public const COLLECTION = true;
 
     public function initArray(array $data)
@@ -65,50 +66,39 @@ class ManyToManyRelation extends AbstractRelation
         );
     }
 
+    public function extract($relData)
+    {
+        return new ContextStorage(
+            $relData->toArray(),
+            $relData->getRelationContext()->getContext()
+        );
+    }
+
     /**
      * @inheritdoc
      */
     public function queueRelation($entity, State $state, $related, $original): CommandInterface
     {
         /**
-         * @var PivotedCollectionInterface $related
-         * @var ContextStorage             $original
+         * @var ContextStorage $related
+         * @var ContextStorage $original
          */
-        $state->setRelation($this->relation, new ContextStorage(
-            $related->toArray(),
-            $related->getRelationContext()->getContext()
-        ));
 
-        // schedule all
-
-        /**
-         * @var PivotedCollectionInterface $related
-         * @var ContextStorage             $original
-         */
-        $relContext = $related->getRelationContext();
-
-        $group = new Sequence();
-        foreach ($related as $item) {
-            // todo: we also have to update
-            $group->addCommand($this->link($state, $item, $relContext->get($item)));
+        $sequence = new Sequence();
+        foreach ($related->getElements() as $item) {
+            // todo: what about original, check the change?
+            $sequence->addCommand($this->link($state, $item, $related->get($item)));
         }
 
         if (!empty($original)) {
             foreach ($original->getElements() as $item) {
                 if (!$related->contains($item)) {
-                    // todo: unlink!
-                    $group->addCommand($this->unlink($state, $item));
+                    $sequence->addCommand($this->unlink($state, $item));
                 }
             }
         }
 
-        // insert delayed
-        // update delayed
-
-        // store or not to store?
-        // cascade can only update
-
-        return $group;
+        return $sequence;
     }
 
     // todo: diff
@@ -121,7 +111,7 @@ class ManyToManyRelation extends AbstractRelation
         $chain = new ContextualSequence();
         $chain->addPrimary($cmd);
 
-        $relState = $this->orm->getHeap()->get($related);
+        $relState = $this->getState($related);
 
         // todo: check if context instance of pivot entity
 

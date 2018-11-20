@@ -101,15 +101,13 @@ final class RelationMap
             }
             $state->setVisited($name, true);
 
+            $related = $relation->extract($data[$name] ?? null);
+
             $sequence->addCommand(
-                $relation->queueRelation(
-                    $entity,
-                    $state,
-                    $data[$name] ?? null,
-                    $state->getRelation($name),
-                    $command
-                )
+                $relation->queueRelation($entity, $state, $related, $state->getRelation($name))
             );
+
+            $state->setRelation($name, $related);
         }
 
         $sequence->onComplete([$state, 'flushVisited']);

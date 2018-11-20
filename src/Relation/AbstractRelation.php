@@ -72,6 +72,11 @@ abstract class AbstractRelation implements RelationInterface
         return new ArrayCollection($data);
     }
 
+    public function extract($relData)
+    {
+        return $relData;
+    }
+
     protected function define(string $key)
     {
         return $this->schema[$key] ?? null;

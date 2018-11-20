@@ -29,8 +29,6 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $related,
         $original
     ): CommandInterface {
-        $state->setRelation($this->relation, $related);
-
         if (is_null($related)) {
             $command->setContext($this->define(Relation::INNER_KEY), null);
 

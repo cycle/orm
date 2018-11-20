@@ -41,4 +41,18 @@ class ContextStorage
     {
         return $this->context;
     }
+
+    public function get($entity)
+    {
+        try {
+            return $this->context->offsetGet($entity);
+        } catch (\UnexpectedValueException $e) {
+            return null;
+        }
+    }
+
+    public function contains($entity)
+    {
+        return in_array($entity, $this->elements, true);
+    }
 }

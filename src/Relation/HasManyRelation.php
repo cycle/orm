@@ -21,18 +21,20 @@ class HasManyRelation extends AbstractRelation
 
     public const COLLECTION = true;
 
+    public function extract($relData)
+    {
+        if ($relData instanceof Collection) {
+            return $relData->toArray();
+        }
+
+        return $relData;
+    }
+
     /**
      * @inheritdoc
      */
     public function queueRelation($entity, State $state, $related, $original): CommandInterface
     {
-        if ($related instanceof Collection) {
-            // todo: unify (see ManyToMany)
-            $related = $related->toArray();
-        }
-
-        $state->setRelation($this->relation, $related);
-
         $sequence = new Sequence();
 
         foreach ($related as $item) {

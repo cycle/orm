@@ -165,7 +165,7 @@ class UnitOfWork implements TransactionInterface
     {
         /** @var CommandInterface $command */
         foreach ($commands as $command) {
-            if ($command->isReady()) {
+            if (!$command->isReady()) {
                 yield null => $command;
                 continue;
             }

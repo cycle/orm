@@ -6,11 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command;
+namespace Spiral\ORM\Command\Control;
 
-// todo: not chain? find better name for chain command?
-class GroupCommand extends AbstractCommand implements \IteratorAggregate
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\NullCommand;
+
+/**
+ * Wraps multiple commands into one sequence.
+ */
+class Sequence implements CommandInterface, \IteratorAggregate
 {
+    /** @var CommandInterface[] */
     private $commands = [];
 
     /**
@@ -31,13 +37,22 @@ class GroupCommand extends AbstractCommand implements \IteratorAggregate
     public function getIterator(): \Generator
     {
         foreach ($this->commands as $command) {
-            if (!$command->isReady() && $command instanceof \Traversable) {
+            if ($command instanceof \Traversable) {
                 yield from $command;
                 continue;
             }
 
             yield $command;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isReady(): bool
+    {
+        // always ready
+        return true;
     }
 
     /**
@@ -60,6 +75,30 @@ class GroupCommand extends AbstractCommand implements \IteratorAggregate
      * {@inheritdoc}
      */
     public function rollBack()
+    {
+        // nothing
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onExecute(callable $closure)
+    {
+        // nothing
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onComplete(callable $closure)
+    {
+        // nothing
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function onRollBack(callable $closure)
     {
         // nothing
     }

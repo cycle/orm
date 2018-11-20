@@ -22,41 +22,13 @@ abstract class AbstractCommand implements CommandInterface
     private $onRollBack = [];
 
     /**
-     * Closure to be called after command executing.
-     *
-     * @param callable $closure
+     * @return bool
      */
-    final public function onExecute(callable $closure)
-    {
-        $this->onExecute[] = $closure;
-    }
-
-    /**
-     * To be called after parent transaction been commited.
-     *
-     * @param callable $closure
-     */
-    final public function onComplete(callable $closure)
-    {
-        $this->onComplete[] = $closure;
-    }
-
-    /**
-     * To be called after parent transaction been rolled back.
-     *
-     * @param callable $closure
-     */
-    final public function onRollBack(callable $closure)
-    {
-        $this->onRollBack[] = $closure;
-    }
-
     public function isReady(): bool
     {
         // is it?
-        return false;
+        return true;
     }
-
 
     /**
      * {@inheritdoc}
@@ -86,5 +58,35 @@ abstract class AbstractCommand implements CommandInterface
         foreach ($this->onRollBack as $closure) {
             call_user_func($closure, $this);
         }
+    }
+
+    /**
+     * Closure to be called after command executing.
+     *
+     * @param callable $closure
+     */
+    final public function onExecute(callable $closure)
+    {
+        $this->onExecute[] = $closure;
+    }
+
+    /**
+     * To be called after parent transaction been commited.
+     *
+     * @param callable $closure
+     */
+    final public function onComplete(callable $closure)
+    {
+        $this->onComplete[] = $closure;
+    }
+
+    /**
+     * To be called after parent transaction been rolled back.
+     *
+     * @param callable $closure
+     */
+    final public function onRollBack(callable $closure)
+    {
+        $this->onRollBack[] = $closure;
     }
 }

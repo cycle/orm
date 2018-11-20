@@ -29,7 +29,7 @@ class ConditionalCommand extends AbstractCommand implements \IteratorAggregate
     public function isReady(): bool
     {
         // is it?
-        return false;
+        return true;
     }
 
     public function execute()

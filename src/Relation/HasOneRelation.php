@@ -12,6 +12,7 @@ use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\Control\ContextSequence;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -29,7 +30,7 @@ class HasOneRelation extends AbstractRelation
         // todo: need rollback
         $state->setRelation($this->relation, $related);
 
-        $chain = new ChainCommand();
+        $chain = new ContextSequence();
 
         // delete, we need to think about replace
         if (!empty($original) && empty($related)) {
@@ -75,7 +76,7 @@ class HasOneRelation extends AbstractRelation
             // todo: dirty state [?]
             $inner = $this->orm->getMapper($related)->queueStore($related);
 
-            $chain->addParent($inner);
+            $chain->addPrimary($inner);
 
             // TODO: DRY
             if (!empty($state->getKey($this->define(Relation::INNER_KEY)))) {
@@ -92,7 +93,7 @@ class HasOneRelation extends AbstractRelation
 
                     // todo: morph key
                 });
-            }
+        }
 
             // todo: update relation state
         }

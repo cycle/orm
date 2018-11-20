@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Command;
 
-class DelayCommand implements CommandInterface, \IteratorAggregate
+class DelayCommand implements ContextualCommandInterface, \IteratorAggregate
 {
     private $parent;
 
@@ -22,22 +22,36 @@ class DelayCommand implements CommandInterface, \IteratorAggregate
 
     public function getIterator()
     {
-        yield $this->parent;
+        if ($this->isReady()) {
+            yield $this->parent;
+            return;
+        }
+
+        yield $this;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
-        $this->parent->execute();
+        // delegated to parent
     }
 
+    /**
+     * @inheritdoc
+     */
     public function complete()
     {
-        $this->parent->complete();
+        // delegated to parent
     }
 
+    /**
+     * @inheritdoc
+     */
     public function rollBack()
     {
-        $this->parent->rollBack();
+        // delegated to parent
     }
 
     public function onExecute(callable $closure)
@@ -77,11 +91,11 @@ class DelayCommand implements CommandInterface, \IteratorAggregate
 
         foreach ($this->need as $key) {
             if (empty($data[$key])) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     private $description;

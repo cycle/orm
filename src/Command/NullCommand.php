@@ -7,7 +7,9 @@
 
 namespace Spiral\ORM\Command;
 
+/**
+ * Doing noting.
+ */
 class NullCommand extends AbstractCommand
 {
-
 }

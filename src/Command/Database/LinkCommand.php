@@ -33,6 +33,11 @@ class LinkCommand extends DatabaseCommand
         $this->where = $where;
     }
 
+    public function isReady(): bool
+    {
+        return !$this->isEmpty();
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -66,11 +71,6 @@ class LinkCommand extends DatabaseCommand
         }
 
         parent::execute();
-    }
-
-    public function isReady(): bool
-    {
-        return $this->isEmpty();
     }
 
     private $description = '';

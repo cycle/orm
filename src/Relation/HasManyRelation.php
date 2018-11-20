@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\ContextualCommandInterface;
-use Spiral\ORM\Command\GroupCommand;
+use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
@@ -38,7 +38,7 @@ class HasManyRelation extends AbstractRelation
 
         $state->setRelation($this->relation, $related);
 
-        $group = new GroupCommand();
+        $group = new Sequence();
         foreach ($related as $item) {
             $group->addCommand($this->store($state, $item));
         }

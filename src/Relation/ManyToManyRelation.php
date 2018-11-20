@@ -15,10 +15,11 @@ use Spiral\ORM\Collection\RelationContext;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\Control\ContextSequence;
+use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\DelayCommand;
-use Spiral\ORM\Command\GroupCommand;
 use Spiral\ORM\Exception\RelationException;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Relation;
@@ -90,7 +91,7 @@ class ManyToManyRelation extends AbstractRelation
          */
         $relContext = $related->getRelationContext();
 
-        $group = new GroupCommand();
+        $group = new Sequence();
         foreach ($related as $item) {
             // todo: we also have to update
             $group->addCommand($this->link($state, $item, $relContext->get($item)));
@@ -121,8 +122,8 @@ class ManyToManyRelation extends AbstractRelation
         // todo: dirty state [?]
         $cmd = $this->orm->getMapper($related)->queueStore($related);
 
-        $chain = new ChainCommand();
-        $chain->addParent($cmd);
+        $chain = new ContextSequence();
+        $chain->addPrimary($cmd);
 
         $relState = $this->orm->getHeap()->get($related);
 

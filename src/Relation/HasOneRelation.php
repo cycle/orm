@@ -10,8 +10,8 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\ContextSequence;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
@@ -39,7 +39,7 @@ class HasOneRelation extends AbstractRelation
 
             // TODO: THIS IS SEPARATE?
 
-            return new ConditionalCommand(
+            return new Condition(
                 $this->orm->getMapper(get_class($original))->queueDelete($original),
                 function () use ($origState) {
                     return $origState->getRefCount() == 0;
@@ -54,7 +54,7 @@ class HasOneRelation extends AbstractRelation
             // TODO: THIS IS SEPARATE?
 
             $chain->addCommand(
-                new ConditionalCommand(
+                new Condition(
                     $this->orm->getMapper($original)->queueDelete($original),
                     function () use ($origState) {
                         return $origState->getRefCount() == 0;

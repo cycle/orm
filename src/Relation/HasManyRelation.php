@@ -10,8 +10,8 @@ namespace Spiral\ORM\Relation;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ConditionalCommand;
 use Spiral\ORM\Command\ContextualCommandInterface;
+use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
@@ -98,7 +98,7 @@ class HasManyRelation extends AbstractRelation
         $origState = $this->orm->getHeap()->get($related);
         $origState->delRef();
 
-        return new ConditionalCommand(
+        return new Condition(
             $this->orm->getMapper($related)->queueDelete($related),
             function () use ($origState) {
                 return $origState->getRefCount() == 0;

@@ -13,7 +13,7 @@ use Spiral\ORM\Command\ContextualCommandInterface;
 /**
  * Control command to defer execution of parent command until needed context values are set.
  */
-class Defer implements ContextualCommandInterface, \IteratorAggregate
+final class Defer implements ContextualCommandInterface, \IteratorAggregate
 {
     /** @var ContextualCommandInterface */
     private $command;

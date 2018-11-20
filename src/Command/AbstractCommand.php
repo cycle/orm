@@ -26,7 +26,6 @@ abstract class AbstractCommand implements CommandInterface
      */
     public function isReady(): bool
     {
-        // is it?
         return true;
     }
 

@@ -9,60 +9,48 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
+use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\Database\Traits\ContextTrait;
 use Spiral\ORM\Command\Database\Traits\WhereTrait;
+use Spiral\ORM\Command\ScopedInterface;
 
-// wait until link is established
-// todo: deprecate?
-class LinkCommand extends DatabaseCommand
+/**
+ * Ensure the link between two objects when non of this objects exists.
+ */
+class LinkCommand extends DatabaseCommand implements ContextualInterface, ScopedInterface
 {
-    use  WhereTrait;
+    use ContextTrait, WhereTrait;
 
-    /** @var array */
-    private $data;
+    /** @var string */
+    private $description;
 
     /**
      * @param DatabaseInterface $db
      * @param string            $table
-     * @param array             $data
-     * @param array             $where
+     * @param string            $description
      */
-    public function __construct(
-        DatabaseInterface $db,
-        string $table,
-        array $data = [],
-        array $where = []
-    ) {
+    public function __construct(DatabaseInterface $db, string $table, string $description)
+    {
         parent::__construct($db, $table);
-        $this->data = $data;
-        $this->where = $where;
+        $this->description = $description;
     }
 
+    /**
+     * Required to display error when values can not be satisfied.
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function isReady(): bool
     {
-        return !$this->isEmpty();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isEmpty(): bool
-    {
-        return empty($this->data) || empty($this->where);
-    }
-
-    /**
-     * Update values, context not included.
-     *
-     * @return array
-     */
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    public function setData(array $data)
-    {
-        $this->data = $data;
+        return !empty($this->context) && !empty($this->where);
     }
 
     /**
@@ -70,22 +58,7 @@ class LinkCommand extends DatabaseCommand
      */
     public function execute()
     {
-        if (!$this->isEmpty()) {
-            $this->db->update($this->table, $this->data, $this->where)->run();
-        }
-
+        $this->db->update($this->table, $this->context, $this->where)->run();
         parent::execute();
-    }
-
-    private $description = '';
-
-    public function setDescription(string $description)
-    {
-        $this->description = $description;
-    }
-
-    public function __toString(): string
-    {
-        return $this->description;
     }
 }

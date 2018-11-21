@@ -29,14 +29,21 @@ class Defer implements ContextualInterface, \IteratorAggregate
      * @param array               $require
      * @param string              $description
      */
-    public function __construct(
-        ContextualInterface $command,
-        array $require = [],
-        string $description = ''
-    ) {
+    public function __construct(ContextualInterface $command, array $require = [], string $description = '')
+    {
         $this->command = $command;
         $this->require = array_flip($require);
         $this->description = $description;
+    }
+
+    /**
+     * Required to display error when values can not be satisfied.
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->description;
     }
 
     /**
@@ -133,15 +140,5 @@ class Defer implements ContextualInterface, \IteratorAggregate
     public function onRollBack(callable $closure)
     {
         $this->command->onRollBack($closure);
-    }
-
-    /**
-     * Required to display error when values can not be satisfied.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->description;
     }
 }

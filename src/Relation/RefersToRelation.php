@@ -33,60 +33,39 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $related,
         $original
     ): CommandInterface {
+        $innerKey = $this->define(Relation::INNER_KEY);
+        $outerKey = $this->define(Relation::OUTER_KEY);
+        $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
+
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
-            $command->setContext($this->define(Relation::INNER_KEY), null);
+            $command->setContext($innerKey, null);
 
             return new NullCommand();
         }
 
         $relState = $this->getState($related);
 
-
-        //        $this->promiseContext(
-        //            $command,
-        //            $relState,
-        //            $this->define(Relation::OUTER_KEY),
-        //            $state,
-        //            $this->define(Relation::INNER_KEY)
-        //        );
-
-        if (!empty($relState) && !empty($relState->getKey($this->define(Relation::OUTER_KEY)))) {
-            $command->setContext(
-                $this->define(Relation::INNER_KEY),
-                $relState->getKey($this->define(Relation::OUTER_KEY))
-            );
+        // related object exists, we can update key immediately
+        if (!empty($relState) && !empty($relState->getKey($outerKey))) {
+            $command->setContext($innerKey, $relState->getKey($outerKey));
 
             return new NullCommand();
         }
 
+        // update the connection between objects once keys are resolved
         $link = new LinkCommand(
             $this->orm->getDatabase($entity),
-            $this->orm->getSchema()->define(get_class($entity), Schema::TABLE)
+            $this->orm->getSchema()->define(get_class($entity), Schema::TABLE),
+            $this
         );
-        $link->setDescription($this);
 
-        $pk = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
+        $this->promiseWhere($link, $state, $primaryKey, null, $primaryKey);
 
-        // todo: NOT DRY
-        // todo: PK is OUTER KEY, not really PK !!!
-
-        if (!empty($state->getKey($pk))) {
-            $link->setWhere([$pk => $state->getKey($pk)]);
-        } else {
-            $state->onUpdate(function (State $state) use ($link, $pk) {
-                if (!empty($state->getKey($pk))) {
-                    $link->setWhere([$pk => $state->getKey($pk)]);
-                }
-            });
-        }
-
-        // or saved directly (need unification)
-        $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
-            if (!empty($state->getKey($this->define(Relation::OUTER_KEY)))) {
-                $link->setData([
-                    $this->define(Relation::INNER_KEY) => $state->getKey($this->define(Relation::OUTER_KEY))
-                ]);
+        // state either not found or key value is not set, subscribe thought the heap
+        $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link, $innerKey, $outerKey) {
+            if (!empty($value = $state->getKey($outerKey))) {
+                $link->setContext($innerKey, $value);
             }
         });
 

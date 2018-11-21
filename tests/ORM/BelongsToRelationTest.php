@@ -268,6 +268,32 @@ abstract class BelongsToRelationTest extends BaseTest
         ], $selector->wherePK(4)->fetchData());
     }
 
+
+    public function testNoWriteQueries()
+    {
+        $u = new User();
+        $u->email = 'test@email.com';
+        $u->balance = 300;
+
+        $p = new Profile();
+        $p->image = 'magic.gif';
+        $p->user = $u;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, Profile::class);
+        $p = $selector->load('user')->wherePK(4)->fetchOne();
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+        $this->assertNumWrites(0);
+    }
+
     public function testSetExistedParent()
     {
         $s = new Selector($this->orm, User::class);

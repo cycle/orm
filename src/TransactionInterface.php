@@ -13,11 +13,13 @@ namespace Spiral\ORM;
  */
 interface TransactionInterface
 {
+    public function store($entity);
+
+    public function delete($entity);
+
     /**
      * Execute all nested commands in transaction, if failed - transaction MUST automatically
      * rollback and exception instance MUST be thrown.
-     *
-     * Transaction will be emptied after the execution.
      *
      * @throws \Throwable
      */

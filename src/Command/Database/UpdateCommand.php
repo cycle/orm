@@ -41,6 +41,20 @@ class UpdateCommand extends DatabaseCommand implements ContextualInterface, Scop
     }
 
     /**
+     * Avoid opening transaction when no changes are expected.
+     *
+     * @return null|DatabaseInterface
+     */
+    public function getDatabase(): ?DatabaseInterface
+    {
+        if ($this->isEmpty()) {
+            return null;
+        }
+
+        return parent::getDatabase();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function isEmpty(): bool

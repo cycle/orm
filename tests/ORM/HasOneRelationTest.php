@@ -479,4 +479,28 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertSame('another', $e->profile->nested->label);
     }
+
+    public function testNoWriteQueries()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
+
+        $e->profile->nested = new Nested();
+        $e->profile->nested->label = 'another';
+
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+
+        $this->assertNumWrites(0);
+    }
 }

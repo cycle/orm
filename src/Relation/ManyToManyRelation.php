@@ -190,6 +190,16 @@ class ManyToManyRelation extends AbstractRelation
         return $sequence;
     }
 
+    protected function upsertArray(): ContextualInterface
+    {
+
+    }
+
+    protected function upsertEntity(): ContextualInterface
+    {
+
+    }
+
     /**
      * Remove the connection between two objects.
      *

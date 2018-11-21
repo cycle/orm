@@ -35,7 +35,7 @@ abstract class DatabaseCommand extends AbstractCommand
     /**
      * @return DatabaseInterface
      */
-    public function getDatabase(): DatabaseInterface
+    public function getDatabase(): ?DatabaseInterface
     {
         return $this->db;
     }

@@ -126,7 +126,7 @@ class Transaction implements TransactionInterface
      */
     private function beginTransaction(CommandInterface $command, array &$drivers)
     {
-        if ($command instanceof DatabaseCommand) {
+        if ($command instanceof DatabaseCommand && !empty($command->getDatabase())) {
             $driver = $command->getDatabase()->getDriver();
 
             if (!empty($driver) && !in_array($driver, $drivers, true)) {

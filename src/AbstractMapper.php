@@ -160,7 +160,7 @@ abstract class AbstractMapper implements MapperInterface
             $this->orm->getDatabase($entity),
             $this->table,
             $cData,
-            [$this->primaryKey => $state->getKey($this->primaryKey) ?? $eData[$this->primaryKey] ?? null]
+            [$this->primaryKey => $state->getData()[$this->primaryKey] ?? $eData[$this->primaryKey] ?? null]
         );
 
         $current = $state->getState();
@@ -168,7 +168,7 @@ abstract class AbstractMapper implements MapperInterface
         $state->setData($cData);
 
         $state->onChange(function (State $state) use ($update) {
-            $update->setWhere($this->primaryKey, $state->getKey($this->primaryKey));
+            $update->setWhere($this->primaryKey, $state->getData()[$this->primaryKey]);
         });
 
         $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
@@ -194,7 +194,7 @@ abstract class AbstractMapper implements MapperInterface
             $this->orm->getDatabase($entity),
             $this->table,
             // todo: uuid?
-            [$this->primaryKey => $state->getKey($this->primaryKey) ?? $this->extract($entity)[$this->primaryKey] ?? null]
+            [$this->primaryKey => $state->getData()[$this->primaryKey] ?? $this->extract($entity)[$this->primaryKey] ?? null]
         );
 
         $current = $state->getState();
@@ -202,7 +202,7 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_DELETE);
 
         $state->onChange(function (State $state) use ($delete) {
-            $delete->setWhere($this->primaryKey, $state->getKey($this->primaryKey));
+            $delete->setWhere($this->primaryKey, $state->getData()[$this->primaryKey]);
         });
 
         $delete->onComplete(function (DeleteCommand $command) use ($entity) {

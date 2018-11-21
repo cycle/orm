@@ -9,6 +9,8 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Traits\ReferenceTrait;
+use Spiral\ORM\Traits\RelationTrait;
+use Spiral\ORM\Traits\VisitorTrait;
 
 /**
  * State carries meta information about all load entities, including original set of data,
@@ -16,7 +18,7 @@ use Spiral\ORM\Traits\ReferenceTrait;
  */
 final class State implements StateInterface
 {
-    use ReferenceTrait;
+    use RelationTrait, ReferenceTrait, VisitorTrait;
 
     // Different entity states in a pool
     public const NEW              = 0;
@@ -30,16 +32,6 @@ final class State implements StateInterface
 
     /** @var array */
     private $data;
-
-    private $relations = [];
-
-    /**
-     * Relations already visited during dependency resolution.
-     *
-     * @var array
-     */
-    private $visited = [];
-
 
     /**
      * @invisible
@@ -66,7 +58,7 @@ final class State implements StateInterface
     }
 
     /**
-     * @param int $state
+     * @inheritdoc
      */
     public function setState(int $state): void
     {
@@ -74,82 +66,41 @@ final class State implements StateInterface
     }
 
     /**
-     * @return int
+     * @inheritdoc
      */
     public function getState(): int
     {
         return $this->state;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setData(array $data)
     {
         $this->data = $data + $this->data;
+
         foreach ($this->handlers as $handler) {
             call_user_func($handler, $this);
         }
     }
 
-    public function getKey(string $key)
-    {
-        return $this->data[$key] ?? null;
-    }
-
     /**
-     * @return array
+     * @inheritdoc
      */
     public function getData(): array
     {
         return $this->data;
     }
 
-
-    // todo: store original set of relations (YEEEEAH BOYYYY)
-    public function setRelation(string $name, $context)
-    {
-        $this->relations[$name] = $context;
-        unset($this->data[$name]);
-    }
-
-    public function getRelation(string $name)
-    {
-        return $this->relations[$name] ?? null;
-    }
-
-
     /**
-     * Return true if relation branch was already visited.
-     *
-     * @param string $branch
-     * @return bool
+     * Reset state.
      */
-    public function visited(string $branch): bool
-    {
-        return isset($this->visited[$branch]);
-    }
-
-    /**
-     * Indicate that relation branch has been visited.
-     *
-     * @param string $branch
-     */
-    public function markVisited(string $branch)
-    {
-        $this->visited[$branch] = true;
-    }
-
-    /**
-     * Reset all visited branches.
-     */
-    public function resetVisited()
-    {
-        $this->visited = [];
-    }
-
     public function __destruct()
     {
         $this->data = [];
-        $this->handlers = [];
         $this->relations = [];
+        $this->handlers = [];
         $this->visited = [];
     }
 }

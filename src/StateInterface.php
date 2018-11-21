@@ -25,8 +25,6 @@ interface StateInterface
 
     public function getData(): array;
 
-    public function getKey(string $key);
-
     // todo: check if i need it in this interface
     public function addReference();
 

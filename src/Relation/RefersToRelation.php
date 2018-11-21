@@ -43,8 +43,9 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $relState = $this->getState($related);
 
         // related object exists, we can update key immediately
-        if (!empty($relState) && !empty($relState->getKey($this->outerKey))) {
-            $command->setContext($this->innerKey, $relState->getKey($this->outerKey));
+        if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
+            $command->setContext($this->innerKey, $outerKey);
+            $command->setContext($this->innerKey, $outerKey);
 
             return new NullCommand();
         }
@@ -61,7 +62,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // state either not found or key value is not set, subscribe thought the heap
         $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
-            if (!empty($value = $state->getKey($this->outerKey))) {
+            if (!empty($value = $this->fetchKey($state, $this->outerKey))) {
                 $link->setContext($this->innerKey, $value);
             }
         });

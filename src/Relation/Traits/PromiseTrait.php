@@ -30,14 +30,14 @@ trait PromiseTrait
         ?StateInterface $current,
         string $localKey
     ) {
-        if (!empty($value = $parent->getKey($parentKey))) {
-            if (empty($current) || $current->getKey($localKey) != $value) {
+        if (!empty($value = $this->fetchKey($parent, $parentKey))) {
+            if ($this->fetchKey($current, $localKey) != $value) {
                 $command->setContext($localKey, $value);
             }
         }
 
-        $parent->onChange(function (StateInterface $source) use ($command, $localKey, $parentKey) {
-            if (!empty($value = $source->getKey($parentKey))) {
+        $parent->onChange(function (StateInterface $state) use ($command, $localKey, $parentKey) {
+            if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 $command->setContext($localKey, $value);
             }
         });
@@ -60,16 +60,32 @@ trait PromiseTrait
         ?StateInterface $current,
         string $localKey
     ) {
-        if (!empty($value = $parent->getKey($parentKey))) {
-            if (empty($current) || $current->getKey($localKey) != $value) {
+        if (!empty($value = $this->fetchKey($parent, $parentKey))) {
+            if ($this->fetchKey($current, $localKey) != $value) {
                 $command->setWhere($localKey, $value);
             }
         }
 
-        $parent->onChange(function (StateInterface $source) use ($command, $localKey, $parentKey) {
-            if (!empty($value = $source->getKey($parentKey))) {
+        $parent->onChange(function (StateInterface $state) use ($command, $localKey, $parentKey) {
+            if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 $command->setWhere($localKey, $value);
             }
         });
+    }
+
+    /**
+     * Fetch key from the state.
+     *
+     * @param StateInterface $state
+     * @param string         $key
+     * @return mixed|null
+     */
+    protected function fetchKey(?StateInterface $state, string $key)
+    {
+        if (is_null($state)) {
+            return null;
+        }
+
+        return $state->getData()[$key] ?? null;
     }
 }

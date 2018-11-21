@@ -76,43 +76,61 @@ final class RelationMap
         ContextualInterface $command
     ): ContextualInterface {
         $sequence = new ContextualSequence();
+        $oriRelated = [];
 
+        // queue all "left" graph branches
         foreach ($this->dependencies as $name => $relation) {
             if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
             $state->setVisited($name, true);
 
+            // get the current relation value
+            $related = $relation->extract($data[$name] ?? null);
+            $oriRelated[$name] = $related;
+
+            // queue needed changes
             $sequence->addCommand(
-                $relation->queueDependency(
-                    $command,
-                    $entity,
-                    $state,
-                    $data[$name] ?? null,
-                    $state->getRelation($name)
-                )
+                $relation->queueDependency($command, $entity, $state, $related, $state->getRelation($name))
             );
+
+            // update current relation state
+            $state->setRelation($name, $related);
         }
 
+        // queue target entity
         $sequence->addPrimary($command);
 
+        // queue all "right" graph branches
         foreach ($this->relations as $name => $relation) {
             if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
             $state->setVisited($name, true);
 
+            // get the current relation value
             $related = $relation->extract($data[$name] ?? null);
+            $oriRelated[$name] = $related;
 
+            // queue needed changes
             $sequence->addCommand(
                 $relation->queueRelation($entity, $state, $related, $state->getRelation($name))
             );
 
+            // update current relation state
             $state->setRelation($name, $related);
         }
 
+        // complete the walkthough sequence
         $sequence->onComplete([$state, 'flushVisited']);
-        $sequence->onRollBack([$state, 'flushVisited']);
+
+        // reset state and revert relation values
+        $sequence->onRollBack(function () use ($state, $oriRelated) {
+            $state->flushVisited();
+            foreach ($oriRelated as $name => $value) {
+                $state->setRelation($name, $value);
+            }
+        });
 
         return $sequence;
     }

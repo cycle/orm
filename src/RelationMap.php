@@ -45,10 +45,18 @@ final class RelationMap
         }
     }
 
+    /**
+     * Init relation data in entity data and entity state.
+     *
+     * @param State $state
+     * @param array $data
+     * @return array
+     */
     public function init(State $state, array $data): array
     {
         foreach ($this->relations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
+                // todo: promises and proxies goes here
                 continue;
             }
 
@@ -92,7 +100,7 @@ final class RelationMap
             if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
-            $state->setVisited($name, true);
+            $state->markVisited($name);
 
             // get the current relation value
             $related = $relation->extract($data[$name] ?? null);
@@ -115,7 +123,7 @@ final class RelationMap
             if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
-            $state->setVisited($name, true);
+            $state->markVisited($name);
 
             // get the current relation value
             $related = $relation->extract($data[$name] ?? null);
@@ -131,11 +139,11 @@ final class RelationMap
         }
 
         // complete the walk-though sequence
-        $sequence->onComplete([$state, 'flushVisited']);
+        $sequence->onComplete([$state, 'resetVisited']);
 
         // reset state and revert relation values
         $sequence->onRollBack(function () use ($state, $oriRelated) {
-            $state->flushVisited();
+            $state->resetVisited();
             foreach ($oriRelated as $name => $value) {
                 $state->setRelation($name, $value);
             }

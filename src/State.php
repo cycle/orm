@@ -36,6 +36,13 @@ final class State
     private $relations = [];
 
     /**
+     * Relations already visited during dependency resolution.
+     *
+     * @var array
+     */
+    private $visited = [];
+
+    /**
      * @param mixed $primaryKey
      * @param int   $state
      * @param array $data
@@ -131,11 +138,6 @@ final class State
         return $this->refCount > 0;
     }
 
-    public function numReferences(): int
-    {
-        return $this->refCount;
-    }
-
     /**
      * @invisible
      * @var array
@@ -147,19 +149,31 @@ final class State
         $this->handlers[] = $handler;
     }
 
-    private $visited = [];
-
-    public function visited($rel)
+    /**
+     * Return true if relation branch was already visited.
+     *
+     * @param string $branch
+     * @return bool
+     */
+    public function visited(string $branch): bool
     {
-        return $this->visited[$rel] ?? null;
+        return isset($this->visited[$branch]);
     }
 
-    public function setVisited($rel, $id)
+    /**
+     * Indicate that relation branch has been visited.
+     *
+     * @param string $branch
+     */
+    public function markVisited(string $branch)
     {
-        $this->visited[$rel] = $id;
+        $this->visited[$branch] = true;
     }
 
-    public function flushVisited()
+    /**
+     * Reset all visited branches.
+     */
+    public function resetVisited()
     {
         $this->visited = [];
     }

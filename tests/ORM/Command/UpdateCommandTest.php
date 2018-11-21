@@ -54,4 +54,17 @@ class UpdateCommandTest extends TestCase
         $cmd->setContext('key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getContext());
     }
+
+    public function testWhere()
+    {
+        $cmd = new Update(
+            m::mock(DatabaseInterface::class),
+            'table',
+            ['name' => 'value'],
+            []
+        );
+
+        $cmd->setWhere('key', 'value');
+        $this->assertSame(['key' => 'value'], $cmd->getWhere());
+    }
 }

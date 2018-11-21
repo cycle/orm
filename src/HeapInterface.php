@@ -9,6 +9,7 @@
 namespace Spiral\ORM;
 
 // todo: ID path will be later
+// todo: handlers
 interface HeapInterface
 {
     public function has($entity): bool;

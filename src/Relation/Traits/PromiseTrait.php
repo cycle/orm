@@ -23,7 +23,7 @@ trait PromiseTrait
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
             if (empty($current) || $current->getKey($localKey) != $value) {
-                $command->setContext($localKey, $parent->getKey($parentKey));
+                $command->setContext($localKey, $value);
             }
         }
 
@@ -33,7 +33,8 @@ trait PromiseTrait
                 return;
             }
 
-            $command->setContext($localKey, $source->getKey($parentKey));
+            // todo: avoid un-necessary updates?
+            $command->setContext($localKey, $value);
         });
     }
 
@@ -46,13 +47,13 @@ trait PromiseTrait
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
             if (empty($current) || $current->getKey($localKey) != $value) {
-                $command->setWhere($localKey, $parent->getKey($parentKey));
+                $command->setWhere($localKey, $value);
             }
         }
 
         $parent->onUpdate(function (State $source) use ($command, $localKey, $parentKey) {
             if (!empty($value = $source->getKey($parentKey))) {
-                $command->setWhere($localKey, $source->getKey($parentKey));
+                $command->setWhere($localKey, $value);
             }
         });
     }

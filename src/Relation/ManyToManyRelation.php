@@ -147,6 +147,8 @@ class ManyToManyRelation extends AbstractRelation
 
         // deal with this clusterfuck
 
+        // --- THIS IS NOT GOOD
+
         if (is_object($pivot)) {
             // todo: check if context instance of pivot entity
             $upsert = $this->orm->queueStore($pivot);
@@ -169,6 +171,7 @@ class ManyToManyRelation extends AbstractRelation
             // todo: can be existed
         }
 
+        // --- THIS IS NOT GOOD
 
         // TODO: DRY!!!
         // todo: ENTITY IS DIFFERENT!!!

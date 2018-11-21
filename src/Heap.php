@@ -101,9 +101,11 @@ class Heap implements HeapInterface
 
     public function hasPath(string $class, $entityID)
     {
+        // todo: this is fun
         return isset($this->path["{$class}:{$entityID}"]);
     }
 
+    // todo: this is fun
     public function getPath(string $class, $entityID)
     {
         return $this->path["{$class}:{$entityID}"];

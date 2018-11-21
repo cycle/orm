@@ -111,6 +111,43 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertSame($u->lastComment, $u->comments[0]);
     }
 
+    public function testCreateUserToExistedReference()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+
+        $u->addComment($c);
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->assertNumWrites(3);
+
+        $u2 = new User();
+        $u2->email = "second@email.com";
+        $u2->balance = 200;
+        $u2->lastComment = $c;
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u2);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u3 = $s->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
+
+        $this->assertNotNull($u3->lastComment);
+        $this->assertEquals($u3->lastComment->id, $u->comments[0]->id);
+    }
+
     public function testCreateWhenParentExists()
     {
         $u = new User();
@@ -126,9 +163,13 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->addComment($c);
 
+        $this->captureWriteQueries();
+
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
+
+        $this->assertNumWrites(2);
 
         $s = new Selector($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();

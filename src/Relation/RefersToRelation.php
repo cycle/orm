@@ -17,6 +17,10 @@ use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 
+/**
+ * Variation of belongs-to relation which provides the ability to be nullable. Relation can be used
+ * to create cyclic references. Relation does not trigger store operation of referenced object!
+ */
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
     /**
@@ -29,6 +33,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $related,
         $original
     ): CommandInterface {
+        // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             $command->setContext($this->define(Relation::INNER_KEY), null);
 
@@ -36,6 +41,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         }
 
         $relState = $this->getState($related);
+
+
         //        $this->promiseContext(
         //            $command,
         //            $relState,

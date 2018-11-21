@@ -20,9 +20,6 @@ interface StateInterface
 
     public function getData(): array;
 
-    // todo: only for the state?
-    public function setKey(string $key, $value);
-
     public function getKey(string $key);
 
     // todo: check if i need it in this interface

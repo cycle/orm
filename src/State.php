@@ -67,17 +67,7 @@ final class State implements StateInterface
 
     public function setData(array $data)
     {
-        $this->data = array_merge($data, $this->data);
-
-        foreach ($this->handlers as $handler) {
-            call_user_func($handler, $this);
-        }
-    }
-
-    public function setKey(string $key, $value)
-    {
-        $this->data[$key] = $value;
-
+        $this->data = $data + $this->data;
         foreach ($this->handlers as $handler) {
             call_user_func($handler, $this);
         }

@@ -122,7 +122,7 @@ abstract class AbstractMapper implements MapperInterface
         // we are managed at this moment
 
         $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
-            $state->setKey($this->primaryKey, $command->getInsertID());
+            $state->setData([$this->primaryKey => $command->getInsertID()]);
         });
 
         $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
@@ -137,6 +137,8 @@ abstract class AbstractMapper implements MapperInterface
 
             // todo: replace with data (!!)
             $state->setData($command->getContext());
+
+            // todo: mount path to the entity!!!
         });
 
         $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {

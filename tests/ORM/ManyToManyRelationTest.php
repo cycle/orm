@@ -19,7 +19,7 @@ use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Tag;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 // todo: pivot table with context
 abstract class ManyToManyRelationTest extends BaseTest
@@ -259,7 +259,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $u->tags->add($t);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -287,7 +287,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $u->tags->add($t);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($t);
         $tr->store($u);
         $tr->run();
@@ -316,7 +316,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $u->tags->add($t);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->store($t);
         $tr->run();
@@ -350,7 +350,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
         $u2->tags->add($t);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->store($u2);
         $tr->run();
@@ -401,7 +401,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $b->tags->add($t);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();

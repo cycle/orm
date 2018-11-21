@@ -20,7 +20,7 @@ use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 abstract class BelongsToRelationTest extends BaseTest
 {
@@ -236,7 +236,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $p->image = 'magic.gif';
         $p->user = $u;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($p);
         $tr->run();
 
@@ -277,7 +277,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $p->image = 'magic.gif';
         $p->user = $u;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($p);
         $tr->run();
 
@@ -316,7 +316,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $p->user = $u;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($p);
         $tr->run();
 
@@ -344,7 +344,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         list($a->user, $b->user) = [$b->user, $a->user];
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
@@ -366,7 +366,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $p = $s->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($p);
         $tr->run();
     }
@@ -437,7 +437,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $p = $s->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($p);
         $tr->run();
 
@@ -446,4 +446,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->assertSame(null, $p->user);
     }
+
+    // todo: check nested belongs to
+    // todo: multiple nested
 }

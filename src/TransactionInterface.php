@@ -11,7 +11,7 @@ namespace Spiral\ORM;
 /**
  * Transaction aggregates set of commands declared by entities and executes them all together.
  */
-interface UnitOfWorkInterface
+interface TransactionInterface
 {
     /**
      * Execute all nested commands in transaction, if failed - transaction MUST automatically

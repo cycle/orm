@@ -16,7 +16,7 @@ use Spiral\ORM\Tests\Fixtures\Comment;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 abstract class RefersToRelationTest extends BaseTest
 {
@@ -96,7 +96,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->addComment($c);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -113,7 +113,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->email = "email@email.com";
         $u->balance = 100;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -122,7 +122,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->addComment($c);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -147,7 +147,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->lastComment = $c;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
     }
@@ -162,7 +162,7 @@ abstract class RefersToRelationTest extends BaseTest
         $c->message = "last comment";
         $u->comments->add($c);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -175,7 +175,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->lastComment = $u->comments[0];
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -197,7 +197,7 @@ abstract class RefersToRelationTest extends BaseTest
         $c->message = "last comment";
         $u->addComment($c);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -211,7 +211,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->lastComment = null;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 

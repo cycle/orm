@@ -15,7 +15,7 @@ use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\Cyclic;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 abstract class HasOneCyclicTest extends BaseTest
 {
@@ -117,7 +117,7 @@ abstract class HasOneCyclicTest extends BaseTest
 
         $c->name = 'updated';
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($c);
         $tr->run();
 
@@ -134,7 +134,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $c->name = "new";
         $c->cyclic = $c;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($c);
         $tr->run();
 

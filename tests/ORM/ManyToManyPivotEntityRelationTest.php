@@ -18,7 +18,7 @@ use Spiral\ORM\Tests\Fixtures\Tag;
 use Spiral\ORM\Tests\Fixtures\TagContext;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 abstract class ManyToManyPivotEntityRelationTest extends BaseTest
 {
@@ -230,7 +230,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
 
         $u->tags->add($t);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -259,7 +259,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $u->tags->add($t);
         $u->tags->getRelationContext()->set($t, ['as' => 'super']);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -293,7 +293,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $u->tags->add($t);
         $u->tags->getRelationContext()->set($t, $pc);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
@@ -339,7 +339,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $b->tags->add($t);
         $b->tags->getRelationContext()->set($t, $pc);
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();

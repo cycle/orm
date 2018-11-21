@@ -24,13 +24,15 @@ class HasOneRelation extends AbstractRelation
         $sequence = new ContextualSequence();
 
         if (!empty($original) && $related !== $original) {
-            $this->deleteOriginal($sequence, $original);
+            $sequence->addCommand($this->deleteOriginal($original));
         }
 
         if (empty($related)) {
             // nothing to persist
             return $sequence;
         }
+
+        // todo: check number of references
 
         // polish even more?
         $relStore = $this->orm->getMapper($related)->queueStore($related);
@@ -55,22 +57,20 @@ class HasOneRelation extends AbstractRelation
     /**
      * Delete original related entity of no other objects reference to it.
      *
-     * @param ContextualSequence $sequence
-     * @param object             $original
+     * @param object $original
+     * @return CommandInterface
      */
-    protected function deleteOriginal(ContextualSequence $sequence, $original)
+    protected function deleteOriginal($original): CommandInterface
     {
         $oriState = $this->getState($original);
         $oriState->decReference();
 
         // only delete original child when no other objects claim it
-        $sequence->addCommand(
-            new Condition(
-                $this->orm->getMapper($original)->queueDelete($original),
-                function () use ($oriState) {
-                    return !$oriState->hasReferences();
-                }
-            )
+        return new Condition(
+            $this->orm->getMapper($original)->queueDelete($original),
+            function () use ($oriState) {
+                return !$oriState->hasReferences();
+            }
         );
     }
 }

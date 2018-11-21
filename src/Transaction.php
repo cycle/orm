@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Database\DatabaseCommand;
 use Spiral\ORM\Exception\TransactionException;
 
-class UnitOfWork implements UnitOfWorkInterface
+class Transaction implements TransactionInterface
 {
     /** @var ORMInterface */
     private $orm;

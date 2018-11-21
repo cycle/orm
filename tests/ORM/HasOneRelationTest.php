@@ -19,7 +19,7 @@ use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 abstract class HasOneRelationTest extends BaseTest
 {
@@ -195,7 +195,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile = new Profile();
         $e->profile->image = "magic.gif";
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -218,7 +218,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile = new Profile();
         $e->profile->image = "secondary.gif";
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -257,7 +257,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile = new Profile();
         $e->profile->image = "secondary.gif";
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -270,7 +270,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('secondary.gif', $e->profile->image);
 
         $e->profile->image = 'updated.png';
-        $tr = new UnitOfWork($orm);
+        $tr = new Transaction($orm);
         $tr->store($e);
         $tr->run();
 
@@ -289,7 +289,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
         $e->profile = null;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -308,7 +308,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile = new Profile();
         $e->profile->image = 'new.jpg';
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -333,7 +333,7 @@ abstract class HasOneRelationTest extends BaseTest
         $p = $a->profile;
         list($b->profile, $a->profile) = [$a->profile, null];
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
@@ -356,7 +356,7 @@ abstract class HasOneRelationTest extends BaseTest
         $b->profile = new Profile();
         $b->profile->image = "secondary.gif";
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($b);
         $tr->run();
 
@@ -370,7 +370,7 @@ abstract class HasOneRelationTest extends BaseTest
 
         list($a->profile, $b->profile) = [$b->profile, $a->profile];
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
@@ -452,7 +452,7 @@ abstract class HasOneRelationTest extends BaseTest
 
         $e->profile->nested->label = 'new-label';
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -470,7 +470,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->nested = new Nested();
         $e->profile->nested->label = 'another';
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 

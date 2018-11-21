@@ -15,7 +15,7 @@ use Spiral\ORM\State;
 use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 abstract class MapperTest extends BaseTest
 {
@@ -114,7 +114,7 @@ abstract class MapperTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->delete($result);
         $tr->run();
 
@@ -153,7 +153,7 @@ abstract class MapperTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
 
@@ -169,7 +169,7 @@ abstract class MapperTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($e);
 
         $e->balance = 400;

@@ -16,7 +16,7 @@ use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\UnitOfWork;
+use Spiral\ORM\Transaction;
 
 abstract class InverseRelationTest extends BaseTest
 {
@@ -161,7 +161,7 @@ abstract class InverseRelationTest extends BaseTest
         // cyclic
         $u->profile->user = $u;
 
-        $tr = new UnitOfWork($this->orm);
+        $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 

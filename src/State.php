@@ -12,8 +12,7 @@ use Spiral\ORM\Traits\ReferenceTrait;
 
 /**
  * State carries meta information about all load entities, including original set of data,
- * relations, state, primary key value (you can handle entities without PK included), and number of
- * active references (in cases when entity become unclaimed).
+ * relations, state and number of active references (in cases when entity become unclaimed).
  */
 final class State implements StateInterface
 {

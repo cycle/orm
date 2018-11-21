@@ -8,6 +8,11 @@
 
 namespace Spiral\ORM;
 
+/**
+ * Resides above each of graph node and carry information about metadata, relations,
+ * references and original state of data. Provides subscription mechanism to propagate
+ * data changes across dependency tree.
+ */
 interface StateInterface
 {
     public function onChange(callable $handler);

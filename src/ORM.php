@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM;
 
+use Prophecy\Promise\PromiseInterface;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\ORM\Command\CommandInterface;
@@ -252,6 +253,10 @@ class ORM implements ORMInterface
 
     protected function resolveClass($entity): string
     {
+        //if ($entity instanceof PromiseInterface) {
+            // fallback to the promise class
+        //}
+
         $entity = is_object($entity) ? get_class($entity) : $entity;
 
         return $this->getSchema()->define($entity, Schema::EXTENDS) ?? $entity;

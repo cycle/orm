@@ -73,7 +73,7 @@ class Transaction implements TransactionInterface
                 $pending = [];
                 $countExecuted = count($executed);
 
-                foreach ($this->reduce($commands) as $do => $wait) {
+                foreach ($this->reduce($commands) as $wait => $do) {
                     if ($wait != null) {
                         $pending[] = $wait;
                         continue;
@@ -121,22 +121,6 @@ class Transaction implements TransactionInterface
     }
 
     /**
-     * @param CommandInterface $command
-     * @param array            $drivers
-     */
-    private function beginTransaction(CommandInterface $command, array &$drivers)
-    {
-        if ($command instanceof DatabaseCommand && !empty($command->getDatabase())) {
-            $driver = $command->getDatabase()->getDriver();
-
-            if (!empty($driver) && !in_array($driver, $drivers, true)) {
-                $driver->beginTransaction();
-                $drivers[] = $driver;
-            }
-        }
-    }
-
-    /**
      * Return flattened list of commands required to store and delete associated entities.
      *
      * @return array
@@ -156,8 +140,24 @@ class Transaction implements TransactionInterface
     }
 
     /**
-     * Fetch commands ready for the execution. Generate ready commands as generated key and
-     * delayed commands as value.
+     * @param CommandInterface $command
+     * @param array            $drivers
+     */
+    private function beginTransaction(CommandInterface $command, array &$drivers)
+    {
+        if ($command instanceof DatabaseCommand && !empty($command->getDatabase())) {
+            $driver = $command->getDatabase()->getDriver();
+
+            if (!empty($driver) && !in_array($driver, $drivers, true)) {
+                $driver->beginTransaction();
+                $drivers[] = $driver;
+            }
+        }
+    }
+
+    /**
+     * Fetch commands ready for the execution. Provide ready commands as generated value and
+     * delayed commands as the key.
      *
      * @param iterable $commands
      * @return \Generator
@@ -167,7 +167,7 @@ class Transaction implements TransactionInterface
         /** @var CommandInterface $command */
         foreach ($commands as $command) {
             if (!$command->isReady()) {
-                yield null => $command;
+                yield $command => null;
                 continue;
             }
 
@@ -175,7 +175,7 @@ class Transaction implements TransactionInterface
                 yield from $this->reduce($command);
             }
 
-            yield $command => null;
+            yield null => $command;
         }
     }
 }

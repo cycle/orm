@@ -11,6 +11,10 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\ContextualSequence;
 
+/**
+ * Generates set of linked commands required to persis or delete given dependency graph. Each RelationMap is specific
+ * to one instance class (type).
+ */
 final class RelationMap
 {
     /**
@@ -73,9 +77,9 @@ final class RelationMap
     /**
      * Generate set of commands required to store the entity and it's relations.
      *
-     * @param object $entity
-     * @param array $data
-     * @param State $state
+     * @param object              $entity
+     * @param array               $data
+     * @param State               $state
      * @param ContextualInterface $command
      * @return ContextualInterface
      */
@@ -131,7 +135,7 @@ final class RelationMap
             $state->setRelation($name, $related);
         }
 
-        // complete the walkthough sequence
+        // complete the walk-though sequence
         $sequence->onComplete([$state, 'flushVisited']);
 
         // reset state and revert relation values

@@ -143,9 +143,13 @@ abstract class CyclicReferencesTest extends BaseTest
         // todo: fix update comment with id NULL, multiple
         $this->enableProfiling();
 
+        $this->captureQueryCount();
+
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
+
+        //$this->assertQueryCount(4);
 
         $selector = new Selector($this->orm, User::class);
         $selector->load('lastComment.user')

@@ -41,6 +41,12 @@ abstract class BaseTest extends TestCase
     /** @var ORM */
     protected $orm;
 
+    /** @var TestLogger */
+    protected $logger;
+
+    /** @var int */
+    protected $lastCount;
+
     /**
      * Init all we need.
      */
@@ -60,6 +66,9 @@ abstract class BaseTest extends TestCase
         if (self::$config['debug']) {
             $this->enableProfiling();
         }
+
+        $this->logger = new TestLogger();
+        $this->getDriver()->setLogger($this->logger);
     }
 
     /**
@@ -94,9 +103,22 @@ abstract class BaseTest extends TestCase
             ]);
         }
 
-        $this->driver->setLogger(new TestLogger());
-
+        $this->driver->setProfiling(true);
         return static::$driverCache[static::DRIVER] = $this->driver;
+    }
+
+    public function captureQueryCount()
+    {
+        $this->lastCount = $this->logger->countQueries();
+    }
+
+    public function assertQueryCount($count)
+    {
+        $queries = $this->logger->countQueries() - $this->lastCount;
+
+        if ($queries != $count) {
+            $this->fail("Number of SQL queries do not match, expected {$count} got {$queries}.");
+        }
     }
 
     /**
@@ -138,8 +160,9 @@ abstract class BaseTest extends TestCase
      */
     protected function enableProfiling()
     {
-        $this->getDriver()->setProfiling(true);
-        $this->getDriver()->setLogger(new TestLogger());
+        if (!is_null($this->logger)) {
+            $this->logger->display();
+        }
     }
 
     /**
@@ -147,7 +170,9 @@ abstract class BaseTest extends TestCase
      */
     protected function disableProfiling()
     {
-        $this->getDriver()->setProfiling(false);
+        if (!is_null($this->logger)) {
+            $this->logger->hide();
+        }
     }
 }
 
@@ -155,8 +180,30 @@ class TestLogger implements LoggerInterface
 {
     use LoggerTrait;
 
+    private $display;
+
+    private $count;
+
+    public function __construct()
+    {
+        $this->count = 0;
+    }
+
+    public function countQueries(): int
+    {
+        return $this->count;
+    }
+
     public function log($level, $message, array $context = [])
     {
+        if (!empty($context['query'])) {
+            $this->count++;
+        }
+
+        if (!$this->display) {
+            return;
+        }
+
         if ($level == LogLevel::ERROR) {
             echo " \n! \033[31m" . $message . "\033[0m";
         } elseif ($level == LogLevel::ALERT) {
@@ -170,5 +217,15 @@ class TestLogger implements LoggerInterface
                 echo " \n> \033[33m" . $message . "\033[0m";
             }
         }
+    }
+
+    public function display()
+    {
+        $this->display = true;
+    }
+
+    public function hide()
+    {
+        $this->display = false;
     }
 }

@@ -111,9 +111,11 @@ abstract class AbstractMapper implements MapperInterface
 
         if (is_null($state)) {
             // todo: do we need to track PK?
-            $state = new State(State::SCHEDULED_INSERT, $columns);
+            $state = new State(State::NEW, $columns);
             $this->orm->getHeap()->attach($entity, $state);
         }
+
+        $state->setState(State::SCHEDULED_INSERT);
 
         unset($columns[$this->primaryKey]);
 

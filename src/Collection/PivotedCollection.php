@@ -15,44 +15,56 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
-    /** @var RelationContext */
-    private $relationContext;
+    /** @var \SplObjectStorage */
+    private $pivotData;
 
     /**
-     * @param array           $elements
-     * @param RelationContext $relationContext
+     * @param array                  $elements
+     * @param \SplObjectStorage|null $pivotData
      */
-    public function __construct(array $elements = [], RelationContext $relationContext = null)
+    public function __construct(array $elements = [], \SplObjectStorage $pivotData = null)
     {
         parent::__construct($elements);
-        $this->relationContext = $relationContext ?? new RelationContext();
+        $this->pivotData = $pivotData ?? new \SplObjectStorage();
     }
 
     /**
-     * Creates a new instance from the specified elements.
-     *
-     * This method is provided for derived classes to specify how a new
-     * instance should be created when constructor semantics have changed.
-     *
-     * @param array $elements Elements.
-     *
-     * @return static
+     * @inheritdoc
      */
     protected function createFrom(array $elements)
     {
-        return new static($elements, $this->relationContext);
+        return new static($elements, $this->pivotData);
     }
 
     /**
-     * @return RelationContextInterface
+     * @inheritdoc
      */
-    public function getRelationContext(): RelationContextInterface
+    public function hasPivot($element): bool
     {
-        return $this->relationContext;
+        return $this->pivotData->offsetExists($element);
     }
 
-    public function __debugInfo()
+    /**
+     * @inheritdoc
+     */
+    public function getPivot($element)
     {
-        return $this->toArray();
+        return $this->pivotData[$element] ?? null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setPivot($element, $pivot)
+    {
+        $this->pivotData[$element] = $pivot;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getPivotData(): \SplObjectStorage
+    {
+        return $this->pivotData;
     }
 }

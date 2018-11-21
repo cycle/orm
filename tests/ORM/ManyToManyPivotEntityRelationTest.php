@@ -191,32 +191,21 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
         $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
 
-        $this->assertTrue($a->tags->getRelationContext()->has($a->tags[0]));
-        $this->assertTrue($a->tags->getRelationContext()->has($a->tags[1]));
-        $this->assertTrue($b->tags->getRelationContext()->has($b->tags[0]));
+        $this->assertTrue($a->tags->hasPivot($a->tags[0]));
+        $this->assertTrue($a->tags->hasPivot($a->tags[1]));
+        $this->assertTrue($b->tags->hasPivot($b->tags[0]));
 
-        $this->assertFalse($b->tags->getRelationContext()->has($a->tags[0]));
-        $this->assertFalse($b->tags->getRelationContext()->has($a->tags[1]));
-        $this->assertFalse($a->tags->getRelationContext()->has($b->tags[0]));
+        $this->assertFalse($b->tags->hasPivot($a->tags[0]));
+        $this->assertFalse($b->tags->hasPivot($a->tags[1]));
+        $this->assertFalse($a->tags->hasPivot($b->tags[0]));
 
-        $this->assertInstanceOf(
-            TagContext::class,
-            $a->tags->getRelationContext()->get($a->tags[0])
-        );
+        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[0]));
+        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[1]));
+        $this->assertInstanceOf(TagContext::class, $b->tags->getPivot($b->tags[0]));
 
-        $this->assertInstanceOf(
-            TagContext::class,
-            $a->tags->getRelationContext()->get($a->tags[1])
-        );
-
-        $this->assertInstanceOf(
-            TagContext::class,
-            $b->tags->getRelationContext()->get($b->tags[0])
-        );
-
-        $this->assertEquals('primary', $a->tags->getRelationContext()->get($a->tags[0])->as);
-        $this->assertEquals('secondary', $a->tags->getRelationContext()->get($a->tags[1])->as);
-        $this->assertEquals('primary', $b->tags->getRelationContext()->get($b->tags[0])->as);
+        $this->assertEquals('primary', $a->tags->getPivot($a->tags[0])->as);
+        $this->assertEquals('secondary', $a->tags->getPivot($a->tags[1])->as);
+        $this->assertEquals('primary', $b->tags->getPivot($b->tags[0])->as);
     }
 
     public function testCreateWithManyToManyCascadeNoContext()
@@ -241,10 +230,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
 
-        $this->assertInstanceOf(
-            TagContext::class,
-            $u->tags->getRelationContext()->get($u->tags[0])
-        );
+        $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
     }
 
     public function testCreateWithManyToManyPivotContextArray()
@@ -257,7 +243,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $t->name = "my tag";
 
         $u->tags->add($t);
-        $u->tags->getRelationContext()->set($t, ['as' => 'super']);
+        $u->tags->setPivot($t, ['as' => 'super']);
 
         $tr = new Transaction($this->orm);
         $tr->store($u);
@@ -270,12 +256,8 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
 
-        $this->assertInstanceOf(
-            TagContext::class,
-            $u->tags->getRelationContext()->get($u->tags[0])
-        );
-
-        $this->assertSame('super', $u->tags->getRelationContext()->get($u->tags[0])->as);
+        $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
+        $this->assertSame('super', $u->tags->getPivot($u->tags[0])->as);
     }
 
     public function testCreateWithManyToManyPivotContext()
@@ -291,7 +273,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $pc->as = 'super';
 
         $u->tags->add($t);
-        $u->tags->getRelationContext()->set($t, $pc);
+        $u->tags->setPivot($t, $pc);
 
         $tr = new Transaction($this->orm);
         $tr->store($u);
@@ -304,12 +286,8 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
 
-        $this->assertInstanceOf(
-            TagContext::class,
-            $u->tags->getRelationContext()->get($u->tags[0])
-        );
-
-        $this->assertSame('super', $u->tags->getRelationContext()->get($u->tags[0])->as);
+        $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
+        $this->assertSame('super', $u->tags->getPivot($u->tags[0])->as);
     }
 
     public function testUnlinkManyToManyAndReplaceSome()
@@ -325,7 +303,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
 
         $a->tags->remove(0);
         $a->tags->add($tagSelector->wherePK(3)->fetchOne());
-        $a->tags->getRelationContext()->get($a->tags[1])->as = "new";
+        $a->tags->getPivot($a->tags[1])->as = "new";
 
         // remove all
         $b->tags->clear();
@@ -337,7 +315,7 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $pc->as = 'super';
 
         $b->tags->add($t);
-        $b->tags->getRelationContext()->set($t, $pc);
+        $b->tags->setPivot($t, $pc);
 
         $this->captureWriteQueries();
 
@@ -356,9 +334,9 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         list($a, $b) = $selector->load('tags')->fetchAll();
 
         $this->assertSame("tag b", $a->tags[0]->name);
-        $this->assertSame('new', $a->tags->getRelationContext()->get($a->tags[0])->as);
+        $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);
 
         $this->assertSame("new tag", $b->tags[0]->name);
-        $this->assertSame('super', $b->tags->getRelationContext()->get($b->tags[0])->as);
+        $this->assertSame('super', $b->tags->getPivot($b->tags[0])->as);
     }
 }

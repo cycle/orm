@@ -8,9 +8,9 @@
 
 namespace Spiral\ORM\Relation;
 
-
+use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Collection\PivotedCollection;
-use Spiral\ORM\Collection\RelationContext;
+use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\ContextualSequence;
@@ -20,57 +20,73 @@ use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Exception\RelationException;
 use Spiral\ORM\Iterator;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\ContextStorage;
 
 class ManyToManyRelation extends AbstractRelation
 {
-    public const COLLECTION = true;
+    /** @var string|null */
+    private $pivotEntity;
 
-    public function initArray(array $data)
+    /**
+     * @param ORMInterface $orm
+     * @param string       $class
+     * @param string       $relation
+     * @param array        $schema
+     */
+    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
     {
-        $iterator = new Iterator($this->orm, $this->class, $data);
+        parent::__construct($orm, $class, $relation, $schema);
+        $this->pivotEntity = $this->define(Relation::PIVOT_ENTITY);
+    }
 
-        $entities = [];
+    /**
+     * @inheritdoc
+     */
+    public function init($data): array
+    {
+        $elements = [];
         $pivotData = new \SplObjectStorage();
-        foreach ($iterator as $pivot => $entity) {
-            $entities[] = $entity;
 
-            // todo: move to the function
-            if (!empty($this->define(Relation::PIVOT_ENTITY))) {
-                $pivot = $this->orm->make(
-                    $this->define(Relation::PIVOT_ENTITY),
-                    $pivot,
-                    State::LOADED
-                );
-            }
-
-            $pivotData->offsetSet($entity, $pivot);
+        foreach (new Iterator($this->orm, $this->class, $data) as $pivot => $entity) {
+            $elements[] = $entity;
+            $pivotData[$entity] = $this->initPivot($pivot);
         }
 
-        // todo: merge with relationContext?
-        return new ContextStorage($entities, $pivotData);
+        return [new PivotedCollection($elements, $pivotData), new ContextStorage($elements, $pivotData)];
     }
 
-    public function wrapCollection($data)
+    /**
+     * Init pivot object if any.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function initPivot(array $data)
     {
-        if (!$data instanceof ContextStorage) {
-            throw new RelationException("ManyToMany relation expects PivotData");
+        if (empty($this->pivotEntity)) {
+            return $data;
         }
 
-        return new PivotedCollection(
-            $data->getElements(),
-            new RelationContext($data->getContext())
-        );
+        return $this->orm->make($this->pivotEntity, $data, State::LOADED);
     }
 
-    public function extract($relData)
+    /**
+     * @inheritdoc
+     */
+    public function extract($data)
     {
-        return new ContextStorage(
-            $relData->toArray(),
-            $relData->getRelationContext()->getContext()
-        );
+        if ($data instanceof PivotedCollectionInterface) {
+            return new ContextStorage($data->toArray(), $data->getPivotData());
+        }
+
+        if ($data instanceof Collection) {
+            return new ContextStorage($data->toArray());
+        }
+
+        return new ContextStorage();
     }
 
     /**
@@ -87,22 +103,21 @@ class ManyToManyRelation extends AbstractRelation
          * @var ContextStorage $related
          * @var ContextStorage $original
          */
-        $original = $original ?? new ContextStorage([], new \SplObjectStorage());
+        $original = $original ?? new ContextStorage();
 
         $sequence = new Sequence();
+
+        // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
-            // todo: what about original, check the change?
-            $sequence->addCommand($this->link(
-                $state,
-                $item,
-                $related->get($item),
-                $original->get($item)
-            ));
+            $sequence->addCommand(
+                $this->link($state, $item, $related->get($item), $original->get($item))
+            );
         }
 
+        // un-link old elements
         foreach ($original->getElements() as $item) {
-            if (!$related->contains($item)) {
-                $sequence->addCommand($this->unlink($state, $item));
+            if (!$related->has($item)) {
+                $sequence->addCommand($this->unlink($state, $item, $original->get($item)));
             }
         }
 
@@ -175,7 +190,7 @@ class ManyToManyRelation extends AbstractRelation
      * @param object $related
      * @return CommandInterface
      */
-    protected function unlink(State $parentState, $related): CommandInterface
+    protected function unlink(State $parentState, $related, $context): CommandInterface
     {
         $relState = $this->getState($related);
         if (empty($relState) || $relState->getState() == State::NEW) {

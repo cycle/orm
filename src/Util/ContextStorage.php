@@ -8,7 +8,10 @@
 
 namespace Spiral\ORM\Util;
 
-class ContextStorage
+/**
+ * Carry information about ordered list of entities and associated pivot context.
+ */
+final class ContextStorage
 {
     /** @var array */
     private $elements;
@@ -20,10 +23,10 @@ class ContextStorage
      * @param array             $elements
      * @param \SplObjectStorage $context
      */
-    public function __construct(array $elements, \SplObjectStorage $context)
+    public function __construct(array $elements = [], \SplObjectStorage $context = null)
     {
         $this->elements = $elements;
-        $this->context = $context;
+        $this->context = $context ?? new \SplObjectStorage();
     }
 
     /**
@@ -42,6 +45,23 @@ class ContextStorage
         return $this->context;
     }
 
+    /**
+     * Check if entity belongs to the storage.
+     *
+     * @param object $entity
+     * @return bool
+     */
+    public function has($entity)
+    {
+        return in_array($entity, $this->elements, true);
+    }
+
+    /**
+     * Get entity context.
+     *
+     * @param object $entity
+     * @return mixed|null
+     */
     public function get($entity)
     {
         try {
@@ -49,10 +69,5 @@ class ContextStorage
         } catch (\UnexpectedValueException $e) {
             return null;
         }
-    }
-
-    public function contains($entity)
-    {
-        return in_array($entity, $this->elements, true);
     }
 }

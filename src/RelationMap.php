@@ -53,22 +53,17 @@ final class RelationMap
             }
 
             $item = $data[$name];
-
             if (is_object($item) || is_null($item)) {
+                // cyclic initialization
                 $state->setRelation($name, $item);
                 continue;
             }
 
-            if (!$relation->isCollection()) {
-                $data[$name] = $relation->init($item);
-                $state->setRelation($name, $data[$name]);
-                continue;
-            }
+            // init relation for the entity and for state and the same time
+            list($data[$name], $item) = $relation->init($item);
 
-            $relData = $relation->initArray($item);
-
-            $state->setRelation($name, $relData);
-            $data[$name] = $relation->wrapCollection($relData);
+            // store current state of relation
+            $state->setRelation($name, $item);
         }
 
         return $data;

@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Relation;
 
-use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
@@ -17,16 +16,7 @@ use Spiral\ORM\State;
 
 class HasManyRelation extends AbstractRelation
 {
-    public const COLLECTION = true;
-
-    public function extract($relData)
-    {
-        if ($relData instanceof Collection) {
-            return $relData->toArray();
-        }
-
-        return $relData;
-    }
+    use Traits\CollectionTrait;
 
     /**
      * @inheritdoc

@@ -10,14 +10,39 @@ namespace Spiral\ORM\Collection;
 
 use Doctrine\Common\Collections\Collection;
 
+/**
+ * Carries pivot data associated with each element.
+ */
 interface PivotedCollectionInterface extends Collection
 {
     /**
-     * Return associated context between the values in collection
-     * and parent entity.
+     * Return true if element has pivot data associated (can be null).
      *
-     * @todo define better name?
-     * @return RelationContextInterface
+     * @param object $element
+     * @return bool
      */
-    public function getRelationContext(): RelationContextInterface;
+    public function hasPivot($element): bool;
+
+    /**
+     * Return pivot data associated with element or null.
+     *
+     * @param object $element
+     * @return mixed|null
+     */
+    public function getPivot($element);
+
+    /**
+     * Associate pivot data with the element.
+     *
+     * @param object $element
+     * @param mixed  $pivot
+     */
+    public function setPivot($element, $pivot);
+
+    /**
+     * Get all associated pivot data.
+     *
+     * @return \SplObjectStorage
+     */
+    public function getPivotData(): \SplObjectStorage;
 }

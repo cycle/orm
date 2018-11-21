@@ -15,7 +15,7 @@ interface RelationInterface
 {
     public function isCascade(): bool;
 
-    public function isCollection(): bool;
+    public function init($data): array;
 
     public function extract($value);
 

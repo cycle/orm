@@ -224,28 +224,28 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
         $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
 
-        $this->assertTrue($a->tags->getRelationContext()->has($a->tags[0]));
-        $this->assertTrue($a->tags->getRelationContext()->has($a->tags[1]));
-        $this->assertTrue($b->tags->getRelationContext()->has($b->tags[0]));
+        $this->assertTrue($a->tags->hasPivot($a->tags[0]));
+        $this->assertTrue($a->tags->hasPivot($a->tags[1]));
+        $this->assertTrue($b->tags->hasPivot($b->tags[0]));
 
-        $this->assertFalse($b->tags->getRelationContext()->has($a->tags[0]));
-        $this->assertFalse($b->tags->getRelationContext()->has($a->tags[1]));
-        $this->assertFalse($a->tags->getRelationContext()->has($b->tags[0]));
+        $this->assertFalse($b->tags->hasPivot($a->tags[0]));
+        $this->assertFalse($b->tags->hasPivot($a->tags[1]));
+        $this->assertFalse($a->tags->hasPivot($b->tags[0]));
 
         $this->assertEquals([
             'user_id' => 1,
             'tag_id'  => 1,
-        ], $a->tags->getRelationContext()->get($a->tags[0]));
+        ], $a->tags->getPivot($a->tags[0]));
 
         $this->assertEquals([
             'user_id' => 1,
             'tag_id'  => 2,
-        ], $a->tags->getRelationContext()->get($a->tags[1]));
+        ], $a->tags->getPivot($a->tags[1]));
 
         $this->assertEquals([
             'user_id' => 2,
             'tag_id'  => 3,
-        ], $b->tags->getRelationContext()->get($b->tags[0]));
+        ], $b->tags->getPivot($b->tags[0]));
     }
 
     public function testCreateWithManyToManyCascade()
@@ -273,7 +273,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertEquals([
             'user_id' => 3,
             'tag_id'  => 4,
-        ], $u->tags->getRelationContext()->get($u->tags[0]));
+        ], $u->tags->getPivot($u->tags[0]));
     }
 
     public function testCreateWithManyToMany()
@@ -302,7 +302,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertEquals([
             'user_id' => 3,
             'tag_id'  => 4,
-        ], $u->tags->getRelationContext()->get($u->tags[0]));
+        ], $u->tags->getPivot($u->tags[0]));
     }
 
     public function testCreateWithManyToManyStoreTagAfterUser()
@@ -331,7 +331,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertEquals([
             'user_id' => 3,
             'tag_id'  => 4,
-        ], $u->tags->getRelationContext()->get($u->tags[0]));
+        ], $u->tags->getPivot($u->tags[0]));
     }
 
     public function testCreateWithManyToManyMultilink()
@@ -365,7 +365,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertEquals([
             'user_id' => 3,
             'tag_id'  => 4,
-        ], $u->tags->getRelationContext()->get($u->tags[0]));
+        ], $u->tags->getPivot($u->tags[0]));
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(4)->fetchOne();
@@ -377,7 +377,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertEquals([
             'user_id' => 4,
             'tag_id'  => 4,
-        ], $u->tags->getRelationContext()->get($u->tags[0]));
+        ], $u->tags->getPivot($u->tags[0]));
     }
 
     public function testUnlinkManyToManyAndReplaceSome()
@@ -420,16 +420,18 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertEquals([
             'user_id' => 1,
             'tag_id'  => 2,
-        ], $a->tags->getRelationContext()->get($a->tags[0]));
+        ], $a->tags->getPivot($a->tags[0]));
 
         $this->assertEquals([
             'user_id' => 1,
             'tag_id'  => 3,
-        ], $a->tags->getRelationContext()->get($a->tags[1]));
+        ], $a->tags->getPivot($a->tags[1]));
 
         $this->assertEquals([
             'user_id' => 2,
             'tag_id'  => 4,
-        ], $b->tags->getRelationContext()->get($b->tags[0]));
+        ], $b->tags->getPivot($b->tags[0]));
     }
+
+    // todo: set data
 }

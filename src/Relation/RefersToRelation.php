@@ -13,6 +13,7 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Database\LinkCommand;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\DependencyInterface;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
@@ -23,6 +24,28 @@ use Spiral\ORM\State;
  */
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
+    /** @var string */
+    private $innerKey;
+
+    /** @var string */
+    private $outerKey;
+
+    /** @var string */
+    private $primaryKey;
+
+    /**
+     * @param ORMInterface $orm
+     * @param string       $class
+     * @param string       $relation
+     * @param array        $schema
+     */
+    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    {
+        parent::__construct($orm, $class, $relation, $schema);
+        $this->innerKey = $this->define(Relation::INNER_KEY);
+        $this->outerKey = $this->define(Relation::OUTER_KEY);
+    }
+
     /**
      * @inheritdoc
      */
@@ -33,13 +56,9 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $related,
         $original
     ): CommandInterface {
-        $innerKey = $this->define(Relation::INNER_KEY);
-        $outerKey = $this->define(Relation::OUTER_KEY);
-        $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
-
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
-            $command->setContext($innerKey, null);
+            $command->setContext($this->innerKey, null);
 
             return new NullCommand();
         }
@@ -47,8 +66,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $relState = $this->getState($related);
 
         // related object exists, we can update key immediately
-        if (!empty($relState) && !empty($relState->getKey($outerKey))) {
-            $command->setContext($innerKey, $relState->getKey($outerKey));
+        if (!empty($relState) && !empty($relState->getKey($this->outerKey))) {
+            $command->setContext($this->innerKey, $relState->getKey($this->outerKey));
 
             return new NullCommand();
         }
@@ -60,12 +79,13 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             $this
         );
 
+        $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
         $this->promiseWhere($link, $state, $primaryKey, null, $primaryKey);
 
         // state either not found or key value is not set, subscribe thought the heap
-        $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link, $innerKey, $outerKey) {
-            if (!empty($value = $state->getKey($outerKey))) {
-                $link->setContext($innerKey, $value);
+        $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
+            if (!empty($value = $state->getKey($this->outerKey))) {
+                $link->setContext($this->innerKey, $value);
             }
         });
 

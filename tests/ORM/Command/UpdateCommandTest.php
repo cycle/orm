@@ -67,4 +67,19 @@ class UpdateCommandTest extends TestCase
         $cmd->setWhere('key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getWhere());
     }
+
+    /**
+     * @expectedException \Spiral\ORM\Exception\CommandException
+     */
+    public function testNoScope()
+    {
+        $cmd = new UpdateCommand(
+            m::mock(DatabaseInterface::class),
+            'table',
+            ['name' => 'value'],
+            []
+        );
+
+        $cmd->execute();
+    }
 }

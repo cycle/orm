@@ -13,12 +13,10 @@ use Spiral\ORM\Collection\PivotedCollection;
 use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Control\ContextualSequence;
 use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
-use Spiral\ORM\Exception\RelationException;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -30,6 +28,12 @@ class ManyToManyRelation extends AbstractRelation
     /** @var string|null */
     private $pivotEntity;
 
+    /** @var string */
+    protected $thoughtInnerKey;
+
+    /** @var string */
+    protected $thoughtOuterKey;
+
     /**
      * @param ORMInterface $orm
      * @param string       $class
@@ -40,6 +44,8 @@ class ManyToManyRelation extends AbstractRelation
     {
         parent::__construct($orm, $class, $relation, $schema);
         $this->pivotEntity = $this->define(Relation::PIVOT_ENTITY);
+        $this->thoughtInnerKey = $this->define(Relation::THOUGHT_INNER_KEY);
+        $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
     }
 
     /**
@@ -124,105 +130,84 @@ class ManyToManyRelation extends AbstractRelation
         return $sequence;
     }
 
-    // todo: diff
-    protected function link(State $parentState, $related, $context, $origContext): CommandInterface
+    /**
+     * Link two entities together and create/update pivot context.
+     *
+     * @param State  $state
+     * @param object $related
+     * @param mixed  $pivot
+     * @param mixed  $origPivot
+     * @return CommandInterface
+     */
+    protected function link(State $state, $related, $pivot, $origPivot): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
 
-        $chain = new ContextualSequence();
-        $chain->addPrimary($relStore);
 
-        if (is_object($context)) {
+        // deal with this clusterfuck
+
+        if (is_object($pivot)) {
             // todo: check if context instance of pivot entity
-            $cmd = $this->orm->queueStore($context);
-            $ctxState = $this->getState($context);
+            $upsert = $this->orm->queueStore($pivot);
+            $ctxState = $this->getState($pivot);
         } else {
+            // todo: WHERE IS ???
+            // todo: MAKE IT SIMPLER?
+
             // todo: update existed?
             // todo: store database name (!!) in relation
-            $cmd = new InsertCommand(
+
+            // it will bypass object creation!!!!
+
+            $upsert = new InsertCommand(
                 $this->orm->getDatabase($this->class),
                 $this->define(Relation::PIVOT_TABLE),
-                $context ?? []
+                $pivot ?? []
             );
+
+            // todo: can be existed
         }
 
-        $insert = new Defer(
-            $cmd,
-            [
-                $this->define(Relation::THOUGHT_INNER_KEY),
-                $this->define(Relation::THOUGHT_OUTER_KEY)
-            ],
-            (string)$this
-        );
 
         // TODO: DRY!!!
         // todo: ENTITY IS DIFFERENT!!!
-
         // todo: DO NOT UPDATE CONTEXT
 
-        $this->promiseContext(
-            $insert,
-            $parentState,
-            $this->define(Relation::INNER_KEY),
-            null,
-            $this->define(Relation::THOUGHT_INNER_KEY)
-        );
+        $sync = new Defer($upsert, [$this->thoughtInnerKey, $this->thoughtOuterKey], (string)$this);
 
-        $this->promiseContext(
-            $insert,
-            $relState,
-            $this->define(Relation::OUTER_KEY),
-            null,
-            $this->define(Relation::THOUGHT_OUTER_KEY)
-        );
+        // it will always throw an insert, BUG!!!
+        $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
+        $this->promiseContext($sync, $relState, $this->outerKey, null, $this->thoughtOuterKey);
 
-        $chain->addCommand($insert);
+        $sequence = new Sequence();
+        $sequence->addCommand($relStore);
+        $sequence->addCommand($sync);
 
-        // todo: update relation state
-        return $chain;
+        return $sequence;
     }
 
     /**
      * Remove the connection between two objects.
      *
-     * @param State  $parentState
+     * @param State  $state
      * @param object $related
      * @return CommandInterface
      */
-    protected function unlink(State $parentState, $related, $context): CommandInterface
+    protected function unlink(State $state, $related, $oriPivot): CommandInterface
     {
-        $relState = $this->getState($related);
-        if (empty($relState) || $relState->getState() == State::NEW) {
-            throw new RelationException(
-                "Invalid relation state, NEW entity scheduled for unlink"
-            );
-        }
+        // delete pivot object?
 
+        // todo: need database and table selection DRY
         $delete = new DeleteCommand(
             $this->orm->getDatabase($this->class),
-            $this->define(Relation::PIVOT_TABLE),
-            [
-                $this->define(Relation::THOUGHT_INNER_KEY) => null,
-                $this->define(Relation::THOUGHT_OUTER_KEY) => null,
-            ]
+            $this->define(Relation::PIVOT_TABLE)
         );
 
-        $this->promiseWhere(
-            $delete,
-            $parentState,
-            $this->define(Relation::INNER_KEY),
-            null,
-            $this->define(Relation::THOUGHT_INNER_KEY)
-        );
+        $relState = $this->getState($related);
 
-        $this->promiseWhere(
-            $delete,
-            $relState,
-            $this->define(Relation::OUTER_KEY),
-            null,
-            $this->define(Relation::THOUGHT_OUTER_KEY)
-        );
+        $this->promiseWhere($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
+        $this->promiseWhere($delete, $relState, $this->outerKey, null, $this->thoughtOuterKey);
 
         return $delete;
     }

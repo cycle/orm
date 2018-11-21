@@ -13,6 +13,7 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Database\Traits\ContextTrait;
 use Spiral\ORM\Command\Database\Traits\WhereTrait;
 use Spiral\ORM\Command\ScopedInterface;
+use Spiral\ORM\Exception\CommandException;
 
 /**
  * Update data CAN be modified by parent commands using context.
@@ -32,12 +33,8 @@ class UpdateCommand extends DatabaseCommand implements ContextualInterface, Scop
      * @param array             $data
      * @param array             $where
      */
-    public function __construct(
-        DatabaseInterface $db,
-        string $table,
-        array $data,
-        array $where
-    ) {
+    public function __construct(DatabaseInterface $db, string $table, array $data = [], array $where = [])
+    {
         parent::__construct($db, $table);
         $this->data = $data;
         $this->where = $where;
@@ -66,6 +63,10 @@ class UpdateCommand extends DatabaseCommand implements ContextualInterface, Scop
      */
     public function execute()
     {
+        if (empty($this->where)) {
+            throw new CommandException("Unable to execute update command without a scope");
+        }
+
         if (!$this->isEmpty()) {
             $this->db->update($this->table, $this->getData(), $this->where)->run();
         }

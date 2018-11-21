@@ -140,13 +140,13 @@ abstract class CyclicReferencesTest extends BaseTest
         $u->addComment($c);
         $u->favorites->add($c);
 
-        $this->captureQueryCount();
+        $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
 
-        $this->assertQueryCount(4);
+        $this->assertNumWrites(4);
 
         $selector = new Selector($this->orm, User::class);
         $selector->load('lastComment.user')

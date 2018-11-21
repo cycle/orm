@@ -107,17 +107,23 @@ abstract class BaseTest extends TestCase
         return static::$driverCache[static::DRIVER] = $this->driver;
     }
 
-    public function captureQueryCount()
+    /**
+     * Start counting update/insert/delete queries.
+     */
+    public function captureWriteQueries()
     {
-        $this->lastCount = $this->logger->countQueries();
+        $this->lastCount = $this->logger->countWriteQueries();
     }
 
-    public function assertQueryCount($count)
+    /**
+     * @param int $numWrites
+     */
+    public function assertNumWrites(int $numWrites)
     {
-        $queries = $this->logger->countQueries() - $this->lastCount;
+        $queries = $this->logger->countWriteQueries() - $this->lastCount;
 
-        if ($queries != $count) {
-            $this->fail("Number of SQL queries do not match, expected {$count} got {$queries}.");
+        if ($queries != $numWrites) {
+            $this->fail("Number of write SQL queries do not match, expected {$numWrites} got {$queries}.");
         }
     }
 
@@ -182,22 +188,29 @@ class TestLogger implements LoggerInterface
 
     private $display;
 
-    private $count;
+    private $countWrites;
 
     public function __construct()
     {
-        $this->count = 0;
+        $this->countWrites = 0;
     }
 
-    public function countQueries(): int
+    public function countWriteQueries(): int
     {
-        return $this->count;
+        return $this->countWrites;
     }
 
     public function log($level, $message, array $context = [])
     {
         if (!empty($context['query'])) {
-            $this->count++;
+            $sql = strtolower($context['query']);
+            if (
+                strpos($sql, 'insert') === 0
+                || strpos($sql, 'update') === 0
+                || strpos($sql, 'delete') === 0
+            ) {
+                $this->countWrites++;
+            }
         }
 
         if (!$this->display) {

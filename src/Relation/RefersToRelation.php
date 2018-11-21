@@ -61,7 +61,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $this->promiseScope($link, $state, $primaryKey, null, $primaryKey);
 
         // state either not found or key value is not set, subscribe thought the heap
-        $this->orm->getHeap()->onUpdate($related, function (State $state) use ($link) {
+        $this->orm->getHeap()->onChange($related, function (State $state) use ($link) {
             if (!empty($value = $this->fetchKey($state, $this->outerKey))) {
                 $link->setContext($this->innerKey, $value);
             }

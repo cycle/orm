@@ -47,20 +47,18 @@ class Heap implements HeapInterface
         }
     }
 
-    public function onUpdate($entity, callable $handler)
+    public function onChange($entity, callable $handler)
     {
-        if (!$this->has($entity)) {
-            if ($this->handlers->offsetExists($entity)) {
-                $this->handlers->offsetSet(
-                    $entity,
-                    array_merge($this->handlers->offsetGet($entity), [$handler])
-                );
-            } else {
-                $this->handlers->offsetSet($entity, [$handler]);
-            }
-
-        } else {
+        if ($this->has($entity)) {
             $this->get($entity)->onChange($handler);
+
+            return;
+        }
+
+        if ($this->handlers->offsetExists($entity)) {
+            $this->handlers[$entity][] = $handler;
+        } else {
+            $this->handlers[$entity] = [$handler];
         }
     }
 
@@ -70,10 +68,12 @@ class Heap implements HeapInterface
     public function attach($entity, StateInterface $state, array $paths = [])
     {
         $this->storage->offsetSet($entity, $state);
+
         if ($this->handlers->offsetExists($entity)) {
-            foreach ($this->handlers->offsetGet($entity) as $handler) {
+            foreach ($this->handlers[$entity] as $handler) {
                 $state->onChange($handler);
             }
+
             $this->handlers->offsetUnset($entity);
         }
 
@@ -88,6 +88,7 @@ class Heap implements HeapInterface
     public function detach($entity)
     {
         $this->storage->offsetUnset($entity);
+        $this->handlers->offsetUnset($entity);
 
         // rare usage
         $this->path = array_filter($this->path, function ($value) use ($entity) {
@@ -107,7 +108,7 @@ class Heap implements HeapInterface
 
     public function hasPath(string $path)
     {
-        // todo: this is fun
+        // todo: this is fun, optimization is required
         return isset($this->path[$path]);
     }
 

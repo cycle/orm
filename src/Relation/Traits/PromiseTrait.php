@@ -14,12 +14,21 @@ use Spiral\ORM\State;
 
 trait PromiseTrait
 {
+    /**
+     * Configure context parameter using value from parent entity. Created promise.
+     *
+     * @param ContextualInterface $command
+     * @param State               $parent
+     * @param string              $parentKey
+     * @param null|State          $current
+     * @param string              $localKey
+     */
     protected function promiseContext(
         ContextualInterface $command,
         State $parent,
-        $parentKey,
+        string $parentKey,
         ?State $current,
-        $localKey
+        string $localKey
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
             if (empty($current) || $current->getKey($localKey) != $value) {
@@ -28,22 +37,28 @@ trait PromiseTrait
         }
 
         $parent->onUpdate(function (State $source) use ($command, $localKey, $parentKey) {
-            if (empty($value = $source->getKey($parentKey))) {
-                // not ready
-                return;
+            if (!empty($value = $source->getKey($parentKey))) {
+                $command->setContext($localKey, $value);
             }
-
-            // todo: avoid un-necessary updates?
-            $command->setContext($localKey, $value);
         });
     }
 
-    protected function promiseWhere(
+    /**
+     * Configure where parameter in scoped command based on key provided by the
+     * parent entity. Creates promise.
+     *
+     * @param ScopedInterface $command
+     * @param State           $parent
+     * @param string          $parentKey
+     * @param null|State      $current
+     * @param string          $localKey
+     */
+    protected function promiseScope(
         ScopedInterface $command,
         State $parent,
-        $parentKey,
+        string $parentKey,
         ?State $current,
-        $localKey
+        string $localKey
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
             if (empty($current) || $current->getKey($localKey) != $value) {

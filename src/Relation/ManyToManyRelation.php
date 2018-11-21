@@ -209,8 +209,8 @@ class ManyToManyRelation extends AbstractRelation
 
         $relState = $this->getState($related);
 
-        $this->promiseWhere($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseWhere($delete, $relState, $this->outerKey, null, $this->thoughtOuterKey);
+        $this->promiseScope($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
+        $this->promiseScope($delete, $relState, $this->outerKey, null, $this->thoughtOuterKey);
 
         return $delete;
     }

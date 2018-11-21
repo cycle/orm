@@ -161,9 +161,13 @@ abstract class InverseRelationTest extends BaseTest
         // cyclic
         $u->profile->user = $u;
 
+        $this->captureQueryCount();
+
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
+
+        $this->assertQueryCount(2);
 
         $this->assertEquals(3, $u->id);
         $this->assertEquals(4, $u->profile->id);

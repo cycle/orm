@@ -134,9 +134,13 @@ abstract class HasOneCyclicTest extends BaseTest
         $c->name = "new";
         $c->cyclic = $c;
 
+        $this->captureQueryCount();
+
         $tr = new Transaction($this->orm);
         $tr->store($c);
         $tr->run();
+
+        $this->assertQueryCount(2);
 
         $selector = new Selector($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(4)->fetchOne();

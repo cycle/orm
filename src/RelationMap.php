@@ -78,9 +78,10 @@ final class RelationMap
         $sequence = new ContextualSequence();
 
         foreach ($this->dependencies as $name => $relation) {
-            if (!$relation->isCascade()) {
+            if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
+            $state->setVisited($name, true);
 
             $sequence->addCommand(
                 $relation->queueDependency(

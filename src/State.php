@@ -131,6 +131,11 @@ final class State
         return $this->refCount > 0;
     }
 
+    public function numReferences(): int
+    {
+        return $this->refCount;
+    }
+
     /**
      * @invisible
      * @var array

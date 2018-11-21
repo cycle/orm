@@ -339,10 +339,14 @@ abstract class ManyToManyPivotEntityRelationTest extends BaseTest
         $b->tags->add($t);
         $b->tags->getRelationContext()->set($t, $pc);
 
+        $this->captureQueryCount();
+
         $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
+
+        $this->assertQueryCount(6);
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         /**

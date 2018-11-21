@@ -96,9 +96,13 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->addComment($c);
 
+        $this->captureQueryCount();
+
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
+
+        $this->assertQueryCount(3);
 
         $s = new Selector($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();

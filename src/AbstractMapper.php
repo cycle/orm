@@ -165,7 +165,7 @@ abstract class AbstractMapper implements MapperInterface
         $state->setData($cData);
 
         $state->onUpdate(function (State $state) use ($update) {
-            $update->setWhere([$this->primaryKey => $state->getKey($this->primaryKey)]);
+            $update->setWhere($this->primaryKey, $state->getKey($this->primaryKey));
         });
 
         $update->onComplete(function (Update $command) use ($entity, $state) {
@@ -199,7 +199,7 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_DELETE);
 
         $state->onUpdate(function (State $state) use ($delete) {
-            $delete->setWhere([$this->primaryKey => $state->getKey($this->primaryKey)]);
+            $delete->setWhere($this->primaryKey, $state->getKey($this->primaryKey));
         });
 
         $delete->onComplete(function (DeleteCommand $command) use ($entity) {

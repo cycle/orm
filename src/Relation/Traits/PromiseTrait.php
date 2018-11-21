@@ -23,7 +23,6 @@ trait PromiseTrait
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
             if (empty($current) || $current->getKey($localKey) != $value) {
-                // no changes
                 $command->setContext($localKey, $parent->getKey($parentKey));
             }
         }
@@ -47,22 +46,14 @@ trait PromiseTrait
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
             if (empty($current) || $current->getKey($localKey) != $value) {
-                // no changes
-                $command->setWhere(
-                    [$localKey => $parent->getKey($parentKey)] + $command->getWhere()
-                );
+                $command->setWhere($localKey, $parent->getKey($parentKey));
             }
         }
 
         $parent->onUpdate(function (State $source) use ($command, $localKey, $parentKey) {
-            if (empty($value = $source->getKey($parentKey))) {
-                // not ready
-                return;
+            if (!empty($value = $source->getKey($parentKey))) {
+                $command->setWhere($localKey, $source->getKey($parentKey));
             }
-
-            $command->setWhere(
-                [$localKey => $source->getKey($parentKey)] + $command->getWhere()
-            );
         });
     }
 }

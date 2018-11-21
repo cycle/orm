@@ -66,7 +66,6 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
      */
     public function execute()
     {
-        // todo: do not update when context is the same, see many to many pivot
         if (!$this->isEmpty()) {
             $this->db->update($this->table, $this->getData(), $this->where)->run();
         }

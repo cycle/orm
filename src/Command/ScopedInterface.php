@@ -11,9 +11,10 @@ namespace Spiral\ORM\Command;
 interface ScopedInterface extends CommandInterface
 {
     /**
-     * @param array $where
+     * @param string $key
+     * @param mixed  $value
      */
-    public function setWhere(array $where);
+    public function setWhere(string $key, $value);
 
     /**
      * @return array

@@ -17,11 +17,12 @@ trait WhereTrait
     private $where = [];
 
     /**
-     * @param array $where
+     * @param string $key
+     * @param mixed  $value
      */
-    public function setWhere(array $where)
+    public function setWhere(string $key, $value)
     {
-        $this->where = $where;
+        $this->where[$key] = $value;
     }
 
     /**

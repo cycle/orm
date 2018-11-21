@@ -183,7 +183,7 @@ class ORM implements ORMInterface
             if (!empty($entityID) && $this->heap->hasPath($class, $entityID)) {
                 $existed = $this->heap->getPath($class, $entityID);
 
-                // todo: optimize, avoid cyclic initiation
+                // todo: optimize, avoid cyclic initiation ? do i have it?
 
                 return $this->getMapper($existed)->hydrate(
                     $existed,
@@ -194,19 +194,13 @@ class ORM implements ORMInterface
 
         $mapper = $this->getMapper($class);
 
-        // todo: data must be filtered (!)
         $state = new State($entityID ?? null, $state, $data);
         $entity = $mapper->init($mapper->entityClass($data));
 
-        if (!empty($entityID)) {
-            $this->heap->attach($entity, $state);
-        }
+        $this->heap->attach($entity, $state);
 
-        // hydrate entity with it's data and relations
-        return $mapper->hydrate(
-            $entity,
-            $this->getRelationMap($entity)->init($state, $data)
-        );
+        // hydrate entity with it's data, relations and proxies
+        return $mapper->hydrate($entity, $this->getRelationMap($entity)->init($state, $data));
     }
 
     public function queueStore($entity, int $mode = 0): ContextualInterface

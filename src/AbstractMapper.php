@@ -124,26 +124,16 @@ abstract class AbstractMapper implements MapperInterface
         // we are managed at this moment
 
         $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
-            $state->setData([$this->primaryKey => $command->getInsertID()]);
+            $state->setData([$this->primaryKey => $command->getInsertID()] + $command->getContext());
         });
 
         $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
-
-            // todo: update entity path
-
-            $this->hydrate(
-                $entity,
-                [$this->primaryKey => $command->getInsertID()] + $command->getContext()
-            );
-
-            // todo: replace with data (!!)
-            $state->setData($command->getContext());
-
-            // todo: mount path to the entity!!!
+            $this->hydrate($entity, $state->getData());
         });
 
         $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
+            // detach or change the state ?
             $this->orm->getHeap()->detach($entity);
         });
 
@@ -162,7 +152,7 @@ abstract class AbstractMapper implements MapperInterface
             $this->orm->getDatabase($entity),
             $this->table,
             $cData,
-            [$this->primaryKey => $state->getData()[$this->primaryKey] ?? $eData[$this->primaryKey] ?? null]
+            [$this->primaryKey => $oData[$this->primaryKey] ?? $eData[$this->primaryKey] ?? null]
         );
 
         $current = $state->getState();
@@ -175,14 +165,13 @@ abstract class AbstractMapper implements MapperInterface
 
         $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
-
-            $this->hydrate($entity, $command->getContext());
             $state->setData($command->getContext());
+            $this->hydrate($entity, $state->getData());
         });
 
         $update->onRollBack(function () use ($state, $current) {
+            //todo: rollback data
             $state->setState($current);
-            //todo: rollback
         });
 
         return $update;

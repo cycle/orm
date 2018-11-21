@@ -33,7 +33,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         }
 
         if (is_null($related)) {
-            $command->setContext($this->define(Relation::INNER_KEY), null);
+            $command->setContext($this->innerKey, null);
 
             return new NullCommand();
         }
@@ -41,13 +41,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
 
-        $this->promiseContext(
-            $command,
-            $relState,
-            $this->define(Relation::OUTER_KEY),
-            $state,
-            $this->define(Relation::INNER_KEY)
-        );
+        $this->promiseContext($command, $relState, $this->outerKey, $state, $this->innerKey);
 
         // todo: morph key
 

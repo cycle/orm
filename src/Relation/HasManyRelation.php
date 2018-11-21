@@ -13,7 +13,6 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
 class HasManyRelation extends AbstractRelation
@@ -76,17 +75,10 @@ class HasManyRelation extends AbstractRelation
     protected function queueStore(State $parentState, $related): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
-
         $relState = $this->getState($related);
         $relState->addReference();
 
-        $this->promiseContext(
-            $relStore,
-            $parentState,
-            $this->define(Relation::INNER_KEY),
-            $relState,
-            $this->define(Relation::OUTER_KEY)
-        );
+        $this->promiseContext($relStore, $parentState, $this->innerKey, $relState, $this->outerKey);
 
         return $relStore;
     }

@@ -12,7 +12,6 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\ContextualSequence;
-use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 
 class HasOneRelation extends AbstractRelation
@@ -38,24 +37,15 @@ class HasOneRelation extends AbstractRelation
             return $sequence;
         }
 
-        // todo: check number of references
-
-        // polish even more?
         $relStore = $this->orm->queueStore($related);
-        $sequence->addPrimary($relStore);
-
         $relState = $this->getState($related);
         $relState->addReference();
 
-        $this->promiseContext(
-            $relStore,
-            $state,
-            $this->define(Relation::INNER_KEY),
-            $relState,
-            $this->define(Relation::OUTER_KEY)
-        );
+        $this->promiseContext($relStore, $state, $this->innerKey, $relState, $this->outerKey);
 
         // todo: morph key
+
+        $sequence->addPrimary($relStore);
 
         return $sequence;
     }

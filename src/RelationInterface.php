@@ -17,6 +17,8 @@ interface RelationInterface
 
     public function isCollection(): bool;
 
+    public function extract($value);
+
     public function queueRelation(
         ContextualInterface $command,
         $entity,

@@ -13,8 +13,6 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Database\LinkCommand;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\DependencyInterface;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 
@@ -24,28 +22,6 @@ use Spiral\ORM\State;
  */
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
-    /** @var string */
-    private $innerKey;
-
-    /** @var string */
-    private $outerKey;
-
-    /** @var string */
-    private $primaryKey;
-
-    /**
-     * @param ORMInterface $orm
-     * @param string       $class
-     * @param string       $relation
-     * @param array        $schema
-     */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
-    {
-        parent::__construct($orm, $class, $relation, $schema);
-        $this->innerKey = $this->define(Relation::INNER_KEY);
-        $this->outerKey = $this->define(Relation::OUTER_KEY);
-    }
-
     /**
      * @inheritdoc
      */

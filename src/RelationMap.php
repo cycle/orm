@@ -73,9 +73,9 @@ final class RelationMap
     /**
      * Generate set of commands required to store the entity and it's relations.
      *
-     * @param object              $entity
-     * @param array               $data
-     * @param State               $state
+     * @param object $entity
+     * @param array $data
+     * @param State $state
      * @param ContextualInterface $command
      * @return ContextualInterface
      */

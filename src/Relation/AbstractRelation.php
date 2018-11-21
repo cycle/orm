@@ -32,16 +32,28 @@ abstract class AbstractRelation implements RelationInterface
 
     protected $schema;
 
+    /** @var string */
+    protected $innerKey;
+
+    /** @var string */
+    protected $outerKey;
+
     public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
     {
         $this->orm = $orm;
         $this->class = $class;
         $this->relation = $relation;
         $this->schema = $schema;
+        $this->innerKey = $this->define(Relation::INNER_KEY);
+        $this->outerKey = $this->define(Relation::OUTER_KEY);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
+        // this is incorrect class
         return sprintf("%s->%s", $this->class, $this->relation);
     }
 
@@ -79,7 +91,6 @@ abstract class AbstractRelation implements RelationInterface
     {
         return $relData;
     }
-
 
     protected function define($key)
     {

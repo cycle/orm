@@ -8,6 +8,8 @@
 
 namespace Spiral\ORM;
 
+use Spiral\ORM\Traits\ReferenceTrait;
+
 /**
  * State carries meta information about all load entities, including original set of data,
  * relations, state, primary key value (you can handle entities without PK included), and number of
@@ -15,6 +17,8 @@ namespace Spiral\ORM;
  */
 final class State implements StateInterface
 {
+    use ReferenceTrait;
+
     // Different entity states in a pool
     public const NEW              = 0;
     public const LOADED           = 1;
@@ -28,8 +32,6 @@ final class State implements StateInterface
     /** @var array */
     private $data;
 
-    private $refCount = 1;
-
     private $relations = [];
 
     /**
@@ -39,6 +41,13 @@ final class State implements StateInterface
      */
     private $visited = [];
 
+
+    /**
+     * @invisible
+     * @var array
+     */
+    private $handlers = [];
+
     /**
      * @param int   $state
      * @param array $data
@@ -47,6 +56,14 @@ final class State implements StateInterface
     {
         $this->state = $state;
         $this->data = $data;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function onChange(callable $handler)
+    {
+        $this->handlers[] = $handler;
     }
 
     /**
@@ -99,31 +116,6 @@ final class State implements StateInterface
         return $this->relations[$name] ?? null;
     }
 
-    public function addReference()
-    {
-        $this->refCount++;
-    }
-
-    public function decReference()
-    {
-        $this->refCount--;
-    }
-
-    public function hasReferences(): bool
-    {
-        return $this->refCount > 0;
-    }
-
-    /**
-     * @invisible
-     * @var array
-     */
-    private $handlers = [];
-
-    public function onChange(callable $handler)
-    {
-        $this->handlers[] = $handler;
-    }
 
     /**
      * Return true if relation branch was already visited.

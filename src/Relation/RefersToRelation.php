@@ -22,7 +22,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queueDependency(
+    public function queueRelation(
         ContextualInterface $command,
         $entity,
         State $state,
@@ -36,13 +36,13 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         }
 
         $relState = $this->getState($related);
-//        $this->promiseContext(
-//            $command,
-//            $relState,
-//            $this->define(Relation::OUTER_KEY),
-//            $state,
-//            $this->define(Relation::INNER_KEY)
-//        );
+        //        $this->promiseContext(
+        //            $command,
+        //            $relState,
+        //            $this->define(Relation::OUTER_KEY),
+        //            $state,
+        //            $this->define(Relation::INNER_KEY)
+        //        );
 
         if (!empty($relState) && !empty($relState->getKey($this->define(Relation::OUTER_KEY)))) {
             $command->setContext(
@@ -84,13 +84,5 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         });
 
         return $link;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function queueRelation($entity, State $state, $related, $original): CommandInterface
-    {
-        return new NullCommand();
     }
 }

@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\ContextualSequence;
 use Spiral\ORM\Relation;
@@ -19,8 +20,13 @@ class HasOneRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queueRelation($entity, State $state, $related, $original): CommandInterface
-    {
+    public function queueRelation(
+        ContextualInterface $command,
+        $entity,
+        State $state,
+        $related,
+        $original
+    ): CommandInterface {
         $sequence = new ContextualSequence();
 
         if (!empty($original) && $related !== $original) {

@@ -9,6 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 
 interface RelationInterface
 {
@@ -16,5 +17,11 @@ interface RelationInterface
 
     public function isCollection(): bool;
 
-    public function queueRelation($entity, State $state, $related, $original): CommandInterface;
+    public function queueRelation(
+        ContextualInterface $command,
+        $entity,
+        State $state,
+        $related,
+        $original
+    ): CommandInterface;
 }

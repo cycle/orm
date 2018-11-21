@@ -91,7 +91,7 @@ final class RelationMap
 
             // queue needed changes
             $sequence->addCommand(
-                $relation->queueDependency($command, $entity, $state, $related, $state->getRelation($name))
+                $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
             );
 
             // update current relation state
@@ -114,7 +114,7 @@ final class RelationMap
 
             // queue needed changes
             $sequence->addCommand(
-                $relation->queueRelation($entity, $state, $related, $state->getRelation($name))
+                $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
             );
 
             // update current relation state

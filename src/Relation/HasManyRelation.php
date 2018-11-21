@@ -10,6 +10,7 @@ namespace Spiral\ORM\Relation;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Relation;
@@ -31,8 +32,13 @@ class HasManyRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queueRelation($entity, State $state, $related, $original): CommandInterface
-    {
+    public function queueRelation(
+        ContextualInterface $command,
+        $entity,
+        State $state,
+        $related,
+        $original
+    ): CommandInterface {
         $sequence = new Sequence();
 
         foreach ($related as $item) {

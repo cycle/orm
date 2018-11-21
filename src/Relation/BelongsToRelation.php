@@ -21,7 +21,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queueDependency(
+    public function queueRelation(
         ContextualInterface $command,
         $entity,
         State $state,
@@ -55,13 +55,5 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         // todo: morph key
 
         return $relStore;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function queueRelation($entity, State $state, $related, $original): CommandInterface
-    {
-        return new NullCommand();
     }
 }

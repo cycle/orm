@@ -12,6 +12,7 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Collection\PivotedCollection;
 use Spiral\ORM\Collection\RelationContext;
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\ContextualSequence;
 use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
@@ -75,8 +76,13 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queueRelation($entity, State $state, $related, $original): CommandInterface
-    {
+    public function queueRelation(
+        ContextualInterface $command,
+        $entity,
+        State $state,
+        $related,
+        $original
+    ): CommandInterface {
         /**
          * @var ContextStorage $related
          * @var ContextStorage $original
@@ -165,7 +171,7 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Remove the connection between two objects.
      *
-     * @param State  $parentState
+     * @param State $parentState
      * @param object $related
      * @return CommandInterface
      */

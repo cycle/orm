@@ -194,13 +194,14 @@ class ORM implements ORMInterface
 
         $mapper = $this->getMapper($class);
 
-        $state = new State($entityID ?? null, $state, $data);
-        $entity = $mapper->init($mapper->entityClass($data));
+        // init entity class and prepare data
+        list($entity, $filtered) = $mapper->prepare($data);
 
+        $state = new State($entityID ?? null, $state, $filtered);
         $this->heap->attach($entity, $state);
 
         // hydrate entity with it's data, relations and proxies
-        return $mapper->hydrate($entity, $this->getRelationMap($entity)->init($state, $data));
+        return $mapper->hydrate($entity, $this->getRelationMap($entity)->init($state, $filtered));
     }
 
     public function queueStore($entity, int $mode = 0): ContextualInterface

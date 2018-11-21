@@ -14,9 +14,7 @@ use Spiral\ORM\Exception\MapperException;
 
 interface MapperInterface
 {
-    public function entityClass(array $data): string;
-
-    public function init(string $class);
+    public function prepare(array $data): array;
 
     public function hydrate($entity, array $data);
 

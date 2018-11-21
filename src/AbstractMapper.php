@@ -55,9 +55,10 @@ abstract class AbstractMapper implements MapperInterface
         return $class;
     }
 
-    public function init(string $class)
+    public function prepare(array $data): array
     {
-        return new $class;
+        $class = $this->entityClass($data);
+        return [new $class, $data];
     }
 
     public function queueStore($entity): ContextualInterface

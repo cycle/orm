@@ -9,7 +9,6 @@
 namespace Spiral\ORM\Tests;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
@@ -206,7 +205,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testRelationContextAccess()
+    public function testRelationAccess()
     {
         $selector = new Selector($this->orm, User::class);
         /**
@@ -221,31 +220,9 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertInstanceOf(Collection::class, $a->tags);
         $this->assertInstanceOf(Collection::class, $b->tags);
 
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
-
-        $this->assertTrue($a->tags->hasPivot($a->tags[0]));
-        $this->assertTrue($a->tags->hasPivot($a->tags[1]));
-        $this->assertTrue($b->tags->hasPivot($b->tags[0]));
-
-        $this->assertFalse($b->tags->hasPivot($a->tags[0]));
-        $this->assertFalse($b->tags->hasPivot($a->tags[1]));
-        $this->assertFalse($a->tags->hasPivot($b->tags[0]));
-
-        $this->assertEquals([
-            'user_id' => 1,
-            'tag_id'  => 1,
-        ], $a->tags->getPivot($a->tags[0]));
-
-        $this->assertEquals([
-            'user_id' => 1,
-            'tag_id'  => 2,
-        ], $a->tags->getPivot($a->tags[1]));
-
-        $this->assertEquals([
-            'user_id' => 2,
-            'tag_id'  => 3,
-        ], $b->tags->getPivot($b->tags[0]));
+        $this->assertSame("tag a", $a->tags[0]->name);
+        $this->assertSame("tag b", $a->tags[1]->name);
+        $this->assertSame("tag c", $b->tags[0]->name);
     }
 
     public function testCreateWithManyToManyCascade()
@@ -269,11 +246,32 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertSame("many@email.com", $u->email);
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
+    }
 
-        $this->assertEquals([
-            'user_id' => 3,
-            'tag_id'  => 4,
-        ], $u->tags->getPivot($u->tags[0]));
+    public function testNoWriteOperations()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags->add($t);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     public function testCreateWithManyToMany()
@@ -298,11 +296,6 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertSame("many@email.com", $u->email);
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
-
-        $this->assertEquals([
-            'user_id' => 3,
-            'tag_id'  => 4,
-        ], $u->tags->getPivot($u->tags[0]));
     }
 
     public function testCreateWithManyToManyStoreTagAfterUser()
@@ -327,11 +320,6 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertSame("many@email.com", $u->email);
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
-
-        $this->assertEquals([
-            'user_id' => 3,
-            'tag_id'  => 4,
-        ], $u->tags->getPivot($u->tags[0]));
     }
 
     public function testCreateWithManyToManyMultilink()
@@ -362,22 +350,12 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
 
-        $this->assertEquals([
-            'user_id' => 3,
-            'tag_id'  => 4,
-        ], $u->tags->getPivot($u->tags[0]));
-
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(4)->fetchOne();
 
         $this->assertSame("many2@email.com", $u->email);
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
-
-        $this->assertEquals([
-            'user_id' => 4,
-            'tag_id'  => 4,
-        ], $u->tags->getPivot($u->tags[0]));
     }
 
     public function testUnlinkManyToManyAndReplaceSome()
@@ -416,21 +394,6 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertSame("tag b", $a->tags[0]->name);
         $this->assertSame("tag c", $a->tags[1]->name);
         $this->assertSame("new tag", $b->tags[0]->name);
-
-        $this->assertEquals([
-            'user_id' => 1,
-            'tag_id'  => 2,
-        ], $a->tags->getPivot($a->tags[0]));
-
-        $this->assertEquals([
-            'user_id' => 1,
-            'tag_id'  => 3,
-        ], $a->tags->getPivot($a->tags[1]));
-
-        $this->assertEquals([
-            'user_id' => 2,
-            'tag_id'  => 4,
-        ], $b->tags->getPivot($b->tags[0]));
     }
 
     // todo: set data

@@ -30,7 +30,7 @@ class InsertCommand extends DatabaseCommand implements ContextualInterface
      * @param string            $table
      * @param array             $data
      */
-    public function __construct(DatabaseInterface $db, string $table, array $data)
+    public function __construct(DatabaseInterface $db, string $table, array $data = [])
     {
         parent::__construct($db, $table);
         $this->data = $data;

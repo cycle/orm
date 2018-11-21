@@ -9,8 +9,8 @@
 namespace Spiral\ORM\Tests\Fixtures;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Collection\PivotedCollection;
-use Spiral\ORM\Collection\PivotedCollectionInterface;
 
 class User
 {
@@ -24,13 +24,13 @@ class User
     /** @var Comment */
     public $lastComment;
 
-    /** @var Comment[]|PivotedCollectionInterface */
+    /** @var Comment[]|Collection */
     public $comments;
 
-    /** @var Tag[]|PivotedCollectionInterface */
+    /** @var Tag[]|Collection */
     public $tags;
 
-    /** @var Comment[]|PivotedCollectionInterface */
+    /** @var Comment[]|Collection */
     public $favorites;
 
     public function __construct()

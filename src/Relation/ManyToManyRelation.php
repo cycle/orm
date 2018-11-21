@@ -11,7 +11,6 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Defer;
@@ -66,10 +65,6 @@ class ManyToManyRelation extends AbstractRelation
      */
     public function extract($data)
     {
-        if ($data instanceof PivotedCollectionInterface) {
-            return new ContextStorage($data->toArray(), $data->getPivotData());
-        }
-
         if ($data instanceof Collection) {
             return new ContextStorage($data->toArray());
         }
@@ -98,7 +93,7 @@ class ManyToManyRelation extends AbstractRelation
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
             $sequence->addCommand(
-                $this->link($state, $item, $related->get($item) ?? [], $original->get($item) ?? [])
+                $this->link($state, $item, $original->get($item) ?? [])
             );
         }
 
@@ -117,11 +112,10 @@ class ManyToManyRelation extends AbstractRelation
      *
      * @param State  $state
      * @param object $related
-     * @param array  $pivot
      * @param array  $origPivot
      * @return CommandInterface
      */
-    protected function link(State $state, $related, array $pivot, array $origPivot): CommandInterface
+    protected function link(State $state, $related, array $origPivot): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         if (!empty($origPivot)) {

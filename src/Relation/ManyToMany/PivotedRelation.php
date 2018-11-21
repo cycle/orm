@@ -127,6 +127,7 @@ class PivotedRelation extends Relation\AbstractRelation
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
 
+        // todo: what about origPivot?
         if (!is_object($pivot)) {
             $pivot = $this->orm->make($this->pivotEntity, $pivot ?? []);
         }

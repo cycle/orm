@@ -19,6 +19,7 @@ use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
+use Spiral\ORM\StateInterface;
 use Spiral\ORM\Util\ContextStorage;
 
 class PivotedRelation extends Relation\AbstractRelation
@@ -59,7 +60,10 @@ class PivotedRelation extends Relation\AbstractRelation
             $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, State::LOADED);
         }
 
-        return [new PivotedCollection($elements, $pivotData), new ContextStorage($elements, $pivotData)];
+        return [
+            new PivotedCollection($elements, $pivotData),
+            new ContextStorage($elements, $pivotData)
+        ];
     }
 
     /**
@@ -84,7 +88,7 @@ class PivotedRelation extends Relation\AbstractRelation
     public function queueRelation(
         ContextualInterface $command,
         $entity,
-        State $state,
+        StateInterface $state,
         $related,
         $original
     ): CommandInterface {
@@ -116,13 +120,13 @@ class PivotedRelation extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param State  $state
-     * @param object $related
-     * @param object $pivot
-     * @param object $origPivot
+     * @param StateInterface $state
+     * @param object         $related
+     * @param object         $pivot
+     * @param object         $origPivot
      * @return CommandInterface
      */
-    protected function link(State $state, $related, $pivot, $origPivot): CommandInterface
+    protected function link(StateInterface $state, $related, $pivot, $origPivot): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
@@ -133,10 +137,7 @@ class PivotedRelation extends Relation\AbstractRelation
         }
 
         $pivotState = $this->getState($pivot);
-        if (!empty($pivotState) && $pivotState->getState() != State::NEW) {
-            // objects already linked, we can try to update pivot data if needed
-            $pivotStore = $this->orm->queueStore($pivot);
-        } else {
+        if ($pivotState == null || $pivotState->getState() == State::NEW) {
             // defer the insert until pivot keys are resolved
             $pivotStore = new Defer(
                 $this->orm->queueStore($pivot),
@@ -146,6 +147,9 @@ class PivotedRelation extends Relation\AbstractRelation
 
             $this->promiseContext($pivotStore, $state, $this->innerKey, null, $this->thoughtInnerKey);
             $this->promiseContext($pivotStore, $relState, $this->outerKey, null, $this->thoughtOuterKey);
+        } else {
+            // objects already linked, we can try to update pivot data if needed
+            $pivotStore = $this->orm->queueStore($pivot);
         }
 
         $sequence = new Sequence();

@@ -14,7 +14,7 @@ use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Relation;
-use Spiral\ORM\State;
+use Spiral\ORM\StateInterface;
 
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
@@ -24,7 +24,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     public function queueRelation(
         ContextualInterface $command,
         $entity,
-        State $state,
+        StateInterface $state,
         $related,
         $original
     ): CommandInterface {

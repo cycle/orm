@@ -20,7 +20,7 @@ use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
-use Spiral\ORM\State;
+use Spiral\ORM\StateInterface;
 use Spiral\ORM\Util\ContextStorage;
 
 class ManyToManyRelation extends AbstractRelation
@@ -78,7 +78,7 @@ class ManyToManyRelation extends AbstractRelation
     public function queueRelation(
         ContextualInterface $command,
         $entity,
-        State $state,
+        StateInterface $state,
         $related,
         $original
     ): CommandInterface {
@@ -110,12 +110,12 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param State  $state
-     * @param object $related
-     * @param array  $origPivot
+     * @param StateInterface $state
+     * @param object         $related
+     * @param array          $origPivot
      * @return CommandInterface
      */
-    protected function link(State $state, $related, array $origPivot): CommandInterface
+    protected function link(StateInterface $state, $related, array $origPivot): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         if (!empty($origPivot)) {
@@ -130,7 +130,8 @@ class ManyToManyRelation extends AbstractRelation
         );
 
         $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseContext($sync, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);
+        $this->promiseContext($sync, $this->getState($related), $this->outerKey, null,
+            $this->thoughtOuterKey);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -142,17 +143,18 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Remove the connection between two objects.
      *
-     * @param State  $state
-     * @param object $related
-     * @param array  $origPivot
+     * @param StateInterface $state
+     * @param object         $related
+     * @param array          $origPivot
      * @return CommandInterface
      */
-    protected function unlink(State $state, $related, array $origPivot): CommandInterface
+    protected function unlink(StateInterface $state, $related, array $origPivot): CommandInterface
     {
         $delete = new DeleteCommand($this->pivotDatabase(), $this->pivotTable());
 
         $this->promiseScope($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseScope($delete, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);
+        $this->promiseScope($delete, $this->getState($related), $this->outerKey, null,
+            $this->thoughtOuterKey);
 
         return $delete;
     }

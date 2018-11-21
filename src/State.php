@@ -13,7 +13,7 @@ namespace Spiral\ORM;
  * relations, state, primary key value (you can handle entities without PK included), and number of
  * active references (in cases when entity become unclaimed).
  */
-final class State
+final class State implements StateInterface
 {
     // Different entity states in a pool
     public const NEW              = 0;
@@ -21,9 +21,6 @@ final class State
     public const SCHEDULED_INSERT = 2;
     public const SCHEDULED_UPDATE = 3;
     public const SCHEDULED_DELETE = 4;
-
-    /** @var mixed */
-    private $primaryKey;
 
     /** @var int */
     private $state;
@@ -43,33 +40,13 @@ final class State
     private $visited = [];
 
     /**
-     * @param mixed $primaryKey
      * @param int   $state
      * @param array $data
      */
-    public function __construct($primaryKey, int $state, array $data)
+    public function __construct(int $state, array $data)
     {
-        $this->primaryKey = $primaryKey;
         $this->state = $state;
         $this->data = $data;
-    }
-
-    public function setPrimaryKey(string $name, $value)
-    {
-        $this->primaryKey = $value;
-        $this->data[$name] = $value;
-
-        foreach ($this->handlers as $handler) {
-            call_user_func($handler, $this);
-        }
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPrimaryKey()
-    {
-        return $this->primaryKey;
     }
 
     /**
@@ -91,6 +68,15 @@ final class State
     public function setData(array $data)
     {
         $this->data = array_merge($data, $this->data);
+
+        foreach ($this->handlers as $handler) {
+            call_user_func($handler, $this);
+        }
+    }
+
+    public function setKey(string $key, $value)
+    {
+        $this->data[$key] = $value;
 
         foreach ($this->handlers as $handler) {
             call_user_func($handler, $this);
@@ -144,7 +130,7 @@ final class State
      */
     private $handlers = [];
 
-    public function onUpdate(callable $handler)
+    public function onChange(callable $handler)
     {
         $this->handlers[] = $handler;
     }

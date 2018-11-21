@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM;
 
-use Prophecy\Promise\PromiseInterface;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\ORM\Command\CommandInterface;
@@ -181,11 +180,14 @@ class ORM implements ORMInterface
             // locate already loaded entity reference
             $entityID = $this->identify($class, $data);
 
-            if (!empty($entityID) && $this->heap->hasPath($class, $entityID)) {
-                $existed = $this->heap->getPath($class, $entityID);
+            $path = $class . ':' . $entityID;
+
+            if (!empty($entityID) && $this->heap->hasPath($path)) {
+                $existed = $this->heap->getPath($path);
 
                 // todo: optimize, avoid cyclic initiation ? do i have it?
 
+                // todo: can be promise
                 return $this->getMapper($existed)->hydrate(
                     $existed,
                     $this->getRelationMap($existed)->init($this->getHeap()->get($existed), $data)
@@ -198,8 +200,9 @@ class ORM implements ORMInterface
         // init entity class and prepare data, todo: work it out
         list($entity, $filtered) = $mapper->prepare($data);
 
-        $state = new State($entityID ?? null, $state, $filtered);
-        $this->heap->attach($entity, $state);
+        // todo: i do not need primary key, but i do need to update paths in mapper
+        $state = new State($state, $filtered);
+        $this->heap->attach($entity, $state, $this->getPaths($entity, $entityID ?? null));
 
         // hydrate entity with it's data, relations and proxies
         return $mapper->hydrate($entity, $this->getRelationMap($entity)->init($state, $filtered));
@@ -217,6 +220,15 @@ class ORM implements ORMInterface
             $this->getHeap()->get($entity),
             $cmd
         );
+    }
+
+    protected function getPaths($entity, $entityID): array
+    {
+        if (is_null($entityID)) {
+            return [];
+        }
+
+        return [get_class($entity) . ':' . $entityID];
     }
 
     public function queueDelete($entity, int $mode = 0): CommandInterface
@@ -254,7 +266,7 @@ class ORM implements ORMInterface
     protected function resolveClass($entity): string
     {
         //if ($entity instanceof PromiseInterface) {
-            // fallback to the promise class
+        // fallback to the promise class
         //}
 
         $entity = is_object($entity) ? get_class($entity) : $entity;

@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation\Traits;
 
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\ScopedInterface;
-use Spiral\ORM\State;
+use Spiral\ORM\StateInterface;
 
 trait PromiseTrait
 {
@@ -18,16 +18,16 @@ trait PromiseTrait
      * Configure context parameter using value from parent entity. Created promise.
      *
      * @param ContextualInterface $command
-     * @param State               $parent
+     * @param StateInterface      $parent
      * @param string              $parentKey
-     * @param null|State          $current
+     * @param null|StateInterface $current
      * @param string              $localKey
      */
     protected function promiseContext(
         ContextualInterface $command,
-        State $parent,
+        StateInterface $parent,
         string $parentKey,
-        ?State $current,
+        ?StateInterface $current,
         string $localKey
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
@@ -36,7 +36,7 @@ trait PromiseTrait
             }
         }
 
-        $parent->onUpdate(function (State $source) use ($command, $localKey, $parentKey) {
+        $parent->onChange(function (StateInterface $source) use ($command, $localKey, $parentKey) {
             if (!empty($value = $source->getKey($parentKey))) {
                 $command->setContext($localKey, $value);
             }
@@ -47,17 +47,17 @@ trait PromiseTrait
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
      *
-     * @param ScopedInterface $command
-     * @param State           $parent
-     * @param string          $parentKey
-     * @param null|State      $current
-     * @param string          $localKey
+     * @param ScopedInterface     $command
+     * @param StateInterface      $parent
+     * @param string              $parentKey
+     * @param null|StateInterface $current
+     * @param string              $localKey
      */
     protected function promiseScope(
         ScopedInterface $command,
-        State $parent,
+        StateInterface $parent,
         string $parentKey,
-        ?State $current,
+        ?StateInterface $current,
         string $localKey
     ) {
         if (!empty($value = $parent->getKey($parentKey))) {
@@ -66,7 +66,7 @@ trait PromiseTrait
             }
         }
 
-        $parent->onUpdate(function (State $source) use ($command, $localKey, $parentKey) {
+        $parent->onChange(function (StateInterface $source) use ($command, $localKey, $parentKey) {
             if (!empty($value = $source->getKey($parentKey))) {
                 $command->setWhere($localKey, $value);
             }

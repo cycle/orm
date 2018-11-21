@@ -58,6 +58,7 @@ abstract class AbstractMapper implements MapperInterface
     public function prepare(array $data): array
     {
         $class = $this->entityClass($data);
+
         return [new $class, $data];
     }
 
@@ -92,7 +93,7 @@ abstract class AbstractMapper implements MapperInterface
         return array_intersect_key($this->extract($entity), array_flip($this->columns));
     }
 
-    protected function queueCreate($entity, State &$state = null): ContextualInterface
+    protected function queueCreate($entity, StateInterface &$state = null): ContextualInterface
     {
         $columns = $this->getColumns($entity);
 
@@ -110,11 +111,7 @@ abstract class AbstractMapper implements MapperInterface
 
         if (is_null($state)) {
             // todo: do we need to track PK?
-            $state = new State(
-                $columns[$this->primaryKey] ?? null,
-                State::SCHEDULED_INSERT,
-                $columns
-            );
+            $state = new State(State::SCHEDULED_INSERT, $columns);
             $this->orm->getHeap()->attach($entity, $state);
         }
 
@@ -125,7 +122,7 @@ abstract class AbstractMapper implements MapperInterface
         // we are managed at this moment
 
         $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
-            $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
+            $state->setKey($this->primaryKey, $command->getInsertID());
         });
 
         $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
@@ -138,7 +135,7 @@ abstract class AbstractMapper implements MapperInterface
                 [$this->primaryKey => $command->getInsertID()] + $command->getContext()
             );
 
-            $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
+            // todo: replace with data (!!)
             $state->setData($command->getContext());
         });
 
@@ -149,7 +146,7 @@ abstract class AbstractMapper implements MapperInterface
         return $insert;
     }
 
-    protected function queueUpdate($entity, State $state): ContextualInterface
+    protected function queueUpdate($entity, StateInterface $state): ContextualInterface
     {
         $eData = $this->getColumns($entity);
         $oData = $state->getData();
@@ -168,7 +165,7 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($cData);
 
-        $state->onUpdate(function (State $state) use ($update) {
+        $state->onChange(function (State $state) use ($update) {
             $update->setWhere($this->primaryKey, $state->getKey($this->primaryKey));
         });
 
@@ -187,7 +184,7 @@ abstract class AbstractMapper implements MapperInterface
         return $update;
     }
 
-    protected function buildDelete($entity, State $state): CommandInterface
+    protected function buildDelete($entity, StateInterface $state): CommandInterface
     {
         // todo: better primary key fetch
 
@@ -202,7 +199,7 @@ abstract class AbstractMapper implements MapperInterface
 
         $state->setState(State::SCHEDULED_DELETE);
 
-        $state->onUpdate(function (State $state) use ($delete) {
+        $state->onChange(function (State $state) use ($delete) {
             $delete->setWhere($this->primaryKey, $state->getKey($this->primaryKey));
         });
 

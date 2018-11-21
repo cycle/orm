@@ -12,7 +12,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\ContextualSequence;
-use Spiral\ORM\State;
+use Spiral\ORM\StateInterface;
 
 class HasOneRelation extends AbstractRelation
 {
@@ -22,7 +22,7 @@ class HasOneRelation extends AbstractRelation
     public function queueRelation(
         ContextualInterface $command,
         $entity,
-        State $state,
+        StateInterface $state,
         $related,
         $original
     ): CommandInterface {

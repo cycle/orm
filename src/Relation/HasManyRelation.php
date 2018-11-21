@@ -12,7 +12,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\State;
+use Spiral\ORM\StateInterface;
 
 class HasManyRelation extends AbstractRelation
 {
@@ -24,7 +24,7 @@ class HasManyRelation extends AbstractRelation
     public function queueRelation(
         ContextualInterface $command,
         $entity,
-        State $state,
+        StateInterface $state,
         $related,
         $original
     ): CommandInterface {
@@ -58,11 +58,11 @@ class HasManyRelation extends AbstractRelation
     /**
      * Persist related object.
      *
-     * @param State  $parentState
-     * @param object $related
+     * @param StateInterface $parentState
+     * @param object         $related
      * @return CommandInterface
      */
-    protected function queueStore(State $parentState, $related): CommandInterface
+    protected function queueStore(StateInterface $parentState, $related): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
@@ -76,11 +76,11 @@ class HasManyRelation extends AbstractRelation
     /**
      * Remove one of related objects.
      *
-     * @param State  $parentState
-     * @param object $related
+     * @param StateInterface $parentState
+     * @param object         $related
      * @return CommandInterface
      */
-    protected function queueDelete(State $parentState, $related): CommandInterface
+    protected function queueDelete(StateInterface $parentState, $related): CommandInterface
     {
         $origState = $this->getState($related);
         $origState->decReference();

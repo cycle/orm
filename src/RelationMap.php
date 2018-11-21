@@ -12,8 +12,8 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\ContextualSequence;
 
 /**
- * Generates set of linked commands required to persis or delete given dependency graph. Each RelationMap is specific
- * to one instance class (type).
+ * Generates set of linked commands required to persis or delete given dependency graph. Each
+ * RelationMap is specific to one instance class (type).
  */
 final class RelationMap
 {
@@ -108,7 +108,8 @@ final class RelationMap
 
             // queue needed changes
             $sequence->addCommand(
-                $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
+                $relation->queueRelation($command, $entity, $state, $related,
+                    $state->getRelation($name))
             );
 
             // update current relation state
@@ -131,7 +132,8 @@ final class RelationMap
 
             // queue needed changes
             $sequence->addCommand(
-                $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
+                $relation->queueRelation($command, $entity, $state, $related,
+                    $state->getRelation($name))
             );
 
             // update current relation state

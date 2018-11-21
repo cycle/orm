@@ -15,6 +15,7 @@ use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
+use Spiral\ORM\StateInterface;
 
 /**
  * Variation of belongs-to relation which provides the ability to be nullable. Relation can be used
@@ -28,7 +29,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     public function queueRelation(
         ContextualInterface $command,
         $entity,
-        State $state,
+        StateInterface $state,
         $related,
         $original
     ): CommandInterface {

@@ -38,7 +38,7 @@ class Heap implements HeapInterface
     /**
      * @inheritdoc
      */
-    public function get($entity): ?State
+    public function get($entity): ?StateInterface
     {
         try {
             return $this->storage->offsetGet($entity);
@@ -60,25 +60,25 @@ class Heap implements HeapInterface
             }
 
         } else {
-            $this->get($entity)->onUpdate($handler);
+            $this->get($entity)->onChange($handler);
         }
     }
 
     /**
      * @inheritdoc
      */
-    public function attach($entity, State $state)
+    public function attach($entity, StateInterface $state, array $paths = [])
     {
         $this->storage->offsetSet($entity, $state);
         if ($this->handlers->offsetExists($entity)) {
             foreach ($this->handlers->offsetGet($entity) as $handler) {
-                $state->onUpdate($handler);
+                $state->onChange($handler);
             }
             $this->handlers->offsetUnset($entity);
         }
 
-        if (!empty($state->getPrimaryKey())) {
-            $this->path[get_class($entity) . ':' . $state->getPrimaryKey()] = $entity;
+        foreach ($paths as $path) {
+            $this->path[$path] = $entity;
         }
     }
 
@@ -88,6 +88,11 @@ class Heap implements HeapInterface
     public function detach($entity)
     {
         $this->storage->offsetUnset($entity);
+
+        // rare usage
+        $this->path = array_filter($this->path, function ($value) use ($entity) {
+            return $value !== $entity;
+        });
     }
 
     /**
@@ -95,20 +100,21 @@ class Heap implements HeapInterface
      */
     public function reset()
     {
+        $this->path = [];
         $this->storage = new \SplObjectStorage();
         $this->handlers = new \SplObjectStorage();
     }
 
-    public function hasPath(string $class, $entityID)
+    public function hasPath(string $path)
     {
         // todo: this is fun
-        return isset($this->path["{$class}:{$entityID}"]);
+        return isset($this->path[$path]);
     }
 
     // todo: this is fun
-    public function getPath(string $class, $entityID)
+    public function getPath(string $path)
     {
-        return $this->path["{$class}:{$entityID}"];
+        return $this->path[$path];
     }
 
     /**

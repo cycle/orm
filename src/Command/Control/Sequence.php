@@ -81,6 +81,7 @@ class Sequence implements CommandInterface, \IteratorAggregate
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function onExecute(callable $closure)
     {
@@ -89,6 +90,7 @@ class Sequence implements CommandInterface, \IteratorAggregate
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function onComplete(callable $closure)
     {
@@ -97,6 +99,7 @@ class Sequence implements CommandInterface, \IteratorAggregate
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function onRollBack(callable $closure)
     {

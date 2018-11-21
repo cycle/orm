@@ -19,7 +19,7 @@ use Spiral\ORM\Command\ScopedInterface;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class Update extends DatabaseCommand implements ContextualInterface, ScopedInterface
+class UpdateCommand extends DatabaseCommand implements ContextualInterface, ScopedInterface
 {
     use ContextTrait, WhereTrait;
 

@@ -53,6 +53,7 @@ class Condition implements CommandInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function execute()
     {
@@ -61,6 +62,7 @@ class Condition implements CommandInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function complete()
     {
@@ -69,6 +71,7 @@ class Condition implements CommandInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function rollBack()
     {
@@ -77,6 +80,7 @@ class Condition implements CommandInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function onExecute(callable $closure)
     {
@@ -85,6 +89,7 @@ class Condition implements CommandInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function onComplete(callable $closure)
     {
@@ -93,6 +98,7 @@ class Condition implements CommandInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function onRollBack(callable $closure)
     {

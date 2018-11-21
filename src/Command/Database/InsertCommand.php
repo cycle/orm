@@ -15,7 +15,7 @@ use Spiral\ORM\Command\Database\Traits\ContextTrait;
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class Insert extends DatabaseCommand implements ContextualInterface
+class InsertCommand extends DatabaseCommand implements ContextualInterface
 {
     use ContextTrait;
 

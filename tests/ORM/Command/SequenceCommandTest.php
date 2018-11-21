@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Spiral\ORM\Command\ChainCommand;
 use Spiral\ORM\Command\Control\ContextualSequence;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\Command\Database\Insert;
+use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Command\NullCommand;
 
 class SequenceCommandTest extends TestCase
@@ -24,12 +24,12 @@ class SequenceCommandTest extends TestCase
 
         $command->addCommand(new NullCommand());
         $command->addCommand(new NullCommand());
-        $command->addCommand(m::mock(Insert::class));
-        $command->addCommand(m::mock(Insert::class));
+        $command->addCommand(m::mock(InsertCommand::class));
+        $command->addCommand(m::mock(InsertCommand::class));
 
         $count = 0;
         foreach ($command as $sub) {
-            $this->assertInstanceOf(Insert::class, $sub);
+            $this->assertInstanceOf(InsertCommand::class, $sub);
             $count++;
         }
 
@@ -53,7 +53,7 @@ class SequenceCommandTest extends TestCase
     public function testGetContext()
     {
         $command = new ContextualSequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
+        $command->addPrimary($lead = m::mock(InsertCommand::class));
 
         $lead->shouldReceive('getContext')->andReturn(['hi']);
 
@@ -63,7 +63,7 @@ class SequenceCommandTest extends TestCase
     public function testAddContext()
     {
         $command = new ContextualSequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
+        $command->addPrimary($lead = m::mock(InsertCommand::class));
 
         $lead->shouldReceive('setContext')->with('name', 'value');
 
@@ -74,7 +74,7 @@ class SequenceCommandTest extends TestCase
     public function testPassCallbackExecute()
     {
         $command = new ContextualSequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
+        $command->addPrimary($lead = m::mock(InsertCommand::class));
 
         $f = function () {
         };
@@ -87,7 +87,7 @@ class SequenceCommandTest extends TestCase
     public function testPassCallbackComplete()
     {
         $command = new ContextualSequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
+        $command->addPrimary($lead = m::mock(InsertCommand::class));
 
         $f = function () {
         };
@@ -100,7 +100,7 @@ class SequenceCommandTest extends TestCase
     public function testPassCallbackRollback()
     {
         $command = new ContextualSequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
+        $command->addPrimary($lead = m::mock(InsertCommand::class));
 
         $f = function () {
         };

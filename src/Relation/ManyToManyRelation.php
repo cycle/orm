@@ -17,7 +17,7 @@ use Spiral\ORM\Command\Control\ContextualSequence;
 use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\DeleteCommand;
-use Spiral\ORM\Command\Database\Insert;
+use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Exception\RelationException;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Relation;
@@ -125,7 +125,7 @@ class ManyToManyRelation extends AbstractRelation
         } else {
             // todo: update existed?
             // todo: store database name (!!) in relation
-            $cmd = new Insert(
+            $cmd = new InsertCommand(
                 $this->orm->getDatabase($this->class),
                 $this->define(Relation::PIVOT_TABLE),
                 $context ?? []

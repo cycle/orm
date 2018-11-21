@@ -11,8 +11,8 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Database\DeleteCommand;
-use Spiral\ORM\Command\Database\Insert;
-use Spiral\ORM\Command\Database\Update;
+use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\UpdateCommand;
 use Spiral\ORM\Command\NullCommand;
 
 // todo: events
@@ -115,16 +115,16 @@ abstract class AbstractMapper implements MapperInterface
 
         unset($columns[$this->primaryKey]);
 
-        $insert = new Insert($this->orm->getDatabase($entity), $this->table, $columns);
+        $insert = new InsertCommand($this->orm->getDatabase($entity), $this->table, $columns);
 
         // we are managed at this moment
         $this->orm->getHeap()->attach($entity, $state);
 
-        $insert->onExecute(function (Insert $command) use ($entity, $state) {
+        $insert->onExecute(function (InsertCommand $command) use ($entity, $state) {
             $state->setPrimaryKey($this->primaryKey, $command->getInsertID());
         });
 
-        $insert->onComplete(function (Insert $command) use ($entity, $state) {
+        $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             // todo: update entity path
@@ -138,7 +138,7 @@ abstract class AbstractMapper implements MapperInterface
             $state->setData($command->getContext());
         });
 
-        $insert->onRollBack(function (Insert $command) use ($entity, $state) {
+        $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
             $this->orm->getHeap()->detach($entity);
         });
 
@@ -153,7 +153,7 @@ abstract class AbstractMapper implements MapperInterface
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
-        $update = new Update(
+        $update = new UpdateCommand(
             $this->orm->getDatabase($entity),
             $this->table,
             $cData,
@@ -168,7 +168,7 @@ abstract class AbstractMapper implements MapperInterface
             $update->setWhere($this->primaryKey, $state->getKey($this->primaryKey));
         });
 
-        $update->onComplete(function (Update $command) use ($entity, $state) {
+        $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
 
             $this->hydrate($entity, $command->getContext());

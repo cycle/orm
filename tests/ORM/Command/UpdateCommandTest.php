@@ -11,13 +11,13 @@ namespace Spiral\ORM\Tests\Command;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\Update;
+use Spiral\ORM\Command\Database\UpdateCommand;
 
 class UpdateCommandTest extends TestCase
 {
     public function testIsEmpty()
     {
-        $cmd = new Update(
+        $cmd = new UpdateCommand(
             m::mock(DatabaseInterface::class),
             'table',
             [],
@@ -29,7 +29,7 @@ class UpdateCommandTest extends TestCase
 
     public function testIsEmptyData()
     {
-        $cmd = new Update(
+        $cmd = new UpdateCommand(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],
@@ -42,7 +42,7 @@ class UpdateCommandTest extends TestCase
 
     public function testIsEmptyContext()
     {
-        $cmd = new Update(
+        $cmd = new UpdateCommand(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],
@@ -57,7 +57,7 @@ class UpdateCommandTest extends TestCase
 
     public function testWhere()
     {
-        $cmd = new Update(
+        $cmd = new UpdateCommand(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],

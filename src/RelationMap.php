@@ -43,32 +43,42 @@ final class RelationMap
 
     public function init(State $state, array $data): array
     {
-        // easy to read huh?
         foreach ($this->relations as $name => $relation) {
-            if (array_key_exists($name, $data)) {
-                $item = $data[$name];
-
-                if (is_object($item) || is_null($item)) {
-                    $state->setRelation($name, $item);
-                    continue;
-                }
-
-                if (!$relation->isCollection()) {
-                    $data[$name] = $relation->init($item);
-                    $state->setRelation($name, $data[$name]);
-                    continue;
-                }
-
-                $relData = $relation->initArray($item);
-
-                $state->setRelation($name, $relData);
-                $data[$name] = $relation->wrapCollection($relData);
+            if (!array_key_exists($name, $data)) {
+                continue;
             }
+
+            $item = $data[$name];
+
+            if (is_object($item) || is_null($item)) {
+                $state->setRelation($name, $item);
+                continue;
+            }
+
+            if (!$relation->isCollection()) {
+                $data[$name] = $relation->init($item);
+                $state->setRelation($name, $data[$name]);
+                continue;
+            }
+
+            $relData = $relation->initArray($item);
+
+            $state->setRelation($name, $relData);
+            $data[$name] = $relation->wrapCollection($relData);
         }
 
         return $data;
     }
 
+    /**
+     * Generate set of commands required to store the entity and it's relations.
+     *
+     * @param object              $entity
+     * @param array               $data
+     * @param State               $state
+     * @param ContextualInterface $command
+     * @return ContextualInterface
+     */
     public function queueRelations(
         $entity,
         array $data,

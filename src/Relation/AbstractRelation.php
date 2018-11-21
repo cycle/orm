@@ -79,7 +79,7 @@ abstract class AbstractRelation implements RelationInterface
         return $relData;
     }
 
-    protected function define(string $key)
+    protected function define($key)
     {
         return $this->schema[$key] ?? null;
     }

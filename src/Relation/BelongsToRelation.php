@@ -28,11 +28,8 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         $related,
         $original
     ): CommandInterface {
-        // todo: into null ?
-        if ($related === null && !$this->define(Relation::NULLABLE)) {
-            throw new NullException(
-                "Relation `{$this->class}`.`{$this->relation}` can not be null"
-            );
+        if (is_null($related) && !$this->define(Relation::NULLABLE)) {
+            throw new NullException("Relation {$this} can not be null");
         }
 
         if (is_null($related)) {

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation;
+namespace Spiral\ORM\Relation\ManyToMany;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Collection\PivotedCollection;
@@ -15,15 +15,13 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\Command\Database\DeleteCommand;
-use Spiral\ORM\Command\Database\InsertCommand;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\ContextStorage;
 
-class PivotedRelation extends AbstractRelation
+class PivotedRelation extends Relation\AbstractRelation
 {
     /** @var string|null */
     private $pivotEntity;
@@ -58,25 +56,10 @@ class PivotedRelation extends AbstractRelation
 
         foreach (new Iterator($this->orm, $this->class, $data) as $pivot => $entity) {
             $elements[] = $entity;
-            $pivotData[$entity] = $this->initPivot($pivot);
+            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, State::LOADED);
         }
 
         return [new PivotedCollection($elements, $pivotData), new ContextStorage($elements, $pivotData)];
-    }
-
-    /**
-     * Init pivot object if any.
-     *
-     * @param array $data
-     * @return array
-     */
-    protected function initPivot(array $data)
-    {
-        if (empty($this->pivotEntity)) {
-            return $data;
-        }
-
-        return $this->orm->make($this->pivotEntity, $data, State::LOADED);
     }
 
     /**
@@ -123,7 +106,7 @@ class PivotedRelation extends AbstractRelation
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
-                $sequence->addCommand($this->unlink($state, $item, $original->get($item)));
+                $sequence->addCommand($this->orm->queueDelete($original->get($item)));
             }
         }
 
@@ -135,8 +118,8 @@ class PivotedRelation extends AbstractRelation
      *
      * @param State  $state
      * @param object $related
-     * @param mixed  $pivot
-     * @param mixed  $origPivot
+     * @param object $pivot
+     * @param object $origPivot
      * @return CommandInterface
      */
     protected function link(State $state, $related, $pivot, $origPivot): CommandInterface
@@ -144,84 +127,30 @@ class PivotedRelation extends AbstractRelation
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
 
-
-        // deal with this clusterfuck
-
-        // --- THIS IS NOT GOOD
-
-        if (is_object($pivot)) {
-            // todo: check if context instance of pivot entity
-            $upsert = $this->orm->queueStore($pivot);
-            $ctxState = $this->getState($pivot);
-        } else {
-            // todo: WHERE IS ???
-            // todo: MAKE IT SIMPLER?
-
-            // todo: update existed?
-            // todo: store database name (!!) in relation
-
-            // it will bypass object creation!!!!
-
-            $upsert = new InsertCommand(
-                $this->orm->getDatabase($this->class),
-                $this->define(Relation::PIVOT_TABLE),
-                $pivot ?? []
-            );
-
-            // todo: can be existed
+        if (!is_object($pivot)) {
+            $pivot = $this->orm->make($this->pivotEntity, $pivot ?? []);
         }
 
-        // --- THIS IS NOT GOOD
+        $pivotState = $this->getState($pivot);
+        if (!empty($pivotState) && $pivotState->getState() != State::NEW) {
+            // objects already linked, we can try to update pivot data if needed
+            $pivotStore = $this->orm->queueStore($pivot);
+        } else {
+            // defer the insert until pivot keys are resolved
+            $pivotStore = new Defer(
+                $this->orm->queueStore($pivot),
+                [$this->thoughtInnerKey, $this->thoughtOuterKey],
+                (string)$this
+            );
 
-        // TODO: DRY!!!
-        // todo: ENTITY IS DIFFERENT!!!
-        // todo: DO NOT UPDATE CONTEXT
-
-        $sync = new Defer($upsert, [$this->thoughtInnerKey, $this->thoughtOuterKey], (string)$this);
-
-        // todo: it will always throw an insert, BUG!!!
-        $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseContext($sync, $relState, $this->outerKey, null, $this->thoughtOuterKey);
+            $this->promiseContext($pivotStore, $state, $this->innerKey, null, $this->thoughtInnerKey);
+            $this->promiseContext($pivotStore, $relState, $this->outerKey, null, $this->thoughtOuterKey);
+        }
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
-        $sequence->addCommand($sync);
+        $sequence->addCommand($pivotStore);
 
         return $sequence;
-    }
-
-    protected function upsertArray(): ContextualInterface
-    {
-
-    }
-
-    protected function upsertEntity(): ContextualInterface
-    {
-
-    }
-
-    /**
-     * Remove the connection between two objects.
-     *
-     * @param State  $state
-     * @param object $related
-     * @return CommandInterface
-     */
-    protected function unlink(State $state, $related, $oriPivot): CommandInterface
-    {
-        // delete pivot object?
-
-        // todo: need database and table selection DRY
-        $delete = new DeleteCommand(
-            $this->orm->getDatabase($this->class),
-            $this->define(Relation::PIVOT_TABLE)
-        );
-
-        $relState = $this->getState($related);
-
-        $this->promiseScope($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseScope($delete, $relState, $this->outerKey, null, $this->thoughtOuterKey);
-
-        return $delete;
     }
 }

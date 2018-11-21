@@ -52,26 +52,30 @@ class RelationConfig extends InjectableConfig
     public static function createDefault()
     {
         return new static([
-            Relation::HAS_ONE      => [
+            Relation::HAS_ONE              => [
                 self::LOADER   => Loader\Relation\HasOneLoader::class,
                 self::RELATION => Relation\HasOneRelation::class
             ],
-            Relation::BELONGS_TO   => [
+            Relation::BELONGS_TO           => [
                 self::LOADER   => Loader\Relation\BelongsToLoader::class,
                 self::RELATION => Relation\BelongsToRelation::class
             ],
-            Relation::REFERS_TO    => [
+            Relation::REFERS_TO            => [
                 self::LOADER   => Loader\Relation\BelongsToLoader::class,
                 self::RELATION => Relation\RefersToRelation::class
             ],
-            Relation::HAS_MANY     => [
+            Relation::HAS_MANY             => [
                 self::LOADER   => Loader\Relation\HasManyLoader::class,
                 self::RELATION => Relation\HasManyRelation::class
             ],
-            Relation::MANY_TO_MANY => [
+            Relation::MANY_TO_MANY         => [
                 self::LOADER   => Loader\Relation\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyToManyRelation::class
-            ]
+            ],
+            Relation::MANY_TO_MANY_PIVOTED => [
+                self::LOADER   => Loader\Relation\ManyToManyLoader::class,
+                self::RELATION => Relation\ManyToMany\PivotedRelation::class
+            ],
         ]);
     }
 }

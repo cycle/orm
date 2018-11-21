@@ -11,7 +11,8 @@ namespace Spiral\ORM\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * Collection with associated relation context.
+ * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
+ * filtered.
  */
 class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
@@ -26,14 +27,6 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
     {
         parent::__construct($elements);
         $this->pivotData = $pivotData ?? new \SplObjectStorage();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function createFrom(array $elements)
-    {
-        return new static($elements, $this->pivotData);
     }
 
     /**

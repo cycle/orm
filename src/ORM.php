@@ -10,6 +10,8 @@ namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Config\RelationConfig;
 
 /**
@@ -205,6 +207,25 @@ class ORM implements ORMInterface
             $entity,
             $this->getRelationMap($entity)->init($state, $data)
         );
+    }
+
+    public function queueStore($entity, int $mode = 0): ContextualInterface
+    {
+        $m = $this->getMapper($entity);
+        $cmd = $m->queueStore($entity);
+
+        // todo: optimize it
+        return $this->getRelationMap($entity)->queueRelations(
+            $entity,
+            $m->extract($entity),
+            $this->getHeap()->get($entity),
+            $cmd
+        );
+    }
+
+    public function queueDelete($entity, int $mode = 0): CommandInterface
+    {
+        return $this->getMapper($entity)->queueDelete($entity);
     }
 
     /**

@@ -75,7 +75,7 @@ class HasManyRelation extends AbstractRelation
      */
     protected function queueStore(State $parentState, $related): CommandInterface
     {
-        $relStore = $this->orm->getMapper($related)->queueStore($related);
+        $relStore = $this->orm->queueStore($related);
 
         $relState = $this->getState($related);
         $relState->addReference();
@@ -104,7 +104,7 @@ class HasManyRelation extends AbstractRelation
         $origState->decReference();
 
         return new Condition(
-            $this->orm->getMapper($related)->queueDelete($related),
+            $this->orm->queueDelete($related),
             function () use ($origState) {
                 return !$origState->hasReferences();
             }

@@ -145,11 +145,11 @@ class Transaction implements TransactionInterface
     {
         $commands = [];
         foreach ($this->store as $entity) {
-            $commands[] = $this->orm->getMapper($entity)->queueStore($entity);
+            $commands[] = $this->orm->queueStore($entity);
         }
 
         foreach ($this->delete as $entity) {
-            $commands[] = $this->orm->getMapper($entity)->queueDelete($entity);
+            $commands[] = $this->orm->queueDelete($entity);
         }
 
         return $commands;

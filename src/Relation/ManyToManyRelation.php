@@ -112,7 +112,7 @@ class ManyToManyRelation extends AbstractRelation
     // todo: diff
     protected function link(State $parentState, $related, $context, $origContext): CommandInterface
     {
-        $relStore = $this->orm->getMapper($related)->queueStore($related);
+        $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
 
         $chain = new ContextualSequence();
@@ -120,7 +120,7 @@ class ManyToManyRelation extends AbstractRelation
 
         if (is_object($context)) {
             // todo: check if context instance of pivot entity
-            $cmd = $this->orm->getMapper($context)->queueStore($context);
+            $cmd = $this->orm->queueStore($context);
             $ctxState = $this->getState($context);
         } else {
             // todo: update existed?
@@ -171,7 +171,7 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Remove the connection between two objects.
      *
-     * @param State $parentState
+     * @param State  $parentState
      * @param object $related
      * @return CommandInterface
      */

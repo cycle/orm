@@ -38,7 +38,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
             return new NullCommand();
         }
 
-        $relStore = $this->orm->getMapper($related)->queueStore($related);
+        $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
 
         $this->promiseContext(

@@ -32,16 +32,17 @@ abstract class AbstractRelation implements RelationInterface
 
     protected $schema;
 
-    public function __construct(
-        ORMInterface $orm,
-        string $class,
-        string $relation,
-        array $schema
-    ) {
+    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    {
         $this->orm = $orm;
         $this->class = $class;
         $this->relation = $relation;
         $this->schema = $schema;
+    }
+
+    public function __toString()
+    {
+        return sprintf("%s->%s", $this->class, $this->relation);
     }
 
     public function isCascade(): bool
@@ -79,6 +80,7 @@ abstract class AbstractRelation implements RelationInterface
         return $relData;
     }
 
+
     protected function define($key)
     {
         return $this->schema[$key] ?? null;
@@ -89,8 +91,4 @@ abstract class AbstractRelation implements RelationInterface
         return $this->orm->getHeap()->get($entity);
     }
 
-    public function __toString()
-    {
-        return sprintf("%s->%s", $this->class, $this->relation);
-    }
 }

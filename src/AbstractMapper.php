@@ -70,15 +70,7 @@ abstract class AbstractMapper implements MapperInterface
             $cmd = $this->queueUpdate($entity, $state);
         }
 
-        $data = $this->extract($entity);
-
-        // todo: extract data only once (!)
-        return $this->orm->getRelationMap(get_class($entity))->queueRelations(
-            $entity,
-            $data,
-            $state,
-            $cmd
-        );
+        return $cmd;
     }
 
     public function queueDelete($entity): CommandInterface

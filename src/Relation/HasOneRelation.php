@@ -41,7 +41,7 @@ class HasOneRelation extends AbstractRelation
         // todo: check number of references
 
         // polish even more?
-        $relStore = $this->orm->getMapper($related)->queueStore($related);
+        $relStore = $this->orm->queueStore($related);
         $sequence->addPrimary($relStore);
 
         $relState = $this->getState($related);
@@ -73,7 +73,7 @@ class HasOneRelation extends AbstractRelation
 
         // only delete original child when no other objects claim it
         return new Condition(
-            $this->orm->getMapper($original)->queueDelete($original),
+            $this->orm->queueDelete($original),
             function () use ($oriState) {
                 return !$oriState->hasReferences();
             }

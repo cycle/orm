@@ -9,6 +9,8 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextualInterface;
 
 interface ORMInterface
 {
@@ -25,4 +27,8 @@ interface ORMInterface
     public function getHeap(): ?HeapInterface;
 
     public function make(string $class, array $data, int $state = State::NEW);
+
+    public function queueStore($entity, int $mode = 0): ContextualInterface;
+
+    public function queueDelete($entity, int $mode = 0): CommandInterface;
 }

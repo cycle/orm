@@ -179,7 +179,7 @@ class ManyToManyRelation extends AbstractRelation
 
         $sync = new Defer($upsert, [$this->thoughtInnerKey, $this->thoughtOuterKey], (string)$this);
 
-        // it will always throw an insert, BUG!!!
+        // todo: it will always throw an insert, BUG!!!
         $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
         $this->promiseContext($sync, $relState, $this->outerKey, null, $this->thoughtOuterKey);
 

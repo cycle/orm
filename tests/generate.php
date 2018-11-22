@@ -33,10 +33,10 @@ $databases = [
         'namespace' => 'Spiral\ORM\Tests\Driver\Postgres',
         'directory' => __DIR__ . '/ORM/Driver/Postgres/'
     ],
-//    'sqlserver' => [
-//        'namespace' => 'Spiral\ORM\Tests\Driver\SQLServer',
-//        'directory' => __DIR__ . '/ORM/Driver/SQLServer/'
-//    ]
+    'sqlserver' => [
+        'namespace' => 'Spiral\ORM\Tests\Driver\SQLServer',
+        'directory' => __DIR__ . '/ORM/Driver/SQLServer/'
+    ]
 ];
 
 echo "Generating test classes for all database types...\n";

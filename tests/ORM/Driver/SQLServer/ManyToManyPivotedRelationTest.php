@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\ORM\Tests\Driver\SQLServer; 
 
 class ManyToManyPivotedRelationTest extends \Spiral\ORM\Tests\ManyToManyPivotedRelationTest 
 { 
-    const DRIVER = "postgres"; 
+    const DRIVER = "sqlserver"; 
 }

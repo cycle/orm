@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -123,5 +124,16 @@ abstract class BelongsToPromiseTest extends BaseTest
                 'image'   => 'third.png',
             ],
         ], $selector->fetchData());
+    }
+
+    public function testFetchPromises()
+    {
+        $selector = new Selector($this->orm, Profile::class);
+        $selector->orderBy('profile.id');
+        list($a, $b, $c) = $selector->fetchAll();
+
+        $this->assertInstanceOf(PromiseInterface::class, $a->user);
+        $this->assertInstanceOf(PromiseInterface::class, $b->user);
+        $this->assertSame(null, $c->user);
     }
 }

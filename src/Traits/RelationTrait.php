@@ -21,6 +21,11 @@ trait RelationTrait
         unset($this->data[$name]);
     }
 
+    public function hasRelation(string $name)
+    {
+        return array_key_exists($name, $this->relations);
+    }
+
     public function getRelation(string $name)
     {
         return $this->relations[$name] ?? null;

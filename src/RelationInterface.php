@@ -17,6 +17,8 @@ interface RelationInterface
 
     public function init($data): array;
 
+    public function initPromise(State $state, $data): ?PromiseInterface;
+
     public function extract($value);
 
     public function queueRelation(

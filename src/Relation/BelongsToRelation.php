@@ -13,11 +13,23 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
+use Spiral\ORM\Promise\Promise;
+use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
+use Spiral\ORM\State;
 use Spiral\ORM\StateInterface;
 
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
+    public function initPromise(State $state, $data): ?PromiseInterface
+    {
+        if (empty($data[$this->innerKey])) {
+            return null;
+        }
+
+        return new Promise();
+    }
+
     /**
      * @inheritdoc
      */

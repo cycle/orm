@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
 use Spiral\ORM\State;
@@ -65,6 +66,11 @@ abstract class AbstractRelation implements RelationInterface
         $item = $this->orm->make($this->class, $data, State::LOADED);
 
         return [$item, $item];
+    }
+
+    public function initPromise(State $state, $data): ?PromiseInterface
+    {
+        return null;
     }
 
     public function extract($data)

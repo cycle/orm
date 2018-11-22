@@ -56,7 +56,11 @@ final class RelationMap
     {
         foreach ($this->relations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
-                // todo: promises and proxies goes here
+                if ($state->hasRelation($name)) {
+                    continue;
+                }
+
+                $data[$name] = $relation->initPromise($state, $data);
                 continue;
             }
 

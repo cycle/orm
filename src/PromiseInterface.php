@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM;
 
-abstract class StatePromise implements StateInterface
+interface PromiseInterface
 {
 
 }

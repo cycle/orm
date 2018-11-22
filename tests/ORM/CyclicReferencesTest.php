@@ -158,6 +158,7 @@ abstract class CyclicReferencesTest extends BaseTest
 
         $this->assertEquals($u->id, $u1->id);
         $this->assertEquals($u->lastComment->id, $u1->lastComment->id);
+
         $this->assertEquals($u->lastComment->user->id, $u1->lastComment->user->id);
         $this->assertEquals($u->comments[0]->id, $u1->comments[0]->id);
         $this->assertEquals($u->favorites[0]->id, $u1->favorites[0]->id);

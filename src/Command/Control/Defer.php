@@ -96,6 +96,7 @@ class Defer implements ContextualInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function execute()
     {
@@ -104,6 +105,7 @@ class Defer implements ContextualInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function complete()
     {
@@ -112,6 +114,7 @@ class Defer implements ContextualInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     * @codeCoverageIgnore
      */
     public function rollBack()
     {

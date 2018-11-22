@@ -1,19 +1,32 @@
 <?php
 /**
- * Spiral, Core Components
+ * Spiral Framework.
  *
- * @author Wolfy-J
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
  */
 
 namespace Spiral\ORM\Command;
 
-/**
- * Doing noting.
- *
- * @codeCoverageIgnore
- */
-final class NullCommand implements CommandInterface
+// todo: rename and make it better
+class ContextualNullCommand implements ContextualInterface
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getContext(): array
+    {
+        // nothing to do
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setContext(string $name, $value)
+    {
+        // nothing to do
+    }
+
     /**
      * {@inheritdoc}
      */

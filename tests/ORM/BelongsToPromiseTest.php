@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Heap;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -16,6 +17,7 @@ use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\ORM\Transaction;
 
 abstract class BelongsToPromiseTest extends BaseTest
 {
@@ -170,5 +172,47 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertNumReads(1);
 
         $this->assertEquals('hello@world.com', $a->user->email);
+    }
+
+    public function testNoWriteOperations()
+    {
+        $selector = new Selector($this->orm, Profile::class);
+        $p = $selector->wherePK(1)->fetchOne();
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+        $this->assertNumWrites(0);
+    }
+
+    public function testAssignPromiseAsRelation()
+    {
+        $selector = new Selector($this->orm, Profile::class);
+        $p = $selector->wherePK(1)->fetchOne();
+        $this->assertInstanceOf(PromiseInterface::class, $p->user);
+
+        $np = new Profile();
+        $np->image = 'new image';
+
+        $this->captureReadQueries();
+        $np->user = $p->user;
+        $this->assertNumReads(0);
+
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($np);
+        $tr->run();
+
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), Profile::class);
+        $p = $selector->wherePK(4)->fetchOne();
+
+        $this->assertInstanceOf(User::class, $p->user->__resolve());
+        $this->assertEquals('hello@world.com', $p->user->email);
     }
 }

@@ -70,4 +70,15 @@ final class ContextStorage
             return null;
         }
     }
+
+    /**
+     * Get entity context.
+     *
+     * @param object $entity
+     * @param mixed  $pivot
+     */
+    public function set($entity, $pivot)
+    {
+        $this->context->offsetSet($entity, $pivot);
+    }
 }

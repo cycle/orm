@@ -92,15 +92,13 @@ class ManyToManyRelation extends AbstractRelation
 
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
-            $sequence->addCommand(
-                $this->link($state, $item, $original->get($item) ?? [])
-            );
+            $sequence->addCommand($this->link($state, $item, $original->has($item)));
         }
 
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
-                $sequence->addCommand($this->unlink($state, $item, $original->get($item)));
+                $sequence->addCommand($this->unlink($state, $item));
             }
         }
 
@@ -112,13 +110,13 @@ class ManyToManyRelation extends AbstractRelation
      *
      * @param StateInterface $state
      * @param object         $related
-     * @param array          $origPivot
+     * @param bool           $exists
      * @return CommandInterface
      */
-    protected function link(StateInterface $state, $related, array $origPivot): CommandInterface
+    protected function link(StateInterface $state, $related, $exists): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
-        if (!empty($origPivot)) {
+        if ($exists) {
             // no changes in relation between the objects
             return $relStore;
         }
@@ -130,8 +128,7 @@ class ManyToManyRelation extends AbstractRelation
         );
 
         $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseContext($sync, $this->getState($related), $this->outerKey, null,
-            $this->thoughtOuterKey);
+        $this->promiseContext($sync, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -145,16 +142,14 @@ class ManyToManyRelation extends AbstractRelation
      *
      * @param StateInterface $state
      * @param object         $related
-     * @param array          $origPivot
      * @return CommandInterface
      */
-    protected function unlink(StateInterface $state, $related, array $origPivot): CommandInterface
+    protected function unlink(StateInterface $state, $related): CommandInterface
     {
         $delete = new DeleteCommand($this->pivotDatabase(), $this->pivotTable());
 
         $this->promiseScope($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseScope($delete, $this->getState($related), $this->outerKey, null,
-            $this->thoughtOuterKey);
+        $this->promiseScope($delete, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);
 
         return $delete;
     }

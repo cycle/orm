@@ -270,9 +270,18 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('secondary.gif', $e->profile->image);
 
         $e->profile->image = 'updated.png';
+
+        $this->captureWriteQueries();
         $tr = new Transaction($orm);
         $tr->store($e);
         $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($orm);
+        $tr->store($e);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         // Re-select
         $orm = $this->orm->withHeap(new Heap());

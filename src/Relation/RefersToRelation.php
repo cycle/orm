@@ -44,8 +44,9 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
-            $command->setContext($this->innerKey, $outerKey);
-            $command->setContext($this->innerKey, $outerKey);
+            if ($outerKey != $this->fetchKey($state, $this->innerKey)) {
+                $command->setContext($this->innerKey, $outerKey);
+            }
 
             return new NullCommand();
         }
@@ -65,6 +66,11 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             if (!empty($value = $this->fetchKey($state, $this->outerKey))) {
                 $link->setContext($this->innerKey, $value);
             }
+        });
+
+        // update state
+        $link->onComplete(function (LinkCommand $command) use ($state) {
+            $state->setData($command->getContext());
         });
 
         return $link;

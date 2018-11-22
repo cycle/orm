@@ -16,9 +16,12 @@ class Promise implements PromiseInterface
 
     private $promise;
 
-    public function __construct(callable $promise)
+    public $context;
+
+    public function __construct(array $context, callable $promise)
     {
         $this->promise = $promise;
+        $this->context = $context;
     }
 
     public function __resolve()

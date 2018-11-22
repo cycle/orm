@@ -370,10 +370,19 @@ abstract class BelongsToRelationTest extends BaseTest
 
         list($a->user, $b->user) = [$b->user, $a->user];
 
+        $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
+        $this->assertNumWrites(2);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $s = new Selector($this->orm->withHeap(new Heap()), Profile::class);
         list($a2, $b2) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')

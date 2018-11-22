@@ -354,6 +354,15 @@ abstract class ManyToManyPivotedRelationTest extends BaseTest
 
         $this->assertNumWrites(6);
 
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        $this->assertNumWrites(0);
+
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
         /**
          * @var User $a

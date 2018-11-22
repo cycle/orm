@@ -103,7 +103,7 @@ class PivotedRelation extends Relation\AbstractRelation
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
             $sequence->addCommand(
-                $this->link($state, $item, $related->get($item), $original->get($item))
+                $this->link($state, $item, $related->get($item), $related)
             );
         }
 
@@ -123,20 +123,21 @@ class PivotedRelation extends Relation\AbstractRelation
      * @param StateInterface $state
      * @param object         $related
      * @param object         $pivot
-     * @param object         $origPivot
+     * @param ContextStorage $storage
      * @return CommandInterface
      */
-    protected function link(StateInterface $state, $related, $pivot, $origPivot): CommandInterface
+    protected function link(StateInterface $state, $related, $pivot, ContextStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
 
-        // todo: what about origPivot?
         if (!is_object($pivot)) {
+            // first time initialization
             $pivot = $this->orm->make($this->pivotEntity, $pivot ?? []);
         }
 
         $pivotState = $this->getState($pivot);
+
         if ($pivotState == null || $pivotState->getState() == State::NEW) {
             // defer the insert until pivot keys are resolved
             $pivotStore = new Defer(
@@ -155,6 +156,9 @@ class PivotedRelation extends Relation\AbstractRelation
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
         $sequence->addCommand($pivotStore);
+
+        // update the link
+        $storage->set($related, $pivot);
 
         return $sequence;
     }

@@ -12,6 +12,8 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\ContextualNullCommand;
+use Spiral\ORM\Command\NullCommand;
 use Spiral\ORM\Config\RelationConfig;
 
 /**
@@ -210,6 +212,10 @@ class ORM implements ORMInterface
 
     public function queueStore($entity, int $mode = 0): ContextualInterface
     {
+        if ($entity instanceof PromiseInterface) {
+            return new ContextualNullCommand();
+        }
+
         $m = $this->getMapper($entity);
         $cmd = $m->queueStore($entity);
 
@@ -222,17 +228,12 @@ class ORM implements ORMInterface
         );
     }
 
-    protected function getPaths($entity, $entityID): array
-    {
-        if (is_null($entityID)) {
-            return [];
-        }
-
-        return [get_class($entity) . ':' . $entityID];
-    }
-
     public function queueDelete($entity, int $mode = 0): CommandInterface
     {
+        if ($entity instanceof PromiseInterface) {
+            return new NullCommand();
+        }
+
         return $this->getMapper($entity)->queueDelete($entity);
     }
 
@@ -243,6 +244,15 @@ class ORM implements ORMInterface
     {
         $this->mappers = [];
         $this->relmaps = [];
+    }
+
+    protected function getPaths($entity, $entityID): array
+    {
+        if (is_null($entityID)) {
+            return [];
+        }
+
+        return [get_class($entity) . ':' . $entityID];
     }
 
     /**

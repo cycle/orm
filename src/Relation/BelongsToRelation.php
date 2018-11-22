@@ -28,7 +28,9 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
             return null;
         }
 
-        return new Promise(function () use ($innerKey) {
+        $pr = new Promise(
+            [$this->outerKey => $innerKey]
+            , function () use ($innerKey) {
             // todo: check in map
             if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
                 // todo: improve it?
@@ -40,6 +42,17 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
             return $selector->fetchOne();
         });
+
+        return $pr;
+    }
+
+    protected function getState($entity): ?StateInterface
+    {
+        if ($entity instanceof PromiseInterface) {
+            return new State(State::PROMISED, $entity->context);
+        }
+
+        return parent::getState($entity);
     }
 
     /**

@@ -6,12 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-
 if (!function_exists('promise')) {
     function promise(&$object)
     {
         if ($object instanceof \Spiral\ORM\PromiseInterface) {
-            $object = $object->resolvePromise();
+            $object = $object->__resolve();
         }
 
         return $object;

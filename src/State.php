@@ -21,11 +21,12 @@ final class State implements StateInterface
     use RelationTrait, ReferenceTrait, VisitorTrait;
 
     // Different entity states in a pool
-    public const NEW              = 0;
-    public const LOADED           = 1;
-    public const SCHEDULED_INSERT = 2;
-    public const SCHEDULED_UPDATE = 3;
-    public const SCHEDULED_DELETE = 4;
+    public const PROMISED         = 0;
+    public const NEW              = 1;
+    public const LOADED           = 2;
+    public const SCHEDULED_INSERT = 3;
+    public const SCHEDULED_UPDATE = 4;
+    public const SCHEDULED_DELETE = 5;
 
     /** @var int */
     private $state;
@@ -79,7 +80,6 @@ final class State implements StateInterface
     public function setData(array $data)
     {
         $this->data = $data + $this->data;
-
         foreach ($this->handlers as $handler) {
             call_user_func($handler, $this);
         }

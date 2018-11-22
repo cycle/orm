@@ -127,6 +127,8 @@ abstract class MapperTest extends BaseTest
         $this->assertFalse($this->orm->getHeap()->has($result));
     }
 
+    // todo: num queries
+
     public function testHeap()
     {
         $selector = new Selector($this->orm, User::class);
@@ -153,9 +155,17 @@ abstract class MapperTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
 
+        $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($e);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->assertEquals(3, $e->id);
 
@@ -169,12 +179,16 @@ abstract class MapperTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
 
+        $this->captureWriteQueries();
+
         $tr = new Transaction($this->orm);
         $tr->store($e);
 
         $e->balance = 400;
 
         $tr->run();
+
+        $this->assertNumWrites(1);
 
         $this->assertEquals(3, $e->id);
         $this->assertTrue($this->orm->getHeap()->has($e));

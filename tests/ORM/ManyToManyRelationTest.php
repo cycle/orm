@@ -262,6 +262,12 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->store($u);
         $tr->run();
 
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+        $this->assertNumWrites(0);
+
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();

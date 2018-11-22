@@ -148,6 +148,13 @@ abstract class CyclicReferencesTest extends BaseTest
 
         $this->assertNumWrites(4);
 
+        // no changes!
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+        $this->assertNumWrites(0);
+
         $selector = new Selector($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')

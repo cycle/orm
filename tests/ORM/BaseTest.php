@@ -246,7 +246,9 @@ class TestLogger implements LoggerInterface
             ) {
                 $this->countWrites++;
             } else {
-                $this->countReads++;
+                if (!$this->isPostgresSystemQuery($sql)) {
+                    $this->countReads++;
+                }
             }
         }
 
@@ -261,6 +263,11 @@ class TestLogger implements LoggerInterface
         } elseif (strpos($message, 'SHOW') === 0) {
             echo " \n> \033[34m" . $message . "\033[0m";
         } else {
+            if ($this->isPostgresSystemQuery($message)) {
+                echo " \n> \033[90m" . $message . "\033[0m";
+                return;
+            }
+
             if (strpos($message, 'SELECT') === 0) {
                 echo " \n> \033[32m" . $message . "\033[0m";
             } else {
@@ -277,5 +284,21 @@ class TestLogger implements LoggerInterface
     public function hide()
     {
         $this->display = false;
+    }
+
+    protected function isPostgresSystemQuery(string $query): bool
+    {
+        if (
+            strpos($query, 'tc.constraint_name')
+            || strpos($query, 'pg_indexes')
+            || strpos($query, 'tc.constraint_name')
+            || strpos($query, 'pg_constraint')
+            || strpos($query, 'information_schema')
+            || strpos($query, 'pg_class')
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -145,4 +145,30 @@ abstract class BelongsToPromiseTest extends BaseTest
 
         $this->assertEquals('hello@world.com', $a->user->email);
     }
+
+    public function testFetchPromisesFromHeap()
+    {
+        $selector = new Selector($this->orm, Profile::class);
+        $selector->orderBy('profile.id');
+        list($a, $b, $c) = $selector->fetchAll();
+
+        $this->assertInstanceOf(PromiseInterface::class, $a->user);
+        $this->assertInstanceOf(PromiseInterface::class, $b->user);
+        $this->assertSame(null, $c->user);
+
+        // warm up
+        (new Selector($this->orm, User::class))->fetchAll();
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(User::class, $a->user->__resolve());
+        $this->assertSame($a->user->__resolve(), $a->user->__resolve());
+        $this->assertNumReads(0);
+
+        // invalid object can't be cached
+        $this->captureReadQueries();
+        $this->assertNull($b->user->__resolve());
+        $this->assertNumReads(1);
+
+        $this->assertEquals('hello@world.com', $a->user->email);
+    }
 }

@@ -29,6 +29,12 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         }
 
         return new Promise(function () use ($innerKey) {
+            // todo: check in map
+            if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
+                // todo: improve it?
+                return $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
+            }
+
             $selector = new Selector($this->orm, $this->class);
             $selector->where([$this->outerKey => $innerKey]);
 

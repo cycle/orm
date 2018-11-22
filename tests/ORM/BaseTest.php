@@ -72,6 +72,10 @@ abstract class BaseTest extends TestCase
 
         $this->logger = new TestLogger();
         $this->getDriver()->setLogger($this->logger);
+
+        if (self::$config['debug']) {
+            $this->logger->display();
+        }
     }
 
     /**
@@ -270,6 +274,8 @@ class TestLogger implements LoggerInterface
 
             if (strpos($message, 'SELECT') === 0) {
                 echo " \n> \033[32m" . $message . "\033[0m";
+            } elseif (strpos($message, 'INSERT') === 0) {
+                echo " \n> \033[36m" . $message . "\033[0m";
             } else {
                 echo " \n> \033[33m" . $message . "\033[0m";
             }
@@ -288,6 +294,7 @@ class TestLogger implements LoggerInterface
 
     protected function isPostgresSystemQuery(string $query): bool
     {
+        $query = strtolower($query);
         if (
             strpos($query, 'tc.constraint_name')
             || strpos($query, 'pg_indexes')

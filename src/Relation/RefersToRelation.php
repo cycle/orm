@@ -69,7 +69,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         });
 
         // update state
-        $link->onComplete(function (LinkCommand $command) use ($state) {
+        $link->onExecute(function (LinkCommand $command) use ($state) {
             $state->setData($command->getContext());
         });
 

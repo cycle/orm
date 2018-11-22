@@ -134,12 +134,12 @@ abstract class AbstractMapper implements MapperInterface
 
         $insert->onComplete(function (InsertCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
-            $state->setData($command->getContext());
             $this->hydrate($entity, $state->getData());
         });
 
         $insert->onRollBack(function (InsertCommand $command) use ($entity, $state) {
             // detach or change the state ?
+            // todo: need test for that (!)
             $this->orm->getHeap()->detach($entity);
         });
 
@@ -151,10 +151,6 @@ abstract class AbstractMapper implements MapperInterface
         $eData = $this->getColumns($entity);
         $oData = $state->getData();
         $cData = array_diff($eData, $oData);
-
-        //   dumP($eData);
-        //  dump($oData);
-        //   dump($cData);
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
@@ -173,9 +169,12 @@ abstract class AbstractMapper implements MapperInterface
             $update->setWhere($this->primaryKey, $state->getData()[$this->primaryKey]);
         });
 
+        $update->onExecute(function (UpdateCommand $command) use ($entity, $state) {
+            $state->setData($command->getContext());
+        });
+
         $update->onComplete(function (UpdateCommand $command) use ($entity, $state) {
             $state->setState(State::LOADED);
-            $state->setData($command->getContext());
             $this->hydrate($entity, $state->getData());
         });
 

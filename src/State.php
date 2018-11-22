@@ -79,6 +79,10 @@ final class State implements StateInterface
      */
     public function setData(array $data)
     {
+        if (empty($data)) {
+            return;
+        }
+
         $this->data = $data + $this->data;
         foreach ($this->handlers as $handler) {
             call_user_func($handler, $this);

@@ -35,7 +35,6 @@ abstract class BelongsToPromiseTest extends BaseTest
             ['email', 'balance'],
             [
                 ['hello@world.com', 100],
-                ['another@world.com', 200],
             ]
         );
 
@@ -135,5 +134,15 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertInstanceOf(PromiseInterface::class, $a->user);
         $this->assertInstanceOf(PromiseInterface::class, $b->user);
         $this->assertSame(null, $c->user);
+
+        $this->assertInstanceOf(User::class, $a->user->__resolve());
+        $this->assertNull($b->user->__resolve());
+
+        $this->captureReadQueries();
+        $this->assertSame($a->user->__resolve(), $a->user->__resolve());
+        $this->assertNull($b->user->__resolve());
+        $this->assertNumReads(0);
+
+        $this->assertEquals('hello@world.com', $a->user->email);
     }
 }

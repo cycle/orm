@@ -16,6 +16,7 @@ use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Promise\Promise;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
+use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\StateInterface;
 
@@ -23,11 +24,16 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
     public function initPromise(State $state, $data): ?PromiseInterface
     {
-        if (empty($data[$this->innerKey])) {
+        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return null;
         }
 
-        return new Promise();
+        return new Promise(function () use ($innerKey) {
+            $selector = new Selector($this->orm, $this->class);
+            $selector->where([$this->outerKey => $innerKey]);
+
+            return $selector->fetchOne();
+        });
     }
 
     /**

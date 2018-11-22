@@ -10,5 +10,5 @@ namespace Spiral\ORM;
 
 interface PromiseInterface
 {
-
+    public function __resolve();
 }

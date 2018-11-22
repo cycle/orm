@@ -45,7 +45,10 @@ abstract class BaseTest extends TestCase
     protected $logger;
 
     /** @var int */
-    protected $lastCount;
+    protected $numWrites;
+
+    /** @var int */
+    protected $numReads;
 
     /**
      * Init all we need.
@@ -112,7 +115,7 @@ abstract class BaseTest extends TestCase
      */
     public function captureWriteQueries()
     {
-        $this->lastCount = $this->logger->countWriteQueries();
+        $this->numWrites = $this->logger->countWriteQueries();
     }
 
     /**
@@ -120,7 +123,7 @@ abstract class BaseTest extends TestCase
      */
     public function assertNumWrites(int $numWrites)
     {
-        $queries = $this->logger->countWriteQueries() - $this->lastCount;
+        $queries = $this->logger->countWriteQueries() - $this->numWrites;
 
         $this->assertSame(
             $numWrites,
@@ -128,6 +131,29 @@ abstract class BaseTest extends TestCase
             "Number of write SQL queries do not match, expected {$numWrites} got {$queries}."
         );
     }
+
+    /**
+     * Start counting update/insert/delete queries.
+     */
+    public function captureReadQueries()
+    {
+        $this->numReads = $this->logger->countReadQueries();
+    }
+
+    /**
+     * @param int $numReads
+     */
+    public function assertNumReads(int $numReads)
+    {
+        $queries = $this->logger->countReadQueries() - $this->numReads;
+
+        $this->assertSame(
+            $numReads,
+            $queries,
+            "Number of write SQL queries do not match, expected {$numReads} got {$queries}."
+        );
+    }
+
 
     /**
      * @return Database
@@ -191,15 +217,22 @@ class TestLogger implements LoggerInterface
     private $display;
 
     private $countWrites;
+    private $countReads;
 
     public function __construct()
     {
         $this->countWrites = 0;
+        $this->countReads = 0;
     }
 
     public function countWriteQueries(): int
     {
         return $this->countWrites;
+    }
+
+    public function countReadQueries(): int
+    {
+        return $this->countReads;
     }
 
     public function log($level, $message, array $context = [])
@@ -212,6 +245,8 @@ class TestLogger implements LoggerInterface
                 || strpos($sql, 'delete') === 0
             ) {
                 $this->countWrites++;
+            } else {
+                $this->countReads++;
             }
         }
 

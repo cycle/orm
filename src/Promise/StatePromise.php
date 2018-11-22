@@ -12,5 +12,4 @@ use Spiral\ORM\StateInterface;
 
 abstract class StatePromise implements StateInterface
 {
-
 }

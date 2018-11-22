@@ -30,17 +30,16 @@ trait PromiseTrait
         ?StateInterface $current,
         string $localKey
     ) {
-        if (!empty($value = $this->fetchKey($parent, $parentKey))) {
-            if ($this->fetchKey($current, $localKey) != $value) {
-                $command->setContext($localKey, $value);
-            }
-        }
-
-        $parent->onChange(function (StateInterface $state) use ($command, $localKey, $parentKey) {
+        $handler = function (StateInterface $state) use ($command, $localKey, $parentKey, $current) {
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
-                $command->setContext($localKey, $value);
+                if ($this->fetchKey($current, $localKey) != $value) {
+                    $command->setContext($localKey, $value);
+                }
             }
-        });
+        };
+
+        call_user_func($handler, $parent);
+        $parent->onChange($handler);
     }
 
     /**
@@ -60,17 +59,16 @@ trait PromiseTrait
         ?StateInterface $current,
         string $localKey
     ) {
-        if (!empty($value = $this->fetchKey($parent, $parentKey))) {
-            if ($this->fetchKey($current, $localKey) != $value) {
-                $command->setWhere($localKey, $value);
-            }
-        }
-
-        $parent->onChange(function (StateInterface $state) use ($command, $localKey, $parentKey) {
+        $handler = function (StateInterface $state) use ($command, $localKey, $parentKey, $current) {
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
-                $command->setWhere($localKey, $value);
+                if ($this->fetchKey($current, $localKey) != $value) {
+                    $command->setWhere($localKey, $value);
+                }
             }
-        });
+        };
+
+        call_user_func($handler, $parent);
+        $parent->onChange($handler);
     }
 
     /**

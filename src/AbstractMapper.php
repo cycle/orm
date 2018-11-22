@@ -116,6 +116,7 @@ abstract class AbstractMapper implements MapperInterface
             $state = new State(State::NEW, $columns);
             $this->orm->getHeap()->attach($entity, $state);
         } else {
+            // todo: do i need it here? do it in complete? OR NOT???
             $state->setData($columns);
         }
 

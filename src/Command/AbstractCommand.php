@@ -22,6 +22,14 @@ abstract class AbstractCommand implements CommandInterface
     private $onRollBack = [];
 
     /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return get_class($this);
+    }
+
+    /**
      * @return bool
      */
     public function isReady(): bool

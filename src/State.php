@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM;
 
+use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Traits\ReferenceTrait;
 use Spiral\ORM\Traits\RelationTrait;
 use Spiral\ORM\Traits\VisitorTrait;
@@ -95,6 +96,18 @@ final class State implements StateInterface
     public function getData(): array
     {
         return $this->data;
+    }
+
+    private $lastCommand;
+
+    public function setActiveCommand(ContextualInterface $cmd = null)
+    {
+        $this->lastCommand = $cmd;
+    }
+
+    public function getActiveCommand(): ?ContextualInterface
+    {
+        return $this->lastCommand;
     }
 
     /**

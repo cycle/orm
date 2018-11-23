@@ -18,7 +18,7 @@ class Relation
     public const MANY_TO_MANY_PIVOTED = 52;
     public const OUTER_KEY            = 2;
     public const INNER_KEY            = 3;
-    public const NULLABLE             = 4;
+    public const NULLABLE             = 40000;
     public const TYPE                 = 10;
     public const TARGET               = 11;
     public const SCHEMA               = 21;

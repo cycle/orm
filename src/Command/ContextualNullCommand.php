@@ -14,6 +14,21 @@ class ContextualNullCommand implements ContextualInterface
     /**
      * {@inheritdoc}
      */
+    public function waitContext(string $key, bool $required = true)
+    {
+
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function freeContext(string $key)
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getContext(): array
     {
         // nothing to do
@@ -22,7 +37,7 @@ class ContextualNullCommand implements ContextualInterface
     /**
      * {@inheritdoc}
      */
-    public function setContext(string $name, $value)
+    public function setContext(string $key, $value)
     {
         // nothing to do
     }

@@ -56,6 +56,15 @@ abstract class AbstractRelation implements RelationInterface
         return sprintf("%s->%s", $this->class, $this->relation);
     }
 
+    public function isRequired(): bool
+    {
+        if (array_key_exists(Relation::NULLABLE, $this->schema)) {
+            return !$this->schema[Relation::NULLABLE];
+        }
+
+        return true;
+    }
+
     public function isCascade(): bool
     {
         return $this->schema[Relation::CASCADE] ?? false;

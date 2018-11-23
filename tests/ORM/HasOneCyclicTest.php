@@ -55,6 +55,7 @@ abstract class HasOneCyclicTest extends BaseTest
                         Relation::TARGET => Cyclic::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
+                            Relation::NULLABLE  => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
                         ],

@@ -14,6 +14,21 @@ namespace Spiral\ORM\Command;
 interface ContextualInterface extends CommandInterface
 {
     /**
+     * Wait for the context value.
+     *
+     * @param string $key
+     * @param bool   $required
+     */
+    public function waitContext(string $key, bool $required = true);
+
+    /**
+     * Indicate that context value is not required anymore.
+     *
+     * @param string $key
+     */
+    public function freeContext(string $key);
+
+    /**
      * Get current command context.
      *
      * @return array
@@ -24,8 +39,8 @@ interface ContextualInterface extends CommandInterface
      * Add context value, usually FK. Must be set before command being executed, usually in leading
      * command "execute" event.
      *
-     * @param string $name
+     * @param string $key
      * @param mixed  $value
      */
-    public function setContext(string $name, $value);
+    public function setContext(string $key, $value);
 }

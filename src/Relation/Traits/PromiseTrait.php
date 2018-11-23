@@ -30,11 +30,15 @@ trait PromiseTrait
         ?StateInterface $current,
         string $localKey
     ) {
+        $command->waitContext($localKey, $this->isRequired());
+
         $handler = function (StateInterface $state) use ($command, $localKey, $parentKey, $current) {
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 if ($this->fetchKey($current, $localKey) != $value) {
                     $command->setContext($localKey, $value);
                 }
+
+                $command->freeContext($localKey);
             }
         };
 
@@ -86,4 +90,11 @@ trait PromiseTrait
 
         return $state->getData()[$key] ?? null;
     }
+
+    /**
+     * True is given relation is required for the object to be saved (i.e. NOT NULL).
+     *
+     * @return bool
+     */
+    abstract public function isRequired(): bool;
 }

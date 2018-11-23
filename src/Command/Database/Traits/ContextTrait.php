@@ -13,7 +13,42 @@ namespace Spiral\ORM\Command\Database\Traits;
 trait ContextTrait
 {
     /** @var array */
+    private $required = [];
+
+    /** @var array */
     private $context = [];
+
+    /**
+     * Command is ready when no context is required.
+     *
+     * @return bool
+     */
+    public function isReady(): bool
+    {
+        return empty($this->required);
+    }
+
+    /**
+     * Wait for the context value.
+     *
+     * @param string $key
+     * @param bool   $required
+     */
+    public function waitContext(string $key, bool $required = true)
+    {
+        $this->required[$key] = true;
+        // we expect all values to be required here
+    }
+
+    /**
+     * Indicate that context value is not required anymore.
+     *
+     * @param string $key
+     */
+    public function freeContext(string $key)
+    {
+        unset($this->required[$key]);
+    }
 
     /**
      * @return array

@@ -12,6 +12,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\SplitCommand;
 use Spiral\ORM\Command\Database\UpdateCommand;
 use Spiral\ORM\Command\NullCommand;
 
@@ -62,17 +63,36 @@ abstract class AbstractMapper implements MapperInterface
         return [new $class, $data];
     }
 
+    // todo: need state as INPUT!!!!
     public function queueStore($entity): ContextualInterface
     {
+        /** @var State $state */
         $state = $this->orm->getHeap()->get($entity);
 
         if ($state == null || $state->getState() == State::NEW) {
             $cmd = $this->queueCreate($entity, $state);
-        } else {
-            $cmd = $this->queueUpdate($entity, $state);
+            $state->setActiveCommand($cmd);
+            $cmd->onComplete(function () use ($state) {
+                $state->setActiveCommand(null);
+            });
+
+            return $cmd;
         }
 
-        return $cmd;
+        $lastCommand = $state->getActiveCommand();
+        if (empty($lastCommand)) {
+            // todo: check multiple update commands working within the split (!)
+            return $this->queueUpdate($entity, $state);
+        }
+
+        if ($lastCommand instanceof SplitCommand) {
+            return $lastCommand;
+        }
+
+        $split = new SplitCommand($lastCommand, $this->queueUpdate($entity, $state));
+        $state->setActiveCommand($split);
+
+        return $split;
     }
 
     public function queueDelete($entity): CommandInterface

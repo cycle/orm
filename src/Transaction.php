@@ -75,7 +75,17 @@ class Transaction implements TransactionInterface
 
                 foreach ($this->reduce($commands) as $wait => $do) {
                     if ($wait != null) {
+                        if (in_array($wait, $pending, true)) {
+                            continue;
+                        }
+
                         $pending[] = $wait;
+                        continue;
+                    }
+
+                    // found same link from multiple branches
+                    if (in_array($do, $executed, true)) {
+                        $countExecuted++;
                         continue;
                     }
 

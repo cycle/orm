@@ -45,6 +45,22 @@ class ContextualSequence extends Sequence implements ContextualInterface
     /**
      * {@inheritdoc}
      */
+    public function waitContext(string $key, bool $required = true)
+    {
+        return $this->getPrimary()->waitContext($key, $required);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function freeContext(string $key)
+    {
+        return $this->getPrimary()->freeContext($key);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getContext(): array
     {
         return $this->getPrimary()->getContext();
@@ -53,9 +69,9 @@ class ContextualSequence extends Sequence implements ContextualInterface
     /**
      * {@inheritdoc}
      */
-    public function setContext(string $name, $value)
+    public function setContext(string $key, $value)
     {
-        $this->getPrimary()->setContext($name, $value);
+        $this->getPrimary()->setContext($key, $value);
     }
 
     /**

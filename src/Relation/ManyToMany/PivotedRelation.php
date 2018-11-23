@@ -13,7 +13,6 @@ use Spiral\ORM\Collection\PivotedCollection;
 use Spiral\ORM\Collection\PivotedCollectionInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
@@ -136,22 +135,12 @@ class PivotedRelation extends Relation\AbstractRelation
             $pivot = $this->orm->make($this->pivotEntity, $pivot ?? []);
         }
 
+        // defer the insert until pivot keys are resolved
+        $pivotStore = $this->orm->queueStore($pivot);
         $pivotState = $this->getState($pivot);
 
-        if ($pivotState == null || $pivotState->getState() == State::NEW) {
-            // defer the insert until pivot keys are resolved
-            $pivotStore = new Defer(
-                $this->orm->queueStore($pivot),
-                [$this->thoughtInnerKey, $this->thoughtOuterKey],
-                (string)$this
-            );
-
-            $this->promiseContext($pivotStore, $state, $this->innerKey, null, $this->thoughtInnerKey);
-            $this->promiseContext($pivotStore, $relState, $this->outerKey, null, $this->thoughtOuterKey);
-        } else {
-            // objects already linked, we can try to update pivot data if needed
-            $pivotStore = $this->orm->queueStore($pivot);
-        }
+        $this->promiseContext($pivotStore, $state, $this->innerKey, $pivotState, $this->thoughtInnerKey);
+        $this->promiseContext($pivotStore, $relState, $this->outerKey, $pivotState, $this->thoughtOuterKey);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);

@@ -33,6 +33,12 @@ class User
     /** @var Comment[]|Collection */
     public $favorites;
 
+    /** @var Nested */
+    public $nested;
+
+    /** @var Nested */
+    public $owned;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();

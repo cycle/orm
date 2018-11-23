@@ -13,7 +13,6 @@ use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Control\Defer;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\DeleteCommand;
 use Spiral\ORM\Command\Database\InsertCommand;
@@ -121,11 +120,7 @@ class ManyToManyRelation extends AbstractRelation
             return $relStore;
         }
 
-        $sync = new Defer(
-            new InsertCommand($this->pivotDatabase(), $this->pivotTable()),
-            [$this->thoughtInnerKey, $this->thoughtOuterKey],
-            (string)$this
-        );
+        $sync = new InsertCommand($this->pivotDatabase(), $this->pivotTable());
 
         $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
         $this->promiseContext($sync, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);

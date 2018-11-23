@@ -11,14 +11,13 @@ namespace Spiral\ORM\Command\Control;
 use Spiral\ORM\Command\ContextualInterface;
 
 /**
- * Branches input context into 2 destinations: original create command (insert) and delayed update command.
- * Used to properly unfold cyclic graphs but at the same time resolve issue with double linked data.
+ * Splits input context command into 2 destinations: original create command (usually insert) and delayed update command.
+ * Used to properly unfold cyclic graphs by keeping the reference data in update and solves the issue of multiple
+ * parent by sending the data to the first command.
  *
- * Mapper must issue one Branch per object save to prevent extra update commands with highly coupled data.
- *
- * Branch will always execute head command but might delay or skip execution of the tail.
+ * Handlers are attached to the head command since we can guarantee that head would always be executed.
  */
-class Branch implements ContextualInterface, \IteratorAggregate
+class Split implements ContextualInterface, \IteratorAggregate
 {
     /** @var bool */
     private $headExecuted = false;

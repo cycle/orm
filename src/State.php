@@ -41,6 +41,9 @@ final class State implements StateInterface
      */
     private $handlers = [];
 
+    /** @var null|ContextualInterface */
+    private $activeCommand;
+
     /**
      * @param int   $state
      * @param array $data
@@ -98,16 +101,22 @@ final class State implements StateInterface
         return $this->data;
     }
 
-    private $lastCommand;
-
+    /**
+     * Carries reference to the last issued command.
+     *
+     * @param ContextualInterface|null $cmd
+     */
     public function setActiveCommand(ContextualInterface $cmd = null)
     {
-        $this->lastCommand = $cmd;
+        $this->activeCommand = $cmd;
     }
 
+    /**
+     * @return null|ContextualInterface
+     */
     public function getActiveCommand(): ?ContextualInterface
     {
-        return $this->lastCommand;
+        return $this->activeCommand;
     }
 
     /**

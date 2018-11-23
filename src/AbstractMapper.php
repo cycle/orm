@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Control\Branch;
+use Spiral\ORM\Command\Control\Split;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
@@ -85,11 +85,11 @@ abstract class AbstractMapper implements MapperInterface
             return $this->queueUpdate($entity, $state);
         }
 
-        if ($lastCommand instanceof Branch) {
+        if ($lastCommand instanceof Split) {
             return $lastCommand;
         }
 
-        $split = new Branch($lastCommand, $this->queueUpdate($entity, $state));
+        $split = new Split($lastCommand, $this->queueUpdate($entity, $state));
         $state->setActiveCommand($split);
 
         return $split;

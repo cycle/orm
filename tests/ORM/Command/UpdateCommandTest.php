@@ -24,7 +24,7 @@ class UpdateCommandTest extends TestCase
             []
         );
 
-        $this->assertTrue($cmd->isEmpty());
+        $this->assertTrue($cmd->isReady());
     }
 
     public function testIsEmptyData()
@@ -36,7 +36,6 @@ class UpdateCommandTest extends TestCase
             ['where' => 'value']
         );
 
-        $this->assertFalse($cmd->isEmpty());
         $this->assertSame(['name' => 'value'], $cmd->getData());
     }
 
@@ -48,8 +47,6 @@ class UpdateCommandTest extends TestCase
             ['name' => 'value'],
             ['where' => 'value']
         );
-
-        $this->assertFalse($cmd->isEmpty());
 
         $cmd->setContext('key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getContext());

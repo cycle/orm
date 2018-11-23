@@ -35,7 +35,7 @@ class InsertCommandTest extends TestCase
             []
         );
 
-        $this->assertTrue($cmd->isEmpty());
+        $this->assertTrue($cmd->isReady());
     }
 
     public function testIsEmptyData()
@@ -46,23 +46,9 @@ class InsertCommandTest extends TestCase
             ['name' => 'value']
         );
 
-        $this->assertFalse($cmd->isEmpty());
         $this->assertSame(['name' => 'value'], $cmd->getData());
     }
 
-    public function testIsEmptyContext()
-    {
-        $cmd = new Insert(
-            m::mock(DatabaseInterface::class),
-            'table',
-            []
-        );
-
-        $this->assertTrue($cmd->isEmpty());
-
-        $cmd->setContext('name', 'value');
-        $this->assertFalse($cmd->isEmpty());
-    }
 
     public function testExecute()
     {

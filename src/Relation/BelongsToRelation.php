@@ -45,6 +45,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         return $pr;
     }
 
+    // todo: common for all relations?
     protected function getState($entity): ?StateInterface
     {
         if ($entity instanceof PromiseInterface) {
@@ -78,6 +79,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
+        $relState->addReference();
 
         $this->promiseContext($command, $relState, $this->outerKey, $state, $this->innerKey);
 

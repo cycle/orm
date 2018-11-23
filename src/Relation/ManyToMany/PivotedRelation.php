@@ -83,6 +83,9 @@ class PivotedRelation extends Relation\AbstractRelation
 
     /**
      * @inheritdoc
+     *
+     * @param ContextStorage $related
+     * @param ContextStorage $original
      */
     public function queueRelation(
         ContextualInterface $command,
@@ -91,10 +94,6 @@ class PivotedRelation extends Relation\AbstractRelation
         $related,
         $original
     ): CommandInterface {
-        /**
-         * @var ContextStorage $related
-         * @var ContextStorage $original
-         */
         $original = $original ?? new ContextStorage();
 
         $sequence = new Sequence();
@@ -109,7 +108,9 @@ class PivotedRelation extends Relation\AbstractRelation
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
-                $sequence->addCommand($this->orm->queueDelete($original->get($item)));
+                $sequence->addCommand(
+                    $this->orm->queueDelete($original->get($item))
+                );
             }
         }
 
@@ -129,6 +130,7 @@ class PivotedRelation extends Relation\AbstractRelation
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
+        $relState->addReference();
 
         if (!is_object($pivot)) {
             // first time initialization

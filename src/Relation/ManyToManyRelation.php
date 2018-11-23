@@ -73,6 +73,9 @@ class ManyToManyRelation extends AbstractRelation
 
     /**
      * @inheritdoc
+     *
+     * @param ContextStorage $related
+     * @param ContextStorage $original
      */
     public function queueRelation(
         ContextualInterface $command,
@@ -81,23 +84,23 @@ class ManyToManyRelation extends AbstractRelation
         $related,
         $original
     ): CommandInterface {
-        /**
-         * @var ContextStorage $related
-         * @var ContextStorage $original
-         */
         $original = $original ?? new ContextStorage();
 
         $sequence = new Sequence();
 
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
-            $sequence->addCommand($this->link($state, $item, $original->has($item)));
+            $sequence->addCommand(
+                $this->link($state, $item, $original->has($item))
+            );
         }
 
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
-                $sequence->addCommand($this->unlink($state, $item));
+                $sequence->addCommand(
+                    $this->unlink($state, $item)
+                );
             }
         }
 
@@ -115,6 +118,7 @@ class ManyToManyRelation extends AbstractRelation
     protected function link(StateInterface $state, $related, $exists): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
+
         if ($exists) {
             // no changes in relation between the objects
             return $relStore;

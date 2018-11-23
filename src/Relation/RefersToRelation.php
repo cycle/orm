@@ -53,28 +53,33 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new Nil();
         }
 
-        $link = new Update(
+        // this needs to be better
+
+        // todo: use queue store?
+
+        $update = new Update(
             $this->orm->getDatabase($entity),
             $this->orm->getSchema()->define(get_class($entity), Schema::TABLE)
         );
 
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
-        $this->promiseScope($link, $state, $primaryKey, null, $primaryKey);
+        $this->promiseScope($update, $state, $primaryKey, null, $primaryKey);
 
         // state either not found or key value is not set, subscribe thought the heap
-        $link->waitContext($this->innerKey, true);
-        $this->orm->getHeap()->onChange($related, function (State $state) use ($link) {
+        $update->waitContext($this->innerKey, true);
+
+        $this->orm->getHeap()->onChange($related, function (State $state) use ($update) {
             if (!empty($value = $this->fetchKey($state, $this->outerKey))) {
-                $link->setContext($this->innerKey, $value);
-                $link->freeContext($this->innerKey);
+                $update->setContext($this->innerKey, $value);
+                $update->freeContext($this->innerKey);
             }
         });
 
         // update state
-        $link->onExecute(function (Update $command) use ($state) {
+        $update->onExecute(function (Update $command) use ($state) {
             $state->setData($command->getContext());
         });
 
-        return $link;
+        return $update;
     }
 }

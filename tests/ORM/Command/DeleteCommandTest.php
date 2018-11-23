@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests\Command;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\DeleteCommand;
+use Spiral\ORM\Command\Database\Delete;
 
 class DeleteCommandTest extends TestCase
 {
@@ -20,7 +20,7 @@ class DeleteCommandTest extends TestCase
      */
     public function testNoScope()
     {
-        $cmd = new DeleteCommand(
+        $cmd = new Delete(
             m::mock(DatabaseInterface::class),
             'table',
             []

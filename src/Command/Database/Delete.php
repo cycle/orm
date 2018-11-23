@@ -9,13 +9,14 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\Traits\WhereTrait;
+use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\ScopedInterface;
+use Spiral\ORM\Command\Traits\ScopeTrait;
 use Spiral\ORM\Exception\CommandException;
 
-class DeleteCommand extends DatabaseCommand implements ScopedInterface
+class Delete extends DatabaseCommand implements ScopedInterface
 {
-    use WhereTrait;
+    use ScopeTrait;
 
     /**
      * @param DatabaseInterface $db
@@ -25,7 +26,15 @@ class DeleteCommand extends DatabaseCommand implements ScopedInterface
     public function __construct(DatabaseInterface $db, string $table, array $where = [])
     {
         parent::__construct($db, $table);
-        $this->where = $where;
+        $this->scope = $where;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isReady(): bool
+    {
+        return empty($this->waitScope);
     }
 
     /**
@@ -33,11 +42,11 @@ class DeleteCommand extends DatabaseCommand implements ScopedInterface
      */
     public function execute()
     {
-        if (empty($this->where)) {
+        if (empty($this->scope)) {
             throw new CommandException("Unable to execute delete command without a scope");
         }
 
-        $this->db->delete($this->table, $this->where)->run();
+        $this->db->delete($this->table, $this->scope)->run();
         parent::execute();
     }
 }

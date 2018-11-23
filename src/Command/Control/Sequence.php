@@ -9,7 +9,6 @@
 namespace Spiral\ORM\Command\Control;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\NullCommand;
 
 /**
  * Wraps multiple commands into one sequence.
@@ -24,7 +23,7 @@ class Sequence implements CommandInterface, \IteratorAggregate
      */
     public function addCommand(CommandInterface $command)
     {
-        if ($command instanceof NullCommand) {
+        if ($command instanceof Nil) {
             return;
         }
 

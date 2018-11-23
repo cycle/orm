@@ -12,8 +12,7 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\ContextualNullCommand;
-use Spiral\ORM\Command\NullCommand;
+use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Config\RelationConfig;
 
 /**
@@ -214,7 +213,7 @@ class ORM implements ORMInterface
     {
         if ($entity instanceof PromiseInterface) {
             // todo: i don't like you
-            return new ContextualNullCommand();
+            return new Nil();
         }
 
         $m = $this->getMapper($entity);
@@ -232,7 +231,7 @@ class ORM implements ORMInterface
     public function queueDelete($entity, int $mode = 0): CommandInterface
     {
         if ($entity instanceof PromiseInterface) {
-            return new NullCommand();
+            return new Nil();
         }
 
         return $this->getMapper($entity)->queueDelete($entity);

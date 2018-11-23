@@ -10,9 +10,10 @@ namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Database\Traits\ContextTrait;
-use Spiral\ORM\Command\Database\Traits\WhereTrait;
+use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\ScopedInterface;
+use Spiral\ORM\Command\Traits\ContextTrait;
+use Spiral\ORM\Command\Traits\ScopeTrait;
 use Spiral\ORM\Exception\CommandException;
 
 /**
@@ -20,9 +21,9 @@ use Spiral\ORM\Exception\CommandException;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class UpdateCommand extends DatabaseCommand implements ContextualInterface, ScopedInterface
+class Update extends DatabaseCommand implements ContextualInterface, ScopedInterface
 {
-    use ContextTrait, WhereTrait;
+    use ContextTrait, ScopeTrait;
 
     /** @var array */
     private $data;
@@ -37,7 +38,7 @@ class UpdateCommand extends DatabaseCommand implements ContextualInterface, Scop
     {
         parent::__construct($db, $table);
         $this->data = $data;
-        $this->where = $where;
+        $this->scope = $where;
     }
 
     /**
@@ -55,11 +56,11 @@ class UpdateCommand extends DatabaseCommand implements ContextualInterface, Scop
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
-    public function isEmpty(): bool
+    public function isReady(): bool
     {
-        return (empty($this->data) && empty($this->context)) || empty($this->where);
+        return empty($this->waitContext) && empty($this->waitScope);
     }
 
     /**
@@ -77,14 +78,23 @@ class UpdateCommand extends DatabaseCommand implements ContextualInterface, Scop
      */
     public function execute()
     {
-        if (empty($this->where)) {
+        if (empty($this->scope)) {
             throw new CommandException("Unable to execute update command without a scope");
         }
 
         if (!$this->isEmpty()) {
-            $this->db->update($this->table, $this->getData(), $this->where)->run();
+            $this->db->update($this->table, $this->getData(), $this->scope)->run();
         }
 
         parent::execute();
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function isEmpty(): bool
+    {
+        return (empty($this->data) && empty($this->context)) || empty($this->scope);
     }
 }

@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\Database\Driver\DriverInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\Database\DatabaseCommand;
+use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Exception\TransactionException;
 
 class Transaction implements TransactionInterface

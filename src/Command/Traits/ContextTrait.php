@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Command\Database\Traits;
+namespace Spiral\ORM\Command\Traits;
 
 /**
  * Provides ability to carry context.
@@ -13,20 +13,10 @@ namespace Spiral\ORM\Command\Database\Traits;
 trait ContextTrait
 {
     /** @var array */
-    private $required = [];
-
-    /** @var array */
     private $context = [];
 
-    /**
-     * Command is ready when no context is required.
-     *
-     * @return bool
-     */
-    public function isReady(): bool
-    {
-        return empty($this->required);
-    }
+    /** @var array */
+    private $waitContext = [];
 
     /**
      * Wait for the context value.
@@ -36,8 +26,7 @@ trait ContextTrait
      */
     public function waitContext(string $key, bool $required = true)
     {
-        $this->required[$key] = true;
-        // we expect all values to be required here
+        $this->waitContext[$key] = true;
     }
 
     /**
@@ -47,7 +36,7 @@ trait ContextTrait
      */
     public function freeContext(string $key)
     {
-        unset($this->required[$key]);
+        unset($this->waitContext[$key]);
     }
 
     /**

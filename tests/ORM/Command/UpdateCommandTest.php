@@ -11,13 +11,13 @@ namespace Spiral\ORM\Tests\Command;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\UpdateCommand;
+use Spiral\ORM\Command\Database\Update;
 
 class UpdateCommandTest extends TestCase
 {
     public function testIsEmpty()
     {
-        $cmd = new UpdateCommand(
+        $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
             [],
@@ -29,7 +29,7 @@ class UpdateCommandTest extends TestCase
 
     public function testIsEmptyData()
     {
-        $cmd = new UpdateCommand(
+        $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],
@@ -42,7 +42,7 @@ class UpdateCommandTest extends TestCase
 
     public function testIsEmptyContext()
     {
-        $cmd = new UpdateCommand(
+        $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],
@@ -57,15 +57,15 @@ class UpdateCommandTest extends TestCase
 
     public function testWhere()
     {
-        $cmd = new UpdateCommand(
+        $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],
             []
         );
 
-        $cmd->setWhere('key', 'value');
-        $this->assertSame(['key' => 'value'], $cmd->getWhere());
+        $cmd->setScope('key', 'value');
+        $this->assertSame(['key' => 'value'], $cmd->getScope());
     }
 
     /**
@@ -73,7 +73,7 @@ class UpdateCommandTest extends TestCase
      */
     public function testNoScope()
     {
-        $cmd = new UpdateCommand(
+        $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
             ['name' => 'value'],

@@ -1,15 +1,20 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Command;
+namespace Spiral\ORM\Command\Control;
 
-// todo: rename and make it better
-class ContextualNullCommand implements ContextualInterface
+use Spiral\ORM\Command\ContextualInterface;
+
+/**
+ * Doing noting.
+ *
+ * @codeCoverageIgnore
+ */
+final class Nil implements ContextualInterface
 {
     /**
      * {@inheritdoc}
@@ -31,7 +36,7 @@ class ContextualNullCommand implements ContextualInterface
      */
     public function getContext(): array
     {
-        // nothing to do
+        return [];
     }
 
     /**

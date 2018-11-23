@@ -10,8 +10,8 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Database\LinkCommand;
-use Spiral\ORM\Command\NullCommand;
+use Spiral\ORM\Command\Control\Nil;
+use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
@@ -39,7 +39,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
                 $command->setContext($this->innerKey, null);
             }
 
-            return new NullCommand();
+            return new Nil();
         }
 
         $relState = $this->getState($related);
@@ -50,28 +50,28 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
                 $command->setContext($this->innerKey, $outerKey);
             }
 
-            return new NullCommand();
+            return new Nil();
         }
 
-        // update the connection between objects once keys are resolved
-        $link = new LinkCommand(
+        $link = new Update(
             $this->orm->getDatabase($entity),
-            $this->orm->getSchema()->define(get_class($entity), Schema::TABLE),
-            $this
+            $this->orm->getSchema()->define(get_class($entity), Schema::TABLE)
         );
 
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
         $this->promiseScope($link, $state, $primaryKey, null, $primaryKey);
 
         // state either not found or key value is not set, subscribe thought the heap
+        $link->waitContext($this->innerKey, true);
         $this->orm->getHeap()->onChange($related, function (State $state) use ($link) {
             if (!empty($value = $this->fetchKey($state, $this->outerKey))) {
                 $link->setContext($this->innerKey, $value);
+                $link->freeContext($this->innerKey);
             }
         });
 
         // update state
-        $link->onExecute(function (LinkCommand $command) use ($state) {
+        $link->onExecute(function (Update $command) use ($state) {
             $state->setData($command->getContext());
         });
 

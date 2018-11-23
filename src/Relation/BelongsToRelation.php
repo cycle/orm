@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\NullCommand;
+use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Promise\Promise;
@@ -73,7 +73,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
                 $command->setContext($this->innerKey, null);
             }
 
-            return new NullCommand();
+            return new Nil();
         }
 
         $relStore = $this->orm->queueStore($related);

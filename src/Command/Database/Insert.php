@@ -10,12 +10,13 @@ namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Database\Traits\ContextTrait;
+use Spiral\ORM\Command\DatabaseCommand;
+use Spiral\ORM\Command\Traits\ContextTrait;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class InsertCommand extends DatabaseCommand implements ContextualInterface
+class Insert extends DatabaseCommand implements ContextualInterface
 {
     use ContextTrait;
 
@@ -37,11 +38,11 @@ class InsertCommand extends DatabaseCommand implements ContextualInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
-    public function isEmpty(): bool
+    public function isReady(): bool
     {
-        return empty($this->data) && empty($this->context);
+        return empty($this->waitContext);
     }
 
     /**

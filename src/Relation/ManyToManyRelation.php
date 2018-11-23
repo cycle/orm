@@ -14,8 +14,8 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\Command\Database\DeleteCommand;
-use Spiral\ORM\Command\Database\InsertCommand;
+use Spiral\ORM\Command\Database\Delete;
+use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -120,7 +120,7 @@ class ManyToManyRelation extends AbstractRelation
             return $relStore;
         }
 
-        $sync = new InsertCommand($this->pivotDatabase(), $this->pivotTable());
+        $sync = new Insert($this->pivotDatabase(), $this->pivotTable());
 
         $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
         $this->promiseContext($sync, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);
@@ -141,7 +141,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function unlink(StateInterface $state, $related): CommandInterface
     {
-        $delete = new DeleteCommand($this->pivotDatabase(), $this->pivotTable());
+        $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
 
         $this->promiseScope($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
         $this->promiseScope($delete, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);

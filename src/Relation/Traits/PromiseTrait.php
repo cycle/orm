@@ -30,8 +30,6 @@ trait PromiseTrait
         ?StateInterface $current,
         string $localKey
     ) {
-        $command->waitContext($localKey, $this->isRequired());
-
         $handler = function (StateInterface $state) use ($command, $localKey, $parentKey, $current) {
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 if ($this->fetchKey($current, $localKey) != $value) {
@@ -41,6 +39,8 @@ trait PromiseTrait
                 $command->freeContext($localKey);
             }
         };
+
+        $command->waitContext($localKey, $this->isRequired());
 
         call_user_func($handler, $parent);
         $parent->onChange($handler);
@@ -66,11 +66,14 @@ trait PromiseTrait
         $handler = function (StateInterface $state) use ($command, $localKey, $parentKey, $current) {
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 if ($this->fetchKey($current, $localKey) != $value) {
-                    $command->setWhere($localKey, $value);
+                    $command->setScope($localKey, $value);
                 }
+
+                $command->freeScope($localKey);
             }
         };
 
+        $command->waitScope($localKey, $this->isRequired());
         call_user_func($handler, $parent);
         $parent->onChange($handler);
     }

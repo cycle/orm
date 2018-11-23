@@ -35,7 +35,9 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     ): CommandInterface {
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
-            $command->setContext($this->innerKey, null);
+            if (!is_null($original)) {
+                $command->setContext($this->innerKey, null);
+            }
 
             return new NullCommand();
         }

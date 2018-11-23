@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -155,13 +156,14 @@ abstract class CyclicReferencesTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')
             ->load('comments.favorited_by')
             ->load('favorites');
 
-        $u1 = $selector->fetchOne();
+        $u1 = $selector->wherePK(1)->fetchOne();
 
         $this->assertEquals($u->id, $u1->id);
         $this->assertEquals($u->lastComment->id, $u1->lastComment->id);
@@ -171,5 +173,123 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->id, $u1->favorites[0]->id);
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
         $this->assertEquals($u->id, $u1->favorites[0]->favorited_by[0]->id);
+    }
+
+    public function testCreateMultipleLinkedTrees()
+    {
+        $u = new User();
+        $u->email = 'test@email.com';
+        $u->balance = 1000;
+
+        $u2 = new User();
+        $u2->email = 'u2@email.com';
+        $u2->balance = 1000;
+
+        $c = new Comment();
+        $c->user = $u;
+        $c->message = 'hello world';
+
+        $u->addComment($c);
+        $u->favorites->add($c);
+        $u2->favorites->add($c);
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->store($u2);
+        $tr->run();
+
+        $this->assertNumWrites(6);
+
+        // no changes!
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->store($u2);
+        $tr->run();
+        $this->assertNumWrites(0);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        $selector->load('lastComment.user')
+            ->load('comments.user')
+            ->load('comments.favorited_by')
+            ->load('favorites');
+
+        $u1 = $selector->wherePK($u->id)->fetchOne();
+
+        $this->assertEquals($u->id, $u1->id);
+        $this->assertEquals($u->lastComment->id, $u1->lastComment->id);
+
+        $this->assertEquals($u->lastComment->user->id, $u1->lastComment->user->id);
+        $this->assertEquals($u->comments[0]->id, $u1->comments[0]->id);
+        $this->assertEquals($u->favorites[0]->id, $u1->favorites[0]->id);
+        $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
+
+        $fav = [
+            $u1->favorites[0]->favorited_by[0]->id,
+            $u1->favorites[0]->favorited_by[1]->id
+        ];
+
+        $this->assertCount(2, $fav);
+        $this->assertContains($u->id, $fav);
+        $this->assertContains($u2->id, $fav);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        $selector->load('lastComment.user')
+            ->load('comments.user')
+            ->load('comments.favorited_by')
+            ->load('favorites');
+
+        $u1 = $selector->wherePK(2)->fetchOne();
+
+        $this->assertEquals($u1->id, $u2->id);
+        $this->assertEquals($u1->favorites[0]->id, $u2->favorites[0]->id);
+    }
+
+    public function testCreateMultipleLinkedTreesExchange()
+    {
+        $u = new User();
+        $u->email = 'u1@email.com';
+        $u->balance = 1000;
+
+        $u2 = new User();
+        $u2->email = 'u2@email.com';
+        $u2->balance = 1000;
+
+        $c = new Comment();
+        $c->user = $u;
+        $c->message = 'hello u1';
+
+        $c2 = new Comment();
+        $c2->user = $u2;
+        $c2->message = 'hello u2';
+
+        $u->addComment($c);
+        $u2->addComment($c2);
+
+        $u->favorites->add($c2);
+        $u2->favorites->add($c);
+        $u->favorites->add($c);
+        $u2->favorites->add($c2);
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->store($u2);
+        $tr->run();
+
+        $this->assertNumWrites(10);
+
+        // no changes!
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->store($u2);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 }

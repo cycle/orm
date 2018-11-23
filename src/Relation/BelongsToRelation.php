@@ -15,7 +15,6 @@ use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Promise\Promise;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Relation;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\StateInterface;
@@ -65,12 +64,14 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         $related,
         $original
     ): CommandInterface {
-        if (is_null($related) && !$this->define(Relation::NULLABLE)) {
-            throw new NullException("Relation {$this} can not be null");
-        }
-
         if (is_null($related)) {
-            $command->setContext($this->innerKey, null);
+            if ($this->isRequired()) {
+                throw new NullException("Relation {$this} can not be null");
+            }
+
+            if (!is_null($original)) {
+                $command->setContext($this->innerKey, null);
+            }
 
             return new NullCommand();
         }

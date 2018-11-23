@@ -21,16 +21,25 @@ class User
     /** @var Profile */
     public $profile;
 
-    /** @var Comment */
+    /**
+     * @invisible
+     * @var Comment
+     */
     public $lastComment;
 
-    /** @var Comment[]|Collection */
+    /**
+     * @invisible
+     * @var Comment[]|Collection
+     */
     public $comments;
 
     /** @var Tag[]|Collection */
     public $tags;
 
-    /** @var Comment[]|Collection */
+    /**
+     * @invisible
+     * @var Comment[]|Collection
+     */
     public $favorites;
 
     /** @var Nested */

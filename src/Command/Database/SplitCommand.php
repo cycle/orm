@@ -16,6 +16,8 @@ use Spiral\ORM\Command\ContextualInterface;
  *
  * Mapper must issue one SplitCommand per object save to prevent extra update commands with highly coupled data.
  */
+// todo: move to control
+
 class SplitCommand implements ContextualInterface, \IteratorAggregate
 {
     private $head;

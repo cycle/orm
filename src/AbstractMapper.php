@@ -188,8 +188,6 @@ abstract class AbstractMapper implements MapperInterface
 
         $current = $state->getState();
         $state->setState(State::SCHEDULED_UPDATE);
-
-        // todo: do it in complete? OR NOT?
         $state->setData($cData);
 
         $state->onChange(function (State $state) use ($update) {

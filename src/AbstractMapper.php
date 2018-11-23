@@ -113,6 +113,7 @@ abstract class AbstractMapper implements MapperInterface
         return array_intersect_key($this->extract($entity), array_flip($this->columns));
     }
 
+    // todo: state must not be null
     protected function queueCreate($entity, StateInterface &$state = null): ContextualInterface
     {
         $columns = $this->getColumns($entity);
@@ -136,6 +137,7 @@ abstract class AbstractMapper implements MapperInterface
             $state = new State(State::NEW, $columns);
             $this->orm->getHeap()->attach($entity, $state);
         } else {
+            // todo: do i need it here? do it in complete? OR NOT???
             $state->setData($columns);
         }
 
@@ -161,6 +163,9 @@ abstract class AbstractMapper implements MapperInterface
             // detach or change the state ?
             // todo: need test for that (!)
             $this->orm->getHeap()->detach($entity);
+
+            // todo: reset state and data
+            $state->setState(State::NEW);
         });
 
         return $insert;
@@ -183,6 +188,8 @@ abstract class AbstractMapper implements MapperInterface
 
         $current = $state->getState();
         $state->setState(State::SCHEDULED_UPDATE);
+
+        // todo: do it in complete? OR NOT?
         $state->setData($cData);
 
         $state->onChange(function (State $state) use ($update) {

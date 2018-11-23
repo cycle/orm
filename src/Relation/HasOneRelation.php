@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
-use Spiral\ORM\Command\Control\ContextualSequence;
+use Spiral\ORM\Command\Control\PrimarySequence;
 use Spiral\ORM\StateInterface;
 
 class HasOneRelation extends AbstractRelation
@@ -26,7 +26,7 @@ class HasOneRelation extends AbstractRelation
         $related,
         $original
     ): CommandInterface {
-        $sequence = new ContextualSequence();
+        $sequence = new PrimarySequence();
 
         if (!empty($original) && $related !== $original) {
             $sequence->addCommand($this->deleteOriginal($original));

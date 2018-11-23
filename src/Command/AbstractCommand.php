@@ -22,14 +22,6 @@ abstract class AbstractCommand implements CommandInterface
     private $onRollBack = [];
 
     /**
-     * @return bool
-     */
-    public function isReady(): bool
-    {
-        return true;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function execute()

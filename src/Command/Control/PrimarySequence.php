@@ -14,7 +14,7 @@ use Spiral\ORM\Exception\CommandException;
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.
  */
-class ContextualSequence extends Sequence implements ContextualInterface
+class PrimarySequence extends Sequence implements ContextualInterface
 {
     /** @var ContextualInterface */
     private $primary;

@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Control\ContextualSequence;
+use Spiral\ORM\Command\Control\PrimarySequence;
 
 /**
  * Generates set of linked commands required to persis or delete given dependency graph. Each
@@ -96,7 +96,7 @@ final class RelationMap
         State $state,
         ContextualInterface $command
     ): ContextualInterface {
-        $sequence = new ContextualSequence();
+        $sequence = new PrimarySequence();
         $oriRelated = [];
 
         // queue all "left" graph branches

@@ -10,7 +10,7 @@ namespace Spiral\ORM\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Command\Control\ContextualSequence;
+use Spiral\ORM\Command\Control\PrimarySequence;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\Insert;
@@ -45,13 +45,13 @@ class SequenceCommandTest extends TestCase
      */
     public function testGetLeadingBad()
     {
-        $command = new ContextualSequence();
+        $command = new PrimarySequence();
         $command->getContext();
     }
 
     public function testGetContext()
     {
-        $command = new ContextualSequence();
+        $command = new PrimarySequence();
         $command->addPrimary($lead = m::mock(Insert::class));
 
         $lead->shouldReceive('getContext')->andReturn(['hi']);
@@ -61,7 +61,7 @@ class SequenceCommandTest extends TestCase
 
     public function testAddContext()
     {
-        $command = new ContextualSequence();
+        $command = new PrimarySequence();
         $command->addPrimary($lead = m::mock(Insert::class));
 
         $lead->shouldReceive('setContext')->with('name', 'value');
@@ -72,7 +72,7 @@ class SequenceCommandTest extends TestCase
 
     public function testPassCallbackExecute()
     {
-        $command = new ContextualSequence();
+        $command = new PrimarySequence();
         $command->addPrimary($lead = m::mock(Insert::class));
 
         $f = function () {
@@ -85,7 +85,7 @@ class SequenceCommandTest extends TestCase
 
     public function testPassCallbackComplete()
     {
-        $command = new ContextualSequence();
+        $command = new PrimarySequence();
         $command->addPrimary($lead = m::mock(Insert::class));
 
         $f = function () {
@@ -98,7 +98,7 @@ class SequenceCommandTest extends TestCase
 
     public function testPassCallbackRollback()
     {
-        $command = new ContextualSequence();
+        $command = new PrimarySequence();
         $command->addPrimary($lead = m::mock(Insert::class));
 
         $f = function () {

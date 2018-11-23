@@ -42,9 +42,16 @@ class Branch implements ContextualInterface, \IteratorAggregate
         $this->tail = $tail;
 
         $this->head->onExecute(function () {
-            // switch the branch
             $this->headExecuted = true;
         });
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isReady(): bool
+    {
+        return $this->getTarget()->isReady();
     }
 
     /**
@@ -93,14 +100,6 @@ class Branch implements ContextualInterface, \IteratorAggregate
     public function setContext(string $key, $value)
     {
         $this->contextPath[$key]->setContext($key, $value);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isReady(): bool
-    {
-        return $this->getTarget()->isReady();
     }
 
     /**

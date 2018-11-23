@@ -19,7 +19,7 @@ use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-abstract class LinkedTreesTest extends BaseTest
+abstract class LinkedTreeTest extends BaseTest
 {
     use TableTrait;
 

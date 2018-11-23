@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-class LinkedTreesTest extends \Spiral\ORM\Tests\LinkedTreesTest 
+class DeepCyclicTest extends \Spiral\ORM\Tests\DeepCyclicTest 
 { 
     const DRIVER = "mysql"; 
 }

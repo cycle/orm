@@ -215,4 +215,60 @@ abstract class DeepCyclicTest extends BaseTest
         $this->assertSame($c3->other, $c4);
         $this->assertSame($c4->other, $c2);
     }
+
+    // make sure that graph transformation is homogeneous
+    public function testOverlappingCycles()
+    {
+        $c1 = new Cyclic("C1");
+        $c2 = new Cyclic("C2");
+        $c3 = new Cyclic("C3");
+        $c4 = new Cyclic("C4");
+        $c5 = new Cyclic("C5");
+
+        // double cycling
+        $c1->cyclic = $c5;
+        $c5->cyclic = $c1;
+
+        // triple cycling
+        $c2->other = $c3;
+        $c3->other = $c4;
+        $c4->other = $c1;
+        $c1->other = $c5;
+        $c5->other = $c2;
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($c1);
+        $tr->store($c2);
+        $tr->store($c3);
+        $tr->store($c4);
+        $tr->store($c5);
+        $tr->run();
+
+        // 5 inserts and 2 loops
+        $this->assertNumWrites(7);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, Cyclic::class);
+        list($c1, $c2, $c3, $c4, $c5) = $selector
+            ->load('cyclic')
+            ->load('other')
+            ->orderBy('cyclic.name')
+            ->fetchAll();
+
+        $this->assertSame($c1->name, 'C1');
+        $this->assertSame($c2->name, 'C2');
+        $this->assertSame($c3->name, 'C3');
+        $this->assertSame($c4->name, 'C4');
+        $this->assertSame($c5->name, 'C5');
+
+        $this->assertSame($c1->cyclic, $c5);
+        $this->assertSame($c5->cyclic, $c1);
+
+        $this->assertSame($c2->other, $c3);
+        $this->assertSame($c3->other, $c4);
+        $this->assertSame($c4->other, $c1);
+        $this->assertSame($c1->other, $c5);
+        $this->assertSame($c5->other, $c2);
+    }
 }

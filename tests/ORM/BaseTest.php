@@ -87,6 +87,10 @@ abstract class BaseTest extends TestCase
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
         $this->dbal = null;
+
+        if (function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
+        }
     }
 
     /**
@@ -111,6 +115,7 @@ abstract class BaseTest extends TestCase
         }
 
         $this->driver->setProfiling(true);
+
         return static::$driverCache[static::DRIVER] = $this->driver;
     }
 
@@ -269,6 +274,7 @@ class TestLogger implements LoggerInterface
         } else {
             if ($this->isPostgresSystemQuery($message)) {
                 echo " \n> \033[90m" . $message . "\033[0m";
+
                 return;
             }
 

@@ -36,16 +36,6 @@ class LinkCommand extends DatabaseCommand implements ContextualInterface, Scoped
     }
 
     /**
-     * Required to display error when values can not be satisfied.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->description;
-    }
-
-    /**
      * @inheritdoc
      */
     public function isReady(): bool

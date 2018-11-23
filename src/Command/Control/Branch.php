@@ -6,19 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Database;
+namespace Spiral\ORM\Command\Control;
 
 use Spiral\ORM\Command\ContextualInterface;
 
 /**
- * Split input context into 2 destinations: original create command (insert) and delayed update command.
+ * Branches input context into 2 destinations: original create command (insert) and delayed update command.
  * Used to properly unfold cyclic graphs but at the same time resolve issue with double linked data.
  *
  * Mapper must issue one SplitCommand per object save to prevent extra update commands with highly coupled data.
  */
-// todo: move to control
-
-class SplitCommand implements ContextualInterface, \IteratorAggregate
+class Branch implements ContextualInterface, \IteratorAggregate
 {
     private $head;
     private $tail;
@@ -34,11 +32,6 @@ class SplitCommand implements ContextualInterface, \IteratorAggregate
         $this->head->onExecute(function () {
             $this->headExecuted = true;
         });
-    }
-
-    public function __toString()
-    {
-        return get_class($this->getTarget());
     }
 
     public function getIterator()

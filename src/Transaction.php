@@ -96,7 +96,7 @@ class Transaction implements TransactionInterface
                 }
 
                 if (count($executed) === $countExecuted) {
-                    throw new TransactionException("Unable to complete: " . join(", ", $pending));
+                    throw new TransactionException("Unable to complete: " . $this->listCommands($pending));
                 }
 
                 $commands = $pending;
@@ -187,5 +187,19 @@ class Transaction implements TransactionInterface
 
             yield null => $command;
         }
+    }
+
+    /**
+     * @param array $commands
+     * @return string
+     */
+    private function listCommands(array $commands): string
+    {
+        $names = [];
+        foreach ($commands as $command) {
+            $names[] = get_class($command);
+        }
+
+        return join(', ', $names);
     }
 }

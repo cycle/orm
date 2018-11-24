@@ -8,9 +8,8 @@
 
 namespace Spiral\ORM;
 
-interface PromiseInterface
-{
-    public function __context(): array;
 
-    public function __resolve();
+class RepositoryInterface
+{
+
 }

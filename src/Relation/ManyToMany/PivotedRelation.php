@@ -88,7 +88,7 @@ class PivotedRelation extends Relation\AbstractRelation
      * @param ContextStorage $original
      */
     public function queueRelation(
-        ContextualInterface $command,
+        ContextualInterface $parent,
         $entity,
         StateInterface $state,
         $related,

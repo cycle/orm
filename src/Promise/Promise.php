@@ -34,6 +34,11 @@ class Promise implements PromiseInterface
         return $this->entity;
     }
 
+    public function __context(): array
+    {
+        return $this->context;
+    }
+
     public function __get($name)
     {
         return $this->__resolve()->$name;

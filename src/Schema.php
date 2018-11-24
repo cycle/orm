@@ -12,6 +12,8 @@ use Spiral\ORM\Exception\SchemaException;
 
 /**
  * Provides access to compiled ORM schema.
+ *
+ * @todo: improve?
  */
 final class Schema implements SchemaInterface
 {

@@ -12,20 +12,31 @@ trait RelationTrait
 {
     private $relations = [];
 
-    // todo: store original set of relations (YEEEEAH BOYYYY)
+    /**
+     * @param string $name
+     * @param mixed  $context
+     */
     public function setRelation(string $name, $context)
     {
         $this->relations[$name] = $context;
 
-        // todo: i don't like this (!)
+        // todo: i don't like this (! !!! !!!)
         unset($this->data[$name]);
     }
 
-    public function hasRelation(string $name)
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasRelation(string $name): bool
     {
         return array_key_exists($name, $this->relations);
     }
 
+    /**
+     * @param string $name
+     * @return mixed
+     */
     public function getRelation(string $name)
     {
         return $this->relations[$name] ?? null;

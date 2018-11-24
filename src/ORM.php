@@ -14,6 +14,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Config\RelationConfig;
+use Spiral\ORM\Tests\Fixtures\Profile;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -186,6 +187,10 @@ class ORM implements ORMInterface
             if (!empty($entityID) && $this->heap->hasPath($path)) {
                 $existed = $this->heap->getPath($path);
 
+                if ($existed instanceof PromiseInterface) {
+                    return $existed;
+                }
+
                 // todo: optimize, avoid cyclic initiation ? do i have it?
 
                 // todo: can be promise
@@ -203,7 +208,7 @@ class ORM implements ORMInterface
 
         // todo: i do not need primary key, but i do need to update paths in mapper
         $state = new State($state, $filtered);
-        $this->heap->attach($entity, $state, $this->getPaths($entity, $entityID ?? null));
+        $this->heap->attach($entity, $state, $this->getPaths($entity, $entityID ?? null, $data));
 
         // hydrate entity with it's data, relations and proxies
         return $mapper->hydrate($entity, $this->getRelationMap($entity)->init($state, $filtered));
@@ -246,13 +251,19 @@ class ORM implements ORMInterface
         $this->relmaps = [];
     }
 
-    protected function getPaths($entity, $entityID): array
+    protected function getPaths($entity, $entityID, array $data): array
     {
         if (is_null($entityID)) {
             return [];
         }
 
-        return [get_class($entity) . ':' . $entityID];
+        $paths = [get_class($entity) . ':' . $entityID];
+
+        if ($entity instanceof Profile && !empty($data['user_id'])) {
+            $paths[] = get_class($entity) . ':user_id.' . $data['user_id'];
+        }
+
+        return $paths;
     }
 
     /**

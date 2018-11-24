@@ -14,20 +14,25 @@ use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Promise\Promise;
-use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\StateInterface;
 
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
-    public function initPromise(State $state, $data): ?PromiseInterface
+    // todo: class
+    public function initPromise(State $state, $data)
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return null;
         }
 
-        $pr = new Promise(
+        if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
+            // todo: has it!
+            return $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
+        }
+
+        return new Promise(
             [$this->outerKey => $innerKey]
             , function () use ($innerKey) {
             // todo: check in map
@@ -41,25 +46,13 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
             return $selector->fetchOne();
         });
-
-        return $pr;
-    }
-
-    // todo: common for all relations?
-    protected function getState($entity): ?StateInterface
-    {
-        if ($entity instanceof PromiseInterface) {
-            return new State(State::PROMISED, $entity->context);
-        }
-
-        return parent::getState($entity);
     }
 
     /**
      * @inheritdoc
      */
     public function queueRelation(
-        ContextualInterface $command,
+        ContextualInterface $parent,
         $entity,
         StateInterface $state,
         $related,
@@ -71,7 +64,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
             }
 
             if (!is_null($original)) {
-                $command->setContext($this->innerKey, null);
+                $parent->setContext($this->innerKey, null);
             }
 
             return new Nil();
@@ -81,7 +74,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         $relState = $this->getState($related);
         $relState->addReference();
 
-        $this->promiseContext($command, $relState, $this->outerKey, $state, $this->innerKey);
+        $this->promiseContext($parent, $relState, $this->outerKey, $state, $this->innerKey);
 
         // todo: morph key
 

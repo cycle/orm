@@ -78,7 +78,7 @@ class ManyToManyRelation extends AbstractRelation
      * @param ContextStorage $original
      */
     public function queueRelation(
-        ContextualInterface $command,
+        ContextualInterface $parent,
         $entity,
         StateInterface $state,
         $related,

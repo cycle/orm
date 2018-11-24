@@ -77,7 +77,7 @@ abstract class AbstractRelation implements RelationInterface
         return [$item, $item];
     }
 
-    public function initPromise(State $state, $data): ?PromiseInterface
+    public function initPromise(State $state, $data)
     {
         return null;
     }
@@ -94,6 +94,10 @@ abstract class AbstractRelation implements RelationInterface
 
     protected function getState($entity): ?StateInterface
     {
+        if ($entity instanceof PromiseInterface) {
+            return new State(State::PROMISED, $entity->__context());
+        }
+
         return $this->orm->getHeap()->get($entity);
     }
 

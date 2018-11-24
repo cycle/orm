@@ -22,7 +22,7 @@ class HasManyRelation extends AbstractRelation
      * @inheritdoc
      */
     public function queueRelation(
-        ContextualInterface $command,
+        ContextualInterface $parent,
         $entity,
         StateInterface $state,
         $related,

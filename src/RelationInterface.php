@@ -17,12 +17,12 @@ interface RelationInterface
 
     public function init($data): array;
 
-    public function initPromise(State $state, $data): ?PromiseInterface;
+    public function initPromise(State $state, $data);
 
     public function extract($value);
 
     public function queueRelation(
-        ContextualInterface $command,
+        ContextualInterface $parent,
         $entity,
         StateInterface $state,
         $related,

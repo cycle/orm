@@ -8,15 +8,39 @@
 
 namespace Spiral\ORM\Relation;
 
+use Spiral\ORM\Collection\PromisedCollection;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
+use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Sequence;
+use Spiral\ORM\Promise\Promise;
+use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Selector;
+use Spiral\ORM\State;
 use Spiral\ORM\StateInterface;
 
 class HasManyRelation extends AbstractRelation
 {
     use Traits\CollectionTrait;
+
+    public function initPromise(State $state, $data): array
+    {
+        // todo: here we need paths (!)
+        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+            return [null, null];
+        }
+
+        $pr = new Promise(
+            [$this->outerKey => $innerKey],
+            function () use ($innerKey) {
+                $s = new Selector($this->orm, $this->class);
+                return $s->where([$this->outerKey => $innerKey])->fetchAll();
+            }
+        );
+
+        return [new PromisedCollection($pr), $pr];
+    }
 
     /**
      * @inheritdoc
@@ -28,6 +52,25 @@ class HasManyRelation extends AbstractRelation
         $related,
         $original
     ): CommandInterface {
+
+        // todo: i can do quick compare here?
+
+        if ($related instanceof PromiseInterface) {
+            if ($related === $original) {
+                // does not mean anything... (???)
+                return new Nil();
+            }
+
+            // todo: resolve both original and related
+            $related = $related->__resolve();
+        }
+
+        if ($original instanceof PromiseInterface) {
+            // todo: check consecutive changes
+            $original = $original->__resolve();
+            // todo: state->setRelation (!!!!!!)
+        }
+
         $sequence = new Sequence();
 
         foreach ($related as $item) {

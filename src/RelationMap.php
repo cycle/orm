@@ -57,13 +57,12 @@ final class RelationMap
         foreach ($this->relations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
                 if ($state->hasRelation($name)) {
+        // todo: do i need it here?
                     continue;
                 }
 
-                // todo: UNTANGLE IT
-
-                $data[$name] = $relation->initPromise($state, $data);
-                $state->setRelation($name, $data[$name]);
+                list($data[$name], $orig) = $relation->initPromise($state, $data);
+                $state->setRelation($name, $orig);
                 continue;
             }
 
@@ -75,10 +74,8 @@ final class RelationMap
             }
 
             // init relation for the entity and for state and the same time
-            list($data[$name], $item) = $relation->init($item);
-
-            // store current state of relation
-            $state->setRelation($name, $item);
+            list($data[$name], $orig) = $relation->init($item);
+            $state->setRelation($name, $orig);
         }
 
         return $data;

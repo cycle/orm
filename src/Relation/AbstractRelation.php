@@ -77,9 +77,9 @@ abstract class AbstractRelation implements RelationInterface
         return [$item, $item];
     }
 
-    public function initPromise(State $state, $data)
+    public function initPromise(State $state, $data): array
     {
-        return null;
+        return [null, null];
     }
 
     public function extract($data)

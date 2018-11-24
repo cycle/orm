@@ -26,18 +26,19 @@ use Spiral\ORM\StateInterface;
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
     // todo: class
-    public function initPromise(State $state, $data)
+    public function initPromise(State $state, $data): array
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
-            return null;
+            return [null, null];
         }
 
         if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
             // todo: has it!
-            return $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
+            $i = $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
+            return [$i, $i];
         }
 
-        return new Promise(
+        $pr = new Promise(
             [$this->outerKey => $innerKey]
             , function () use ($innerKey) {
             // todo: check in map
@@ -53,6 +54,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return $selector->fetchOne();
 
         });
+
+        return [$pr, $pr];
     }
 
     /**

@@ -12,7 +12,7 @@ use Spiral\ORM\PromiseInterface;
 
 class Promise implements PromiseInterface
 {
-    private $entity;
+    private $data;
 
     private $promise;
 
@@ -27,16 +27,21 @@ class Promise implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->promise)) {
-            $this->entity = call_user_func($this->promise);
+            $this->data = call_user_func($this->promise);
             $this->promise = null;
         }
 
-        return $this->entity;
+        return $this->data;
     }
 
     public function __context(): array
     {
         return $this->context;
+    }
+
+    public function __loaded(): bool
+    {
+        return !empty($this->promise);
     }
 
     public function __get($name)

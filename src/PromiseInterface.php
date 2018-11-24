@@ -13,4 +13,6 @@ interface PromiseInterface
     public function __context(): array;
 
     public function __resolve();
+
+    public function __loaded(): bool;
 }

@@ -17,7 +17,7 @@ interface RelationInterface
 
     public function init($data): array;
 
-    public function initPromise(State $state, $data);
+    public function initPromise(State $state, $data): array;
 
     public function extract($value);
 

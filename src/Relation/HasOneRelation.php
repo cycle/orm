@@ -20,24 +20,25 @@ use Spiral\ORM\StateInterface;
 
 class HasOneRelation extends AbstractRelation
 {
-    public function initPromise(State $state, $data)
+    public function initPromise(State $state, $data): array
     {
         // todo: here we need paths (!)
 
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
-            return null;
+            return [null, null];
         }
 
         if ($this->orm->getHeap()->hasPath("{$this->class}:{$this->outerKey}.$innerKey")) {
-            return $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
+            $i = $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
+            return [$i, $i];
         }
 
         // todo: can i unify it?
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
-            return null;
+            return [null, null];
         }
 
-        return new Promise(
+        $pr = new Promise(
             [$this->outerKey => $innerKey],
             function () use ($innerKey) {
                 // todo: check in map
@@ -52,6 +53,9 @@ class HasOneRelation extends AbstractRelation
                 return $selector->fetchOne();
             }
         );
+
+        return [$pr, $pr];
+
     }
 
     /**
@@ -76,6 +80,7 @@ class HasOneRelation extends AbstractRelation
             }
         }
 
+        // todo: unify?
         if ($related instanceof PromiseInterface) {
             // no operations if promise did not changed
             if ($related === $original) {

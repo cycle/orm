@@ -10,7 +10,9 @@ namespace Spiral\ORM\Relation\Traits;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Spiral\ORM\Collection\PromisedCollection;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\State;
 
 trait CollectionTrait
@@ -35,10 +37,14 @@ trait CollectionTrait
      * Convert entity data into array.
      *
      * @param mixed $data
-     * @return array
+     * @return array|PromiseInterface
      */
     public function extract($data)
     {
+        if ($data instanceof PromisedCollection && !$data->isInitialized()) {
+            return $data->getPromise();
+        }
+
         if ($data instanceof Collection) {
             return $data->toArray();
         }

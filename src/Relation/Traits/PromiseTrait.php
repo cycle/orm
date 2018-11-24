@@ -12,6 +12,7 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\StateInterface;
 
+// todo: rename, this is not promise trait
 trait PromiseTrait
 {
     /**

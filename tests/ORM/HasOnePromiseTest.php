@@ -260,4 +260,33 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNull($a->profile);
         $this->assertEquals(1, $b->profile->id);
     }
+
+    public function testMoveToAnotherUserPartial()
+    {
+        $selector = new Selector($this->orm, User::class);
+        list($a, $b) = $selector->orderBy('id')->fetchAll();
+
+        $b->profile = $a->profile;
+        $a->profile = null;
+
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($b);
+        $tr->run();
+
+        // load both promises
+        $this->assertNumReads(2);
+
+        // delete related entity
+        $this->assertNumWrites(1);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        list($a, $b) = $selector->orderBy('user.id')->load('profile')->fetchAll();
+
+        $this->assertNull($a->profile);
+        $this->assertEquals(1, $b->profile->id);
+    }
 }

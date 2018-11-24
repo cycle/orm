@@ -13,6 +13,7 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\PrimarySequence;
 use Spiral\ORM\Promise\Promise;
+use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\StateInterface;
@@ -37,19 +38,20 @@ class HasOneRelation extends AbstractRelation
         }
 
         return new Promise(
-            [$this->outerKey => $innerKey]
-            , function () use ($innerKey) {
-            // todo: check in map
+            [$this->outerKey => $innerKey],
+            function () use ($innerKey) {
+                // todo: check in map
 
                 if ($this->orm->getHeap()->hasPath("{$this->class}:{$this->outerKey}.$innerKey")) {
-                return $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
+                    return $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
+                }
+
+                $selector = new Selector($this->orm, $this->class);
+                $selector->where([$this->outerKey => $innerKey]);
+
+                return $selector->fetchOne();
             }
-
-            $selector = new Selector($this->orm, $this->class);
-            $selector->where([$this->outerKey => $innerKey]);
-
-            return $selector->fetchOne();
-        });
+        );
     }
 
     /**
@@ -65,7 +67,22 @@ class HasOneRelation extends AbstractRelation
         $sequence = new PrimarySequence();
 
         if (!empty($original) && $related !== $original) {
-            $sequence->addCommand($this->deleteOriginal($original));
+            if ($original instanceof PromiseInterface) {
+                $original = $original->__resolve();
+            }
+
+            if (!empty($original)) {
+                $sequence->addCommand($this->deleteOriginal($original));
+            }
+        }
+
+        if ($related instanceof PromiseInterface) {
+            // no operations if promise did not changed
+            if ($related === $original) {
+                return $sequence;
+            }
+
+            $related = $related->__resolve();
         }
 
         if (empty($related)) {
@@ -77,6 +94,7 @@ class HasOneRelation extends AbstractRelation
         $relState = $this->getState($related);
         $relState->addReference();
 
+        // todo: promise context into Promise :)
         $this->promiseContext($relStore, $state, $this->innerKey, $relState, $this->outerKey);
 
         // todo: morph key

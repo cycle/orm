@@ -60,7 +60,10 @@ final class RelationMap
                     continue;
                 }
 
+                // todo: UNTANGLE IT
+
                 $data[$name] = $relation->initPromise($state, $data);
+                $state->setRelation($name, $data[$name]);
                 continue;
             }
 
@@ -112,8 +115,7 @@ final class RelationMap
 
             // queue needed changes
             $sequence->addCommand(
-                $relation->queueRelation($command, $entity, $state, $related,
-                    $state->getRelation($name))
+                $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
             );
 
             // update current relation state

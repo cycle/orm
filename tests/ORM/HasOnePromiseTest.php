@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Heap;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -202,35 +203,61 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    // todo: has one promise to another user (?)
+    public function testRemoveAssignment()
+    {
+        $selector = new Selector($this->orm, User::class);
+        list($a, $b) = $selector->orderBy('id')->fetchAll();
 
-    //    public function testAssignPromiseAsRelation()
-    //    {
-    //        $selector = new Selector($this->orm, Profile::class);
-    //        $p = $selector->wherePK(1)->fetchOne();
-    //        $this->assertInstanceOf(PromiseInterface::class, $p->user);
-    //
-    //        $np = new Profile();
-    //        $np->image = 'new image';
-    //
-    //        $this->captureReadQueries();
-    //        $np->user = $p->user;
-    //        $this->assertNumReads(0);
-    //
-    //        $this->captureWriteQueries();
-    //        $this->captureReadQueries();
-    //
-    //        $tr = new Transaction($this->orm);
-    //        $tr->store($np);
-    //        $tr->run();
-    //
-    //        $this->assertNumWrites(1);
-    //        $this->assertNumReads(0);
-    //
-    //        $selector = new Selector($this->orm->withHeap(new Heap()), Profile::class);
-    //        $p = $selector->wherePK(4)->fetchOne();
-    //
-    //        $this->assertInstanceOf(User::class, $p->user->__resolve());
-    //        $this->assertEquals('hello@world.com', $p->user->email);
-    //    }
+        $a->profile = null;
+
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->run();
+
+        // load related entity
+        $this->assertNumReads(1);
+
+        // delete related entity
+        $this->assertNumWrites(1);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        list($a, $b) = $selector->orderBy('id')->fetchAll();
+
+        $this->assertNull($a->profile->__resolve());
+        $this->assertNull($b->profile->__resolve());
+    }
+
+    public function testMoveToAnotherUser()
+    {
+        $selector = new Selector($this->orm, User::class);
+        list($a, $b) = $selector->orderBy('id')->fetchAll();
+
+        $b->profile = $a->profile;
+        $a->profile = null;
+
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        // load both promises
+        $this->assertNumReads(2);
+
+        // delete related entity
+        $this->assertNumWrites(1);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        list($a, $b) = $selector->orderBy('user.id')->load('profile')->fetchAll();
+
+        $this->assertNull($a->profile);
+        $this->assertEquals(1, $b->profile->id);
+    }
 }

@@ -73,7 +73,7 @@ class Transaction implements TransactionInterface
                 $pending = [];
                 $countExecuted = count($executed);
 
-                foreach ($this->reduce($commands) as $wait => $do) {
+                foreach ($this->sort($commands) as $wait => $do) {
                     if ($wait != null) {
                         if (in_array($wait, $pending, true)) {
                             continue;
@@ -169,10 +169,11 @@ class Transaction implements TransactionInterface
      * Fetch commands ready for the execution. Provide ready commands as generated value and
      * delayed commands as the key.
      *
+     * @see https://cse.sc.edu/~mgv/csce580f09/gradPres/korf_IDAStar_1985.pdf
      * @param iterable $commands
      * @return \Generator
      */
-    protected function reduce(iterable $commands): \Generator
+    protected function sort(iterable $commands): \Generator
     {
         /** @var CommandInterface $command */
         foreach ($commands as $command) {
@@ -182,7 +183,7 @@ class Transaction implements TransactionInterface
             }
 
             if ($command instanceof \Traversable) {
-                yield from $this->reduce($command);
+                yield from $this->sort($command);
             }
 
             yield null => $command;

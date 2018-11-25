@@ -142,6 +142,8 @@ class Transaction implements TransactionInterface
             $commands[] = $this->orm->queueStore($entity);
         }
 
+        // add custom commands?
+
         foreach ($this->delete as $entity) {
             $commands[] = $this->orm->queueDelete($entity);
         }

@@ -13,8 +13,18 @@ namespace Spiral\ORM;
  */
 interface TransactionInterface
 {
+    /**
+     * Persist the entity.
+     *
+     * @param object $entity
+     */
     public function store($entity);
 
+    /**
+     * Delete entity from the database.
+     *
+     * @param object $entity
+     */
     public function delete($entity);
 
     /**

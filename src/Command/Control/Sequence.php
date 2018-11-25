@@ -50,7 +50,7 @@ class Sequence implements CommandInterface, \IteratorAggregate
      */
     public function isReady(): bool
     {
-        // always ready
+        // always ready since check will be delegated to underlying nodes
         return true;
     }
 

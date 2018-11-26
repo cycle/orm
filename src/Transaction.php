@@ -168,8 +168,8 @@ class Transaction implements TransactionInterface
     }
 
     /**
-     * Fetch commands ready for the execution. Provide ready commands as generated value and
-     * delayed commands as the key.
+     * Fetch commands which are ready for the execution. Provide ready commands
+     * as generated value and delayed commands as the key.
      *
      * @param iterable $commands
      * @return \Generator

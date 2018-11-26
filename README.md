@@ -4,7 +4,7 @@
 
 Features:
 ---------
-- naked objects support
+- plain php classes support
 - eager and lazy loading
 - ability to dynamically define data schema (same class for all tables)
 - single table inheritance

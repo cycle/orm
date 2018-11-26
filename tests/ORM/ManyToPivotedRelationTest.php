@@ -20,7 +20,7 @@ use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-abstract class ManyToManyPivotedTest extends BaseTest
+abstract class ManyToPivotedRelationTest extends BaseTest
 {
     use TableTrait;
 

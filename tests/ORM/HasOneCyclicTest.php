@@ -129,6 +129,15 @@ abstract class HasOneCyclicTest extends BaseTest
         $this->assertSame($c, $c->cyclic);
     }
 
+    // todo: NEED MULTIPLE PATHS
+    //    public function testCyclicWithoutLoad()
+    //    {
+    //        $selector = new Selector($this->orm, Cyclic::class);
+    //        $c = $selector->wherePK(3)->fetchOne();
+    //        $this->assertEquals('self-reference', $c->name);
+    //        $this->assertSame($c, $c->cyclic);
+    //    }
+
     public function testCreateCyclic()
     {
         $c = new Cyclic();

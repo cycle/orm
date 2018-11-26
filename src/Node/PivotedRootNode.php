@@ -8,19 +8,21 @@
 namespace Spiral\ORM\Node;
 
 
+use Spiral\ORM\Exception\NodeException;
+
 /**
  * Similar to normal pivot node but does not require parent!
  */
 class PivotedRootNode extends OutputNode
 {
-    /** @var int */
-    private $countPivot = 0;
+    /** @var array */
+    private $pivotColumns = [];
 
     /** @var string */
-    protected $innerPivotKey;
+    private $innerPivotKey;
 
     /** @var string */
-    protected $outerPivotKey;
+    private $outerPivotKey;
 
     /**
      * @param array  $columns
@@ -37,9 +39,9 @@ class PivotedRootNode extends OutputNode
         string $outerPivotKey
     ) {
         //Pivot columns are always prior to table columns
-        parent::__construct(array_merge($pivotColumns, $columns), $outerKey);
-        $this->countPivot = count($pivotColumns);
+        parent::__construct($columns, $outerKey);
 
+        $this->pivotColumns = $pivotColumns;
         $this->innerPivotKey = $innerPivotKey;
         $this->outerPivotKey = $outerPivotKey;
     }
@@ -63,13 +65,34 @@ class PivotedRootNode extends OutputNode
      */
     protected function fetchData(int $dataOffset, array $line): array
     {
-        $data = parent::fetchData($dataOffset, $line);
+        return [
+                PivotedNode::PIVOT_DATA => $this->pivotData($dataOffset, $line)
+            ] + parent::fetchData($dataOffset + count($this->pivotColumns), $line);
+    }
 
-        //Forming pivot data presence
-        return array_merge(
-            [PivotedNode::PIVOT_DATA => array_slice($data, 0, $this->countPivot)],
-            array_slice($data, $this->countPivot)
-        );
+
+    /**
+     * Fetch record columns from query row, must use data offset to slice required part of query.
+     *
+     * @param int   $dataOffset
+     * @param array $line
+     * @return array
+     */
+    protected function pivotData(int $dataOffset, array $line): array
+    {
+        try {
+            //Combine column names with sliced piece of row
+            return array_combine(
+                $this->pivotColumns,
+                array_slice($line, $dataOffset, count($this->pivotColumns))
+            );
+        } catch (\Exception $e) {
+            throw new NodeException(
+                "Unable to parse incoming row: " . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 
     /**

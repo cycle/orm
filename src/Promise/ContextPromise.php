@@ -8,6 +8,8 @@
 
 namespace Spiral\ORM\Promise;
 
+use Spiral\ORM\Util\ContextStorage;
+
 class ContextPromise extends Promise
 {
     public function __resolve()
@@ -17,7 +19,7 @@ class ContextPromise extends Promise
         return $response->getElements();
     }
 
-    public function __resolveContext()
+    public function __resolveContext(): ContextStorage
     {
         return parent::__resolve();
     }

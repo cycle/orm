@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-class ManyToManyPivotedTest extends \Spiral\ORM\Tests\ManyToManyPivotedTest
+class ManyToPivotedPromiseTest extends \Spiral\ORM\Tests\ManyToPivotedPromiseTest 
 { 
     const DRIVER = "mysql"; 
 }

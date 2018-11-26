@@ -13,7 +13,6 @@ Features:
 - designed to work in long-running applications
 - MySQL, PostgreSQL, SQLServer, SQLite
 - in memory database mocks (SQLite)
-- various methods for schema definition
 - ActiveRecord and custom base entity support 
 - modular and custom relations, relations to other data sources
 - Doctrine Collections

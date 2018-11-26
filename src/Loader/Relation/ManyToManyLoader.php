@@ -60,7 +60,7 @@ class ManyToManyLoader extends RelationLoader
     /**
      * {@inheritdoc}
      */
-    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if (!empty($this->options['using'])) {
             //Use pre-defined query
@@ -216,5 +216,4 @@ class ManyToManyLoader extends RelationLoader
 
         return $this->pivotAlias() . '.' . $this->schema[$key];
     }
-
 }

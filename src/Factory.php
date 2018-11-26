@@ -88,10 +88,11 @@ class Factory implements FactoryInterface
         $type = $schema[Relation::TYPE];
 
         return $this->config->getRelation($type)->resolve($this->factory, [
-            'orm'      => $this->orm,
-            'class'    => $schema[Relation::TARGET],
-            'relation' => $relation,
-            'schema'   => $schema[Relation::SCHEMA]
+            'orm'         => $this->orm,
+            'entityClass' => $class,
+            'class'       => $schema[Relation::TARGET],
+            'relation'    => $relation,
+            'schema'      => $schema[Relation::SCHEMA]
         ]);
     }
 

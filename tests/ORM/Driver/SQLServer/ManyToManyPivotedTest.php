@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\SQLServer; 
 
-class ManyToManyPivotedRelationTest extends \Spiral\ORM\Tests\ManyToManyPivotedRelationTest 
+class ManyToManyPivotedTest extends \Spiral\ORM\Tests\ManyToManyPivotedTest
 { 
     const DRIVER = "sqlserver"; 
 }

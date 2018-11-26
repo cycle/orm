@@ -6,10 +6,9 @@ Features:
 ---------
 - naked objects support
 - eager and lazy loading
-- IDDFS and one-pass reference tree compilation
 - ability to dynamically define data schema (same class for all tables)
 - single table inheritance
-- works with DAG and DG
+- works with DAG and DG using IDDFS
 - designed to work in long-running applications
 - MySQL, PostgreSQL, SQLServer, SQLite
 - in memory database mocks (SQLite)

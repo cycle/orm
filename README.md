@@ -11,7 +11,7 @@ Features:
 - works with DAG and DG using IDDFS
 - one pass compiler approach for data trees generation
 - designed to work in long-running applications
-- MySQL, PostgreSQL, SQLServer, SQLite
+- MySQL, PostgresSQL, SQLServer, SQLite
 - in memory database mocks (SQLite)
 - ActiveRecord and custom base entity support 
 - modular and custom relations, relations to other data sources

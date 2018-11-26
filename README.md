@@ -15,4 +15,4 @@ Features:
 - in memory database mocks (SQLite)
 - ActiveRecord and custom base entity support 
 - modular and custom relations, relations to other data sources
-- Doctrine Collections
+- compatible with Doctrine Collections, Symfony Events and Zend Hydrator

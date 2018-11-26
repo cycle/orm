@@ -9,7 +9,7 @@ Features:
 - IDDFS and one-pass reference tree compilation
 - ability to dynamically define data schema (same class for all tables)
 - single table inheritance
-- works with DAG and DCG
+- works with DAG and DG
 - designed to work in long-running applications
 - MySQL, PostgreSQL, SQLServer, SQLite
 - in memory database mocks (SQLite)

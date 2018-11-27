@@ -35,7 +35,7 @@ class Promise implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return !empty($this->promise);
+        return empty($this->promise);
     }
 
     /**
@@ -52,7 +52,7 @@ class Promise implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->promise)) {
-            $this->resolved = call_user_func($this->promise);
+            $this->resolved = call_user_func($this->promise, $this->context);
             $this->promise = null;
         }
 

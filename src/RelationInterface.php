@@ -24,7 +24,7 @@ interface RelationInterface
     public function queueRelation(
         ContextualInterface $parent,
         $entity,
-        StateInterface $state,
+        State $state,
         $related,
         $original
     ): CommandInterface;

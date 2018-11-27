@@ -21,11 +21,10 @@ use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Node\PivotedRootNode;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Promise\ContextPromise;
+use Spiral\ORM\Util\PivotedPromise;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
-use Spiral\ORM\StateInterface;
 use Spiral\ORM\Util\ContextStorage;
 
 class PivotedRelation extends Relation\AbstractRelation
@@ -60,7 +59,7 @@ class PivotedRelation extends Relation\AbstractRelation
         }
 
         // todo: context promise (!)
-        $pr = new ContextPromise(
+        $pr = new PivotedPromise(
             [$this->outerKey => $innerKey],
             function () use ($innerKey) {
                 // todo: store pivot context as well!!! or NOT?
@@ -161,13 +160,13 @@ class PivotedRelation extends Relation\AbstractRelation
     public function queueRelation(
         ContextualInterface $parent,
         $entity,
-        StateInterface $state,
+        State $state,
         $related,
         $original
     ): CommandInterface {
         $original = $original ?? new ContextStorage();
 
-        if ($related instanceof ContextPromise) {
+        if ($related instanceof PivotedPromise) {
             if ($related === $original) {
                 return new Nil();
             }
@@ -176,7 +175,7 @@ class PivotedRelation extends Relation\AbstractRelation
             $related = $related->__resolveContext();
         }
 
-        if ($original instanceof ContextPromise) {
+        if ($original instanceof PivotedPromise) {
             // todo: check consecutive changes
             $original = $original->__resolveContext();
             // todo: state->setRelation (!!!!!!)
@@ -206,13 +205,13 @@ class PivotedRelation extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param StateInterface $state
+     * @param State          $state
      * @param object         $related
      * @param object         $pivot
      * @param ContextStorage $storage
      * @return CommandInterface
      */
-    protected function link(StateInterface $state, $related, $pivot, ContextStorage $storage): CommandInterface
+    protected function link(State $state, $related, $pivot, ContextStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);

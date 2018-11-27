@@ -38,7 +38,7 @@ class Heap implements HeapInterface
     /**
      * @inheritdoc
      */
-    public function get($entity): ?StateInterface
+    public function get($entity): ?State
     {
         try {
             return $this->storage->offsetGet($entity);
@@ -65,7 +65,7 @@ class Heap implements HeapInterface
     /**
      * @inheritdoc
      */
-    public function attach($entity, StateInterface $state, array $paths = [])
+    public function attach($entity, State $state, array $paths = [])
     {
         $this->storage->offsetSet($entity, $state);
 

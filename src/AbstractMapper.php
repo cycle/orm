@@ -114,7 +114,7 @@ abstract class AbstractMapper implements MapperInterface
     }
 
     // todo: state must not be null
-    protected function queueCreate($entity, StateInterface &$state = null): ContextualInterface
+    protected function queueCreate($entity, State &$state = null): ContextualInterface
     {
         $columns = $this->getColumns($entity);
 
@@ -171,7 +171,7 @@ abstract class AbstractMapper implements MapperInterface
         return $insert;
     }
 
-    protected function queueUpdate($entity, StateInterface $state): ContextualInterface
+    protected function queueUpdate($entity, State $state): ContextualInterface
     {
         $eData = $this->getColumns($entity);
         $oData = $state->getData();
@@ -211,7 +211,7 @@ abstract class AbstractMapper implements MapperInterface
         return $update;
     }
 
-    protected function buildDelete($entity, StateInterface $state): CommandInterface
+    protected function buildDelete($entity, State $state): CommandInterface
     {
         // todo: better primary key fetch
 

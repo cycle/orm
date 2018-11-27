@@ -14,9 +14,9 @@ interface HeapInterface
 {
     public function has($entity): bool;
 
-    public function get($entity): ?StateInterface;
+    public function get($entity): ?State;
 
-    public function attach($entity, StateInterface $state, array $paths = []);
+    public function attach($entity, State $state, array $paths = []);
 
     public function onChange($entity, callable $handler);
 

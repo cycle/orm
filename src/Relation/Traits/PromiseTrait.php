@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation\Traits;
 
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\ScopedInterface;
-use Spiral\ORM\StateInterface;
+use Spiral\ORM\State;
 
 // todo: rename, this is not promise trait
 trait PromiseTrait
@@ -19,19 +19,19 @@ trait PromiseTrait
      * Configure context parameter using value from parent entity. Created promise.
      *
      * @param ContextualInterface $command
-     * @param StateInterface      $parent
+     * @param State               $parent
      * @param string              $parentKey
-     * @param null|StateInterface $current
+     * @param null|State          $current
      * @param string              $localKey
      */
     protected function promiseContext(
         ContextualInterface $command,
-        StateInterface $parent,
+        State $parent,
         string $parentKey,
-        ?StateInterface $current,
+        ?State $current,
         string $localKey
     ) {
-        $handler = function (StateInterface $state) use ($command, $localKey, $parentKey, $current) {
+        $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 if ($this->fetchKey($current, $localKey) != $value) {
                     $command->setContext($localKey, $value);
@@ -51,20 +51,20 @@ trait PromiseTrait
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
      *
-     * @param ScopedInterface     $command
-     * @param StateInterface      $parent
-     * @param string              $parentKey
-     * @param null|StateInterface $current
-     * @param string              $localKey
+     * @param ScopedInterface $command
+     * @param State           $parent
+     * @param string          $parentKey
+     * @param null|State      $current
+     * @param string          $localKey
      */
     protected function promiseScope(
         ScopedInterface $command,
-        StateInterface $parent,
+        State $parent,
         string $parentKey,
-        ?StateInterface $current,
+        ?State $current,
         string $localKey
     ) {
-        $handler = function (StateInterface $state) use ($command, $localKey, $parentKey, $current) {
+        $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 if ($this->fetchKey($current, $localKey) != $value) {
                     $command->setScope($localKey, $value);
@@ -82,11 +82,11 @@ trait PromiseTrait
     /**
      * Fetch key from the state.
      *
-     * @param StateInterface $state
-     * @param string         $key
+     * @param State  $state
+     * @param string $key
      * @return mixed|null
      */
-    protected function fetchKey(?StateInterface $state, string $key)
+    protected function fetchKey(?State $state, string $key)
     {
         if (is_null($state)) {
             return null;

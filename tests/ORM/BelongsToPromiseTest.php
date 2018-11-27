@@ -145,7 +145,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertNull($b->user->__resolve());
         $this->assertNumReads(0);
 
-        $this->assertEquals('hello@world.com', $a->user->email);
+        $this->assertEquals('hello@world.com', $a->user->__resolve()->email);
     }
 
     public function testFetchPromisesFromHeap()
@@ -171,7 +171,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertNull($b->user->__resolve());
         $this->assertNumReads(1);
 
-        $this->assertEquals('hello@world.com', $a->user->email);
+        $this->assertEquals('hello@world.com', $a->user->__resolve()->email);
     }
 
     public function testNoWriteOperations()
@@ -213,6 +213,6 @@ abstract class BelongsToPromiseTest extends BaseTest
         $p = $selector->wherePK(4)->fetchOne();
 
         $this->assertInstanceOf(User::class, $p->user->__resolve());
-        $this->assertEquals('hello@world.com', $p->user->email);
+        $this->assertEquals('hello@world.com', $p->user->__resolve()->email);
     }
 }

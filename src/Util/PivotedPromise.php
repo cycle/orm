@@ -6,19 +6,23 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Promise;
+namespace Spiral\ORM\Util;
 
-use Spiral\ORM\Util\ContextStorage;
-
-class ContextPromise extends Promise
+class PivotedPromise extends Promise
 {
+    /**
+     * @inheritdoc
+     */
     public function __resolve()
     {
-        $response = parent::__resolve();
-
-        return $response->getElements();
+        return parent::__resolve()->getElements();
     }
 
+    /**
+     * Return promised pivot context.
+     *
+     * @return ContextStorage
+     */
     public function __resolveContext(): ContextStorage
     {
         return parent::__resolve();

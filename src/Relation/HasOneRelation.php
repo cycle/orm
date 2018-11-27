@@ -12,11 +12,10 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\PrimarySequence;
-use Spiral\ORM\Promise\Promise;
+use Spiral\ORM\Util\Promise;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\StateInterface;
 
 class HasOneRelation extends AbstractRelation
 {
@@ -64,7 +63,7 @@ class HasOneRelation extends AbstractRelation
     public function queueRelation(
         ContextualInterface $parent,
         $entity,
-        StateInterface $state,
+        State $state,
         $related,
         $original
     ): CommandInterface {

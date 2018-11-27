@@ -16,7 +16,6 @@ use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Promise\Promise;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\StateInterface;
 
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
@@ -57,7 +56,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     public function queueRelation(
         ContextualInterface $parent,
         $entity,
-        StateInterface $state,
+        State $state,
         $related,
         $original
     ): CommandInterface {

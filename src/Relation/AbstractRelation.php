@@ -13,7 +13,6 @@ use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
 use Spiral\ORM\State;
-use Spiral\ORM\StateInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
@@ -92,7 +91,7 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[$key] ?? null;
     }
 
-    protected function getState($entity): ?StateInterface
+    protected function getState($entity): ?State
     {
         if ($entity instanceof PromiseInterface) {
             return new State(State::PROMISED, $entity->__context());

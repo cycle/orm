@@ -17,7 +17,7 @@ use Spiral\ORM\Traits\VisitorTrait;
  * State carries meta information about all load entities, including original set of data,
  * relations, state and number of active references (in cases when entity become unclaimed).
  */
-final class State implements StateInterface
+final class State
 {
     use RelationTrait, ReferenceTrait, VisitorTrait;
 
@@ -104,6 +104,7 @@ final class State implements StateInterface
     /**
      * Carries reference to the last issued command.
      *
+     * @internal
      * @param ContextualInterface|null $cmd
      */
     public function setActiveCommand(ContextualInterface $cmd = null)
@@ -112,11 +113,20 @@ final class State implements StateInterface
     }
 
     /**
+     * @internal
      * @return null|ContextualInterface
      */
     public function getActiveCommand(): ?ContextualInterface
     {
         return $this->activeCommand;
+    }
+
+    /**
+     * Remove all the data change handlers.
+     */
+    public function resetHandlers()
+    {
+        $this->handlers = [];
     }
 
     /**

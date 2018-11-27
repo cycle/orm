@@ -164,7 +164,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNull($b->profile->__resolve());
         $this->assertNumReads(0);
 
-        $this->assertEquals('image.png', $a->profile->image);
+        $this->assertEquals('image.png', $a->profile->__resolve()->image);
     }
 
     public function testFetchPromisesFromHeap()
@@ -188,7 +188,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNull($b->profile->__resolve());
         $this->assertNumReads(1);
 
-        $this->assertEquals('image.png', $a->profile->image);
+        $this->assertEquals('image.png', $a->profile->__resolve()->image);
     }
 
     public function testNoWriteOperations()

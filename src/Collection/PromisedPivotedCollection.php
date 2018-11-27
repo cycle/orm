@@ -10,14 +10,14 @@ namespace Spiral\ORM\Collection;
 
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
-use Spiral\ORM\Promise\ContextPromise;
+use Spiral\ORM\Util\PivotedPromise;
 use Spiral\ORM\PromiseInterface;
 
 class PromisedPivotedCollection extends AbstractLazyCollection implements PivotedCollectionInterface
 {
     private $promise;
 
-    public function __construct(ContextPromise $promise)
+    public function __construct(PivotedPromise $promise)
     {
         $this->promise = $promise;
     }

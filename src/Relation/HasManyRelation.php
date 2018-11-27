@@ -14,7 +14,7 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\Promise\Promise;
+use Spiral\ORM\Util\Promise;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;

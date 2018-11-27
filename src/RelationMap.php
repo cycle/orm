@@ -10,6 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\PrimarySequence;
+use Spiral\ORM\Command\Control\Sequence;
 
 /**
  * Generates set of linked commands required to persis or delete given dependency graph. Each
@@ -97,26 +98,16 @@ final class RelationMap
         ContextualInterface $command
     ): ContextualInterface {
         $sequence = new PrimarySequence();
-        $oriRelated = [];
+        $origRelated = [];
 
         // queue all "left" graph branches
         foreach ($this->dependencies as $name => $relation) {
             if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
-            $state->markVisited($name);
 
-            // get the current relation value
-            $related = $relation->extract($data[$name] ?? null);
-            $oriRelated[$name] = $related;
-
-            // queue needed changes
-            $sequence->addCommand(
-                $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
-            );
-
-            // update current relation state
-            $state->setRelation($name, $related);
+            $origRelated[$name] = $state->getRelation($name);
+            $this->queueRelation($sequence, $entity, $data, $state, $command, $relation, $name);
         }
 
         // queue target entity
@@ -127,33 +118,63 @@ final class RelationMap
             if (!$relation->isCascade() || $state->visited($name)) {
                 continue;
             }
-            $state->markVisited($name);
 
-            // get the current relation value
-            $related = $relation->extract($data[$name] ?? null);
-            $oriRelated[$name] = $related;
-
-            // queue needed changes
-            $sequence->addCommand(
-                $relation->queueRelation($command, $entity, $state, $related,
-                    $state->getRelation($name))
-            );
-
-            // update current relation state
-            $state->setRelation($name, $related);
+            $origRelated[$name] = $state->getRelation($name);
+            $this->queueRelation($sequence, $entity, $data, $state, $command, $relation, $name);
         }
 
         // complete the walk-though sequence
         $sequence->onComplete([$state, 'resetVisited']);
 
         // reset state and revert relation values
-        $sequence->onRollBack(function () use ($state, $oriRelated) {
+        $sequence->onRollBack(function () use ($state, $origRelated) {
             $state->resetVisited();
-            foreach ($oriRelated as $name => $value) {
+            foreach ($origRelated as $name => $value) {
                 $state->setRelation($name, $value);
             }
         });
 
         return $sequence;
+    }
+
+    /**
+     * Queue relation and return related object.
+     *
+     * @param Sequence            $sequence
+     * @param object              $entity
+     * @param array               $data
+     * @param State               $state
+     * @param ContextualInterface $command
+     * @param RelationInterface   $relation
+     * @param string              $name
+     */
+    private function queueRelation(
+        Sequence $sequence,
+        $entity,
+        array $data,
+        State $state,
+        ContextualInterface $command,
+        RelationInterface $relation,
+        string $name
+    ) {
+        $state->markVisited($name);
+
+        // get the current relation value
+        $related = $relation->extract($data[$name] ?? null);
+
+        // no changes in promised relation
+        if ($related instanceof PromiseInterface && $related === $state->getRelation($name)) {
+            return;
+        }
+
+        // queue needed changes
+        $sequence->addCommand(
+            $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
+        );
+
+        // update current relation state
+        $state->setRelation($name, $related);
+
+        return;
     }
 }

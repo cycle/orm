@@ -13,7 +13,7 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
-use Spiral\ORM\Promise\Promise;
+use Spiral\ORM\Util\Promise;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;

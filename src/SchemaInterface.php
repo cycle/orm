@@ -12,17 +12,18 @@ use Spiral\ORM\Exception\SchemaException;
 
 interface SchemaInterface
 {
-    public const ALIAS       = 0;
-    public const MAPPER      = 1;
-    public const SOURCE      = 2;
-    public const DATABASE    = 3;
-    public const TABLE       = 4;
-    public const PRIMARY_KEY = 5;
-    public const COLUMNS     = 6;
-    public const SCHEMA      = 7;
-    public const RELATIONS   = 8;
-    public const EXTENDS     = 10;
-    public const CHILDREN    = 11;
+    public const ALIAS        = 0;
+    public const MAPPER       = 1;
+    public const SOURCE       = 2;
+    public const DATABASE     = 3;
+    public const TABLE        = 4;
+    public const PRIMARY_KEY  = 5;
+    public const CAPTURE_KEYS = 6;
+    public const COLUMNS      = 7;
+    public const SCHEMA       = 8;
+    public const RELATIONS    = 9;
+    public const EXTENDS      = 10;
+    public const CHILDREN     = 11;
 
     /**
      * Define schema value.

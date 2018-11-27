@@ -29,13 +29,6 @@ interface ContextualInterface extends CommandInterface
     public function freeContext(string $key);
 
     /**
-     * Get current command context.
-     *
-     * @return array
-     */
-    public function getContext(): array;
-
-    /**
      * Add context value, usually FK. Must be set before command being executed, usually in leading
      * command "execute" event.
      *
@@ -43,4 +36,11 @@ interface ContextualInterface extends CommandInterface
      * @param mixed  $value
      */
     public function setContext(string $key, $value);
+
+    /**
+     * Get current command context.
+     *
+     * @return array
+     */
+    public function getContext(): array;
 }

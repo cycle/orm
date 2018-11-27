@@ -14,7 +14,6 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Config\RelationConfig;
-use Spiral\ORM\Tests\Fixtures\Profile;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -259,10 +258,14 @@ class ORM implements ORMInterface
             return [];
         }
 
+        $keys = $this->schema->define(get_class($entity), Schema::CAPTURE_KEYS) ?? [];
+
         $paths = [get_class($entity) . ':' . $entityID];
 
-        if ($entity instanceof Profile && !empty($data['user_id'])) {
-            $paths[] = get_class($entity) . ':user_id.' . $data['user_id'];
+        foreach ($keys as $key) {
+            if (!empty($data[$key])) {
+                $paths[] = get_class($entity) . ':' . $key . '.' . $data[$key];
+            }
         }
 
         return $paths;

@@ -185,6 +185,7 @@ class Transaction implements TransactionInterface
 
             if ($command instanceof \Traversable) {
                 yield from $this->sort($command);
+                continue;
             }
 
             yield null => $command;

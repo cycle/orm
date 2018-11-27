@@ -14,6 +14,8 @@ use Spiral\ORM\Exception\MapperException;
 
 interface MapperInterface
 {
+    public function getRepository(string $class = null): RepositoryInterface;
+
     // todo: need better stuff
 
     // todo: i don't like this
@@ -22,8 +24,6 @@ interface MapperInterface
     public function hydrate($entity, array $data);
 
     public function extract($entity): array;
-
-    // todo: get repository?
 
     /**
      * Initiate chain of commands require to store object and it's data into persistent storage.

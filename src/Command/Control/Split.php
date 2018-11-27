@@ -85,20 +85,20 @@ class Split implements ContextualInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     */
+    public function setContext(string $key, $value)
+    {
+        $this->contextPath[$key]->setContext($key, $value);
+    }
+
+    /**
+     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function getContext(): array
     {
         // branch can not hold the context, only underlying commands can
         return [];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setContext(string $key, $value)
-    {
-        $this->contextPath[$key]->setContext($key, $value);
     }
 
     /**
@@ -134,6 +134,7 @@ class Split implements ContextualInterface, \IteratorAggregate
     public function onExecute(callable $closure)
     {
         $this->head->onExecute($closure);
+        $this->tail->onExecute($closure);
     }
 
     /**
@@ -142,6 +143,7 @@ class Split implements ContextualInterface, \IteratorAggregate
     public function onComplete(callable $closure)
     {
         $this->head->onComplete($closure);
+        $this->tail->onComplete($closure);
     }
 
     /**
@@ -150,6 +152,7 @@ class Split implements ContextualInterface, \IteratorAggregate
     public function onRollBack(callable $closure)
     {
         $this->head->onRollBack($closure);
+        $this->tail->onRollBack($closure);
     }
 
     /**

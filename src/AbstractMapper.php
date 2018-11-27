@@ -10,11 +10,11 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Split;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
-use Spiral\ORM\Command\Control\Nil;
 
 // todo: events
 abstract class AbstractMapper implements MapperInterface
@@ -61,6 +61,11 @@ abstract class AbstractMapper implements MapperInterface
         $class = $this->entityClass($data);
 
         return [new $class, $data];
+    }
+
+    public function getRepository(string $class = null): RepositoryInterface
+    {
+        return null;
     }
 
     // todo: need state as INPUT!!!!
@@ -191,7 +196,9 @@ abstract class AbstractMapper implements MapperInterface
         $state->setData($cData);
 
         $state->onChange(function (State $state) use ($update) {
-            $update->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
+            if (!empty($state->getData()[$this->primaryKey])) {
+                $update->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
+            }
         });
 
         $update->onExecute(function (Update $command) use ($entity, $state) {

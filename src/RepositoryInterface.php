@@ -14,5 +14,5 @@ interface RepositoryInterface
 
     public function findOne(array $where = []);
 
-    public function findAll(array $where = []);
+    public function findAll(array $where = []): iterable;
 }

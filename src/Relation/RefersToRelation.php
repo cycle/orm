@@ -13,10 +13,10 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
-use Spiral\ORM\Util\Promise;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Promise;
 
 /**
  * Variation of belongs-to relation which provides the ability to be nullable. Relation can be used
@@ -99,11 +99,13 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
         $this->promiseScope($update, $state, $primaryKey, null, $primaryKey);
 
+        // todo: throws another command when not needed?
+
         // state either not found or key value is not set, subscribe thought the heap
         $update->waitContext($this->innerKey, true);
 
-        $this->orm->getHeap()->onChange($related, function (State $state) use ($update) {
-            if (!empty($value = $this->fetchKey($state, $this->outerKey))) {
+        $this->orm->getHeap()->onChange($related, function (State $relState) use ($update) {
+            if (!empty($value = $this->fetchKey($relState, $this->outerKey))) {
                 $update->setContext($this->innerKey, $value);
                 $update->freeContext($this->innerKey);
             }

@@ -10,6 +10,7 @@ namespace Spiral\ORM\Traits;
 
 trait RelationTrait
 {
+    /** @var array */
     private $relations = [];
 
     /**

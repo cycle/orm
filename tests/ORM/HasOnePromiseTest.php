@@ -90,14 +90,15 @@ abstract class HasOnePromiseTest extends BaseTest
                 ]
             ],
             Profile::class => [
-                Schema::ALIAS       => 'profile',
-                Schema::MAPPER      => EntityMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'profile',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'image'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::ALIAS        => 'profile',
+                Schema::MAPPER       => EntityMapper::class,
+                Schema::DATABASE     => 'default',
+                Schema::TABLE        => 'profile',
+                Schema::PRIMARY_KEY  => 'id',
+                Schema::CAPTURE_KEYS => ['user_id'],
+                Schema::COLUMNS      => ['id', 'user_id', 'image'],
+                Schema::SCHEMA       => [],
+                Schema::RELATIONS    => [
                     'nested' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Nested::class,

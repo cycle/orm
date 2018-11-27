@@ -42,14 +42,15 @@ abstract class HasOneCyclicTest extends BaseTest
 
         $this->orm = $this->orm->withSchema(new Schema([
             Cyclic::class => [
-                Schema::ALIAS       => 'cyclic',
-                Schema::MAPPER      => EntityMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'cyclic',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'parent_id', 'name'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::ALIAS        => 'cyclic',
+                Schema::MAPPER       => EntityMapper::class,
+                Schema::DATABASE     => 'default',
+                Schema::TABLE        => 'cyclic',
+                Schema::PRIMARY_KEY  => 'id',
+                Schema::CAPTURE_KEYS => ['parent_id'],
+                Schema::COLUMNS      => ['id', 'parent_id', 'name'],
+                Schema::SCHEMA       => [],
+                Schema::RELATIONS    => [
                     'cyclic' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Cyclic::class,
@@ -129,14 +130,13 @@ abstract class HasOneCyclicTest extends BaseTest
         $this->assertSame($c, $c->cyclic);
     }
 
-    // todo: NEED MULTIPLE PATHS
-    //    public function testCyclicWithoutLoad()
-    //    {
-    //        $selector = new Selector($this->orm, Cyclic::class);
-    //        $c = $selector->wherePK(3)->fetchOne();
-    //        $this->assertEquals('self-reference', $c->name);
-    //        $this->assertSame($c, $c->cyclic);
-    //    }
+    public function testCyclicWithoutLoad()
+    {
+        $selector = new Selector($this->orm, Cyclic::class);
+        $c = $selector->wherePK(3)->fetchOne();
+        $this->assertEquals('self-reference', $c->name);
+        $this->assertSame($c, $c->cyclic);
+    }
 
     public function testCreateCyclic()
     {

@@ -61,17 +61,17 @@ class PrimarySequence extends Sequence implements ContextualInterface
     /**
      * {@inheritdoc}
      */
-    public function getContext(): array
+    public function setContext(string $key, $value)
     {
-        return $this->getPrimary()->getContext();
+        $this->getPrimary()->setContext($key, $value);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setContext(string $key, $value)
+    public function getContext(): array
     {
-        $this->getPrimary()->setContext($key, $value);
+        return $this->getPrimary()->getContext();
     }
 
     /**

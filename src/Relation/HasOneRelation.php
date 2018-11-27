@@ -12,10 +12,10 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\PrimarySequence;
-use Spiral\ORM\Util\Promise;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Promise;
 
 class HasOneRelation extends AbstractRelation
 {
@@ -81,11 +81,6 @@ class HasOneRelation extends AbstractRelation
 
         // todo: unify?
         if ($related instanceof PromiseInterface) {
-            // no operations if promise did not changed
-            if ($related === $original) {
-                return $sequence;
-            }
-
             $related = $related->__resolve();
         }
 

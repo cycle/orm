@@ -216,6 +216,8 @@ class ORM implements ORMInterface
 
     public function queueStore($entity, int $mode = 0): ContextualInterface
     {
+        // todo: NICE?
+
         if ($entity instanceof PromiseInterface) {
             // todo: i don't like you
             return new Nil();

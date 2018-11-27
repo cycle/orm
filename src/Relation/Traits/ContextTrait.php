@@ -13,7 +13,7 @@ use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\State;
 
 // todo: rename, this is not promise trait
-trait PromiseTrait
+trait ContextTrait
 {
     /**
      * Configure context parameter using value from parent entity. Created promise.

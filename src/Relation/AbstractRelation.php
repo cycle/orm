@@ -16,7 +16,7 @@ use Spiral\ORM\State;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    use Traits\PromiseTrait;
+    use Traits\ContextTrait;
 
     /**
      * @invisible

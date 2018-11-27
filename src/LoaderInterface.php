@@ -17,8 +17,6 @@ use Spiral\ORM\Node\AbstractNode;
  */
 interface LoaderInterface
 {
-
-
     /**
      * Loader specific entity class.
      *

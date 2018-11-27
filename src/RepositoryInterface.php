@@ -8,8 +8,11 @@
 
 namespace Spiral\ORM;
 
-
-class RepositoryInterface
+interface RepositoryInterface
 {
+    public function findByPK($value);
 
+    public function findOne(array $where = []);
+
+    public function findAll(array $where = []);
 }

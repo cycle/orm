@@ -12,12 +12,11 @@ use Spiral\ORM\Collection\PromisedCollection;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
-use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\Util\Promise;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Promise;
 
 class HasManyRelation extends AbstractRelation
 {
@@ -55,11 +54,6 @@ class HasManyRelation extends AbstractRelation
         // todo: i can do quick compare here?
 
         if ($related instanceof PromiseInterface) {
-            if ($related === $original) {
-                // does not mean anything... (???)
-                return new Nil();
-            }
-
             // todo: resolve both original and related
             $related = $related->__resolve();
         }

@@ -14,7 +14,6 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Collection\PromisedCollection;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
-use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
@@ -23,11 +22,11 @@ use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Node\PivotedRootNode;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Util\PivotedPromise;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\ContextStorage;
+use Spiral\ORM\Util\PivotedPromise;
 
 class ManyToManyRelation extends AbstractRelation
 {
@@ -159,10 +158,6 @@ class ManyToManyRelation extends AbstractRelation
         $original = $original ?? new ContextStorage();
 
         if ($related instanceof PivotedPromise) {
-            if ($related === $original) {
-                return new Nil();
-            }
-
             // todo: unify?
             $related = $related->__resolveContext();
         }
@@ -171,6 +166,7 @@ class ManyToManyRelation extends AbstractRelation
             // todo: check consecutive changes
             $original = $original->__resolveContext();
             // todo: state->setRelation (!!!!!!)
+            // YYEEAH?
         }
 
         $sequence = new Sequence();

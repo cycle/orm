@@ -8,11 +8,11 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
-use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
@@ -42,7 +42,7 @@ abstract class MapperTest extends BaseTest
         $this->orm = $this->orm->withSchema(new Schema([
             User::class => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',

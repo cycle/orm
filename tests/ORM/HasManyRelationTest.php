@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Doctrine\Common\Collections\Collection;
+use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
@@ -16,7 +17,6 @@ use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\Tests\Fixtures\Comment;
-use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
@@ -61,7 +61,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->orm = $this->orm->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -81,7 +81,7 @@ abstract class HasManyRelationTest extends BaseTest
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',

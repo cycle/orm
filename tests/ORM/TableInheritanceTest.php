@@ -8,11 +8,11 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\Admin;
-use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
@@ -48,7 +48,7 @@ abstract class TableInheritanceTest extends BaseTest
                 Schema::CHILDREN    => [
                     'admin' => Admin::class
                 ],
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',

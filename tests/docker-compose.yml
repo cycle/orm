@@ -4,7 +4,7 @@ services:
   sqlserver:
     image: microsoft/mssql-server-linux
     ports:
-    - "11433:1433"
+      - "11433:1433"
     environment:
       SA_PASSWORD: "SSpaSS__1"
       ACCEPT_EULA: "Y"
@@ -14,7 +14,7 @@ services:
     restart: 'always'
     command: --default-authentication-plugin=mysql_native_password
     ports:
-    - "13306:3306"
+      - "13306:3306"
     environment:
       MYSQL_DATABASE: "spiral"
       MYSQL_ROOT_PASSWORD: "root"
@@ -24,7 +24,7 @@ services:
     image: mysql:5.5
     restart: 'always'
     ports:
-    - "13305:3306"
+      - "13305:3306"
     environment:
       MYSQL_DATABASE: "spiral"
       MYSQL_ROOT_PASSWORD: "root"
@@ -34,7 +34,7 @@ services:
     image: postgres:11
     restart: always
     ports:
-    - "15432:5432"
+      - "15432:5432"
     environment:
       POSTGRES_DB: "spiral"
       POSTGRES_USER: "postgres"

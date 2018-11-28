@@ -8,12 +8,12 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
@@ -71,7 +71,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->orm = $this->orm->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -91,7 +91,7 @@ abstract class HasOnePromiseTest extends BaseTest
             ],
             Profile::class => [
                 Schema::ALIAS        => 'profile',
-                Schema::MAPPER       => EntityMapper::class,
+                Schema::MAPPER       => Mapper::class,
                 Schema::DATABASE     => 'default',
                 Schema::TABLE        => 'profile',
                 Schema::PRIMARY_KEY  => 'id',
@@ -112,7 +112,7 @@ abstract class HasOnePromiseTest extends BaseTest
             ],
             Nested::class  => [
                 Schema::ALIAS       => 'nested',
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'nested',
                 Schema::PRIMARY_KEY => 'id',

@@ -9,12 +9,12 @@
 namespace Spiral\ORM\Tests;
 
 use Doctrine\Common\Collections\Collection;
+use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Fixtures\Tag;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
@@ -24,7 +24,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 {
     use TableTrait;
 
-        public function setUp()
+    public function setUp()
     {
         parent::setUp();
 
@@ -73,7 +73,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->orm = $this->orm->withSchema(new Schema([
             User::class => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -98,7 +98,7 @@ abstract class ManyToManyRelationTest extends BaseTest
             ],
             Tag::class  => [
                 Schema::ALIAS       => 'tag',
-                Schema::MAPPER      => EntityMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',

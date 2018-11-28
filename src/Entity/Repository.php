@@ -8,7 +8,9 @@
 
 namespace Spiral\ORM\Entity;
 
-class Repository
+use Spiral\ORM\RepositoryInterface;
+
+abstract class Repository implements RepositoryInterface
 {
 
 }

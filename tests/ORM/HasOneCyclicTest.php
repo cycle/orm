@@ -8,12 +8,12 @@
 
 namespace Spiral\ORM\Tests;
 
+use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\Cyclic;
-use Spiral\ORM\Tests\Fixtures\EntityMapper;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
@@ -43,7 +43,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $this->orm = $this->orm->withSchema(new Schema([
             Cyclic::class => [
                 Schema::ALIAS        => 'cyclic',
-                Schema::MAPPER       => EntityMapper::class,
+                Schema::MAPPER       => Mapper::class,
                 Schema::DATABASE     => 'default',
                 Schema::TABLE        => 'cyclic',
                 Schema::PRIMARY_KEY  => 'id',

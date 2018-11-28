@@ -61,6 +61,9 @@ class ManyToManyRelation extends AbstractRelation
             function () use ($innerKey) {
                 // todo: store pivot context as well!!! or NOT?
 
+
+                // repository won't work here
+
                 // todo: need easy way to get access to table
                 $tableName = $this->orm->getSchema()->define($this->class, Schema::TABLE);
 

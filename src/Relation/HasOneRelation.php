@@ -13,7 +13,6 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\PrimarySequence;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\Promise;
 
@@ -46,10 +45,7 @@ class HasOneRelation extends AbstractRelation
                     return $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
                 }
 
-                $selector = new Selector($this->orm, $this->class);
-                $selector->where([$this->outerKey => $innerKey]);
-
-                return $selector->fetchOne();
+                return $this->orm->getMapper($this->class)->getRepository()->findOne([$this->outerKey => $innerKey]);
             }
         );
 

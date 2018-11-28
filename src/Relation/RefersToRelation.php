@@ -14,7 +14,6 @@ use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\Promise;
 
@@ -47,11 +46,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             }
 
             // todo: this is critical to have right
-            $selector = new Selector($this->orm, $this->class);
-            $selector->where([$this->outerKey => $innerKey]);
-
-            return $selector->fetchOne();
-
+            return $this->orm->getMapper($this->class)->getRepository()->findOne([$this->outerKey => $innerKey]);
         });
 
         return [$pr, $pr];

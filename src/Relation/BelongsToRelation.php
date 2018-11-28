@@ -13,9 +13,8 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
-use Spiral\ORM\Util\Promise;
-use Spiral\ORM\Selector;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Promise;
 
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
@@ -36,15 +35,16 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
             [$this->outerKey => $innerKey]
             , function () use ($innerKey) {
             // todo: check in map
+
+            // todo: CHECK IN HEAP?
+            // todo: CHECK IN HEAP VIA REPOSITORY?
+
             if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
                 // todo: improve it?
                 return $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
             }
 
-            $selector = new Selector($this->orm, $this->class);
-            $selector->where([$this->outerKey => $innerKey]);
-
-            return $selector->fetchOne();
+            return $this->orm->getMapper($this->class)->getRepository()->findOne([$this->outerKey => $innerKey]);
         });
 
         return [$pr, $pr];

@@ -14,7 +14,6 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\Promise;
 
@@ -32,8 +31,8 @@ class HasManyRelation extends AbstractRelation
         $pr = new Promise(
             [$this->outerKey => $innerKey],
             function () use ($innerKey) {
-                $s = new Selector($this->orm, $this->class);
-                return $s->where([$this->outerKey => $innerKey])->fetchAll();
+                // todo: where?
+                return $this->orm->getMapper($this->class)->getRepository()->findAll([$this->outerKey => $innerKey]);
             }
         );
 

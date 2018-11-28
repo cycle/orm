@@ -401,9 +401,16 @@ abstract class BelongsToRelationTest extends BaseTest
         $p = $s->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
 
-        $tr = new Transaction($this->orm);
-        $tr->store($p);
-        $tr->run();
+        try {
+            $tr = new Transaction($this->orm);
+            $tr->store($p);
+            $tr->run();
+        } catch (\Throwable $e) {
+            throw $e;
+        } finally {
+            // we do not expect state to be consistent as transaction failed, see rollback tests
+            $this->orm = $this->orm->withHeap(new Heap());
+        }
     }
 
     public function testSetNull()
@@ -482,6 +489,5 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame(null, $p->user);
     }
 
-    // todo: check nested belongs to
     // todo: multiple nested
 }

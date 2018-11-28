@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
+use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
@@ -17,7 +18,13 @@ use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
+use Spiral\ORM\Collection\PromisedCollection;
+use Spiral\ORM\Collection\PromisedPivotedCollection;
 use Spiral\ORM\ORM;
+use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\State;
+use Spiral\ORM\Util\ContextStorage;
+use Spiral\ORM\Util\PivotedPromise;
 
 // todo: TEST WITH FK
 // todo: TEST WITH
@@ -83,6 +90,8 @@ abstract class BaseTest extends TestCase
      */
     public function tearDown()
     {
+        $this->assertClearState($this->orm);
+
         $this->disableProfiling();
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
@@ -163,7 +172,6 @@ abstract class BaseTest extends TestCase
         );
     }
 
-
     /**
      * @return Database
      */
@@ -215,6 +223,84 @@ abstract class BaseTest extends TestCase
     {
         if (!is_null($this->logger)) {
             $this->logger->hide();
+        }
+    }
+
+    protected function assertClearState(ORM $orm)
+    {
+        $r = new \ReflectionClass(State::class);
+        $lis = $r->getProperty('listeners');
+        $lis->setAccessible(true);
+
+        $rel = $r->getProperty('relations');
+        $rel->setAccessible(true);
+
+        $heap = $orm->getHeap();
+        foreach ($heap as $entity) {
+            $state = $heap->get($entity);
+            $this->assertNotNull($state);
+
+            $this->assertEntitySynced(
+                $r->getShortName(),
+                $orm->getMapper($entity)->extract($entity),
+                $state->getData(),
+                $rel->getValue($state)
+            );
+
+            // all the states must be closed
+            $this->assertNotEquals(State::SCHEDULED_INSERT, $state);
+            $this->assertNotEquals(State::SCHEDULED_UPDATE, $state);
+            $this->assertNotEquals(State::SCHEDULED_DELETE, $state);
+
+            //            $this->assertEmpty($p->getValue($state), "State listeners leaked");
+        }
+    }
+
+    protected function assertEntitySynced(string $eName, array $entity, array $stateData, array $relations)
+    {
+        foreach ($entity as $name => $eValue) {
+            if (array_key_exists($name, $stateData)) {
+                $this->assertSame(
+                    $eValue,
+                    $stateData[$name],
+                    "Entity and State are not in sync `{$eName}`.`{$name}`"
+                );
+
+                continue;
+            }
+
+            if (!array_key_exists($name, $relations)) {
+                // something else
+                continue;
+            }
+
+            $rValue = $relations[$name];
+
+            if ($rValue instanceof ContextStorage || $rValue instanceof PivotedPromise) {
+                // todo: implement PIVOT data verification
+                continue;
+            }
+
+            if ($eValue instanceof PromisedCollection || $eValue instanceof PromisedPivotedCollection) {
+                if (!$eValue->isInitialized()) {
+                    $eValue = $eValue->getPromise();
+                } else {
+                    // normalizing
+                    if ($rValue instanceof PromiseInterface && $rValue->__loaded()) {
+                        $rValue = $rValue->__resolve();
+                    }
+                }
+            }
+
+            if ($eValue instanceof Collection) {
+                $eValue = $eValue->toArray();
+            }
+
+            $this->assertEquals(
+                $rValue,
+                $eValue,
+                "Entity and State are not in sync `{$eName}`.`{$name}`"
+            );
         }
     }
 }

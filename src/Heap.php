@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM;
 
-class Heap implements HeapInterface
+class Heap implements HeapInterface, \IteratorAggregate
 {
     /** @var \SplObjectStorage */
     private $storage;
@@ -25,6 +25,14 @@ class Heap implements HeapInterface
     public function __construct()
     {
         $this->reset();
+    }
+
+    /**
+     * @return \SplObjectStorage
+     */
+    public function getIterator(): \SplObjectStorage
+    {
+        return $this->storage;
     }
 
     /**

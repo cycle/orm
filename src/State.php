@@ -55,15 +55,9 @@ final class State
     }
 
     /**
-     * @inheritdoc
-     */
-    public function onChange(callable $handler)
-    {
-        $this->handlers[] = $handler;
-    }
-
-    /**
-     * @inheritdoc
+     * Set new state value.
+     *
+     * @param int $state
      */
     public function setState(int $state): void
     {
@@ -71,7 +65,9 @@ final class State
     }
 
     /**
-     * @inheritdoc
+     * Get current state.
+     *
+     * @return int
      */
     public function getState(): int
     {
@@ -79,7 +75,9 @@ final class State
     }
 
     /**
-     * @inheritdoc
+     * Set new state data (will trigger state handlers).
+     *
+     * @param array $data
      */
     public function setData(array $data)
     {
@@ -94,7 +92,9 @@ final class State
     }
 
     /**
-     * @inheritdoc
+     * Get current state data.
+     *
+     * @return array
      */
     public function getData(): array
     {
@@ -119,6 +119,17 @@ final class State
     public function getActiveCommand(): ?ContextualInterface
     {
         return $this->activeCommand;
+    }
+
+    /**
+     * Handle changes in state data.
+     *
+     * @internal
+     * @param callable $handler
+     */
+    public function onChange(callable $handler)
+    {
+        $this->handlers[] = $handler;
     }
 
     /**

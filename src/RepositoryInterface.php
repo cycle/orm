@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 interface RepositoryInterface
 {
-    public function findByPK($value);
+    public function findByPK($id);
 
     public function findOne(array $where = []);
 

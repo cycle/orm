@@ -5,10 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+ 
+namespace Spiral\ORM\Tests\Driver\Postgres; 
 
-namespace Spiral\ORM\Tests\Driver\Postgres;
-
-class HasOnePromiseTest extends \Spiral\ORM\Tests\HasOnePromiseTest
-{
-    const DRIVER = "postgres";
+class HasOnePromiseTest extends \Spiral\ORM\Tests\HasOnePromiseTest 
+{ 
+    const DRIVER = "postgres"; 
 }

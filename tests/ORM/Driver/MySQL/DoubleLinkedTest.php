@@ -5,10 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+ 
+namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-namespace Spiral\ORM\Tests\Driver\MySQL;
-
-class DoubleLinkedTest extends \Spiral\ORM\Tests\DoubleLinkedTest
-{
-    const DRIVER = "mysql";
+class DoubleLinkedTest extends \Spiral\ORM\Tests\DoubleLinkedTest 
+{ 
+    const DRIVER = "mysql"; 
 }

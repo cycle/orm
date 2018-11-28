@@ -5,10 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+ 
+namespace Spiral\ORM\Tests\Driver\Postgres; 
 
-namespace Spiral\ORM\Tests\Driver\Postgres;
-
-class DoubleLinkedTest extends \Spiral\ORM\Tests\DoubleLinkedTest
-{
-    const DRIVER = "postgres";
+class DoubleLinkedTest extends \Spiral\ORM\Tests\DoubleLinkedTest 
+{ 
+    const DRIVER = "postgres"; 
 }

@@ -19,6 +19,7 @@ use Spiral\ORM\MapperInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Schema;
+use Spiral\ORM\Selector;
 use Spiral\ORM\State;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
@@ -87,7 +88,8 @@ class Mapper implements MapperInterface
 
     public function getRepository(string $class = null): RepositoryInterface
     {
-        return null;
+        // todo: child class select
+        return new Repository(new Selector($this->orm, $class ?? $this->class));
     }
 
     // todo: need state as INPUT!!!!

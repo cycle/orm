@@ -5,10 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+ 
+namespace Spiral\ORM\Tests\Driver\SQLServer; 
 
-namespace Spiral\ORM\Tests\Driver\SQLServer;
-
-class BelongsToPromiseTest extends \Spiral\ORM\Tests\BelongsToPromiseTest
-{
-    const DRIVER = "sqlserver";
+class BelongsToPromiseTest extends \Spiral\ORM\Tests\BelongsToPromiseTest 
+{ 
+    const DRIVER = "sqlserver"; 
 }

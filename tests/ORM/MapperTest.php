@@ -196,4 +196,42 @@ abstract class MapperTest extends BaseTest
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);
     }
+
+    public function testRepositoryFindAll()
+    {
+        $r = $this->orm->getMapper(User::class)->getRepository();
+        $result = $r->findAll();
+
+        $this->assertInstanceOf(User::class, $result[0]);
+        $this->assertEquals(1, $result[0]->id);
+        $this->assertEquals('hello@world.com', $result[0]->email);
+        $this->assertEquals(100.0, $result[0]->balance);
+
+        $this->assertInstanceOf(User::class, $result[1]);
+        $this->assertEquals(2, $result[1]->id);
+        $this->assertEquals('another@world.com', $result[1]->email);
+        $this->assertEquals(200.0, $result[1]->balance);
+    }
+
+    public function testRepositoryFindOne()
+    {
+        $r = $this->orm->getMapper(User::class)->getRepository();
+        $result = $r->findOne();
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals(1, $result->id);
+        $this->assertEquals('hello@world.com', $result->email);
+        $this->assertEquals(100.0, $result->balance);
+    }
+
+    public function testRepositoryFindOneWithWhere()
+    {
+        $r = $this->orm->getMapper(User::class)->getRepository();
+        $result = $r->findOne(['id' => 2]);
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals(2, $result->id);
+        $this->assertEquals('another@world.com', $result->email);
+        $this->assertEquals(200.0, $result->balance);
+    }
 }

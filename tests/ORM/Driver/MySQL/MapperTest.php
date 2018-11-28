@@ -5,10 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+ 
+namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-namespace Spiral\ORM\Tests\Driver\MySQL;
-
-class MapperTest extends \Spiral\ORM\Tests\MapperTest
-{
-    const DRIVER = "mysql";
+class MapperTest extends \Spiral\ORM\Tests\MapperTest 
+{ 
+    const DRIVER = "mysql"; 
 }

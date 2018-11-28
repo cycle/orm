@@ -16,7 +16,7 @@ interface HeapInterface
 
     public function get($entity): ?State;
 
-    public function attach($entity, State $state, array $paths = []);
+    public function attach($entity, State $state, array $index = []);
 
     public function detach($entity);
 

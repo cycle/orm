@@ -42,7 +42,7 @@ final class State
     private $listeners = [];
 
     /** @var null|ContextualInterface */
-    private $activeCommand;
+    private $leadCommand;
 
     /**
      * @param int   $state
@@ -111,7 +111,7 @@ final class State
      */
     public function setLeadCommand(ContextualInterface $cmd = null)
     {
-        $this->activeCommand = $cmd;
+        $this->leadCommand = $cmd;
     }
 
     /**
@@ -120,7 +120,7 @@ final class State
      */
     public function getLeadCommand(): ?ContextualInterface
     {
-        return $this->activeCommand;
+        return $this->leadCommand;
     }
 
     /**
@@ -151,6 +151,6 @@ final class State
         $this->relations = [];
         $this->listeners = [];
         $this->visited = [];
-        $this->activeCommand = null;
+        $this->leadCommand = null;
     }
 }

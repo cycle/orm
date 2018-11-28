@@ -5,10 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+ 
+namespace Spiral\ORM\Tests\Driver\Postgres; 
 
-namespace Spiral\ORM\Tests\Driver\Postgres;
-
-class ManyToManyRelationTest extends \Spiral\ORM\Tests\ManyToManyRelationTest
-{
-    const DRIVER = "postgres";
+class ManyToManyRelationTest extends \Spiral\ORM\Tests\ManyToManyRelationTest 
+{ 
+    const DRIVER = "postgres"; 
 }

@@ -85,7 +85,7 @@ class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function attach($entity, State $state, array $paths = [])
+    public function attach($entity, State $state, array $index = [])
     {
         $this->storage->offsetSet($entity, $state);
 
@@ -97,8 +97,11 @@ class Heap implements HeapInterface, \IteratorAggregate
             $this->handlers->offsetUnset($entity);
         }
 
-        foreach ($paths as $path) {
+        foreach ($index as $path) {
             $this->path[$path] = $entity;
+
+            // todo: need better path approach
+            $this->path[get_class($entity)][$path] = $entity;
         }
     }
 

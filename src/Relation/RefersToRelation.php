@@ -102,12 +102,14 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // state either not found or key value is not set, subscribe thought the heap
         $update->waitContext($this->innerKey, true);
 
-        // wait for the context value to come to link 2 entities together
+        // wait for the context value to come to link 2 entities together (todo: unify with trait?)
         $this->orm->getHeap()->onChange($related, function (State $relState) use ($update, $state) {
             if (!empty($value = $this->fetchKey($relState, $this->outerKey))) {
                 if ($this->fetchKey($state, $this->innerKey) != $value) {
                     $update->setContext($this->innerKey, $value);
-                    $state->setData([$this->innerKey => $value]);
+                    if (!is_null($state)) {
+                        $state->setData([$this->innerKey => $value]);
+                    }
                 }
 
                 $update->freeContext($this->innerKey);

@@ -35,6 +35,9 @@ trait ContextTrait
             if (!empty($value = $this->fetchKey($state, $parentKey))) {
                 if ($this->fetchKey($current, $localKey) != $value) {
                     $command->setContext($localKey, $value);
+                    if (!is_null($current)) {
+                        $current->setData([$localKey => $value]);
+                    }
                 }
 
                 $command->freeContext($localKey);

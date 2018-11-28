@@ -76,15 +76,15 @@ abstract class AbstractMapper implements MapperInterface
 
         if ($state == null || $state->getState() == State::NEW) {
             $cmd = $this->queueCreate($entity, $state);
-            $state->setActiveCommand($cmd);
+            $state->setLeadCommand($cmd);
             $cmd->onComplete(function () use ($state) {
-                $state->setActiveCommand(null);
+                $state->setLeadCommand(null);
             });
 
             return $cmd;
         }
 
-        $lastCommand = $state->getActiveCommand();
+        $lastCommand = $state->getLeadCommand();
         if (empty($lastCommand)) {
             // todo: check multiple update commands working within the split (!)
             return $this->queueUpdate($entity, $state);
@@ -95,7 +95,7 @@ abstract class AbstractMapper implements MapperInterface
         }
 
         $split = new Split($lastCommand, $this->queueUpdate($entity, $state));
-        $state->setActiveCommand($split);
+        $state->setLeadCommand($split);
 
         return $split;
     }
@@ -195,7 +195,7 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($cData);
 
-        $state->attachListener(function (State $state) use ($update) {
+        $state->addListener(function (State $state) use ($update) {
             if (!empty($state->getData()[$this->primaryKey])) {
                 $update->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
             }
@@ -233,8 +233,12 @@ abstract class AbstractMapper implements MapperInterface
 
         $state->setState(State::SCHEDULED_DELETE);
 
-        $state->attachListener(function (State $state) use ($delete) {
+        $handler = function (State $state) use ($delete) {
             $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
+        };
+
+        $state->addListener(function () use ($state, $handler) {
+            $state->resetListeners($handler);
         });
 
         $delete->onComplete(function (Delete $command) use ($entity) {

@@ -35,25 +35,24 @@ trait ContextTrait
         string $localKey
     ) {
         $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
-            if (!empty($value = $this->fetchKey($state, $parentKey))) {
-                if ($this->fetchKey($current, $localKey) != $value) {
-                    $command->setContext($localKey, $value);
-                    if (!is_null($current)) {
-                        $current->setData([$localKey => $value]);
-                    }
-                }
-
-                $command->freeContext($localKey);
+            if (empty($value = $this->fetchKey($state, $parentKey))) {
+                return false;
             }
+
+            if ($this->fetchKey($current, $localKey) != $value) {
+                $command->setContext($localKey, $value);
+                if (!is_null($current)) {
+                    $current->setData([$localKey => $value]);
+                }
+            }
+
+            $command->freeContext($localKey);
+            return true;
         };
 
         $command->waitContext($localKey, $this->isRequired());
         call_user_func($handler, $parent);
-
-        $parent->attachListener($handler);
-        $command->onDestruct(function () use ($parent, $handler) {
-            $parent->removeListener($handler);
-        });
+        $parent->addListener($handler);
     }
 
     /**
@@ -74,22 +73,21 @@ trait ContextTrait
         string $localKey
     ) {
         $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
-            if (!empty($value = $this->fetchKey($state, $parentKey))) {
-                if ($this->fetchKey($current, $localKey) != $value) {
-                    $command->setScope($localKey, $value);
-                }
-
-                $command->freeScope($localKey);
+            if (empty($value = $this->fetchKey($state, $parentKey))) {
+                return false;
             }
+
+            if ($this->fetchKey($current, $localKey) != $value) {
+                $command->setScope($localKey, $value);
+            }
+
+            $command->freeScope($localKey);
+            return true;
         };
 
         $command->waitScope($localKey, $this->isRequired());
         call_user_func($handler, $parent);
-
-        $parent->attachListener($handler);
-        $command->onDestruct(function () use ($parent, $handler) {
-            $parent->removeListener($handler);
-        });
+        $parent->addListener($handler);
     }
 
     /**

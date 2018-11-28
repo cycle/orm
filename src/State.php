@@ -86,8 +86,10 @@ final class State
         }
 
         $this->data = $data + $this->data;
-        foreach ($this->listeners as $handler) {
-            call_user_func($handler, $this);
+        foreach ($this->listeners as $id => $handler) {
+            if (call_user_func($handler, $this) === true) {
+                unset($this->listeners[$id]);
+            }
         }
     }
 
@@ -102,12 +104,12 @@ final class State
     }
 
     /**
-     * Carries reference to the last issued command.
+     * Set the reference to the object creation command (non executed).
      *
      * @internal
      * @param ContextualInterface|null $cmd
      */
-    public function setActiveCommand(ContextualInterface $cmd = null)
+    public function setLeadCommand(ContextualInterface $cmd = null)
     {
         $this->activeCommand = $cmd;
     }
@@ -116,35 +118,28 @@ final class State
      * @internal
      * @return null|ContextualInterface
      */
-    public function getActiveCommand(): ?ContextualInterface
+    public function getLeadCommand(): ?ContextualInterface
     {
         return $this->activeCommand;
     }
 
     /**
-     * Handle changes in state data.
+     * Handle changes in state data. Listener should return true to automatically detach itself.
      *
      * @internal
-     * @param callable $listener
+     * @param callable $closure
      */
-    public function attachListener(callable $listener)
+    public function addListener(callable $closure)
     {
-        $this->listeners[] = $listener;
+        $this->listeners[] = $closure;
     }
 
     /**
-     * Remove state change handler.
-     *
-     * @param callable $listener
+     * Remove all state listeners.
      */
-    public function removeListener(callable $listener)
+    public function resetListeners()
     {
-        foreach ($this->listeners as $index => $handler) {
-            if ($handler === $listener) {
-                unset($this->listeners[$index]);
-                break;
-            }
-        }
+        $this->listeners = [];
     }
 
     /**
@@ -156,5 +151,6 @@ final class State
         $this->relations = [];
         $this->listeners = [];
         $this->visited = [];
+        $this->activeCommand = null;
     }
 }

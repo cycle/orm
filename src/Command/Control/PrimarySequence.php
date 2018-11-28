@@ -103,14 +103,4 @@ class PrimarySequence extends Sequence implements ContextualInterface
     {
         $this->getPrimary()->onRollBack($closure);
     }
-
-    /**
-     * Handler to be invoked when command is being destructed.
-     *
-     * @param callable $closure
-     */
-    public function onDestruct(callable $closure)
-    {
-        $this->getPrimary()->onDestruct($closure);
-    }
 }

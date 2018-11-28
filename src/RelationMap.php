@@ -97,6 +97,11 @@ final class RelationMap
         State $state,
         ContextualInterface $command
     ): ContextualInterface {
+
+        if (empty($this->relations)) {
+            return $command;
+        }
+
         $sequence = new PrimarySequence();
         $origRelated = [];
 

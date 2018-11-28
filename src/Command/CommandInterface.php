@@ -59,11 +59,4 @@ interface CommandInterface
      * @param callable $closure
      */
     public function onRollBack(callable $closure);
-
-    /**
-     * Handler to be invoked when command is being destructed.
-     *
-     * @param callable $closure
-     */
-    public function onDestruct(callable $closure);
 }

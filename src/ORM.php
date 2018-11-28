@@ -225,13 +225,17 @@ class ORM implements ORMInterface
         $m = $this->getMapper($entity);
         $cmd = $m->queueStore($entity);
 
+        // TODO: RESET HANDLERS
+
         // todo: optimize it
-        return $this->getRelationMap($entity)->queueRelations(
+        $cmd = $this->getRelationMap($entity)->queueRelations(
             $entity,
             $m->extract($entity),
-            $this->getHeap()->get($entity),
+            $state = $this->getHeap()->get($entity),
             $cmd
         );
+
+        return $cmd;
     }
 
     public function queueDelete($entity, int $mode = 0): CommandInterface

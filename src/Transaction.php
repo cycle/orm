@@ -125,9 +125,13 @@ class Transaction implements TransactionInterface
             $command->complete();
         }
 
+        // resetting the scope
         $this->store = [];
         $this->delete = [];
         $this->managed = new \SplObjectStorage();
+
+        // listening scope must only exists within the transaction scope
+        $this->orm->getHeap()->resetListeners();
     }
 
     /**

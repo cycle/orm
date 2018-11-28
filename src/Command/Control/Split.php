@@ -158,15 +158,6 @@ class Split implements ContextualInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function onDestruct(callable $closure)
-    {
-        $this->head->onDestruct($closure);
-        $this->tail->onDestruct($closure);
-    }
-
-    /**
-     * @inheritdoc
-     */
     protected function getTarget(): ContextualInterface
     {
         if ($this->headExecuted) {

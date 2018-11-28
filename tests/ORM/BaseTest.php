@@ -229,8 +229,6 @@ abstract class BaseTest extends TestCase
     protected function assertClearState(ORM $orm)
     {
         $r = new \ReflectionClass(State::class);
-        $lis = $r->getProperty('listeners');
-        $lis->setAccessible(true);
 
         $rel = $r->getProperty('relations');
         $rel->setAccessible(true);
@@ -251,8 +249,6 @@ abstract class BaseTest extends TestCase
             $this->assertNotEquals(State::SCHEDULED_INSERT, $state);
             $this->assertNotEquals(State::SCHEDULED_UPDATE, $state);
             $this->assertNotEquals(State::SCHEDULED_DELETE, $state);
-
-            //            $this->assertEmpty($p->getValue($state), "State listeners leaked");
         }
     }
 

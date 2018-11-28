@@ -55,10 +55,10 @@ class Heap implements HeapInterface, \IteratorAggregate
         }
     }
 
-    public function onChange($entity, callable $handler)
+    public function listenChange($entity, callable $handler)
     {
         if ($this->has($entity)) {
-            $this->get($entity)->attachListener($handler);
+            $this->get($entity)->addListener($handler);
 
             return;
         }
@@ -73,13 +73,25 @@ class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
+    public function resetListeners()
+    {
+        $this->handlers = new \SplObjectStorage();
+
+        foreach ($this->storage as $item) {
+            $this->get($item)->resetListeners();
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function attach($entity, State $state, array $paths = [])
     {
         $this->storage->offsetSet($entity, $state);
 
         if ($this->handlers->offsetExists($entity)) {
             foreach ($this->handlers[$entity] as $handler) {
-                $state->attachListener($handler);
+                $state->addListener($handler);
             }
 
             $this->handlers->offsetUnset($entity);

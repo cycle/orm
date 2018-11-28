@@ -103,7 +103,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $update->waitContext($this->innerKey, true);
 
         // wait for the context value to come to link 2 entities together (todo: unify with trait?)
-        $this->orm->getHeap()->onChange($related, function (State $relState) use ($update, $state) {
+        $this->orm->getHeap()->listenChange($related, function (State $relState) use ($update, $state) {
             if (!empty($value = $this->fetchKey($relState, $this->outerKey))) {
                 if ($this->fetchKey($state, $this->innerKey) != $value) {
                     $update->setContext($this->innerKey, $value);

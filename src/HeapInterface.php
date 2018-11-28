@@ -18,9 +18,11 @@ interface HeapInterface
 
     public function attach($entity, State $state, array $paths = []);
 
-    public function onChange($entity, callable $handler);
-
     public function detach($entity);
 
     public function reset();
+
+    public function listenChange($entity, callable $handler);
+
+    public function resetListeners();
 }

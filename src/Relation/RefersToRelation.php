@@ -99,21 +99,19 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
         $this->promiseScope($update, $state, $primaryKey, null, $primaryKey);
 
-        // todo: throws another command when not needed?
-
         // state either not found or key value is not set, subscribe thought the heap
         $update->waitContext($this->innerKey, true);
 
-        $this->orm->getHeap()->onChange($related, function (State $relState) use ($update) {
+        // wait for the context value to come to link 2 entities together
+        $this->orm->getHeap()->onChange($related, function (State $relState) use ($update, $state) {
             if (!empty($value = $this->fetchKey($relState, $this->outerKey))) {
-                $update->setContext($this->innerKey, $value);
+                if ($this->fetchKey($state, $this->innerKey) != $value) {
+                    $update->setContext($this->innerKey, $value);
+                    $state->setData([$this->innerKey => $value]);
+                }
+
                 $update->freeContext($this->innerKey);
             }
-        });
-
-        // update state
-        $update->onExecute(function (Update $command) use ($state) {
-            $state->setData($command->getContext());
         });
 
         return $update;

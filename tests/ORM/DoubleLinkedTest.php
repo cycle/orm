@@ -67,43 +67,43 @@ abstract class DoubleLinkedTest extends BaseTest
         ]));
     }
 
-    //    public function testCreateDoubleLink()
-    //    {
-    //        $c1 = new Cyclic();
-    //        $c2 = new Cyclic();
-    //
-    //        $c1->name = 'c1';
-    //        $c2->name = 'c2';
-    //
-    //        $c1->cyclic = $c2;
-    //        $c2->cyclic = $c1;
-    //
-    //        $this->captureWriteQueries();
-    //        $tr = new Transaction($this->orm);
-    //        $tr->store($c1);
-    //        $tr->store($c2);
-    //        $tr->run();
-    //
-    //        // 2 inserts + 1 update
-    //        $this->assertNumWrites(3);
-    //
-    //        $this->orm = $this->orm->withHeap(new Heap());
-    //        $selector = new Selector($this->orm, Cyclic::class);
-    //        list ($a, $b) = $selector->orderBy('id')->fetchAll();
-    //
-    //        $this->captureReadQueries();
-    //        $this->assertSame($b, $a->cyclic->__resolve());
-    //        $this->assertSame($a, $b->cyclic);
-    //        $this->assertNumReads(0);
-    //
-    //        $this->captureWriteQueries();
-    //        $tr = new Transaction($this->orm);
-    //        $tr->store($a);
-    //        $tr->store($b);
-    //        $tr->run();
-    //
-    //        $this->assertNumWrites(0);
-    //    }
+    public function testCreateDoubleLink()
+    {
+        $c1 = new Cyclic();
+        $c2 = new Cyclic();
+
+        $c1->name = 'c1';
+        $c2->name = 'c2';
+
+        $c1->cyclic = $c2;
+        $c2->cyclic = $c1;
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($c1);
+        $tr->store($c2);
+        $tr->run();
+
+        // 2 inserts + 1 update
+        $this->assertNumWrites(3);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, Cyclic::class);
+        list ($a, $b) = $selector->orderBy('id')->fetchAll();
+
+        $this->captureReadQueries();
+        $this->assertSame($b, $a->cyclic->__resolve());
+        $this->assertSame($a, $b->cyclic);
+        $this->assertNumReads(0);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+
+        $this->assertNumWrites(0);
+    }
 
     public function testCreateDoubleLinkWithInverted()
     {
@@ -119,10 +119,14 @@ abstract class DoubleLinkedTest extends BaseTest
         $c1->other = $c2;
         $c2->other = $c1;
 
+        $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($c1);
         $tr->store($c2);
         $tr->run();
+
+        // 2 inserts, 2 updates
+        $this->assertNumWrites(4);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, Cyclic::class);
@@ -143,9 +147,11 @@ abstract class DoubleLinkedTest extends BaseTest
         $c1->cyclic = $c1;
         $c1->other = $c1;
 
+        $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($c1);
         $tr->run();
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, Cyclic::class);

@@ -104,4 +104,14 @@ class Sequence implements CommandInterface, \IteratorAggregate
     {
         // nothing
     }
+
+    /**
+     * Handler to be invoked when command is being destructed.
+     *
+     * @param callable $closure
+     */
+    public function onDestruct(callable $closure)
+    {
+        // nothing
+    }
 }

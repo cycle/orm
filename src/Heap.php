@@ -50,7 +50,7 @@ class Heap implements HeapInterface
     public function onChange($entity, callable $handler)
     {
         if ($this->has($entity)) {
-            $this->get($entity)->onChange($handler);
+            $this->get($entity)->attachListener($handler);
 
             return;
         }
@@ -71,7 +71,7 @@ class Heap implements HeapInterface
 
         if ($this->handlers->offsetExists($entity)) {
             foreach ($this->handlers[$entity] as $handler) {
-                $state->onChange($handler);
+                $state->attachListener($handler);
             }
 
             $this->handlers->offsetUnset($entity);

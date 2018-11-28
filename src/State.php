@@ -39,7 +39,7 @@ final class State
      * @invisible
      * @var array
      */
-    private $handlers = [];
+    private $listeners = [];
 
     /** @var null|ContextualInterface */
     private $activeCommand;
@@ -86,7 +86,7 @@ final class State
         }
 
         $this->data = $data + $this->data;
-        foreach ($this->handlers as $handler) {
+        foreach ($this->listeners as $handler) {
             call_user_func($handler, $this);
         }
     }
@@ -125,19 +125,26 @@ final class State
      * Handle changes in state data.
      *
      * @internal
-     * @param callable $handler
+     * @param callable $listener
      */
-    public function onChange(callable $handler)
+    public function attachListener(callable $listener)
     {
-        $this->handlers[] = $handler;
+        $this->listeners[] = $listener;
     }
 
     /**
-     * Remove all the data change handlers.
+     * Remove state change handler.
+     *
+     * @param callable $listener
      */
-    public function resetHandlers()
+    public function removeListener(callable $listener)
     {
-        $this->handlers = [];
+        foreach ($this->listeners as $index => $handler) {
+            if ($handler === $listener) {
+                unset($this->listeners[$index]);
+                break;
+            }
+        }
     }
 
     /**
@@ -147,7 +154,7 @@ final class State
     {
         $this->data = [];
         $this->relations = [];
-        $this->handlers = [];
+        $this->listeners = [];
         $this->visited = [];
     }
 }

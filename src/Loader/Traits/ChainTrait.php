@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Loader\Traits;
 
-
 use Spiral\ORM\Exception\LoaderException;
 use Spiral\ORM\LoaderInterface;
 
@@ -56,9 +55,5 @@ trait ChainTrait
     /**
      * @inheritdoc
      */
-    abstract public function loadRelation(
-        string $relation,
-        array $options,
-        bool $join = false
-    ): LoaderInterface;
+    abstract public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface;
 }

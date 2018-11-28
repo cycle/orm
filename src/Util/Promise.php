@@ -19,15 +19,16 @@ class Promise implements PromiseInterface
     private $promise;
 
     /** @var array */
-    private $context;
+    private $scope;
 
     /**
-     * @inheritdoc
+     * @param array    $scope
+     * @param callable $promise
      */
-    public function __construct(array $context, callable $promise)
+    public function __construct(array $scope, callable $promise)
     {
         $this->promise = $promise;
-        $this->context = $context;
+        $this->scope = $scope;
     }
 
     /**
@@ -41,9 +42,9 @@ class Promise implements PromiseInterface
     /**
      * @inheritdoc
      */
-    public function __context(): array
+    public function __scope(): array
     {
-        return $this->context;
+        return $this->scope;
     }
 
     /**
@@ -52,7 +53,7 @@ class Promise implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->promise)) {
-            $this->resolved = call_user_func($this->promise, $this->context);
+            $this->resolved = call_user_func($this->promise, $this->scope);
             $this->promise = null;
         }
 

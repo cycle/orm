@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Command\Control;
 
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\Traits\DestructTrait;
 
 /**
  * Expose underlying command when condition is met. If condition not met - underlying command is
@@ -16,6 +17,8 @@ use Spiral\ORM\Command\CommandInterface;
  */
 class Condition implements CommandInterface, \IteratorAggregate
 {
+    use DestructTrait;
+
     /** @var CommandInterface */
     private $parent;
 

@@ -108,4 +108,14 @@ final class Nil implements ContextualInterface
     {
         // nothing to do
     }
+
+    /**
+     * Handler to be invoked when command is being destructed.
+     *
+     * @param callable $closure
+     */
+    public function onDestruct(callable $closure)
+    {
+        // nothing to do
+    }
 }

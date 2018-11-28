@@ -21,7 +21,7 @@ class PromiseTest extends TestCase
         });
 
         $this->assertFalse($p->__loaded());
-        $this->assertSame(['key' => 'value'], $p->__context());
+        $this->assertSame(['key' => 'value'], $p->__scope());
         $this->assertSame(['key' => 'value'], $p->__resolve());
         $this->assertTrue($p->__loaded());
     }
@@ -33,7 +33,7 @@ class PromiseTest extends TestCase
         });
 
         $this->assertFalse($p->__loaded());
-        $this->assertSame(['key' => 'value'], $p->__context());
+        $this->assertSame(['key' => 'value'], $p->__scope());
         $this->assertSame(null, $p->__resolve());
         $this->assertTrue($p->__loaded());
     }

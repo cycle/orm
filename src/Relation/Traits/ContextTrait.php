@@ -12,7 +12,10 @@ use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\State;
 
-// todo: rename, this is not promise trait
+/**
+ * Provides the ability to set the promises for command context and scopes linked
+ * to related entity state change.
+ */
 trait ContextTrait
 {
     /**
@@ -45,9 +48,12 @@ trait ContextTrait
         };
 
         $command->waitContext($localKey, $this->isRequired());
-
         call_user_func($handler, $parent);
-        $parent->onChange($handler);
+
+        $parent->attachListener($handler);
+        $command->onDestruct(function () use ($parent, $handler) {
+            $parent->removeListener($handler);
+        });
     }
 
     /**
@@ -79,7 +85,11 @@ trait ContextTrait
 
         $command->waitScope($localKey, $this->isRequired());
         call_user_func($handler, $parent);
-        $parent->onChange($handler);
+
+        $parent->attachListener($handler);
+        $command->onDestruct(function () use ($parent, $handler) {
+            $parent->removeListener($handler);
+        });
     }
 
     /**

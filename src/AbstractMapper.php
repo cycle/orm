@@ -195,7 +195,7 @@ abstract class AbstractMapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($cData);
 
-        $state->onChange(function (State $state) use ($update) {
+        $state->attachListener(function (State $state) use ($update) {
             if (!empty($state->getData()[$this->primaryKey])) {
                 $update->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
             }
@@ -233,7 +233,7 @@ abstract class AbstractMapper implements MapperInterface
 
         $state->setState(State::SCHEDULED_DELETE);
 
-        $state->onChange(function (State $state) use ($delete) {
+        $state->attachListener(function (State $state) use ($delete) {
             $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
         });
 

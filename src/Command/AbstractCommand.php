@@ -7,11 +7,15 @@
 
 namespace Spiral\ORM\Command;
 
+use Spiral\ORM\Command\Traits\DestructTrait;
+
 /**
  * Provides support for command events.
  */
 abstract class AbstractCommand implements CommandInterface
 {
+    use DestructTrait;
+
     /** @var callable[] */
     private $onExecute = [];
 

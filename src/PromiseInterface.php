@@ -27,7 +27,7 @@ interface PromiseInterface
      *
      * @return array
      */
-    public function __context(): array;
+    public function __scope(): array;
 
     /**
      * Resolve promise and return related data.

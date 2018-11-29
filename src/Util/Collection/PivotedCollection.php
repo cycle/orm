@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Collection;
+namespace Spiral\ORM\Util\Collection;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -14,10 +14,10 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
  * filtered.
  */
-class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
+class PivotedCollection extends ArrayCollection implements PivotedInterface
 {
     /** @var \SplObjectStorage */
-    private $pivotData;
+    protected $pivotContext;
 
     /**
      * @param array                  $elements
@@ -26,7 +26,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
     public function __construct(array $elements = [], \SplObjectStorage $pivotData = null)
     {
         parent::__construct($elements);
-        $this->pivotData = $pivotData ?? new \SplObjectStorage();
+        $this->pivotContext = $pivotData ?? new \SplObjectStorage();
     }
 
     /**
@@ -34,7 +34,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
      */
     public function hasPivot($element): bool
     {
-        return $this->pivotData->offsetExists($element);
+        return $this->pivotContext->offsetExists($element);
     }
 
     /**
@@ -42,7 +42,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
      */
     public function getPivot($element)
     {
-        return $this->pivotData[$element] ?? null;
+        return $this->pivotContext[$element] ?? null;
     }
 
     /**
@@ -50,14 +50,14 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
      */
     public function setPivot($element, $pivot)
     {
-        $this->pivotData[$element] = $pivot;
+        $this->pivotContext[$element] = $pivot;
     }
 
     /**
      * @inheritdoc
      */
-    public function getPivotData(): \SplObjectStorage
+    public function getPivotContext(): \SplObjectStorage
     {
-        return $this->pivotData;
+        return $this->pivotContext;
     }
 }

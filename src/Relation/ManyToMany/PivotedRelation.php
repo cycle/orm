@@ -9,9 +9,9 @@
 namespace Spiral\ORM\Relation\ManyToMany;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Collection\PivotedCollection;
-use Spiral\ORM\Collection\PivotedCollectionInterface;
-use Spiral\ORM\Collection\PromisedPivotedCollection;
+use Spiral\ORM\Util\Collection\PivotedCollection;
+use Spiral\ORM\Util\Collection\PivotedInterface;
+use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Nil;
@@ -109,7 +109,7 @@ class PivotedRelation extends Relation\AbstractRelation
             }
         );
 
-        return [new PromisedPivotedCollection($pr), $pr];
+        return [new PivotedCollectionPromise($pr), $pr];
     }
 
     /**
@@ -136,12 +136,12 @@ class PivotedRelation extends Relation\AbstractRelation
      */
     public function extract($data)
     {
-        if ($data instanceof PromisedPivotedCollection && !$data->isInitialized()) {
+        if ($data instanceof PivotedCollectionPromise && !$data->isInitialized()) {
             return $data->getPromise();
         }
 
-        if ($data instanceof PivotedCollectionInterface) {
-            return new ContextStorage($data->toArray(), $data->getPivotData());
+        if ($data instanceof PivotedInterface) {
+            return new ContextStorage($data->toArray(), $data->getPivotContext());
         }
 
         if ($data instanceof Collection) {

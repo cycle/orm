@@ -8,6 +8,9 @@
 
 namespace Spiral\ORM\Util;
 
+/**
+ * Promise with additional connection context (pivot data).
+ */
 class PivotedPromise extends Promise
 {
     /**

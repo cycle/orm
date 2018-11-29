@@ -65,10 +65,11 @@ class Transaction implements TransactionInterface
      */
     public function run()
     {
-        $commands = $this->initCommands();
         $executed = $drivers = [];
 
         try {
+            $commands = $this->initCommands();
+
             while (!empty($commands)) {
                 $pending = [];
                 $countExecuted = count($executed);
@@ -113,6 +114,9 @@ class Transaction implements TransactionInterface
             }
 
             throw $e;
+        } finally {
+            // listening scope must only exists within the transaction scope
+            $this->orm->getHeap()->resetListeners();
         }
 
         foreach (array_reverse($drivers) as $driver) {
@@ -129,9 +133,6 @@ class Transaction implements TransactionInterface
         $this->store = [];
         $this->delete = [];
         $this->managed = new \SplObjectStorage();
-
-        // listening scope must only exists within the transaction scope
-        $this->orm->getHeap()->resetListeners();
     }
 
     /**

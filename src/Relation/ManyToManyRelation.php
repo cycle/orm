@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Collection\PromisedCollection;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Sequence;
@@ -110,7 +110,7 @@ class ManyToManyRelation extends AbstractRelation
             }
         );
 
-        return [new PromisedCollection($pr), $pr];
+        return [new CollectionPromise($pr), $pr];
     }
 
     /**
@@ -134,7 +134,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     public function extract($data)
     {
-        if ($data instanceof PromisedCollection && !$data->isInitialized()) {
+        if ($data instanceof CollectionPromise && !$data->isInitialized()) {
             return $data->getPromise();
         }
 

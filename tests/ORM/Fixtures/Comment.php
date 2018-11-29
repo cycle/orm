@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Tests\Fixtures;
 
-use Spiral\ORM\Collection\PivotedCollection;
-use Spiral\ORM\Collection\PivotedCollectionInterface;
+use Spiral\ORM\Util\Collection\PivotedCollection;
+use Spiral\ORM\Util\Collection\PivotedInterface;
 
 class Comment
 {
@@ -20,7 +20,7 @@ class Comment
     /** @var User */
     public $user;
 
-    /** @var User[]|PivotedCollectionInterface */
+    /** @var User[]|PivotedInterface */
     public $favorited_by;
 
     public function __construct()

@@ -10,6 +10,9 @@ namespace Spiral\ORM\Util;
 
 use Spiral\ORM\PromiseInterface;
 
+/**
+ * Provides the ability to resolve data on-demand.
+ */
 class Promise implements PromiseInterface
 {
     /** @var mixed */

@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Collection\PromisedCollection;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
@@ -161,8 +161,8 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         list($a, $b) = $selector->orderBy('user.id')->fetchAll();
 
-        $this->assertInstanceOf(PromisedCollection::class, $a->tags);
-        $this->assertInstanceOf(PromisedCollection::class, $b->tags);
+        $this->assertInstanceOf(CollectionPromise::class, $a->tags);
+        $this->assertInstanceOf(CollectionPromise::class, $b->tags);
 
         $this->captureReadQueries();
         $this->assertCount(2, $a->tags);

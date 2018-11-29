@@ -18,8 +18,8 @@ use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
-use Spiral\ORM\Collection\PromisedCollection;
-use Spiral\ORM\Collection\PromisedPivotedCollection;
+use Spiral\ORM\Util\Collection\CollectionPromise;
+use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\ORM;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\State;
@@ -277,7 +277,7 @@ abstract class BaseTest extends TestCase
                 continue;
             }
 
-            if ($eValue instanceof PromisedCollection || $eValue instanceof PromisedPivotedCollection) {
+            if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionPromise) {
                 if (!$eValue->isInitialized()) {
                     $eValue = $eValue->getPromise();
                 } else {

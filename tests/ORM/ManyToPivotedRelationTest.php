@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Collection\PivotedCollectionInterface;
+use Spiral\ORM\Util\Collection\PivotedInterface;
 use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
@@ -188,8 +188,8 @@ abstract class ManyToPivotedRelationTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
 
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
+        $this->assertInstanceOf(PivotedInterface::class, $a->tags);
+        $this->assertInstanceOf(PivotedInterface::class, $b->tags);
 
         $this->assertTrue($a->tags->hasPivot($a->tags[0]));
         $this->assertTrue($a->tags->hasPivot($a->tags[1]));

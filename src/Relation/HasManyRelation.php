@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Collection\PromisedCollection;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
@@ -36,7 +36,7 @@ class HasManyRelation extends AbstractRelation
             }
         );
 
-        return [new PromisedCollection($pr), $pr];
+        return [new CollectionPromise($pr), $pr];
     }
 
     /**

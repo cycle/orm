@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Collection\PromisedCollection;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
@@ -134,7 +134,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(PromisedCollection::class, $u->comments);
+        $this->assertInstanceOf(CollectionPromise::class, $u->comments);
         $this->assertCount(3, $u->comments);
         $this->assertInstanceOf(Comment::class, $u->comments[0]);
         $this->assertNumReads(1);
@@ -146,7 +146,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $u = $selector->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(PromisedCollection::class, $u->comments);
+        $this->assertInstanceOf(CollectionPromise::class, $u->comments);
         $this->assertCount(0, $u->comments);
         $this->assertNumReads(1);
     }

@@ -35,14 +35,17 @@ final class State
     /** @var array */
     private $data;
 
+    /** @var null|ContextualInterface */
+    private $leadCommand;
+
     /**
+     * Listeners used to provide context and scope clarification in non complete
+     * dependency graph. Must only be used within Transaction scope.
+     *
      * @invisible
      * @var array
      */
     private $listeners = [];
-
-    /** @var null|ContextualInterface */
-    private $leadCommand;
 
     /**
      * @param int   $state

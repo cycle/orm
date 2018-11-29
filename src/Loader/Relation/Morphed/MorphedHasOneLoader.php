@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Loader\Relation\Morphed;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Loader\Relation\HasManyLoader;
+use Spiral\ORM\Loader\Relation\HasOneLoader;
 use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -17,7 +17,7 @@ use Spiral\ORM\Schema;
 /**
  * Creates an additional query constrain based on parent entity alias.
  */
-class HasManyMorphedLoader extends HasManyLoader
+class MorphedHasOneLoader extends HasOneLoader
 {
     use WhereTrait;
 

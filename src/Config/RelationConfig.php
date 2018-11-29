@@ -77,11 +77,11 @@ class RelationConfig extends InjectableConfig
                 self::RELATION => Relation\ManyToMany\PivotedRelation::class
             ],
             Relation::MORPHED_HAS_ONE      => [
-                self::LOADER   => Loader\Relation\Morphed\HasOneMorphedLoader::class,
-                self::RELATION => Relation\Morphed\HasOneMorphedRelation::class
+                self::LOADER   => Loader\Relation\Morphed\MorphedHasOneLoader::class,
+                self::RELATION => Relation\Morphed\MorphedHasOneRelation::class
             ],
             Relation::MORPHED_HAS_MANY     => [
-                self::LOADER => Loader\Relation\Morphed\HasManyMorphedLoader::class,
+                self::LOADER => Loader\Relation\Morphed\MorphedHasManyLoader::class,
                 //self::RELATION => Relation\Morphed\HasOneMorphedRelation::class
             ],
         ]);

@@ -20,7 +20,7 @@ use Spiral\ORM\Util\Promise;
 /**
  * Inverted version of belongs to morphed.
  */
-class HasOneMorphedRelation extends HasOneRelation
+class MorphedHasOneRelation extends HasOneRelation
 {
     /** @var mixed|null */
     private $morphKey;

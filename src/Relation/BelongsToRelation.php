@@ -33,18 +33,20 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $pr = new Promise(
             [$this->outerKey => $innerKey]
-            , function () use ($innerKey) {
+            , function ($context) use ($innerKey) {
             // todo: check in map
 
             // todo: CHECK IN HEAP?
             // todo: CHECK IN HEAP VIA REPOSITORY?
+
+            // todo: THIS CAN BE UNIFIED!!!
 
             if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
                 // todo: improve it?
                 return $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
             }
 
-            return $this->orm->getMapper($this->class)->getRepository()->findOne([$this->outerKey => $innerKey]);
+            return $this->orm->getMapper($this->class)->getRepository()->findOne($context);
         });
 
         return [$pr, $pr];

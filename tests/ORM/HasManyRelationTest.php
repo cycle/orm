@@ -186,6 +186,23 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals('msg 3', $a->comments[2]->message);
     }
 
+    public function testNoWrite()
+    {
+        $selector = new Selector($this->orm, User::class);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('comments')->orderBy('user.id')->fetchAll();
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+        $this->assertNumWrites(0);
+    }
+
     public function testCreateWithRelations()
     {
         $e = new User();

@@ -181,7 +181,7 @@ abstract class RelationLoader extends AbstractLoader
      */
     protected function initQuery(): SelectQuery
     {
-        return $this->getDatabase()->select()->from($this->getJoinedTable());
+        return $this->getDatabase()->select()->from($this->getJoinTable());
     }
 
     /**
@@ -236,11 +236,19 @@ abstract class RelationLoader extends AbstractLoader
     }
 
     /**
+     * @return string
+     */
+    protected function getJoinMethod(): string
+    {
+        return $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT';
+    }
+
+    /**
      * Joined table name and alias.
      *
      * @return string
      */
-    protected function getJoinedTable(): string
+    protected function getJoinTable(): string
     {
         return "{$this->define(Schema::TABLE)} AS {$this->getAlias()}";
     }

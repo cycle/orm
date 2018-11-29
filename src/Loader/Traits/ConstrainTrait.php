@@ -9,6 +9,7 @@ namespace Spiral\ORM\Loader\Traits;
 
 
 use Spiral\Database\Query\SelectQuery;
+use Spiral\ORM\Util\AliasDecorator;
 
 /**
  * Provides ability to set LIMIT and ORDER BY in relation loaders.

@@ -11,6 +11,8 @@ namespace Spiral\ORM\Loader\Relation;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\Traits\ConstrainTrait;
+use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\Node\AbstractNode;
 use Spiral\ORM\Node\PivotedNode;
 use Spiral\ORM\ORMInterface;
@@ -19,17 +21,7 @@ use Spiral\ORM\Schema;
 
 class ManyToManyLoader extends RelationLoader
 {
-    // todo: where trait
-    // todo: constrain trait
-
-    /**
-     * When target role is null parent role to be used. Redefine this variable to revert behaviour
-     * of ManyToMany relation.
-     *
-     * @see ManyToMorphedRelation
-     * @var string|null
-     */
-    //  private $targetRole = null;
+    use WhereTrait, ConstrainTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -69,7 +61,7 @@ class ManyToManyLoader extends RelationLoader
 
         if ($this->isJoined()) {
             $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->getJoinMethod(),
                 $this->pivotTable() . ' AS ' . $this->pivotAlias())
                 ->on(
                     $this->pivotKey(Relation::THOUGHT_INNER_KEY),
@@ -77,48 +69,48 @@ class ManyToManyLoader extends RelationLoader
                 );
         } else {
             $query->innerJoin(
-                $this->pivotTable() . ' AS ' . $this->pivotAlias())
-                ->on(
-                    $this->pivotKey(Relation::THOUGHT_OUTER_KEY),
-                    $this->localKey(Relation::OUTER_KEY)
-                )->where(
-                    $this->pivotKey(Relation::THOUGHT_INNER_KEY),
-                    new Parameter($outerKeys)
-                );
+                $this->pivotTable() . ' AS ' . $this->pivotAlias()
+            )->on(
+                $this->pivotKey(Relation::THOUGHT_OUTER_KEY),
+                $this->localKey(Relation::OUTER_KEY)
+            )->where(
+                $this->pivotKey(Relation::THOUGHT_INNER_KEY),
+                new Parameter($outerKeys)
+            );
 
-            //   $this->configureWindow($query, $this->options['orderBy'], $this->options['limit']);
+            $this->configureWindow($query, $this->options['orderBy'], $this->options['limit']);
         }
 
-        //When relation is joined we will use ON statements, when not - normal WHERE
+        // when relation is joined we will use ON statements, when not - normal WHERE
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
-        //Pivot conditions specified in relation schema
-        //        $this->setWhere(
-        //            $query,
-        //            $this->pivotAlias(),
-        //            $whereTarget,
-        //            $this->schema[Relation::WHERE_PIVOT]
-        //        );
+        // pivot conditions specified in relation schema
+        $this->setWhere(
+            $query,
+            $this->pivotAlias(),
+            $whereTarget,
+            $this->define(Relation::PIVOT_SCOPE)
+        );
 
-        //Pivot conditions specified by user
-        // $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);
+        // pivot conditions specified by user
+        $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);
 
         if ($this->isJoined()) {
-            //Actual data is always INNER join
+            // actual data is always INNER join
             $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                $this->getJoinedTable()
+                $this->getJoinMethod(),
+                $this->getJoinTable()
             )->on(
                 $this->localKey(Relation::OUTER_KEY),
                 $this->pivotKey(Relation::THOUGHT_OUTER_KEY)
             );
         }
 
-        //Where conditions specified in relation definition
-        //  $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Relation::WHERE]);
+        // where conditions specified in relation definition
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::SCOPE));
 
-        //User specified WHERE conditions
-        // $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+        // user specified WHERE conditions
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
 
         return parent::configureQuery($query);
     }

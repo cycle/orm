@@ -11,6 +11,8 @@ namespace Spiral\ORM\Loader\Relation;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\Traits\ConstrainTrait;
+use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\Node\AbstractNode;
 use Spiral\ORM\Node\ArrayNode;
 use Spiral\ORM\ORMInterface;
@@ -19,8 +21,7 @@ use Spiral\ORM\Schema;
 
 class HasManyLoader extends RelationLoader
 {
-    // todo: where trait
-    // todo: constrain trait
+    use WhereTrait, ConstrainTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -60,8 +61,8 @@ class HasManyLoader extends RelationLoader
 
         if ($this->isJoined()) {
             $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                $this->getJoinedTable()
+                $this->getJoinMethod(),
+                $this->getJoinTable()
             )->on(
                 $localKey,
                 $this->parentKey(Relation::INNER_KEY)
@@ -70,25 +71,17 @@ class HasManyLoader extends RelationLoader
             // relation is loaded using external query
             $query->where($localKey, 'IN', new Parameter($outerKeys));
 
-            // todo: configureWindow
+            $this->configureWindow($query, $this->options['orderBy'], $this->options['limit']);
         }
 
-        // todo: where configuration
+        //When relation is joined we will use ON statements, when not - normal WHERE
+        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
-        //todo: Morphed records
-        //        if (!empty($this->schema[Record::MORPH_KEY])) {
-        //            $this->setWhere(
-        //                $query,
-        //                $this->getAlias(),
-        //                $this->isJoined() ? 'onWhere' : 'where',
-        //                [
-        //                    $this->localKey(Record::MORPH_KEY) => $this->orm->define(
-        //                        $this->parent->getClass(),
-        //                        ORMInterface::R_ROLE_NAME
-        //                    )
-        //                ]
-        //            );
-        //        }
+        //Where conditions specified in relation definition
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::SCOPE));
+
+        //User specified WHERE conditions
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
 
         return parent::configureQuery($query);
     }

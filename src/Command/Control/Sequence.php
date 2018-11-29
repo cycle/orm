@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CommandInterface;
 /**
  * Wraps multiple commands into one sequence.
  */
-class Sequence implements CommandInterface, \IteratorAggregate
+class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 {
     /** @var CommandInterface[] */
     private $commands = [];
@@ -43,6 +43,14 @@ class Sequence implements CommandInterface, \IteratorAggregate
 
             yield $command;
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function count(): int
+    {
+        return count($this->commands);
     }
 
     /**

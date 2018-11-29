@@ -48,6 +48,12 @@ class User
     /** @var Nested */
     public $owned;
 
+    /** @var Image */
+    public $image;
+
+    /** @var Post[]|Collection */
+    public $posts;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();

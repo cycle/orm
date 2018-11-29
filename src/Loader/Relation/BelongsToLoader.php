@@ -48,8 +48,8 @@ class BelongsToLoader extends RelationLoader
 
         if ($this->isJoined()) {
             $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                $this->getJoinedTable()
+                $this->getJoinMethod(),
+                $this->getJoinTable()
             )->on(
                 $localKey,
                 $this->parentKey(Relation::INNER_KEY)

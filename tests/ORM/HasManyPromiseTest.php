@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
@@ -19,6 +18,7 @@ use Spiral\ORM\Tests\Fixtures\Comment;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 
 abstract class HasManyPromiseTest extends BaseTest
 {
@@ -156,7 +156,20 @@ abstract class HasManyPromiseTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
-        $this->enableProfiling();
+        $this->captureReadQueries();
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
+    }
+
+    public function testNoChangesWithNoChildren()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $u = $selector->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
         $this->captureWriteQueries();

@@ -8,13 +8,13 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
 class HasManyRelation extends AbstractRelation
@@ -30,9 +30,9 @@ class HasManyRelation extends AbstractRelation
 
         $pr = new Promise(
             [$this->outerKey => $innerKey],
-            function () use ($innerKey) {
-                // todo: where?
-                return $this->orm->getMapper($this->class)->getRepository()->findAll([$this->outerKey => $innerKey]);
+            function (array $context) use ($innerKey) {
+                // todo: where is part of CONTEXT - yeeeaeh ????
+                return $this->orm->getMapper($this->class)->getRepository()->findAll($context);
             }
         );
 

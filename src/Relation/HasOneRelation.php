@@ -11,6 +11,7 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Condition;
+use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\PrimarySequence;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\State;
@@ -31,21 +32,17 @@ class HasOneRelation extends AbstractRelation
             return [$i, $i];
         }
 
-        // todo: can i unify it?
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
-            return [null, null];
-        }
-
         $pr = new Promise(
             [$this->outerKey => $innerKey],
-            function () use ($innerKey) {
+            function ($context) use ($innerKey) {
                 // todo: check in map
 
+                // todo: improve it
                 if ($this->orm->getHeap()->hasPath("{$this->class}:{$this->outerKey}.$innerKey")) {
                     return $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
                 }
 
-                return $this->orm->getMapper($this->class)->getRepository()->findOne([$this->outerKey => $innerKey]);
+                return $this->orm->getMapper($this->class)->getRepository()->findOne($context);
             }
         );
 
@@ -81,6 +78,10 @@ class HasOneRelation extends AbstractRelation
         }
 
         if (empty($related)) {
+            if (count($sequence) === 0) {
+                return new Nil();
+            }
+
             // nothing to persist
             return $sequence;
         }

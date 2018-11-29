@@ -93,6 +93,10 @@ abstract class AbstractRelation implements RelationInterface
 
     protected function getState($entity): ?State
     {
+        if (is_null($entity)) {
+            return null;
+        }
+
         if ($entity instanceof PromiseInterface) {
             return new State(State::PROMISED, $entity->__scope());
         }

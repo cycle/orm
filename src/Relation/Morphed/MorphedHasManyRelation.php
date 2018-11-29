@@ -8,18 +8,15 @@
 
 namespace Spiral\ORM\Relation\Morphed;
 
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
-use Spiral\ORM\Relation\HasOneRelation;
+use Spiral\ORM\Relation\HasManyRelation;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
-/**
- * Inverted version of belongs to morphed.
- */
-class MorphedHasOneRelation extends HasOneRelation
+class MorphedHasManyRelation extends HasManyRelation
 {
     /** @var mixed|null */
     private $morphKey;
@@ -38,45 +35,37 @@ class MorphedHasOneRelation extends HasOneRelation
 
     public function initPromise(State $state, $data): array
     {
+        // todo: here we need paths (!)
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return [null, null];
         }
 
-        // todo: need simple promise :)
-
-        $promise = new Promise(
+        $pr = new Promise(
             [
                 $this->outerKey => $innerKey,
                 $this->morphKey => $state->getAlias()
             ],
-            function ($context) {
-                // todo: check in map
-                return $this->orm->getMapper($this->class)->getRepository()->findOne($context);
+            function (array $scope) use ($innerKey) {
+                return $this->orm->getMapper($this->class)->getRepository()->findAll($scope);
             }
         );
 
-        return [$promise, $promise];
+        return [new CollectionPromise($pr), $pr];
     }
 
     /**
-     * @inheritdoc
+     * Persist related object.
+     *
+     * @param State  $parent
+     * @param object $related
+     * @return ContextualInterface
      */
-    public function queueRelation(
-        ContextualInterface $parent,
-        $entity,
-        State $state,
-        $related,
-        $original
-    ): CommandInterface {
-        $store = parent::queueRelation($parent, $entity, $state, $related, $original);
+    protected function queueStore(State $parent, $related): ContextualInterface
+    {
+        $store = parent::queueStore($parent, $related);
 
-        if ($store instanceof ContextualInterface) {
-            // todo: work it out
-            if (!is_null($related)) {
-                if ($this->fetchKey($this->getState($related), $this->morphKey) != $state->getAlias()) {
-                    $store->setContext($this->morphKey, $state->getAlias());
-                }
-            }
+        if ($this->fetchKey($this->getState($related), $this->morphKey) != $parent->getAlias()) {
+            $store->setContext($this->morphKey, $parent->getAlias());
         }
 
         return $store;

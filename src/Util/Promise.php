@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Util;
 
+use Spiral\ORM\MapperInterface;
 use Spiral\ORM\PromiseInterface;
 
 /**

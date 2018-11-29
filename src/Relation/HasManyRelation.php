@@ -30,9 +30,9 @@ class HasManyRelation extends AbstractRelation
 
         $pr = new Promise(
             [$this->outerKey => $innerKey],
-            function (array $context) use ($innerKey) {
+            function (array $scope) use ($innerKey) {
                 // todo: where is part of CONTEXT - yeeeaeh ????
-                return $this->orm->getMapper($this->class)->getRepository()->findAll($context);
+                return $this->orm->getMapper($this->class)->getRepository()->findAll($scope);
             }
         );
 
@@ -51,6 +51,7 @@ class HasManyRelation extends AbstractRelation
     ): CommandInterface {
 
         // todo: i can do quick compare here?
+        // todo: why there is so many todos?
 
         if ($related instanceof PromiseInterface) {
             // todo: resolve both original and related
@@ -93,17 +94,17 @@ class HasManyRelation extends AbstractRelation
     /**
      * Persist related object.
      *
-     * @param State  $parentState
+     * @param State  $parent
      * @param object $related
-     * @return CommandInterface
+     * @return ContextualInterface
      */
-    protected function queueStore(State $parentState, $related): CommandInterface
+    protected function queueStore(State $parent, $related): ContextualInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);
         $relState->addReference();
 
-        $this->promiseContext($relStore, $parentState, $this->innerKey, $relState, $this->outerKey);
+        $this->promiseContext($relStore, $parent, $this->innerKey, $relState, $this->outerKey);
 
         return $relStore;
     }
@@ -111,11 +112,11 @@ class HasManyRelation extends AbstractRelation
     /**
      * Remove one of related objects.
      *
-     * @param State  $parentState
+     * @param State  $parent
      * @param object $related
      * @return CommandInterface
      */
-    protected function queueDelete(State $parentState, $related): CommandInterface
+    protected function queueDelete(State $parent, $related): CommandInterface
     {
         $origState = $this->getState($related);
         $origState->decReference();

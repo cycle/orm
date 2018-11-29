@@ -13,7 +13,14 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Exception\TransactionException;
 
-class Transaction implements TransactionInterface
+/**
+ * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
+ * can operate as UnitOfWork. Multiple transactions can co-exists in one application.
+ *
+ * Internally, upon "run", transaction will request mappers to generate graph of linked commands to create, update or
+ * delete entities.
+ */
+final class Transaction implements TransactionInterface
 {
     /** @var ORMInterface */
     private $orm;

@@ -10,7 +10,7 @@ php:
   - 7.2
 
 env:
-  - "COVERAGE=ALL DB=ALL"
+  - "DB=ALL COVERAGE=ALL"
 
 before_install:
   - cd tests
@@ -32,6 +32,8 @@ jobs:
     # PHP Nightly builds does not support SQLServer yet
     - stage: Test
       php: nightly
+      env:
+        - "DB=postgres,mysql,sqlite COVERAGE=ALL"
       before_install:
         - cd tests
         - docker-compose up -d

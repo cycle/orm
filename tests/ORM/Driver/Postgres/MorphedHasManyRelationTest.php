@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\Postgres; 
 
-class MorphedHasOnePromiseTest extends \Spiral\ORM\Tests\Morphed\MorphedHasOnePromiseTest 
+class MorphedHasManyRelationTest extends \Spiral\ORM\Tests\Morphed\MorphedHasManyRelationTest
 { 
     const DRIVER = "postgres"; 
 }

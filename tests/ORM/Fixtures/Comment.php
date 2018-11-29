@@ -23,6 +23,8 @@ class Comment
     /** @var User[]|PivotedInterface */
     public $favorited_by;
 
+    public $parent;
+
     public function __construct()
     {
         $this->favorited_by = new PivotedCollection();

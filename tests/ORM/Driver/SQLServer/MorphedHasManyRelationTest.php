@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\SQLServer; 
 
-class MorphedHasOneRelationTest extends \Spiral\ORM\Tests\Morphed\MorphedHasOneRelationTest 
+class MorphedHasManyRelationTest extends \Spiral\ORM\Tests\Morphed\MorphedHasManyRelationTest
 { 
     const DRIVER = "sqlserver"; 
 }

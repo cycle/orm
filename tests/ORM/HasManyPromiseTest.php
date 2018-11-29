@@ -247,7 +247,6 @@ abstract class HasManyPromiseTest extends BaseTest
         $this->assertCount(0, $b->comments);
 
         $b->comments = $a->comments->slice(0, 2);
-
         foreach ($b->comments as $c) {
             $a->comments->removeElement($c);
         }
@@ -257,10 +256,20 @@ abstract class HasManyPromiseTest extends BaseTest
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);
 
+        $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
+        $this->assertNumWrites(2);
+
+        // consecutive
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($a);
+        $tr->store($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
 

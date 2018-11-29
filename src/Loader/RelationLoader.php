@@ -24,6 +24,7 @@ abstract class RelationLoader extends AbstractLoader
     use ColumnsTrait;
 
     // require to properly calculate unique column aliases while minified
+    // todo: i need stable approach (?)
     private static $countLevels = 0;
 
     /**

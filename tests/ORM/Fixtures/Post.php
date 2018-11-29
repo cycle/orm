@@ -14,4 +14,5 @@ class Post
     public $title;
     public $content;
     public $image;
+    public $comments;
 }

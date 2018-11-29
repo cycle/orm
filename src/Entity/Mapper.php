@@ -163,7 +163,11 @@ class Mapper implements MapperInterface
 
         if (is_null($state)) {
             // todo: do we need to track PK?
-            $state = new State(State::NEW, $columns);
+            $state = new State(
+                State::NEW,
+                $columns,
+                $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
+            );
             $this->orm->getHeap()->attach($entity, $state);
         } else {
             // todo: do i need it here? do it in complete? OR NOT???

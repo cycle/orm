@@ -12,6 +12,7 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
+use Spiral\ORM\Schema;
 use Spiral\ORM\State;
 
 abstract class AbstractRelation implements RelationInterface
@@ -98,7 +99,11 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         if ($entity instanceof PromiseInterface) {
-            return new State(State::PROMISED, $entity->__scope());
+            return new State(
+                State::PROMISED,
+                $entity->__scope(),
+                $this->orm->getSchema()->define($this->class, Schema::ALIAS)
+            );
         }
 
         return $this->orm->getHeap()->get($entity);

@@ -49,9 +49,9 @@ class HasOneMorphedRelation extends HasOneRelation
         $pr = new Promise(
             [
                 $this->outerKey => $innerKey,
-                $this->morphKey => 11 // need role from state!!!!!!!
+                $this->morphKey => $state->getAlias()
             ],
-            function ($context) {
+            function ($context) use ($state) {
                 // todo: check in map
                 return $this->orm->getMapper($this->class)->getRepository()->findOne($context);
             }

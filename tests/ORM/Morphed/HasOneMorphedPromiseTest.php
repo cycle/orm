@@ -10,6 +10,7 @@ namespace Spiral\ORM\Tests\Morphed;
 
 use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
+use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -20,8 +21,7 @@ use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-
-abstract class HasOneMorphedRelationTest extends BaseTest
+abstract class HasOneMorphedPromiseTest extends BaseTest
 {
     use TableTrait;
 
@@ -143,188 +143,25 @@ abstract class HasOneMorphedRelationTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
-    {
-        $selector = new Selector($this->orm, User::class);
-        $selector->load('image')->orderBy('user.id');
-
-        $this->assertEquals([
-            [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
-                'balance' => 100.0,
-                'image'   => [
-                    'id'          => 1,
-                    'parent_id'   => 1,
-                    'parent_type' => 'user',
-                    'url'         => 'user-image.png',
-                ],
-            ],
-            [
-                'id'      => 2,
-                'email'   => 'another@world.com',
-                'balance' => 200.0,
-                'image'   =>
-                    [
-                        'id'          => 3,
-                        'parent_id'   => 2,
-                        'parent_type' => 'user',
-                        'url'         => 'user-2-image.png',
-                    ],
-            ],
-        ], $selector->fetchData());
-    }
-
-    public function testFetchRelationAnother()
-    {
-        $selector = new Selector($this->orm, Post::class);
-        $selector->load('image')->orderBy('post.id');
-
-        $this->assertEquals([
-            [
-                'id'      => 1,
-                'user_id' => 1,
-                'title'   => 'post 1',
-                'content' => 'post 1 body',
-                'image'   => [
-                    'id'          => 2,
-                    'parent_id'   => 1,
-                    'parent_type' => 'post',
-                    'url'         => 'post-image.png',
-                ],
-            ],
-            [
-                'id'      => 2,
-                'user_id' => 1,
-                'title'   => 'post 2',
-                'content' => 'post 2 body',
-                'image'   => [
-                    'id'          => 4,
-                    'parent_id'   => 2,
-                    'parent_type' => 'post',
-                    'url'         => 'post-2-image.png',
-                ],
-            ],
-            [
-                'id'      => 3,
-                'user_id' => 2,
-                'title'   => 'post 3',
-                'content' => 'post 3 body',
-                'image'   => [
-                    'id'          => 5,
-                    'parent_id'   => 3,
-                    'parent_type' => 'post',
-                    'url'         => 'post-3-image.png',
-                ],
-            ],
-            [
-                'id'      => 4,
-                'user_id' => 2,
-                'title'   => 'post 4',
-                'content' => 'post 4 body',
-                'image'   => null,
-            ],
-        ], $selector->fetchData());
-    }
-
-    public function testFetchOverlapping()
-    {
-        $selector = new Selector($this->orm, User::class);
-        $selector->load('image')
-            ->load('posts.image')
-            ->orderBy('user.id');
-
-
-        $this->assertEquals([
-            [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
-                'balance' => 100.0,
-                'image'   => [
-                    'id'          => 1,
-                    'parent_id'   => 1,
-                    'parent_type' => 'user',
-                    'url'         => 'user-image.png',
-                ],
-                'posts'   => [
-                    [
-                        'id'      => 1,
-                        'user_id' => 1,
-                        'title'   => 'post 1',
-                        'content' => 'post 1 body',
-                        'image'   => [
-                            'id'          => 2,
-                            'parent_id'   => 1,
-                            'parent_type' => 'post',
-                            'url'         => 'post-image.png',
-                        ],
-                    ],
-                    [
-                        'id'      => 2,
-                        'user_id' => 1,
-                        'title'   => 'post 2',
-                        'content' => 'post 2 body',
-                        'image'   => [
-                            'id'          => 4,
-                            'parent_id'   => 2,
-                            'parent_type' => 'post',
-                            'url'         => 'post-2-image.png',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id'      => 2,
-                'email'   => 'another@world.com',
-                'balance' => 200.0,
-                'image'   => [
-                    'id'          => 3,
-                    'parent_id'   => 2,
-                    'parent_type' => 'user',
-                    'url'         => 'user-2-image.png',
-                ],
-                'posts'   => [
-                    [
-                        'id'      => 3,
-                        'user_id' => 2,
-                        'title'   => 'post 3',
-                        'content' => 'post 3 body',
-                        'image'   => [
-                            'id'          => 5,
-                            'parent_id'   => 3,
-                            'parent_type' => 'post',
-                            'url'         => 'post-3-image.png',
-                        ],
-                    ],
-                    [
-                        'id'      => 4,
-                        'user_id' => 2,
-                        'title'   => 'post 4',
-                        'content' => 'post 4 body',
-                        'image'   => null,
-                    ],
-                ],
-            ],
-        ], $selector->fetchData());
-    }
-
     public function testAccessEntity()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
-        $this->assertInstanceOf(Image::class, $a->image);
-        $this->assertInstanceOf(Image::class, $b->image);
+        $this->assertInstanceOf(PromiseInterface::class, $a->image);
+        $this->assertInstanceOf(PromiseInterface::class, $b->image);
 
-        $this->assertSame('user-image.png', $a->image->url);
-        $this->assertSame('user-2-image.png', $b->image->url);
+        $this->captureReadQueries();
+        $this->assertSame('user-image.png', $a->image->__resolve()->url);
+        $this->assertSame('user-2-image.png', $b->image->__resolve()->url);
+        $this->assertNumReads(2);
     }
 
     public function testNoWrite()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $this->enableProfiling();
@@ -340,7 +177,7 @@ abstract class HasOneMorphedRelationTest extends BaseTest
     public function testSetNull()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $a->image = null;
@@ -361,43 +198,47 @@ abstract class HasOneMorphedRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
-        $this->assertSame(null, $a->image);
-        $this->assertSame('user-2-image.png', $b->image->url);
+        $this->assertInstanceOf(PromiseInterface::class, $a->image);
+        $this->assertSame('user-2-image.png', $b->image->__resolve()->url);
     }
 
     public function testExchangeParentsSameType()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         list($a->image, $b->image) = [$b->image, $a->image];
 
+        $this->captureReadQueries();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
+        $this->assertNumReads(2);
         $this->assertNumWrites(2);
 
         // consecutive
+        $this->captureReadQueries();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($a);
         $tr->store($b);
         $tr->run();
+        $this->assertNumReads(0);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
-        $this->assertSame('user-image.png', $b->image->url);
-        $this->assertSame('user-2-image.png', $a->image->url);
+        $this->assertSame('user-image.png', $b->image->__resolve()->url);
+        $this->assertSame('user-2-image.png', $a->image->__resolve()->url);
     }
 
     public function testReplaceExisted()
@@ -405,7 +246,6 @@ abstract class HasOneMorphedRelationTest extends BaseTest
         $count = (new Selector($this->orm, Image::class))->count();
 
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image');
         $u = $selector->wherePK(1)->fetchOne();
 
         $u->image = new Image();
@@ -426,10 +266,9 @@ abstract class HasOneMorphedRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, User::class);
-        $selector->load('image');
         $u = $selector->wherePK(1)->fetchOne();
 
-        $this->assertSame('new.png', $u->image->url);
+        $this->assertSame('new.png', $u->image->__resolve()->url);
         $this->assertSame($count, (new Selector($this->orm, Image::class))->count());
     }
 
@@ -457,66 +296,71 @@ abstract class HasOneMorphedRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, Post::class);
-        $selector->load('image');
         $p = $selector->wherePK(5)->fetchOne();
 
         $this->assertSame("post title", $p->title);
-        $this->assertSame("new-post.png", $p->image->url);
+        $this->assertSame("new-post.png", $p->image->__resolve()->url);
     }
 
     public function testMoveToAnotherParent()
     {
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
+        $u = (new Selector($this->orm, User::class))->fetchOne(['user.id' => 1]);
+        $p = (new Selector($this->orm, Post::class))->fetchOne(['post.id' => 1]);
 
         $u->image = $p->image;
         $p->image = null;
 
+        $this->captureReadQueries();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->store($p);
         $tr->run();
         $this->assertNumWrites(2);
+        $this->assertNumReads(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
+        $u = (new Selector($this->orm, User::class))->fetchOne(['user.id' => 1]);
+        $p = (new Selector($this->orm, Post::class))->fetchOne(['post.id' => 1]);
 
-        $this->assertSame("post-image.png", $u->image->url);
-        $this->assertSame(null, $p->image);
+        $this->assertSame("post-image.png", $u->image->__resolve()->url);
+        $this->assertSame(null, $p->image->__resolve());
     }
 
 
     public function testChangeParents()
     {
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
+        $u = (new Selector($this->orm, User::class))->fetchOne(['user.id' => 1]);
+        $p = (new Selector($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
         list($u->image, $p->image) = [$p->image, $u->image];
 
+        $this->captureReadQueries();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->store($p);
         $tr->run();
         $this->assertNumWrites(2);
+        $this->assertNumReads(2);
 
         // no changes expected
+        $this->captureReadQueries();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->store($p);
         $tr->run();
         $this->assertNumWrites(0);
+        $this->assertNumReads(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
+        $u = (new Selector($this->orm, User::class))->fetchOne(['user.id' => 1]);
+        $p = (new Selector($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
-        $this->assertSame("post-2-image.png", $u->image->url);
-        $this->assertSame("user-image.png", $p->image->url);
+        $this->assertSame("post-2-image.png", $u->image->__resolve()->url);
+        $this->assertSame("user-image.png", $p->image->__resolve()->url);
     }
 }

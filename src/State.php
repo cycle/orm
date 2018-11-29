@@ -29,6 +29,9 @@ final class State
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
 
+    /** @var string */
+    private $alias;
+
     /** @var int */
     private $state;
 
@@ -48,13 +51,23 @@ final class State
     private $listeners = [];
 
     /**
-     * @param int   $state
-     * @param array $data
+     * @param int    $state
+     * @param array  $data
+     * @param string $alias
      */
-    public function __construct(int $state, array $data)
+    public function __construct(int $state, array $data, string $alias)
     {
         $this->state = $state;
         $this->data = $data;
+        $this->alias = $alias;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAlias(): string
+    {
+        return $this->alias;
     }
 
     /**

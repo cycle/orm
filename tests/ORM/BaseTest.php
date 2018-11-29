@@ -27,7 +27,6 @@ use Spiral\ORM\Util\ContextStorage;
 use Spiral\ORM\Util\PivotedPromise;
 
 // todo: TEST WITH FK
-// todo: TEST WITH
 abstract class BaseTest extends TestCase
 {
     // tests configuration
@@ -96,10 +95,6 @@ abstract class BaseTest extends TestCase
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
         $this->dbal = null;
-
-        if (function_exists('gc_collect_cycles')) {
-            gc_collect_cycles();
-        }
     }
 
     /**

@@ -206,7 +206,7 @@ class ORM implements ORMInterface
         list($entity, $filtered) = $mapper->prepare($data);
 
         // todo: i do not need primary key, but i do need to update paths in mapper
-        $state = new State($state, $filtered);
+        $state = new State($state, $filtered, $this->schema->define(get_class($entity), Schema::ALIAS));
         $this->heap->attach($entity, $state, $this->getPaths($entity, $entityID ?? null, $data));
 
         // hydrate entity with it's data, relations and proxies

@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\MySQL; 
 
-class HasOneMorphedRelationTest extends \Spiral\ORM\Tests\Morphed\HasOneMorphedRelationTest 
+class MorphedHasOneRelationTest extends \Spiral\ORM\Tests\Morphed\MorphedHasOneRelationTest
 { 
     const DRIVER = "mysql"; 
 }

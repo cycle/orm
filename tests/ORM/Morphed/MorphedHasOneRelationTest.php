@@ -21,7 +21,7 @@ use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
 
-abstract class HasOneMorphedRelationTest extends BaseTest
+abstract class MorphedHasOneRelationTest extends BaseTest
 {
     use TableTrait;
 

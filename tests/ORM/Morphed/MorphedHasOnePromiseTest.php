@@ -21,7 +21,7 @@ use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-abstract class HasOneMorphedPromiseTest extends BaseTest
+abstract class MorphedHasOnePromiseTest extends BaseTest
 {
     use TableTrait;
 

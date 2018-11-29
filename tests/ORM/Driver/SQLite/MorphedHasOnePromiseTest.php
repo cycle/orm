@@ -8,7 +8,7 @@
  
 namespace Spiral\ORM\Tests\Driver\SQLite; 
 
-class HasOneMorphedPromiseTest extends \Spiral\ORM\Tests\Morphed\HasOneMorphedPromiseTest 
+class MorphedHasOnePromiseTest extends \Spiral\ORM\Tests\Morphed\MorphedHasOnePromiseTest
 { 
     const DRIVER = "sqlite"; 
 }

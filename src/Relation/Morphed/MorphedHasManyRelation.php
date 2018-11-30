@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Relation\Morphed;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -37,7 +38,7 @@ class MorphedHasManyRelation extends HasManyRelation
     {
         // todo: here we need paths (!)
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
-            return [null, null];
+            return [new ArrayCollection(), null];
         }
 
         $pr = new Promise(

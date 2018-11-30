@@ -288,11 +288,25 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $this->assertCount(2, $a->comments);
         $this->assertCount(3, $b->comments);
 
-        $this->assertSame('second comment', $a->comments[0]->message);
-        $this->assertSame('third comment', $a->comments[1]->message);
 
-        $this->assertSame('first comment', $b->comments[0]->message);
-        $this->assertSame('post 1 comment', $b->comments[1]->message);
-        $this->assertSame('post 1.1 comment', $b->comments[2]->message);
+        $this->assertTrue($a->comments->exists(function ($i, $c) {
+            return $c->message == 'third comment';
+        }));
+
+        $this->assertTrue($a->comments->exists(function ($i, $c) {
+            return $c->message == 'second comment';
+        }));
+
+        $this->assertTrue($b->comments->exists(function ($i, $c) {
+            return $c->message == 'first comment';
+        }));
+
+        $this->assertTrue($b->comments->exists(function ($i, $c) {
+            return $c->message == 'post 1 comment';
+        }));
+
+        $this->assertTrue($b->comments->exists(function ($i, $c) {
+            return $c->message == 'post 1.1 comment';
+        }));
     }
 }

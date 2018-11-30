@@ -42,7 +42,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [null, null];
         }
 
-        // parent class
+        // parent class (todo: i don't need it!!!!!!!! use aliases directly)
         $parentClass = $this->orm->getSchema()->getClass($this->fetchKey($state, $this->morphKey));
 
         if ($this->orm->getHeap()->hasPath("{$parentClass}:$innerKey")) {
@@ -107,10 +107,6 @@ class BelongsToMorphedRelation extends BelongsToRelation
 
     protected function getState($entity): ?State
     {
-        if (is_null($entity)) {
-            return null;
-        }
-
         if ($entity instanceof PromiseInterface) {
             $scope = $entity->__scope();
 
@@ -121,6 +117,6 @@ class BelongsToMorphedRelation extends BelongsToRelation
             );
         }
 
-        return $this->orm->getHeap()->get($entity);
+        return parent::getState($entity);
     }
 }

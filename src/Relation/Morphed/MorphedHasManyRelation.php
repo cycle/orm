@@ -67,6 +67,7 @@ class MorphedHasManyRelation extends HasManyRelation
 
         $relState = $this->getState($related);
         if ($this->fetchKey($relState, $this->morphKey) != $parent->getAlias()) {
+            // polish it
             $store->setContext($this->morphKey, $parent->getAlias());
             $relState->setData([$this->morphKey => $parent->getAlias()]);
         }

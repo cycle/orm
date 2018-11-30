@@ -185,20 +185,9 @@ class Mapper implements MapperInterface
 
         $insert->onExecute(function (Insert $command) use ($entity, $state) {
             $state->setData([$this->primaryKey => $command->getInsertID()] + $command->getContext());
-        });
-
-        $insert->onComplete(function (Insert $command) use ($entity, $state) {
             $state->setState(State::LOADED);
+
             $this->hydrate($entity, $state->getData());
-        });
-
-        $insert->onRollBack(function (Insert $command) use ($entity, $state) {
-            // detach or change the state ?
-            // todo: need test for that (!)
-            $this->orm->getHeap()->detach($entity);
-
-            // todo: reset state and data
-            $state->setState(State::NEW);
         });
 
         return $insert;
@@ -219,7 +208,6 @@ class Mapper implements MapperInterface
             [$this->primaryKey => $oData[$this->primaryKey] ?? $eData[$this->primaryKey] ?? null]
         );
 
-        $current = $state->getState();
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($cData);
 
@@ -231,16 +219,8 @@ class Mapper implements MapperInterface
 
         $update->onExecute(function (Update $command) use ($entity, $state) {
             $state->setData($command->getContext());
-        });
-
-        $update->onComplete(function (Update $command) use ($entity, $state) {
             $state->setState(State::LOADED);
             $this->hydrate($entity, $state->getData());
-        });
-
-        $update->onRollBack(function () use ($state, $current) {
-            //todo: rollback data
-            $state->setState($current);
         });
 
         return $update;
@@ -257,8 +237,6 @@ class Mapper implements MapperInterface
             [$this->primaryKey => $state->getData()[$this->primaryKey] ?? $this->extract($entity)[$this->primaryKey] ?? null]
         );
 
-        $current = $state->getState();
-
         $state->setState(State::SCHEDULED_DELETE);
 
         $state->addListener(function (State $state) use ($delete) {
@@ -267,11 +245,6 @@ class Mapper implements MapperInterface
 
         $delete->onComplete(function (Delete $command) use ($entity) {
             $this->orm->getHeap()->detach($entity);
-        });
-
-        // todo: check reset state
-        $delete->onRollBack(function () use ($state, $current) {
-            $state->setState($current);
         });
 
         return $delete;

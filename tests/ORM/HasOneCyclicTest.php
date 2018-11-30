@@ -145,16 +145,13 @@ abstract class HasOneCyclicTest extends BaseTest
         $c->cyclic = $c;
 
         $this->captureWriteQueries();
-
         $tr = new Transaction($this->orm);
         $tr->store($c);
         $tr->run();
-
         $this->assertNumWrites(2);
 
         $selector = new Selector($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(4)->fetchOne();
-
         $this->assertEquals('new', $c->name);
         $this->assertSame($c, $c->cyclic);
     }

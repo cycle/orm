@@ -84,6 +84,9 @@ class RelationConfig extends InjectableConfig
                 self::LOADER   => Loader\Relation\Morphed\MorphedHasManyLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasManyRelation::class
             ],
+            Relation::BELONGS_TO_MORPHED   => [
+                self::RELATION => Relation\Morphed\BelongsToMorphedRelation::class
+            ]
         ]);
     }
 }

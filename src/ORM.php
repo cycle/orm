@@ -224,7 +224,6 @@ class ORM implements ORMInterface
 
         $m = $this->getMapper($entity);
         $cmd = $m->queueStore($entity);
-
         // TODO: RESET HANDLERS
 
         // todo: optimize it

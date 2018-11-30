@@ -18,11 +18,11 @@ use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
-use Spiral\ORM\Util\Collection\CollectionPromise;
-use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\ORM;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Collection\CollectionPromise;
+use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
 use Spiral\ORM\Util\PivotedPromise;
 

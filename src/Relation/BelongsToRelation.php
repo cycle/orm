@@ -16,6 +16,7 @@ use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\Promise;
 
+// todo: what is the difference with refers to?
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
     // todo: class

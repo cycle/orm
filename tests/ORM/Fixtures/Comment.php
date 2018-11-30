@@ -21,12 +21,14 @@ class Comment
     public $user;
 
     /** @var User[]|PivotedInterface */
-    public $favorited_by;
+    public $favoredBy;
 
     public $parent;
 
+    public $level;
+
     public function __construct()
     {
-        $this->favorited_by = new PivotedCollection();
+        $this->favoredBy = new PivotedCollection();
     }
 }

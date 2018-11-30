@@ -19,17 +19,12 @@ trait ConstrainTrait
     /**
      * @param SelectQuery $query
      * @param array       $orderBy
-     * @param int         $limit 0 when no selection.
      */
-    private function configureWindow(SelectQuery $query, array $orderBy, int $limit = 0)
+    private function configureWindow(SelectQuery $query, array $orderBy)
     {
         if (!empty($orderBy)) {
             $decorator = new AliasDecorator($query, 'where', $this->getAlias());
             $decorator->orderBy($orderBy);
-        }
-
-        if ($limit !== 0) {
-            $query->limit($limit);
         }
     }
 

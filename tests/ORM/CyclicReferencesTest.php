@@ -109,7 +109,7 @@ abstract class CyclicReferencesTest extends BaseTest
                             Relation::OUTER_KEY => 'id',
                         ],
                     ],
-                    'favorited_by' => [
+                    'favoredBy' => [
                         Relation::TYPE   => Relation::MANY_TO_MANY,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
@@ -160,7 +160,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')
-            ->load('comments.favorited_by')
+            ->load('comments.favoredBy')
             ->load('favorites');
 
         $u1 = $selector->wherePK(1)->fetchOne();
@@ -172,7 +172,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->comments[0]->id, $u1->comments[0]->id);
         $this->assertEquals($u->favorites[0]->id, $u1->favorites[0]->id);
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
-        $this->assertEquals($u->id, $u1->favorites[0]->favorited_by[0]->id);
+        $this->assertEquals($u->id, $u1->favorites[0]->favoredBy[0]->id);
     }
 
     public function testCreateMultipleLinkedTrees()
@@ -214,7 +214,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')
-            ->load('comments.favorited_by')
+            ->load('comments.favoredBy')
             ->load('favorites');
 
         $u1 = $selector->wherePK($u->id)->fetchOne();
@@ -228,8 +228,8 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
 
         $fav = [
-            $u1->favorites[0]->favorited_by[0]->id,
-            $u1->favorites[0]->favorited_by[1]->id
+            $u1->favorites[0]->favoredBy[0]->id,
+            $u1->favorites[0]->favoredBy[1]->id
         ];
 
         $this->assertCount(2, $fav);
@@ -240,7 +240,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')
-            ->load('comments.favorited_by')
+            ->load('comments.favoredBy')
             ->load('favorites');
 
         $u1 = $selector->wherePK(2)->fetchOne();

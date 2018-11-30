@@ -37,7 +37,6 @@ class ManyToManyLoader extends RelationLoader
         'where'      => null,
         'wherePivot' => null,
         'orderBy'    => [],
-        'limit'      => 0
     ];
 
     /**
@@ -47,6 +46,8 @@ class ManyToManyLoader extends RelationLoader
     {
         parent::__construct($orm, $class, $relation, $schema);
         $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
+        $this->options['where'] = $schema[Relation::WHERE_SCOPE] ?? [];
+        $this->options['wherePivot'] = $schema[Relation::PIVOT_SCOPE] ?? [];
     }
 
     /**
@@ -78,7 +79,7 @@ class ManyToManyLoader extends RelationLoader
                 new Parameter($outerKeys)
             );
 
-            $this->configureWindow($query, $this->options['orderBy'], $this->options['limit']);
+            $this->configureWindow($query, $this->options['orderBy']);
         }
 
         // when relation is joined we will use ON statements, when not - normal WHERE
@@ -107,7 +108,7 @@ class ManyToManyLoader extends RelationLoader
         }
 
         // where conditions specified in relation definition
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::SCOPE));
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE_SCOPE));
 
         // user specified WHERE conditions
         $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);

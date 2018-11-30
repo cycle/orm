@@ -11,4 +11,5 @@ namespace Spiral\ORM\Tests\Fixtures;
 class Nested
 {
     public $label;
+    public $profile;
 }

@@ -51,6 +51,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [$i, $i];
         }
 
+        // todo: i don't like carrying alias in a context (!!!!)
         // this is not right (!!)
         $pr = new Promise(
             [

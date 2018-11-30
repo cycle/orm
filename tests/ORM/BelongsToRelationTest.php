@@ -479,9 +479,18 @@ abstract class BelongsToRelationTest extends BaseTest
         $p = $s->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
 
+        $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($p);
         $tr->run();
+        $this->assertNumWrites(1);
+
+        // consecutive
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($p);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $s = new Selector($this->orm->withHeap(new Heap()), Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
@@ -489,5 +498,32 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame(null, $p->user);
     }
 
-    // todo: multiple nested
+    public function testNested()
+    {
+        $n = new Nested();
+        $n->label = 'nested label';
+        $n->profile = new Profile();
+        $n->profile->image = 'profile';
+        $n->profile->user = new User();
+        $n->profile->user->email = "new@email.com";
+        $n->profile->user->balance = 999;
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($n);
+        $tr->run();
+        $this->assertNumWrites(3);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($n);
+        $tr->run();
+        $this->assertNumWrites(0);
+
+        $s = new Selector($this->orm->withHeap(new Heap()), Nested::class);
+        $n = $s->wherePK(2)->load('profile.user')->fetchOne();
+
+        $this->assertSame('profile', $n->profile->image);
+        $this->assertSame('new@email.com', $n->profile->user->email);
+    }
 }

@@ -239,6 +239,23 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
     }
 
+    /**
+     * @expectedException \Spiral\Database\Exception\StatementException
+     */
+    public function testInvalidOrderBy()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 3]],
+            Relation::ORDER_BY    => ['@.level' => 'DESC']
+        ]);
+
+        // sort by users and then by comments and only include comments with level > 3
+        (new Selector($this->orm, User::class))->load('comments', [
+            'method'  => RelationLoader::INLOAD,
+            'orderBy' => ['@.column' => 'ASC']
+        ])->orderBy('user.id', 'DESC')->fetchAll();
+    }
+
     protected function withCommentsSchema(array $relationSchema)
     {
         return $this->orm->withSchema(new Schema([

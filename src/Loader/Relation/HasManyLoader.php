@@ -29,7 +29,7 @@ class HasManyLoader extends RelationLoader
      * @var array
      */
     protected $options = [
-        'method'  => self::INLOAD,
+        'method'  => self::POSTLOAD,
         'minify'  => true,
         'alias'   => null,
         'using'   => null,

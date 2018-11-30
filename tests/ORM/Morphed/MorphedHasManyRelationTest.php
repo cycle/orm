@@ -98,7 +98,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
                     'posts'    => [
@@ -107,7 +107,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id'
+                            Relation::OUTER_KEY => 'user_id',
                         ]
                     ]
                 ]
@@ -128,7 +128,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
                 ]
@@ -331,7 +331,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
             [
                 'id'       => 2,
                 'email'    => 'another@world.com',
-                'balance'  => '200.0',
+                'balance'  => 200.0,
                 'posts'    => [
                     [
                         'id'       => 3,

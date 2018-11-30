@@ -64,8 +64,10 @@ class MorphedHasManyRelation extends HasManyRelation
     {
         $store = parent::queueStore($parent, $related);
 
-        if ($this->fetchKey($this->getState($related), $this->morphKey) != $parent->getAlias()) {
+        $relState = $this->getState($related);
+        if ($this->fetchKey($relState, $this->morphKey) != $parent->getAlias()) {
             $store->setContext($this->morphKey, $parent->getAlias());
+            $relState->setData([$this->morphKey => $parent->getAlias()]);
         }
 
         return $store;

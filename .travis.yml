@@ -27,34 +27,34 @@ script:
 after_success:
   - bash <(curl -s https://codecov.io/bash) -f coverage.xml
 
-#jobs:
-#  include:
-#    # PHP Nightly builds does not support SQLServer yet
-#    - stage: Test
-#      php: nightly
-#      env:
-#        - "DB=postgres,mysql,sqlite COVERAGE=ALL"
-#      before_install:
-#        - cd tests
-#        - docker-compose up -d
-#        - cd ..
-#      script:
-#        - vendor/bin/phpunit tests/ORM/Driver/SQLite
-#        - vendor/bin/phpunit tests/ORM/Driver/MySQL
-#        - vendor/bin/phpunit tests/ORM/Driver/Postgres
-#
-#    # Testing various PostgresSQL version
-#    - stage: Test
-#      php: 7.2
-#      addons:
-#        postgresql: "9.2"
-#      env:
-#        - "DB=postgres POSTGRES=9.2"
-#      before_install:
-#        - psql -c 'create database spiral;' -U postgres
-#      script:
-#        - vendor/bin/phpunit tests/ORM/Driver/Postgres
-#
+jobs:
+  include:
+    # PHP Nightly builds does not support SQLServer yet
+    - stage: Test
+      php: nightly
+      env:
+        - "DB=postgres,mysql,sqlite COVERAGE=ALL"
+      before_install:
+        - cd tests
+        - docker-compose up -d
+        - cd ..
+      script:
+        - vendor/bin/phpunit tests/ORM/Driver/SQLite
+        - vendor/bin/phpunit tests/ORM/Driver/MySQL
+        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+
+    # Testing various PostgresSQL version
+    - stage: Test
+      php: 7.2
+      addons:
+        postgresql: "9.2"
+      env:
+        - "DB=postgres POSTGRES=9.2"
+      before_install:
+        - psql -c 'create database spiral;' -U postgres
+      script:
+        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+
 #    - stage: Test
 #      php: 7.2
 #      addons:

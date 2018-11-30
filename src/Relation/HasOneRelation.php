@@ -77,6 +77,7 @@ class HasOneRelation extends AbstractRelation
             $related = $related->__resolve();
         }
 
+        // todo: make it better
         if (empty($related)) {
             if (count($sequence) === 0) {
                 return new Nil();

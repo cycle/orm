@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Util\Collection\PivotedCollection;
 
-class User
+class User implements ImagedInterface
 {
     public $id;
     public $email;

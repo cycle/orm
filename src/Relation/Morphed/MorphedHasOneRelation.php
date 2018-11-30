@@ -70,14 +70,11 @@ class MorphedHasOneRelation extends HasOneRelation
     ): CommandInterface {
         $store = parent::queueRelation($parent, $entity, $state, $related, $original);
 
-        if ($store instanceof ContextualInterface) {
-            // todo: work it out, make it better :)
-            if (!is_null($related)) {
-                $relState = $this->getState($related);
-                if ($this->fetchKey($relState, $this->morphKey) != $state->getAlias()) {
-                    $store->setContext($this->morphKey, $state->getAlias());
-                    $relState->setData([$this->morphKey => $state->getAlias()]);
-                }
+        if ($store instanceof ContextualInterface && !is_null($related)) {
+            $relState = $this->getState($related);
+            if ($this->fetchKey($relState, $this->morphKey) != $state->getAlias()) {
+                $store->setContext($this->morphKey, $state->getAlias());
+                $relState->setData([$this->morphKey => $state->getAlias()]);
             }
         }
 

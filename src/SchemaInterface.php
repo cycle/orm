@@ -39,6 +39,12 @@ interface SchemaInterface
     public function define(string $class, int $property);
 
     /**
+     * @param string $alias
+     * @return null|string
+     */
+    public function getClass(string $alias): ?string;
+
+    /**
      * Define options associated with specific entity relation.
      *
      * @param string $class

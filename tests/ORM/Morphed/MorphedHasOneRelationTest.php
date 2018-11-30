@@ -20,7 +20,6 @@ use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-
 abstract class MorphedHasOneRelationTest extends BaseTest
 {
     use TableTrait;

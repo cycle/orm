@@ -184,10 +184,16 @@ class Mapper implements MapperInterface
         // we are managed at this moment
 
         $insert->onExecute(function (Insert $command) use ($entity, $state) {
-            $state->setData([$this->primaryKey => $command->getInsertID()] + $command->getContext());
             $state->setState(State::LOADED);
+            $state->setData([$this->primaryKey => $command->getInsertID()] + $command->getContext());
 
+            // move newly assigned data to the entity
             $this->hydrate($entity, $state->getData());
+        });
+
+        // remove inconsistent entity state
+        $insert->onRollBack(function () use ($entity) {
+            $this->orm->getHeap()->detach($entity);
         });
 
         return $insert;
@@ -220,6 +226,8 @@ class Mapper implements MapperInterface
         $update->onExecute(function (Update $command) use ($entity, $state) {
             $state->setData($command->getContext());
             $state->setState(State::LOADED);
+
+            // move newly generated data into the entity
             $this->hydrate($entity, $state->getData());
         });
 
@@ -243,7 +251,7 @@ class Mapper implements MapperInterface
             $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
         });
 
-        $delete->onComplete(function (Delete $command) use ($entity) {
+        $delete->onComplete(function () use ($entity) {
             $this->orm->getHeap()->detach($entity);
         });
 

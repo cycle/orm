@@ -44,6 +44,17 @@ final class Schema implements SchemaInterface
         return $this->schema[$class][$property];
     }
 
+    public function getClass(string $alias): ?string
+    {
+        foreach ($this->schema as $class => $schema) {
+            if ($schema[self::ALIAS] == $alias) {
+                return $class;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @inheritdoc
      */

@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests\Fixtures;
 
 use Spiral\ORM\Util\Collection\PivotedInterface;
 
-class Post
+class Post implements ImagedInterface
 {
     public $title;
     public $content;

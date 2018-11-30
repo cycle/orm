@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Tests\Morphed;
 
+
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
@@ -21,7 +22,7 @@ use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-abstract class MorphedHasManyRelationTest extends BaseTest
+abstract class MorphedHasManyPromiseTest extends BaseTest
 {
     use TableTrait;
 
@@ -146,217 +147,11 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
-    {
-        $selector = new Selector($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id');
-
-        $this->assertEquals([
-            [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
-                'comments' => [
-
-                    [
-                        'id'          => 1,
-                        'parent_id'   => 1,
-                        'parent_type' => 'user',
-                        'message'     => 'first comment',
-                    ],
-
-                    [
-                        'id'          => 2,
-                        'parent_id'   => 1,
-                        'parent_type' => 'user',
-                        'message'     => 'second comment',
-                    ],
-
-                    [
-                        'id'          => 3,
-                        'parent_id'   => 1,
-                        'parent_type' => 'user',
-                        'message'     => 'third comment',
-                    ],
-                ],
-            ],
-            [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
-                'comments' => [],
-            ],
-        ], $selector->fetchData());
-    }
-
-    public function testFetchAnother()
-    {
-        $selector = new Selector($this->orm, Post::class);
-        $selector->load('comments')->orderBy('post.id');
-
-        $this->assertEquals([
-            [
-                'id'       => 1,
-                'user_id'  => 1,
-                'title'    => 'post 1',
-                'content'  => 'post 1 body',
-                'comments' => [
-                    [
-                        'id'          => 4,
-                        'parent_id'   => 1,
-                        'parent_type' => 'post',
-                        'message'     => 'post 1 comment',
-                    ],
-                    [
-                        'id'          => 6,
-                        'parent_id'   => 1,
-                        'parent_type' => 'post',
-                        'message'     => 'post 1.1 comment',
-                    ],
-                ],
-            ],
-            [
-                'id'       => 2,
-                'user_id'  => 1,
-                'title'    => 'post 2',
-                'content'  => 'post 2 body',
-                'comments' => [
-                    [
-                        'id'          => 5,
-                        'parent_id'   => 2,
-                        'parent_type' => 'post',
-                        'message'     => 'post 2 comment',
-                    ],
-                    [
-                        'id'          => 7,
-                        'parent_id'   => 2,
-                        'parent_type' => 'post',
-                        'message'     => 'post 2.1 comment',
-                    ],
-                ],
-            ],
-            [
-                'id'       => 3,
-                'user_id'  => 2,
-                'title'    => 'post 3',
-                'content'  => 'post 3 body',
-                'comments' => [],
-            ],
-            [
-                'id'       => 4,
-                'user_id'  => 2,
-                'title'    => 'post 4',
-                'content'  => 'post 4 body',
-                'comments' => [],
-            ],
-        ], $selector->fetchData());
-    }
-
-    public function testLoadOverlapping()
-    {
-        $selector = new Selector($this->orm, User::class);
-        $selector
-            ->load('posts.comments')
-            ->load('comments')
-            ->orderBy('user.id');
-
-        $this->assertEquals([
-            [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
-                'posts'    => [
-                    [
-                        'id'       => 1,
-                        'user_id'  => 1,
-                        'title'    => 'post 1',
-                        'content'  => 'post 1 body',
-                        'comments' => [
-                            [
-                                'id'          => 4,
-                                'parent_id'   => 1,
-                                'parent_type' => 'post',
-                                'message'     => 'post 1 comment',
-                            ],
-                            [
-                                'id'          => 6,
-                                'parent_id'   => 1,
-                                'parent_type' => 'post',
-                                'message'     => 'post 1.1 comment',
-                            ],
-                        ],
-                    ],
-                    [
-                        'id'       => 2,
-                        'user_id'  => 1,
-                        'title'    => 'post 2',
-                        'content'  => 'post 2 body',
-                        'comments' => [
-                            [
-                                'id'          => 5,
-                                'parent_id'   => 2,
-                                'parent_type' => 'post',
-                                'message'     => 'post 2 comment',
-                            ],
-                            [
-                                'id'          => 7,
-                                'parent_id'   => 2,
-                                'parent_type' => 'post',
-                                'message'     => 'post 2.1 comment',
-                            ],
-                        ],
-                    ],
-                ],
-                'comments' => [
-                    [
-                        'id'          => 1,
-                        'parent_id'   => 1,
-                        'parent_type' => 'user',
-                        'message'     => 'first comment',
-                    ],
-                    [
-                        'id'          => 2,
-                        'parent_id'   => 1,
-                        'parent_type' => 'user',
-                        'message'     => 'second comment',
-                    ],
-                    [
-                        'id'          => 3,
-                        'parent_id'   => 1,
-                        'parent_type' => 'user',
-                        'message'     => 'third comment',
-                    ],
-                ],
-            ],
-            [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
-                'posts'    => [
-                    [
-                        'id'       => 3,
-                        'user_id'  => 2,
-                        'title'    => 'post 3',
-                        'content'  => 'post 3 body',
-                        'comments' => [],
-                    ],
-                    [
-                        'id'       => 4,
-                        'user_id'  => 2,
-                        'title'    => 'post 4',
-                        'content'  => 'post 4 body',
-                        'comments' => [],
-                    ],
-                ],
-                'comments' => [],
-            ],
-        ], $selector->fetchData());
-    }
 
     public function testAccessEntity()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $this->assertInstanceOf(Collection::class, $a->comments);
@@ -373,7 +168,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
     public function testNoWrite()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $this->captureWriteQueries();
@@ -387,7 +182,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
     public function testDeleteComment()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $a->comments->remove(0);
@@ -409,7 +204,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $this->assertCount(2, $a->comments);
@@ -423,7 +218,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
          * @var User $b
          */
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $b->comments = $a->comments->slice(0, 1);
@@ -448,7 +243,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id');
+        $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
         $this->assertCount(2, $a->comments);
@@ -465,8 +260,8 @@ abstract class MorphedHasManyRelationTest extends BaseTest
          * @var User $a
          * @var Post $b
          */
-        $a = (new Selector($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
-        $b = (new Selector($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
+        $a = (new Selector($this->orm, User::class))->wherePK(1)->fetchOne();
+        $b = (new Selector($this->orm, Post::class))->wherePK(1)->fetchOne();
 
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
@@ -487,8 +282,8 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $a = (new Selector($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
-        $b = (new Selector($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
+        $a = (new Selector($this->orm, User::class))->wherePK(1)->fetchOne();
+        $b = (new Selector($this->orm, Post::class))->wherePK(1)->fetchOne();
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(3, $b->comments);

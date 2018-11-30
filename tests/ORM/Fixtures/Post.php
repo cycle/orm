@@ -9,10 +9,13 @@
 namespace Spiral\ORM\Tests\Fixtures;
 
 
+use Spiral\ORM\Util\Collection\PivotedInterface;
+
 class Post
 {
     public $title;
     public $content;
     public $image;
+    /** @var Comment[]|PivotedInterface */
     public $comments;
 }

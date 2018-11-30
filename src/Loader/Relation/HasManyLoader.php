@@ -70,9 +70,10 @@ class HasManyLoader extends RelationLoader
         } else {
             // relation is loaded using external query
             $query->where($localKey, 'IN', new Parameter($outerKeys));
-
-            $this->configureWindow($query, $this->options['orderBy']);
         }
+
+        // order and where window configuration
+        $this->configureWindow($query, $this->options['orderBy']);
 
         //When relation is joined we will use ON statements, when not - normal WHERE
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';

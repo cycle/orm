@@ -28,7 +28,6 @@ class User implements ImagedInterface
     public $lastComment;
 
     /**
-     * @invisible
      * @var Comment[]|Collection
      */
     public $comments;

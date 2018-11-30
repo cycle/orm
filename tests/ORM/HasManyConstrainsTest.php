@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Entity\Mapper;
+use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -166,7 +167,6 @@ abstract class HasManyConstrainsTest extends BaseTest
             Relation::WHERE_SCOPE => ['@.level' => 4]
         ]);
 
-        $this->enableProfiling();
         // second user has been filtered out
         $res = (new Selector($this->orm, User::class))->with('comments')->fetchAll();
 
@@ -190,7 +190,54 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('another@world.com', $res[1]->email);
     }
 
-    // todo: INLOAD WITH ORDER !!!!!!
+    public function testInloadWithOrderAndWhere()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 3]],
+            Relation::ORDER_BY    => ['@.level' => 'DESC']
+        ]);
+
+        // sort by users and then by comments and only include comments with level > 3
+        $res = (new Selector($this->orm, User::class))->load('comments', [
+            'method' => RelationLoader::INLOAD
+        ])->orderBy('user.id', 'DESC')->fetchAll();
+
+        $this->assertCount(2, $res);
+        $this->assertSame('hello@world.com', $res[1]->email);
+        $this->assertSame('another@world.com', $res[0]->email);
+
+        $this->assertCount(2, $res[1]->comments);
+        $this->assertCount(1, $res[0]->comments);
+
+        $this->assertSame('msg 4', $res[1]->comments[0]->message);
+        $this->assertSame('msg 3', $res[1]->comments[1]->message);
+        $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
+    }
+
+    public function testInloadWithOrderAndWhereAltered()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 3]],
+            Relation::ORDER_BY    => ['@.level' => 'DESC']
+        ]);
+
+        // sort by users and then by comments and only include comments with level > 3
+        $res = (new Selector($this->orm, User::class))->load('comments', [
+            'method'  => RelationLoader::INLOAD,
+            'orderBy' => ['@.level' => 'ASC']
+        ])->orderBy('user.id', 'DESC')->fetchAll();
+
+        $this->assertCount(2, $res);
+        $this->assertSame('hello@world.com', $res[1]->email);
+        $this->assertSame('another@world.com', $res[0]->email);
+
+        $this->assertCount(2, $res[1]->comments);
+        $this->assertCount(1, $res[0]->comments);
+
+        $this->assertSame('msg 4', $res[1]->comments[1]->message);
+        $this->assertSame('msg 3', $res[1]->comments[0]->message);
+        $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
+    }
 
     protected function withCommentsSchema(array $relationSchema)
     {

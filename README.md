@@ -6,7 +6,7 @@ Features:
 ---------
 - plain php classes support (DataMapper)
 - eager and lazy loading
-- ability to dynamically define data schema (same class for all tables)
+- runtime configuration without code-generation
 - single table inheritanc
 - works with any data repository
 - works with DAG and DG using IDDFS

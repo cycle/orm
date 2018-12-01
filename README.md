@@ -5,7 +5,7 @@
 Features:
 ---------
 - plain php classes support (DataMapper)
-- eager and lazy loading
+- eager and lazy loading, promises and proxies
 - runtime configuration without code-generation
 - single table inheritanc
 - works with any data repository

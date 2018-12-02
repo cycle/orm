@@ -103,9 +103,7 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
             unset($this->waitContext[$column]);
         }
 
-        if ($changed) {
-            $this->context[$column] = $value;
-        }
+        $this->context[$column] = $value;
     }
 
     /**

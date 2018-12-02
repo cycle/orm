@@ -163,7 +163,8 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    // last record 66MB for 5000
+    // last record 66MB for 5000 (but incomplete)
+    // current one 70 mb (can i optimize it more)???
     public function testMemUsage()
     {
         $this->orm = $this->orm->withHeap(new Heap());

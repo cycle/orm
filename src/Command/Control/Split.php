@@ -91,6 +91,10 @@ class Split implements ContextualInterface, \IteratorAggregate
         $this->contextPath[$key]->setContext($key, $value);
     }
 
+    public function accept($k, $v){
+        $this->contextPath[$k]->accept($k, $v);
+    }
+
     /**
      * @inheritdoc
      * @codeCoverageIgnore

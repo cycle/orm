@@ -35,7 +35,10 @@ trait ContextTrait
         string $localKey
     ) {
         if (!is_null($current)) {
-            $parent->addRoute($current, $parentKey, $localKey);
+            $parent->forward($current, $parentKey, $localKey);
+
+            // YEEAHAHAAH TO COMMAND
+            $current->forward($command, $localKey, $localKey);
         }
 
         // todo: need massive optimization (!) <- i want to save 20 mb here
@@ -46,9 +49,9 @@ trait ContextTrait
 
             if ($this->fetchKey($current, $localKey) != $value) {
                 $command->setContext($localKey, $value);
-                if (!is_null($current)) {
-                    $current->setData([$localKey => $value]);
-                }
+                //if (!is_null($current)) {
+                //   $current->setData([$localKey => $value]);
+                // }
             }
 
             $command->freeContext($localKey);
@@ -58,7 +61,12 @@ trait ContextTrait
         // optimizing this will save a lot of memory
         $command->waitContext($localKey, $this->isRequired());
         call_user_func($handler, $parent);
+
         $parent->addListener($handler);
+
+        if (!empty($current) && !empty($value = $this->fetchKey($parent, $parentKey))) {
+            $current->accept($localKey, $value);
+        }
     }
 
     /**

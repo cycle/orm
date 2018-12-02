@@ -101,12 +101,16 @@ final class State
             return;
         }
 
-        $this->data = $data + $this->data;
-        foreach ($this->listeners as $id => $handler) {
-            if (call_user_func($handler, $this) === true) {
-                unset($this->listeners[$id]);
-            }
+        foreach ($data as $column => $value) {
+            $this->accept($column, $value);
         }
+
+        //        $this->data = $data + $this->data;
+        //        foreach ($this->listeners as $id => $handler) {
+        //            if (call_user_func($handler, $this) === true) {
+        //                unset($this->listeners[$id]);
+        //            }
+        //        }
     }
 
     /**
@@ -161,13 +165,17 @@ final class State
 
     private $routing;
 
-    public function addRoute($target, $source, $into)
+    public function forward($target, $source, $into)
     {
         $this->routing[$source][] = [$target, $into];
     }
 
     public function accept($column, $value)
     {
+        if (($this->data[$column] ?? null) == $value) {
+            return;
+        }
+
         $this->data[$column] = $value;
 
         foreach ($this->listeners as $id => $handler) {
@@ -177,8 +185,9 @@ final class State
         }
 
         if (!empty($this->routing[$column])) {
-            foreach ($this->routing[$column] as $handler) {
+            foreach ($this->routing[$column] as $id => $handler) {
                 call_user_func([$handler[0], 'accept'], $handler[1], $value);
+                unset($this->routing[$column][$id]);
             }
         }
     }

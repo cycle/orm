@@ -72,6 +72,13 @@ class Insert extends DatabaseCommand implements ContextualInterface
         $this->targetColumn = $column;
     }
 
+
+    public function accept($column, $value)
+    {
+        unset($this->waitContext[$column]);
+        $this->waitContext[$column] = $value;
+    }
+
     /**
      * Insert data into associated table.
      */

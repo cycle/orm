@@ -193,6 +193,9 @@ class Mapper implements MapperInterface
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
+        // todo: this part is weird
+        unset($cData[$this->primaryKey]);
+
         $update = new Update(
             $this->orm->getDatabase($entity),
             $this->table,
@@ -204,7 +207,7 @@ class Mapper implements MapperInterface
         $state->setData($cData);
 
         // todo: scope prefix (call immediatelly?)
-        $state->addRoute($update, $this->primaryKey, $this->primaryKey);
+        $state->forward($update, $this->primaryKey, "scope:" . $this->primaryKey);
 
         return $update;
     }

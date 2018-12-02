@@ -91,8 +91,14 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
 
     public function accept($column, $value)
     {
-        unset($this->waitScope[$column]);
-        $this->scope[$column] = $value;
+        if (strpos($column, 'scope:') === 0) {
+            $column = substr($column, 6);
+            unset($this->waitScope[$column]);
+            $this->scope[$column] = $value;
+        } else {
+            unset($this->waitContext[$column]);
+            $this->waitContext[$column] = $value;
+        }
     }
 
     /**

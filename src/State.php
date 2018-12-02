@@ -165,14 +165,14 @@ final class State
 
     private $routing;
 
-    public function forward($target, $source, $into, bool $trigger=false)
+    public function forward($target, $source, $into, bool $trigger = false)
     {
         $this->routing[$source][] = [$target, $into];
 
-        if($trigger && !empty($this->data[$source])){
+        if ($trigger && !empty($this->data[$source])) {
             if (!empty($this->routing[$source])) {
                 foreach ($this->routing[$source] as $id => $handler) {
-                    call_user_func([$handler[0], 'accept'], $handler[1], $this->data[$source]);
+                    call_user_func([$handler[0], 'accept'], $handler[1], $this->data[$source], false);
                 }
             }
         }

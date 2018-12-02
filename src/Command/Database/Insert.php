@@ -77,6 +77,7 @@ class Insert extends DatabaseCommand implements ContextualInterface
 
     public function accept($column, $value, $changed = true)
     {
+        if($changed||!is_null($value))
         unset($this->waitContext[$column]);
 
       //  if ($changed) {

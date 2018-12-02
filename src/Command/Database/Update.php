@@ -99,11 +99,17 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
         }
 
         // todo: can it be empty by design?
-        if (!is_null($value)) {
+        if (!is_null($value) || $changed) {
             unset($this->waitContext[$column]);
         }
 
-        $this->context[$column] = $value;
+        // todo: changed is a bit weird
+        if ($changed) {
+            $this->context[$column] = $value;
+        }
+
+        // todo: right now i have 2 update commands per relation, probably too much
+        // what if i will forward all state changes to one COMMAND??? LIKE ALLLLLLL
     }
 
     /**

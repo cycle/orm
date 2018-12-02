@@ -30,6 +30,11 @@ class Sequence implements CommandInterface, \IteratorAggregate, \Countable
         $this->commands[] = $command;
     }
 
+    public function getCommands()
+    {
+        return $this->commands;
+    }
+
     /**
      * {@inheritdoc}
      */

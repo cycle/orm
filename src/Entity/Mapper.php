@@ -101,14 +101,12 @@ class Mapper implements MapperInterface
         if ($state == null || $state->getState() == State::NEW) {
             $cmd = $this->queueCreate($entity, $state);
             $state->setLeadCommand($cmd);
-            $cmd->onComplete(function () use ($state) {
-                $state->setLeadCommand(null);
-            });
 
             return $cmd;
         }
 
         $lastCommand = $state->getLeadCommand();
+
         if (empty($lastCommand)) {
             // todo: check multiple update commands working within the split (!)
             return $this->queueUpdate($entity, $state);
@@ -118,6 +116,7 @@ class Mapper implements MapperInterface
             return $lastCommand;
         }
 
+        // todo: do i like it?
         $split = new Split($lastCommand, $this->queueUpdate($entity, $state));
         $state->setLeadCommand($split);
 

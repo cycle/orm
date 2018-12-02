@@ -53,6 +53,8 @@ class Split implements ContextualInterface, \IteratorAggregate
         return $this->getTarget()->isReady();
     }
 
+    protected $done;
+
     /**
      * @return \Generator
      */
@@ -91,7 +93,8 @@ class Split implements ContextualInterface, \IteratorAggregate
         $this->contextPath[$key]->setContext($key, $value);
     }
 
-    public function accept($k, $v, $c=false){
+    public function accept($k, $v, $c = false)
+    {
         $this->contextPath[$k]->accept($k, $v, $c);
     }
 

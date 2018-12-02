@@ -76,7 +76,7 @@ final class Transaction implements TransactionInterface
 
         try {
             $commands = $this->initCommands();
-
+dump($commands);
             while (!empty($commands)) {
                 $pending = [];
                 $countExecuted = count($executed);
@@ -103,7 +103,7 @@ final class Transaction implements TransactionInterface
                     $executed[] = $do;
                 }
 
-                if (count($executed) === $countExecuted) {
+                if (count($executed) === $countExecuted && !empty($pending)) {
                     throw new TransactionException("Unable to complete: " . $this->listCommands($pending));
                 }
 
@@ -126,6 +126,7 @@ final class Transaction implements TransactionInterface
                 // syncing
                 foreach ($this->orm->getHeap() as $entity) {
                     $state = $this->orm->getHeap()->get($entity);
+                    $state->setLeadCommand(null);
 
                     $state->setState(State::LOADED);
                     $this->orm->getMapper($entity)->hydrate($entity, $state->getData());

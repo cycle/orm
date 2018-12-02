@@ -84,15 +84,22 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // this needs to be better
 
-        // todo: use queue store?
+        // todo: use queue store? merge with belongs to?
 
-        $update = new Update(
-            $this->orm->getDatabase($entity),
-            $this->orm->getSchema()->define(get_class($entity), Schema::TABLE)
-        );
+        // why am i taking same command?
+     //   $update = new Update(
+       //     $this->orm->getDatabase($entity),
+       //     $this->orm->getSchema()->define(get_class($entity), Schema::TABLE)
+       // );
 
-        $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
-        $this->promiseScope($update, $state, $primaryKey, $this->getState($related), $primaryKey);
+        // todo: here we go, the problem is that i need UPDATE command to be automatically
+        // created here, or we are going to end in a infinite loop OR inability to resolve the command
+        $update = $this->orm->queueStore($entity);
+
+        // this will give UPDATE (!)
+
+       // $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
+       // $this->promiseScope($update, $state, $primaryKey, $this->getState($related), $primaryKey);
         $this->promiseContext($update, $this->getState($related), $this->outerKey, $state, $this->innerKey);
 
         return $update;

@@ -50,6 +50,7 @@ trait ContextTrait
             return true;
         };
 
+        // optimizing this will save a lot of memory
         $command->waitContext($localKey, $this->isRequired());
         call_user_func($handler, $parent);
         $parent->addListener($handler);
@@ -85,6 +86,7 @@ trait ContextTrait
             return true;
         };
 
+        // optimizing this will save a lot of memory
         $command->waitScope($localKey, $this->isRequired());
         call_user_func($handler, $parent);
         $parent->addListener($handler);

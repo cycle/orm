@@ -91,10 +91,7 @@ class HasOneRelation extends AbstractRelation
         $relState = $this->getState($related);
         $relState->addReference();
 
-        // todo: promise context into Promise :)
         $this->promiseContext($relStore, $state, $this->innerKey, $relState, $this->outerKey);
-
-        // todo: morph key
 
         $sequence->addPrimary($relStore);
 

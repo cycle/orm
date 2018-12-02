@@ -97,10 +97,6 @@ final class RelationMap
         State $state,
         ContextualInterface $command
     ): ContextualInterface {
-        if (empty($this->relations)) {
-            return $command;
-        }
-
         $sequence = new PrimarySequence();
         $origRelated = [];
 
@@ -138,6 +134,10 @@ final class RelationMap
             }
         });
 
+        if (count($sequence) === 1) {
+            return $sequence->getPrimary();
+        }
+
         return $sequence;
     }
 
@@ -171,10 +171,15 @@ final class RelationMap
             return;
         }
 
+        $relStore = $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name));
+
+        if ($relStore instanceof PrimarySequence && count($relStore) === 1) {
+            // todo: improve
+            $relStore = $relStore->getCommands()[0];
+        }
+
         // queue needed changes
-        $sequence->addCommand(
-            $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name))
-        );
+        $sequence->addCommand($relStore);
 
         // update current relation state
         $state->setRelation($name, $related);

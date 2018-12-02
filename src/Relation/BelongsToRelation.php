@@ -81,8 +81,6 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $this->promiseContext($parent, $relState, $this->outerKey, $state, $this->innerKey);
 
-        // todo: morph key
-
         return $relStore;
     }
 }

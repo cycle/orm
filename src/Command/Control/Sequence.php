@@ -16,7 +16,7 @@ use Spiral\ORM\Command\CommandInterface;
 class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 {
     /** @var CommandInterface[] */
-    private $commands = [];
+    protected $commands = [];
 
     /**
      * {@inheritdoc}

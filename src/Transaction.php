@@ -121,6 +121,21 @@ final class Transaction implements TransactionInterface
             }
 
             throw $e;
+        } finally {
+            if (empty($e)) {
+                // syncing
+                foreach ($this->orm->getHeap() as $entity) {
+                    $state = $this->orm->getHeap()->get($entity);
+
+                    $state->setState(State::LOADED);
+                    $this->orm->getMapper($entity)->hydrate($entity, $state->getData());
+                }
+            } else {
+                foreach ($this->orm->getHeap() as $entity) {
+                    $this->orm->getHeap()->detach($entity);
+                }
+                // resetting
+            }
         }
 
         foreach (array_reverse($drivers) as $driver) {

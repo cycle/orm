@@ -30,6 +30,10 @@ class PrimarySequence extends Sequence implements ContextualInterface
         $this->primary = $command;
     }
 
+    public function getCommands(){
+        return $this->commands;
+    }
+
     /**
      * @return ContextualInterface
      */

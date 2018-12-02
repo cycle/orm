@@ -89,15 +89,22 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
         parent::execute();
     }
 
-    public function accept($column, $value)
+    public function accept($column, $value, $changed = true)
     {
         if (strpos($column, 'scope:') === 0) {
             $column = substr($column, 6);
             unset($this->waitScope[$column]);
             $this->scope[$column] = $value;
-        } else {
+            return;
+        }
+
+        // todo: can it be empty by design?
+        if (!is_null($value)) {
             unset($this->waitContext[$column]);
-            $this->waitContext[$column] = $value;
+        }
+
+        if ($changed) {
+            $this->context[$column] = $value;
         }
     }
 

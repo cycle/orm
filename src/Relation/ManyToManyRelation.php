@@ -11,7 +11,6 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Sequence;
@@ -25,6 +24,7 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\State;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
 use Spiral\ORM\Util\PivotedPromise;
 
@@ -212,8 +212,11 @@ class ManyToManyRelation extends AbstractRelation
 
         $sync = new Insert($this->pivotDatabase(), $this->pivotTable());
 
-        $this->promiseContext($sync, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseContext($sync, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);
+        $sync->waitContext($this->thoughtInnerKey, true);
+        $sync->waitContext($this->thoughtOuterKey, true);
+
+        $state->forward($sync, $this->innerKey, $this->thoughtInnerKey, true);
+        $this->getState($related)->forward($sync, $this->outerKey, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -232,9 +235,11 @@ class ManyToManyRelation extends AbstractRelation
     protected function unlink(State $state, $related): CommandInterface
     {
         $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
+        $delete->waitScope($this->thoughtOuterKey, true);
+        $delete->waitScope($this->thoughtInnerKey, true);
 
-        $this->promiseScope($delete, $state, $this->innerKey, null, $this->thoughtInnerKey);
-        $this->promiseScope($delete, $this->getState($related), $this->outerKey, null, $this->thoughtOuterKey);
+        $state->forward($delete, $this->innerKey, $this->thoughtInnerKey, true);
+        $this->getState($related)->forward($delete, $this->outerKey, $this->thoughtOuterKey, true);
 
         return $delete;
     }

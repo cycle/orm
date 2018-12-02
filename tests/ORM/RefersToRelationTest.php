@@ -154,6 +154,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->email = "email@email.com";
         $u->balance = 100;
 
+
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();

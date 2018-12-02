@@ -92,8 +92,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         );
 
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
-        $this->promiseScope($update, $state, $primaryKey, null, $primaryKey);
-
+        $this->promiseScope($update, $state, $primaryKey, $this->getState($related), $primaryKey);
         $this->promiseContext($update, $this->getState($related), $this->outerKey, $state, $this->innerKey);
 
         return $update;

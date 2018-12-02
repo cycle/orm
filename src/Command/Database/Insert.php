@@ -63,6 +63,9 @@ class Insert extends DatabaseCommand implements ContextualInterface
         return $this->insertID;
     }
 
+    /**
+     * @invisible
+     */
     private $target;
     private $targetColumn;
 
@@ -72,11 +75,13 @@ class Insert extends DatabaseCommand implements ContextualInterface
         $this->targetColumn = $column;
     }
 
-
-    public function accept($column, $value)
+    public function accept($column, $value, $changed = true)
     {
         unset($this->waitContext[$column]);
-        $this->waitContext[$column] = $value;
+
+      //  if ($changed) {
+            $this->context[$column] = $value;
+        //}
     }
 
     /**

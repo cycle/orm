@@ -165,16 +165,22 @@ final class State
 
     private $routing;
 
-    public function forward($target, $source, $into)
+    public function forward($target, $source, $into, bool $trigger=false)
     {
         $this->routing[$source][] = [$target, $into];
+
+        if($trigger && !empty($this->data[$source])){
+            if (!empty($this->routing[$source])) {
+                foreach ($this->routing[$source] as $id => $handler) {
+                    call_user_func([$handler[0], 'accept'], $handler[1], $this->data[$source]);
+                }
+            }
+        }
     }
 
     public function accept($column, $value)
     {
-        if (($this->data[$column] ?? null) == $value) {
-            return;
-        }
+        $changed = !(($this->data[$column] ?? null) == $value);
 
         $this->data[$column] = $value;
 
@@ -186,8 +192,7 @@ final class State
 
         if (!empty($this->routing[$column])) {
             foreach ($this->routing[$column] as $id => $handler) {
-                call_user_func([$handler[0], 'accept'], $handler[1], $value);
-                unset($this->routing[$column][$id]);
+                call_user_func([$handler[0], 'accept'], $handler[1], $value, $changed);
             }
         }
     }

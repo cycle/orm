@@ -218,16 +218,17 @@ class Mapper implements MapperInterface
 
         $delete = new Delete(
             $this->orm->getDatabase($entity),
-            $this->table,
-            // todo: uuid?
-            [$this->primaryKey => $state->getData()[$this->primaryKey] ?? $this->extract($entity)[$this->primaryKey] ?? null]
+            $this->table
         );
 
         $state->setState(State::SCHEDULED_DELETE);
 
-        $state->addListener(function (State $state) use ($delete) {
-            $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
-        });
+        $delete->waitScope($this->primaryKey);
+        $state->forward($delete, $this->primaryKey, $this->primaryKey, true);
+
+        //$state->addListener(function (State $state) use ($delete) {
+        //    $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
+        //});
 
         $delete->onComplete(function () use ($entity) {
             $this->orm->getHeap()->detach($entity);

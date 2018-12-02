@@ -121,9 +121,6 @@ final class Transaction implements TransactionInterface
             }
 
             throw $e;
-        } finally {
-            // listening scope must only exists within the transaction scope
-            $this->orm->getHeap()->resetListeners();
         }
 
         foreach (array_reverse($drivers) as $driver) {

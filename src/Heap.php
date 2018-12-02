@@ -13,9 +13,6 @@ class Heap implements HeapInterface, \IteratorAggregate
     /** @var \SplObjectStorage */
     private $storage;
 
-    /** @var \SplObjectStorage */
-    private $handlers;
-
     /** @var array */
     private $path = [];
 
@@ -55,47 +52,12 @@ class Heap implements HeapInterface, \IteratorAggregate
         }
     }
 
-    public function listenChange($entity, callable $handler)
-    {
-        if ($this->has($entity)) {
-            $this->get($entity)->addListener($handler);
-
-            return;
-        }
-
-        if ($this->handlers->offsetExists($entity)) {
-            $this->handlers[$entity][] = $handler;
-        } else {
-            $this->handlers[$entity] = [$handler];
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function resetListeners()
-    {
-        $this->handlers = new \SplObjectStorage();
-
-        foreach ($this->storage as $item) {
-            $this->get($item)->resetListeners();
-        }
-    }
-
     /**
      * @inheritdoc
      */
     public function attach($entity, State $state, array $index = [])
     {
         $this->storage->offsetSet($entity, $state);
-
-        if ($this->handlers->offsetExists($entity)) {
-            foreach ($this->handlers[$entity] as $handler) {
-                $state->addListener($handler);
-            }
-
-            $this->handlers->offsetUnset($entity);
-        }
 
         foreach ($index as $path) {
             $this->path[$path] = $entity;
@@ -111,7 +73,6 @@ class Heap implements HeapInterface, \IteratorAggregate
     public function detach($entity)
     {
         $this->storage->offsetUnset($entity);
-        $this->handlers->offsetUnset($entity);
 
         // rare usage
         $this->path = array_filter($this->path, function ($value) use ($entity) {
@@ -126,7 +87,6 @@ class Heap implements HeapInterface, \IteratorAggregate
     {
         $this->path = [];
         $this->storage = new \SplObjectStorage();
-        $this->handlers = new \SplObjectStorage();
     }
 
     public function hasPath(string $path)

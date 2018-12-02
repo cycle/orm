@@ -106,7 +106,17 @@ abstract class AbstractRelation implements RelationInterface
             );
         }
 
-        return $this->orm->getHeap()->get($entity);
+        $state = $this->orm->getHeap()->get($entity);
+
+        if (is_null($state)) {
+            $state = new State(State::NEW, [],
+                $this->orm->getSchema()->define($this->class, Schema::ALIAS)
+            );
+
+            $this->orm->getHeap()->attach($entity, $state);
+        }
+
+        return $state;
     }
 
     protected function getORM(): ORMInterface

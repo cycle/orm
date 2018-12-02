@@ -94,22 +94,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
         $this->promiseScope($update, $state, $primaryKey, null, $primaryKey);
 
-        // state either not found or key value is not set, subscribe thought the heap
-        $update->waitContext($this->innerKey, true);
-
-        // wait for the context value to come to link 2 entities together (todo: unify with trait?)
-        $this->orm->getHeap()->listenChange($related, function (State $relState) use ($update, $state) {
-            if (!empty($value = $this->fetchKey($relState, $this->outerKey))) {
-                if ($this->fetchKey($state, $this->innerKey) != $value) {
-                    $update->setContext($this->innerKey, $value);
-                    if (!is_null($state)) {
-                        $state->setData([$this->innerKey => $value]);
-                    }
-                }
-
-                $update->freeContext($this->innerKey);
-            }
-        });
+        $this->promiseContext($update, $this->getState($related), $this->outerKey, $state, $this->innerKey);
 
         return $update;
     }

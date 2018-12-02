@@ -21,8 +21,4 @@ interface HeapInterface
     public function detach($entity);
 
     public function reset();
-
-    public function listenChange($entity, callable $handler);
-
-    public function resetListeners();
 }

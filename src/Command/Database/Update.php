@@ -89,6 +89,11 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
         parent::execute();
     }
 
+    public function accept($column, $value)
+    {
+        unset($this->waitScope[$column]);
+        $this->scope[$column] = $value;
+    }
 
     /**
      * {@inheritdoc}

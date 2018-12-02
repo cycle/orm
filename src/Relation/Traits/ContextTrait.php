@@ -34,6 +34,11 @@ trait ContextTrait
         ?State $current,
         string $localKey
     ) {
+        if (!is_null($current)) {
+            $parent->addRoute($current, $parentKey, $localKey);
+        }
+
+        // todo: need massive optimization (!) <- i want to save 20 mb here
         $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
             if (empty($value = $this->fetchKey($state, $parentKey))) {
                 return false;

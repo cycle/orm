@@ -158,6 +158,31 @@ final class State
         $this->listeners = [];
     }
 
+
+    private $routing;
+
+    public function addRoute($target, $source, $into)
+    {
+        $this->routing[$source][] = [$target, $into];
+    }
+
+    public function accept($column, $value)
+    {
+        $this->data[$column] = $value;
+
+        foreach ($this->listeners as $id => $handler) {
+            if (call_user_func($handler, $this) === true) {
+                unset($this->listeners[$id]);
+            }
+        }
+
+        if (!empty($this->routing[$column])) {
+            foreach ($this->routing[$column] as $handler) {
+                call_user_func([$handler[0], 'accept'], $handler[1], $value);
+            }
+        }
+    }
+
     /**
      * Reset state.
      */

@@ -180,12 +180,7 @@ class Mapper implements MapperInterface
         unset($columns[$this->primaryKey]);
 
         $insert = new Insert($this->orm->getDatabase($entity), $this->table, $columns);
-
-        // we are managed at this moment
-
-        $insert->onExecute(function (Insert $command) use ($entity, $state) {
-            $state->setData([$this->primaryKey => $command->getInsertID()]);
-        });
+        $insert->onInsert($state, $this->primaryKey);
 
         return $insert;
     }
@@ -208,11 +203,8 @@ class Mapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($cData);
 
-        $state->addListener(function (State $state) use ($update) {
-            if (!empty($state->getData()[$this->primaryKey])) {
-                $update->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
-            }
-        });
+        // todo: scope prefix (call immediatelly?)
+        $state->addRoute($update, $this->primaryKey, $this->primaryKey);
 
         return $update;
     }

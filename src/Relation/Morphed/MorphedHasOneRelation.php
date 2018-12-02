@@ -44,6 +44,7 @@ class MorphedHasOneRelation extends HasOneRelation
 
         // todo: need simple promise :)
 
+        // todo: better promises?
         $promise = new Promise(
             [
                 $this->outerKey => $innerKey,

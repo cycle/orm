@@ -134,17 +134,13 @@ final class State
         $this->routing[$source][] = [$target, $into];
 
         if ($trigger && !empty($this->data[$source])) {
-            if (!empty($this->routing[$source])) {
-                foreach ($this->routing[$source] as $id => $handler) {
-                    call_user_func([$handler[0], 'accept'], $handler[1], $this->data[$source], false);
-                }
-            }
+            $this->accept($source, $this->data[$source], true);
         }
     }
 
-    public function accept($column, $value)
+    public function accept($column, $value, $changed = false)
     {
-        $changed = !(($this->data[$column] ?? null) == $value);
+        $changed = $changed || !(($this->data[$column] ?? null) == $value);
 
         $this->data[$column] = $value;
 

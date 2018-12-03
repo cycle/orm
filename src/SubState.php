@@ -23,6 +23,4 @@ class SubState
         $this->listeners = [];
         $this->lastCommand = null;
     }
-
-
 }

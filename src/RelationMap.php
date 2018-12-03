@@ -123,17 +123,6 @@ final class RelationMap
             $this->queueRelation($sequence, $entity, $data, $state, $command, $relation, $name);
         }
 
-        // complete the walk-though sequence
-        $sequence->onComplete([$state, 'resetVisited']);
-
-        // reset state and revert relation values
-        $sequence->onRollBack(function () use ($state, $origRelated) {
-            $state->resetVisited();
-            foreach ($origRelated as $name => $value) {
-                $state->setRelation($name, $value);
-            }
-        });
-
         if (count($sequence) === 1) {
             return $sequence->getPrimary();
         }

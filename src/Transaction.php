@@ -76,7 +76,7 @@ final class Transaction implements TransactionInterface
 
         try {
             $commands = $this->initCommands();
-//dump($commands);
+
             while (!empty($commands)) {
                 $pending = [];
                 $countExecuted = count($executed);
@@ -120,22 +120,12 @@ final class Transaction implements TransactionInterface
                 $command->rollBack();
             }
 
+            $this->resetHeap();
+
             throw $e;
         } finally {
             if (empty($e)) {
-                // syncing
-                foreach ($this->orm->getHeap() as $entity) {
-                    $state = $this->orm->getHeap()->get($entity);
-                    $state->setLeadCommand(null);
-
-                    $state->setState(State::LOADED);
-                    $this->orm->getMapper($entity)->hydrate($entity, $state->getData());
-                }
-            } else {
-                foreach ($this->orm->getHeap() as $entity) {
-                    $this->orm->getHeap()->detach($entity);
-                }
-                // resetting
+                $this->syncHeap();
             }
         }
 
@@ -153,6 +143,29 @@ final class Transaction implements TransactionInterface
         $this->store = [];
         $this->delete = [];
         $this->managed = new \SplObjectStorage();
+    }
+
+    protected function syncHeap()
+    {
+        foreach ($this->orm->getHeap() as $entity) {
+            $state = $this->orm->getHeap()->get($entity);
+            $state->setLeadCommand(null);
+            $state->resetVisited();
+
+            $state->setState(State::LOADED);
+            $this->orm->getMapper($entity)->hydrate($entity, $state->getData());
+        }
+    }
+
+    /**
+     * Reset heap to it's initial state and remove all the changes.
+     */
+    protected function resetHeap()
+    {
+        foreach ($this->orm->getHeap() as $entity) {
+            // todo: need better reset?
+            $this->orm->getHeap()->get($entity)->resetVisited();
+        }
     }
 
     /**

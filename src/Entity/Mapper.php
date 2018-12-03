@@ -165,7 +165,6 @@ class Mapper implements MapperInterface
             }
 
             // todo: what is that?
-
             // todo: exception
         }
 
@@ -174,6 +173,7 @@ class Mapper implements MapperInterface
             $state = new State(
                 State::NEW,
                 $columns,
+                // unify it
                 $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
             );
             $this->orm->getHeap()->attach($entity, $state);
@@ -204,40 +204,26 @@ class Mapper implements MapperInterface
         // todo: this part is weird
         unset($cData[$this->primaryKey]);
 
-        $update = new Update(
-            $this->orm->getDatabase($entity),
-            $this->table,
-            $cData,
-            [$this->primaryKey => $oData[$this->primaryKey] ?? $eData[$this->primaryKey] ?? null]
-        );
-
+        $update = new Update($this->orm->getDatabase($entity), $this->table, $cData);
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($cData);
 
         // todo: scope prefix (call immediatelly?)
-        $state->forward($update, $this->primaryKey, "scope:" . $this->primaryKey);
+        $state->forward($update, $this->primaryKey, "scope:" . $this->primaryKey, true);
 
         return $update;
     }
 
     protected function buildDelete($entity, State $state): CommandInterface
     {
-        // todo: better primary key fetch
-
-        $delete = new Delete(
-            $this->orm->getDatabase($entity),
-            $this->table
-        );
+        $delete = new Delete($this->orm->getDatabase($entity), $this->table);
 
         $state->setState(State::SCHEDULED_DELETE);
 
         $delete->waitScope($this->primaryKey);
         $state->forward($delete, $this->primaryKey, $this->primaryKey, true);
 
-        //$state->addListener(function (State $state) use ($delete) {
-        //    $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
-        //});
-
+        // todo: this must be changed (CORRECT?) BUT HOW?
         $delete->onComplete(function () use ($entity) {
             $this->orm->getHeap()->detach($entity);
         });

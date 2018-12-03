@@ -76,7 +76,7 @@ final class Transaction implements TransactionInterface
 
         try {
             $commands = $this->initCommands();
-dump($commands);
+//dump($commands);
             while (!empty($commands)) {
                 $pending = [];
                 $countExecuted = count($executed);

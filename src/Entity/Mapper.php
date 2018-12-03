@@ -97,6 +97,15 @@ class Mapper implements MapperInterface
     {
         /** @var State $state */
         $state = $this->orm->getHeap()->get($entity);
+        if (is_null($state)) {
+            // todo: do we need to track PK?
+            $state = new State(
+                State::NEW,
+                [],
+                $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
+            );
+            $this->orm->getHeap()->attach($entity, $state);
+        }
 
         if ($state == null || $state->getState() == State::NEW) {
             $cmd = $this->queueCreate($entity, $state);

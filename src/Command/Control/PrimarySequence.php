@@ -16,7 +16,10 @@ use Spiral\ORM\Exception\CommandException;
  */
 class PrimarySequence extends Sequence implements ContextualInterface
 {
-    /** @var ContextualInterface */
+    /**
+     * @invisible
+     * @var ContextualInterface
+     */
     private $primary;
 
     /**
@@ -29,8 +32,6 @@ class PrimarySequence extends Sequence implements ContextualInterface
         $this->addCommand($command);
         $this->primary = $command;
     }
-
-
 
     public function accept($c, $v, $ch = true)
     {

@@ -5,14 +5,15 @@
 Features:
 ---------
 - plain php classes support (DataMapper)
-- eager and lazy loading
-- ability to dynamically define data schema (same class for all tables)
-- single table inheritance
+- eager and lazy loading, promises and proxies
+- runtime configuration without code-generation
+- single table inheritanc
+- works with any data repository
 - works with DAG and DG using IDDFS
 - one pass compiler approach for data trees generation
 - designed to work in long-running applications
 - MySQL, PostgresSQL, SQLServer, SQLite
 - in memory database mocks (SQLite)
 - ActiveRecord and custom base entity support 
-- modular and custom relations, relations to other data sources
+- custom relations, morphed over interface  and statically linked relations
 - compatible with Doctrine Collections, Symfony Events and Zend Hydrator

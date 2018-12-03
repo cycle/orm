@@ -162,25 +162,4 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertSame($a, $a->other);
         $this->assertNumReads(0);
     }
-
-    // last record 64MB for 5000 (but incomplete) - I DID IT AGAIN!
-    public function testMemUsage()
-    {
-        $this->orm = $this->orm->withHeap(new Heap());
-        $tr = new Transaction($this->orm);
-
-        for ($i = 0; $i < 5000; $i++) {
-            $c1 = new Cyclic();
-
-            // inverted
-            $c1->name = "self-reference";
-            $c1->other = $c1;
-
-            $tr->store($c1);
-        }
-
-        $tr->run();
-    }
 }
-
-// todo: cyclic belongs to must work BTW

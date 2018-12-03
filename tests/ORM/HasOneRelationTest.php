@@ -509,7 +509,6 @@ abstract class HasOneRelationTest extends BaseTest
         $tr = new Transaction($this->orm);
         $tr->store($e);
         $tr->run();
-
         $this->assertNumWrites(0);
     }
 }

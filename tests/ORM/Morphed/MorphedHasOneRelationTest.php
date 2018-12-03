@@ -326,8 +326,6 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $selector->load('image')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
-        $this->enableProfiling();
-
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($a);

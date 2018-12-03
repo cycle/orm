@@ -64,11 +64,38 @@ class Insert extends DatabaseCommand implements ContextualInterface
     }
 
     /**
+     * @invisible
+     */
+    private $target;
+    private $targetColumn;
+
+    public function onInsert($target, $column)
+    {
+        $this->target = $target;
+        $this->targetColumn = $column;
+    }
+
+    public function accept($column, $value, $changed = true)
+    {
+        if($changed||!is_null($value))
+        unset($this->waitContext[$column]);
+
+      //  if ($changed) {
+            $this->context[$column] = $value;
+        //}
+    }
+
+    /**
      * Insert data into associated table.
      */
     public function execute()
     {
         $this->insertID = $this->db->insert($this->table)->values($this->getData())->run();
+
+        if (!empty($this->target)) {
+            call_user_func([$this->target, 'accept'], $this->targetColumn, $this->insertID);
+        }
+
         parent::execute();
     }
 }

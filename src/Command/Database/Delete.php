@@ -37,6 +37,14 @@ class Delete extends DatabaseCommand implements ScopedInterface
         return empty($this->waitScope);
     }
 
+    public function accept($column, $value)
+    {
+        if (!is_null($value)) {
+            unset($this->waitScope[$column]);
+        }
+        $this->scope[$column] = $value;
+    }
+
     /**
      * Inserting data into associated table.
      */

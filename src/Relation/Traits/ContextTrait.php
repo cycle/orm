@@ -31,29 +31,64 @@ trait ContextTrait
         ContextualInterface $command,
         State $parent,
         string $parentKey,
-        ?State $current,
+        State $current,
         string $localKey
     ) {
-        $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
-            if (empty($value = $this->fetchKey($state, $parentKey))) {
-                return false;
-            }
+        // todo: need massive optimization (!) <- i want to save 20 mb here
+        //        $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
+        //            if (empty($value = $this->fetchKey($state, $parentKey))) {
+        //                return false;
+        //            }
+        //
+        //            if ($this->fetchKey($current, $localKey) != $value) {
+        //                $command->setContext($localKey, $value);
+        //                //  if (!is_null($current)) {
+        //                //   $current->setData([$localKey => $value]);
+        //                // }
+        //            }
+        //
+        //            $command->freeContext($localKey);
+        //            return true;
+        //        };
 
-            if ($this->fetchKey($current, $localKey) != $value) {
-                $command->setContext($localKey, $value);
-                if (!is_null($current)) {
-                    $current->setData([$localKey => $value]);
-                }
-            }
-
-            $command->freeContext($localKey);
-            return true;
-        };
 
         // optimizing this will save a lot of memory
+        // $command->waitContext($localKey, $this->isRequired());
+
+        //call_user_func($handler, $parent);
+
+        //  $parent->addListener($handler);
+
+        //  if (is_null($current)) {
+        //    return;
+        // }
+
+        // YEEAHAHAAH TO COMMAND
+        // $current->forward($command, $localKey, $localKey);
+
         $command->waitContext($localKey, $this->isRequired());
-        call_user_func($handler, $parent);
-        $parent->addListener($handler);
+        $current->forward($command, $localKey, $localKey);
+        $parent->forward($current, $parentKey, $localKey, true);
+
+        //        $command->waitContext($localKey, $this->isRequired());
+        //        $value = $this->fetchKey($parent, $parentKey);
+        //        if (!empty($value)) {
+        //            if (!empty($current)) {
+        //                $current->accept($localKey, $value);
+        //            }
+        //
+        //            $command->accept($localKey, $value);
+        //        }
+        //
+        //        if (!empty($current)) {
+        //            if (!empty($value = $this->fetchKey($parent, $parentKey))) {
+        //                $current->accept($localKey, $value);
+        //            }
+        //
+        //            $parent->forward($current, $parentKey, $localKey);
+        //        }
+        //
+        //        $parent->forward($command, $parentKey, $localKey);
     }
 
     /**
@@ -70,26 +105,31 @@ trait ContextTrait
         ScopedInterface $command,
         State $parent,
         string $parentKey,
-        ?State $current,
+        State $current,
         string $localKey
     ) {
-        $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
-            if (empty($value = $this->fetchKey($state, $parentKey))) {
-                return false;
-            }
-
-            if ($this->fetchKey($current, $localKey) != $value) {
-                $command->setScope($localKey, $value);
-            }
-
-            $command->freeScope($localKey);
-            return true;
-        };
-
-        // optimizing this will save a lot of memory
         $command->waitScope($localKey, $this->isRequired());
-        call_user_func($handler, $parent);
-        $parent->addListener($handler);
+
+       // $current->forward($command, $localKey, $localKey);
+        $parent->forward($command, $parentKey, "scope:".$localKey, true);
+
+//        $handler = function (State $state) use ($command, $localKey, $parentKey, $current) {
+//            if (empty($value = $this->fetchKey($state, $parentKey))) {
+//                return false;
+//            }
+//
+//            if ($this->fetchKey($current, $localKey) != $value) {
+//                $command->setScope($localKey, $value);
+//            }
+//
+//            $command->freeScope($localKey);
+//            return true;
+//        };
+//
+//        // optimizing this will save a lot of memory
+//        $command->waitScope($localKey, $this->isRequired());
+//        call_user_func($handler, $parent);
+//        $parent->addListener($handler);
     }
 
     /**

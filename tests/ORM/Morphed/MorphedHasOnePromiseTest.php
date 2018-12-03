@@ -164,8 +164,6 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
-        $this->enableProfiling();
-
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($a);

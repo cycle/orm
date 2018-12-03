@@ -89,6 +89,28 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
         parent::execute();
     }
 
+    public function accept($column, $value, $changed = true)
+    {
+        if (strpos($column, 'scope:') === 0) {
+            $column = substr($column, 6);
+            unset($this->waitScope[$column]);
+            $this->scope[$column] = $value;
+            return;
+        }
+
+        // todo: can it be empty by design?
+        if (!is_null($value) || $changed) {
+            unset($this->waitContext[$column]);
+        }
+
+        // todo: changed is a bit weird
+        if ($changed) {
+            $this->context[$column] = $value;
+        }
+
+        // todo: right now i have 2 update commands per relation, probably too much
+        // what if i will forward all state changes to one COMMAND??? LIKE ALLLLLLL
+    }
 
     /**
      * {@inheritdoc}

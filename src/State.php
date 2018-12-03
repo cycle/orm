@@ -42,15 +42,6 @@ final class State
     private $leadCommand;
 
     /**
-     * Listeners used to provide context and scope clarification in non complete
-     * dependency graph. Must only be used within Transaction scope.
-     *
-     * @invisible
-     * @var array
-     */
-    private $listeners = [];
-
-    /**
      * @param int    $state
      * @param array  $data
      * @param string $alias
@@ -101,11 +92,8 @@ final class State
             return;
         }
 
-        $this->data = $data + $this->data;
-        foreach ($this->listeners as $id => $handler) {
-            if (call_user_func($handler, $this) === true) {
-                unset($this->listeners[$id]);
-            }
+        foreach ($data as $column => $value) {
+            $this->accept($column, $value);
         }
     }
 
@@ -139,23 +127,29 @@ final class State
         return $this->leadCommand;
     }
 
-    /**
-     * Handle changes in state data. Listener should return true to automatically detach itself.
-     *
-     * @internal
-     * @param callable $closure
-     */
-    public function addListener(callable $closure)
+    private $routing;
+
+    public function forward($target, $source, $into, bool $trigger = false)
     {
-        $this->listeners[] = $closure;
+        $this->routing[$source][] = [$target, $into];
+
+        if ($trigger && !empty($this->data[$source])) {
+            $this->accept($source, $this->data[$source], true);
+        }
     }
 
-    /**
-     * Remove all state listeners.
-     */
-    public function resetListeners()
+    public function accept($column, $value, $changed = false)
     {
-        $this->listeners = [];
+        $changed = $changed || !(($this->data[$column] ?? null) == $value);
+
+        $this->data[$column] = $value;
+
+        if (!empty($this->routing[$column])) {
+            foreach ($this->routing[$column] as $id => $handler) {
+                call_user_func([$handler[0], 'accept'], $handler[1], $value, $changed);
+                $changed = false;
+            }
+        }
     }
 
     /**
@@ -165,7 +159,6 @@ final class State
     {
         $this->data = [];
         $this->relations = [];
-        $this->listeners = [];
         $this->visited = [];
         $this->leadCommand = null;
     }

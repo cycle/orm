@@ -97,18 +97,25 @@ class Mapper implements MapperInterface
     {
         /** @var State $state */
         $state = $this->orm->getHeap()->get($entity);
+        if (is_null($state)) {
+            // todo: do we need to track PK?
+            $state = new State(
+                State::NEW,
+                [],
+                $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
+            );
+            $this->orm->getHeap()->attach($entity, $state);
+        }
 
         if ($state == null || $state->getState() == State::NEW) {
             $cmd = $this->queueCreate($entity, $state);
             $state->setLeadCommand($cmd);
-            $cmd->onComplete(function () use ($state) {
-                $state->setLeadCommand(null);
-            });
 
             return $cmd;
         }
 
         $lastCommand = $state->getLeadCommand();
+
         if (empty($lastCommand)) {
             // todo: check multiple update commands working within the split (!)
             return $this->queueUpdate($entity, $state);
@@ -118,6 +125,7 @@ class Mapper implements MapperInterface
             return $lastCommand;
         }
 
+        // todo: do i like it?
         $split = new Split($lastCommand, $this->queueUpdate($entity, $state));
         $state->setLeadCommand($split);
 
@@ -180,12 +188,7 @@ class Mapper implements MapperInterface
         unset($columns[$this->primaryKey]);
 
         $insert = new Insert($this->orm->getDatabase($entity), $this->table, $columns);
-
-        // we are managed at this moment
-
-        $insert->onExecute(function (Insert $command) use ($entity, $state) {
-            $state->setData([$this->primaryKey => $command->getInsertID()]);
-        });
+        $insert->onInsert($state, $this->primaryKey);
 
         return $insert;
     }
@@ -198,6 +201,9 @@ class Mapper implements MapperInterface
 
         // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
 
+        // todo: this part is weird
+        unset($cData[$this->primaryKey]);
+
         $update = new Update(
             $this->orm->getDatabase($entity),
             $this->table,
@@ -208,11 +214,8 @@ class Mapper implements MapperInterface
         $state->setState(State::SCHEDULED_UPDATE);
         $state->setData($cData);
 
-        $state->addListener(function (State $state) use ($update) {
-            if (!empty($state->getData()[$this->primaryKey])) {
-                $update->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
-            }
-        });
+        // todo: scope prefix (call immediatelly?)
+        $state->forward($update, $this->primaryKey, "scope:" . $this->primaryKey);
 
         return $update;
     }
@@ -223,16 +226,17 @@ class Mapper implements MapperInterface
 
         $delete = new Delete(
             $this->orm->getDatabase($entity),
-            $this->table,
-            // todo: uuid?
-            [$this->primaryKey => $state->getData()[$this->primaryKey] ?? $this->extract($entity)[$this->primaryKey] ?? null]
+            $this->table
         );
 
         $state->setState(State::SCHEDULED_DELETE);
 
-        $state->addListener(function (State $state) use ($delete) {
-            $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
-        });
+        $delete->waitScope($this->primaryKey);
+        $state->forward($delete, $this->primaryKey, $this->primaryKey, true);
+
+        //$state->addListener(function (State $state) use ($delete) {
+        //    $delete->setScope($this->primaryKey, $state->getData()[$this->primaryKey]);
+        //});
 
         $delete->onComplete(function () use ($entity) {
             $this->orm->getHeap()->detach($entity);

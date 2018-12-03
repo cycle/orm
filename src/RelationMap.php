@@ -173,7 +173,7 @@ final class RelationMap
 
         $relStore = $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name));
 
-        if ($relStore instanceof PrimarySequence && count($relStore) === 1) {
+        if ($relStore instanceof Sequence && count($relStore) === 1) {
             // todo: improve
             $relStore = $relStore->getCommands()[0];
         }

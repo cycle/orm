@@ -280,7 +280,6 @@ abstract class ManyToPivotedRelationTest extends BaseTest
         $selector = new Selector($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
-        $this->enableProfiling();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($u);

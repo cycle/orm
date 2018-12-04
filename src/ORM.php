@@ -251,6 +251,7 @@ class ORM implements ORMInterface
      */
     public function __clone()
     {
+        $this->heap = new Heap();
         $this->mappers = [];
         $this->relmaps = [];
     }

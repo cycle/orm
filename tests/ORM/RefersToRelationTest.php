@@ -110,162 +110,168 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertNotNull($u->lastComment);
         $this->assertSame($u->lastComment, $u->comments[0]);
     }
-//
-//    public function testCreateUserToExistedReference()
-//    {
-//        $u = new User();
-//        $u->email = "email@email.com";
-//        $u->balance = 100;
-//
-//        $c = new Comment();
-//        $c->message = "last comment";
-//
-//        $u->addComment($c);
-//
-//        $this->captureWriteQueries();
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $this->assertNumWrites(3);
-//
-//        $u2 = new User();
-//        $u2->email = "second@email.com";
-//        $u2->balance = 200;
-//        $u2->lastComment = $c;
-//
-//        $this->captureWriteQueries();
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u2);
-//        $tr->run();
-//        $this->assertNumWrites(1);
-//
-//        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
-//        $u3 = $s->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
-//
-//        $this->assertNotNull($u3->lastComment);
-//        $this->assertEquals($u3->lastComment->id, $u->comments[0]->id);
-//    }
-//
-//    public function testCreateWhenParentExists()
-//    {
-//        $u = new User();
-//        $u->email = "email@email.com";
-//        $u->balance = 100;
-//
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $c = new Comment();
-//        $c->message = "last comment";
-//
-//        $u->addComment($c);
-//
-//        $this->captureWriteQueries();
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $this->assertNumWrites(2);
-//
-//        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
-//        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
-//
-//        $this->assertNotNull($u->lastComment);
-//        $this->assertSame($u->lastComment, $u->comments[0]);
-//    }
-//
-//    /**
-//     * @expectedException \Spiral\ORM\Exception\TransactionException
-//     */
-//    public function testCreateWithoutProperDependency()
-//    {
-//        $u = new User();
-//        $u->email = "email@email.com";
-//        $u->balance = 100;
-//
-//        $c = new Comment();
-//        $c->message = "last comment";
-//
-//        $u->lastComment = $c;
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//    }
-//
-//    public function testAssignParentAsUpdate()
-//    {
-//        $u = new User();
-//        $u->email = "email@email.com";
-//        $u->balance = 100;
-//
-//        $c = new Comment();
-//        $c->message = "last comment";
-//        $u->comments->add($c);
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $this->orm = $this->orm->withHeap(new Heap());
-//        $s = new Selector($this->orm, User::class);
-//        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
-//
-//        $this->assertNull($u->lastComment);
-//        $this->assertCount(1, $u->comments);
-//
-//        $u->lastComment = $u->comments[0];
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $s = new Selector($this->orm, User::class);
-//        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
-//
-//        $this->assertNotNull($u->lastComment);
-//        $this->assertCount(1, $u->comments);
-//        $this->assertSame($u->lastComment, $u->comments[0]);
-//    }
-//
-//    public function testSetNull()
-//    {
-//        $u = new User();
-//        $u->email = "email@email.com";
-//        $u->balance = 100;
-//
-//        $c = new Comment();
-//        $c->message = "last comment";
-//        $u->addComment($c);
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $this->orm = $this->orm->withHeap(new Heap());
-//        $s = new Selector($this->orm, User::class);
-//        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
-//
-//        $this->assertNotNull($u->lastComment);
-//        $this->assertCount(1, $u->comments);
-//        $this->assertSame($u->lastComment, $u->comments[0]);
-//
-//        $u->lastComment = null;
-//
-//        $tr = new Transaction($this->orm);
-//        $tr->store($u);
-//        $tr->run();
-//
-//        $this->orm = $this->orm->withHeap(new Heap());
-//        $s = new Selector($this->orm, User::class);
-//        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
-//
-//        $this->assertNull($u->lastComment);
-//        $this->assertCount(1, $u->comments);
-//    }
+
+    public function testCreateUserToExistedReference()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+
+        $u->addComment($c);
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->assertNumWrites(3);
+
+        $u2 = new User();
+        $u2->email = "second@email.com";
+        $u2->balance = 200;
+        $u2->lastComment = $c;
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u2);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u3 = $s->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
+
+        $this->assertNotNull($u3->lastComment);
+        $this->assertEquals($u3->lastComment->id, $u->comments[0]->id);
+    }
+
+    public function testCreateWhenParentExists()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $c = new Comment();
+        $c->message = "last comment";
+
+        $u->addComment($c);
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->assertNumWrites(2);
+
+        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($u->lastComment);
+        $this->assertSame($u->lastComment, $u->comments[0]);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exception\TransactionException
+     */
+    public function testCreateWithoutProperDependency()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+
+        $u->lastComment = $c;
+        try {
+            $tr = new Transaction($this->orm);
+            $tr->store($u);
+            $tr->run();
+        } catch (\Throwable $e) {
+            throw $e;
+        } finally {
+            // todo: state verification
+            $this->orm = $this->orm->withHeap(new Heap());
+        }
+    }
+
+    public function testAssignParentAsUpdate()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+        $u->comments->add($c);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+
+        $u->lastComment = $u->comments[0];
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+        $this->assertSame($u->lastComment, $u->comments[0]);
+    }
+
+    public function testSetNull()
+    {
+        $u = new User();
+        $u->email = "email@email.com";
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = "last comment";
+        $u->addComment($c);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+        $this->assertSame($u->lastComment, $u->comments[0]);
+
+        $u->lastComment = null;
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $s = new Selector($this->orm, User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertNull($u->lastComment);
+        $this->assertCount(1, $u->comments);
+    }
 }

@@ -8,40 +8,35 @@
 
 namespace Spiral\ORM\Command\Control;
 
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Exception\CommandException;
 
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.
  */
-class PrimarySequence extends Sequence implements ContextualInterface
+class PrimarySequence extends Sequence implements CarrierInterface
 {
     /**
      * @invisible
-     * @var ContextualInterface
+     * @var CarrierInterface
      */
     private $primary;
 
     /**
      * Add primary command to the sequence.
      *
-     * @param ContextualInterface $command
+     * @param CarrierInterface $command
      */
-    public function addPrimary(ContextualInterface $command)
+    public function addPrimary(CarrierInterface $command)
     {
         $this->addCommand($command);
         $this->primary = $command;
     }
 
-    public function accept($c, $v, $ch = true)
-    {
-        $this->getPrimary()->accept($c, $v, $ch);
-    }
-
     /**
-     * @return ContextualInterface
+     * @return CarrierInterface
      */
-    public function getPrimary(): ContextualInterface
+    public function getPrimary(): CarrierInterface
     {
         if (empty($this->primary)) {
             throw new CommandException("Primary sequence command is not set");
@@ -61,14 +56,6 @@ class PrimarySequence extends Sequence implements ContextualInterface
     /**
      * {@inheritdoc}
      */
-    public function freeContext(string $key)
-    {
-        return $this->getPrimary()->freeContext($key);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function setContext(string $key, $value)
     {
         $this->getPrimary()->setContext($key, $value);
@@ -80,6 +67,18 @@ class PrimarySequence extends Sequence implements ContextualInterface
     public function getContext(): array
     {
         return $this->getPrimary()->getContext();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function accept(
+        string $key,
+        ?string $value,
+        bool $handled = false,
+        int $type = self::DATA
+    ) {
+        $this->getPrimary()->accept($key, $value, $handled, $type);
     }
 
     /**

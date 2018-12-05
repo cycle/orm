@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\Command\Traits\ContextTrait;
@@ -21,7 +21,7 @@ use Spiral\ORM\Exception\CommandException;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class Update extends DatabaseCommand implements ContextualInterface, ScopedInterface
+class Update extends DatabaseCommand implements CarrierInterface, ScopedInterface
 {
     use ContextTrait, ScopeTrait;
 
@@ -64,6 +64,33 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
     }
 
     /**
+     * @inheritdoc
+     */
+    public function accept(
+        string $key,
+        ?string $value,
+        bool $handled = false,
+        int $type = self::DATA
+    ) {
+        if ($type == self::SCOPE) {
+            $this->freeScope($key);
+            $this->setScope($key, $value);
+
+            return;
+        }
+
+        if (!$handled || !is_null($value)) {
+            $this->freeContext($key);
+        }
+
+        if (!$handled) {
+            // we only accept context when context has changed to avoid un-necessary
+            // update commands
+            $this->setContext($key, $value);
+        }
+    }
+
+    /**
      * Update values, context not included.
      *
      * @return array
@@ -87,29 +114,6 @@ class Update extends DatabaseCommand implements ContextualInterface, ScopedInter
         }
 
         parent::execute();
-    }
-
-    public function accept($column, $value, $changed = true)
-    {
-        if (strpos($column, 'scope:') === 0) {
-            $column = substr($column, 6);
-            unset($this->waitScope[$column]);
-            $this->scope[$column] = $value;
-            return;
-        }
-
-        // todo: can it be empty by design?
-        if (!is_null($value) || $changed) {
-            unset($this->waitContext[$column]);
-        }
-
-        // todo: changed is a bit weird
-        if ($changed) {
-            $this->context[$column] = $value;
-        }
-
-        // todo: right now i have 2 update commands per relation, probably too much
-        // what if i will forward all state changes to one COMMAND??? LIKE ALLLLLLL
     }
 
     /**

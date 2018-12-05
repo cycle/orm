@@ -7,14 +7,14 @@
 
 namespace Spiral\ORM\Command\Control;
 
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 
 /**
  * Doing noting.
  *
  * @codeCoverageIgnore
  */
-final class Nil implements ContextualInterface
+final class Nil implements CarrierInterface
 {
     /**
      * {@inheritdoc}
@@ -22,13 +22,6 @@ final class Nil implements ContextualInterface
     public function waitContext(string $key, bool $required = true)
     {
 
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function freeContext(string $key)
-    {
     }
 
     /**
@@ -44,6 +37,18 @@ final class Nil implements ContextualInterface
      */
     public function setContext(string $key, $value)
     {
+        // nothing to do
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function accept(
+        string $key,
+        ?string $value,
+        bool $handled = false,
+        int $type = self::DATA
+    ) {
         // nothing to do
     }
 

@@ -19,33 +19,15 @@ trait ScopeTrait
      * Wait for the context value.
      *
      * @param string $key
-     * @param bool   $required
      */
-    public function waitScope(string $key, bool $required = true)
+    public function waitScope(string $key)
     {
         $this->waitScope[$key] = true;
     }
 
-    public function accept($column, $value)
-    {
-        if (!is_null($value)) {
-            unset($this->waitScope[$column]);
-        }
-
-        $this->scope[$column] = $value;
-    }
-
     /**
-     * Indicate that context value is not required anymore.
+     * Set scope value.
      *
-     * @param string $key
-     */
-    public function freeScope(string $key)
-    {
-        unset($this->waitScope[$key]);
-    }
-
-    /**
      * @param string $key
      * @param mixed  $value
      */
@@ -60,5 +42,15 @@ trait ScopeTrait
     public function getScope(): array
     {
         return $this->scope;
+    }
+
+    /**
+     * Indicate that context value is not required anymore.
+     *
+     * @param string $key
+     */
+    protected function freeScope(string $key)
+    {
+        unset($this->waitScope[$key]);
     }
 }

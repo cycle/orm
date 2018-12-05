@@ -8,13 +8,14 @@
 
 namespace Spiral\ORM\Entity;
 
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Split;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
+use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\MapperInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RepositoryInterface;
@@ -93,7 +94,7 @@ class Mapper implements MapperInterface
     }
 
     // todo: need state as INPUT!!!!
-    public function queueStore($entity): ContextualInterface
+    public function queueStore($entity): CarrierInterface
     {
         /** @var State $state */
         $state = $this->orm->getHeap()->get($entity);
@@ -151,7 +152,7 @@ class Mapper implements MapperInterface
     }
 
     // todo: state must not be null
-    protected function queueCreate($entity, State &$state = null): ContextualInterface
+    protected function queueCreate($entity, State &$state = null): CarrierInterface
     {
         $columns = $this->getColumns($entity);
 
@@ -193,7 +194,7 @@ class Mapper implements MapperInterface
         return $insert;
     }
 
-    protected function queueUpdate($entity, State $state): ContextualInterface
+    protected function queueUpdate($entity, State $state): CarrierInterface
     {
         $eData = $this->getColumns($entity);
         $oData = $state->getData();
@@ -209,7 +210,7 @@ class Mapper implements MapperInterface
         $state->setData($cData);
 
         // todo: scope prefix (call immediatelly?)
-        $state->forward($update, $this->primaryKey, "scope:" . $this->primaryKey, true);
+        $state->forward($this->primaryKey, $update, $this->primaryKey, true, AcceptorInterface::SCOPE);
 
         return $update;
     }
@@ -221,7 +222,7 @@ class Mapper implements MapperInterface
         $state->setState(State::SCHEDULED_DELETE);
 
         $delete->waitScope($this->primaryKey);
-        $state->forward($delete, $this->primaryKey, $this->primaryKey, true);
+        $state->forward($this->primaryKey, $delete, $this->primaryKey, true, AcceptorInterface::SCOPE);
 
         // todo: this must be changed (CORRECT?) BUT HOW?
         $delete->onComplete(function () use ($entity) {

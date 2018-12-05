@@ -30,7 +30,12 @@ class Sequence implements CommandInterface, \IteratorAggregate, \Countable
         $this->commands[] = $command;
     }
 
-    public function getCommands()
+    /**
+     * Get array of underlying commands.
+     *
+     * @return CommandInterface[]
+     */
+    public function getCommands(): array
     {
         return $this->commands;
     }

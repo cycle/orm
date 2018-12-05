@@ -11,11 +11,12 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualInterface;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
+use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
@@ -152,7 +153,7 @@ class ManyToManyRelation extends AbstractRelation
      * @param ContextStorage $original
      */
     public function queueRelation(
-        ContextualInterface $parent,
+        CarrierInterface $parentCommand,
         $entity,
         State $state,
         $related,
@@ -215,8 +216,8 @@ class ManyToManyRelation extends AbstractRelation
         $sync->waitContext($this->thoughtInnerKey, true);
         $sync->waitContext($this->thoughtOuterKey, true);
 
-        $state->forward($sync, $this->innerKey, $this->thoughtInnerKey, true);
-        $this->getState($related)->forward($sync, $this->outerKey, $this->thoughtOuterKey, true);
+        $state->forward($this->innerKey, $sync, $this->thoughtInnerKey, true);
+        $this->getState($related)->forward($this->outerKey, $sync, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -234,12 +235,14 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function unlink(State $state, $related): CommandInterface
     {
-        $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
-        $delete->waitScope($this->thoughtOuterKey, true);
-        $delete->waitScope($this->thoughtInnerKey, true);
+        $relState = $this->getState($related);
 
-        $state->forward($delete, $this->innerKey, $this->thoughtInnerKey, true);
-        $this->getState($related)->forward($delete, $this->outerKey, $this->thoughtOuterKey, true);
+        $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
+        $delete->waitScope($this->thoughtOuterKey);
+        $delete->waitScope($this->thoughtInnerKey);
+
+        $state->forward($this->innerKey, $delete, $this->thoughtInnerKey, true, AcceptorInterface::SCOPE);
+        $relState->forward($this->outerKey, $delete, $this->thoughtOuterKey, true, AcceptorInterface::SCOPE);
 
         return $delete;
     }

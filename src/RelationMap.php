@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\Control\PrimarySequence;
 use Spiral\ORM\Command\Control\Sequence;
 
@@ -85,18 +85,18 @@ final class RelationMap
     /**
      * Generate set of commands required to store the entity and it's relations.
      *
-     * @param object              $entity
-     * @param array               $data
-     * @param State               $state
-     * @param ContextualInterface $command
-     * @return ContextualInterface
+     * @param object           $entity
+     * @param array            $data
+     * @param State            $state
+     * @param CarrierInterface $command
+     * @return CarrierInterface
      */
     public function queueRelations(
         $entity,
         array $data,
         State $state,
-        ContextualInterface $command
-    ): ContextualInterface {
+        CarrierInterface $command
+    ): CarrierInterface {
         $sequence = new PrimarySequence();
         $origRelated = [];
 
@@ -133,20 +133,20 @@ final class RelationMap
     /**
      * Queue relation and return related object.
      *
-     * @param Sequence            $sequence
-     * @param object              $entity
-     * @param array               $data
-     * @param State               $state
-     * @param ContextualInterface $command
-     * @param RelationInterface   $relation
-     * @param string              $name
+     * @param Sequence          $sequence
+     * @param object            $entity
+     * @param array             $data
+     * @param State             $state
+     * @param CarrierInterface  $command
+     * @param RelationInterface $relation
+     * @param string            $name
      */
     private function queueRelation(
         Sequence $sequence,
         $entity,
         array $data,
         State $state,
-        ContextualInterface $command,
+        CarrierInterface $command,
         RelationInterface $relation,
         string $name
     ) {

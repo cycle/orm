@@ -8,24 +8,23 @@
 
 namespace Spiral\ORM\Command;
 
-interface ScopedInterface extends CommandInterface
+use Spiral\ORM\Context\AcceptorInterface;
+
+/**
+ * Command indicates the ability to accept the forwarded scope values.
+ */
+interface ScopedInterface extends CommandInterface, AcceptorInterface
 {
     /**
-     * Wait for the scope value.
-     *
-     * @param string $key
-     * @param bool   $required
-     */
-    public function waitScope(string $key, bool $required = true);
-
-    /**
-     * Indicate that scope value is not required anymore.
+     * Wait for the scope value. Command must not be ready until the value come.
      *
      * @param string $key
      */
-    public function freeScope(string $key);
+    public function waitScope(string $key);
 
     /**
+     * Set scope value.
+     *
      * @param string $key
      * @param mixed  $value
      */

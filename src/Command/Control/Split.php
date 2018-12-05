@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Command\Control;
 
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 
 /**
  * Splits input context command into 2 destinations: original create command (usually insert) and delayed update command.
@@ -17,29 +17,30 @@ use Spiral\ORM\Command\ContextualInterface;
  *
  * Handlers are attached to the head command since we can guarantee that head would always be executed.
  */
-class Split implements ContextualInterface, \IteratorAggregate
+class Split implements CarrierInterface, \IteratorAggregate
 {
     /** @var bool */
     private $headExecuted = false;
 
-    /** @var ContextualInterface */
+    /** @var CarrierInterface */
     private $head;
 
-    /** @var ContextualInterface */
+    /** @var CarrierInterface */
     private $tail;
 
     /** @var array */
     private $contextPath = [];
 
     /**
-     * @param ContextualInterface $head
-     * @param ContextualInterface $tail
+     * @param CarrierInterface $head
+     * @param CarrierInterface $tail
      */
-    public function __construct(ContextualInterface $head, ContextualInterface $tail)
+    public function __construct(CarrierInterface $head, CarrierInterface $tail)
     {
         $this->head = $head;
         $this->tail = $tail;
 
+        // todo: i can remove it AS WELL!!!!
         $this->head->onExecute(function () {
             $this->headExecuted = true;
         });
@@ -80,22 +81,9 @@ class Split implements ContextualInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function freeContext(string $key)
-    {
-        $this->contextPath[$key]->freeContext($key, true);
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function setContext(string $key, $value)
     {
         $this->contextPath[$key]->setContext($key, $value);
-    }
-
-    public function accept($k, $v, $c = false)
-    {
-        $this->contextPath[$k]->accept($k, $v, $c);
     }
 
     /**
@@ -106,6 +94,18 @@ class Split implements ContextualInterface, \IteratorAggregate
     {
         // branch can not hold the context, only underlying commands can
         return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function accept(
+        string $key,
+        ?string $value,
+        bool $handled = false,
+        int $type = self::DATA
+    ) {
+        $this->contextPath[$key]->accept($key, $value, $handled, $type);
     }
 
     /**
@@ -140,6 +140,7 @@ class Split implements ContextualInterface, \IteratorAggregate
      */
     public function onExecute(callable $closure)
     {
+        // todo: optimize
         $this->head->onExecute($closure);
         $this->tail->onExecute($closure);
     }
@@ -149,6 +150,8 @@ class Split implements ContextualInterface, \IteratorAggregate
      */
     public function onComplete(callable $closure)
     {
+        // todo: optimize
+
         $this->head->onComplete($closure);
         $this->tail->onComplete($closure);
     }
@@ -158,6 +161,8 @@ class Split implements ContextualInterface, \IteratorAggregate
      */
     public function onRollBack(callable $closure)
     {
+        // todo: optimize
+
         $this->head->onRollBack($closure);
         $this->tail->onRollBack($closure);
     }
@@ -165,7 +170,7 @@ class Split implements ContextualInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    protected function getTarget(): ContextualInterface
+    protected function getTarget(): CarrierInterface
     {
         if ($this->headExecuted) {
             return $this->tail;

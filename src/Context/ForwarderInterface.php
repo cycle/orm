@@ -20,14 +20,14 @@ interface ForwarderInterface
      * @param string            $key      The key name to forward.
      * @param AcceptorInterface $acceptor Class to accept the key.
      * @param string            $target   Target key name in acceptor.
-     * @param int               $type     One of the context types (data context, scope context).
      * @param bool              $trigger  When set to true forwarder is allowed to send key immediately.
+     * @param int               $type     One of the context types (data context, scope context).
      */
     public function forward(
         string $key,
         AcceptorInterface $acceptor,
         string $target,
-        int $type = AcceptorInterface::DATA,
-        bool $trigger = false
+        bool $trigger = false,
+        int $type = AcceptorInterface::DATA
     );
 }

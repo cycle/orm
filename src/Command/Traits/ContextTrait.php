@@ -26,17 +26,9 @@ trait ContextTrait
      */
     public function waitContext(string $key, bool $required = true)
     {
-        $this->waitContext[$key] = true;
-    }
-
-    /**
-     * Indicate that context value is not required anymore.
-     *
-     * @param string $key
-     */
-    protected function freeContext(string $key)
-    {
-        unset($this->waitContext[$key]);
+        if ($required) {
+            $this->waitContext[$key] = true;
+        }
     }
 
     /**
@@ -54,5 +46,15 @@ trait ContextTrait
     public function getContext(): array
     {
         return $this->context;
+    }
+
+    /**
+     * Indicate that context value is not required anymore.
+     *
+     * @param string $key
+     */
+    protected function freeContext(string $key)
+    {
+        unset($this->waitContext[$key]);
     }
 }

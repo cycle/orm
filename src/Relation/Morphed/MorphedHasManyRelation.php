@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation\Morphed;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasManyRelation;
@@ -59,9 +59,9 @@ class MorphedHasManyRelation extends HasManyRelation
      *
      * @param State  $parent
      * @param object $related
-     * @return ContextualInterface
+     * @return CarrierInterface
      */
-    protected function queueStore(State $parent, $related): ContextualInterface
+    protected function queueStore(State $parent, $related): CarrierInterface
     {
         $store = parent::queueStore($parent, $related);
 

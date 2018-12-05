@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\PromiseInterface;
@@ -43,7 +43,7 @@ class HasManyRelation extends AbstractRelation
      * @inheritdoc
      */
     public function queueRelation(
-        ContextualInterface $parent,
+        CarrierInterface $parentCommand,
         $entity,
         State $state,
         $related,
@@ -96,9 +96,9 @@ class HasManyRelation extends AbstractRelation
      *
      * @param State  $parent
      * @param object $related
-     * @return ContextualInterface
+     * @return CarrierInterface
      */
-    protected function queueStore(State $parent, $related): ContextualInterface
+    protected function queueStore(State $parent, $related): CarrierInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getState($related);

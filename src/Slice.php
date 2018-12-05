@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 
 /**
  *
@@ -25,7 +25,7 @@ class Slice
     /** @var array */
     private $data;
 
-    /** @var null|ContextualInterface */
+    /** @var null|CarrierInterface */
     private $command;
 
     /**
@@ -90,18 +90,18 @@ class Slice
      * Set the reference to the object creation command (non executed).
      *
      * @internal
-     * @param ContextualInterface|null $cmd
+     * @param CarrierInterface|null $cmd
      */
-    public function setCommand(ContextualInterface $cmd = null)
+    public function setCommand(CarrierInterface $cmd = null)
     {
         $this->command = $cmd;
     }
 
     /**
      * @internal
-     * @return null|ContextualInterface
+     * @return null|CarrierInterface
      */
-    public function getCommand(): ?ContextualInterface
+    public function getCommand(): ?CarrierInterface
     {
         return $this->command;
     }

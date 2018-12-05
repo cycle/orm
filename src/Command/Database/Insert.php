@@ -9,22 +9,22 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\Traits\ContextTrait;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class Insert extends DatabaseCommand implements ContextualInterface
+class Insert extends DatabaseCommand implements CarrierInterface
 {
     use ContextTrait;
 
+    // Special identifier to forward insert key into
+    public const INSERT_ID = '@lastInsertID';
+
     /** @var array */
     private $data;
-
-    /** @var null|mixed */
-    private $insertID = null;
 
     /**
      * @param DatabaseInterface $db
@@ -46,6 +46,22 @@ class Insert extends DatabaseCommand implements ContextualInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function accept(
+        string $key,
+        ?string $value,
+        bool $handled = false,
+        int $type = self::DATA
+    ) {
+        if (!$handled || !is_null($value)) {
+            $this->freeContext($key);
+        }
+
+        $this->setContext($key, $value);
+    }
+
+    /**
      * Insert values, context not included.
      *
      * @return array
@@ -53,14 +69,6 @@ class Insert extends DatabaseCommand implements ContextualInterface
     public function getData(): array
     {
         return array_merge($this->data, $this->context);
-    }
-
-    /**
-     * @return mixed|null
-     */
-    public function getInsertID()
-    {
-        return $this->insertID;
     }
 
     /**
@@ -75,25 +83,17 @@ class Insert extends DatabaseCommand implements ContextualInterface
         $this->targetColumn = $column;
     }
 
-    public function accept($column, $value, $changed = true)
-    {
-        if($changed||!is_null($value))
-        unset($this->waitContext[$column]);
-
-      //  if ($changed) {
-            $this->context[$column] = $value;
-        //}
-    }
-
     /**
      * Insert data into associated table.
      */
     public function execute()
     {
-        $this->insertID = $this->db->insert($this->table)->values($this->getData())->run();
+        $insertID = $this->db->insert($this->table)->values($this->getData())->run();
+
+        // todo: forwarding keys
 
         if (!empty($this->target)) {
-            call_user_func([$this->target, 'accept'], $this->targetColumn, $this->insertID);
+            call_user_func([$this->target, 'accept'], $this->targetColumn, $insertID);
         }
 
         parent::execute();

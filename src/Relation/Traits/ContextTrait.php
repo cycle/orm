@@ -8,8 +8,9 @@
 
 namespace Spiral\ORM\Relation\Traits;
 
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\ScopedInterface;
+use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\State;
 
 /**
@@ -21,14 +22,14 @@ trait ContextTrait
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
-     * @param ContextualInterface $carrier
-     * @param State               $source
-     * @param string              $sourceKey
-     * @param null|State          $target
-     * @param string              $targetKey
+     * @param CarrierInterface $carrier
+     * @param State            $source
+     * @param string           $sourceKey
+     * @param null|State       $target
+     * @param string           $targetKey
      */
     protected function forwardContext(
-        ContextualInterface $carrier,
+        CarrierInterface $carrier,
         State $source,
         string $sourceKey,
         State $target,
@@ -36,8 +37,8 @@ trait ContextTrait
     ) {
         $carrier->waitContext($targetKey, $this->isRequired());
 
-        $target->forward($carrier, $targetKey, $targetKey);
-        $source->forward($target, $sourceKey, $targetKey, true);
+        $target->forward($targetKey, $carrier, $targetKey);
+        $source->forward($sourceKey, $target, $targetKey, true);
     }
 
     /**
@@ -51,14 +52,14 @@ trait ContextTrait
      */
     protected function forwardScope(ScopedInterface $carrier, State $source, string $sourceKey, string $targetKey)
     {
-        $carrier->waitScope($targetKey, $this->isRequired());
-        $source->forward($carrier, $sourceKey, "scope:" . $targetKey, true);
+        $carrier->waitScope($targetKey);
+        $source->forward($sourceKey, $carrier, $targetKey, true, AcceptorInterface::SCOPE);
     }
 
     /**
      * Fetch key from the state.
      *
-     * @param State $state
+     * @param State  $state
      * @param string $key
      * @return mixed|null
      */

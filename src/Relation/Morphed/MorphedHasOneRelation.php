@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation\Morphed;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasOneRelation;
@@ -63,15 +63,15 @@ class MorphedHasOneRelation extends HasOneRelation
      * @inheritdoc
      */
     public function queueRelation(
-        ContextualInterface $parent,
+        CarrierInterface $parentCommand,
         $entity,
         State $state,
         $related,
         $original
     ): CommandInterface {
-        $store = parent::queueRelation($parent, $entity, $state, $related, $original);
+        $store = parent::queueRelation($parentCommand, $entity, $state, $related, $original);
 
-        if ($store instanceof ContextualInterface && !is_null($related)) {
+        if ($store instanceof CarrierInterface && !is_null($related)) {
             $relState = $this->getState($related);
             if ($this->fetchKey($relState, $this->morphKey) != $state->getAlias()) {
                 $store->setContext($this->morphKey, $state->getAlias());

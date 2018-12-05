@@ -104,6 +104,7 @@ final class Transaction implements TransactionInterface
                 }
 
                 if (count($executed) === $countExecuted && !empty($pending)) {
+                    dump($pending);
                     throw new TransactionException("Unable to complete: " . $this->listCommands($pending));
                 }
 

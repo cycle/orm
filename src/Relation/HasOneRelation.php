@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\PrimarySequence;
@@ -54,7 +54,7 @@ class HasOneRelation extends AbstractRelation
      * @inheritdoc
      */
     public function queueRelation(
-        ContextualInterface $parent,
+        CarrierInterface $parentCommand,
         $entity,
         State $state,
         $related,

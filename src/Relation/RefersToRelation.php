@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
@@ -61,7 +61,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
      * @inheritdoc
      */
     public function queueRelation(
-        ContextualInterface $parent,
+        CarrierInterface $parentCommand,
         $entity,
         State $state,
         $related,
@@ -70,7 +70,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             if (!is_null($original)) {
-                $parent->setContext($this->innerKey, null);
+                $parentCommand->setContext($this->innerKey, null);
             }
 
             return new Nil();
@@ -81,7 +81,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
             if ($outerKey != $this->fetchKey($state, $this->innerKey)) {
-                $parent->setContext($this->innerKey, $outerKey);
+                $parentCommand->setContext($this->innerKey, $outerKey);
             }
 
             return new Nil();
@@ -115,10 +115,6 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         );
 
         // todo: here we go, the problem is that i need UPDATE command to be automatically
-        // created here, or we are going to end in a infinite loop OR inability to resolve the command
-        // $update = $this->orm->queueStore($entity);
-
-        // this will give UPDATE (!)
 
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
         $this->forwardScope($update, $state, $primaryKey, $primaryKey);

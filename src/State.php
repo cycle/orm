@@ -8,7 +8,9 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\ContextualInterface;
+use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Context\AcceptorInterface;
+use Spiral\ORM\Context\ForwarderInterface;
 use Spiral\ORM\Traits\ReferenceTrait;
 use Spiral\ORM\Traits\RelationTrait;
 use Spiral\ORM\Traits\VisitorTrait;
@@ -17,7 +19,7 @@ use Spiral\ORM\Traits\VisitorTrait;
  * State carries meta information about all load entities, including original set of data,
  * relations, state and number of active references (in cases when entity become unclaimed).
  */
-final class State
+final class State implements ForwarderInterface, AcceptorInterface
 {
     use RelationTrait, ReferenceTrait, VisitorTrait;
 
@@ -38,7 +40,7 @@ final class State
     /** @var array */
     private $data;
 
-    /** @var null|ContextualInterface */
+    /** @var null|CarrierInterface */
     private $leadCommand;
 
     /**
@@ -111,43 +113,58 @@ final class State
      * Set the reference to the object creation command (non executed).
      *
      * @internal
-     * @param ContextualInterface|null $cmd
+     * @param CarrierInterface|null $cmd
      */
-    public function setLeadCommand(ContextualInterface $cmd = null)
+    public function setLeadCommand(CarrierInterface $cmd = null)
     {
         $this->leadCommand = $cmd;
     }
 
     /**
      * @internal
-     * @return null|ContextualInterface
+     * @return null|CarrierInterface
      */
-    public function getLeadCommand(): ?ContextualInterface
+    public function getLeadCommand(): ?CarrierInterface
     {
         return $this->leadCommand;
     }
 
     private $routing;
 
-    public function forward($target, $source, $into, bool $trigger = false)
-    {
-        $this->routing[$source][] = [$target, $into];
+    /**
+     * @inheritdoc
+     */
+    public function forward(
+        string $key,
+        AcceptorInterface $acceptor,
+        string $target,
+        bool $trigger = false,
+        int $type = AcceptorInterface::DATA
+    ) {
+        $this->routing[$key][] = [$acceptor, $target, $type];
 
-        if ($trigger && !empty($this->data[$source])) {
-            $this->accept($source, $this->data[$source], true);
+        if ($trigger && !empty($this->data[$key])) {
+            $this->accept($target, $this->data[$key], false, $type);
         }
     }
 
-    public function accept($column, $value, $changed = false)
-    {
-        $changed = $changed || !(($this->data[$column] ?? null) == $value);
+    /**
+     * @inheritdoc
+     */
+    public function accept(
+        string $key,
+        ?string $value,
+        bool $handled = false,
+        int $type = self::DATA
+    ) {
+        $handled = $handled || (($this->data[$key] ?? null) == $value);
+        $this->data[$key] = $value;
 
-        $this->data[$column] = $value;
-
-        if (!empty($this->routing[$column])) {
-            foreach ($this->routing[$column] as $id => $handler) {
-                call_user_func([$handler[0], 'accept'], $handler[1], $value, $changed);
-                $changed = false;
+        // cascade
+        if (!empty($this->routing[$key])) {
+            foreach ($this->routing[$key] as $id => $handler) {
+                call_user_func([$handler[0], 'accept'], $handler[1], $value, $handled, $handler[2]);
+                $handled = true;
             }
         }
     }

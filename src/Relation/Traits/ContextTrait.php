@@ -21,49 +21,44 @@ trait ContextTrait
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
-     * @param ContextualInterface $command
-     * @param State               $parent
-     * @param string              $parentKey
-     * @param null|State          $current
-     * @param string              $localKey
+     * @param ContextualInterface $carrier
+     * @param State               $source
+     * @param string              $sourceKey
+     * @param null|State          $target
+     * @param string              $targetKey
      */
-    protected function promiseContext(
-        ContextualInterface $command,
-        State $parent,
-        string $parentKey,
-        State $current,
-        string $localKey
+    protected function forwardContext(
+        ContextualInterface $carrier,
+        State $source,
+        string $sourceKey,
+        State $target,
+        string $targetKey
     ) {
-        $command->waitContext($localKey, $this->isRequired());
-        $current->forward($command, $localKey, $localKey);
-        $parent->forward($current, $parentKey, $localKey, true);
+        $carrier->waitContext($targetKey, $this->isRequired());
+
+        $target->forward($carrier, $targetKey, $targetKey);
+        $source->forward($target, $sourceKey, $targetKey, true);
     }
 
     /**
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
      *
-     * @param ScopedInterface $command
-     * @param State           $parent
-     * @param string          $parentKey
-     * @param null|State      $current
-     * @param string          $localKey
+     * @param ScopedInterface $carrier
+     * @param State           $source
+     * @param string          $sourceKey
+     * @param string          $targetKey
      */
-    protected function promiseScope(
-        ScopedInterface $command,
-        State $parent,
-        string $parentKey,
-        State $current,
-        string $localKey
-    ) {
-        $command->waitScope($localKey, $this->isRequired());
-        $parent->forward($command, $parentKey, "scope:" . $localKey, true);
+    protected function forwardScope(ScopedInterface $carrier, State $source, string $sourceKey, string $targetKey)
+    {
+        $carrier->waitScope($targetKey, $this->isRequired());
+        $source->forward($carrier, $sourceKey, "scope:" . $targetKey, true);
     }
 
     /**
      * Fetch key from the state.
      *
-     * @param State  $state
+     * @param State $state
      * @param string $key
      * @return mixed|null
      */

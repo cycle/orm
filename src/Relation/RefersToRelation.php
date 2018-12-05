@@ -103,7 +103,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
             // todo: how reliable is it? it's not
             if (!($update instanceof Insert)) {
-                $this->promiseContext($update, $relState, $this->outerKey, $state, $this->innerKey);
+                $this->forwardContext($update, $relState, $this->outerKey, $state, $this->innerKey);
                 return new Nil();
             }
         }
@@ -121,8 +121,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // this will give UPDATE (!)
 
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
-        $this->promiseScope($update, $state, $primaryKey, $this->getState($related), $primaryKey);
-        $this->promiseContext($update, $this->getState($related), $this->outerKey, $state, $this->innerKey);
+        $this->forwardScope($update, $state, $primaryKey, $primaryKey);
+        $this->forwardContext($update, $this->getState($related), $this->outerKey, $state, $this->innerKey);
 
         return $update;
     }

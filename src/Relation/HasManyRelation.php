@@ -104,7 +104,7 @@ class HasManyRelation extends AbstractRelation
         $relState = $this->getState($related);
         $relState->addReference();
 
-        $this->promiseContext($relStore, $parent, $this->innerKey, $relState, $this->outerKey);
+        $this->forwardContext($relStore, $parent, $this->innerKey, $relState, $this->outerKey);
 
         return $relStore;
     }

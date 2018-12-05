@@ -88,7 +88,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
         $original
     ): CommandInterface {
         $store = parent::queueRelation($parent, $entity, $state, $related, $original);
-
+// todo: use forward as well
         if (is_null($related)) {
             if ($this->fetchKey($state, $this->morphKey) !== null) {
                 $parent->setContext($this->morphKey, null);

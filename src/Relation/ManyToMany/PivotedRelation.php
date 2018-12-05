@@ -226,8 +226,8 @@ class PivotedRelation extends Relation\AbstractRelation
         $pivotStore = $this->orm->queueStore($pivot);
         $pivotState = $this->getState($pivot);
 
-        $this->promiseContext($pivotStore, $state, $this->innerKey, $pivotState, $this->thoughtInnerKey);
-        $this->promiseContext($pivotStore, $relState, $this->outerKey, $pivotState, $this->thoughtOuterKey);
+        $this->forwardContext($pivotStore, $state, $this->innerKey, $pivotState, $this->thoughtInnerKey);
+        $this->forwardContext($pivotStore, $relState, $this->outerKey, $pivotState, $this->thoughtOuterKey);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);

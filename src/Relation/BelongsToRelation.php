@@ -79,7 +79,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         $relState = $this->getState($related);
         $relState->addReference();
 
-        $this->promiseContext($parent, $relState, $this->outerKey, $state, $this->innerKey);
+        $this->forwardContext($parent, $relState, $this->outerKey, $state, $this->innerKey);
 
         return $relStore;
     }

@@ -26,6 +26,15 @@ trait ScopeTrait
         $this->waitScope[$key] = true;
     }
 
+    public function accept($column, $value)
+    {
+        if (!is_null($value)) {
+            unset($this->waitScope[$column]);
+        }
+
+        $this->scope[$column] = $value;
+    }
+
     /**
      * Indicate that context value is not required anymore.
      *

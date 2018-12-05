@@ -34,7 +34,7 @@ trait ContextTrait
      *
      * @param string $key
      */
-    public function freeContext(string $key)
+    protected function freeContext(string $key)
     {
         unset($this->waitContext[$key]);
     }

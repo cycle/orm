@@ -221,6 +221,13 @@ abstract class BaseTest extends TestCase
         }
     }
 
+    protected function assertSQL($expected, $given)
+    {
+        $expected = preg_replace("/[ \s]+/", ' ', $expected);
+        $given = preg_replace("/[ \s]+/", ' ', $given);
+        $this->assertSame($expected, $given);
+    }
+
     protected function assertClearState(ORM $orm)
     {
         $r = new \ReflectionClass(State::class);

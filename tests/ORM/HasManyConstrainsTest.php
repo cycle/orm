@@ -190,6 +190,34 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('another@world.com', $res[1]->email);
     }
 
+    public function testLimitParentSelection()
+    {
+        $this->orm = $this->withCommentsSchema([
+        ]);
+
+        // second user has been filtered out
+        $res = (new Selector($this->orm, User::class))
+            ->load('comments')
+            ->limit(1)->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(1, $res);
+        $this->assertSame('hello@world.com', $res[0]->email);
+        $this->assertCount(4, $res[0]->comments);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exception\LoaderException
+     */
+    public function testLimitParentSelectionError()
+    {
+        $this->orm = $this->withCommentsSchema([]);
+
+        // do not allow limits with joined and loaded relations
+        (new Selector($this->orm, User::class))
+            ->load('comments', ['method' => RelationLoader::INLOAD])
+            ->limit(1)->orderBy('user.id')->fetchAll();
+    }
+
     public function testInloadWithOrderAndWhere()
     {
         $this->orm = $this->withCommentsSchema([

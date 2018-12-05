@@ -184,3 +184,4 @@ abstract class DoubleLinkedTest extends BaseTest
 }
 
 // todo: cyclic belongs to must work BTW
+// todo: more optimizations for cyclic relations

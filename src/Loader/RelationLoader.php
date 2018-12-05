@@ -165,6 +165,10 @@ abstract class RelationLoader extends AbstractLoader
     protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isJoined()) {
+            if ($this->isLoaded() && $query->getLimit() != 0) {
+                throw new LoaderException("Unable to load data using join with limit on parent query");
+            }
+
             // mounting the columns to parent query
             $this->mountColumns($query, $this->options['minify']);
         } else {

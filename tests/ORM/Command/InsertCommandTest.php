@@ -58,7 +58,7 @@ class InsertCommandTest extends TestCase
             ['key' => 'value']
         );
 
-        $cmd->setContext('name', 'value');
+        $cmd->accept('name', 'value');
         $this->assertSame(null, $cmd->getInsertID());
 
         $m->expects('insert')->with('table')->andReturn(

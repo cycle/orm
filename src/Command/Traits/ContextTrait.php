@@ -30,16 +30,6 @@ trait ContextTrait
     }
 
     /**
-     * Indicate that context value is not required anymore.
-     *
-     * @param string $key
-     */
-    public function freeContext(string $key)
-    {
-        unset($this->waitContext[$key]);
-    }
-
-    /**
      * @param string $name
      * @param mixed  $value
      */

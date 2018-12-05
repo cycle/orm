@@ -223,8 +223,8 @@ abstract class BaseTest extends TestCase
 
     protected function assertSQL($expected, $given)
     {
-        $expected = preg_replace("/[ \s]+/", ' ', $expected);
-        $given = preg_replace("/[ \s]+/", ' ', $given);
+        $expected = preg_replace("/[ \s\'\[\]\"]+/", ' ', $expected);
+        $given = preg_replace("/[ \s'\[\]\"]+/", ' ', $given);
         $this->assertSame($expected, $given);
     }
 

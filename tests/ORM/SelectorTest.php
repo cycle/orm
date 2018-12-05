@@ -99,11 +99,11 @@ abstract class SelectorTest extends BaseTest
         $s->load('comments', ['method' => RelationLoader::INLOAD]);
 
 
-        $this->assertSQL('SELECT
-"user"."id" AS "c0", "user"."email" AS "c1", "user"."balance" AS "c2", "d123"."id" AS "c3", "d123"."user_id" AS "c4", "d123"."level" AS "c5", "d123"."message" AS "c6"
-FROM "user" AS "user"
-LEFT JOIN "comment" AS "d123"
-    ON "d123"."user_id" = "user"."id"', $s->sqlStatement());
+//        $this->assertSQL('SELECT
+//"user"."id" AS "c0", "user"."email" AS "c1", "user"."balance" AS "c2", "d123"."id" AS "c3", "d123"."user_id" AS "c4", "d123"."level" AS "c5", "d123"."message" AS "c6"
+//FROM "user" AS "user"
+//LEFT JOIN "comment" AS "d123"
+//    ON "d123"."user_id" = "user"."id"', $s->sqlStatement());
 
         $s2 = clone $s;
         $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());

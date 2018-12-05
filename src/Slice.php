@@ -10,6 +10,10 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Command\ContextualInterface;
 
+/**
+ *
+ * @codeCoverageIgnore
+ */
 class Slice
 {
     /** @var string */

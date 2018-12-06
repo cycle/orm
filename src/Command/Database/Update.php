@@ -69,11 +69,15 @@ class Update extends DatabaseCommand implements CarrierInterface, ScopedInterfac
      */
     public function push(
         string $key,
-         $value,
+        $value,
         bool $update = false,
         int $stream = self::DATA
     ) {
         if ($stream == self::SCOPE) {
+            if (empty($value)) {
+                return;
+            }
+
             $this->freeScope($key);
             $this->setScope($key, $value);
 

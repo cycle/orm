@@ -62,6 +62,8 @@ class Split implements CarrierInterface, \IteratorAggregate
     public function getIterator(): \Generator
     {
         yield $this->getTarget();
+        //yield $this;
+        //$this->headExecuted = true;
     }
 
     /**
@@ -101,7 +103,7 @@ class Split implements CarrierInterface, \IteratorAggregate
      */
     public function push(
         string $key,
-         $value,
+        $value,
         bool $update = false,
         int $stream = self::DATA
     ) {

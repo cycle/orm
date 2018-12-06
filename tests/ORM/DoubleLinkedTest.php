@@ -164,22 +164,22 @@ abstract class DoubleLinkedTest extends BaseTest
     }
 
     // last record 46MB for 5000 - I DID IT AGAIN!
-    //    public function testMemUsage()
-    //    {
-    //        $this->orm = $this->orm->withHeap(new Heap());
-    //        $tr = new Transaction($this->orm);
-    //
-    //        for ($i = 0; $i < 10000; $i++) {
-    //            // inverted
-    //            $c1 = new Cyclic();
-    //            $c1->name = "self-reference";
-    //            $c1->cyclic = $c1;
-    //
-    //            $tr->store($c1);
-    //        }
-    //
-    //        $tr->run();
-    //    }
+    public function testMemUsage()
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+        $tr = new Transaction($this->orm);
+
+        for ($i = 0; $i < 10000; $i++) {
+            // inverted
+            $c1 = new Cyclic();
+            $c1->name = "self-reference";
+            $c1->cyclic = $c1;
+
+            $tr->store($c1);
+        }
+
+        $tr->run();
+    }
 }
 
 // todo: cyclic belongs to must work BTW

@@ -80,9 +80,9 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
-           // if ($outerKey != $this->fetchKey($state, $this->innerKey)) {
+            if ($outerKey != $this->fetchKey($state, $this->innerKey)) {
                 $parentCommand->push($this->innerKey, $outerKey, true);
-           // }
+            }
 
             return new Nil();
         }
@@ -102,10 +102,10 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             $update = $relState->getCommand();
 
             // todo: how reliable is it? it's not
-           // if (!($update instanceof Insert)) {
-            //    $this->forwardContext($update, $relState, $this->outerKey, $state, $this->innerKey);
-            //    return new Nil();
-           // }
+            if (!($update instanceof Insert)) {
+                $this->forwardContext($update, $relState, $this->outerKey, $state, $this->innerKey);
+                return new Nil();
+            }
         }
 
         // why am i taking same command?

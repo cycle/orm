@@ -13,6 +13,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 \Spiral\ORM\Tests\BaseTest::$config = [
     'debug'     => false,
+    'strict'    => false,
     'sqlite'    => [
         'driver' => \Spiral\Database\Driver\SQLite\SQLiteDriver::class,
         'check'  => function () {

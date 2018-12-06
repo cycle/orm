@@ -268,7 +268,6 @@ abstract class BelongsToRelationTest extends BaseTest
         ], $selector->wherePK(4)->fetchData());
     }
 
-
     public function testNoWriteQueries()
     {
         $u = new User();

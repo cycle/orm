@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Relation\Morphed;
 
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasOneRelation;
@@ -48,7 +48,7 @@ class MorphedHasOneRelation extends HasOneRelation
         $promise = new Promise(
             [
                 $this->outerKey => $innerKey,
-                $this->morphKey => $state->getAlias()
+                $this->morphKey => $state->getRole()
             ],
             function ($context) {
                 // todo: check in map
@@ -73,9 +73,9 @@ class MorphedHasOneRelation extends HasOneRelation
 
         if ($store instanceof CarrierInterface && !is_null($related)) {
             $relState = $this->getState($related);
-            if ($this->fetchKey($relState, $this->morphKey) != $state->getAlias()) {
-                $store->setContext($this->morphKey, $state->getAlias());
-                $relState->setData([$this->morphKey => $state->getAlias()]);
+            if ($this->fetchKey($relState, $this->morphKey) != $state->getRole()) {
+                $store->push($this->morphKey, $state->getRole(), true);
+                $relState->setData([$this->morphKey => $state->getRole()]);
             }
         }
 

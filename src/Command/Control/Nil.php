@@ -43,11 +43,11 @@ final class Nil implements CarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function accept(
+    public function push(
         string $key,
-        ?string $value,
-        bool $handled = false,
-        int $type = self::DATA
+         $value,
+        bool $update = false,
+        int $stream = self::DATA
     ) {
         // nothing to do
     }

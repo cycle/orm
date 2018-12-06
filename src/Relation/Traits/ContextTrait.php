@@ -23,22 +23,29 @@ trait ContextTrait
      * Configure context parameter using value from parent entity. Created promise.
      *
      * @param CarrierInterface $carrier
-     * @param State            $source
-     * @param string           $sourceKey
-     * @param null|State       $target
-     * @param string           $targetKey
+     * @param State            $from
+     * @param string           $fromKey
+     * @param null|State       $to
+     * @param string           $toKey
      */
     protected function forwardContext(
         CarrierInterface $carrier,
-        State $source,
-        string $sourceKey,
-        State $target,
-        string $targetKey
+        State $from,
+        string $fromKey,
+        // here
+        State $to,
+        string $toKey
     ) {
-        $carrier->waitContext($targetKey, $this->isRequired());
+        $carrier->waitContext($toKey, $this->isRequired());
 
-        $target->forward($targetKey, $carrier, $targetKey);
-        $source->forward($sourceKey, $target, $targetKey, true);
+        // forward key from state to the command (on change)
+        $to->pull($toKey, $carrier, $toKey);
+
+        // link 2 keys and trigger cascade falling right now (if exists)
+        $from->pull($fromKey, $to, $toKey, true);
+       // dump($from);
+
+        //dump($to);
     }
 
     /**
@@ -46,14 +53,19 @@ trait ContextTrait
      * parent entity. Creates promise.
      *
      * @param ScopedInterface $carrier
-     * @param State           $source
-     * @param string          $sourceKey
-     * @param string          $targetKey
+     * @param State           $from
+     * @param string          $fromKey
+     * @param string          $toKey
      */
-    protected function forwardScope(ScopedInterface $carrier, State $source, string $sourceKey, string $targetKey)
-    {
-        $carrier->waitScope($targetKey);
-        $source->forward($sourceKey, $carrier, $targetKey, true, AcceptorInterface::SCOPE);
+    protected function forwardScope(
+        ScopedInterface $carrier,
+        State $from,
+        string $fromKey,
+        // here
+        string $toKey
+    ) {
+        $carrier->waitScope($toKey);
+        $from->pull($fromKey, $carrier, $toKey, true, AcceptorInterface::SCOPE);
     }
 
     /**

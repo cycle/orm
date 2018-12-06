@@ -44,7 +44,7 @@ class MorphedHasManyRelation extends HasManyRelation
         $pr = new Promise(
             [
                 $this->outerKey => $innerKey,
-                $this->morphKey => $state->getAlias()
+                $this->morphKey => $state->getRole()
             ],
             function (array $scope) use ($innerKey) {
                 return $this->orm->getMapper($this->class)->getRepository()->findAll($scope);
@@ -66,10 +66,12 @@ class MorphedHasManyRelation extends HasManyRelation
         $store = parent::queueStore($parent, $related);
 
         $relState = $this->getState($related);
-        if ($this->fetchKey($relState, $this->morphKey) != $parent->getAlias()) {
+        if ($this->fetchKey($relState, $this->morphKey) != $parent->getRole()) {
             // polish it
-            $store->setContext($this->morphKey, $parent->getAlias());
-            $relState->setData([$this->morphKey => $parent->getAlias()]);
+            $store->push($this->morphKey, $parent->getRole(), true);
+
+            // todo: update store only?
+            $relState->setData([$this->morphKey => $parent->getRole()]);
         }
 
         return $store;

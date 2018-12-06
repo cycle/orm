@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
@@ -70,7 +70,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             if (!is_null($original)) {
-                $parentCommand->setContext($this->innerKey, null);
+                $parentCommand->push($this->innerKey, null, true);
             }
 
             return new Nil();
@@ -80,9 +80,9 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
-            if ($outerKey != $this->fetchKey($state, $this->innerKey)) {
-                $parentCommand->setContext($this->innerKey, $outerKey);
-            }
+           // if ($outerKey != $this->fetchKey($state, $this->innerKey)) {
+                $parentCommand->push($this->innerKey, $outerKey, true);
+           // }
 
             return new Nil();
         }
@@ -98,14 +98,14 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
          */
 
 
-        if (!empty($relState->getLeadCommand())) {
-            $update = $relState->getLeadCommand();
+        if (!empty($relState->getCommand())) {
+            $update = $relState->getCommand();
 
             // todo: how reliable is it? it's not
-            if (!($update instanceof Insert)) {
-                $this->forwardContext($update, $relState, $this->outerKey, $state, $this->innerKey);
-                return new Nil();
-            }
+           // if (!($update instanceof Insert)) {
+            //    $this->forwardContext($update, $relState, $this->outerKey, $state, $this->innerKey);
+            //    return new Nil();
+           // }
         }
 
         // why am i taking same command?

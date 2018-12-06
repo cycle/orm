@@ -104,7 +104,6 @@ final class Transaction implements TransactionInterface
                 }
 
                 if (count($executed) === $countExecuted && !empty($pending)) {
-                    dump($pending);
                     throw new TransactionException("Unable to complete: " . $this->listCommands($pending));
                 }
 
@@ -150,7 +149,7 @@ final class Transaction implements TransactionInterface
     {
         foreach ($this->orm->getHeap() as $entity) {
             $state = $this->orm->getHeap()->get($entity);
-            $state->setLeadCommand(null);
+            $state->setCommand(null);
             $state->resetVisited();
 
             $state->setState(State::LOADED);
@@ -237,11 +236,15 @@ final class Transaction implements TransactionInterface
      */
     private function listCommands(array $commands): string
     {
-        $names = [];
+        $errors = [];
         foreach ($commands as $command) {
-            $names[] = get_class($command);
+            if (method_exists($command, '__toString')) {
+                $errors[] = $command->__toString();
+            } else {
+                $errors[] = get_class($command);
+            }
         }
 
-        return join(', ', $names);
+        return join(', ', $errors);
     }
 }

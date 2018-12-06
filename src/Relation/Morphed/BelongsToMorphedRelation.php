@@ -93,14 +93,14 @@ class BelongsToMorphedRelation extends BelongsToRelation
 
         if (is_null($related)) {
             if ($this->fetchKey($state, $this->morphKey) !== null) {
-                $parentCommand->setContext($this->morphKey, null);
+                $parentCommand->push($this->morphKey, null, true);
                 $state->setData([$this->morphKey => null]);
             }
         } else {
             $relState = $this->getState($related);
-            if ($this->fetchKey($state, $this->morphKey) != $relState->getAlias()) {
-                $parentCommand->setContext($this->morphKey, $relState->getAlias());
-                $state->setData([$this->morphKey => $relState->getAlias()]);
+            if ($this->fetchKey($state, $this->morphKey) != $relState->getRole()) {
+                $parentCommand->push($this->morphKey, $relState->getRole(), true);
+                $state->setData([$this->morphKey => $relState->getRole()]);
             }
         }
 

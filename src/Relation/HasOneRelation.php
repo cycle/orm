@@ -17,6 +17,7 @@ use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\State;
 use Spiral\ORM\Util\Promise;
 
+// todo: NOT DELETE VIA CONTEXT KEY BEING UPDATED (!)
 class HasOneRelation extends AbstractRelation
 {
     public function initPromise(State $state, $data): array
@@ -108,6 +109,8 @@ class HasOneRelation extends AbstractRelation
     {
         $oriState = $this->getState($original);
         $oriState->decReference();
+
+        // todo: NOT DELETE VIA CONTEXT KEY BEING UPDATED (!) MEMORY CUT!
 
         // only delete original child when no other objects claim it
         return new Condition(

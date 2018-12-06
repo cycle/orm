@@ -13,6 +13,7 @@ use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\Command\Traits\ContextTrait;
+use Spiral\ORM\Command\Traits\ErrorTrait;
 use Spiral\ORM\Command\Traits\ScopeTrait;
 use Spiral\ORM\Exception\CommandException;
 
@@ -23,7 +24,7 @@ use Spiral\ORM\Exception\CommandException;
  */
 class Update extends DatabaseCommand implements CarrierInterface, ScopedInterface
 {
-    use ContextTrait, ScopeTrait;
+    use ContextTrait, ScopeTrait, ErrorTrait;
 
     /** @var array */
     private $data;
@@ -66,24 +67,24 @@ class Update extends DatabaseCommand implements CarrierInterface, ScopedInterfac
     /**
      * @inheritdoc
      */
-    public function accept(
+    public function push(
         string $key,
-        ?string $value,
-        bool $handled = false,
-        int $type = self::DATA
+         $value,
+        bool $update = false,
+        int $stream = self::DATA
     ) {
-        if ($type == self::SCOPE) {
+        if ($stream == self::SCOPE) {
             $this->freeScope($key);
             $this->setScope($key, $value);
 
             return;
         }
 
-        if (!$handled || !is_null($value)) {
+        if ($update || !is_null($value)) {
             $this->freeContext($key);
         }
 
-        if (!$handled) {
+        if ($update) {
             // we only accept context when context has changed to avoid un-necessary
             // update commands
             $this->setContext($key, $value);

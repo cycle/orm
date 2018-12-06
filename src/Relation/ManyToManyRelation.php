@@ -216,8 +216,8 @@ class ManyToManyRelation extends AbstractRelation
         $sync->waitContext($this->thoughtInnerKey, true);
         $sync->waitContext($this->thoughtOuterKey, true);
 
-        $state->forward($this->innerKey, $sync, $this->thoughtInnerKey, true);
-        $this->getState($related)->forward($this->outerKey, $sync, $this->thoughtOuterKey, true);
+        $state->pull($this->innerKey, $sync, $this->thoughtInnerKey, true);
+        $this->getState($related)->pull($this->outerKey, $sync, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -241,8 +241,8 @@ class ManyToManyRelation extends AbstractRelation
         $delete->waitScope($this->thoughtOuterKey);
         $delete->waitScope($this->thoughtInnerKey);
 
-        $state->forward($this->innerKey, $delete, $this->thoughtInnerKey, true, AcceptorInterface::SCOPE);
-        $relState->forward($this->outerKey, $delete, $this->thoughtOuterKey, true, AcceptorInterface::SCOPE);
+        $state->pull($this->innerKey, $delete, $this->thoughtInnerKey, true, AcceptorInterface::SCOPE);
+        $relState->pull($this->outerKey, $delete, $this->thoughtOuterKey, true, AcceptorInterface::SCOPE);
 
         return $delete;
     }

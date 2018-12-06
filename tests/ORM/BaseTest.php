@@ -138,11 +138,13 @@ abstract class BaseTest extends TestCase
     {
         $queries = $this->logger->countWriteQueries() - $this->numWrites;
 
-        $this->assertSame(
-            $numWrites,
-            $queries,
-            "Number of write SQL queries do not match, expected {$numWrites} got {$queries}."
-        );
+        if (!empty(self::$config['strict'])) {
+            $this->assertSame(
+                $numWrites,
+                $queries,
+                "Number of write SQL queries do not match, expected {$numWrites} got {$queries}."
+            );
+        }
     }
 
     /**
@@ -160,11 +162,13 @@ abstract class BaseTest extends TestCase
     {
         $queries = $this->logger->countReadQueries() - $this->numReads;
 
-        $this->assertSame(
-            $numReads,
-            $queries,
-            "Number of write SQL queries do not match, expected {$numReads} got {$queries}."
-        );
+        if (!empty(self::$config['strict'])) {
+            $this->assertSame(
+                $numReads,
+                $queries,
+                "Number of write SQL queries do not match, expected {$numReads} got {$queries}."
+            );
+        }
     }
 
     /**

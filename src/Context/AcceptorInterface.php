@@ -22,10 +22,10 @@ interface AcceptorInterface
      * initial trigger.
      *
      * @see ForwarderInterface
-     * @param string $key     Key name to accept the value.
-     * @param string $value   The key value.
-     * @param bool   $handled Indicates that value has not been handled by any other acceptor.
-     * @param int    $type    One of the context types (data context, scope context).
+     * @param string $key    Key name to accept the value.
+     * @param mixed  $value  The key value.
+     * @param bool   $update Indicates that value has not been handled by any other acceptor.
+     * @param int    $stream One of the context types (data context, scope context).
      */
-    public function accept(string $key, ?string $value, bool $handled = false, int $type = self::DATA);
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA);
 }

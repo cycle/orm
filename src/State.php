@@ -32,7 +32,7 @@ final class State implements ForwarderInterface, AcceptorInterface
     public const SCHEDULED_DELETE = 5;
 
     /** @var string */
-    private $alias;
+    private $role;
 
     /** @var int */
     private $state;
@@ -41,7 +41,7 @@ final class State implements ForwarderInterface, AcceptorInterface
     private $data;
 
     /** @var null|CarrierInterface */
-    private $leadCommand;
+    private $command;
 
     /**
      * @param int    $state
@@ -52,15 +52,15 @@ final class State implements ForwarderInterface, AcceptorInterface
     {
         $this->state = $state;
         $this->data = $data;
-        $this->alias = $alias;
+        $this->role = $alias;
     }
 
     /**
      * @return string
      */
-    public function getAlias(): string
+    public function getRole(): string
     {
-        return $this->alias;
+        return $this->role;
     }
 
     /**
@@ -95,7 +95,7 @@ final class State implements ForwarderInterface, AcceptorInterface
         }
 
         foreach ($data as $column => $value) {
-            $this->accept($column, $value);
+            $this->push($column, $value);
         }
     }
 
@@ -115,56 +115,62 @@ final class State implements ForwarderInterface, AcceptorInterface
      * @internal
      * @param CarrierInterface|null $cmd
      */
-    public function setLeadCommand(CarrierInterface $cmd = null)
+    public function setCommand(CarrierInterface $cmd = null)
     {
-        $this->leadCommand = $cmd;
+        $this->command = $cmd;
     }
 
     /**
      * @internal
      * @return null|CarrierInterface
      */
-    public function getLeadCommand(): ?CarrierInterface
+    public function getCommand(): ?CarrierInterface
     {
-        return $this->leadCommand;
+        // i can forward to it directly
+        return $this->command;
     }
 
-    private $routing;
+    private $handlers;
 
     /**
      * @inheritdoc
      */
-    public function forward(
+    public function pull(
         string $key,
-        AcceptorInterface $acceptor,
+        AcceptorInterface $h,
         string $target,
         bool $trigger = false,
-        int $type = AcceptorInterface::DATA
+        int $stream = AcceptorInterface::DATA
     ) {
-        $this->routing[$key][] = [$acceptor, $target, $type];
+        $this->handlers[$key][] = [$h, $target, $stream];
 
-        if ($trigger && !empty($this->data[$key])) {
-            $this->accept($target, $this->data[$key], false, $type);
+        if ($trigger || !empty($this->data[$key])) {
+            $this->push($key, $this->data[$key] ?? null, false, $stream);
         }
     }
 
     /**
      * @inheritdoc
      */
-    public function accept(
+    public function push(
         string $key,
-        ?string $value,
-        bool $handled = false,
-        int $type = self::DATA
+        $value,
+        bool $update = false,
+        int $stream = self::DATA
     ) {
-        $handled = $handled || (($this->data[$key] ?? null) == $value);
+        if (!$update) {
+            $update = ($this->data[$key] ?? null) != $value;
+        }
+
         $this->data[$key] = $value;
 
         // cascade
-        if (!empty($this->routing[$key])) {
-            foreach ($this->routing[$key] as $id => $handler) {
-                call_user_func([$handler[0], 'accept'], $handler[1], $value, $handled, $handler[2]);
-                $handled = true;
+        if (!empty($this->handlers[$key])) {
+            foreach ($this->handlers[$key] as $id => $h) {
+                /** @var AcceptorInterface $acc */
+                $acc = $h[0];
+                $acc->push($h[1], $value, $update, $h[2]);
+                $update = false;
             }
         }
     }
@@ -177,6 +183,6 @@ final class State implements ForwarderInterface, AcceptorInterface
         $this->data = [];
         $this->relations = [];
         $this->visited = [];
-        $this->leadCommand = null;
+        $this->command = null;
     }
 }

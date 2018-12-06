@@ -99,13 +99,13 @@ class Split implements CarrierInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function accept(
+    public function push(
         string $key,
-        ?string $value,
-        bool $handled = false,
-        int $type = self::DATA
+         $value,
+        bool $update = false,
+        int $stream = self::DATA
     ) {
-        $this->contextPath[$key]->accept($key, $value, $handled, $type);
+        $this->contextPath[$key]->push($key, $value, $update, $stream);
     }
 
     /**

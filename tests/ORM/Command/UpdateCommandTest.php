@@ -48,7 +48,7 @@ class UpdateCommandTest extends TestCase
             ['where' => 'value']
         );
 
-        $cmd->accept('key', 'value');
+        $cmd->push('key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getContext());
     }
 
@@ -61,7 +61,7 @@ class UpdateCommandTest extends TestCase
             []
         );
 
-        $cmd->accept('scope:key', 'value');
+        $cmd->push('scope:key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getScope());
     }
 

@@ -27,7 +27,7 @@ trait ContextTrait
     public function waitContext(string $key, bool $required = true)
     {
         if ($required) {
-            $this->waitContext[$key] = true;
+            $this->waitContext[$key] = null;
         }
     }
 

@@ -110,12 +110,12 @@ class Mapper implements MapperInterface
 
         if ($state == null || $state->getState() == State::NEW) {
             $cmd = $this->queueCreate($entity, $state);
-            $state->setLeadCommand($cmd);
+            $state->setCommand($cmd);
 
             return $cmd;
         }
 
-        $lastCommand = $state->getLeadCommand();
+        $lastCommand = $state->getCommand();
 
         if (empty($lastCommand)) {
             // todo: check multiple update commands working within the split (!)
@@ -128,7 +128,7 @@ class Mapper implements MapperInterface
 
         // todo: do i like it?
         $split = new Split($lastCommand, $this->queueUpdate($entity, $state));
-        $state->setLeadCommand($split);
+        $state->setCommand($split);
 
         return $split;
     }
@@ -210,7 +210,7 @@ class Mapper implements MapperInterface
         $state->setData($cData);
 
         // todo: scope prefix (call immediatelly?)
-        $state->forward($this->primaryKey, $update, $this->primaryKey, true, AcceptorInterface::SCOPE);
+        $state->pull($this->primaryKey, $update, $this->primaryKey, true, AcceptorInterface::SCOPE);
 
         return $update;
     }
@@ -222,7 +222,7 @@ class Mapper implements MapperInterface
         $state->setState(State::SCHEDULED_DELETE);
 
         $delete->waitScope($this->primaryKey);
-        $state->forward($this->primaryKey, $delete, $this->primaryKey, true, AcceptorInterface::SCOPE);
+        $state->pull($this->primaryKey, $delete, $this->primaryKey, true, AcceptorInterface::SCOPE);
 
         // todo: this must be changed (CORRECT?) BUT HOW?
         $delete->onComplete(function () use ($entity) {

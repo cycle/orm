@@ -12,13 +12,15 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\Traits\ContextTrait;
+use Spiral\ORM\Command\Traits\ErrorTrait;
+use Spiral\ORM\Context\AcceptorInterface;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
 class Insert extends DatabaseCommand implements CarrierInterface
 {
-    use ContextTrait;
+    use ContextTrait, ErrorTrait;
 
     // Special identifier to forward insert key into
     public const INSERT_ID = '@lastInsertID';
@@ -48,13 +50,9 @@ class Insert extends DatabaseCommand implements CarrierInterface
     /**
      * @inheritdoc
      */
-    public function accept(
-        string $key,
-        ?string $value,
-        bool $handled = false,
-        int $type = self::DATA
-    ) {
-        if (!$handled || !is_null($value)) {
+    public function push(string $key,  $value, bool $update = false, int $stream = self::DATA)
+    {
+        if ($update || !is_null($value)) {
             $this->freeContext($key);
         }
 
@@ -73,14 +71,15 @@ class Insert extends DatabaseCommand implements CarrierInterface
 
     /**
      * @invisible
+     * @var AcceptorInterface
      */
     private $target;
-    private $targetColumn;
+    private $sequence;
 
     public function onInsert($target, $column)
     {
         $this->target = $target;
-        $this->targetColumn = $column;
+        $this->sequence = $column;
     }
 
     /**
@@ -93,7 +92,7 @@ class Insert extends DatabaseCommand implements CarrierInterface
         // todo: forwarding keys
 
         if (!empty($this->target)) {
-            call_user_func([$this->target, 'accept'], $this->targetColumn, $insertID);
+            $this->target->push($this->sequence, $insertID);
         }
 
         parent::execute();

@@ -49,26 +49,26 @@ class InsertCommandTest extends TestCase
         $this->assertSame(['name' => 'value'], $cmd->getData());
     }
 
-
-    public function testExecute()
-    {
-        $cmd = new Insert(
-            $m = m::mock(DatabaseInterface::class),
-            'table',
-            ['key' => 'value']
-        );
-
-        $cmd->push('name', 'value');
-      //  $this->assertSame(null, $cmd->getInsertID());
-
-        $m->expects('insert')->with('table')->andReturn(
-            $i = m::mock(InsertQuery::class)
-        );
-
-        $i->expects('values')->with(['name' => 'value', 'key' => 'value'])->andReturnSelf();
-        $i->expects('run')->andReturn(1);
-
-        $cmd->execute();
-        //$this->assertSame(1, $cmd->getInsertID());
-    }
+//
+//    public function testExecute()
+//    {
+//        $cmd = new Insert(
+//            $m = m::mock(DatabaseInterface::class),
+//            'table',
+//            ['key' => 'value']
+//        );
+//
+//        $cmd->push('name', 'value');
+//      //  $this->assertSame(null, $cmd->getInsertID());
+//
+//        $m->expects('insert')->with('table')->andReturn(
+//            $i = m::mock(InsertQuery::class)
+//        );
+//
+//        $i->expects('values')->with(['name' => 'value', 'key' => 'value'])->andReturnSelf();
+//        $i->expects('run')->andReturn(1);
+//
+//        $cmd->execute();
+//        $this->assertSame(1, $cmd->getInsertID());
+//    }
 }

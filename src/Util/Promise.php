@@ -50,11 +50,6 @@ class Promise implements PromiseInterface
         return $this->scope;
     }
 
-    public function __role(): string
-    {
-        return '';
-    }
-
     /**
      * @inheritdoc
      */

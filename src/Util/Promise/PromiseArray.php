@@ -56,12 +56,6 @@ class PromiseArray implements PromiseInterface
         return $this->scope;
     }
 
-    // todo: do i need it?
-    public function __role(): string
-    {
-        return '';
-    }
-
     /**
      * @inheritdoc
      */

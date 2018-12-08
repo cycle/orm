@@ -63,11 +63,6 @@ class PromiseMany implements PromiseInterface
         return $this->scope;
     }
 
-    public function __role(): string
-    {
-        return $this->class;
-    }
-
     /**
      * @inheritdoc
      */

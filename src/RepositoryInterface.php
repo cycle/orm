@@ -12,7 +12,7 @@ interface RepositoryInterface
 {
     public function findByPK($id);
 
-    public function findOne(array $where = []);
+    public function findOne(array $scope = []);
 
-    public function findAll(array $where = []): iterable;
+    public function findAll(array $scope = []): iterable;
 }

@@ -10,8 +10,8 @@ namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Config\RelationConfig;
 
@@ -100,6 +100,26 @@ class ORM implements ORMInterface
         }
 
         return $this->relmaps[$entity] = new RelationMap($this, $relations);
+    }
+
+    public function locateOne(string $class, array $scope, bool $load = false)
+    {
+        if (count($scope) === 1) {
+            $p = $class;
+            foreach ($scope as $k => $v) {
+                $p .= ':' . $k . '.' . $v;
+            }
+
+            if ($this->heap->hasPath($p)) {
+                return $this->heap->getPath($p);
+            }
+        }
+
+        if ($load) {
+            return $this->getMapper($class)->getRepository()->findOne($scope);
+        }
+
+        return null;
     }
 
     /**
@@ -264,6 +284,8 @@ class ORM implements ORMInterface
         $keys = $this->schema->define(get_class($entity), Schema::CAPTURE_KEYS) ?? [];
 
         $paths = [get_class($entity) . ':' . $entityID];
+        $paths[] = get_class($entity) . ':' . $this->schema->define(get_class($entity),
+                Schema::PRIMARY_KEY) . '.' . $entityID;
 
         foreach ($keys as $key) {
             if (!empty($data[$key])) {

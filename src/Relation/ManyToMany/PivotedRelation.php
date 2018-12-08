@@ -18,9 +18,9 @@ use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Node\PivotedRootNode;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Point;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Point;
 use Spiral\ORM\Util\Collection\PivotedCollection;
 use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\Util\Collection\PivotedInterface;
@@ -52,9 +52,9 @@ class PivotedRelation extends Relation\AbstractRelation
         $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
     }
 
-    public function initPromise(Point $state, $data): array
+    public function initPromise(Point $point): array
     {
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 

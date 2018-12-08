@@ -11,11 +11,10 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Nil;
-use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
-use Spiral\ORM\Schema;
 use Spiral\ORM\Point;
+use Spiral\ORM\Schema;
 use Spiral\ORM\Util\Promise;
 
 /**
@@ -26,35 +25,24 @@ use Spiral\ORM\Util\Promise;
  */
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
-    // todo: class
-    public function initPromise(Point $state, $data): array
+    /**
+     * @inheritdoc
+     */
+    public function initPromise(Point $point): array
     {
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 
-        // todo: search in map (?)
+        $scope = [$this->outerKey => $innerKey];
 
-        if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
-            // todo: has it!
-            $i = $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
-            return [$i, $i];
+        if (!empty($e = $this->orm->locateOne($this->class, $scope, false))) {
+            return [$e, $e];
         }
 
-        $pr = new Promise(
-            [$this->outerKey => $innerKey]
-            , function () use ($innerKey) {
-            // todo: check in map
-            if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
-                // todo: improve it?
-                return $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
-            }
+        $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
 
-            // todo: this is critical to have right
-            return $this->orm->getMapper($this->class)->getRepository()->findOne([$this->outerKey => $innerKey]);
-        });
-
-        return [$pr, $pr];
+        return [$p, $p];
     }
 
     /**
@@ -98,15 +86,15 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
          */
 
 
-      //  if (!empty($relState->getCommand())) {
-         //   $update = $relState->getCommand();
+        //  if (!empty($relState->getCommand())) {
+        //   $update = $relState->getCommand();
 
-            // todo: how reliable is it? it's not
+        // todo: how reliable is it? it's not
         //    if (!($update instanceof Insert)) {
-           //     $this->forwardContext($relState, $this->outerKey, $update, $state, $this->innerKey);
-         //       return new Nil();
-          //  }
-     //   }
+        //     $this->forwardContext($relState, $this->outerKey, $update, $state, $this->innerKey);
+        //       return new Nil();
+        //  }
+        //   }
 
         // why am i taking same command?
         $update = new Update(

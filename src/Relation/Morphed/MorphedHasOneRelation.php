@@ -36,9 +36,9 @@ class MorphedHasOneRelation extends HasOneRelation
         $this->morphKey = $this->define(Relation::MORPH_KEY);
     }
 
-    public function initPromise(Point $state, $data): array
+    public function initPromise(Point $point): array
     {
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 
@@ -48,7 +48,7 @@ class MorphedHasOneRelation extends HasOneRelation
         $promise = new Promise(
             [
                 $this->outerKey => $innerKey,
-                $this->morphKey => $state->getRole()
+                $this->morphKey => $point->getRole()
             ],
             function ($context) {
                 // todo: check in map

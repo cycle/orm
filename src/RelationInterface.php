@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 
 interface RelationInterface
 {
@@ -17,7 +17,7 @@ interface RelationInterface
 
     public function init($data): array;
 
-    public function initPromise(Point $state, $data): array;
+    public function initPromise(Point $point): array;
 
     public function extract($value);
 

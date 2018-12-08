@@ -40,17 +40,17 @@ class Repository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findOne(array $where = [])
+    public function findOne(array $scope = [])
     {
-        return $this->find($where)->fetchOne();
+        return $this->find($scope)->fetchOne();
     }
 
     /**
      * @inheritdoc
      */
-    public function findAll(array $where = []): iterable
+    public function findAll(array $scope = []): iterable
     {
-        return $this->find($where)->fetchAll();
+        return $this->find($scope)->fetchAll();
     }
 
     /**

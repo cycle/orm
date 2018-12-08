@@ -17,38 +17,26 @@ use Spiral\ORM\Point;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Util\Promise;
 
-// todo: NOT DELETE VIA CONTEXT KEY BEING UPDATED (!)
 class HasOneRelation extends AbstractRelation
 {
-    public function initPromise(Point $state, $data): array
+    /**
+     * @inheritdoc
+     */
+    public function initPromise(Point $point): array
     {
-        // todo: here we need paths (!)
-
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 
-        if ($this->orm->getHeap()->hasPath("{$this->class}:{$this->outerKey}.$innerKey")) {
-            $i = $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
-            return [$i, $i];
+        $scope = [$this->outerKey => $innerKey];
+
+        if (!empty($e = $this->orm->locateOne($this->class, $scope, false))) {
+            return [$e, $e];
         }
 
-        $pr = new Promise(
-            [$this->outerKey => $innerKey],
-            function ($context) use ($innerKey) {
-                // todo: check in map
+        $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
 
-                // todo: improve it
-                if ($this->orm->getHeap()->hasPath("{$this->class}:{$this->outerKey}.$innerKey")) {
-                    return $this->orm->getHeap()->getPath("{$this->class}:{$this->outerKey}.$innerKey");
-                }
-
-                return $this->orm->getMapper($this->class)->getRepository()->findOne($context);
-            }
-        );
-
-        return [$pr, $pr];
-
+        return [$p, $p];
     }
 
     /**

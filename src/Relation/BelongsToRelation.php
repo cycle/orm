@@ -19,38 +19,24 @@ use Spiral\ORM\Util\Promise;
 // todo: what is the difference with refers to?
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
-    // todo: class
-    public function initPromise(Point $state, $data): array
+    /**
+     * @inheritdoc
+     */
+    public function initPromise(Point $point): array
     {
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 
-        if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
-            // todo: has it!
-            $i = $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
-            return [$i, $i];
+        $scope = [$this->outerKey => $innerKey];
+
+        if (!empty($e = $this->orm->locateOne($this->class, $scope, false))) {
+            return [$e, $e];
         }
 
-        $pr = new Promise(
-            [$this->outerKey => $innerKey]
-            , function ($context) use ($innerKey) {
-            // todo: check in map
+        $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
 
-            // todo: CHECK IN HEAP?
-            // todo: CHECK IN HEAP VIA REPOSITORY?
-
-            // todo: THIS CAN BE UNIFIED!!!
-
-            if ($this->orm->getHeap()->hasPath("{$this->class}:$innerKey")) {
-                // todo: improve it?
-                return $this->orm->getHeap()->getPath("{$this->class}:$innerKey");
-            }
-
-            return $this->orm->getMapper($this->class)->getRepository()->findOne($context);
-        });
-
-        return [$pr, $pr];
+        return [$p, $p];
     }
 
     /**

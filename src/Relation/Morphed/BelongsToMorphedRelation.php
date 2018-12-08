@@ -36,14 +36,14 @@ class BelongsToMorphedRelation extends BelongsToRelation
     }
 
     // todo: class
-    public function initPromise(Point $state, $data): array
+    public function initPromise(Point $point): array
     {
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 
         // parent class (todo: i don't need it!!!!!!!! use aliases directly)
-        $parentClass = $this->orm->getSchema()->getClass($this->fetchKey($state, $this->morphKey));
+        $parentClass = $this->orm->getSchema()->getClass($this->fetchKey($point, $this->morphKey));
 
         if ($this->orm->getHeap()->hasPath("{$parentClass}:$innerKey")) {
             // todo: has it!
@@ -56,7 +56,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
         $pr = new Promise(
             [
                 $this->outerKey => $innerKey,
-                $this->morphKey => $this->fetchKey($state, $this->morphKey)
+                $this->morphKey => $this->fetchKey($point, $this->morphKey)
             ]
             , function ($context) use ($innerKey) {
 

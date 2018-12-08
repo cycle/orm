@@ -21,10 +21,10 @@ class HasManyRelation extends AbstractRelation
 {
     use Traits\CollectionTrait;
 
-    public function initPromise(Point $state, $data): array
+    public function initPromise(Point $point): array
     {
         // todo: here we need paths (!)
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 

@@ -14,11 +14,11 @@ use Spiral\ORM\Command\CommandInterface;
 
 interface ORMInterface
 {
+    public function locateOne(string $class, array $scope, bool $load = false);
+
     public function getDatabase($entity): DatabaseInterface;
 
     public function getMapper($entity): MapperInterface;
-
-    public function getRelationMap($entity): RelationMap;
 
     public function getSchema(): SchemaInterface;
 

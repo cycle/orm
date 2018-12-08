@@ -34,17 +34,17 @@ class MorphedHasManyRelation extends HasManyRelation
         $this->morphKey = $this->define(Relation::MORPH_KEY);
     }
 
-    public function initPromise(Point $state, $data): array
+    public function initPromise(Point $point): array
     {
         // todo: here we need paths (!)
-        if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [new ArrayCollection(), null];
         }
 
         $pr = new Promise(
             [
                 $this->outerKey => $innerKey,
-                $this->morphKey => $state->getRole()
+                $this->morphKey => $point->getRole()
             ],
             function (array $scope) use ($innerKey) {
                 return $this->orm->getMapper($this->class)->getRepository()->findAll($scope);

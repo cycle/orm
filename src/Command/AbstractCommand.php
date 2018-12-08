@@ -36,7 +36,7 @@ abstract class AbstractCommand implements CommandInterface
      */
     public function complete()
     {
-
+        // nothing to do
     }
 
     /**

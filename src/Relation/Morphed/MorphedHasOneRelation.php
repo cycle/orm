@@ -64,18 +64,18 @@ class MorphedHasOneRelation extends HasOneRelation
      */
     public function queueRelation(
         CarrierInterface $parentCommand,
-        $entity,
-        Point $state,
+        $parentEntity,
+        Point $parentState,
         $related,
         $original
     ): CommandInterface {
-        $store = parent::queueRelation($parentCommand, $entity, $state, $related, $original);
+        $store = parent::queueRelation($parentCommand, $parentEntity, $parentState, $related, $original);
 
         if ($store instanceof CarrierInterface && !is_null($related)) {
             $relState = $this->getPoint($related);
-            if ($this->fetchKey($relState, $this->morphKey) != $state->getRole()) {
-                $store->push($this->morphKey, $state->getRole(), true);
-                $relState->setData([$this->morphKey => $state->getRole()]);
+            if ($this->fetchKey($relState, $this->morphKey) != $parentState->getRole()) {
+                $store->push($this->morphKey, $parentState->getRole(), true);
+                $relState->setData([$this->morphKey => $parentState->getRole()]);
             }
         }
 

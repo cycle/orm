@@ -27,9 +27,15 @@ trait ContextTrait
      * @param CarrierInterface $carrier
      * @param null|Point       $to
      * @param string           $toKey
+     * @return CarrierInterface
      */
-    protected function forwardContext(Point $from, string $fromKey, CarrierInterface $carrier, Point $to, string $toKey)
-    {
+    protected function addDependency(
+        Point $from,
+        string $fromKey,
+        CarrierInterface $carrier,
+        Point $to,
+        string $toKey
+    ): CarrierInterface {
         $carrier->waitContext($toKey, $this->isRequired());
 
         // forward key from state to the command (on change)
@@ -37,6 +43,8 @@ trait ContextTrait
 
         // link 2 keys and trigger cascade falling right now (if exists)
         $from->pull($fromKey, $to, $toKey, true);
+
+        return $carrier;
     }
 
     /**
@@ -47,11 +55,18 @@ trait ContextTrait
      * @param string          $fromKey
      * @param ScopedInterface $carrier
      * @param string          $toKey
+     * @return ScopedInterface
      */
-    protected function forwardScope(Point $from, string $fromKey, ScopedInterface $carrier, string $toKey)
-    {
+    protected function forwardScope(
+        Point $from,
+        string $fromKey,
+        ScopedInterface $carrier,
+        string $toKey
+    ): ScopedInterface {
         $carrier->waitScope($toKey);
         $from->pull($fromKey, $carrier, $toKey, true, AcceptorInterface::SCOPE);
+
+        return $carrier;
     }
 
     /**

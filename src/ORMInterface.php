@@ -9,8 +9,8 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 
 interface ORMInterface
 {

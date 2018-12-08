@@ -58,8 +58,8 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
      */
     public function queueRelation(
         CarrierInterface $parentCommand,
-        $entity,
-        Point $state,
+        $parentEntity,
+        Point $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -77,9 +77,9 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getPoint($related);
-        $relState->addReference();
+        $relState->addClaim();
 
-        $this->forwardContext($relState, $this->outerKey, $parentCommand, $state, $this->innerKey);
+        $this->addDependency($relState, $this->outerKey, $parentCommand, $parentState, $this->innerKey);
 
         return $relStore;
     }

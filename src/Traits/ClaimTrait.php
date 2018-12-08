@@ -8,25 +8,28 @@
 
 namespace Spiral\ORM\Traits;
 
-trait ReferenceTrait
+/**
+ * Provides ability to calculate number of object claims.
+ */
+trait ClaimTrait
 {
     /** @var int */
-    private $numReferences = 1;
+    private $numClaims = 1;
 
     /**
      * Add reference to the related entity.
      */
-    public function addReference()
+    public function addClaim()
     {
-        $this->numReferences++;
+        $this->numClaims++;
     }
 
     /**
      * Un-claim reference to the related entity.
      */
-    public function decReference()
+    public function decClaim()
     {
-        $this->numReferences--;
+        $this->numClaims--;
     }
 
     /**
@@ -34,8 +37,8 @@ trait ReferenceTrait
      *
      * @return bool
      */
-    public function hasReferences(): bool
+    public function hasClaims(): bool
     {
-        return $this->numReferences > 0;
+        return $this->numClaims > 0;
     }
 }

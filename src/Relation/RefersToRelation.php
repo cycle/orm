@@ -62,8 +62,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
      */
     public function queueRelation(
         CarrierInterface $parentCommand,
-        $entity,
-        Point $state,
+        $parentEntity,
+        Point $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -80,7 +80,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
-            if ($outerKey != $this->fetchKey($state, $this->innerKey)) {
+            if ($outerKey != $this->fetchKey($parentState, $this->innerKey)) {
                 $parentCommand->push($this->innerKey, $outerKey, true);
             }
 
@@ -110,15 +110,15 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // why am i taking same command?
         $update = new Update(
-            $this->orm->getDatabase($entity),
-            $this->orm->getSchema()->define(get_class($entity), Schema::TABLE)
+            $this->orm->getDatabase($parentEntity),
+            $this->orm->getSchema()->define(get_class($parentEntity), Schema::TABLE)
         );
 
         // todo: here we go, the problem is that i need UPDATE command to be automatically
 
-        $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
-        $this->forwardScope($state, $primaryKey, $update, $primaryKey);
-        $this->forwardContext($this->getPoint($related), $this->outerKey, $update, $state, $this->innerKey);
+        $primaryKey = $this->orm->getSchema()->define(get_class($parentEntity), Schema::PRIMARY_KEY);
+        $this->forwardScope($parentState, $primaryKey, $update, $primaryKey);
+        $this->addDependency($this->getPoint($related), $this->outerKey, $update, $parentState, $this->innerKey);
 
         return $update;
     }

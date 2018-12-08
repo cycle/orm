@@ -85,29 +85,27 @@ final class RelationMap
     /**
      * Generate set of commands required to store the entity and it's relations.
      *
-     * @param object           $entity
+     * @param object           $parentEntity
      * @param array            $data
-     * @param Point            $point
+     * @param Point            $parentPoint
      * @param CarrierInterface $command
      * @return CarrierInterface
      */
     public function queueRelations(
-        $entity,
+        $parentEntity,
         array $data,
-        Point $point,
+        Point $parentPoint,
         CarrierInterface $command
     ): CarrierInterface {
         $sequence = new PrimarySequence();
-        $origRelated = [];
 
         // queue all "left" graph branches
         foreach ($this->dependencies as $name => $relation) {
-            if (!$relation->isCascade() || $point->getState()->visited($name)) {
+            if (!$relation->isCascade() || $parentPoint->getState()->visited($name)) {
                 continue;
             }
 
-            $origRelated[$name] = $point->getRelation($name);
-            $this->queueRelation($sequence, $entity, $data, $point, $command, $relation, $name);
+            $this->queueRelation($sequence, $parentEntity, $data, $parentPoint, $command, $relation, $name);
         }
 
         // queue target entity
@@ -115,16 +113,15 @@ final class RelationMap
 
         // queue all "right" graph branches
         foreach ($this->relations as $name => $relation) {
-            if (!$relation->isCascade() || $point->getState()->visited($name)) {
+            if (!$relation->isCascade() || $parentPoint->getState()->visited($name)) {
                 continue;
             }
 
-            $origRelated[$name] = $point->getRelation($name);
-            $this->queueRelation($sequence, $entity, $data, $point, $command, $relation, $name);
+            $this->queueRelation($sequence, $parentEntity, $data, $parentPoint, $command, $relation, $name);
         }
 
         if (count($sequence) === 1) {
-            return $sequence->getPrimary();
+            return current($sequence->getCommands());
         }
 
         return $sequence;
@@ -133,45 +130,47 @@ final class RelationMap
     /**
      * Queue relation and return related object.
      *
-     * @param Sequence          $sequence
-     * @param object            $entity
+     * @param Sequence          $parentSequence
+     * @param object            $parent
      * @param array             $data
-     * @param Point             $point
+     * @param Point             $parentPoint
      * @param CarrierInterface  $command
      * @param RelationInterface $relation
      * @param string            $name
      */
     private function queueRelation(
-        Sequence $sequence,
-        $entity,
+        Sequence $parentSequence,
+        $parent,
         array $data,
-        Point $point,
+        // move
+        Point $parentPoint,
         CarrierInterface $command,
         RelationInterface $relation,
         string $name
     ) {
-        $point->getState()->markVisited($name);
-
         // get the current relation value
         $related = $relation->extract($data[$name] ?? null);
+        $original = $parentPoint->getRelation($name);
 
-        // no changes in promised relation
-        if ($related instanceof PromiseInterface && $related === $point->getRelation($name)) {
+        // indicate that branch has been calculated
+        $parentPoint->getState()->markVisited($name);
+
+        // no changes in non changed promised relation
+        if ($related instanceof PromiseInterface && $related === $original) {
             return;
         }
 
-        $relStore = $relation->queueRelation($command, $entity, $point, $related, $point->getRelation($name));
+        $relStore = $relation->queueRelation($command, $parent, $parentPoint, $related, $original);
 
         if ($relStore instanceof Sequence && count($relStore) === 1) {
-            // todo: improve
-            $relStore = $relStore->getCommands()[0];
+            $relStore = current($relStore->getCommands());
         }
 
         // queue needed changes
-        $sequence->addCommand($relStore);
+        $parentSequence->addCommand($relStore);
 
         // update current relation state
-        $point->setRelation($name, $related);
+        $parentPoint->setRelation($name, $related);
 
         return;
     }

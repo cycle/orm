@@ -11,7 +11,7 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\Context\ForwarderInterface;
-use Spiral\ORM\Traits\ReferenceTrait;
+use Spiral\ORM\Traits\ClaimTrait;
 use Spiral\ORM\Traits\RelationTrait;
 
 /**
@@ -20,7 +20,7 @@ use Spiral\ORM\Traits\RelationTrait;
  */
 final class Point implements ForwarderInterface, AcceptorInterface
 {
-    use RelationTrait, ReferenceTrait;
+    use RelationTrait, ClaimTrait;
 
     // Different entity states in a pool
     public const PROMISED         = 0;
@@ -45,13 +45,13 @@ final class Point implements ForwarderInterface, AcceptorInterface
     /**
      * @param int    $status
      * @param array  $data
-     * @param string $alias
+     * @param string $role
      */
-    public function __construct(int $status, array $data, string $alias)
+    public function __construct(int $status, array $data, string $role)
     {
         $this->status = $status;
         $this->data = $data;
-        $this->role = $alias;
+        $this->role = $role;
     }
 
     /**

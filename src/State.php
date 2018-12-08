@@ -11,7 +11,7 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\Context\ForwarderInterface;
-use Spiral\ORM\Traits\ReferenceTrait;
+use Spiral\ORM\Traits\ClaimTrait;
 use Spiral\ORM\Traits\RelationTrait;
 use Spiral\ORM\Traits\VisitorTrait;
 
@@ -20,7 +20,7 @@ use Spiral\ORM\Traits\VisitorTrait;
  */
 class State implements AcceptorInterface, ForwarderInterface
 {
-    use RelationTrait, ReferenceTrait, VisitorTrait;
+    use RelationTrait, ClaimTrait, VisitorTrait;
 
     /** @var int */
     private $state;

@@ -44,8 +44,8 @@ class HasManyRelation extends AbstractRelation
      */
     public function queueRelation(
         CarrierInterface $parentCommand,
-        $entity,
-        Point $state,
+        $parentEntity,
+        Point $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -67,11 +67,11 @@ class HasManyRelation extends AbstractRelation
         $sequence = new Sequence();
 
         foreach ($related as $item) {
-            $sequence->addCommand($this->queueStore($state, $item));
+            $sequence->addCommand($this->queueStore($parentState, $item));
         }
 
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $sequence->addCommand($this->queueDelete($state, $item));
+            $sequence->addCommand($this->queueDelete($parentState, $item));
         }
 
         return $sequence;
@@ -102,9 +102,9 @@ class HasManyRelation extends AbstractRelation
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getPoint($related);
-        $relState->addReference();
+        $relState->addClaim();
 
-        $this->forwardContext($parent, $this->innerKey, $relStore, $relState, $this->outerKey);
+        $this->addDependency($parent, $this->innerKey, $relStore, $relState, $this->outerKey);
 
         return $relStore;
     }
@@ -119,12 +119,12 @@ class HasManyRelation extends AbstractRelation
     protected function queueDelete(Point $parent, $related): CommandInterface
     {
         $origState = $this->getPoint($related);
-        $origState->decReference();
+        $origState->decClaim();
 
         return new Condition(
             $this->orm->queueDelete($related),
             function () use ($origState) {
-                return !$origState->hasReferences();
+                return !$origState->hasClaims();
             }
         );
     }

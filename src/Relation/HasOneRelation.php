@@ -56,8 +56,8 @@ class HasOneRelation extends AbstractRelation
      */
     public function queueRelation(
         CarrierInterface $parentCommand,
-        $entity,
-        Point $state,
+        $parentEntity,
+        Point $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -88,13 +88,14 @@ class HasOneRelation extends AbstractRelation
             return $sequence;
         }
 
-        $relStore = $this->orm->queueStore($related);
-        $relPoint = $this->getPoint($related);
-        $relPoint->addReference();
-
-        $this->forwardContext($state, $this->innerKey, $relStore, $relPoint, $this->outerKey);
-
-        $sequence->addPrimary($relStore);
+        // store command with dependency on parent key
+        $sequence->addPrimary($this->addDependency(
+            $parentState,
+            $this->innerKey,
+            $this->orm->queueStore($related),
+            $this->getPoint($related, +1),
+            $this->outerKey
+        ));
 
         return $sequence;
     }
@@ -107,17 +108,11 @@ class HasOneRelation extends AbstractRelation
      */
     protected function deleteOriginal($original): CommandInterface
     {
-        $oriState = $this->getPoint($original);
-        $oriState->decReference();
-
-        // todo: NOT DELETE VIA CONTEXT KEY BEING UPDATED (!) MEMORY CUT!
+        $point = $this->getPoint($original, -1);
 
         // only delete original child when no other objects claim it
-        return new Condition(
-            $this->orm->queueDelete($original),
-            function () use ($oriState) {
-                return !$oriState->hasReferences();
-            }
-        );
+        return new Condition($this->orm->queueDelete($original), function () use ($point) {
+            return !$point->hasClaims();
+        });
     }
 }

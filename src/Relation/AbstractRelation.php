@@ -9,11 +9,11 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Point;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Point;
 
 abstract class AbstractRelation implements RelationInterface
 {
@@ -92,7 +92,7 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[$key] ?? null;
     }
 
-    protected function getPoint($entity): ?Point
+    protected function getPoint($entity, int $claim = 0): ?Point
     {
         if (is_null($entity)) {
             return null;
@@ -114,6 +114,14 @@ abstract class AbstractRelation implements RelationInterface
             );
 
             $this->orm->getHeap()->attach($entity, $state);
+        }
+
+        if ($claim === 1) {
+            $state->addClaim();
+        }
+
+        if ($claim === -1) {
+            $state->decClaim();
         }
 
         return $state;

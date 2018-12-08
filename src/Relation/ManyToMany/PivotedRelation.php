@@ -159,8 +159,8 @@ class PivotedRelation extends Relation\AbstractRelation
      */
     public function queueRelation(
         CarrierInterface $parentCommand,
-        $entity,
-        Point $state,
+        $parentEntity,
+        Point $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -186,7 +186,7 @@ class PivotedRelation extends Relation\AbstractRelation
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
             $sequence->addCommand(
-                $this->link($state, $item, $related->get($item), $related)
+                $this->link($parentState, $item, $related->get($item), $related)
             );
         }
 
@@ -215,7 +215,7 @@ class PivotedRelation extends Relation\AbstractRelation
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getPoint($related);
-        $relState->addReference();
+        $relState->addClaim();
 
         if (!is_object($pivot)) {
             // first time initialization
@@ -226,8 +226,8 @@ class PivotedRelation extends Relation\AbstractRelation
         $pivotStore = $this->orm->queueStore($pivot);
         $pivotState = $this->getPoint($pivot);
 
-        $this->forwardContext($state, $this->innerKey, $pivotStore, $pivotState, $this->thoughtInnerKey);
-        $this->forwardContext($relState, $this->outerKey, $pivotStore, $pivotState, $this->thoughtOuterKey);
+        $this->addDependency($state, $this->innerKey, $pivotStore, $pivotState, $this->thoughtInnerKey);
+        $this->addDependency($relState, $this->outerKey, $pivotStore, $pivotState, $this->thoughtOuterKey);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);

@@ -12,10 +12,10 @@ namespace Spiral\ORM\Relation\Morphed;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Point;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\BelongsToRelation;
-use Spiral\ORM\Point;
 use Spiral\ORM\Util\Promise;
 
 class BelongsToMorphedRelation extends BelongsToRelation
@@ -82,32 +82,32 @@ class BelongsToMorphedRelation extends BelongsToRelation
      */
     public function queueRelation(
         CarrierInterface $parentCommand,
-        $entity,
-        Point $state,
+        $parentEntity,
+        Point $parentState,
         $related,
         $original
     ): CommandInterface {
-        $store = parent::queueRelation($parentCommand, $entity, $state, $related, $original);
+        $store = parent::queueRelation($parentCommand, $parentEntity, $parentState, $related, $original);
 
         // todo: use forward as well
 
         if (is_null($related)) {
-            if ($this->fetchKey($state, $this->morphKey) !== null) {
+            if ($this->fetchKey($parentState, $this->morphKey) !== null) {
                 $parentCommand->push($this->morphKey, null, true);
-                $state->setData([$this->morphKey => null]);
+                $parentState->setData([$this->morphKey => null]);
             }
         } else {
             $relState = $this->getPoint($related);
-            if ($this->fetchKey($state, $this->morphKey) != $relState->getRole()) {
+            if ($this->fetchKey($parentState, $this->morphKey) != $relState->getRole()) {
                 $parentCommand->push($this->morphKey, $relState->getRole(), true);
-                $state->setData([$this->morphKey => $relState->getRole()]);
+                $parentState->setData([$this->morphKey => $relState->getRole()]);
             }
         }
 
         return $store;
     }
 
-    protected function getPoint($entity): ?Point
+    protected function getPoint($entity, int $claim = 0): ?Point
     {
         if ($entity instanceof PromiseInterface) {
             $scope = $entity->__scope();
@@ -119,6 +119,6 @@ class BelongsToMorphedRelation extends BelongsToRelation
             );
         }
 
-        return parent::getPoint($entity);
+        return parent::getPoint($entity, $claim);
     }
 }

@@ -93,6 +93,7 @@ final class Transaction implements TransactionInterface
 
                     // found same link from multiple branches
                     if (in_array($do, $executed, true)) {
+                        // todo: use isExecuted flag?
                         $countExecuted++;
                         continue;
                     }

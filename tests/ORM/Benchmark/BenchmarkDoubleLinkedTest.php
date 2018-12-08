@@ -77,7 +77,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
-        for ($i = 0; $i < 5000; $i++) {
+        for ($i = 0; $i < 10000; $i++) {
             // inverted
             $c1 = new Cyclic();
             $c1->name = "self-reference";
@@ -94,7 +94,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
-        for ($i = 0; $i < 5000; $i++) {
+        for ($i = 0; $i < 10000; $i++) {
             // inverted
             $c1 = new Cyclic();
             $c1->name = "self-reference";
@@ -111,7 +111,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
-        for ($i = 0; $i < 5000; $i++) {
+        for ($i = 0; $i < 10000; $i++) {
             // inverted
             $c1 = new Cyclic();
             $c1->name = "self-reference";

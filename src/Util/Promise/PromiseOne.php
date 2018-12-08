@@ -62,7 +62,7 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $this->result = $this->orm->locateOne($this->class, $this->scope, true);
+            $this->result = $this->orm->fetchOne($this->class, $this->scope, true);
             $this->orm = $this->class = null;
         }
 

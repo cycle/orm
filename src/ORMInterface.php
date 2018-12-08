@@ -14,7 +14,7 @@ use Spiral\ORM\Command\CommandInterface;
 
 interface ORMInterface
 {
-    public function locateOne(string $class, array $scope, bool $load = false);
+    public function fetchOne(string $class, array $scope, bool $load = false);
 
     public function getDatabase($entity): DatabaseInterface;
 

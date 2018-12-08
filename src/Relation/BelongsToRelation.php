@@ -30,7 +30,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->locateOne($this->class, $scope, false))) {
+        if (!empty($e = $this->orm->fetchOne($this->class, $scope, false))) {
             return [$e, $e];
         }
 

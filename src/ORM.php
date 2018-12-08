@@ -102,7 +102,7 @@ class ORM implements ORMInterface
         return $this->relmaps[$entity] = new RelationMap($this, $relations);
     }
 
-    public function locateOne(string $class, array $scope, bool $load = false)
+    public function fetchOne(string $class, array $scope, bool $load = false)
     {
         if (count($scope) === 1) {
             $p = $class;

@@ -162,6 +162,44 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
+    public function testOrderedAndWhereReversed()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY    => ['@.level' => 'DESC'],
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
+
+        $this->assertCount(3, $a->comments);
+        $this->assertCount(2, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[2]->message);
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+    }
+
+    public function testOrderedAndWhereReversedPromised()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY    => ['@.level' => 'DESC'],
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
+
+        $this->assertCount(3, $a->comments);
+        $this->assertCount(2, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[2]->message);
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+    }
+
     public function testChangedOrder()
     {
         $this->orm = $this->withCommentsSchema([

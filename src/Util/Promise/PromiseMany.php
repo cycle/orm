@@ -14,7 +14,10 @@ use Spiral\ORM\PromiseInterface;
 
 class PromiseMany implements PromiseInterface
 {
-    /** @var ORMInterface|null */
+    /**
+     * @invisible
+     * @var ORMInterface|null
+     */
     private $orm;
 
     /** @var string|null */
@@ -28,11 +31,13 @@ class PromiseMany implements PromiseInterface
     /** @var mixed */
     private $result;
 
-
     /**
+     * PromiseMany constructor.
+     *
      * @param ORMInterface $orm
      * @param string       $class
      * @param array        $scope
+     * @param array        $orderBy
      */
     public function __construct(ORMInterface $orm, string $class, array $scope, array $orderBy = [])
     {

@@ -33,10 +33,10 @@ class HasManyRelation extends AbstractRelation
         }
 
         // todo: where scope
-        $p = new Promise\PromiseMany(
-            $this->orm,
-            $this->class,
-            [$this->outerKey => $innerKey] + ($this->define(Relation::WHERE_SCOPE) ?? [])
+        $p = new Promise\PromiseArray(
+            $this->orm->getMapper($this->class)->getRepository(),
+            [$this->outerKey => $innerKey] + ($this->define(Relation::WHERE_SCOPE) ?? []),
+            $this->define(Relation::ORDER_BY) ?? []
         );
 
         return [new CollectionPromise($p), $p];

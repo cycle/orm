@@ -29,6 +29,8 @@ interface PromiseInterface
      */
     public function __scope(): array;
 
+    public function __role(): string;
+
     /**
      * Resolve promise and return related data.
      *

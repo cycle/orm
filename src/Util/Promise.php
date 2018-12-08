@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Util;
 
-use Spiral\ORM\MapperInterface;
 use Spiral\ORM\PromiseInterface;
 
 /**
@@ -49,6 +48,11 @@ class Promise implements PromiseInterface
     public function __scope(): array
     {
         return $this->scope;
+    }
+
+    public function __role(): string
+    {
+        return '';
     }
 
     /**

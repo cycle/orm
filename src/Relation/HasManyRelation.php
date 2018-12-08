@@ -8,12 +8,13 @@
 
 namespace Spiral\ORM\Relation;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Point;
+use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
@@ -21,22 +22,21 @@ class HasManyRelation extends AbstractRelation
 {
     use Traits\CollectionTrait;
 
+    /**
+     * @inheritdoc
+     */
     public function initPromise(Point $point): array
     {
-        // todo: here we need paths (!)
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
-            return [null, null];
+            return [new ArrayCollection(), null];
         }
 
-        $pr = new Promise(
-            [$this->outerKey => $innerKey],
-            function (array $scope) use ($innerKey) {
-                // todo: where is part of CONTEXT - yeeeaeh ????
-                return $this->orm->getMapper($this->class)->getRepository()->findAll($scope);
-            }
-        );
+        // todo: where scope
+        $p = new Promise\PromiseMany($this->orm, $this->class, [
+            $this->outerKey => $innerKey
+        ]);
 
-        return [new CollectionPromise($pr), $pr];
+        return [new CollectionPromise($p), $p];
     }
 
     /**

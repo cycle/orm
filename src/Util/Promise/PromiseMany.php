@@ -8,13 +8,11 @@
 
 namespace Spiral\ORM\Util\Promise;
 
+
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
 
-/**
- * Promises one class and resolves the result via ORM heap or entity repository.
- */
-class PromiseOne implements PromiseInterface
+class PromiseMany implements PromiseInterface
 {
     /** @var ORMInterface|null */
     private $orm;
@@ -67,7 +65,7 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $this->result = $this->orm->fetchOne($this->class, $this->scope, true);
+            $this->result = $this->orm->getMapper($this->class)->getRepository()->findAll($this->scope);
             $this->orm = null;
         }
 

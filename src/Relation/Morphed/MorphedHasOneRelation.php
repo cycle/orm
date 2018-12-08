@@ -11,9 +11,9 @@ namespace Spiral\ORM\Relation\Morphed;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Point;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasOneRelation;
-use Spiral\ORM\Point;
 use Spiral\ORM\Util\Promise;
 
 /**
@@ -36,27 +36,21 @@ class MorphedHasOneRelation extends HasOneRelation
         $this->morphKey = $this->define(Relation::MORPH_KEY);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function initPromise(Point $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
         }
 
-        // todo: need simple promise :)
+        $p = new Promise\PromiseOne($this->orm, $this->class, [
+            $this->outerKey => $innerKey,
+            $this->morphKey => $point->getRole()
+        ]);
 
-        // todo: better promises?
-        $promise = new Promise(
-            [
-                $this->outerKey => $innerKey,
-                $this->morphKey => $point->getRole()
-            ],
-            function ($context) {
-                // todo: check in map
-                return $this->orm->getMapper($this->class)->getRepository()->findOne($context);
-            }
-        );
-
-        return [$promise, $promise];
+        return [$p, $p];
     }
 
     /**

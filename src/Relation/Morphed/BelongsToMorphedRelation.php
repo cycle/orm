@@ -35,7 +35,9 @@ class BelongsToMorphedRelation extends BelongsToRelation
         $this->morphKey = $this->define(Relation::MORPH_KEY);
     }
 
-    // todo: class
+    /**
+     * @inheritdoc
+     */
     public function initPromise(Point $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
@@ -43,16 +45,19 @@ class BelongsToMorphedRelation extends BelongsToRelation
         }
 
         // parent class (todo: i don't need it!!!!!!!! use aliases directly)
+        // todo: yeeeep, need aliases directly
+
         $parentClass = $this->orm->getSchema()->getClass($this->fetchKey($point, $this->morphKey));
 
-        if ($this->orm->getHeap()->hasPath("{$parentClass}:$innerKey")) {
-            // todo: has it!
-            $i = $this->orm->getHeap()->getPath("{$parentClass}:$innerKey");
-            return [$i, $i];
+        $scope = [$this->outerKey => $innerKey];
+
+        if (!empty($e = $this->orm->fetchOne($parentClass, $scope, false))) {
+            return [$e, $e];
         }
 
-        // todo: i don't like carrying alias in a context (!!!!)
-        // this is not right (!!)
+
+        //        // todo: i don't like carrying alias in a context (!!!!)
+        //        // this is not right (!!)
         $pr = new Promise(
             [
                 $this->outerKey => $innerKey,

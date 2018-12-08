@@ -11,9 +11,9 @@ namespace Spiral\ORM\Relation\Morphed;
 use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Point;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasManyRelation;
-use Spiral\ORM\Point;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
@@ -34,24 +34,21 @@ class MorphedHasManyRelation extends HasManyRelation
         $this->morphKey = $this->define(Relation::MORPH_KEY);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function initPromise(Point $point): array
     {
-        // todo: here we need paths (!)
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [new ArrayCollection(), null];
         }
 
-        $pr = new Promise(
-            [
-                $this->outerKey => $innerKey,
-                $this->morphKey => $point->getRole()
-            ],
-            function (array $scope) use ($innerKey) {
-                return $this->orm->getMapper($this->class)->getRepository()->findAll($scope);
-            }
-        );
+        $p = new Promise\PromiseMany($this->orm, $this->class, [
+            $this->outerKey => $innerKey,
+            $this->morphKey => $point->getRole()
+        ]);
 
-        return [new CollectionPromise($pr), $pr];
+        return [new CollectionPromise($p), $p];
     }
 
     /**

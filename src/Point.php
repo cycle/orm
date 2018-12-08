@@ -13,7 +13,6 @@ use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\Context\ForwarderInterface;
 use Spiral\ORM\Traits\ReferenceTrait;
 use Spiral\ORM\Traits\RelationTrait;
-use Spiral\ORM\Traits\VisitorTrait;
 
 /**
  * Point (metadata) carries meta information about entitey state, changes forwards data to other points thought
@@ -21,7 +20,7 @@ use Spiral\ORM\Traits\VisitorTrait;
  */
 final class Point implements ForwarderInterface, AcceptorInterface
 {
-    use RelationTrait, ReferenceTrait, VisitorTrait;
+    use RelationTrait, ReferenceTrait;
 
     // Different entity states in a pool
     public const PROMISED         = 0;
@@ -169,7 +168,6 @@ final class Point implements ForwarderInterface, AcceptorInterface
     public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
     {
         $this->getState()->push($key, $value, $update, $stream);
-
     }
 
     /**
@@ -180,6 +178,5 @@ final class Point implements ForwarderInterface, AcceptorInterface
         $this->data = [];
         $this->state = null;
         $this->relations = [];
-        $this->visited = [];
     }
 }

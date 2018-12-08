@@ -87,14 +87,14 @@ final class RelationMap
      *
      * @param object           $entity
      * @param array            $data
-     * @param Point            $state
+     * @param Point            $point
      * @param CarrierInterface $command
      * @return CarrierInterface
      */
     public function queueRelations(
         $entity,
         array $data,
-        Point $state,
+        Point $point,
         CarrierInterface $command
     ): CarrierInterface {
         $sequence = new PrimarySequence();
@@ -102,12 +102,12 @@ final class RelationMap
 
         // queue all "left" graph branches
         foreach ($this->dependencies as $name => $relation) {
-            if (!$relation->isCascade() || $state->visited($name)) {
+            if (!$relation->isCascade() || $point->getState()->visited($name)) {
                 continue;
             }
 
-            $origRelated[$name] = $state->getRelation($name);
-            $this->queueRelation($sequence, $entity, $data, $state, $command, $relation, $name);
+            $origRelated[$name] = $point->getRelation($name);
+            $this->queueRelation($sequence, $entity, $data, $point, $command, $relation, $name);
         }
 
         // queue target entity
@@ -115,12 +115,12 @@ final class RelationMap
 
         // queue all "right" graph branches
         foreach ($this->relations as $name => $relation) {
-            if (!$relation->isCascade() || $state->visited($name)) {
+            if (!$relation->isCascade() || $point->getState()->visited($name)) {
                 continue;
             }
 
-            $origRelated[$name] = $state->getRelation($name);
-            $this->queueRelation($sequence, $entity, $data, $state, $command, $relation, $name);
+            $origRelated[$name] = $point->getRelation($name);
+            $this->queueRelation($sequence, $entity, $data, $point, $command, $relation, $name);
         }
 
         if (count($sequence) === 1) {
@@ -136,7 +136,7 @@ final class RelationMap
      * @param Sequence          $sequence
      * @param object            $entity
      * @param array             $data
-     * @param Point             $state
+     * @param Point             $point
      * @param CarrierInterface  $command
      * @param RelationInterface $relation
      * @param string            $name
@@ -145,22 +145,22 @@ final class RelationMap
         Sequence $sequence,
         $entity,
         array $data,
-        Point $state,
+        Point $point,
         CarrierInterface $command,
         RelationInterface $relation,
         string $name
     ) {
-        $state->markVisited($name);
+        $point->getState()->markVisited($name);
 
         // get the current relation value
         $related = $relation->extract($data[$name] ?? null);
 
         // no changes in promised relation
-        if ($related instanceof PromiseInterface && $related === $state->getRelation($name)) {
+        if ($related instanceof PromiseInterface && $related === $point->getRelation($name)) {
             return;
         }
 
-        $relStore = $relation->queueRelation($command, $entity, $state, $related, $state->getRelation($name));
+        $relStore = $relation->queueRelation($command, $entity, $point, $related, $point->getRelation($name));
 
         if ($relStore instanceof Sequence && count($relStore) === 1) {
             // todo: improve
@@ -171,7 +171,7 @@ final class RelationMap
         $sequence->addCommand($relStore);
 
         // update current relation state
-        $state->setRelation($name, $related);
+        $point->setRelation($name, $related);
 
         return;
     }

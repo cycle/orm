@@ -148,12 +148,12 @@ final class Transaction implements TransactionInterface
     protected function syncHeap()
     {
         foreach ($this->orm->getHeap() as $entity) {
-            $state = $this->orm->getHeap()->get($entity);
-            $state->setCommand(null);
-            $state->resetVisited();
+            $point = $this->orm->getHeap()->get($entity);
+            $point->setCommand(null);
+            $point->getState()->resetVisited();
 
-            $state->setStatus(Point::LOADED);
-            $this->orm->getMapper($entity)->hydrate($entity, $state->getData());
+            $point->setStatus(Point::LOADED);
+            $this->orm->getMapper($entity)->hydrate($entity, $point->getData());
         }
     }
 
@@ -164,7 +164,7 @@ final class Transaction implements TransactionInterface
     {
         foreach ($this->orm->getHeap() as $entity) {
             // todo: need better reset?
-            $this->orm->getHeap()->get($entity)->resetVisited();
+            $this->orm->getHeap()->get($entity)->getState()->resetVisited();
         }
     }
 

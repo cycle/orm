@@ -11,15 +11,17 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\Context\ForwarderInterface;
+use Spiral\ORM\Traits\ReferenceTrait;
 use Spiral\ORM\Traits\RelationTrait;
+use Spiral\ORM\Traits\VisitorTrait;
 
 /**
  * Point state.
  */
 class State implements AcceptorInterface, ForwarderInterface
 {
-    use RelationTrait;
-    
+    use RelationTrait, ReferenceTrait, VisitorTrait;
+
     /** @var int */
     private $state;
 

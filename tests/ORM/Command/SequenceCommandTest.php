@@ -69,43 +69,4 @@ class SequenceCommandTest extends TestCase
         $command->setContext('name', 'value');
         $this->assertTrue(true);
     }
-
-    public function testPassCallbackExecute()
-    {
-        $command = new PrimarySequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
-
-        $f = function () {
-        };
-
-        $lead->shouldReceive('onExecute')->with($f);
-        $command->onExecute($f);
-        $this->assertTrue(true);
-    }
-
-    public function testPassCallbackComplete()
-    {
-        $command = new PrimarySequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
-
-        $f = function () {
-        };
-
-        $lead->shouldReceive('onComplete')->with($f);
-        $command->onComplete($f);
-        $this->assertTrue(true);
-    }
-
-    public function testPassCallbackRollback()
-    {
-        $command = new PrimarySequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
-
-        $f = function () {
-        };
-
-        $lead->shouldReceive('onRollback')->with($f);
-        $command->onRollBack($f);
-        $this->assertTrue(true);
-    }
 }

@@ -20,7 +20,7 @@ use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
 use Spiral\ORM\ORM;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
@@ -234,7 +234,7 @@ abstract class BaseTest extends TestCase
 
     protected function assertClearState(ORM $orm)
     {
-        $r = new \ReflectionClass(State::class);
+        $r = new \ReflectionClass(Point::class);
 
         $rel = $r->getProperty('relations');
         $rel->setAccessible(true);
@@ -252,9 +252,9 @@ abstract class BaseTest extends TestCase
             );
 
             // all the states must be closed
-            $this->assertNotEquals(State::SCHEDULED_INSERT, $state);
-            $this->assertNotEquals(State::SCHEDULED_UPDATE, $state);
-            $this->assertNotEquals(State::SCHEDULED_DELETE, $state);
+            $this->assertNotEquals(Point::SCHEDULED_INSERT, $state);
+            $this->assertNotEquals(Point::SCHEDULED_UPDATE, $state);
+            $this->assertNotEquals(Point::SCHEDULED_DELETE, $state);
         }
     }
 

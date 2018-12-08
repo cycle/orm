@@ -15,7 +15,7 @@ use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Schema;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Promise;
 
 /**
@@ -27,7 +27,7 @@ use Spiral\ORM\Util\Promise;
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
     // todo: class
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return [null, null];
@@ -63,7 +63,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
@@ -76,7 +76,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new Nil();
         }
 
-        $relState = $this->getState($related);
+        $relState = $this->getPoint($related);
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
@@ -91,22 +91,22 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // todo: use queue store? merge with belongs to?
 
-        $relState = $this->getState($related);
+        $relState = $this->getPoint($related);
 
         /*
          * REMEMBER THE CYCLES!!!!
          */
 
 
-        if (!empty($relState->getCommand())) {
-            $update = $relState->getCommand();
+      //  if (!empty($relState->getCommand())) {
+         //   $update = $relState->getCommand();
 
             // todo: how reliable is it? it's not
-            if (!($update instanceof Insert)) {
-                $this->forwardContext($update, $relState, $this->outerKey, $state, $this->innerKey);
-                return new Nil();
-            }
-        }
+        //    if (!($update instanceof Insert)) {
+           //     $this->forwardContext($relState, $this->outerKey, $update, $state, $this->innerKey);
+         //       return new Nil();
+          //  }
+     //   }
 
         // why am i taking same command?
         $update = new Update(
@@ -117,8 +117,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // todo: here we go, the problem is that i need UPDATE command to be automatically
 
         $primaryKey = $this->orm->getSchema()->define(get_class($entity), Schema::PRIMARY_KEY);
-        $this->forwardScope($update, $state, $primaryKey, $primaryKey);
-        $this->forwardContext($update, $this->getState($related), $this->outerKey, $state, $this->innerKey);
+        $this->forwardScope($state, $primaryKey, $update, $primaryKey);
+        $this->forwardContext($this->getPoint($related), $this->outerKey, $update, $state, $this->innerKey);
 
         return $update;
     }

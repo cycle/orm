@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasOneRelation;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Promise;
 
 /**
@@ -36,7 +36,7 @@ class MorphedHasOneRelation extends HasOneRelation
         $this->morphKey = $this->define(Relation::MORPH_KEY);
     }
 
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return [null, null];
@@ -65,14 +65,14 @@ class MorphedHasOneRelation extends HasOneRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
         $store = parent::queueRelation($parentCommand, $entity, $state, $related, $original);
 
         if ($store instanceof CarrierInterface && !is_null($related)) {
-            $relState = $this->getState($related);
+            $relState = $this->getPoint($related);
             if ($this->fetchKey($relState, $this->morphKey) != $state->getRole()) {
                 $store->push($this->morphKey, $state->getRole(), true);
                 $relState->setData([$this->morphKey => $state->getRole()]);

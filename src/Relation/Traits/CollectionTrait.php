@@ -13,7 +13,7 @@ use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 
 trait CollectionTrait
 {
@@ -27,7 +27,7 @@ trait CollectionTrait
     {
         $result = [];
         foreach ($data as $item) {
-            $result[] = $this->getORM()->make($this->class, $item, State::LOADED);
+            $result[] = $this->getORM()->make($this->class, $item, Point::LOADED);
         }
 
         return [new ArrayCollection($result), $result];

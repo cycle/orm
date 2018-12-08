@@ -15,7 +15,7 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\BelongsToRelation;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Promise;
 
 class BelongsToMorphedRelation extends BelongsToRelation
@@ -36,7 +36,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
     }
 
     // todo: class
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return [null, null];
@@ -83,7 +83,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
@@ -97,7 +97,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
                 $state->setData([$this->morphKey => null]);
             }
         } else {
-            $relState = $this->getState($related);
+            $relState = $this->getPoint($related);
             if ($this->fetchKey($state, $this->morphKey) != $relState->getRole()) {
                 $parentCommand->push($this->morphKey, $relState->getRole(), true);
                 $state->setData([$this->morphKey => $relState->getRole()]);
@@ -107,18 +107,18 @@ class BelongsToMorphedRelation extends BelongsToRelation
         return $store;
     }
 
-    protected function getState($entity): ?State
+    protected function getPoint($entity): ?Point
     {
         if ($entity instanceof PromiseInterface) {
             $scope = $entity->__scope();
 
-            return new State(
-                State::PROMISED,
+            return new Point(
+                Point::PROMISED,
                 [$this->outerKey => $scope[$this->outerKey]],
                 $scope[$this->morphKey]
             );
         }
 
-        return parent::getState($entity);
+        return parent::getPoint($entity);
     }
 }

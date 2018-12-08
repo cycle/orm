@@ -43,7 +43,7 @@ class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function get($entity): ?State
+    public function get($entity): ?Point
     {
         try {
             return $this->storage->offsetGet($entity);
@@ -55,7 +55,7 @@ class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function attach($entity, State $state, array $index = [])
+    public function attach($entity, Point $state, array $index = [])
     {
         $this->storage->offsetSet($entity, $state);
 

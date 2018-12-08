@@ -23,6 +23,11 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
 
     public function setUp()
     {
+        if (!BaseTest::$config['benchmark']) {
+            $this->markTestSkipped();
+            return;
+        }
+
         parent::setUp();
 
         $this->makeTable('cyclic', [
@@ -72,11 +77,46 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
-        for ($i = 0; $i < 10000; $i++) {
+        for ($i = 0; $i < 5000; $i++) {
             // inverted
             $c1 = new Cyclic();
             $c1->name = "self-reference";
             $c1->cyclic = $c1;
+
+            $tr->store($c1);
+        }
+
+        $tr->run();
+    }
+
+    public function testMemoryUsageOther()
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+        $tr = new Transaction($this->orm);
+
+        for ($i = 0; $i < 5000; $i++) {
+            // inverted
+            $c1 = new Cyclic();
+            $c1->name = "self-reference";
+            $c1->other = $c1;
+
+            $tr->store($c1);
+        }
+
+        $tr->run();
+    }
+
+    public function testMemoryUsageDouble()
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+        $tr = new Transaction($this->orm);
+
+        for ($i = 0; $i < 5000; $i++) {
+            // inverted
+            $c1 = new Cyclic();
+            $c1->name = "self-reference";
+            $c1->cyclic = $c1;
+            $c1->other = $c1;
 
             $tr->store($c1);
         }

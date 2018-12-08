@@ -11,29 +11,15 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\Context\ForwarderInterface;
-use Spiral\ORM\Traits\ReferenceTrait;
 use Spiral\ORM\Traits\RelationTrait;
-use Spiral\ORM\Traits\VisitorTrait;
 
 /**
- * State carries meta information about all load entities, including original set of data,
- * relations, state and number of active references (in cases when entity become unclaimed).
+ * Point state.
  */
-final class State implements ForwarderInterface, AcceptorInterface
+class State implements AcceptorInterface, ForwarderInterface
 {
-    use RelationTrait, ReferenceTrait, VisitorTrait;
-
-    // Different entity states in a pool
-    public const PROMISED         = 0;
-    public const NEW              = 1;
-    public const LOADED           = 2;
-    public const SCHEDULED_INSERT = 3;
-    public const SCHEDULED_UPDATE = 4;
-    public const SCHEDULED_DELETE = 5;
-
-    /** @var string */
-    private $role;
-
+    use RelationTrait;
+    
     /** @var int */
     private $state;
 
@@ -44,23 +30,13 @@ final class State implements ForwarderInterface, AcceptorInterface
     private $command;
 
     /**
-     * @param int    $state
-     * @param array  $data
-     * @param string $alias
+     * @param int   $state
+     * @param array $data
      */
-    public function __construct(int $state, array $data, string $alias)
+    public function __construct(int $state, array $data)
     {
         $this->state = $state;
         $this->data = $data;
-        $this->role = $alias;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRole(): string
-    {
-        return $this->role;
     }
 
     /**
@@ -68,7 +44,7 @@ final class State implements ForwarderInterface, AcceptorInterface
      *
      * @param int $state
      */
-    public function setState(int $state): void
+    public function setStatus(int $state): void
     {
         $this->state = $state;
     }
@@ -78,7 +54,7 @@ final class State implements ForwarderInterface, AcceptorInterface
      *
      * @return int
      */
-    public function getState(): int
+    public function getStatus(): int
     {
         return $this->state;
     }
@@ -126,7 +102,6 @@ final class State implements ForwarderInterface, AcceptorInterface
      */
     public function getCommand(): ?CarrierInterface
     {
-        // i can forward to it directly
         return $this->command;
     }
 
@@ -137,12 +112,12 @@ final class State implements ForwarderInterface, AcceptorInterface
      */
     public function pull(
         string $key,
-        AcceptorInterface $h,
+        AcceptorInterface $acceptor,
         string $target,
         bool $trigger = false,
         int $stream = AcceptorInterface::DATA
     ) {
-        $this->handlers[$key][] = [$h, $target, $stream];
+        $this->handlers[$key][] = [$acceptor, $target, $stream];
 
         if ($trigger || !empty($this->data[$key])) {
             $this->push($key, $this->data[$key] ?? null, false, $stream);
@@ -152,12 +127,8 @@ final class State implements ForwarderInterface, AcceptorInterface
     /**
      * @inheritdoc
      */
-    public function push(
-        string $key,
-        $value,
-        bool $update = false,
-        int $stream = self::DATA
-    ) {
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    {
         if (!$update) {
             $update = ($this->data[$key] ?? null) != $value;
         }
@@ -173,16 +144,5 @@ final class State implements ForwarderInterface, AcceptorInterface
                 $update = false;
             }
         }
-    }
-
-    /**
-     * Reset state.
-     */
-    public function __destruct()
-    {
-        $this->data = [];
-        $this->relations = [];
-        $this->visited = [];
-        $this->command = null;
     }
 }

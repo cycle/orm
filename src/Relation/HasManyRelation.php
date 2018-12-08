@@ -8,12 +8,12 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
@@ -21,7 +21,7 @@ class HasManyRelation extends AbstractRelation
 {
     use Traits\CollectionTrait;
 
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         // todo: here we need paths (!)
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
@@ -45,7 +45,7 @@ class HasManyRelation extends AbstractRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
@@ -94,17 +94,17 @@ class HasManyRelation extends AbstractRelation
     /**
      * Persist related object.
      *
-     * @param State  $parent
+     * @param Point  $parent
      * @param object $related
      * @return CarrierInterface
      */
-    protected function queueStore(State $parent, $related): CarrierInterface
+    protected function queueStore(Point $parent, $related): CarrierInterface
     {
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getState($related);
+        $relState = $this->getPoint($related);
         $relState->addReference();
 
-        $this->forwardContext($relStore, $parent, $this->innerKey, $relState, $this->outerKey);
+        $this->forwardContext($parent, $this->innerKey, $relStore, $relState, $this->outerKey);
 
         return $relStore;
     }
@@ -112,13 +112,13 @@ class HasManyRelation extends AbstractRelation
     /**
      * Remove one of related objects.
      *
-     * @param State  $parent
+     * @param Point  $parent
      * @param object $related
      * @return CommandInterface
      */
-    protected function queueDelete(State $parent, $related): CommandInterface
+    protected function queueDelete(Point $parent, $related): CommandInterface
     {
-        $origState = $this->getState($related);
+        $origState = $this->getPoint($related);
         $origState->decReference();
 
         return new Condition(

@@ -249,9 +249,12 @@ abstract class RefersToRelationTest extends BaseTest
         $c->message = "last comment";
         $u->addComment($c);
 
+        $this->captureWriteQueries();
+
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
+        $this->assertNumWrites(3);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $s = new Selector($this->orm, User::class);
@@ -263,9 +266,11 @@ abstract class RefersToRelationTest extends BaseTest
 
         $u->lastComment = null;
 
+        $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
         $tr->store($u);
         $tr->run();
+        $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $s = new Selector($this->orm, User::class);

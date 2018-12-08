@@ -8,19 +8,19 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\PrimarySequence;
+use Spiral\ORM\Point;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\State;
 use Spiral\ORM\Util\Promise;
 
 // todo: NOT DELETE VIA CONTEXT KEY BEING UPDATED (!)
 class HasOneRelation extends AbstractRelation
 {
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         // todo: here we need paths (!)
 
@@ -57,7 +57,7 @@ class HasOneRelation extends AbstractRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
@@ -89,10 +89,10 @@ class HasOneRelation extends AbstractRelation
         }
 
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getState($related);
-        $relState->addReference();
+        $relPoint = $this->getPoint($related);
+        $relPoint->addReference();
 
-        $this->forwardContext($relStore, $state, $this->innerKey, $relState, $this->outerKey);
+        $this->forwardContext($state, $this->innerKey, $relStore, $relPoint, $this->outerKey);
 
         $sequence->addPrimary($relStore);
 
@@ -107,7 +107,7 @@ class HasOneRelation extends AbstractRelation
      */
     protected function deleteOriginal($original): CommandInterface
     {
-        $oriState = $this->getState($original);
+        $oriState = $this->getPoint($original);
         $oriState->decReference();
 
         // todo: NOT DELETE VIA CONTEXT KEY BEING UPDATED (!) MEMORY CUT!

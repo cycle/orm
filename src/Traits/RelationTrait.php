@@ -21,7 +21,7 @@ trait RelationTrait
     {
         $this->relations[$name] = $context;
 
-        // todo: i don't like this (! !!! !!!)
+        // todo: is it good approach?
         unset($this->data[$name]);
     }
 

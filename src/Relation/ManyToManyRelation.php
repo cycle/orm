@@ -24,7 +24,7 @@ use Spiral\ORM\Node\PivotedRootNode;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
 use Spiral\ORM\Util\PivotedPromise;
@@ -50,7 +50,7 @@ class ManyToManyRelation extends AbstractRelation
         $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
     }
 
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return [null, null];
@@ -155,7 +155,7 @@ class ManyToManyRelation extends AbstractRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
@@ -197,12 +197,12 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param State  $state
+     * @param Point  $state
      * @param object $related
      * @param bool   $exists
      * @return CommandInterface
      */
-    protected function link(State $state, $related, $exists): CommandInterface
+    protected function link(Point $state, $related, $exists): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
 
@@ -217,7 +217,7 @@ class ManyToManyRelation extends AbstractRelation
         $sync->waitContext($this->thoughtOuterKey, true);
 
         $state->pull($this->innerKey, $sync, $this->thoughtInnerKey, true);
-        $this->getState($related)->pull($this->outerKey, $sync, $this->thoughtOuterKey, true);
+        $this->getPoint($related)->pull($this->outerKey, $sync, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -229,13 +229,13 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Remove the connection between two objects.
      *
-     * @param State  $state
+     * @param Point  $state
      * @param object $related
      * @return CommandInterface
      */
-    protected function unlink(State $state, $related): CommandInterface
+    protected function unlink(Point $state, $related): CommandInterface
     {
-        $relState = $this->getState($related);
+        $relState = $this->getPoint($related);
 
         $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
         $delete->waitScope($this->thoughtOuterKey);

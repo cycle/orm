@@ -72,12 +72,8 @@ class PrimarySequence extends Sequence implements CarrierInterface
     /**
      * @inheritdoc
      */
-    public function push(
-        string $key,
-         $value,
-        bool $update = false,
-        int $stream = self::DATA
-    ) {
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    {
         $this->getPrimary()->push($key, $value, $update, $stream);
     }
 

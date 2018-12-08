@@ -8,19 +8,19 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Promise;
 
 // todo: what is the difference with refers to?
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
     // todo: class
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return [null, null];
@@ -59,7 +59,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
@@ -76,10 +76,10 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         }
 
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getState($related);
+        $relState = $this->getPoint($related);
         $relState->addReference();
 
-        $this->forwardContext($parentCommand, $relState, $this->outerKey, $state, $this->innerKey);
+        $this->forwardContext($relState, $this->outerKey, $parentCommand, $state, $this->innerKey);
 
         return $relStore;
     }

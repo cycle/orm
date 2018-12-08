@@ -12,7 +12,7 @@ use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
@@ -135,7 +135,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(1, $result->id);
 
         $this->assertTrue($this->orm->getHeap()->has($result));
-        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($result)->getState());
+        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($result)->getStatus());
 
         $this->assertEquals(
             [
@@ -168,7 +168,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(3, $e->id);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
+        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($e)->getStatus());
     }
 
     public function testStoreWithUpdate()
@@ -190,7 +190,7 @@ abstract class MapperTest extends BaseTest
 
         $this->assertEquals(3, $e->id);
         $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($e)->getState());
+        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($e)->getStatus());
 
         $selector = new Selector($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();

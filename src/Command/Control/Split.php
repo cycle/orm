@@ -40,7 +40,7 @@ class Split implements CarrierInterface, \IteratorAggregate
         $this->head = $head;
         $this->tail = $tail;
 
-        // todo: i can remove it AS WELL!!!!
+        // todo: optimize, can i wrap?
         $this->head->onExecute(function () {
             $this->headExecuted = true;
         });
@@ -54,16 +54,12 @@ class Split implements CarrierInterface, \IteratorAggregate
         return $this->getTarget()->isReady();
     }
 
-    protected $done;
-
     /**
      * @return \Generator
      */
     public function getIterator(): \Generator
     {
         yield $this->getTarget();
-        //yield $this;
-        $this->headExecuted = true;
     }
 
     /**
@@ -101,13 +97,11 @@ class Split implements CarrierInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function push(
-        string $key,
-        $value,
-        bool $update = false,
-        int $stream = self::DATA
-    ) {
-        $this->contextPath[$key]->push($key, $value, $update, $stream);
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    {
+        if (isset($this->contextPath[$key])) {
+            $this->contextPath[$key]->push($key, $value, $update, $stream);
+        }
     }
 
     /**
@@ -142,7 +136,6 @@ class Split implements CarrierInterface, \IteratorAggregate
      */
     public function onExecute(callable $closure)
     {
-        // todo: optimize
         $this->head->onExecute($closure);
         $this->tail->onExecute($closure);
     }
@@ -152,8 +145,6 @@ class Split implements CarrierInterface, \IteratorAggregate
      */
     public function onComplete(callable $closure)
     {
-        // todo: optimize
-
         $this->head->onComplete($closure);
         $this->tail->onComplete($closure);
     }
@@ -163,8 +154,6 @@ class Split implements CarrierInterface, \IteratorAggregate
      */
     public function onRollBack(callable $closure)
     {
-        // todo: optimize
-
         $this->head->onRollBack($closure);
         $this->tail->onRollBack($closure);
     }

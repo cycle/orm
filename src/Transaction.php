@@ -152,7 +152,7 @@ final class Transaction implements TransactionInterface
             $state->setCommand(null);
             $state->resetVisited();
 
-            $state->setState(State::LOADED);
+            $state->setStatus(Point::LOADED);
             $this->orm->getMapper($entity)->hydrate($entity, $state->getData());
         }
     }

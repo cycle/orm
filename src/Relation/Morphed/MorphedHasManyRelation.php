@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasManyRelation;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
@@ -34,7 +34,7 @@ class MorphedHasManyRelation extends HasManyRelation
         $this->morphKey = $this->define(Relation::MORPH_KEY);
     }
 
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         // todo: here we need paths (!)
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
@@ -57,15 +57,15 @@ class MorphedHasManyRelation extends HasManyRelation
     /**
      * Persist related object.
      *
-     * @param State  $parent
+     * @param Point  $parent
      * @param object $related
      * @return CarrierInterface
      */
-    protected function queueStore(State $parent, $related): CarrierInterface
+    protected function queueStore(Point $parent, $related): CarrierInterface
     {
         $store = parent::queueStore($parent, $related);
 
-        $relState = $this->getState($related);
+        $relState = $this->getPoint($related);
         if ($this->fetchKey($relState, $this->morphKey) != $parent->getRole()) {
             // polish it
             $store->push($this->morphKey, $parent->getRole(), true);

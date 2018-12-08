@@ -50,7 +50,7 @@ final class Iterator implements \IteratorAggregate
                 unset($data[PivotedNode::PIVOT_DATA]);
             }
 
-            yield $index => $this->orm->make($this->class, $data, State::LOADED);
+            yield $index => $this->orm->make($this->class, $data, Point::LOADED);
         }
     }
 }

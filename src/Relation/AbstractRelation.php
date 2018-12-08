@@ -13,7 +13,7 @@ use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
 use Spiral\ORM\Schema;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 
 abstract class AbstractRelation implements RelationInterface
 {
@@ -72,12 +72,12 @@ abstract class AbstractRelation implements RelationInterface
 
     public function init($data): array
     {
-        $item = $this->orm->make($this->class, $data, State::LOADED);
+        $item = $this->orm->make($this->class, $data, Point::LOADED);
 
         return [$item, $item];
     }
 
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         return [null, null];
     }
@@ -92,15 +92,15 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[$key] ?? null;
     }
 
-    protected function getState($entity): ?State
+    protected function getPoint($entity): ?Point
     {
         if (is_null($entity)) {
             return null;
         }
 
         if ($entity instanceof PromiseInterface) {
-            return new State(
-                State::PROMISED,
+            return new Point(
+                Point::PROMISED,
                 $entity->__scope(),
                 $this->orm->getSchema()->define($this->class, Schema::ALIAS)
             );
@@ -109,7 +109,7 @@ abstract class AbstractRelation implements RelationInterface
         $state = $this->orm->getHeap()->get($entity);
 
         if (is_null($state)) {
-            $state = new State(State::NEW, [],
+            $state = new Point(Point::NEW, [],
                 $this->orm->getSchema()->define($this->class, Schema::ALIAS)
             );
 

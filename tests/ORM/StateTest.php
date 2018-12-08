@@ -9,13 +9,13 @@
 namespace Spiral\ORM\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 
 class StateTest extends TestCase
 {
     public function testPush()
     {
-        $s = new State(State::LOADED, [], "parent");
+        $s = new Point(Point::LOADED, [], "parent");
 
         $s->push('user_id', 1);
 
@@ -24,8 +24,8 @@ class StateTest extends TestCase
 
     public function testForward()
     {
-        $s = new State(State::LOADED, [], "parent");
-        $c = new State(State::LOADED, [], "child");
+        $s = new Point(Point::LOADED, [], "parent");
+        $c = new Point(Point::LOADED, [], "child");
 
         $s->pull('id', $c, 'user_id');
         $s->push('id', 1);
@@ -35,8 +35,8 @@ class StateTest extends TestCase
 
     public function testForwardDefault()
     {
-        $s = new State(State::LOADED, ['id' => 1], "parent");
-        $c = new State(State::LOADED, [], "child");
+        $s = new Point(Point::LOADED, ['id' => 1], "parent");
+        $c = new Point(Point::LOADED, [], "child");
 
         $s->pull('id', $c, 'user_id');
 
@@ -45,8 +45,8 @@ class StateTest extends TestCase
 
     public function testForwardDefaultTrigger()
     {
-        $s = new State(State::LOADED, ['id' => 1], "parent");
-        $c = new State(State::LOADED, [], "child");
+        $s = new Point(Point::LOADED, ['id' => 1], "parent");
+        $c = new Point(Point::LOADED, [], "child");
 
         $s->pull('id', $c, 'user_id', true);
 

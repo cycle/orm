@@ -15,7 +15,7 @@ use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
@@ -244,10 +244,10 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertEquals(4, $p->id);
 
         $this->assertTrue($this->orm->getHeap()->has($u));
-        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($u)->getState());
+        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($u)->getStatus());
 
         $this->assertTrue($this->orm->getHeap()->has($p));
-        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($p)->getState());
+        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($p)->getStatus());
 
         $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
 
@@ -310,7 +310,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertEquals(4, $p->id);
 
         $this->assertTrue($this->orm->getHeap()->has($p));
-        $this->assertSame(State::LOADED, $this->orm->getHeap()->get($p)->getState());
+        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($p)->getStatus());
 
         $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
 

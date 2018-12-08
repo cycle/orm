@@ -169,7 +169,7 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function make(string $class, array $data, int $state = State::NEW)
+    public function make(string $class, array $data, int $state = Point::NEW)
     {
         if ($data instanceof \Traversable) {
             $data = iterator_to_array($data);
@@ -177,7 +177,7 @@ class ORM implements ORMInterface
 
         // todo: deal with alias
 
-        if ($state !== State::NEW) {
+        if ($state !== Point::NEW) {
             // locate already loaded entity reference
             $entityID = $this->identify($class, $data);
 
@@ -206,7 +206,7 @@ class ORM implements ORMInterface
         list($entity, $filtered) = $mapper->prepare($data);
 
         // todo: i do not need primary key, but i do need to update paths in mapper
-        $state = new State($state, $filtered, $this->schema->define(get_class($entity), Schema::ALIAS));
+        $state = new Point($state, $filtered, $this->schema->define(get_class($entity), Schema::ALIAS));
         $this->heap->attach($entity, $state, $this->getPaths($entity, $entityID ?? null, $data));
 
         // hydrate entity with it's data, relations and proxies

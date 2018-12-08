@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation\Traits;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\Context\AcceptorInterface;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
 
 /**
  * Provides the ability to set the promises for command context and scopes linked
@@ -22,20 +22,14 @@ trait ContextTrait
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
-     * @param CarrierInterface $carrier
-     * @param State            $from
+     * @param Point            $from
      * @param string           $fromKey
-     * @param null|State       $to
+     * @param CarrierInterface $carrier
+     * @param null|Point       $to
      * @param string           $toKey
      */
-    protected function forwardContext(
-        CarrierInterface $carrier,
-        State $from,
-        string $fromKey,
-        // here
-        State $to,
-        string $toKey
-    ) {
+    protected function forwardContext(Point $from, string $fromKey, CarrierInterface $carrier, Point $to, string $toKey)
+    {
         $carrier->waitContext($toKey, $this->isRequired());
 
         // forward key from state to the command (on change)
@@ -43,27 +37,19 @@ trait ContextTrait
 
         // link 2 keys and trigger cascade falling right now (if exists)
         $from->pull($fromKey, $to, $toKey, true);
-       // dump($from);
-
-        //dump($to);
     }
 
     /**
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
      *
-     * @param ScopedInterface $carrier
-     * @param State           $from
+     * @param Point           $from
      * @param string          $fromKey
+     * @param ScopedInterface $carrier
      * @param string          $toKey
      */
-    protected function forwardScope(
-        ScopedInterface $carrier,
-        State $from,
-        string $fromKey,
-        // here
-        string $toKey
-    ) {
+    protected function forwardScope(Point $from, string $fromKey, ScopedInterface $carrier, string $toKey)
+    {
         $carrier->waitScope($toKey);
         $from->pull($fromKey, $carrier, $toKey, true, AcceptorInterface::SCOPE);
     }
@@ -71,11 +57,11 @@ trait ContextTrait
     /**
      * Fetch key from the state.
      *
-     * @param State  $state
+     * @param Point  $state
      * @param string $key
      * @return mixed|null
      */
-    protected function fetchKey(?State $state, string $key)
+    protected function fetchKey(?Point $state, string $key)
     {
         if (is_null($state)) {
             return null;

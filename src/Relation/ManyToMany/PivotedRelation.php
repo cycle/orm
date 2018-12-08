@@ -9,11 +9,8 @@
 namespace Spiral\ORM\Relation\ManyToMany;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Util\Collection\PivotedCollection;
-use Spiral\ORM\Util\Collection\PivotedInterface;
-use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Iterator;
@@ -21,11 +18,14 @@ use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Node\PivotedRootNode;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Util\PivotedPromise;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\State;
+use Spiral\ORM\Point;
+use Spiral\ORM\Util\Collection\PivotedCollection;
+use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
+use Spiral\ORM\Util\Collection\PivotedInterface;
 use Spiral\ORM\Util\ContextStorage;
+use Spiral\ORM\Util\PivotedPromise;
 
 class PivotedRelation extends Relation\AbstractRelation
 {
@@ -52,7 +52,7 @@ class PivotedRelation extends Relation\AbstractRelation
         $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
     }
 
-    public function initPromise(State $state, $data): array
+    public function initPromise(Point $state, $data): array
     {
         if (empty($innerKey = $this->fetchKey($state, $this->innerKey))) {
             return [null, null];
@@ -102,7 +102,7 @@ class PivotedRelation extends Relation\AbstractRelation
                 $pivotData = new \SplObjectStorage();
                 foreach (new Iterator($this->orm, $this->class, $node->getResult()) as $pivot => $entity) {
                     $elements[] = $entity;
-                    $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, State::LOADED);
+                    $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Point::LOADED);
                 }
 
                 return new ContextStorage($elements, $pivotData);
@@ -122,7 +122,7 @@ class PivotedRelation extends Relation\AbstractRelation
 
         foreach (new Iterator($this->orm, $this->class, $data) as $pivot => $entity) {
             $elements[] = $entity;
-            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, State::LOADED);
+            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Point::LOADED);
         }
 
         return [
@@ -160,7 +160,7 @@ class PivotedRelation extends Relation\AbstractRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $entity,
-        State $state,
+        Point $state,
         $related,
         $original
     ): CommandInterface {
@@ -205,16 +205,16 @@ class PivotedRelation extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param State          $state
+     * @param Point          $state
      * @param object         $related
      * @param object         $pivot
      * @param ContextStorage $storage
      * @return CommandInterface
      */
-    protected function link(State $state, $related, $pivot, ContextStorage $storage): CommandInterface
+    protected function link(Point $state, $related, $pivot, ContextStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getState($related);
+        $relState = $this->getPoint($related);
         $relState->addReference();
 
         if (!is_object($pivot)) {
@@ -224,10 +224,10 @@ class PivotedRelation extends Relation\AbstractRelation
 
         // defer the insert until pivot keys are resolved
         $pivotStore = $this->orm->queueStore($pivot);
-        $pivotState = $this->getState($pivot);
+        $pivotState = $this->getPoint($pivot);
 
-        $this->forwardContext($pivotStore, $state, $this->innerKey, $pivotState, $this->thoughtInnerKey);
-        $this->forwardContext($pivotStore, $relState, $this->outerKey, $pivotState, $this->thoughtOuterKey);
+        $this->forwardContext($state, $this->innerKey, $pivotStore, $pivotState, $this->thoughtInnerKey);
+        $this->forwardContext($relState, $this->outerKey, $pivotStore, $pivotState, $this->thoughtOuterKey);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);

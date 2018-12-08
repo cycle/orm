@@ -42,4 +42,12 @@ trait RelationTrait
     {
         return $this->relations[$name] ?? null;
     }
+
+    /**
+     * @return array
+     */
+    public function getRelations(): array
+    {
+        return $this->relations;
+    }
 }

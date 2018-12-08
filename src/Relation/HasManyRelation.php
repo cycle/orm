@@ -120,7 +120,7 @@ class HasManyRelation extends AbstractRelation
      */
     protected function queueDelete(Point $parent, $related): CommandInterface
     {
-        $origState = $this->getPoint($related, -1);
+        $origState = $this->getPoint($related);
 
         return new Condition(
             $this->orm->queueDelete($related),

@@ -31,6 +31,9 @@ class State implements AcceptorInterface, ForwarderInterface
     /** @var null|CarrierInterface */
     private $command;
 
+    /** @var AcceptorInterface[] */
+    private $handlers;
+
     /**
      * @param int   $state
      * @param array $data
@@ -106,8 +109,6 @@ class State implements AcceptorInterface, ForwarderInterface
     {
         return $this->command;
     }
-
-    private $handlers;
 
     /**
      * @inheritdoc

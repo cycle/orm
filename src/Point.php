@@ -85,7 +85,7 @@ final class Point implements ForwarderInterface, AcceptorInterface
     }
 
     /**
-     * Get current state. todo: status?
+     * Get current state.
      *
      * @return int
      */
@@ -154,13 +154,17 @@ final class Point implements ForwarderInterface, AcceptorInterface
             return [];
         }
 
-        $data = array_diff($this->getData(), $this->state->getData());
+        $changes = array_diff($this->state->getData(), $this->data);
 
-        // todo: what about deleted?
+        foreach ($this->state->getRelations() as $name => $relation) {
+            $this->setRelation($name, $relation);
+        }
+
+        $this->data = $this->state->getData();
         $this->status = self::LOADED;
         $this->state = null;
 
-        return $data;
+        return $changes;
     }
 
     /**

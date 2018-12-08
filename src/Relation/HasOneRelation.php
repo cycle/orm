@@ -96,7 +96,7 @@ class HasOneRelation extends AbstractRelation
      */
     protected function deleteOriginal($original): CommandInterface
     {
-        $point = $this->getPoint($original, -1);
+        $point = $this->getPoint($original);
 
         // only delete original child when no other objects claim it
         return new Condition($this->orm->queueDelete($original), function () use ($point) {

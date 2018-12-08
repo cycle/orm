@@ -120,12 +120,12 @@ final class Transaction implements TransactionInterface
                 $command->rollBack();
             }
 
-            $this->resetHeap();
+            $this->resetStates();
 
             throw $e;
         } finally {
             if (empty($e)) {
-                $this->syncHeap();
+                $this->syncStates();
             }
         }
 
@@ -145,22 +145,27 @@ final class Transaction implements TransactionInterface
         $this->managed = new \SplObjectStorage();
     }
 
-    protected function syncHeap()
+    /**
+     * Sync all entity states with generated changes.
+     */
+    protected function syncStates()
     {
         foreach ($this->orm->getHeap() as $entity) {
             $point = $this->orm->getHeap()->get($entity);
-            $point->getState()->setCommand(null);
-            $point->getState()->resetVisited();
 
-            $point->setStatus(Point::LOADED);
-            $this->orm->getMapper($entity)->hydrate($entity, $point->getData());
+            if ($point->getStatus() == Point::SCHEDULED_DELETE && !$point->getState()->hasClaims()) {
+                $this->orm->getHeap()->detach($entity);
+                continue;
+            }
+
+            $this->orm->getMapper($entity)->hydrate($entity, $point->syncState());
         }
     }
 
     /**
      * Reset heap to it's initial state and remove all the changes.
      */
-    protected function resetHeap()
+    protected function resetStates()
     {
         foreach ($this->orm->getHeap() as $entity) {
             $this->orm->getHeap()->get($entity)->resetState();

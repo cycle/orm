@@ -209,14 +209,15 @@ class Mapper implements MapperInterface
         $delete = new Delete($this->orm->getDatabase($entity), $this->table);
 
         $state->setStatus(Point::SCHEDULED_DELETE);
+        $state->getState()->decClaim();
 
         $delete->waitScope($this->primaryKey);
         $state->pull($this->primaryKey, $delete, $this->primaryKey, true, AcceptorInterface::SCOPE);
 
         // todo: this must be changed (CORRECT?) BUT HOW?
-        $delete->onComplete(function () use ($entity) {
-            $this->orm->getHeap()->detach($entity);
-        });
+        //  $delete->onComplete(function () use ($entity) {
+        //      $this->orm->getHeap()->detach($entity);
+        //  });
 
         return $delete;
     }

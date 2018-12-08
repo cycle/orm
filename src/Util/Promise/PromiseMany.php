@@ -23,19 +23,23 @@ class PromiseMany implements PromiseInterface
     /** @var array */
     private $scope;
 
+    private $orderBy;
+
     /** @var mixed */
     private $result;
+
 
     /**
      * @param ORMInterface $orm
      * @param string       $class
      * @param array        $scope
      */
-    public function __construct(ORMInterface $orm, string $class, array $scope)
+    public function __construct(ORMInterface $orm, string $class, array $scope, array $orderBy = [])
     {
         $this->orm = $orm;
         $this->class = $class;
         $this->scope = $scope;
+        $this->orderBy = $orderBy;
     }
 
     /**
@@ -65,7 +69,13 @@ class PromiseMany implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $this->result = $this->orm->getMapper($this->class)->getRepository()->findAll($this->scope);
+            // todo: need it better
+            $scope = [];
+            foreach ($this->scope as $key => $value) {
+                $scope[str_replace('@.', '', $key)] = $value;
+            }
+
+            $this->result = $this->orm->getMapper($this->class)->getRepository()->findAll($scope);
             $this->orm = null;
         }
 

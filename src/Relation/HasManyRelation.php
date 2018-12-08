@@ -15,6 +15,7 @@ use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Point;
 use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Relation;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
@@ -32,9 +33,11 @@ class HasManyRelation extends AbstractRelation
         }
 
         // todo: where scope
-        $p = new Promise\PromiseMany($this->orm, $this->class, [
-            $this->outerKey => $innerKey
-        ]);
+        $p = new Promise\PromiseMany(
+            $this->orm,
+            $this->class,
+            [$this->outerKey => $innerKey] + ($this->define(Relation::WHERE_SCOPE) ?? [])
+        );
 
         return [new CollectionPromise($p), $p];
     }

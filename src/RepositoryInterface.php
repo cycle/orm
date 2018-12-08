@@ -14,5 +14,6 @@ interface RepositoryInterface
 
     public function findOne(array $scope = []);
 
+    // todo: order bY?
     public function findAll(array $scope = []): iterable;
 }

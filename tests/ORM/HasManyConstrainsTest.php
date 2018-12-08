@@ -102,6 +102,28 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
+
+    public function testOrderedPromisedASC()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY => ['@.level' => 'ASC'],
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[3]->message);
+        $this->assertSame('msg 3', $a->comments[2]->message);
+        $this->assertSame('msg 2', $a->comments[1]->message);
+        $this->assertSame('msg 1', $a->comments[0]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[2]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        $this->assertSame('msg 2.1', $b->comments[0]->message);
+    }
+
     public function testOrderedAndWhere()
     {
         $this->orm = $this->withCommentsSchema([
@@ -110,6 +132,25 @@ abstract class HasManyConstrainsTest extends BaseTest
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
+
+        $this->assertCount(3, $a->comments);
+        $this->assertCount(2, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[2]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[0]->message);
+        $this->assertSame('msg 2.3', $b->comments[1]->message);
+        $this->assertSame('msg 2.2', $b->comments[0]->message);
+    }
+
+    public function testOrderedAndWherePromised()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY    => ['@.level' => 'ASC'],
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);

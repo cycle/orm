@@ -11,7 +11,6 @@ namespace Spiral\ORM\Util\Promise;
 
 use Spiral\ORM\Entity\Repository;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\RepositoryInterface;
 
 class PromiseArray implements PromiseInterface
 {
@@ -30,11 +29,11 @@ class PromiseArray implements PromiseInterface
     /**
      * PromiseMany constructor.
      *
-     * @param RepositoryInterface $repository
-     * @param array               $scope
-     * @param array               $orderBy
+     * @param Repository $repository
+     * @param array      $scope
+     * @param array      $orderBy
      */
-    public function __construct(RepositoryInterface $repository, array $scope, array $orderBy = [])
+    public function __construct(Repository $repository, array $scope, array $orderBy = [])
     {
         $this->repository = $repository;
         $this->scope = $scope;

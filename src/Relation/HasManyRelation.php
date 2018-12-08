@@ -104,8 +104,7 @@ class HasManyRelation extends AbstractRelation
     protected function queueStore(Point $parent, $related): CarrierInterface
     {
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getPoint($related);
-        $relState->addClaim();
+        $relState = $this->getPoint($related, +1);
 
         $this->addDependency($parent, $this->innerKey, $relStore, $relState, $this->outerKey);
 
@@ -121,13 +120,12 @@ class HasManyRelation extends AbstractRelation
      */
     protected function queueDelete(Point $parent, $related): CommandInterface
     {
-        $origState = $this->getPoint($related);
-        $origState->decClaim();
+        $origState = $this->getPoint($related, -1);
 
         return new Condition(
             $this->orm->queueDelete($related),
             function () use ($origState) {
-                return !$origState->hasClaims();
+                return !$origState->getState()->hasClaims();
             }
         );
     }

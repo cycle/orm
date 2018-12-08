@@ -64,7 +64,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new Nil();
         }
 
-        $relState = $this->getPoint($related);
+        $relState = $this->getPoint($related, +1);
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {

@@ -117,11 +117,11 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         if ($claim === 1) {
-            $state->addClaim();
+            $state->getState()->addClaim();
         }
 
         if ($claim === -1) {
-            $state->decClaim();
+            $state->getState()->decClaim();
         }
 
         return $state;

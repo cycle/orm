@@ -100,7 +100,7 @@ class HasOneRelation extends AbstractRelation
 
         // only delete original child when no other objects claim it
         return new Condition($this->orm->queueDelete($original), function () use ($point) {
-            return !$point->hasClaims();
+            return !$point->getState()->hasClaims();
         });
     }
 }

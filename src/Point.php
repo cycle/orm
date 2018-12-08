@@ -8,10 +8,8 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\Context\ForwarderInterface;
-use Spiral\ORM\Traits\ClaimTrait;
 use Spiral\ORM\Traits\RelationTrait;
 
 /**
@@ -20,7 +18,7 @@ use Spiral\ORM\Traits\RelationTrait;
  */
 final class Point implements ForwarderInterface, AcceptorInterface
 {
-    use RelationTrait, ClaimTrait;
+    use RelationTrait;
 
     // Different entity states in a pool
     public const PROMISED         = 0;
@@ -125,31 +123,6 @@ final class Point implements ForwarderInterface, AcceptorInterface
     }
 
     /**
-     * Set the reference to the object creation command (non executed).
-     *
-     * @internal
-     * @todo: optimize?
-     * @param CarrierInterface|null $cmd
-     */
-    public function setCommand(CarrierInterface $cmd = null)
-    {
-        $this->getState()->setCommand($cmd);
-    }
-
-    /**
-     * @internal
-     * @return null|CarrierInterface
-     */
-    public function getCommand(): ?CarrierInterface
-    {
-        if (!is_null($this->state)) {
-            return $this->state->getCommand();
-        }
-
-        return null;
-    }
-
-    /**
      * @inheritdoc
      */
     public function pull(
@@ -157,7 +130,7 @@ final class Point implements ForwarderInterface, AcceptorInterface
         AcceptorInterface $acceptor,
         string $target,
         bool $trigger = false,
-        int $stream = AcceptorInterface::DATA
+        int $stream = self::DATA
     ) {
         $this->getState()->pull($key, $acceptor, $target, $trigger, $stream);
     }
@@ -168,6 +141,34 @@ final class Point implements ForwarderInterface, AcceptorInterface
     public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
     {
         $this->getState()->push($key, $value, $update, $stream);
+    }
+
+    /**
+     * Sync the point state and return data diff.
+     *
+     * @return array
+     */
+    public function syncState(): array
+    {
+        if (is_null($this->state)) {
+            return [];
+        }
+
+        $data = array_diff($this->getData(), $this->state->getData());
+
+        // todo: what about deleted?
+        $this->status = self::LOADED;
+        $this->state = null;
+
+        return $data;
+    }
+
+    /**
+     * Reset point state and flush all the changes.
+     */
+    public function resetState()
+    {
+        $this->state = null;
     }
 
     /**

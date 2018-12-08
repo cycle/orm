@@ -63,8 +63,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         }
 
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getPoint($related);
-        $relState->addClaim();
+        $relState = $this->getPoint($related, +1);
 
         $this->addDependency($relState, $this->outerKey, $parentCommand, $parentState, $this->innerKey);
 

@@ -149,7 +149,7 @@ final class Transaction implements TransactionInterface
     {
         foreach ($this->orm->getHeap() as $entity) {
             $point = $this->orm->getHeap()->get($entity);
-            $point->setCommand(null);
+            $point->getState()->setCommand(null);
             $point->getState()->resetVisited();
 
             $point->setStatus(Point::LOADED);
@@ -163,8 +163,7 @@ final class Transaction implements TransactionInterface
     protected function resetHeap()
     {
         foreach ($this->orm->getHeap() as $entity) {
-            // todo: need better reset?
-            $this->orm->getHeap()->get($entity)->getState()->resetVisited();
+            $this->orm->getHeap()->get($entity)->resetState();
         }
     }
 

@@ -214,8 +214,7 @@ class PivotedRelation extends Relation\AbstractRelation
     protected function link(Point $state, $related, $pivot, ContextStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getPoint($related);
-        $relState->addClaim();
+        $relState = $this->getPoint($related, +1);
 
         if (!is_object($pivot)) {
             // first time initialization

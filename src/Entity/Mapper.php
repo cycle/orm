@@ -18,10 +18,10 @@ use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\Context\AcceptorInterface;
 use Spiral\ORM\MapperInterface;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Point;
 use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\Point;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 
@@ -96,30 +96,30 @@ class Mapper implements MapperInterface
     // todo: need state as INPUT!!!!
     public function queueStore($entity): CarrierInterface
     {
-        /** @var Point $state */
-        $state = $this->orm->getHeap()->get($entity);
-        if (is_null($state)) {
+        /** @var Point $point */
+        $point = $this->orm->getHeap()->get($entity);
+        if (is_null($point)) {
             // todo: do we need to track PK?
-            $state = new Point(
+            $point = new Point(
                 Point::NEW,
                 [],
                 $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
             );
-            $this->orm->getHeap()->attach($entity, $state);
+            $this->orm->getHeap()->attach($entity, $point);
         }
 
-        if ($state == null || $state->getStatus() == Point::NEW) {
-            $cmd = $this->queueCreate($entity, $state);
-            $state->setCommand($cmd);
+        if ($point == null || $point->getStatus() == Point::NEW) {
+            $cmd = $this->queueCreate($entity, $point);
+            $point->getState()->setCommand($cmd);
 
             return $cmd;
         }
 
-        $lastCommand = $state->getCommand();
+        $lastCommand = $point->getState()->getCommand();
 
         if (empty($lastCommand)) {
             // todo: check multiple update commands working within the split (!)
-            return $this->queueUpdate($entity, $state);
+            return $this->queueUpdate($entity, $point);
         }
 
         if ($lastCommand instanceof Split) {
@@ -127,8 +127,8 @@ class Mapper implements MapperInterface
         }
 
         // todo: do i like it?
-        $split = new Split($lastCommand, $this->queueUpdate($entity, $state));
-        $state->setCommand($split);
+        $split = new Split($lastCommand, $this->queueUpdate($entity, $point));
+        $point->getState()->setCommand($split);
 
         return $split;
     }

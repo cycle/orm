@@ -23,14 +23,6 @@ interface ScopedInterface extends CommandInterface, AcceptorInterface
     public function waitScope(string $key);
 
     /**
-     * Set scope value.
-     *
-     * @param string $key
-     * @param mixed  $value
-     */
-    public function setScope(string $key, $value);
-
-    /**
      * @return array
      */
     public function getScope(): array;

@@ -17,7 +17,7 @@ use Spiral\ORM\Command\CommandInterface;
 class Condition implements CommandInterface, \IteratorAggregate
 {
     /** @var CommandInterface */
-    private $parent;
+    private $command;
 
     /** @var callable */
     private $condition;
@@ -28,7 +28,7 @@ class Condition implements CommandInterface, \IteratorAggregate
      */
     public function __construct(CommandInterface $parent, callable $condition)
     {
-        $this->parent = $parent;
+        $this->command = $parent;
         $this->condition = $condition;
     }
 
@@ -38,7 +38,7 @@ class Condition implements CommandInterface, \IteratorAggregate
     public function getIterator()
     {
         if (call_user_func($this->condition)) {
-            yield $this->parent;
+            yield $this->command;
         }
     }
 
@@ -47,7 +47,7 @@ class Condition implements CommandInterface, \IteratorAggregate
      */
     public function isExecuted(): bool
     {
-        return false;
+        return $this->command->isExecuted();
     }
 
     /**
@@ -57,7 +57,7 @@ class Condition implements CommandInterface, \IteratorAggregate
     public function isReady(): bool
     {
         // condition is always ready
-        return true;
+        return $this->command->isReady();
     }
 
     /**

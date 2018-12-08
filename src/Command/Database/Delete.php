@@ -19,6 +19,9 @@ class Delete extends DatabaseCommand implements ScopedInterface
 {
     use ScopeTrait, ErrorTrait;
 
+    /** @var callable[] */
+    private $onComplete = [];
+
     /**
      * @param DatabaseInterface $db
      * @param string            $table
@@ -61,5 +64,25 @@ class Delete extends DatabaseCommand implements ScopedInterface
 
         $this->db->delete($this->table, $this->scope)->run();
         parent::execute();
+    }
+
+    /**
+     * To be called after parent transaction been commited.
+     *
+     * @param callable $closure
+     */
+    public function onComplete(callable $closure)
+    {
+        $this->onComplete[] = $closure;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function complete()
+    {
+        foreach ($this->onComplete as $closure) {
+            call_user_func($closure, $this);
+        }
     }
 }

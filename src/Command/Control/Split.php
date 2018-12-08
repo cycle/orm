@@ -78,14 +78,6 @@ class Split implements CarrierInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
-     */
-    public function setContext(string $key, $value)
-    {
-        $this->contextPath[$key]->setContext($key, $value);
-    }
-
-    /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function getContext(): array

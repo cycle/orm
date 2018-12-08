@@ -19,6 +19,23 @@ class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     protected $commands = [];
 
     /**
+     * @inheritdoc
+     */
+    public function isExecuted(): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isReady(): bool
+    {
+        // always ready since check will be delegated to underlying nodes
+        return true;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function addCommand(CommandInterface $command)
@@ -61,23 +78,6 @@ class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     public function count(): int
     {
         return count($this->commands);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isExecuted(): bool
-    {
-        return false;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isReady(): bool
-    {
-        // always ready since check will be delegated to underlying nodes
-        return true;
     }
 
     /**

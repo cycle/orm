@@ -15,12 +15,6 @@ abstract class AbstractCommand implements CommandInterface
     /** @var bool */
     private $executed = false;
 
-    /** @var callable[] */
-    private $onExecute = [];
-
-    /** @var callable[] */
-    private $onComplete = [];
-
     /**
      * {@inheritdoc}
      */
@@ -35,9 +29,6 @@ abstract class AbstractCommand implements CommandInterface
     public function execute()
     {
         $this->executed = true;
-        foreach ($this->onExecute as $closure) {
-            call_user_func($closure, $this);
-        }
     }
 
     /**
@@ -45,9 +36,7 @@ abstract class AbstractCommand implements CommandInterface
      */
     public function complete()
     {
-        foreach ($this->onComplete as $closure) {
-            call_user_func($closure, $this);
-        }
+
     }
 
     /**
@@ -56,25 +45,5 @@ abstract class AbstractCommand implements CommandInterface
     public function rollBack()
     {
         // nothing to do
-    }
-
-    /**
-     * Closure to be called after command executing.
-     *
-     * @param callable $closure
-     */
-    final public function onExecute(callable $closure)
-    {
-        $this->onExecute[] = $closure;
-    }
-
-    /**
-     * To be called after parent transaction been commited.
-     *
-     * @param callable $closure
-     */
-    final public function onComplete(callable $closure)
-    {
-        $this->onComplete[] = $closure;
     }
 }

@@ -56,14 +56,6 @@ class PrimarySequence extends Sequence implements CarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function setContext(string $key, $value)
-    {
-        $this->getPrimary()->setContext($key, $value);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getContext(): array
     {
         return $this->getPrimary()->getContext();

@@ -35,14 +35,6 @@ final class Nil implements CarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function setContext(string $key, $value)
-    {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
     {
         // nothing to do

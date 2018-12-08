@@ -32,20 +32,20 @@ trait ContextTrait
     }
 
     /**
-     * @param string $name
-     * @param mixed  $value
-     */
-    public function setContext(string $name, $value)
-    {
-        $this->context[$name] = $value;
-    }
-
-    /**
      * @return array
      */
     public function getContext(): array
     {
         return $this->context;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed  $value
+     */
+    protected function setContext(string $name, $value)
+    {
+        $this->context[$name] = $value;
     }
 
     /**

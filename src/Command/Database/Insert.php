@@ -50,7 +50,7 @@ class Insert extends DatabaseCommand implements CarrierInterface
     /**
      * @inheritdoc
      */
-    public function push(string $key,  $value, bool $update = false, int $stream = self::DATA)
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
     {
         if ($update || !is_null($value)) {
             $this->freeContext($key);
@@ -70,6 +70,7 @@ class Insert extends DatabaseCommand implements CarrierInterface
     }
 
     /**
+     * @todo improve
      * @invisible
      * @var AcceptorInterface
      */

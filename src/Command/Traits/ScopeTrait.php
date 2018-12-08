@@ -26,22 +26,22 @@ trait ScopeTrait
     }
 
     /**
-     * Set scope value.
-     *
-     * @param string $key
-     * @param mixed  $value
-     */
-    public function setScope(string $key, $value)
-    {
-        $this->scope[$key] = $value;
-    }
-
-    /**
      * @return array
      */
     public function getScope(): array
     {
         return $this->scope;
+    }
+
+    /**
+     * Set scope value.
+     *
+     * @param string $key
+     * @param mixed  $value
+     */
+    protected function setScope(string $key, $value)
+    {
+        $this->scope[$key] = $value;
     }
 
     /**

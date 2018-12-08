@@ -23,14 +23,6 @@ interface CarrierInterface extends CommandInterface, AcceptorInterface
     public function waitContext(string $key, bool $required = true);
 
     /**
-     * Set context value.
-     *
-     * @param string $key
-     * @param mixed  $value
-     */
-    public function setContext(string $key, $value);
-
-    /**
      * Get current command context.
      *
      * @return array

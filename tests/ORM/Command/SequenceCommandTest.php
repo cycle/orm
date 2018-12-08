@@ -58,15 +58,4 @@ class SequenceCommandTest extends TestCase
 
         $this->assertSame(['hi'], $command->getContext());
     }
-
-    public function testAddContext()
-    {
-        $command = new PrimarySequence();
-        $command->addPrimary($lead = m::mock(Insert::class));
-
-        $lead->shouldReceive('setContext')->with('name', 'value');
-
-        $command->setContext('name', 'value');
-        $this->assertTrue(true);
-    }
 }

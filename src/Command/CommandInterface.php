@@ -45,18 +45,4 @@ interface CommandInterface
      * Rollback command or declare that command been rolled back.
      */
     public function rollBack();
-
-    /**
-     * Closure to be called after command executing.
-     *
-     * @param callable $closure
-     */
-    //public function onExecute(callable $closure);
-
-    /**
-     * To be called after parent transaction been committed.
-     *
-     * @param callable $closure
-     */
-    //public function onComplete(callable $closure);
 }

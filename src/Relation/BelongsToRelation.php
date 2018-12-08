@@ -55,7 +55,8 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
             }
 
             if (!is_null($original)) {
-                $parentCommand->setContext($this->innerKey, null);
+                // push?
+                $parentCommand->push($this->innerKey, null, true);
             }
 
             return new Nil();

@@ -63,7 +63,7 @@ class Split implements CarrierInterface, \IteratorAggregate
     {
         yield $this->getTarget();
         //yield $this;
-        //$this->headExecuted = true;
+        $this->headExecuted = true;
     }
 
     /**

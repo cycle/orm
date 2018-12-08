@@ -43,13 +43,13 @@ final class Point implements ForwarderInterface, AcceptorInterface
     private $state;
 
     /**
-     * @param int    $state
+     * @param int    $status
      * @param array  $data
      * @param string $alias
      */
-    public function __construct(int $state, array $data, string $alias)
+    public function __construct(int $status, array $data, string $alias)
     {
-        $this->status = $state;
+        $this->status = $status;
         $this->data = $data;
         $this->role = $alias;
     }

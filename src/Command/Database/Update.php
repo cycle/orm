@@ -67,12 +67,8 @@ class Update extends DatabaseCommand implements CarrierInterface, ScopedInterfac
     /**
      * @inheritdoc
      */
-    public function push(
-        string $key,
-        $value,
-        bool $update = false,
-        int $stream = self::DATA
-    ) {
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    {
         if ($stream == self::SCOPE) {
             if (empty($value)) {
                 return;

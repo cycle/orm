@@ -41,13 +41,9 @@ class Delete extends DatabaseCommand implements ScopedInterface
     /**
      * @inheritdoc
      */
-    public function push(
-        string $key,
-        $value,
-        bool $update = false,
-        int $stream = self::DATA
-    ) {
-        if (!$update || !is_null($value)) {
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    {
+        if ($update || !is_null($value)) {
             $this->freeScope($key);
         }
 

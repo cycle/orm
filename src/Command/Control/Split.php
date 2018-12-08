@@ -19,9 +19,6 @@ use Spiral\ORM\Command\CarrierInterface;
  */
 class Split implements CarrierInterface, \IteratorAggregate
 {
-    /** @var bool */
-    private $headExecuted = false;
-
     /** @var CarrierInterface */
     private $head;
 
@@ -39,11 +36,6 @@ class Split implements CarrierInterface, \IteratorAggregate
     {
         $this->head = $head;
         $this->tail = $tail;
-
-        // todo: optimize, can i wrap?
-        $this->head->onExecute(function () {
-            $this->headExecuted = true;
-        });
     }
 
     /**
@@ -144,10 +136,10 @@ class Split implements CarrierInterface, \IteratorAggregate
      */
     protected function getTarget(): CarrierInterface
     {
-        if ($this->headExecuted) {
-            return $this->tail;
+        if (!$this->head->isExecuted()) {
+            return $this->head;
         }
 
-        return $this->head;
+        return $this->tail;
     }
 }

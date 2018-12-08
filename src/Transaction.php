@@ -217,11 +217,13 @@ final class Transaction implements TransactionInterface
         /** @var CommandInterface $command */
         foreach ($commands as $command) {
             if (!$command->isReady()) {
+                // command or command branch is not ready
                 yield $command => null;
                 continue;
             }
 
             if ($command instanceof \Traversable) {
+                // deepening (cut-off on first not-ready level)
                 yield from $this->sort($command);
                 continue;
             }

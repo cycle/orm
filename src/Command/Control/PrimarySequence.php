@@ -16,11 +16,8 @@ use Spiral\ORM\Exception\CommandException;
  */
 class PrimarySequence extends Sequence implements CarrierInterface
 {
-    /**
-     * @invisible
-     * @var CarrierInterface
-     */
-    private $primary;
+    /** @var CarrierInterface */
+    protected $primary;
 
     /**
      * Add primary command to the sequence.

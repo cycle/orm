@@ -49,6 +49,14 @@ final class Nil implements CarrierInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function isExecuted(): bool
+    {
+        return false;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function isReady(): bool

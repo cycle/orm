@@ -49,6 +49,14 @@ class Split implements CarrierInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
+    public function isExecuted(): bool
+    {
+        return $this->getTarget()->isExecuted();
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function isReady(): bool
     {
         return $this->getTarget()->isReady();

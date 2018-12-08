@@ -64,6 +64,14 @@ class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     }
 
     /**
+     * @inheritdoc
+     */
+    public function isExecuted(): bool
+    {
+        return false;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function isReady(): bool

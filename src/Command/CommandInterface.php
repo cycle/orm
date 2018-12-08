@@ -24,6 +24,13 @@ interface CommandInterface
     public function isReady(): bool;
 
     /**
+     * Indicates that command has been executed.
+     *
+     * @return bool
+     */
+    public function isExecuted(): bool;
+
+    /**
      * Executes command.
      */
     public function execute();

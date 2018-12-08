@@ -12,6 +12,9 @@ namespace Spiral\ORM\Command;
  */
 abstract class AbstractCommand implements CommandInterface
 {
+    /** @var bool */
+    private $executed = false;
+
     /** @var callable[] */
     private $onExecute = [];
 
@@ -21,8 +24,17 @@ abstract class AbstractCommand implements CommandInterface
     /**
      * {@inheritdoc}
      */
+    public function isExecuted(): bool
+    {
+        return $this->executed;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function execute()
     {
+        $this->executed = true;
         foreach ($this->onExecute as $closure) {
             call_user_func($closure, $this);
         }

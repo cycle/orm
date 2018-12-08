@@ -44,6 +44,14 @@ class Condition implements CommandInterface, \IteratorAggregate
 
     /**
      * @inheritdoc
+     */
+    public function isExecuted(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function isReady(): bool

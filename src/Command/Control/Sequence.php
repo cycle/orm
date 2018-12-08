@@ -95,31 +95,4 @@ class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     {
         // nothing
     }
-
-    /**
-     * {@inheritdoc}
-     * @codeCoverageIgnore
-     */
-    public function onExecute(callable $closure)
-    {
-        // nothing
-    }
-
-    /**
-     * {@inheritdoc}
-     * @codeCoverageIgnore
-     */
-    public function onComplete(callable $closure)
-    {
-        // nothing
-    }
-
-    /**
-     * {@inheritdoc}
-     * @codeCoverageIgnore
-     */
-    public function onRollBack(callable $closure)
-    {
-        // nothing
-    }
 }

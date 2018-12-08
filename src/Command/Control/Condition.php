@@ -78,31 +78,4 @@ class Condition implements CommandInterface, \IteratorAggregate
     {
         // nothing to do
     }
-
-    /**
-     * @inheritdoc
-     * @codeCoverageIgnore
-     */
-    public function onExecute(callable $closure)
-    {
-        // nothing to do
-    }
-
-    /**
-     * @inheritdoc
-     * @codeCoverageIgnore
-     */
-    public function onComplete(callable $closure)
-    {
-        // nothing to do
-    }
-
-    /**
-     * @inheritdoc
-     * @codeCoverageIgnore
-     */
-    public function onRollBack(callable $closure)
-    {
-        // nothing to do
-    }
 }

@@ -43,12 +43,8 @@ final class Nil implements CarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function push(
-        string $key,
-         $value,
-        bool $update = false,
-        int $stream = self::DATA
-    ) {
+    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    {
         // nothing to do
     }
 
@@ -80,36 +76,6 @@ final class Nil implements CarrierInterface
      * {@inheritdoc}
      */
     public function rollBack()
-    {
-        // nothing to do
-    }
-
-    /**
-     * Closure to be called after command executing.
-     *
-     * @param callable $closure
-     */
-    public function onExecute(callable $closure)
-    {
-        // nothing to do
-    }
-
-    /**
-     * To be called after parent transaction been commited.
-     *
-     * @param callable $closure
-     */
-    public function onComplete(callable $closure)
-    {
-        // nothing to do
-    }
-
-    /**
-     * To be called after parent transaction been rolled back.
-     *
-     * @param callable $closure
-     */
-    public function onRollBack(callable $closure)
     {
         // nothing to do
     }

@@ -44,19 +44,12 @@ interface CommandInterface
      *
      * @param callable $closure
      */
-    public function onExecute(callable $closure);
+    //public function onExecute(callable $closure);
 
     /**
      * To be called after parent transaction been committed.
      *
      * @param callable $closure
      */
-    public function onComplete(callable $closure);
-
-    /**
-     * To be called after parent transaction been rolled back.
-     *
-     * @param callable $closure
-     */
-    public function onRollBack(callable $closure);
+    //public function onComplete(callable $closure);
 }

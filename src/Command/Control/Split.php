@@ -134,33 +134,6 @@ class Split implements CarrierInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function onExecute(callable $closure)
-    {
-        $this->head->onExecute($closure);
-        $this->tail->onExecute($closure);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function onComplete(callable $closure)
-    {
-        $this->head->onComplete($closure);
-        $this->tail->onComplete($closure);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function onRollBack(callable $closure)
-    {
-        $this->head->onRollBack($closure);
-        $this->tail->onRollBack($closure);
-    }
-
-    /**
-     * @inheritdoc
-     */
     protected function getTarget(): CarrierInterface
     {
         if ($this->headExecuted) {

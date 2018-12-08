@@ -18,9 +18,6 @@ abstract class AbstractCommand implements CommandInterface
     /** @var callable[] */
     private $onComplete = [];
 
-    /** @var callable[] */
-    private $onRollBack = [];
-
     /**
      * {@inheritdoc}
      */
@@ -46,9 +43,7 @@ abstract class AbstractCommand implements CommandInterface
      */
     public function rollBack()
     {
-        foreach ($this->onRollBack as $closure) {
-            call_user_func($closure, $this);
-        }
+        // nothing to do
     }
 
     /**
@@ -69,15 +64,5 @@ abstract class AbstractCommand implements CommandInterface
     final public function onComplete(callable $closure)
     {
         $this->onComplete[] = $closure;
-    }
-
-    /**
-     * To be called after parent transaction been rolled back.
-     *
-     * @param callable $closure
-     */
-    final public function onRollBack(callable $closure)
-    {
-        $this->onRollBack[] = $closure;
     }
 }

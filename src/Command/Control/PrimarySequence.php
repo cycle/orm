@@ -76,34 +76,4 @@ class PrimarySequence extends Sequence implements CarrierInterface
     {
         $this->getPrimary()->push($key, $value, $update, $stream);
     }
-
-    /**
-     * Closure to be called after command executing.
-     *
-     * @param callable $closure
-     */
-    public function onExecute(callable $closure)
-    {
-        $this->getPrimary()->onExecute($closure);
-    }
-
-    /**
-     * To be called after parent transaction been commited.
-     *
-     * @param callable $closure
-     */
-    public function onComplete(callable $closure)
-    {
-        $this->getPrimary()->onComplete($closure);
-    }
-
-    /**
-     * To be called after parent transaction been rolled back.
-     *
-     * @param callable $closure
-     */
-    public function onRollBack(callable $closure)
-    {
-        $this->getPrimary()->onRollBack($closure);
-    }
 }

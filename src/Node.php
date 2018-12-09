@@ -23,7 +23,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     // Different entity states in a pool
     public const PROMISED         = 0;
     public const NEW              = 1;
-    public const LOADED           = 2;
+    public const MANAGED          = 2;
     public const SCHEDULED_INSERT = 3;
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
@@ -161,7 +161,7 @@ final class Node implements ProducerInterface, ConsumerInterface
         }
 
         // DELETE handled separately
-        $this->status = self::LOADED;
+        $this->status = self::MANAGED;
         $this->data = $this->state->getData();
         $this->state = null;
 

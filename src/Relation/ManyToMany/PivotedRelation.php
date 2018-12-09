@@ -102,7 +102,7 @@ class PivotedRelation extends Relation\AbstractRelation
                 $pivotData = new \SplObjectStorage();
                 foreach (new Iterator($this->orm, $this->targetRole, $node->getResult()) as $pivot => $entity) {
                     $elements[] = $entity;
-                    $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::LOADED);
+                    $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
                 }
 
                 return new ContextStorage($elements, $pivotData);
@@ -122,7 +122,7 @@ class PivotedRelation extends Relation\AbstractRelation
 
         foreach (new Iterator($this->orm, $this->targetRole, $data) as $pivot => $entity) {
             $elements[] = $entity;
-            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::LOADED);
+            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
         }
 
         return [

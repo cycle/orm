@@ -77,7 +77,7 @@ abstract class AbstractRelation implements RelationInterface
 
     public function init($data): array
     {
-        $item = $this->orm->make($this->targetRole, $data, Node::LOADED);
+        $item = $this->orm->make($this->targetRole, $data, Node::MANAGED);
 
         return [$item, $item];
     }

@@ -135,7 +135,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(1, $result->id);
 
         $this->assertTrue($this->orm->getHeap()->has($result));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($result)->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($result)->getStatus());
 
         $this->assertEquals(
             [
@@ -168,7 +168,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(3, $e->id);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e)->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
     }
 
     public function testStoreWithUpdate()
@@ -190,7 +190,7 @@ abstract class MapperTest extends BaseTest
 
         $this->assertEquals(3, $e->id);
         $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e)->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
         $selector = new Selector($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();

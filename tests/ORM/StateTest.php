@@ -15,7 +15,7 @@ class StateTest extends TestCase
 {
     public function testPush()
     {
-        $s = new Node(Node::LOADED, [], "parent");
+        $s = new Node(Node::MANAGED, [], "parent");
 
         $s->register('user_id', 1);
 
@@ -24,8 +24,8 @@ class StateTest extends TestCase
 
     public function testForward()
     {
-        $s = new Node(Node::LOADED, [], "parent");
-        $c = new Node(Node::LOADED, [], "child");
+        $s = new Node(Node::MANAGED, [], "parent");
+        $c = new Node(Node::MANAGED, [], "child");
 
         $s->listen('id', $c, 'user_id');
         $s->register('id', 1);
@@ -35,8 +35,8 @@ class StateTest extends TestCase
 
     public function testForwardDefault()
     {
-        $s = new Node(Node::LOADED, ['id' => 1], "parent");
-        $c = new Node(Node::LOADED, [], "child");
+        $s = new Node(Node::MANAGED, ['id' => 1], "parent");
+        $c = new Node(Node::MANAGED, [], "child");
 
         $s->listen('id', $c, 'user_id');
 
@@ -45,8 +45,8 @@ class StateTest extends TestCase
 
     public function testForwardDefaultTrigger()
     {
-        $s = new Node(Node::LOADED, ['id' => 1], "parent");
-        $c = new Node(Node::LOADED, [], "child");
+        $s = new Node(Node::MANAGED, ['id' => 1], "parent");
+        $c = new Node(Node::MANAGED, [], "child");
 
         $s->listen('id', $c, 'user_id', true);
 

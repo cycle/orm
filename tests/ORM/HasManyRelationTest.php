@@ -230,14 +230,14 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals(3, $e->id);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e)->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
         $this->assertTrue($this->orm->getHeap()->has($e->comments[0]));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e->comments[0])->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->comments[0])->getStatus());
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[0])->getData()['user_id']);
 
         $this->assertTrue($this->orm->getHeap()->has($e->comments[1]));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e->comments[1])->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->comments[1])->getStatus());
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[1])->getData()['user_id']);
 
         $selector = new Selector($this->orm, User::class);

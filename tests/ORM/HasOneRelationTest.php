@@ -202,10 +202,10 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals(3, $e->id);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e)->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
         $this->assertTrue($this->orm->getHeap()->has($e->profile));
-        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e->profile)->getStatus());
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->profile)->getStatus());
 
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->profile)->getData()['user_id']);
     }

@@ -8,11 +8,13 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 
 interface RelationInterface
 {
+    public function getName(): string;
+
     public function isCascade(): bool;
 
     public function init($data): array;
@@ -22,9 +24,9 @@ interface RelationInterface
     public function extract($value);
 
     public function queueRelation(
-        ContextCarrierInterface $parentCommand,
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        Node $parentState,
+        Node $parentNode,
         $related,
         $original
     ): CommandInterface;

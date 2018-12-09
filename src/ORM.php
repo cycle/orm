@@ -10,9 +10,9 @@ namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Config\RelationConfig;
 
 /**
@@ -248,10 +248,10 @@ class ORM implements ORMInterface
 
         // todo: optimize it
         $cmd = $this->getRelationMap($entity)->queueRelations(
+            $cmd,
             $entity,
-            $m->extract($entity),
             $state = $this->getHeap()->get($entity),
-            $cmd
+            $m->extract($entity)
         );
 
         return $cmd;

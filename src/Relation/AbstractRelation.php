@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
@@ -45,6 +45,11 @@ abstract class AbstractRelation implements RelationInterface
         $this->schema = $schema;
         $this->innerKey = $this->define(Relation::INNER_KEY);
         $this->outerKey = $this->define(Relation::OUTER_KEY);
+    }
+
+    public function getName(): string
+    {
+        return $this->relation;
     }
 
     /**

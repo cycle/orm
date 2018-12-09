@@ -12,7 +12,7 @@ use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Condition;
 use Spiral\ORM\Command\Branch\Nil;
-use Spiral\ORM\Command\Branch\PrimarySequence;
+use Spiral\ORM\Command\Branch\ContextSequence;
 use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Util\Promise;
@@ -43,13 +43,13 @@ class HasOneRelation extends AbstractRelation
      * @inheritdoc
      */
     public function queueRelation(
-        ContextCarrierInterface $parentCommand,
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        Node $parentState,
+        Node $parentNode,
         $related,
         $original
     ): CommandInterface {
-        $sequence = new PrimarySequence();
+        $sequence = new ContextSequence();
 
         if (!empty($original) && $related !== $original) {
             if ($original instanceof PromiseInterface) {
@@ -78,7 +78,7 @@ class HasOneRelation extends AbstractRelation
 
         // store command with dependency on parent key
         $sequence->addPrimary($this->addDependency(
-            $parentState,
+            $parentNode,
             $this->innerKey,
             $this->orm->queueStore($related),
             $this->getPoint($related, +1),

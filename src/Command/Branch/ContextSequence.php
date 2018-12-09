@@ -14,7 +14,7 @@ use Spiral\ORM\Exception\CommandException;
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.
  */
-class PrimarySequence extends Sequence implements ContextCarrierInterface
+class ContextSequence extends Sequence implements ContextCarrierInterface
 {
     /** @var ContextCarrierInterface */
     protected $primary;

@@ -86,26 +86,26 @@ class BelongsToMorphedRelation extends BelongsToRelation
      * @inheritdoc
      */
     public function queueRelation(
-        ContextCarrierInterface $parentCommand,
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        Node $parentState,
+        Node $parentNode,
         $related,
         $original
     ): CommandInterface {
-        $store = parent::queueRelation($parentCommand, $parentEntity, $parentState, $related, $original);
+        $store = parent::queueRelation($parentStore, $parentEntity, $parentNode, $related, $original);
 
         // todo: use forward as well
 
         if (is_null($related)) {
-            if ($this->fetchKey($parentState, $this->morphKey) !== null) {
-                $parentCommand->register($this->morphKey, null, true);
-                $parentState->setData([$this->morphKey => null]);
+            if ($this->fetchKey($parentNode, $this->morphKey) !== null) {
+                $parentStore->register($this->morphKey, null, true);
+                $parentNode->setData([$this->morphKey => null]);
             }
         } else {
             $relState = $this->getPoint($related);
-            if ($this->fetchKey($parentState, $this->morphKey) != $relState->getRole()) {
-                $parentCommand->register($this->morphKey, $relState->getRole(), true);
-                $parentState->setData([$this->morphKey => $relState->getRole()]);
+            if ($this->fetchKey($parentNode, $this->morphKey) != $relState->getRole()) {
+                $parentStore->register($this->morphKey, $relState->getRole(), true);
+                $parentNode->setData([$this->morphKey => $relState->getRole()]);
             }
         }
 

@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests\Command;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\ORM\Command\Branch\Nil;
-use Spiral\ORM\Command\Branch\PrimarySequence;
+use Spiral\ORM\Command\Branch\ContextSequence;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\Database\Insert;
 
@@ -45,13 +45,13 @@ class SequenceCommandTest extends TestCase
      */
     public function testGetLeadingBad()
     {
-        $command = new PrimarySequence();
+        $command = new ContextSequence();
         $command->getContext();
     }
 
     public function testGetContext()
     {
-        $command = new PrimarySequence();
+        $command = new ContextSequence();
         $command->addPrimary($lead = m::mock(Insert::class));
 
         $lead->shouldReceive('getContext')->andReturn(['hi']);

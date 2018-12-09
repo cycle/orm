@@ -153,9 +153,9 @@ class ManyToManyRelation extends AbstractRelation
      * @param ContextStorage $original
      */
     public function queueRelation(
-        ContextCarrierInterface $parentCommand,
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        Node $parentState,
+        Node $parentNode,
         $related,
         $original
     ): CommandInterface {
@@ -178,7 +178,7 @@ class ManyToManyRelation extends AbstractRelation
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
             $sequence->addCommand(
-                $this->link($parentState, $item, $original->has($item))
+                $this->link($parentNode, $item, $original->has($item))
             );
         }
 
@@ -186,7 +186,7 @@ class ManyToManyRelation extends AbstractRelation
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
                 $sequence->addCommand(
-                    $this->unlink($parentState, $item)
+                    $this->unlink($parentNode, $item)
                 );
             }
         }

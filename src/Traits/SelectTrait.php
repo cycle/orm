@@ -40,7 +40,10 @@ trait SelectTrait
      */
     public function wherePK($id): self
     {
-        $this->getLoader()->getQuery()->where($this->getLoader()->getPrimaryKey(), $id);
+        $this->getLoader()->getQuery()->where(
+            $this->getLoader()->getPrimaryKey(),
+            $id
+        );
 
         return $this;
     }
@@ -73,6 +76,7 @@ trait SelectTrait
     {
         $loader = $this->getLoader();
 
+        // todo: alias wrapper
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM'])) {
             // one of aggregation requests
             $result = call_user_func_array([$loader->compileQuery(), $name], $arguments);

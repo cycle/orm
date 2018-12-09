@@ -8,9 +8,10 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\Branch\PrimarySequence;
+use Spiral\ORM\Command\Branch\ContextSequence;
 use Spiral\ORM\Command\Branch\Sequence;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 
 /**
  * Generates set of linked commands required to persis or delete given dependency graph. Each
@@ -62,7 +63,7 @@ final class RelationMap
                     continue;
                 }
 
-                list($data[$name], $orig) = $relation->initPromise($state, $data);
+                list($data[$name], $orig) = $relation->initPromise($state);
                 $state->setRelation($name, $orig);
                 continue;
             }
@@ -83,41 +84,68 @@ final class RelationMap
     }
 
     /**
-     * Generate set of commands required to store the entity and it's relations.
+     * Queue entity relations.
      *
+     * @param ContextCarrierInterface $parentStore
      * @param object                  $parentEntity
-     * @param array                   $data
-     * @param Node                    $parentPoint
-     * @param ContextCarrierInterface $command
+     * @param Node                    $parentNode
+     * @param array                   $parentData
      * @return ContextCarrierInterface
      */
     public function queueRelations(
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        array $data,
-        Node $parentPoint,
-        ContextCarrierInterface $command
+        Node $parentNode,
+        array $parentData
     ): ContextCarrierInterface {
-        $sequence = new PrimarySequence();
+
+        $state = $parentNode->getState();
+
+        $sequence = new ContextSequence();
 
         // queue all "left" graph branches
         foreach ($this->dependencies as $name => $relation) {
-            if (!$relation->isCascade() || $parentPoint->getState()->visited($name)) {
+            if (!$relation->isCascade() || $parentNode->getState()->visited($name)) {
                 continue;
             }
+            $state->markVisited($name);
 
-            $this->queueRelation($sequence, $parentEntity, $data, $parentPoint, $command, $relation, $name);
+            $command = $this->queueRelation(
+                $parentStore,
+                $parentEntity,
+                $parentNode,
+                $relation,
+                $relation->extract($parentData[$name] ?? null),
+                $parentNode->getRelation($name)
+            );
+
+            if ($command !== null) {
+                $sequence->addCommand($command);
+            }
         }
 
         // queue target entity
-        $sequence->addPrimary($command);
+        $sequence->addPrimary($parentStore);
 
         // queue all "right" graph branches
         foreach ($this->relations as $name => $relation) {
-            if (!$relation->isCascade() || $parentPoint->getState()->visited($name)) {
+            if (!$relation->isCascade() || $parentNode->getState()->visited($name)) {
                 continue;
             }
+            $state->markVisited($name);
 
-            $this->queueRelation($sequence, $parentEntity, $data, $parentPoint, $command, $relation, $name);
+            $command = $this->queueRelation(
+                $parentStore,
+                $parentEntity,
+                $parentNode,
+                $relation,
+                $relation->extract($parentData[$name] ?? null),
+                $parentNode->getRelation($name)
+            );
+
+            if ($command !== null) {
+                $sequence->addCommand($command);
+            }
         }
 
         if (count($sequence) === 1) {
@@ -128,50 +156,45 @@ final class RelationMap
     }
 
     /**
-     * Queue relation and return related object.
+     * Queue the relation.
      *
-     * @param Sequence                $parentSequence
-     * @param object                  $parent
-     * @param array                   $data
-     * @param Node                    $parentPoint
-     * @param ContextCarrierInterface $command
+     * @param ContextCarrierInterface $parentStore
+     * @param object                  $parentEntity
+     * @param Node                    $parentNode
      * @param RelationInterface       $relation
-     * @param string                  $name
+     * @param mixed                   $related
+     * @param mixed                   $original
+     * @return CommandInterface|null
      */
     private function queueRelation(
-        Sequence $parentSequence,
-        $parent,
-        array $data,
-        // move
-        Node $parentPoint,
-        ContextCarrierInterface $command,
+        ContextCarrierInterface $parentStore,
+        $parentEntity,
+        Node $parentNode,
         RelationInterface $relation,
-        string $name
-    ) {
-        // get the current relation value
-        $related = $relation->extract($data[$name] ?? null);
-        $original = $parentPoint->getRelation($name);
-
-        // indicate that branch has been calculated
-        $parentPoint->getState()->markVisited($name);
-
-        // no changes in non changed promised relation
+        $related,
+        $original
+    ): ?CommandInterface {
         if ($related instanceof PromiseInterface && $related === $original) {
-            return;
+            // no changes in non changed promised relation
+            return null;
         }
 
-        $relStore = $relation->queueRelation($command, $parent, $parentPoint, $related, $original);
+        $relStore = $relation->queueRelation(
+            $parentStore,
+            $parentEntity,
+            $parentNode,
+            $related,
+            $original
+        );
 
         if ($relStore instanceof Sequence && count($relStore) === 1) {
+            // simplify the branch
             $relStore = current($relStore->getCommands());
         }
 
-        // queue needed changes
-        $parentSequence->addCommand($relStore);
-
         // update current relation state
-        $parentPoint->setRelation($name, $related);
+        $parentNode->getState()->setRelation($relation->getName(), $related);
 
-        return;
+        return $relStore;
     }
 }

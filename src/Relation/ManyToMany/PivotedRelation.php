@@ -158,9 +158,9 @@ class PivotedRelation extends Relation\AbstractRelation
      * @param ContextStorage $original
      */
     public function queueRelation(
-        ContextCarrierInterface $parentCommand,
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        Node $parentState,
+        Node $parentNode,
         $related,
         $original
     ): CommandInterface {
@@ -186,7 +186,7 @@ class PivotedRelation extends Relation\AbstractRelation
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
             $sequence->addCommand(
-                $this->link($parentState, $item, $related->get($item), $related)
+                $this->link($parentNode, $item, $related->get($item), $related)
             );
         }
 

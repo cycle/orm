@@ -20,8 +20,6 @@ trait RelationTrait
     public function setRelation(string $name, $context)
     {
         $this->relations[$name] = $context;
-
-        // todo: is it good approach?
         unset($this->data[$name]);
     }
 

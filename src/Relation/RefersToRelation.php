@@ -49,16 +49,16 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
      * @inheritdoc
      */
     public function queueRelation(
-        ContextCarrierInterface $parentCommand,
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        Node $parentState,
+        Node $parentNode,
         $related,
         $original
     ): CommandInterface {
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             if (!is_null($original)) {
-                $parentCommand->register($this->innerKey, null, true);
+                $parentStore->register($this->innerKey, null, true);
             }
 
             return new Nil();
@@ -68,8 +68,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
-            if ($outerKey != $this->fetchKey($parentState, $this->innerKey)) {
-                $parentCommand->register($this->innerKey, $outerKey, true);
+            if ($outerKey != $this->fetchKey($parentNode, $this->innerKey)) {
+                $parentStore->register($this->innerKey, $outerKey, true);
             }
 
             return new Nil();
@@ -105,8 +105,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // todo: here we go, the problem is that i need UPDATE command to be automatically
 
         $primaryKey = $this->orm->getSchema()->define(get_class($parentEntity), Schema::PRIMARY_KEY);
-        $this->forwardScope($parentState, $primaryKey, $update, $primaryKey);
-        $this->addDependency($this->getPoint($related), $this->outerKey, $update, $parentState, $this->innerKey);
+        $this->forwardScope($parentNode, $primaryKey, $update, $primaryKey);
+        $this->addDependency($this->getPoint($related), $this->outerKey, $update, $parentNode, $this->innerKey);
 
         return $update;
     }

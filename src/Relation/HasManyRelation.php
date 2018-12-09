@@ -46,9 +46,9 @@ class HasManyRelation extends AbstractRelation
      * @inheritdoc
      */
     public function queueRelation(
-        ContextCarrierInterface $parentCommand,
+        ContextCarrierInterface $parentStore,
         $parentEntity,
-        Node $parentState,
+        Node $parentNode,
         $related,
         $original
     ): CommandInterface {
@@ -70,11 +70,11 @@ class HasManyRelation extends AbstractRelation
         $sequence = new Sequence();
 
         foreach ($related as $item) {
-            $sequence->addCommand($this->queueStore($parentState, $item));
+            $sequence->addCommand($this->queueStore($parentNode, $item));
         }
 
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $sequence->addCommand($this->queueDelete($parentState, $item));
+            $sequence->addCommand($this->queueDelete($parentNode, $item));
         }
 
         return $sequence;

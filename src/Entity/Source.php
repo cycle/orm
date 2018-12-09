@@ -8,13 +8,12 @@
 
 namespace Spiral\ORM\Entity;
 
-use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Selector;
 
 /**
  * Repository provides ability to load entities and construct queries.
  */
-class Repository implements RepositoryInterface
+class Source implements SourceInterface
 {
     /** @var Selector */
     private $selector;
@@ -48,9 +47,9 @@ class Repository implements RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function findAll(array $scope = []): iterable
+    public function findAll(array $scope = [], array $orderBy = []): iterable
     {
-        return $this->find($scope)->fetchAll();
+        return $this->find($scope)->orderBy($orderBy)->fetchAll();
     }
 
     /**
@@ -67,9 +66,9 @@ class Repository implements RepositoryInterface
      * closure function.
      *
      * @param callable $scope
-     * @return Repository
+     * @return Source
      */
-    public function withScope(callable $scope): self
+    public function withScope(callable $scope): SourceInterface
     {
         $repository = clone $this;
         call_user_func($scope, $repository->selector);

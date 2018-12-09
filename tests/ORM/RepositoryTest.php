@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Entity\Mapper;
-use Spiral\ORM\Entity\Repository;
+use Spiral\ORM\Entity\Source;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
@@ -109,7 +109,7 @@ abstract class RepositoryTest extends BaseTest
 
     public function testFindImmutable()
     {
-        /** @var Repository $r */
+        /** @var Source $r */
         $r = $this->orm->getMapper(User::class)->getRepository();
 
         $result = $r->find()->orderBy('id', 'DESC')->fetchAll();

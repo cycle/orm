@@ -70,6 +70,8 @@ class Mapper implements MapperInterface
         return $this->hydrator->extract($entity);
     }
 
+
+
     public function entityClass(array $data): string
     {
         $class = $this->class;
@@ -90,7 +92,7 @@ class Mapper implements MapperInterface
     public function getRepository(string $class = null): RepositoryInterface
     {
         // todo: child class select
-        return new Repository(new Selector($this->orm, $class ?? $this->class));
+        return new Source(new Selector($this->orm, $class ?? $this->class));
     }
 
     // todo: need state as INPUT!!!!

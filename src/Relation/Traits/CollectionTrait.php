@@ -23,7 +23,7 @@ trait CollectionTrait
      * @param array $data
      * @return array
      */
-    public function init($data): array
+    public function init(array $data): array
     {
         $result = [];
         foreach ($data as $item) {

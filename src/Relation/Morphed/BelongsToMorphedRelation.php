@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation\Morphed;
 
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Mapper\ProxyFactoryInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
@@ -44,18 +44,18 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [null, null];
         }
 
-        $parentRole = $this->fetchKey($parentNode, $this->morphKey);
+        $target = $this->fetchKey($parentNode, $this->morphKey);
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->get($parentRole, $scope, false))) {
+        if (!empty($e = $this->orm->get($target, $scope, false))) {
             return [$e, $e];
         }
 
-        $mapper = $this->getMapper($parentRole);
+        $mapper = $this->getMapper($target);
         if ($mapper instanceof ProxyFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {
-            $p = new Promise\PromiseOne($this->orm, $parentRole, $scope);
+            $p = new Promise\PromiseOne($this->orm, $target, $scope);
         }
 
         return [$p, $p];
@@ -64,16 +64,9 @@ class BelongsToMorphedRelation extends BelongsToRelation
     /**
      * @inheritdoc
      */
-    public function queue(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
-        $store = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
-
-        // todo: use forward as well
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
+        $wrappedStore = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
 
         if (is_null($related)) {
             if ($this->fetchKey($parentNode, $this->morphKey) !== null) {
@@ -88,21 +81,6 @@ class BelongsToMorphedRelation extends BelongsToRelation
             }
         }
 
-        return $store;
+        return $wrappedStore;
     }
-
-    //    protected function getNode($entity, int $claim = 0): ?Node
-    //    {
-    //        if ($entity instanceof PromiseInterface) {
-    //            $scope = $entity->__scope();
-    //
-    //            return new Node(
-    //                Node::PROMISED,
-    //                [$this->outerKey => $scope[$this->outerKey]],
-    //                $scope[$this->morphKey]
-    //            );
-    //        }
-    //
-    //        return parent::getNode($entity, $claim);
-    //    }
 }

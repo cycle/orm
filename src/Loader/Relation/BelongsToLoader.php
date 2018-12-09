@@ -10,7 +10,7 @@ namespace Spiral\ORM\Loader\Relation;
 
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\TreeGenerator\AbstractNode;
 use Spiral\ORM\TreeGenerator\SingularNode;
 use Spiral\ORM\Relation;
@@ -19,7 +19,7 @@ use Spiral\ORM\Schema;
 /**
  * Load parent data. Similar to HasOne but use POSTLOAD as default method.
  */
-class BelongsToLoader extends RelationLoader
+class BelongsToLoader extends JoinableLoader
 {
     /**
      * Default set of relation options. Child implementation might defined their of default options.

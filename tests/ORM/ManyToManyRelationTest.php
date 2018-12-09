@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests;
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -160,7 +160,7 @@ abstract class ManyToManyRelationTest extends BaseTest
     public function testLoadRelationInload()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('tags', ['method' => RelationLoader::INLOAD]);
+        $selector->load('tags', ['method' => JoinableLoader::INLOAD]);
 
         $this->assertEquals([
             [

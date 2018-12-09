@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests;
 use Spiral\Database\Injection\Parameter;
 use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Node;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -168,7 +168,7 @@ abstract class BelongsToRelationTest extends BaseTest
     public function testFetchRelationInload()
     {
         $selector = new Selector($this->orm, Profile::class);
-        $selector->load('user', ['method' => RelationLoader::INLOAD])
+        $selector->load('user', ['method' => JoinableLoader::INLOAD])
             ->orderBy('profile.id');
 
         $this->assertEquals([

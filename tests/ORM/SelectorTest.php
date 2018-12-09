@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -96,7 +96,7 @@ abstract class SelectorTest extends BaseTest
     public function testStableStatement()
     {
         $s = new Selector($this->orm, User::class);
-        $s->load('comments', ['method' => RelationLoader::INLOAD]);
+        $s->load('comments', ['method' => JoinableLoader::INLOAD]);
 
 
 //        $this->assertSQL('SELECT

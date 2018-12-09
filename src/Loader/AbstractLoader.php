@@ -198,7 +198,7 @@ abstract class AbstractLoader implements LoaderInterface
         $node = $this->initNode();
 
         foreach ($this->load as $relation => $loader) {
-            if ($loader instanceof RelationLoader && $loader->isJoined()) {
+            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
                 $node->joinNode($relation, $loader->createNode());
                 continue;
             }
@@ -271,7 +271,7 @@ abstract class AbstractLoader implements LoaderInterface
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         foreach ($this->load as $loader) {
-            if ($loader instanceof RelationLoader && $loader->isJoined()) {
+            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
                 $query = $loader->configureQuery(clone $query);
             }
         }

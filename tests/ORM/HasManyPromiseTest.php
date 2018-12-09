@@ -10,7 +10,7 @@ namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -278,7 +278,7 @@ abstract class HasManyPromiseTest extends BaseTest
          * @var User $b
          */
         list($a, $b) = $selector->load('comments', [
-            'method' => RelationLoader::INLOAD,
+            'method' => JoinableLoader::INLOAD,
             'alias'  => 'comment'
         ])->orderBy('user.id')->orderBy('comment.id')->fetchAll();
 

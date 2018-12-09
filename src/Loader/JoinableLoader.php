@@ -19,7 +19,7 @@ use Spiral\ORM\Schema;
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
  */
-abstract class RelationLoader extends AbstractLoader
+abstract class JoinableLoader extends AbstractLoader
 {
     use ColumnsTrait;
 

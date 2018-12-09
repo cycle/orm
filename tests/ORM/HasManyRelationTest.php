@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests;
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -132,7 +132,7 @@ abstract class HasManyRelationTest extends BaseTest
     public function testFetchRelationInload()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments', ['method' => RelationLoader::INLOAD])->orderBy('user.id');
+        $selector->load('comments', ['method' => JoinableLoader::INLOAD])->orderBy('user.id');
 
         $this->assertEquals([
             [
@@ -374,7 +374,7 @@ abstract class HasManyRelationTest extends BaseTest
          * @var User $b
          */
         list($a, $b) = $selector->load('comments', [
-            'method' => RelationLoader::INLOAD,
+            'method' => JoinableLoader::INLOAD,
             'alias'  => 'comment'
         ])->orderBy('user.id')->orderBy('comment.id')->fetchAll();
 

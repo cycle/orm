@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -293,7 +293,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // do not allow limits with joined and loaded relations
         (new Selector($this->orm, User::class))
-            ->load('comments', ['method' => RelationLoader::INLOAD])
+            ->load('comments', ['method' => JoinableLoader::INLOAD])
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
@@ -306,7 +306,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // sort by users and then by comments and only include comments with level > 3
         $res = (new Selector($this->orm, User::class))->load('comments', [
-            'method' => RelationLoader::INLOAD
+            'method' => JoinableLoader::INLOAD
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
         $this->assertCount(2, $res);
@@ -330,7 +330,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // sort by users and then by comments and only include comments with level > 3
         $res = (new Selector($this->orm, User::class))->load('comments', [
-            'method'  => RelationLoader::INLOAD,
+            'method'  => JoinableLoader::INLOAD,
             'orderBy' => ['@.level' => 'ASC']
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
@@ -358,7 +358,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // sort by users and then by comments and only include comments with level > 3
         (new Selector($this->orm, User::class))->load('comments', [
-            'method'  => RelationLoader::INLOAD,
+            'method'  => JoinableLoader::INLOAD,
             'orderBy' => ['@.column' => 'ASC']
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }

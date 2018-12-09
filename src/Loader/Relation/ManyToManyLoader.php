@@ -10,7 +10,7 @@ namespace Spiral\ORM\Loader\Relation;
 
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Loader\Traits\ConstrainTrait;
 use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\TreeGenerator\AbstractNode;
@@ -19,7 +19,7 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 
-class ManyToManyLoader extends RelationLoader
+class ManyToManyLoader extends JoinableLoader
 {
     use WhereTrait, ConstrainTrait;
 

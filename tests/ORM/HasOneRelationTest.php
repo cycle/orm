@@ -10,7 +10,7 @@ namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -151,7 +151,7 @@ abstract class HasOneRelationTest extends BaseTest
     public function testFetchRelationPostload()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('profile', ['method' => RelationLoader::POSTLOAD]);
+        $selector->load('profile', ['method' => JoinableLoader::POSTLOAD]);
 
         $this->assertEquals([
             [
@@ -426,7 +426,7 @@ abstract class HasOneRelationTest extends BaseTest
     public function testFetchNestedRelationPostload()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('profile', ['method' => RelationLoader::POSTLOAD]);
+        $selector->load('profile', ['method' => JoinableLoader::POSTLOAD]);
         $selector->load('profile.nested');
 
         $this->assertEquals([

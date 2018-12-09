@@ -15,7 +15,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Loader\Relation\ManyToManyLoader;
-use Spiral\ORM\Loader\RelationLoader;
+use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -78,7 +78,7 @@ class PivotedRelation extends Relation\AbstractRelation
                     [
                         'alias'      => $tableName,
                         'pivotAlias' => $tableName . '_pivot',
-                        'method'     => RelationLoader::POSTLOAD
+                        'method'     => JoinableLoader::POSTLOAD
                     ]
                 );
 

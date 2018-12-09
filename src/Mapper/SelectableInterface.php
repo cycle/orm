@@ -10,9 +10,11 @@ namespace Spiral\ORM\Mapper;
 
 
 use Spiral\Database\DatabaseInterface;
+use Spiral\ORM\Loader\Scope\ScopeInterface;
+use Spiral\ORM\MapperInterface;
 use Spiral\ORM\Selector;
 
-interface SelectableInterface
+interface SelectableInterface extends MapperInterface
 {
     // default selection scope
     public const DEFAULT_SCOPE = '';
@@ -42,7 +44,7 @@ interface SelectableInterface
      * Return named Selector scope or return null.
      *
      * @param string $name
-     * @return Selector\ScopeInterface|null
+     * @return ScopeInterface|null
      */
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?Selector\ScopeInterface;
+    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface;
 }

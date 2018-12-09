@@ -36,7 +36,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->fetchOne($this->targetRole, $scope, false))) {
+        if (!empty($e = $this->orm->get($this->targetRole, $scope, false))) {
             return [$e, $e];
         }
 

@@ -52,6 +52,11 @@ class ORM implements ORMInterface
         $this->factory = $factory ?? new Factory(RelationConfig::createDefault());
     }
 
+    public function getDBAL(): DatabaseManager
+    {
+        return $this->dbal;
+    }
+
     /**
      * @inheritdoc
      */
@@ -102,7 +107,7 @@ class ORM implements ORMInterface
         return $this->relmaps[$entity] = new RelationMap($this, $relations);
     }
 
-    public function fetchOne(string $class, array $scope, bool $load = false)
+    public function get(string $class, array $scope, bool $load = false)
     {
         if (count($scope) === 1) {
             $p = $class;

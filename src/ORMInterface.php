@@ -9,12 +9,17 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\Database\DatabaseManager;
 use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 
 interface ORMInterface
 {
-    public function fetchOne(string $class, array $scope, bool $load = false);
+    public function get(string $class, array $scope, bool $load = false);
+
+    public function make(string $class, array $data, int $state = Node::NEW);
+
+    public function getDBAL(): DatabaseManager;
 
     public function getDatabase($entity): DatabaseInterface;
 
@@ -26,7 +31,6 @@ interface ORMInterface
 
     public function getHeap(): ?HeapInterface;
 
-    public function make(string $class, array $data, int $state = Node::NEW);
 
     public function queueStore($entity, int $mode = 0): ContextCarrierInterface;
 

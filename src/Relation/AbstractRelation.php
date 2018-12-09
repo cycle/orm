@@ -15,7 +15,6 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
-use Spiral\ORM\SchemaInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
@@ -52,8 +51,8 @@ abstract class AbstractRelation implements RelationInterface
         $this->relation = $relation;
         $this->schema = $schema;
 
-        $this->innerKey = $this->define(Relation::INNER_KEY);
-        $this->outerKey = $this->define(Relation::OUTER_KEY);
+        $this->innerKey = $schema[Relation::INNER_KEY];
+        $this->outerKey = $schema[Relation::OUTER_KEY];
     }
 
     /**
@@ -62,14 +61,6 @@ abstract class AbstractRelation implements RelationInterface
     public function getName(): string
     {
         return $this->relation;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getRole(): string
-    {
-        return $this->orm->getSchema()->define($this->targetRole, SchemaInterface::ALIAS);
     }
 
     /**
@@ -150,7 +141,7 @@ abstract class AbstractRelation implements RelationInterface
         $node = $this->orm->getHeap()->get($entity);
 
         if (is_null($node)) {
-            $node = new Node(Node::NEW, [], $this->getRole());
+            $node = new Node(Node::NEW, [], $this->orm->getMapper($entity)->getRole());
             $this->orm->getHeap()->attach($entity, $node);
         }
 
@@ -166,7 +157,6 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
-     * @deprecated
      * @return ORMInterface
      */
     protected function getORM(): ORMInterface

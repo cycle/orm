@@ -8,6 +8,7 @@
 
 namespace Spiral\ORM\Mapper;
 
+use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\Branch\Split;
 use Spiral\ORM\Command\CommandInterface;
@@ -16,6 +17,7 @@ use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\ORM\Loader\Scope\ScopeInterface;
 use Spiral\ORM\MapperInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
@@ -25,7 +27,7 @@ use Spiral\ORM\Selector;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 
-class Mapper implements MapperInterface
+class Mapper implements MapperInterface, SelectableInterface
 {
     // system column to store entity type
     public const ENTITY_TYPE = '_type';
@@ -68,15 +70,6 @@ class Mapper implements MapperInterface
         return $this->role;
     }
 
-    public function hydrate($entity, array $data)
-    {
-        return $this->hydrator->hydrate($data, $entity);
-    }
-
-    public function extract($entity): array
-    {
-        return $this->hydrator->extract($entity);
-    }
 
     public function entityClass(array $data): string
     {
@@ -88,17 +81,54 @@ class Mapper implements MapperInterface
         return $class;
     }
 
-    public function init(array $data): array
+    public function getDatabase(): DatabaseInterface
     {
-        $class = $this->entityClass($data);
-
-        return [new $class, $data];
+        return $this->orm->getDBAL()->database($this->orm->getSchema()->define($this->role, Schema::DATABASE));
     }
+
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    public function getSelector(): Selector
+    {
+        $selector = new Selector($this->orm, $this->role);
+        if (!empty($scope = $this->getScope(self::DEFAULT_SCOPE))) {
+            $selector = $selector->withScope($scope);
+        }
+
+        return $selector;
+    }
+
+    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface
+    {
+        return null;
+    }
+
+    public function hydrate($entity, array $data)
+    {
+        return $this->hydrator->hydrate($data, $entity);
+    }
+
+    public function extract($entity): array
+    {
+        return $this->hydrator->extract($entity);
+    }
+
 
     public function getRepository(string $class = null): RepositoryInterface
     {
         // todo: child class select
         return new Repository(new Selector($this->orm, $class ?? $this->role));
+    }
+
+
+    public function init(array $data): array
+    {
+        $class = $this->entityClass($data);
+
+        return [new $class, $data];
     }
 
     // todo: need state as INPUT!!!!

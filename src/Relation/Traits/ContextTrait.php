@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Relation\Traits;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\ScopeCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
+use Spiral\ORM\Command\ScopeCarrierInterface as CS;
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Node;
 
@@ -22,20 +22,16 @@ trait ContextTrait
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
-     * @param Node                    $from
-     * @param string                  $fromKey
-     * @param ContextCarrierInterface $carrier
-     * @param null|Node               $to
-     * @param string                  $toKey
-     * @return ContextCarrierInterface
+     * @param Node      $from
+     * @param string    $fromKey
+     * @param CC        $carrier
+     * @param null|Node $to
+     * @param string    $toKey
+     * @return CC
      */
-    protected function forwardContext(
-        Node $from,
-        string $fromKey,
-        ContextCarrierInterface $carrier,
-        Node $to,
-        string $toKey
-    ): ContextCarrierInterface {
+    protected function forwardContext(Node $from, string $fromKey, CC $carrier, Node $to, string $toKey): CC
+    {
+        // do not execute until the key is given
         $carrier->waitContext($toKey, $this->isRequired());
 
         // forward key from state to the command (on change)
@@ -51,18 +47,14 @@ trait ContextTrait
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
      *
-     * @param Node                  $from
-     * @param string                $fromKey
-     * @param ScopeCarrierInterface $carrier
-     * @param string                $toKey
-     * @return ScopeCarrierInterface
+     * @param Node   $from
+     * @param string $fromKey
+     * @param CS     $carrier
+     * @param string $toKey
+     * @return CS
      */
-    protected function forwardScope(
-        Node $from,
-        string $fromKey,
-        ScopeCarrierInterface $carrier,
-        string $toKey
-    ): ScopeCarrierInterface {
+    protected function forwardScope(Node $from, string $fromKey, CS $carrier, string $toKey): CS
+    {
         $carrier->waitScope($toKey);
         $from->listen($fromKey, $carrier, $toKey, true, ConsumerInterface::SCOPE);
 

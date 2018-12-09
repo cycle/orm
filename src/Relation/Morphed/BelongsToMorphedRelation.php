@@ -51,7 +51,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
 
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->fetchOne($parentClass, $scope, false))) {
+        if (!empty($e = $this->orm->get($parentClass, $scope, false))) {
             return [$e, $e];
         }
 

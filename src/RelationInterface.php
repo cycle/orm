@@ -54,12 +54,12 @@ interface RelationInterface
     /**
      * Returns tuple of [promise to insert into entity, promise to store as relation context].
      *
-     * @param Node $point
+     * @param Node $parentNode
      * @return array
      *
      * @throws RelationException
      */
-    public function initPromise(Node $point): array;
+    public function initPromise(Node $parentNode): array;
 
     /**
      * Create branch of operations required to store the relation.

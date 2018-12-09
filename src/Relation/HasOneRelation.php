@@ -26,14 +26,16 @@ class HasOneRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             // nothing to be promising
             return [null, null];
         }
 
-        $scope = [$this->outerKey => $innerKey];
+        $scope = [
+            $this->outerKey => $innerKey
+        ];
 
         if (!empty($e = $this->orm->get($this->target, $scope, false))) {
             return [$e, $e];
@@ -101,11 +103,11 @@ class HasOneRelation extends AbstractRelation
      */
     protected function deleteOriginal($original): CommandInterface
     {
-        $point = $this->getNode($original);
+        $relNode = $this->getNode($original);
 
         // only delete original child when no other objects claim it
-        return new Condition($this->orm->queueDelete($original), function () use ($point) {
-            return !$point->getState()->hasClaims();
+        return new Condition($this->orm->queueDelete($original), function () use ($relNode) {
+            return !$relNode->getState()->hasClaims();
         });
     }
 }

@@ -26,13 +26,15 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [null, null];
         }
 
-        $scope = [$this->outerKey => $innerKey];
+        $scope = [
+            $this->outerKey => $innerKey
+        ];
 
         if (!empty($e = $this->orm->get($this->target, $scope, false))) {
             return [$e, $e];

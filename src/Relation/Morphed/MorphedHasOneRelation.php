@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation\Morphed;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -39,21 +39,16 @@ class MorphedHasOneRelation extends HasOneRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [null, null];
         }
 
-        $p = new Promise\PromiseOne(
-            $this->orm,
-            $this->target,
-            [
-                $this->outerKey => $innerKey,
-                $this->morphKey => $point->getRole()
-            ],
-            $point->getRole()
-        );
+        $p = new Promise\PromiseOne($this->orm, $this->target, [
+            $this->outerKey => $innerKey,
+            $this->morphKey => $parentNode->getRole()
+        ]);
 
         return [$p, $p];
     }
@@ -61,23 +56,19 @@ class MorphedHasOneRelation extends HasOneRelation
     /**
      * @inheritdoc
      */
-    public function queue(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
-        $store = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
+        $relStore = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
 
-        if ($store instanceof ContextCarrierInterface && !is_null($related)) {
-            $relState = $this->getNode($related);
-            if ($this->fetchKey($relState, $this->morphKey) != $parentNode->getRole()) {
-                $store->register($this->morphKey, $parentNode->getRole(), true);
-                $relState->setData([$this->morphKey => $parentNode->getRole()]);
+        if ($relStore instanceof CC && !is_null($related)) {
+            $relNode = $this->getNode($related);
+
+            if ($this->fetchKey($relNode, $this->morphKey) != $parentNode->getRole()) {
+                $relStore->register($this->morphKey, $parentNode->getRole(), true);
+                $relNode->register($this->morphKey, $parentNode->getRole(), true);
             }
         }
 
-        return $store;
+        return $relStore;
     }
 }

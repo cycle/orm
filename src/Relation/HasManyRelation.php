@@ -63,15 +63,17 @@ class HasManyRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [new ArrayCollection(), null];
         }
 
         $p = new Promise\PromiseMany(
-            $this->getMapper(),
-            [$this->outerKey => $innerKey],
+            $this->getMapper()->getSelector(),
+            [
+                $this->outerKey => $innerKey
+            ],
             $this->schema[Relation::WHERE_SCOPE] ?? [],
             $this->schema[Relation::ORDER_BY] ?? []
         );

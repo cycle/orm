@@ -8,16 +8,16 @@
 
 namespace Spiral\ORM\Util\Promise;
 
-use Spiral\ORM\Mapper\SelectableInterface;
 use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Selector;
 
 /**
  * Promises the selection of the
  */
 class PromiseMany implements PromiseInterface
 {
-    /** @var SelectableInterface|null */
-    private $mapper;
+    /** @var Selector|null */
+    private $selector;
 
     /** @var array */
     private $scope = [];
@@ -32,18 +32,18 @@ class PromiseMany implements PromiseInterface
     private $result = [];
 
     /**
-     * @param SelectableInterface $mapper
-     * @param array               $scope
-     * @param array               $whereScope
-     * @param array               $orderBy
+     * @param Selector $selector
+     * @param array    $scope
+     * @param array    $whereScope
+     * @param array    $orderBy
      */
     public function __construct(
-        SelectableInterface $mapper,
+        Selector $selector,
         array $scope = [],
         array $whereScope = [],
         array $orderBy = []
     ) {
-        $this->mapper = $mapper;
+        $this->selector = $selector;
         $this->scope = $scope;
         $this->whereScope = $whereScope;
         $this->orderBy = $orderBy;
@@ -54,7 +54,7 @@ class PromiseMany implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->mapper);
+        return empty($this->selector);
     }
 
     /**
@@ -62,7 +62,7 @@ class PromiseMany implements PromiseInterface
      */
     public function __role(): string
     {
-        return $this->mapper->getRole();
+        return $this->selector->getLoader()->getRole();
     }
 
     /**
@@ -78,16 +78,16 @@ class PromiseMany implements PromiseInterface
      */
     public function __resolve()
     {
-        if (is_null($this->mapper)) {
+        if (is_null($this->selector)) {
             return $this->result;
         }
 
-        $this->result = $this->mapper->getSelector()
+        $this->result = $this->selector
             ->where($this->scope + $this->whereScope)
             ->orderBy($this->orderBy)
             ->fetchAll();
 
-        $this->mapper = null;
+        $this->selector = null;
 
         return $this->result;
     }

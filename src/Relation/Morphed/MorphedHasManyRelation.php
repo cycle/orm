@@ -10,8 +10,8 @@ namespace Spiral\ORM\Relation\Morphed;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasManyRelation;
 use Spiral\ORM\Util\Collection\CollectionPromise;
@@ -37,16 +37,21 @@ class MorphedHasManyRelation extends HasManyRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [new ArrayCollection(), null];
         }
 
-        $p = new Promise\PromiseManyX($this->orm, $this->target, [
-            $this->outerKey => $innerKey,
-            $this->morphKey => $point->getRole()
-        ]);
+        $p = new Promise\PromiseMany(
+            $this->getMapper()->getSelector(),
+            [
+                $this->outerKey => $innerKey,
+                $this->morphKey => $parentNode->getRole(),
+            ],
+            $this->schema[Relation::WHERE_SCOPE] ?? [],
+            $this->schema[Relation::ORDER_BY] ?? []
+        );
 
         return [new CollectionPromise($p), $p];
     }
@@ -60,17 +65,14 @@ class MorphedHasManyRelation extends HasManyRelation
      */
     protected function queueStore(Node $parentNode, $related): ContextCarrierInterface
     {
-        $store = parent::queueStore($parentNode, $related);
+        $relStore = parent::queueStore($parentNode, $related);
 
         $relState = $this->getNode($related);
         if ($this->fetchKey($relState, $this->morphKey) != $parentNode->getRole()) {
-            // polish it
-            $store->register($this->morphKey, $parentNode->getRole(), true);
-
-            // todo: update store only?
-            $relState->setData([$this->morphKey => $parentNode->getRole()]);
+            $relStore->register($this->morphKey, $parentNode->getRole(), true);
+            $relState->register($this->morphKey, $parentNode->getRole(), true);
         }
 
-        return $store;
+        return $relStore;
     }
 }

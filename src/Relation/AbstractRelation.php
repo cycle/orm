@@ -91,7 +91,7 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
         return [null, null];
     }

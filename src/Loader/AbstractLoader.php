@@ -77,7 +77,7 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * @return string
      */
-    public function getClass(): string
+    public function getRole(): string
     {
         return $this->class;
     }

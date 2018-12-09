@@ -26,7 +26,7 @@ class MorphedHasManyLoader extends HasManyLoader
      */
     protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        $parentAlias = $this->orm->getSchema()->define($this->parent->getClass(), Schema::ALIAS);
+        $parentAlias = $this->orm->getSchema()->define($this->parent->getRole(), Schema::ALIAS);
 
         return $this->setWhere(
             parent::configureQuery($query, $outerKeys),

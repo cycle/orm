@@ -67,10 +67,10 @@ class MorphedHasManyRelation extends HasManyRelation
     {
         $relStore = parent::queueStore($parentNode, $related);
 
-        $relState = $this->getNode($related);
-        if ($this->fetchKey($relState, $this->morphKey) != $parentNode->getRole()) {
+        $relNode = $this->getNode($related);
+        if ($this->fetchKey($relNode, $this->morphKey) != $parentNode->getRole()) {
             $relStore->register($this->morphKey, $parentNode->getRole(), true);
-            $relState->register($this->morphKey, $parentNode->getRole(), true);
+            $relNode->register($this->morphKey, $parentNode->getRole(), true);
         }
 
         return $relStore;

@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Node;
@@ -20,8 +20,6 @@ use Spiral\ORM\Schema;
 /**
  * Variation of belongs-to relation which provides the ability to be self. Relation can be used
  * to create cyclic references. Relation does not trigger store operation of referenced object!
- *
- * @todo merge with belongs to (?)
  */
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
@@ -30,14 +28,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queue(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
-
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             if (!is_null($original)) {
@@ -47,10 +39,10 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new Nil();
         }
 
-        $relState = $this->getNode($related, +1);
+        $relNode = $this->getNode($related, +1);
 
         // related object exists, we can update key immediately
-        if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
+        if (!empty($outerKey = $this->fetchKey($relNode, $this->outerKey))) {
             if ($outerKey != $this->fetchKey($parentNode, $this->innerKey)) {
                 $parentStore->register($this->innerKey, $outerKey, true);
             }
@@ -58,38 +50,30 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new Nil();
         }
 
-        // this needs to be better
-
-        // todo: use queue store? merge with belongs to?
-
-        $relState = $this->getNode($related);
-
-        /*
-         * REMEMBER THE CYCLES!!!!
-        */
-
-
-        //  if (!empty($relState->getCommand())) {
-        //   $update = $relState->getCommand();
-
-        // todo: how reliable is it? it's not
-        //    if (!($update instanceof Insert)) {
-        //     $this->forwardContext($relState, $this->outerKey, $update, $state, $this->innerKey);
-        //       return new Nil();
-        //  }
-        //   }
-
-        // why am i taking same command?
+        // update parent entity once related instance is able to provide us context key
         $update = new Update(
-            $this->orm->getDatabase($parentEntity),
-            $this->orm->getSchema()->define(get_class($parentEntity), Schema::TABLE)
+            $this->getMapper($parentNode->getRole())->getDatabase(),
+            $this->getMapper($parentNode->getRole())->getTable()
         );
 
-        // todo: here we go, the problem is that i need UPDATE command to be automatically
+        // fastest way to identify the entity
+        $pk = $this->orm->getSchema()->define($parentNode->getRole(), Schema::PRIMARY_KEY);
 
-        $primaryKey = $this->orm->getSchema()->define(get_class($parentEntity), Schema::PRIMARY_KEY);
-        $this->forwardScope($parentNode, $primaryKey, $update, $primaryKey);
-        $this->forwardContext($this->getNode($related), $this->outerKey, $update, $parentNode, $this->innerKey);
+        $this->forwardContext(
+            $relNode,
+            $this->outerKey,
+            $update,
+            $parentNode,
+            $this->innerKey
+        );
+
+        // set where condition for update query
+        $this->forwardScope(
+            $parentNode,
+            $pk,
+            $update,
+            $pk
+        );
 
         return $update;
     }

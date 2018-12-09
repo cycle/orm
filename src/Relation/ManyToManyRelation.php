@@ -132,12 +132,12 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node   $node
+     * @param Node   $parentNode
      * @param object $related
      * @param bool   $exists
      * @return CommandInterface
      */
-    protected function link(Node $node, $related, $exists): CommandInterface
+    protected function link(Node $parentNode, $related, $exists): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
 
@@ -151,7 +151,7 @@ class ManyToManyRelation extends AbstractRelation
         $sync->waitContext($this->thoughtInnerKey, true);
         $sync->waitContext($this->thoughtOuterKey, true);
 
-        $node->forward($this->innerKey, $sync, $this->thoughtInnerKey, true);
+        $parentNode->forward($this->innerKey, $sync, $this->thoughtInnerKey, true);
         $this->getNode($related)->forward($this->outerKey, $sync, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
@@ -164,11 +164,11 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Remove the connection between two objects.
      *
-     * @param Node   $node
+     * @param Node   $parentNode
      * @param object $related
      * @return CommandInterface
      */
-    protected function unlink(Node $node, $related): CommandInterface
+    protected function unlink(Node $parentNode, $related): CommandInterface
     {
         $relNode = $this->getNode($related);
 
@@ -176,7 +176,7 @@ class ManyToManyRelation extends AbstractRelation
         $delete->waitScope($this->thoughtOuterKey);
         $delete->waitScope($this->thoughtInnerKey);
 
-        $node->forward(
+        $parentNode->forward(
             $this->innerKey
             , $delete,
             $this->thoughtInnerKey,

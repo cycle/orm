@@ -136,13 +136,13 @@ class PivotedRelation extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node           $state
+     * @param Node           $parentNode
      * @param object         $related
      * @param object         $pivot
      * @param ContextStorage $storage
      * @return CommandInterface
      */
-    protected function link(Node $state, $related, $pivot, ContextStorage $storage): CommandInterface
+    protected function link(Node $parentNode, $related, $pivot, ContextStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);
@@ -154,13 +154,13 @@ class PivotedRelation extends Relation\AbstractRelation
 
         // defer the insert until pivot keys are resolved
         $pivotStore = $this->orm->queueStore($pivot);
-        $pivotState = $this->getNode($pivot);
+        $pivotNode = $this->getNode($pivot);
 
         $this->forwardContext(
-            $state,
+            $parentNode,
             $this->innerKey,
             $pivotStore,
-            $pivotState,
+            $pivotNode,
             $this->thoughtInnerKey
         );
 
@@ -168,7 +168,7 @@ class PivotedRelation extends Relation\AbstractRelation
             $relNode,
             $this->outerKey,
             $pivotStore,
-            $pivotState,
+            $pivotNode,
             $this->thoughtOuterKey
         );
 

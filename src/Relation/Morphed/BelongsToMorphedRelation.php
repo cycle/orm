@@ -67,17 +67,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
             , function ($context) use ($innerKey) {
 
             $parentClass = $this->orm->getSchema()->getClass($context[$this->morphKey]);
-
-            if ($this->orm->getHeap()->hasPath("{$parentClass}:$innerKey")) {
-                // todo: has it!
-                $i = $this->orm->getHeap()->getPath("{$parentClass}:$innerKey");
-                return $i;
-            }
-
-            // todo: optimize
-            return $this->orm->getMapper($parentClass)->getRepository()->findOne([
-                $this->outerKey => $context[$this->outerKey]
-            ]);
+            return $this->orm->get($parentClass, [$this->outerKey => $innerKey], true);
         });
 
         return [$pr, $pr];

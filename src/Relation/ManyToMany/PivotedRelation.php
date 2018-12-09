@@ -116,7 +116,7 @@ class PivotedRelation extends Relation\AbstractRelation
     /**
      * @inheritdoc
      */
-    public function init($data): array
+    public function init(array $data): array
     {
         $elements = [];
         $pivotData = new \SplObjectStorage();

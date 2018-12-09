@@ -17,7 +17,7 @@ interface ORMInterface
 {
     public function get(string $class, array $scope, bool $load = false);
 
-    public function make(string $class, array $data, int $state = Node::NEW);
+    public function make(string $role, array $data, int $node = Node::NEW);
 
     public function getDBAL(): DatabaseManager;
 

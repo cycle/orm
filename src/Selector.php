@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Loader\RootLoader;
-use Spiral\ORM\Node\OutputNode;
+use Spiral\ORM\TreeGenerator\OutputNode;
 use Spiral\ORM\Traits\SelectTrait;
 
 /**
@@ -234,7 +234,7 @@ class Selector implements \IteratorAggregate, \Countable
             return null;
         }
 
-        return $this->orm->make($this->loader->getClass(), $data[0], Point::LOADED);
+        return $this->orm->make($this->loader->getClass(), $data[0], Node::LOADED);
     }
 
     /**

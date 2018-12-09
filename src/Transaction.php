@@ -153,7 +153,7 @@ final class Transaction implements TransactionInterface
         foreach ($this->orm->getHeap() as $entity) {
             $point = $this->orm->getHeap()->get($entity);
 
-            if ($point->getStatus() == Point::SCHEDULED_DELETE && !$point->getState()->hasClaims()) {
+            if ($point->getStatus() == Node::SCHEDULED_DELETE && !$point->getState()->hasClaims()) {
                 $this->orm->getHeap()->detach($entity);
                 continue;
             }

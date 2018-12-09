@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Control\PrimarySequence;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Util\Promise;
 
@@ -22,7 +22,7 @@ class HasOneRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
@@ -45,7 +45,7 @@ class HasOneRelation extends AbstractRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface {

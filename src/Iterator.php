@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Node\PivotedNode;
+use Spiral\ORM\TreeGenerator\PivotedNode;
 
 /**
  * Iterates over given data-set and instantiates objects.
@@ -50,7 +50,7 @@ final class Iterator implements \IteratorAggregate
                 unset($data[PivotedNode::PIVOT_DATA]);
             }
 
-            yield $index => $this->orm->make($this->class, $data, Point::LOADED);
+            yield $index => $this->orm->make($this->class, $data, Node::LOADED);
         }
     }
 }

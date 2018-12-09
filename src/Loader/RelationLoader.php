@@ -12,7 +12,7 @@ use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Exception\LoaderException;
 use Spiral\ORM\Loader\Traits\ColumnsTrait;
 use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\Node\AbstractNode;
+use Spiral\ORM\TreeGenerator\AbstractNode;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schema;
 

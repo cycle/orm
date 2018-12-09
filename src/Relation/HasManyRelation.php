@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Condition;
 use Spiral\ORM\Command\Control\Sequence;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Util\Collection\CollectionPromise;
@@ -26,7 +26,7 @@ class HasManyRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [new ArrayCollection(), null];
@@ -48,7 +48,7 @@ class HasManyRelation extends AbstractRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -97,11 +97,11 @@ class HasManyRelation extends AbstractRelation
     /**
      * Persist related object.
      *
-     * @param Point  $parent
+     * @param Node   $parent
      * @param object $related
      * @return CarrierInterface
      */
-    protected function queueStore(Point $parent, $related): CarrierInterface
+    protected function queueStore(Node $parent, $related): CarrierInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getPoint($related, +1);
@@ -114,11 +114,11 @@ class HasManyRelation extends AbstractRelation
     /**
      * Remove one of related objects.
      *
-     * @param Point  $parent
+     * @param Node   $parent
      * @param object $related
      * @return CommandInterface
      */
-    protected function queueDelete(Point $parent, $related): CommandInterface
+    protected function queueDelete(Node $parent, $related): CommandInterface
     {
         $origState = $this->getPoint($related);
 

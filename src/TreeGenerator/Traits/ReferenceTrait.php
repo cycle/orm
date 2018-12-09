@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Node\Traits;
+namespace Spiral\ORM\TreeGenerator\Traits;
 
 use Spiral\ORM\Exception\NodeException;
 

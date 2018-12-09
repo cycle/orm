@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation\Morphed;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasOneRelation;
 use Spiral\ORM\Util\Promise;
@@ -39,7 +39,7 @@ class MorphedHasOneRelation extends HasOneRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
@@ -59,7 +59,7 @@ class MorphedHasOneRelation extends HasOneRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface {

@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Util\Promise;
 
@@ -28,7 +28,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
@@ -51,7 +51,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface {

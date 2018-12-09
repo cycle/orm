@@ -49,11 +49,11 @@ final class RelationMap
     /**
      * Init relation data in entity data and entity state.
      *
-     * @param Point $state
+     * @param Node  $state
      * @param array $data
      * @return array
      */
-    public function init(Point $state, array $data): array
+    public function init(Node $state, array $data): array
     {
         foreach ($this->relations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
@@ -87,14 +87,14 @@ final class RelationMap
      *
      * @param object           $parentEntity
      * @param array            $data
-     * @param Point            $parentPoint
+     * @param Node             $parentPoint
      * @param CarrierInterface $command
      * @return CarrierInterface
      */
     public function queueRelations(
         $parentEntity,
         array $data,
-        Point $parentPoint,
+        Node $parentPoint,
         CarrierInterface $command
     ): CarrierInterface {
         $sequence = new PrimarySequence();
@@ -133,7 +133,7 @@ final class RelationMap
      * @param Sequence          $parentSequence
      * @param object            $parent
      * @param array             $data
-     * @param Point             $parentPoint
+     * @param Node              $parentPoint
      * @param CarrierInterface  $command
      * @param RelationInterface $relation
      * @param string            $name
@@ -143,7 +143,7 @@ final class RelationMap
         $parent,
         array $data,
         // move
-        Point $parentPoint,
+        Node $parentPoint,
         CarrierInterface $command,
         RelationInterface $relation,
         string $name

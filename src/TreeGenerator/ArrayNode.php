@@ -5,14 +5,14 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Node;
+namespace Spiral\ORM\TreeGenerator;
 
 use Spiral\ORM\Exception\NodeException;
 
 /**
- * Node with ability to push it's data into referenced tree location.
+ * Parses multiple sub children and mount them under parent node.
  */
-class SingularNode extends AbstractNode
+class ArrayNode extends AbstractNode implements ArrayInterface
 {
     /** @var string */
     protected $innerKey;
@@ -41,15 +41,15 @@ class SingularNode extends AbstractNode
     protected function push(array &$data)
     {
         if (empty($this->parent)) {
-            throw new NodeException("Unable to register data tree, parent is missing");
+            throw new NodeException("Unable to register data tree, parent is missing.");
         }
 
         if (is_null($data[$this->innerKey])) {
-            //No data was loaded
+            // no data was parsed
             return;
         }
 
-        $this->parent->mount(
+        $this->parent->mountArray(
             $this->container,
             $this->outerKey,
             $data[$this->innerKey],

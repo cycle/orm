@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation\Traits;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\Context\AcceptorInterface;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 
 /**
  * Provides the ability to set the promises for command context and scopes linked
@@ -22,18 +22,18 @@ trait ContextTrait
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
-     * @param Point            $from
+     * @param Node             $from
      * @param string           $fromKey
      * @param CarrierInterface $carrier
-     * @param null|Point       $to
+     * @param null|Node        $to
      * @param string           $toKey
      * @return CarrierInterface
      */
     protected function addDependency(
-        Point $from,
+        Node $from,
         string $fromKey,
         CarrierInterface $carrier,
-        Point $to,
+        Node $to,
         string $toKey
     ): CarrierInterface {
         $carrier->waitContext($toKey, $this->isRequired());
@@ -51,14 +51,14 @@ trait ContextTrait
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
      *
-     * @param Point           $from
+     * @param Node            $from
      * @param string          $fromKey
      * @param ScopedInterface $carrier
      * @param string          $toKey
      * @return ScopedInterface
      */
     protected function forwardScope(
-        Point $from,
+        Node $from,
         string $fromKey,
         ScopedInterface $carrier,
         string $toKey
@@ -72,11 +72,11 @@ trait ContextTrait
     /**
      * Fetch key from the state.
      *
-     * @param Point  $state
+     * @param Node   $state
      * @param string $key
      * @return mixed|null
      */
-    protected function fetchKey(?Point $state, string $key)
+    protected function fetchKey(?Node $state, string $key)
     {
         if (is_null($state)) {
             return null;

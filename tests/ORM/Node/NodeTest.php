@@ -9,9 +9,9 @@
 namespace Spiral\ORM\Tests\Node;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Node\ArrayNode;
-use Spiral\ORM\Node\RootNode;
-use Spiral\ORM\Node\SingularNode;
+use Spiral\ORM\TreeGenerator\ArrayNode;
+use Spiral\ORM\TreeGenerator\RootNode;
+use Spiral\ORM\TreeGenerator\SingularNode;
 
 class NodeTest extends TestCase
 {

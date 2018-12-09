@@ -16,9 +16,9 @@ use Spiral\ORM\Command\Control\Sequence;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
-use Spiral\ORM\Node\PivotedRootNode;
+use Spiral\ORM\TreeGenerator\PivotedRootNode;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Util\Collection\PivotedCollection;
@@ -52,7 +52,7 @@ class PivotedRelation extends Relation\AbstractRelation
         $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
     }
 
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
@@ -102,7 +102,7 @@ class PivotedRelation extends Relation\AbstractRelation
                 $pivotData = new \SplObjectStorage();
                 foreach (new Iterator($this->orm, $this->class, $node->getResult()) as $pivot => $entity) {
                     $elements[] = $entity;
-                    $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Point::LOADED);
+                    $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::LOADED);
                 }
 
                 return new ContextStorage($elements, $pivotData);
@@ -122,7 +122,7 @@ class PivotedRelation extends Relation\AbstractRelation
 
         foreach (new Iterator($this->orm, $this->class, $data) as $pivot => $entity) {
             $elements[] = $entity;
-            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Point::LOADED);
+            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::LOADED);
         }
 
         return [
@@ -160,7 +160,7 @@ class PivotedRelation extends Relation\AbstractRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -205,13 +205,13 @@ class PivotedRelation extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Point          $state
+     * @param Node           $state
      * @param object         $related
      * @param object         $pivot
      * @param ContextStorage $storage
      * @return CommandInterface
      */
-    protected function link(Point $state, $related, $pivot, ContextStorage $storage): CommandInterface
+    protected function link(Node $state, $related, $pivot, ContextStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getPoint($related, +1);

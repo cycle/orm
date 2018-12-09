@@ -11,8 +11,8 @@ namespace Spiral\ORM\Loader\Relation;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\RelationLoader;
-use Spiral\ORM\Node\AbstractNode;
-use Spiral\ORM\Node\SingularNode;
+use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\TreeGenerator\SingularNode;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 

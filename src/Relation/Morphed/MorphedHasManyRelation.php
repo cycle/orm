@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation\Morphed;
 use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasManyRelation;
 use Spiral\ORM\Util\Collection\CollectionPromise;
@@ -37,7 +37,7 @@ class MorphedHasManyRelation extends HasManyRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [new ArrayCollection(), null];
@@ -54,11 +54,11 @@ class MorphedHasManyRelation extends HasManyRelation
     /**
      * Persist related object.
      *
-     * @param Point  $parent
+     * @param Node   $parent
      * @param object $related
      * @return CarrierInterface
      */
-    protected function queueStore(Point $parent, $related): CarrierInterface
+    protected function queueStore(Node $parent, $related): CarrierInterface
     {
         $store = parent::queueStore($parent, $related);
 

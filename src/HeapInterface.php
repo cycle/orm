@@ -14,9 +14,9 @@ interface HeapInterface
 {
     public function has($entity): bool;
 
-    public function get($entity): ?Point;
+    public function get($entity): ?Node;
 
-    public function attach($entity, Point $state, array $index = []);
+    public function attach($entity, Node $state, array $index = []);
 
     public function detach($entity);
 

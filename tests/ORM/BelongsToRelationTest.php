@@ -12,7 +12,7 @@ use Spiral\Database\Injection\Parameter;
 use Spiral\ORM\Entity\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -244,10 +244,10 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertEquals(4, $p->id);
 
         $this->assertTrue($this->orm->getHeap()->has($u));
-        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($u)->getStatus());
+        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($u)->getStatus());
 
         $this->assertTrue($this->orm->getHeap()->has($p));
-        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($p)->getStatus());
+        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($p)->getStatus());
 
         $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
 
@@ -310,7 +310,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertEquals(4, $p->id);
 
         $this->assertTrue($this->orm->getHeap()->has($p));
-        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($p)->getStatus());
+        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($p)->getStatus());
 
         $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
 

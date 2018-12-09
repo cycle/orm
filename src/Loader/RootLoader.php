@@ -10,8 +10,8 @@ namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\Traits\ColumnsTrait;
-use Spiral\ORM\Node\AbstractNode;
-use Spiral\ORM\Node\RootNode;
+use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\TreeGenerator\RootNode;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schema;
 

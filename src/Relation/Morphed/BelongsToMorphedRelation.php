@@ -12,7 +12,7 @@ namespace Spiral\ORM\Relation\Morphed;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\BelongsToRelation;
@@ -38,7 +38,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
@@ -88,7 +88,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface {
@@ -112,13 +112,13 @@ class BelongsToMorphedRelation extends BelongsToRelation
         return $store;
     }
 
-    protected function getPoint($entity, int $claim = 0): ?Point
+    protected function getPoint($entity, int $claim = 0): ?Node
     {
         if ($entity instanceof PromiseInterface) {
             $scope = $entity->__scope();
 
-            return new Point(
-                Point::PROMISED,
+            return new Node(
+                Node::PROMISED,
                 [$this->outerKey => $scope[$this->outerKey]],
                 $scope[$this->morphKey]
             );

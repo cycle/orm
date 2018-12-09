@@ -17,14 +17,14 @@ interface RelationInterface
 
     public function init($data): array;
 
-    public function initPromise(Point $point): array;
+    public function initPromise(Node $point): array;
 
     public function extract($value);
 
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface;

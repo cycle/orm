@@ -13,10 +13,10 @@ use Spiral\ORM\Context\ForwarderInterface;
 use Spiral\ORM\Traits\RelationTrait;
 
 /**
- * Point (metadata) carries meta information about entitey state, changes forwards data to other points thought
+ * Node (metadata) carries meta information about entitey state, changes forwards data to other points thought
  * inner states.
  */
-final class Point implements ForwarderInterface, AcceptorInterface
+final class Node implements ForwarderInterface, AcceptorInterface
 {
     use RelationTrait;
 

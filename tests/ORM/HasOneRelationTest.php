@@ -14,7 +14,7 @@ use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;
@@ -202,10 +202,10 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals(3, $e->id);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($e)->getStatus());
+        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e)->getStatus());
 
         $this->assertTrue($this->orm->getHeap()->has($e->profile));
-        $this->assertSame(Point::LOADED, $this->orm->getHeap()->get($e->profile)->getStatus());
+        $this->assertSame(Node::LOADED, $this->orm->getHeap()->get($e->profile)->getStatus());
 
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->profile)->getData()['user_id']);
     }

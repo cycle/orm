@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
@@ -72,12 +72,12 @@ abstract class AbstractRelation implements RelationInterface
 
     public function init($data): array
     {
-        $item = $this->orm->make($this->class, $data, Point::LOADED);
+        $item = $this->orm->make($this->class, $data, Node::LOADED);
 
         return [$item, $item];
     }
 
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         return [null, null];
     }
@@ -92,15 +92,15 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[$key] ?? null;
     }
 
-    protected function getPoint($entity, int $claim = 0): ?Point
+    protected function getPoint($entity, int $claim = 0): ?Node
     {
         if (is_null($entity)) {
             return null;
         }
 
         if ($entity instanceof PromiseInterface) {
-            return new Point(
-                Point::PROMISED,
+            return new Node(
+                Node::PROMISED,
                 $entity->__scope(),
                 $this->orm->getSchema()->define($this->class, Schema::ALIAS)
             );
@@ -109,7 +109,7 @@ abstract class AbstractRelation implements RelationInterface
         $state = $this->orm->getHeap()->get($entity);
 
         if (is_null($state)) {
-            $state = new Point(Point::NEW, [],
+            $state = new Node(Node::NEW, [],
                 $this->orm->getSchema()->define($this->class, Schema::ALIAS)
             );
 

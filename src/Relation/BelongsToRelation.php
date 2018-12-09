@@ -13,7 +13,7 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Control\Nil;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
-use Spiral\ORM\Point;
+use Spiral\ORM\Node;
 use Spiral\ORM\Util\Promise;
 
 // todo: what is the difference with refers to?
@@ -22,7 +22,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function initPromise(Point $point): array
+    public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
             return [null, null];
@@ -45,7 +45,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     public function queueRelation(
         CarrierInterface $parentCommand,
         $parentEntity,
-        Point $parentState,
+        Node $parentState,
         $related,
         $original
     ): CommandInterface {

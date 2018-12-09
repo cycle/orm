@@ -5,11 +5,11 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Node;
+namespace Spiral\ORM\TreeGenerator;
 
 use Spiral\ORM\Exception\NodeException;
-use Spiral\ORM\Node\Traits\DuplicateTrait;
-use Spiral\ORM\Node\Traits\ReferenceTrait;
+use Spiral\ORM\TreeGenerator\Traits\DuplicateTrait;
+use Spiral\ORM\TreeGenerator\Traits\ReferenceTrait;
 
 /**
  * Represents data node in a tree with ability to parse line of results, split it into sub

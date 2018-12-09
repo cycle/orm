@@ -8,6 +8,8 @@
 
 namespace Spiral\ORM\Relation;
 
+use Spiral\ORM\Exception\RelationException;
+use Spiral\ORM\Mapper\SelectableInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
@@ -43,6 +45,7 @@ abstract class AbstractRelation implements RelationInterface
         $this->targetRole = $class;
         $this->relation = $relation;
         $this->schema = $schema;
+
         $this->innerKey = $this->define(Relation::INNER_KEY);
         $this->outerKey = $this->define(Relation::OUTER_KEY);
     }
@@ -135,5 +138,23 @@ abstract class AbstractRelation implements RelationInterface
     protected function getORM(): ORMInterface
     {
         return $this->orm;
+    }
+
+    /**
+     * Get selectable mapper associated with a role.
+     *
+     * @param string|null $role
+     * @return SelectableInterface
+     *
+     * @throws RelationException
+     */
+    protected function getMapper(string $role = null): SelectableInterface
+    {
+        $mapper = $this->orm->getMapper($role ?? $this->targetRole);
+        if (!$mapper instanceof SelectableInterface) {
+            throw new RelationException("Relation {$this} can only with with SelectableInterface mappers");
+        }
+
+        return $mapper;
     }
 }

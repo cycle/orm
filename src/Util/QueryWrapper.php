@@ -9,7 +9,6 @@
 namespace Spiral\ORM\Util;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Selector;
 
 /**
  * Proxy calls to underlying query to automatically calculate column aliases.
@@ -19,8 +18,8 @@ class QueryWrapper
     /** @var string */
     private $alias;
 
-    /** @var Selector|SelectQuery */
-    private $target;
+    /** @var null|SelectQuery */
+    private $query;
 
     /**
      * @param string $alias
@@ -33,13 +32,13 @@ class QueryWrapper
     /**
      * Link wrapper to the given target (query or selector).
      *
-     * @param Selector|SelectQuery $target
+     * @param SelectQuery $target
      * @return QueryWrapper
      */
-    public function withTarget($target): self
+    public function withTarget(SelectQuery $target): self
     {
         $wrapper = clone $this;
-        $wrapper->target = $target;
+        $wrapper->query = $target;
 
         return $wrapper;
     }
@@ -54,7 +53,7 @@ class QueryWrapper
     public function __call(string $name, array $arguments)
     {
         // prepare arguments
-        return call_user_func_array([$this->target, $name], $this->prepare($arguments));
+        return call_user_func_array([$this->query, $name], $this->prepare($arguments));
     }
 
     /**
@@ -66,7 +65,12 @@ class QueryWrapper
     protected function prepare($where)
     {
         if (is_string($where)) {
-            return str_replace(['{@}', '@'], $this->alias, $where);
+            if (strpos($where, '.') === false) {
+                // always mount alias
+                return sprintf("%s.%s", $this->alias, $where);
+            }
+
+            return str_replace('@', $this->alias, $where);
         }
 
         if (!is_array($where)) {
@@ -76,7 +80,7 @@ class QueryWrapper
         $result = [];
         foreach ($where as $column => $value) {
             if (is_string($column) && !is_int($column)) {
-                $column = str_replace(['{@}', '@'], $this->alias, $column);
+                $column = str_replace('@', $this->alias, $column);
             }
 
             $result[$column] = !is_array($value) ? $value : $this->prepare($value);

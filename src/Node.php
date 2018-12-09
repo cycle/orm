@@ -28,14 +28,14 @@ final class Node implements ProducerInterface, ConsumerInterface
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
 
-    /** @var string */
-    private $role;
-
     /** @var int */
     private $status;
 
     /** @var array */
     private $data;
+
+    /** @var string */
+    private $role;
 
     /** @var null|State */
     private $state;

@@ -50,7 +50,7 @@ class HasManyRelation extends AbstractRelation
     public function extract($data)
     {
         if ($data instanceof CollectionPromise && !$data->isInitialized()) {
-            return $data->getPromise();
+            return $data->toPromise();
         }
 
         if ($data instanceof Collection) {
@@ -71,7 +71,8 @@ class HasManyRelation extends AbstractRelation
 
         $p = new Promise\PromiseMany(
             $this->getMapper(),
-            array_merge([$this->outerKey => $innerKey], $this->schema[Relation::WHERE_SCOPE] ?? []),
+            [$this->outerKey => $innerKey],
+            $this->schema[Relation::WHERE_SCOPE] ?? [],
             $this->schema[Relation::ORDER_BY] ?? []
         );
 

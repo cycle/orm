@@ -298,7 +298,7 @@ abstract class BaseTest extends TestCase
 
             if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionPromise) {
                 if (!$eValue->isInitialized()) {
-                    $eValue = $eValue->getPromise();
+                    $eValue = $eValue->toPromise();
                 } else {
                     // normalizing
                     if ($rValue instanceof PromiseInterface && $rValue->__loaded()) {

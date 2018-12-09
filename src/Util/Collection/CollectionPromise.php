@@ -31,7 +31,7 @@ class CollectionPromise extends AbstractLazyCollection implements PromisedInterf
     /**
      * @inheritdoc
      */
-    public function getPromise(): PromiseInterface
+    public function toPromise(): PromiseInterface
     {
         return $this->promise;
     }

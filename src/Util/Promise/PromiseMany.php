@@ -23,6 +23,9 @@ class PromiseMany implements PromiseInterface
     private $scope = [];
 
     /** @var array */
+    private $whereScope = [];
+
+    /** @var array */
     private $orderBy = [];
 
     /** @var array */
@@ -31,12 +34,18 @@ class PromiseMany implements PromiseInterface
     /**
      * @param SelectableInterface $mapper
      * @param array               $scope
+     * @param array               $whereScope
      * @param array               $orderBy
      */
-    public function __construct(SelectableInterface $mapper, array $scope = [], array $orderBy = [])
-    {
+    public function __construct(
+        SelectableInterface $mapper,
+        array $scope = [],
+        array $whereScope = [],
+        array $orderBy = []
+    ) {
         $this->mapper = $mapper;
         $this->scope = $scope;
+        $this->whereScope = $whereScope;
         $this->orderBy = $orderBy;
     }
 
@@ -73,7 +82,11 @@ class PromiseMany implements PromiseInterface
             return $this->result;
         }
 
-        $this->result = $this->mapper->getSelector()->where($this->scope)->orderBy($this->orderBy)->fetchAll();
+        $this->result = $this->mapper->getSelector()
+            ->where($this->scope + $this->whereScope)
+            ->orderBy($this->orderBy)
+            ->fetchAll();
+
         $this->mapper = null;
 
         return $this->result;

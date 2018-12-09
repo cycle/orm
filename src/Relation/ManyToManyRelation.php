@@ -138,7 +138,7 @@ class ManyToManyRelation extends AbstractRelation
     public function extract($data)
     {
         if ($data instanceof CollectionPromise && !$data->isInitialized()) {
-            return $data->getPromise();
+            return $data->toPromise();
         }
 
         if ($data instanceof Collection) {

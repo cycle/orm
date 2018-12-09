@@ -138,7 +138,7 @@ class PivotedRelation extends Relation\AbstractRelation
     public function extract($data)
     {
         if ($data instanceof PivotedCollectionPromise && !$data->isInitialized()) {
-            return $data->getPromise();
+            return $data->toPromise();
         }
 
         if ($data instanceof PivotedInterface) {

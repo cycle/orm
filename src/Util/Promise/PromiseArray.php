@@ -9,12 +9,12 @@
 namespace Spiral\ORM\Util\Promise;
 
 
-use Spiral\ORM\Entity\Source;
 use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\RepositoryInterface;
 
 class PromiseArray implements PromiseInterface
 {
-    /** @var Source|null */
+    /** @var RepositoryInterface|null */
     private $repository;
 
     /** @var array */
@@ -29,11 +29,11 @@ class PromiseArray implements PromiseInterface
     /**
      * PromiseMany constructor.
      *
-     * @param Source $repository
-     * @param array  $scope
-     * @param array  $orderBy
+     * @param RepositoryInterface $repository
+     * @param array               $scope
+     * @param array               $orderBy
      */
-    public function __construct(Source $repository, array $scope, array $orderBy = [])
+    public function __construct(RepositoryInterface $repository, array $scope, array $orderBy = [])
     {
         $this->repository = $repository;
         $this->scope = $scope;
@@ -62,7 +62,7 @@ class PromiseArray implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->repository)) {
-            $this->result = $this->repository->find($this->filter($this->scope))->orderBy($this->filter($this->orderBy))->fetchAll();
+            $this->result = $this->repository->findAll($this->filter($this->scope), $this->filter($this->orderBy));
             $this->repository = null;
         }
 

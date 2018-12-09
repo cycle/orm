@@ -92,7 +92,7 @@ class Mapper implements MapperInterface
     public function getRepository(string $class = null): RepositoryInterface
     {
         // todo: child class select
-        return new Source(new Selector($this->orm, $class ?? $this->class));
+        return new Repository(new Selector($this->orm, $class ?? $this->class));
     }
 
     // todo: need state as INPUT!!!!

@@ -18,7 +18,7 @@ use Spiral\ORM\Schema;
 use Spiral\ORM\Util\Promise;
 
 /**
- * Variation of belongs-to relation which provides the ability to be nullable. Relation can be used
+ * Variation of belongs-to relation which provides the ability to be self. Relation can be used
  * to create cyclic references. Relation does not trigger store operation of referenced object!
  *
  * @todo merge with belongs to (?)

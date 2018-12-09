@@ -8,12 +8,13 @@
 
 namespace Spiral\ORM\Entity;
 
+use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Selector;
 
 /**
  * Repository provides ability to load entities and construct queries.
  */
-class Source implements SourceInterface
+class Repository implements RepositoryInterface
 {
     /** @var Selector */
     private $selector;
@@ -66,7 +67,7 @@ class Source implements SourceInterface
      * closure function.
      *
      * @param callable $scope
-     * @return Source
+     * @return Repository
      */
     public function withScope(callable $scope): SourceInterface
     {

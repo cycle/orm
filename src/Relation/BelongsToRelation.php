@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Entity\ProxyFactoryInterface;
 use Spiral\ORM\Exception\Relation\NullException;
@@ -53,30 +53,31 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queue(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
         if (is_null($related)) {
             if ($this->isRequired()) {
                 throw new NullException("Relation {$this} can not be null");
             }
 
             if (!is_null($original)) {
-                // push?
+                // reset the key
                 $parentStore->register($this->innerKey, null, true);
             }
 
+            // nothing to do
             return new Nil();
         }
 
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getNode($related, +1);
 
-        $this->forwardContext($relState, $this->outerKey, $parentStore, $parentNode, $this->innerKey);
+        $this->forwardContext(
+            $this->getNode($related, +1),
+            $this->outerKey,
+            $parentStore,
+            $parentNode,
+            $this->innerKey
+        );
 
         return $relStore;
     }

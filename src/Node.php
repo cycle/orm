@@ -8,15 +8,15 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Context\AcceptorInterface;
-use Spiral\ORM\Context\ForwarderInterface;
+use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\ORM\Context\ProducerInterface;
 use Spiral\ORM\Traits\RelationTrait;
 
 /**
  * Node (metadata) carries meta information about entitey state, changes forwards data to other points thought
  * inner states.
  */
-final class Node implements ForwarderInterface, AcceptorInterface
+final class Node implements ProducerInterface, ConsumerInterface
 {
     use RelationTrait;
 
@@ -125,22 +125,22 @@ final class Node implements ForwarderInterface, AcceptorInterface
     /**
      * @inheritdoc
      */
-    public function pull(
+    public function listen(
         string $key,
-        AcceptorInterface $acceptor,
+        ConsumerInterface $acceptor,
         string $target,
         bool $trigger = false,
         int $stream = self::DATA
     ) {
-        $this->getState()->pull($key, $acceptor, $target, $trigger, $stream);
+        $this->getState()->listen($key, $acceptor, $target, $trigger, $stream);
     }
 
     /**
      * @inheritdoc
      */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $update = false, int $stream = self::DATA)
     {
-        $this->getState()->push($key, $value, $update, $stream);
+        $this->getState()->register($key, $value, $update, $stream);
     }
 
     /**

@@ -8,12 +8,12 @@
 
 namespace Spiral\ORM\Command;
 
-use Spiral\ORM\Context\AcceptorInterface;
+use Spiral\ORM\Context\ConsumerInterface;
 
 /**
  * Command indicates the ability to accept the forwarded scope values.
  */
-interface ScopedInterface extends CommandInterface, AcceptorInterface
+interface ScopedInterface extends CommandInterface, ConsumerInterface
 {
     /**
      * Wait for the scope value. Command must not be ready until the value come.

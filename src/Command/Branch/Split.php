@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Command\Branch;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 
 /**
  * Splits input context command into 2 destinations: original create command (usually insert) and delayed update command.
@@ -17,22 +17,22 @@ use Spiral\ORM\Command\CarrierInterface;
  *
  * Handlers are attached to the head command since we can guarantee that head would always be executed.
  */
-class Split implements CarrierInterface, \IteratorAggregate
+class Split implements ContextCarrierInterface, \IteratorAggregate
 {
-    /** @var CarrierInterface */
+    /** @var ContextCarrierInterface */
     private $head;
 
-    /** @var CarrierInterface */
+    /** @var ContextCarrierInterface */
     private $tail;
 
-    /** @var array */
+    /** @var ContextCarrierInterface[] */
     private $contextPath = [];
 
     /**
-     * @param CarrierInterface $head
-     * @param CarrierInterface $tail
+     * @param ContextCarrierInterface $head
+     * @param ContextCarrierInterface $tail
      */
-    public function __construct(CarrierInterface $head, CarrierInterface $tail)
+    public function __construct(ContextCarrierInterface $head, ContextCarrierInterface $tail)
     {
         $this->head = $head;
         $this->tail = $tail;
@@ -89,10 +89,14 @@ class Split implements CarrierInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
-    {
+    public function register(
+        string $key,
+        $value,
+        bool $update = false,
+        int $stream = self::DATA
+    ) {
         if (isset($this->contextPath[$key])) {
-            $this->contextPath[$key]->push($key, $value, $update, $stream);
+            $this->contextPath[$key]->register($key, $value, $update, $stream);
         }
     }
 
@@ -126,7 +130,7 @@ class Split implements CarrierInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    protected function getTarget(): CarrierInterface
+    protected function getTarget(): ContextCarrierInterface
     {
         if (!$this->head->isExecuted()) {
             return $this->head;

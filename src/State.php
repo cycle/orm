@@ -8,17 +8,17 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\CarrierInterface;
-use Spiral\ORM\Context\AcceptorInterface;
-use Spiral\ORM\Context\ForwarderInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\ORM\Context\ProducerInterface;
 use Spiral\ORM\Traits\ClaimTrait;
 use Spiral\ORM\Traits\RelationTrait;
 use Spiral\ORM\Traits\VisitorTrait;
 
 /**
- * Point state.
+ * Current node state.
  */
-class State implements AcceptorInterface, ForwarderInterface
+class State implements ConsumerInterface, ProducerInterface
 {
     use RelationTrait, ClaimTrait, VisitorTrait;
 
@@ -28,11 +28,11 @@ class State implements AcceptorInterface, ForwarderInterface
     /** @var array */
     private $data;
 
-    /** @var null|CarrierInterface */
+    /** @var null|ContextCarrierInterface */
     private $command;
 
-    /** @var AcceptorInterface[] */
-    private $handlers;
+    /** @var ContextCarrierInterface[] */
+    private $contextPath;
 
     /**
      * @param int   $state
@@ -76,7 +76,7 @@ class State implements AcceptorInterface, ForwarderInterface
         }
 
         foreach ($data as $column => $value) {
-            $this->push($column, $value);
+            $this->register($column, $value);
         }
     }
 
@@ -94,18 +94,18 @@ class State implements AcceptorInterface, ForwarderInterface
      * Set the reference to the object creation command (non executed).
      *
      * @internal
-     * @param CarrierInterface|null $cmd
+     * @param ContextCarrierInterface|null $cmd
      */
-    public function setCommand(CarrierInterface $cmd = null)
+    public function setCommand(ContextCarrierInterface $cmd = null)
     {
         $this->command = $cmd;
     }
 
     /**
      * @internal
-     * @return null|CarrierInterface
+     * @return null|ContextCarrierInterface
      */
-    public function getCommand(): ?CarrierInterface
+    public function getCommand(): ?ContextCarrierInterface
     {
         return $this->command;
     }
@@ -113,25 +113,29 @@ class State implements AcceptorInterface, ForwarderInterface
     /**
      * @inheritdoc
      */
-    public function pull(
+    public function listen(
         string $key,
-        AcceptorInterface $acceptor,
+        ConsumerInterface $acceptor,
         string $target,
         bool $trigger = false,
-        int $stream = AcceptorInterface::DATA
+        int $stream = ConsumerInterface::DATA
     ) {
-        $this->handlers[$key][] = [$acceptor, $target, $stream];
+        $this->contextPath[$key][] = [$acceptor, $target, $stream];
 
         if ($trigger || !empty($this->data[$key])) {
-            $this->push($key, $this->data[$key] ?? null, false, $stream);
+            $this->register($key, $this->data[$key] ?? null, false, $stream);
         }
     }
 
     /**
      * @inheritdoc
      */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
-    {
+    public function register(
+        string $key,
+        $value,
+        bool $update = false,
+        int $stream = self::DATA
+    ) {
         if (!$update) {
             $update = ($this->data[$key] ?? null) != $value;
         }
@@ -139,11 +143,11 @@ class State implements AcceptorInterface, ForwarderInterface
         $this->data[$key] = $value;
 
         // cascade
-        if (!empty($this->handlers[$key])) {
-            foreach ($this->handlers[$key] as $id => $h) {
-                /** @var AcceptorInterface $acc */
+        if (!empty($this->contextPath[$key])) {
+            foreach ($this->contextPath[$key] as $id => $h) {
+                /** @var ConsumerInterface $acc */
                 $acc = $h[0];
-                $acc->push($h[1], $value, $update, $h[2]);
+                $acc->register($h[1], $value, $update, $h[2]);
                 $update = false;
             }
         }

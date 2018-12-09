@@ -8,32 +8,32 @@
 
 namespace Spiral\ORM\Command\Branch;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Exception\CommandException;
 
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.
  */
-class PrimarySequence extends Sequence implements CarrierInterface
+class PrimarySequence extends Sequence implements ContextCarrierInterface
 {
-    /** @var CarrierInterface */
+    /** @var ContextCarrierInterface */
     protected $primary;
 
     /**
      * Add primary command to the sequence.
      *
-     * @param CarrierInterface $command
+     * @param ContextCarrierInterface $command
      */
-    public function addPrimary(CarrierInterface $command)
+    public function addPrimary(ContextCarrierInterface $command)
     {
         $this->addCommand($command);
         $this->primary = $command;
     }
 
     /**
-     * @return CarrierInterface
+     * @return ContextCarrierInterface
      */
-    public function getPrimary(): CarrierInterface
+    public function getPrimary(): ContextCarrierInterface
     {
         if (empty($this->primary)) {
             throw new CommandException("Primary sequence command is not set");
@@ -61,8 +61,12 @@ class PrimarySequence extends Sequence implements CarrierInterface
     /**
      * @inheritdoc
      */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
-    {
-        $this->getPrimary()->push($key, $value, $update, $stream);
+    public function register(
+        string $key,
+        $value,
+        bool $update = false,
+        int $stream = self::DATA
+    ) {
+        $this->getPrimary()->register($key, $value, $update, $stream);
     }
 }

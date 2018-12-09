@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\DependencyInterface;
@@ -43,7 +43,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
      * @inheritdoc
      */
     public function queueRelation(
-        CarrierInterface $parentCommand,
+        ContextCarrierInterface $parentCommand,
         $parentEntity,
         Node $parentState,
         $related,
@@ -56,7 +56,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
             if (!is_null($original)) {
                 // push?
-                $parentCommand->push($this->innerKey, null, true);
+                $parentCommand->register($this->innerKey, null, true);
             }
 
             return new Nil();

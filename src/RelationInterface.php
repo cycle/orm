@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 
 interface RelationInterface
@@ -22,7 +22,7 @@ interface RelationInterface
     public function extract($value);
 
     public function queueRelation(
-        CarrierInterface $parentCommand,
+        ContextCarrierInterface $parentCommand,
         $parentEntity,
         Node $parentState,
         $related,

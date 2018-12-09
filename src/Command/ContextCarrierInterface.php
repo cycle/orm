@@ -7,12 +7,12 @@
 
 namespace Spiral\ORM\Command;
 
-use Spiral\ORM\Context\AcceptorInterface;
+use Spiral\ORM\Context\ConsumerInterface;
 
 /**
  * Command provide the ability to accept and carry the context to the persistence layer.
  */
-interface CarrierInterface extends CommandInterface, AcceptorInterface
+interface ContextCarrierInterface extends CommandInterface, ConsumerInterface
 {
     /**
      * Wait for the context value. Command must not be ready until the value come if value is required.

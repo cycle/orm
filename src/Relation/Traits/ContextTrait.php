@@ -8,9 +8,9 @@
 
 namespace Spiral\ORM\Relation\Traits;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\ScopedInterface;
-use Spiral\ORM\Context\AcceptorInterface;
+use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Node;
 
 /**
@@ -22,27 +22,27 @@ trait ContextTrait
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
-     * @param Node             $from
-     * @param string           $fromKey
-     * @param CarrierInterface $carrier
-     * @param null|Node        $to
-     * @param string           $toKey
-     * @return CarrierInterface
+     * @param Node                    $from
+     * @param string                  $fromKey
+     * @param ContextCarrierInterface $carrier
+     * @param null|Node               $to
+     * @param string                  $toKey
+     * @return ContextCarrierInterface
      */
     protected function addDependency(
         Node $from,
         string $fromKey,
-        CarrierInterface $carrier,
+        ContextCarrierInterface $carrier,
         Node $to,
         string $toKey
-    ): CarrierInterface {
+    ): ContextCarrierInterface {
         $carrier->waitContext($toKey, $this->isRequired());
 
         // forward key from state to the command (on change)
-        $to->pull($toKey, $carrier, $toKey);
+        $to->listen($toKey, $carrier, $toKey);
 
         // link 2 keys and trigger cascade falling right now (if exists)
-        $from->pull($fromKey, $to, $toKey, true);
+        $from->listen($fromKey, $to, $toKey, true);
 
         return $carrier;
     }
@@ -64,7 +64,7 @@ trait ContextTrait
         string $toKey
     ): ScopedInterface {
         $carrier->waitScope($toKey);
-        $from->pull($fromKey, $carrier, $toKey, true, AcceptorInterface::SCOPE);
+        $from->listen($fromKey, $carrier, $toKey, true, ConsumerInterface::SCOPE);
 
         return $carrier;
     }

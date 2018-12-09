@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Relation\Morphed;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
@@ -57,7 +57,7 @@ class MorphedHasOneRelation extends HasOneRelation
      * @inheritdoc
      */
     public function queueRelation(
-        CarrierInterface $parentCommand,
+        ContextCarrierInterface $parentCommand,
         $parentEntity,
         Node $parentState,
         $related,
@@ -65,10 +65,10 @@ class MorphedHasOneRelation extends HasOneRelation
     ): CommandInterface {
         $store = parent::queueRelation($parentCommand, $parentEntity, $parentState, $related, $original);
 
-        if ($store instanceof CarrierInterface && !is_null($related)) {
+        if ($store instanceof ContextCarrierInterface && !is_null($related)) {
             $relState = $this->getPoint($related);
             if ($this->fetchKey($relState, $this->morphKey) != $parentState->getRole()) {
-                $store->push($this->morphKey, $parentState->getRole(), true);
+                $store->register($this->morphKey, $parentState->getRole(), true);
                 $relState->setData([$this->morphKey => $parentState->getRole()]);
             }
         }

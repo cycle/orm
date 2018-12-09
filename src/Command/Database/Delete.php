@@ -39,18 +39,6 @@ class Delete extends DatabaseCommand implements ScopedInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
-    {
-        if ($update || !is_null($value)) {
-            $this->freeScope($key);
-        }
-
-        $this->setScope($key, $value);
-    }
-
-    /**
      * Inserting data into associated table.
      */
     public function execute()
@@ -61,5 +49,21 @@ class Delete extends DatabaseCommand implements ScopedInterface
 
         $this->db->delete($this->table, $this->scope)->run();
         parent::execute();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function register(
+        string $key,
+        $value,
+        bool $update = false,
+        int $stream = self::DATA
+    ) {
+        if ($update || !is_null($value)) {
+            $this->freeScope($key);
+        }
+
+        $this->setScope($key, $value);
     }
 }

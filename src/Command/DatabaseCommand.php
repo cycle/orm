@@ -10,7 +10,7 @@ namespace Spiral\ORM\Command;
 
 use Spiral\Database\DatabaseInterface;
 
-abstract class DatabaseCommand extends AbstractCommand
+abstract class DatabaseCommand implements CommandInterface
 {
     /**
      * @invisible
@@ -20,6 +20,9 @@ abstract class DatabaseCommand extends AbstractCommand
 
     /** @var string|null */
     protected $table;
+
+    /** @var bool */
+    private $executed = false;
 
     /**
      * @param DatabaseInterface $db
@@ -37,5 +40,37 @@ abstract class DatabaseCommand extends AbstractCommand
     public function getDatabase(): ?DatabaseInterface
     {
         return $this->db;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isExecuted(): bool
+    {
+        return $this->executed;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function execute()
+    {
+        $this->executed = true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function complete()
+    {
+        // nothing to do
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rollBack()
+    {
+        // nothing to do
     }
 }

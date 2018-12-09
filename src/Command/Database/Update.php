@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\ScopedInterface;
 use Spiral\ORM\Command\Traits\ContextTrait;
@@ -22,7 +22,7 @@ use Spiral\ORM\Exception\CommandException;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class Update extends DatabaseCommand implements CarrierInterface, ScopedInterface
+class Update extends DatabaseCommand implements ContextCarrierInterface, ScopedInterface
 {
     use ContextTrait, ScopeTrait, ErrorTrait;
 
@@ -65,33 +65,6 @@ class Update extends DatabaseCommand implements CarrierInterface, ScopedInterfac
     }
 
     /**
-     * @inheritdoc
-     */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
-    {
-        if ($stream == self::SCOPE) {
-            if (empty($value)) {
-                return;
-            }
-
-            $this->freeScope($key);
-            $this->setScope($key, $value);
-
-            return;
-        }
-
-        if ($update || !is_null($value)) {
-            $this->freeContext($key);
-        }
-
-        if ($update) {
-            // we only accept context when context has changed to avoid un-necessary
-            // update commands
-            $this->setContext($key, $value);
-        }
-    }
-
-    /**
      * Update values, context not included.
      *
      * @return array
@@ -123,5 +96,33 @@ class Update extends DatabaseCommand implements CarrierInterface, ScopedInterfac
     protected function isEmpty(): bool
     {
         return (empty($this->data) && empty($this->context)) || empty($this->scope);
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function register(string $key, $value, bool $update = false, int $stream = self::DATA)
+    {
+        if ($stream == self::SCOPE) {
+            if (empty($value)) {
+                return;
+            }
+
+            $this->freeScope($key);
+            $this->setScope($key, $value);
+
+            return;
+        }
+
+        if ($update || !is_null($value)) {
+            $this->freeContext($key);
+        }
+
+        if ($update) {
+            // we only accept context when context has changed to avoid un-necessary
+            // update commands
+            $this->setContext($key, $value);
+        }
     }
 }

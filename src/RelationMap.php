@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\Branch\PrimarySequence;
 use Spiral\ORM\Command\Branch\Sequence;
 
@@ -85,18 +85,18 @@ final class RelationMap
     /**
      * Generate set of commands required to store the entity and it's relations.
      *
-     * @param object           $parentEntity
-     * @param array            $data
-     * @param Node             $parentPoint
-     * @param CarrierInterface $command
-     * @return CarrierInterface
+     * @param object                  $parentEntity
+     * @param array                   $data
+     * @param Node                    $parentPoint
+     * @param ContextCarrierInterface $command
+     * @return ContextCarrierInterface
      */
     public function queueRelations(
         $parentEntity,
         array $data,
         Node $parentPoint,
-        CarrierInterface $command
-    ): CarrierInterface {
+        ContextCarrierInterface $command
+    ): ContextCarrierInterface {
         $sequence = new PrimarySequence();
 
         // queue all "left" graph branches
@@ -130,13 +130,13 @@ final class RelationMap
     /**
      * Queue relation and return related object.
      *
-     * @param Sequence          $parentSequence
-     * @param object            $parent
-     * @param array             $data
-     * @param Node              $parentPoint
-     * @param CarrierInterface  $command
-     * @param RelationInterface $relation
-     * @param string            $name
+     * @param Sequence                $parentSequence
+     * @param object                  $parent
+     * @param array                   $data
+     * @param Node                    $parentPoint
+     * @param ContextCarrierInterface $command
+     * @param RelationInterface       $relation
+     * @param string                  $name
      */
     private function queueRelation(
         Sequence $parentSequence,
@@ -144,7 +144,7 @@ final class RelationMap
         array $data,
         // move
         Node $parentPoint,
-        CarrierInterface $command,
+        ContextCarrierInterface $command,
         RelationInterface $relation,
         string $name
     ) {

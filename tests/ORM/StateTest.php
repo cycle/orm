@@ -17,7 +17,7 @@ class StateTest extends TestCase
     {
         $s = new Node(Node::LOADED, [], "parent");
 
-        $s->push('user_id', 1);
+        $s->register('user_id', 1);
 
         $this->assertSame(1, $s->getData()['user_id']);
     }
@@ -27,8 +27,8 @@ class StateTest extends TestCase
         $s = new Node(Node::LOADED, [], "parent");
         $c = new Node(Node::LOADED, [], "child");
 
-        $s->pull('id', $c, 'user_id');
-        $s->push('id', 1);
+        $s->listen('id', $c, 'user_id');
+        $s->register('id', 1);
 
         $this->assertSame(1, $c->getData()['user_id']);
     }
@@ -38,7 +38,7 @@ class StateTest extends TestCase
         $s = new Node(Node::LOADED, ['id' => 1], "parent");
         $c = new Node(Node::LOADED, [], "child");
 
-        $s->pull('id', $c, 'user_id');
+        $s->listen('id', $c, 'user_id');
 
         $this->assertSame(1, $c->getData()['user_id']);
     }
@@ -48,7 +48,7 @@ class StateTest extends TestCase
         $s = new Node(Node::LOADED, ['id' => 1], "parent");
         $c = new Node(Node::LOADED, [], "child");
 
-        $s->pull('id', $c, 'user_id', true);
+        $s->listen('id', $c, 'user_id', true);
 
         $this->assertSame(1, $c->getData()['user_id']);
     }

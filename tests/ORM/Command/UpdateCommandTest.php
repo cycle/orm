@@ -12,7 +12,7 @@ use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\Database\Update;
-use Spiral\ORM\Context\AcceptorInterface;
+use Spiral\ORM\Context\ConsumerInterface;
 
 class UpdateCommandTest extends TestCase
 {
@@ -49,7 +49,7 @@ class UpdateCommandTest extends TestCase
             ['where' => 'value']
         );
 
-        $cmd->push('key', 'value', true);
+        $cmd->register('key', 'value', true);
         $this->assertSame(['key' => 'value'], $cmd->getContext());
     }
 
@@ -62,7 +62,7 @@ class UpdateCommandTest extends TestCase
             []
         );
 
-        $cmd->push('key', 'value', false, AcceptorInterface::SCOPE);
+        $cmd->register('key', 'value', false, ConsumerInterface::SCOPE);
         $this->assertSame(['key' => 'value'], $cmd->getScope());
     }
 

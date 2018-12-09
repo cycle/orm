@@ -8,14 +8,14 @@
 
 namespace Spiral\ORM\Entity;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\Branch\Split;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
-use Spiral\ORM\Context\AcceptorInterface;
+use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\MapperInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
@@ -96,7 +96,7 @@ class Mapper implements MapperInterface
     }
 
     // todo: need state as INPUT!!!!
-    public function queueStore($entity): CarrierInterface
+    public function queueStore($entity): ContextCarrierInterface
     {
         /** @var Node $point */
         $point = $this->orm->getHeap()->get($entity);
@@ -154,7 +154,7 @@ class Mapper implements MapperInterface
     }
 
     // todo: state must not be null
-    protected function queueCreate($entity, Node &$state = null): CarrierInterface
+    protected function queueCreate($entity, Node &$state = null): ContextCarrierInterface
     {
         $columns = $this->getColumns($entity);
 
@@ -185,7 +185,7 @@ class Mapper implements MapperInterface
         return $insert;
     }
 
-    protected function queueUpdate($entity, Node $state): CarrierInterface
+    protected function queueUpdate($entity, Node $state): ContextCarrierInterface
     {
         $eData = $this->getColumns($entity);
         $oData = $state->getData();
@@ -201,7 +201,7 @@ class Mapper implements MapperInterface
         $state->setData($cData);
 
         // todo: scope prefix (call immediatelly?)
-        $state->pull($this->primaryKey, $update, $this->primaryKey, true, AcceptorInterface::SCOPE);
+        $state->listen($this->primaryKey, $update, $this->primaryKey, true, ConsumerInterface::SCOPE);
 
         return $update;
     }
@@ -214,7 +214,7 @@ class Mapper implements MapperInterface
         $state->getState()->decClaim();
 
         $delete->waitScope($this->primaryKey);
-        $state->pull($this->primaryKey, $delete, $this->primaryKey, true, AcceptorInterface::SCOPE);
+        $state->listen($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
 
         // todo: this must be changed (CORRECT?) BUT HOW?
         //  $delete->onComplete(function () use ($entity) {

@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation\Morphed;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\Relation;
@@ -56,16 +56,16 @@ class MorphedHasManyRelation extends HasManyRelation
      *
      * @param Node   $parent
      * @param object $related
-     * @return CarrierInterface
+     * @return ContextCarrierInterface
      */
-    protected function queueStore(Node $parent, $related): CarrierInterface
+    protected function queueStore(Node $parent, $related): ContextCarrierInterface
     {
         $store = parent::queueStore($parent, $related);
 
         $relState = $this->getPoint($related);
         if ($this->fetchKey($relState, $this->morphKey) != $parent->getRole()) {
             // polish it
-            $store->push($this->morphKey, $parent->getRole(), true);
+            $store->register($this->morphKey, $parent->getRole(), true);
 
             // todo: update store only?
             $relState->setData([$this->morphKey => $parent->getRole()]);

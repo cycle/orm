@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Condition;
 use Spiral\ORM\Command\Branch\Sequence;
@@ -46,7 +46,7 @@ class HasManyRelation extends AbstractRelation
      * @inheritdoc
      */
     public function queueRelation(
-        CarrierInterface $parentCommand,
+        ContextCarrierInterface $parentCommand,
         $parentEntity,
         Node $parentState,
         $related,
@@ -99,9 +99,9 @@ class HasManyRelation extends AbstractRelation
      *
      * @param Node   $parent
      * @param object $related
-     * @return CarrierInterface
+     * @return ContextCarrierInterface
      */
-    protected function queueStore(Node $parent, $related): CarrierInterface
+    protected function queueStore(Node $parent, $related): ContextCarrierInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relState = $this->getPoint($related, +1);

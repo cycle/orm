@@ -11,7 +11,7 @@ namespace Spiral\ORM\Context;
 /**
  * Provides the ability to accept the forwarded key value.
  */
-interface AcceptorInterface
+interface ConsumerInterface
 {
     // Value destinations.
     public const DATA  = 1;
@@ -21,11 +21,11 @@ interface AcceptorInterface
      * Accept the value forwarded by another object. The `handled` value will always be false when forwarded using
      * initial trigger.
      *
-     * @see ForwarderInterface
+     * @see ProducerInterface
      * @param string $key    Key name to accept the value.
      * @param mixed  $value  The key value.
      * @param bool   $update Indicates that value has not been handled by any other acceptor.
      * @param int    $stream One of the context types (data context, scope context).
      */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA);
+    public function register(string $key, $value, bool $update = false, int $stream = self::DATA);
 }

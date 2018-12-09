@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\Database\Update;
@@ -49,7 +49,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
      * @inheritdoc
      */
     public function queueRelation(
-        CarrierInterface $parentCommand,
+        ContextCarrierInterface $parentCommand,
         $parentEntity,
         Node $parentState,
         $related,
@@ -58,7 +58,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             if (!is_null($original)) {
-                $parentCommand->push($this->innerKey, null, true);
+                $parentCommand->register($this->innerKey, null, true);
             }
 
             return new Nil();
@@ -69,7 +69,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
             if ($outerKey != $this->fetchKey($parentState, $this->innerKey)) {
-                $parentCommand->push($this->innerKey, $outerKey, true);
+                $parentCommand->register($this->innerKey, $outerKey, true);
             }
 
             return new Nil();

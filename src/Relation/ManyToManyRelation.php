@@ -11,12 +11,12 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
-use Spiral\ORM\Context\AcceptorInterface;
+use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
@@ -153,7 +153,7 @@ class ManyToManyRelation extends AbstractRelation
      * @param ContextStorage $original
      */
     public function queueRelation(
-        CarrierInterface $parentCommand,
+        ContextCarrierInterface $parentCommand,
         $parentEntity,
         Node $parentState,
         $related,
@@ -216,8 +216,8 @@ class ManyToManyRelation extends AbstractRelation
         $sync->waitContext($this->thoughtInnerKey, true);
         $sync->waitContext($this->thoughtOuterKey, true);
 
-        $state->pull($this->innerKey, $sync, $this->thoughtInnerKey, true);
-        $this->getPoint($related)->pull($this->outerKey, $sync, $this->thoughtOuterKey, true);
+        $state->listen($this->innerKey, $sync, $this->thoughtInnerKey, true);
+        $this->getPoint($related)->listen($this->outerKey, $sync, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -241,8 +241,8 @@ class ManyToManyRelation extends AbstractRelation
         $delete->waitScope($this->thoughtOuterKey);
         $delete->waitScope($this->thoughtInnerKey);
 
-        $state->pull($this->innerKey, $delete, $this->thoughtInnerKey, true, AcceptorInterface::SCOPE);
-        $relState->pull($this->outerKey, $delete, $this->thoughtOuterKey, true, AcceptorInterface::SCOPE);
+        $state->listen($this->innerKey, $delete, $this->thoughtInnerKey, true, ConsumerInterface::SCOPE);
+        $relState->listen($this->outerKey, $delete, $this->thoughtOuterKey, true, ConsumerInterface::SCOPE);
 
         return $delete;
     }

@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation\Morphed;
 
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
@@ -86,7 +86,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
      * @inheritdoc
      */
     public function queueRelation(
-        CarrierInterface $parentCommand,
+        ContextCarrierInterface $parentCommand,
         $parentEntity,
         Node $parentState,
         $related,
@@ -98,13 +98,13 @@ class BelongsToMorphedRelation extends BelongsToRelation
 
         if (is_null($related)) {
             if ($this->fetchKey($parentState, $this->morphKey) !== null) {
-                $parentCommand->push($this->morphKey, null, true);
+                $parentCommand->register($this->morphKey, null, true);
                 $parentState->setData([$this->morphKey => null]);
             }
         } else {
             $relState = $this->getPoint($related);
             if ($this->fetchKey($parentState, $this->morphKey) != $relState->getRole()) {
-                $parentCommand->push($this->morphKey, $relState->getRole(), true);
+                $parentCommand->register($this->morphKey, $relState->getRole(), true);
                 $parentState->setData([$this->morphKey => $relState->getRole()]);
             }
         }

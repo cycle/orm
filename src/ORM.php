@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Config\RelationConfig;
@@ -233,7 +233,7 @@ class ORM implements ORMInterface
         return $mapper->hydrate($entity, $this->getRelationMap($entity)->init($state, $filtered));
     }
 
-    public function queueStore($entity, int $mode = 0): CarrierInterface
+    public function queueStore($entity, int $mode = 0): ContextCarrierInterface
     {
         // todo: NICE?
 

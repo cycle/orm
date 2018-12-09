@@ -7,14 +7,14 @@
 
 namespace Spiral\ORM\Command\Branch;
 
-use Spiral\ORM\Command\CarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 
 /**
  * Doing noting.
  *
  * @codeCoverageIgnore
  */
-final class Nil implements CarrierInterface
+final class Nil implements ContextCarrierInterface
 {
     /**
      * {@inheritdoc}
@@ -35,7 +35,7 @@ final class Nil implements CarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function push(string $key, $value, bool $update = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $update = false, int $stream = self::DATA)
     {
         // nothing to do
     }

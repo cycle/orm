@@ -50,19 +50,14 @@ abstract class AbstractRelation implements RelationInterface
         $this->outerKey = $this->define(Relation::OUTER_KEY);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getName(): string
     {
         return $this->relation;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        // this is incorrect class
-        return sprintf("%s->%s", $this->targetRole, $this->relation);
-    }
 
     public function isRequired(): bool
     {
@@ -78,7 +73,7 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
-    public function init($data): array
+    public function init(array $data): array
     {
         $item = $this->orm->make($this->targetRole, $data, Node::MANAGED);
 
@@ -93,6 +88,16 @@ abstract class AbstractRelation implements RelationInterface
     public function extract($data)
     {
         return $data;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        // this is incorrect class
+        return sprintf("%s->%s", $this->targetRole, $this->relation);
     }
 
     protected function define($key)

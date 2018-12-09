@@ -9,25 +9,69 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
+use Spiral\ORM\Exception\RelationException;
 
+/**
+ * Manages single branch type between parent entity and other objects.
+ */
 interface RelationInterface
 {
+    /**
+     * Relation name.
+     *
+     * @return string
+     */
     public function getName(): string;
 
+    /**
+     * Must return true to trigger queue.
+     *
+     * @return bool
+     */
     public function isCascade(): bool;
 
-    public function init($data): array;
+    /**
+     * Init related entity value(s). Returns tupe [value, value to store as relation context].
+     *
+     * @param array $data
+     * @return array
+     *
+     * @throws RelationException
+     */
+    public function init(array $data): array;
 
-    public function initPromise(Node $point): array;
-
+    /**
+     * Extract the related values from the entity field value.
+     *
+     * @param mixed $value
+     * @return mixed
+     *
+     * @throws RelationException
+     */
     public function extract($value);
 
-    public function queue(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface;
+    /**
+     * Returns tuple of [promise to insert into entity, promise to store as relation context].
+     *
+     * @param Node $point
+     * @return array
+     *
+     * @throws RelationException
+     */
+    public function initPromise(Node $point): array;
+
+    /**
+     * Create branch of operations required to store the relation.
+     *
+     * @param CC     $parentStore
+     * @param object $parentEntity
+     * @param Node   $parentNode
+     * @param object $related
+     * @param object $original
+     * @return CommandInterface
+     *
+     * @throws RelationException
+     */
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface;
 }

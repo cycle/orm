@@ -35,7 +35,7 @@ class HasOneRelation extends AbstractRelation
 
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->get($this->targetRole, $scope, false))) {
+        if (!empty($e = $this->orm->get($this->target, $scope, false))) {
             return [$e, $e];
         }
 
@@ -43,7 +43,7 @@ class HasOneRelation extends AbstractRelation
         if ($mapper instanceof ProxyFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {
-            $p = new Promise\PromiseOne($this->orm, $mapper->getRole(), $scope);
+            $p = new Promise\PromiseOne($this->orm, $this->target, $scope);
         }
 
         return [$p, $p];

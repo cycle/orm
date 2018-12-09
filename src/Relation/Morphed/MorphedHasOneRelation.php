@@ -27,12 +27,12 @@ class MorphedHasOneRelation extends HasOneRelation
     /**
      * @param ORMInterface $orm
      * @param string       $target
-     * @param string       $relation
+     * @param string       $name
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $relation, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $relation, $target, $schema);
+        parent::__construct($orm, $name, $target, $schema);
         $this->morphKey = $schema[Relation::MORPH_KEY] ?? null;
     }
 
@@ -47,7 +47,7 @@ class MorphedHasOneRelation extends HasOneRelation
 
         $p = new Promise\PromiseOne(
             $this->orm,
-            $this->targetRole,
+            $this->target,
             [
                 $this->outerKey => $innerKey,
                 $this->morphKey => $point->getRole()

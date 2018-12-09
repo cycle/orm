@@ -40,16 +40,16 @@ class PivotedRelation extends Relation\AbstractRelation
 
     /**
      * @param ORMInterface $orm
-     * @param string       $relation
+     * @param string       $name
      * @param string       $target
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $relation, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $relation, $target, $schema);
-        $this->pivotEntity = $this->define(Relation::PIVOT_ENTITY);
-        $this->thoughtInnerKey = $this->define(Relation::THOUGHT_INNER_KEY);
-        $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
+        parent::__construct($orm, $name, $target, $schema);
+        $this->pivotEntity = $this->schema[Relation::PIVOT_ENTITY] ?? null;
+        $this->thoughtInnerKey = $this->schema[Relation::THOUGHT_INNER_KEY] ?? null;
+        $this->thoughtOuterKey = $this->schema[Relation::THOUGHT_OUTER_KEY] ?? null;
     }
 
     public function initPromise(Node $point): array
@@ -60,18 +60,18 @@ class PivotedRelation extends Relation\AbstractRelation
 
         // todo: context promise (!)
         $pr = new PivotedPromise(
-            $this->targetRole,
+            $this->target,
             [$this->outerKey => $innerKey],
             function () use ($innerKey) {
                 // todo: store pivot context as well!!! or NOT?
 
                 // todo: need easy way to get access to table
-                $tableName = $this->orm->getSchema()->define($this->targetRole, Schema::TABLE);
+                $tableName = $this->orm->getSchema()->define($this->target, Schema::TABLE);
 
                 // todo: i need parent entity name
-                $query = $this->orm->getDatabase($this->targetRole)->select()->from($tableName);
+                $query = $this->orm->getDatabase($this->target)->select()->from($tableName);
 
-                $loader = new ManyToManyLoader($this->orm, $this->targetRole, $this->relation, $this->schema);
+                $loader = new ManyToManyLoader($this->orm, $this->target, $this->name, $this->schema);
 
                 $loader = $loader->withContext(
                     $loader,
@@ -86,7 +86,7 @@ class PivotedRelation extends Relation\AbstractRelation
                 $query = $loader->configureQuery($query, [$innerKey]);
 
                 $node = new PivotedRootNode(
-                    $this->orm->getSchema()->define($this->targetRole, Schema::COLUMNS),
+                    $this->orm->getSchema()->define($this->target, Schema::COLUMNS),
                     $this->schema[Relation::PIVOT_COLUMNS],
                     $this->schema[Relation::OUTER_KEY],
                     $this->schema[Relation::THOUGHT_INNER_KEY],
@@ -101,7 +101,7 @@ class PivotedRelation extends Relation\AbstractRelation
 
                 $elements = [];
                 $pivotData = new \SplObjectStorage();
-                foreach (new Iterator($this->orm, $this->targetRole, $node->getResult()) as $pivot => $entity) {
+                foreach (new Iterator($this->orm, $this->target, $node->getResult()) as $pivot => $entity) {
                     $elements[] = $entity;
                     $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
                 }
@@ -121,7 +121,7 @@ class PivotedRelation extends Relation\AbstractRelation
         $elements = [];
         $pivotData = new \SplObjectStorage();
 
-        foreach (new Iterator($this->orm, $this->targetRole, $data) as $pivot => $entity) {
+        foreach (new Iterator($this->orm, $this->target, $data) as $pivot => $entity) {
             $elements[] = $entity;
             $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
         }

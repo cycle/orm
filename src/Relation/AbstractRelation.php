@@ -24,10 +24,10 @@ abstract class AbstractRelation implements RelationInterface
     protected $orm;
 
     /** @var string */
-    protected $targetRole;
+    protected $name;
 
     /** @var string */
-    protected $relation;
+    protected $target;
 
     /** @var array */
     protected $schema;
@@ -40,17 +40,16 @@ abstract class AbstractRelation implements RelationInterface
 
     /**
      * @param ORMInterface $orm
-     * @param string       $relation
+     * @param string       $name
      * @param string       $target
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $relation, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         $this->orm = $orm;
-        $this->targetRole = $target;
-        $this->relation = $relation;
+        $this->name = $name;
+        $this->target = $target;
         $this->schema = $schema;
-
         $this->innerKey = $schema[Relation::INNER_KEY];
         $this->outerKey = $schema[Relation::OUTER_KEY];
     }
@@ -60,7 +59,7 @@ abstract class AbstractRelation implements RelationInterface
      */
     public function getName(): string
     {
-        return $this->relation;
+        return $this->name;
     }
 
     /**
@@ -76,7 +75,7 @@ abstract class AbstractRelation implements RelationInterface
      */
     public function init(array $data): array
     {
-        $item = $this->orm->make($this->targetRole, $data, Node::MANAGED);
+        $item = $this->orm->make($this->target, $data, Node::MANAGED);
 
         return [$item, $item];
     }
@@ -103,7 +102,7 @@ abstract class AbstractRelation implements RelationInterface
     public function __toString()
     {
         // this is incorrect class
-        return sprintf("%s->%s", $this->targetRole, $this->relation);
+        return sprintf("%s->%s", $this->target, $this->name);
     }
 
     /**
@@ -157,24 +156,6 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
-     * @return ORMInterface
-     */
-    protected function getORM(): ORMInterface
-    {
-        return $this->orm;
-    }
-
-    /**
-     * @deprecated
-     * @param $key
-     * @return mixed|null
-     */
-    protected function define($key)
-    {
-        return $this->schema[$key] ?? null;
-    }
-
-    /**
      * Get selectable mapper associated with a role.
      *
      * @param string|null $role
@@ -184,7 +165,7 @@ abstract class AbstractRelation implements RelationInterface
      */
     protected function getMapper(string $role = null): SelectableInterface
     {
-        $mapper = $this->orm->getMapper($role ?? $this->targetRole);
+        $mapper = $this->orm->getMapper($role ?? $this->target);
         if (!$mapper instanceof SelectableInterface) {
             throw new RelationException("Relation {$this} can only with with SelectableInterface mappers");
         }

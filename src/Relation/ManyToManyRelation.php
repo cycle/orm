@@ -40,15 +40,15 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * @param ORMInterface $orm
      * @param string       $target
-     * @param string       $relation
+     * @param string       $name
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $relation, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $relation, $target, $schema);
+        parent::__construct($orm, $name, $target, $schema);
 
-        $this->thoughtInnerKey = $this->define(Relation::THOUGHT_INNER_KEY);
-        $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
+        $this->thoughtInnerKey = $this->schema[Relation::THOUGHT_INNER_KEY] ?? null;
+        $this->thoughtOuterKey = $this->schema[Relation::THOUGHT_OUTER_KEY] ?? null;
     }
 
     public function initPromise(Node $point): array
@@ -59,7 +59,7 @@ class ManyToManyRelation extends AbstractRelation
 
         // todo: context promise (!)
         $pr = new PivotedPromise(
-            $this->targetRole,
+            $this->target,
             [$this->outerKey => $innerKey],
             function () use ($innerKey) {
                 // todo: store pivot context as well!!! or NOT?
@@ -68,12 +68,12 @@ class ManyToManyRelation extends AbstractRelation
                 // repository won't work here
 
                 // todo: need easy way to get access to table
-                $tableName = $this->orm->getSchema()->define($this->targetRole, Schema::TABLE);
+                $tableName = $this->orm->getSchema()->define($this->target, Schema::TABLE);
 
                 // todo: i need parent entity name
-                $query = $this->orm->getDatabase($this->targetRole)->select()->from($tableName);
+                $query = $this->orm->getDatabase($this->target)->select()->from($tableName);
 
-                $loader = new ManyToManyLoader($this->orm, $this->targetRole, $this->relation, $this->schema);
+                $loader = new ManyToManyLoader($this->orm, $this->target, $this->name, $this->schema);
 
                 $loader = $loader->withContext(
                     $loader,
@@ -88,7 +88,7 @@ class ManyToManyRelation extends AbstractRelation
                 $query = $loader->configureQuery($query, [$innerKey]);
 
                 $node = new PivotedRootNode(
-                    $this->orm->getSchema()->define($this->targetRole, Schema::COLUMNS),
+                    $this->orm->getSchema()->define($this->target, Schema::COLUMNS),
                     $this->schema[Relation::PIVOT_COLUMNS],
                     $this->schema[Relation::OUTER_KEY],
                     $this->schema[Relation::THOUGHT_INNER_KEY],
@@ -104,7 +104,7 @@ class ManyToManyRelation extends AbstractRelation
 
                 $elements = [];
                 $pivotData = new \SplObjectStorage();
-                foreach (new Iterator($this->orm, $this->targetRole, $node->getResult()) as $pivot => $entity) {
+                foreach (new Iterator($this->orm, $this->target, $node->getResult()) as $pivot => $entity) {
                     $pivotData[$entity] = $pivot;
                     $elements[] = $entity;
                 }
@@ -124,7 +124,7 @@ class ManyToManyRelation extends AbstractRelation
         $elements = [];
         $pivotData = new \SplObjectStorage();
 
-        foreach (new Iterator($this->orm, $this->targetRole, $data) as $pivot => $entity) {
+        foreach (new Iterator($this->orm, $this->target, $data) as $pivot => $entity) {
             $pivotData[$entity] = $pivot;
             $elements[] = $entity;
         }
@@ -254,7 +254,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function pivotDatabase(): DatabaseInterface
     {
-        return $this->orm->getDatabase($this->targetRole);
+        return $this->orm->getDatabase($this->target);
     }
 
     /**
@@ -262,6 +262,6 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function pivotTable(): string
     {
-        return $this->define(Relation::PIVOT_TABLE);
+        return $this->schema[Relation::PIVOT_TABLE] ?? null;
     }
 }

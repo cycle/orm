@@ -36,11 +36,11 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->get($this->targetRole, $scope, false))) {
+        if (!empty($e = $this->orm->get($this->target, $scope, false))) {
             return [$e, $e];
         }
 
-        $p = new Promise\PromiseOne($this->orm, $this->targetRole, $scope);
+        $p = new Promise\PromiseOne($this->orm, $this->target, $scope);
 
         return [$p, $p];
     }

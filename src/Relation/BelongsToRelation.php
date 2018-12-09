@@ -34,7 +34,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->get($this->targetRole, $scope, false))) {
+        if (!empty($e = $this->orm->get($this->target, $scope, false))) {
             return [$e, $e];
         }
 
@@ -42,7 +42,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         if ($mapper instanceof ProxyFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {
-            $p = new Promise\PromiseOne($this->orm, $mapper->getRole(), $scope);
+            $p = new Promise\PromiseOne($this->orm, $this->target, $scope);
         }
 
         return [$p, $p];

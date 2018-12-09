@@ -96,24 +96,7 @@ class Heap implements HeapInterface, \IteratorAggregate
             }
         }
 
-        // todo: DEPRECATE
-        $this->paths = array_filter($this->paths, function ($value) use ($entity) {
-            return $value !== $entity;
-        });
-
         $this->storage->offsetUnset($entity);
-    }
-
-    public function hasPath(string $path)
-    {
-        // todo: this is fun, optimization is required
-        return isset($this->paths[$path]);
-    }
-
-    // todo: this is fun
-    public function getPath(string $path)
-    {
-        return $this->paths[$path];
     }
 
     /**

@@ -10,11 +10,11 @@ namespace Spiral\ORM\Loader\Relation;
 
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
+use Spiral\ORM\Generator\AbstractNode;
+use Spiral\ORM\Generator\SingularNode;
 use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Generator\AbstractNode;
-use Spiral\ORM\Generator\SingularNode;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
@@ -25,8 +25,6 @@ use Spiral\ORM\Generator\SingularNode;
  */
 class HasOneLoader extends JoinableLoader
 {
-    // todo: where trait
-
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *

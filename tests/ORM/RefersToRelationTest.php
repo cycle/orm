@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
+use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -199,7 +199,6 @@ abstract class RefersToRelationTest extends BaseTest
         } catch (\Throwable $e) {
             throw $e;
         } finally {
-            // todo: state verification
             $this->orm = $this->orm->withHeap(new Heap());
         }
     }

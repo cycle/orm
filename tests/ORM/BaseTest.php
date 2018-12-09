@@ -27,7 +27,6 @@ use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
 use Spiral\ORM\Util\PivotedPromise;
 
-// todo: TEST WITH FK
 abstract class BaseTest extends TestCase
 {
     // tests configuration

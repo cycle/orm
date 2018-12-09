@@ -17,9 +17,6 @@ use Spiral\ORM\Exception\MapperException;
  */
 interface MapperInterface
 {
-    // points to the scope which must be applied to all queries
-    public const SCOPE_DEFAULT = '@default';
-
     /**
      * Get role name mapper is responsible for.
      *

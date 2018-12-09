@@ -10,9 +10,9 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\Control\Condition;
-use Spiral\ORM\Command\Control\Nil;
-use Spiral\ORM\Command\Control\PrimarySequence;
+use Spiral\ORM\Command\Branch\Condition;
+use Spiral\ORM\Command\Branch\Nil;
+use Spiral\ORM\Command\Branch\PrimarySequence;
 use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Util\Promise;

@@ -26,7 +26,7 @@ final class Transaction implements TransactionInterface
     private $orm;
 
     /** @var \SplObjectStorage */
-    private $managed;
+    private $known;
 
     /** @var array */
     private $store = [];
@@ -38,7 +38,7 @@ final class Transaction implements TransactionInterface
     public function __construct(ORMInterface $orm)
     {
         $this->orm = $orm;
-        $this->managed = new \SplObjectStorage();
+        $this->known = new \SplObjectStorage();
     }
 
     /**
@@ -46,10 +46,10 @@ final class Transaction implements TransactionInterface
      */
     public function store($entity)
     {
-        if ($this->managed->offsetExists($entity)) {
+        if ($this->known->offsetExists($entity)) {
             return;
         }
-        $this->managed->offsetSet($entity, true);
+        $this->known->offsetSet($entity, true);
 
         $this->store[] = $entity;
     }
@@ -59,10 +59,10 @@ final class Transaction implements TransactionInterface
      */
     public function delete($entity)
     {
-        if ($this->managed->offsetExists($entity)) {
+        if ($this->known->offsetExists($entity)) {
             return;
         }
-        $this->managed->offsetSet($entity, true);
+        $this->known->offsetSet($entity, true);
 
         $this->delete[] = $entity;
     }
@@ -110,62 +110,69 @@ final class Transaction implements TransactionInterface
                 $commands = $pending;
             }
         } catch (\Throwable $e) {
+            // close all open and normalized database transactions
             foreach (array_reverse($drivers) as $driver) {
                 /** @var DriverInterface $driver */
                 $driver->rollbackTransaction();
             }
 
+            // close all of external types of transactions (revert changes)
             foreach (array_reverse($executed) as $command) {
                 /** @var CommandInterface $command */
                 $command->rollBack();
             }
 
-            $this->resetStates();
+            // no calculations must be kept in node states, resetting
+            // this will keep entity data as it was before transaction run
+            $this->resetHeap();
 
             throw $e;
         } finally {
             if (empty($e)) {
-                $this->syncStates();
+                // we are ready to commit all changes to our representation layer
+                $this->syncHeap();
             }
         }
 
+        // commit all of the open and normalized database transactions
         foreach (array_reverse($drivers) as $driver) {
             /** @var DriverInterface $driver */
             $driver->commitTransaction();
         }
 
         foreach ($executed as $command) {
-            // deliver all generated values to the linked entities
+            // other type of transaction to close
             $command->complete();
         }
 
         // resetting the scope
-        $this->store = [];
-        $this->delete = [];
-        $this->managed = new \SplObjectStorage();
+        $this->store = $this->delete = [];
+        $this->known = new \SplObjectStorage();
     }
 
     /**
      * Sync all entity states with generated changes.
      */
-    protected function syncStates()
+    protected function syncHeap()
     {
         foreach ($this->orm->getHeap() as $entity) {
-            $point = $this->orm->getHeap()->get($entity);
+            $node = $this->orm->getHeap()->get($entity);
 
-            if ($point->getStatus() == Node::SCHEDULED_DELETE && !$point->getState()->hasClaims()) {
+            // marked as being deleted and has no external claims (GC like approach)
+            if ($node->getStatus() == Node::SCHEDULED_DELETE && !$node->getState()->hasClaims()) {
                 $this->orm->getHeap()->detach($entity);
                 continue;
             }
 
-            $this->orm->getMapper($entity)->hydrate($entity, $point->syncState());
+            // sync the current entity data with newly generated data
+            $this->orm->getMapper($entity)->hydrate($entity, $node->syncState());
         }
     }
 
     /**
      * Reset heap to it's initial state and remove all the changes.
      */
-    protected function resetStates()
+    protected function resetHeap()
     {
         foreach ($this->orm->getHeap() as $entity) {
             $this->orm->getHeap()->get($entity)->resetState();
@@ -184,7 +191,7 @@ final class Transaction implements TransactionInterface
             $commands[] = $this->orm->queueStore($entity);
         }
 
-        // add custom commands?
+        // other commands?
 
         foreach ($this->delete as $entity) {
             $commands[] = $this->orm->queueDelete($entity);
@@ -244,8 +251,9 @@ final class Transaction implements TransactionInterface
     {
         $errors = [];
         foreach ($commands as $command) {
-            if (method_exists($command, '__toString')) {
-                $errors[] = $command->__toString();
+            // i miss you Go
+            if (method_exists($command, '__toError')) {
+                $errors[] = $command->__toError();
             } else {
                 $errors[] = get_class($command);
             }

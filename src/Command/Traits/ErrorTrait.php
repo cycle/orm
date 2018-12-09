@@ -8,10 +8,10 @@
 
 namespace Spiral\ORM\Command\Traits;
 
-// i miss you go
+// describes why command has been locked up
 trait ErrorTrait
 {
-    public function __toString()
+    public function __toError()
     {
         $missing = [];
         if (property_exists($this, 'waitScope')) {

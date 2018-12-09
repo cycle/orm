@@ -10,7 +10,7 @@ namespace Spiral\ORM\Relation;
 
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\Control\Nil;
+use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Node;

@@ -160,8 +160,9 @@ final class Node implements ForwarderInterface, AcceptorInterface
             $this->setRelation($name, $relation);
         }
 
-        $this->data = $this->state->getData();
+        // DELETE handled separately
         $this->status = self::LOADED;
+        $this->data = $this->state->getData();
         $this->state = null;
 
         return $changes;

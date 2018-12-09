@@ -9,8 +9,8 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\CarrierInterface;
-use Spiral\ORM\Command\Control\PrimarySequence;
-use Spiral\ORM\Command\Control\Sequence;
+use Spiral\ORM\Command\Branch\PrimarySequence;
+use Spiral\ORM\Command\Branch\Sequence;
 
 /**
  * Generates set of linked commands required to persis or delete given dependency graph. Each

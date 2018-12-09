@@ -10,9 +10,9 @@ namespace Spiral\ORM\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Command\Control\Nil;
-use Spiral\ORM\Command\Control\PrimarySequence;
-use Spiral\ORM\Command\Control\Sequence;
+use Spiral\ORM\Command\Branch\Nil;
+use Spiral\ORM\Command\Branch\PrimarySequence;
+use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\Database\Insert;
 
 class SequenceCommandTest extends TestCase

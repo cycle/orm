@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Command\Control;
+namespace Spiral\ORM\Command\Branch;
 
 use Spiral\ORM\Command\CarrierInterface;
 

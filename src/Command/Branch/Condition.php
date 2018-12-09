@@ -6,13 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Control;
+namespace Spiral\ORM\Command\Branch;
 
 use Spiral\ORM\Command\CommandInterface;
 
 /**
- * Expose underlying command when condition is met. If condition not met - underlying command is
- * skipped.
+ * Execute branch only if condition is met.
  */
 class Condition implements CommandInterface, \IteratorAggregate
 {

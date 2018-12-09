@@ -12,7 +12,7 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\Control\Nil;
+use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Config\RelationConfig;
 
 /**

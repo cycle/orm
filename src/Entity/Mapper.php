@@ -10,8 +10,8 @@ namespace Spiral\ORM\Entity;
 
 use Spiral\ORM\Command\CarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\Control\Nil;
-use Spiral\ORM\Command\Control\Split;
+use Spiral\ORM\Command\Branch\Nil;
+use Spiral\ORM\Command\Branch\Split;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;

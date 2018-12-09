@@ -23,12 +23,8 @@ class SingularNode extends AbstractNode
      * @param string      $innerKey Inner relation key (for example user_id)
      * @param string|null $outerKey Outer (parent) relation key (for example id = parent.id)
      */
-    public function __construct(
-        array $columns,
-        string $primaryKey,
-        string $innerKey,
-        string $outerKey
-    ) {
+    public function __construct(array $columns, string $primaryKey, string $innerKey, string $outerKey)
+    {
         parent::__construct($columns, $outerKey);
         $this->setDuplicateCriteria($primaryKey);
 

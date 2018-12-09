@@ -14,8 +14,8 @@ use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Node;
+use Spiral\ORM\Relation\Traits\PromiseOneTrait;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Util\Promise;
 
 /**
  * Variation of belongs-to relation which provides the ability to be self. Relation can be used
@@ -25,25 +25,7 @@ use Spiral\ORM\Util\Promise;
  */
 class RefersToRelation extends AbstractRelation implements DependencyInterface
 {
-    /**
-     * @inheritdoc
-     */
-    public function initPromise(Node $parentNode): array
-    {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
-            return [null, null];
-        }
-
-        $scope = [$this->outerKey => $innerKey];
-
-        if (!empty($e = $this->orm->get($this->target, $scope, false))) {
-            return [$e, $e];
-        }
-
-        $p = new Promise\PromiseOne($this->orm, $this->target, $scope);
-
-        return [$p, $p];
-    }
+    use PromiseOneTrait;
 
     /**
      * @inheritdoc
@@ -84,7 +66,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         /*
          * REMEMBER THE CYCLES!!!!
-         */
+        */
 
 
         //  if (!empty($relState->getCommand())) {

@@ -10,6 +10,7 @@ namespace Spiral\ORM\Relation\Morphed;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
+use Spiral\ORM\Mapper\ProxyFactoryInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -45,10 +46,17 @@ class MorphedHasOneRelation extends HasOneRelation
             return [null, null];
         }
 
-        $p = new Promise\PromiseOne($this->orm, $this->target, [
+        $scope = [
             $this->outerKey => $innerKey,
             $this->morphKey => $parentNode->getRole()
-        ]);
+        ];
+
+        $mapper = $this->getMapper();
+        if ($mapper instanceof ProxyFactoryInterface) {
+            $p = $mapper->initProxy($scope);
+        } else {
+            $p = new Promise\PromiseOne($this->orm, $this->target, $scope);
+        }
 
         return [$p, $p];
     }

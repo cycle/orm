@@ -15,22 +15,22 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\RelationInterface;
-use Spiral\ORM\Schema;
+use Spiral\ORM\SchemaInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
     use Traits\ContextTrait;
 
-    /**
-     * @invisible
-     * @var ORMInterface
-     */
+    /** @var ORMInterface @internal */
     protected $orm;
 
+    /** @var string */
     protected $targetRole;
 
+    /** @var string */
     protected $relation;
 
+    /** @var array */
     protected $schema;
 
     /** @var string */
@@ -39,6 +39,12 @@ abstract class AbstractRelation implements RelationInterface
     /** @var string */
     protected $outerKey;
 
+    /**
+     * @param ORMInterface $orm
+     * @param string       $class
+     * @param string       $relation
+     * @param array        $schema
+     */
     public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
     {
         $this->orm = $orm;
@@ -58,21 +64,25 @@ abstract class AbstractRelation implements RelationInterface
         return $this->relation;
     }
 
-
-    public function isRequired(): bool
+    /**
+     * @inheritdoc
+     */
+    public function getRole(): string
     {
-        if (array_key_exists(Relation::NULLABLE, $this->schema)) {
-            return !$this->schema[Relation::NULLABLE];
-        }
-
-        return true;
+        return $this->orm->getSchema()->define($this->targetRole, SchemaInterface::ALIAS);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function isCascade(): bool
     {
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function init(array $data): array
     {
         $item = $this->orm->make($this->targetRole, $data, Node::MANAGED);
@@ -80,16 +90,21 @@ abstract class AbstractRelation implements RelationInterface
         return [$item, $item];
     }
 
-    public function initPromise(Node $point): array
-    {
-        return [null, null];
-    }
-
+    /**
+     * @inheritdoc
+     */
     public function extract($data)
     {
         return $data;
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function initPromise(Node $point): array
+    {
+        return [null, null];
+    }
 
     /**
      * @return string
@@ -100,11 +115,28 @@ abstract class AbstractRelation implements RelationInterface
         return sprintf("%s->%s", $this->targetRole, $this->relation);
     }
 
-    protected function define($key)
+    /**
+     * Indicates that relation can not be nullable.
+     *
+     * @return bool
+     */
+    protected function isRequired(): bool
     {
-        return $this->schema[$key] ?? null;
+        if (array_key_exists(Relation::NULLABLE, $this->schema)) {
+            return !$this->schema[Relation::NULLABLE];
+        }
+
+        return true;
     }
 
+    /**
+     * Get Node for the given entity. Null if entity does not exists. Automatically
+     * register entity claims.
+     *
+     * @param object $entity
+     * @param int    $claim
+     * @return Node|null
+     */
     protected function getNode($entity, int $claim = 0): ?Node
     {
         if (is_null($entity)) {
@@ -112,37 +144,44 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         if ($entity instanceof PromiseInterface) {
-            return new Node(
-                Node::PROMISED,
-                $entity->__scope(),
-                $this->orm->getSchema()->define($this->targetRole, Schema::ALIAS)
-            );
+            return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
         }
 
-        $state = $this->orm->getHeap()->get($entity);
+        $node = $this->orm->getHeap()->get($entity);
 
-        if (is_null($state)) {
-            $state = new Node(Node::NEW, [],
-                $this->orm->getSchema()->define($this->targetRole, Schema::ALIAS)
-            );
-
-            $this->orm->getHeap()->attach($entity, $state);
+        if (is_null($node)) {
+            $node = new Node(Node::NEW, [], $this->getRole());
+            $this->orm->getHeap()->attach($entity, $node);
         }
 
         if ($claim === 1) {
-            $state->getState()->addClaim();
+            $node->getState()->addClaim();
         }
 
         if ($claim === -1) {
-            $state->getState()->decClaim();
+            $node->getState()->decClaim();
         }
 
-        return $state;
+        return $node;
     }
 
+    /**
+     * @deprecated
+     * @return ORMInterface
+     */
     protected function getORM(): ORMInterface
     {
         return $this->orm;
+    }
+
+    /**
+     * @deprecated
+     * @param $key
+     * @return mixed|null
+     */
+    protected function define($key)
+    {
+        return $this->schema[$key] ?? null;
     }
 
     /**

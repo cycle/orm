@@ -9,10 +9,10 @@
 namespace Spiral\ORM\Relation\Morphed;
 
 
-use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Node;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\BelongsToRelation;
@@ -59,6 +59,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
         //        // todo: i don't like carrying alias in a context (!!!!)
         //        // this is not right (!!)
         $pr = new Promise(
+            $this->fetchKey($point, $this->morphKey),
             [
                 $this->outerKey => $innerKey,
                 $this->morphKey => $this->fetchKey($point, $this->morphKey)

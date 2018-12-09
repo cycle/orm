@@ -25,6 +25,13 @@ interface RelationInterface
     public function getName(): string;
 
     /**
+     * Return the entity role relation points to.
+     *
+     * @return string
+     */
+    public function getRole(): string;
+
+    /**
      * Must return true to trigger queue.
      *
      * @return bool

@@ -24,12 +24,16 @@ class Promise implements PromiseInterface
     /** @var array */
     private $scope;
 
+    private $role;
+
     /**
+     * @param string   $role
      * @param array    $scope
      * @param callable $promise
      */
-    public function __construct(array $scope, callable $promise)
+    public function __construct(string $role, array $scope, callable $promise)
     {
+        $this->role = $role;
         $this->promise = $promise;
         $this->scope = $scope;
     }
@@ -40,6 +44,11 @@ class Promise implements PromiseInterface
     public function __loaded(): bool
     {
         return empty($this->promise);
+    }
+
+    public function __role(): string
+    {
+        return $this->role;
     }
 
     /**

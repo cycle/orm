@@ -26,6 +26,8 @@ class PromiseArray implements PromiseInterface
     /** @var mixed */
     private $result;
 
+    private $role;
+
     /**
      * PromiseMany constructor.
      *
@@ -33,8 +35,9 @@ class PromiseArray implements PromiseInterface
      * @param array               $scope
      * @param array               $orderBy
      */
-    public function __construct(RepositoryInterface $repository, array $scope, array $orderBy = [])
+    public function __construct($role, RepositoryInterface $repository, array $scope, array $orderBy = [])
     {
+        $this->role = $role;
         $this->repository = $repository;
         $this->scope = $scope;
         $this->orderBy = $orderBy;
@@ -46,6 +49,11 @@ class PromiseArray implements PromiseInterface
     public function __loaded(): bool
     {
         return empty($this->promise);
+    }
+
+    public function __role(): string
+    {
+        return $this->role;
     }
 
     /**

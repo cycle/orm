@@ -11,20 +11,20 @@ namespace Spiral\ORM\Relation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Sequence;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\RelationLoader;
-use Spiral\ORM\TreeGenerator\PivotedRootNode;
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
+use Spiral\ORM\TreeGenerator\PivotedRootNode;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
 use Spiral\ORM\Util\PivotedPromise;
@@ -59,6 +59,7 @@ class ManyToManyRelation extends AbstractRelation
 
         // todo: context promise (!)
         $pr = new PivotedPromise(
+            $this->targetRole,
             [$this->outerKey => $innerKey],
             function () use ($innerKey) {
                 // todo: store pivot context as well!!! or NOT?

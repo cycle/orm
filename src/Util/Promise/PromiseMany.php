@@ -11,6 +11,7 @@ namespace Spiral\ORM\Util\Promise;
 
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\SchemaInterface;
 
 class PromiseMany implements PromiseInterface
 {
@@ -53,6 +54,11 @@ class PromiseMany implements PromiseInterface
     public function __loaded(): bool
     {
         return empty($this->promise);
+    }
+
+    public function __role(): string
+    {
+        return $this->orm->getSchema()->define($this->class, SchemaInterface::ALIAS);
     }
 
     /**

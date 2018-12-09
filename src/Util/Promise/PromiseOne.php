@@ -10,6 +10,7 @@ namespace Spiral\ORM\Util\Promise;
 
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\SchemaInterface;
 
 /**
  * Promises one class and resolves the result via ORM heap or entity repository.
@@ -28,16 +29,19 @@ class PromiseOne implements PromiseInterface
     /** @var mixed */
     private $result;
 
+    private $mrole;
+
     /**
      * @param ORMInterface $orm
      * @param string       $class
      * @param array        $scope
      */
-    public function __construct(ORMInterface $orm, string $class, array $scope)
+    public function __construct(ORMInterface $orm, string $class, array $scope, $mrole = null)
     {
         $this->orm = $orm;
         $this->class = $class;
         $this->scope = $scope;
+        $this->mrole = $mrole;
     }
 
     /**
@@ -46,6 +50,13 @@ class PromiseOne implements PromiseInterface
     public function __loaded(): bool
     {
         return empty($this->promise);
+    }
+
+    public function __role(): string
+    {
+
+
+        return $this->mrole ?? $this->orm->getSchema()->define($this->class, SchemaInterface::ALIAS);
     }
 
     /**

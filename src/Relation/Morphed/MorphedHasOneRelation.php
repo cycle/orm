@@ -8,10 +8,10 @@
 
 namespace Spiral\ORM\Relation\Morphed;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Node;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasOneRelation;
 use Spiral\ORM\Util\Promise;
@@ -45,10 +45,15 @@ class MorphedHasOneRelation extends HasOneRelation
             return [null, null];
         }
 
-        $p = new Promise\PromiseOne($this->orm, $this->targetRole, [
-            $this->outerKey => $innerKey,
-            $this->morphKey => $point->getRole()
-        ]);
+        $p = new Promise\PromiseOne(
+            $this->orm,
+            $this->targetRole,
+            [
+                $this->outerKey => $innerKey,
+                $this->morphKey => $point->getRole()
+            ],
+            $point->getRole()
+        );
 
         return [$p, $p];
     }

@@ -21,6 +21,13 @@ interface PromiseInterface
     public function __loaded(): bool;
 
     /**
+     * Entity role associated with the promise.
+     *
+     * @return string
+     */
+    public function __role(): string;
+
+    /**
      * Return association data used to resolve the promise.
      * In most of cases simply contain outer key name and it's
      * value.

@@ -16,8 +16,8 @@ use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\TreeGenerator\AbstractNode;
-use Spiral\ORM\TreeGenerator\ArrayNode;
+use Spiral\ORM\Generator\AbstractNode;
+use Spiral\ORM\Generator\ArrayNode;
 
 class HasManyLoader extends JoinableLoader
 {

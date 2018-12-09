@@ -15,7 +15,7 @@ use Spiral\ORM\Exception\LoaderException;
 use Spiral\ORM\Loader\Traits\ChainTrait;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\Generator\AbstractNode;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,

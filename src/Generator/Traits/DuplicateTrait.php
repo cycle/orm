@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\TreeGenerator\Traits;
+namespace Spiral\ORM\Generator\Traits;
 
 /**
  * Trait provides ability for Node to ensure that given data is unique in selection. Primary key

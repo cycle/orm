@@ -13,8 +13,8 @@ use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\TreeGenerator\AbstractNode;
-use Spiral\ORM\TreeGenerator\SingularNode;
+use Spiral\ORM\Generator\AbstractNode;
+use Spiral\ORM\Generator\SingularNode;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.

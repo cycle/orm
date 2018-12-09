@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Exception\LoaderException;
-use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\Generator\AbstractNode;
 
 /**
  * Loaders provide the ability to create data tree based on set of nested queries or parse resulted

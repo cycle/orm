@@ -14,7 +14,7 @@ use Spiral\ORM\Loader\Traits\ColumnsTrait;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schema;
-use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\Generator\AbstractNode;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.

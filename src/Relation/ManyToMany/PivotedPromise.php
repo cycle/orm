@@ -17,7 +17,7 @@ use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\TreeGenerator\PivotedRootNode;
+use Spiral\ORM\Generator\PivotedRootNode;
 use Spiral\ORM\Util\ContextStorage;
 use Spiral\ORM\Util\Promise\PivotedPromiseInterface;
 

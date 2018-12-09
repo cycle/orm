@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\TreeGenerator;
+namespace Spiral\ORM\Generator;
 
 /**
  * Node without specified parent.

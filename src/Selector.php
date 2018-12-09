@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Loader\RootLoader;
 use Spiral\ORM\Loader\Scope\ScopeInterface;
-use Spiral\ORM\TreeGenerator\OutputNode;
+use Spiral\ORM\Generator\OutputNode;
 use Spiral\ORM\Util\QueryWrapper;
 
 /**

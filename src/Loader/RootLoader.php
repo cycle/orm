@@ -49,7 +49,7 @@ class RootLoader extends AbstractLoader
      */
     public function getAlias(): string
     {
-        return $this->orm->getSchema()->define($this->class, Schema::ALIAS);
+        return $this->orm->getSchema()->define($this->role, Schema::ALIAS);
     }
 
     /**

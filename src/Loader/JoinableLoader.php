@@ -10,11 +10,12 @@ namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Exception\LoaderException;
+use Spiral\ORM\Generator\AbstractNode;
 use Spiral\ORM\Loader\Traits\ColumnsTrait;
 use Spiral\ORM\LoaderInterface;
+use Spiral\ORM\Mapper\SelectableInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Generator\AbstractNode;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
@@ -174,6 +175,16 @@ abstract class JoinableLoader extends AbstractLoader
         } else {
             // this is initial set of columns (remove all existed)
             $this->mountColumns($query, $this->options['minify'], '', true);
+        }
+
+        // apply the global scope
+        if (!empty($this->options['using'])) {
+            $mapper = $this->orm->getMapper($this->role);
+            if ($mapper instanceof SelectableInterface) {
+                if (!empty($scope = $mapper->getScope())) {
+                    $query = $scope->apply($query);
+                }
+            }
         }
 
         return parent::configureQuery($query);

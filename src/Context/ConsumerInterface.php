@@ -27,5 +27,10 @@ interface ConsumerInterface
      * @param bool   $update Indicates that value has not been handled by any other acceptor.
      * @param int    $stream One of the context types (data context, scope context).
      */
-    public function register(string $key, $value, bool $update = false, int $stream = self::DATA);
+    public function register(
+        string $key,
+        $value,
+        bool $update = false,
+        int $stream = self::DATA
+    );
 }

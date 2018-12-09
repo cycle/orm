@@ -73,9 +73,7 @@ abstract class JoinableLoader extends AbstractLoader
 
         if ($loader->getDatabase() !== $parent->getDatabase()) {
             if ($loader->isJoined()) {
-                throw new LoaderException(
-                    'Unable to join tables located in different databases'
-                );
+                throw new LoaderException("Unable to join tables located in different databases");
             }
 
             // loader is not joined, let's make sure that POSTLOAD is used

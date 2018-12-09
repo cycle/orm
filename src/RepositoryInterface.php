@@ -13,10 +13,6 @@ namespace Spiral\ORM;
  */
 interface RepositoryInterface
 {
-    // OrderBy options.
-    const SORT_ASC  = 'ASC';
-    const SORT_DESC = 'DESC';
-
     /**
      * Find entity by the primary key value or return null.
      *
@@ -37,8 +33,7 @@ interface RepositoryInterface
      * Find multiple entities using given scope and sort options.
      *
      * @param array $scope
-     * @param array $orderBy
      * @return iterable
      */
-    public function findAll(array $scope = [], array $orderBy = []): iterable;
+    public function findAll(array $scope = []): iterable;
 }

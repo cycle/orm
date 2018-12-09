@@ -46,6 +46,7 @@ class ManyToManyRelation extends AbstractRelation
     public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
     {
         parent::__construct($orm, $class, $relation, $schema);
+
         $this->thoughtInnerKey = $this->define(Relation::THOUGHT_INNER_KEY);
         $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);
     }
@@ -66,12 +67,12 @@ class ManyToManyRelation extends AbstractRelation
                 // repository won't work here
 
                 // todo: need easy way to get access to table
-                $tableName = $this->orm->getSchema()->define($this->class, Schema::TABLE);
+                $tableName = $this->orm->getSchema()->define($this->targetRole, Schema::TABLE);
 
                 // todo: i need parent entity name
-                $query = $this->orm->getDatabase($this->class)->select()->from($tableName);
+                $query = $this->orm->getDatabase($this->targetRole)->select()->from($tableName);
 
-                $loader = new ManyToManyLoader($this->orm, $this->class, $this->relation, $this->schema);
+                $loader = new ManyToManyLoader($this->orm, $this->targetRole, $this->relation, $this->schema);
 
                 $loader = $loader->withContext(
                     $loader,
@@ -86,7 +87,7 @@ class ManyToManyRelation extends AbstractRelation
                 $query = $loader->configureQuery($query, [$innerKey]);
 
                 $node = new PivotedRootNode(
-                    $this->orm->getSchema()->define($this->class, Schema::COLUMNS),
+                    $this->orm->getSchema()->define($this->targetRole, Schema::COLUMNS),
                     $this->schema[Relation::PIVOT_COLUMNS],
                     $this->schema[Relation::OUTER_KEY],
                     $this->schema[Relation::THOUGHT_INNER_KEY],
@@ -102,7 +103,7 @@ class ManyToManyRelation extends AbstractRelation
 
                 $elements = [];
                 $pivotData = new \SplObjectStorage();
-                foreach (new Iterator($this->orm, $this->class, $node->getResult()) as $pivot => $entity) {
+                foreach (new Iterator($this->orm, $this->targetRole, $node->getResult()) as $pivot => $entity) {
                     $pivotData[$entity] = $pivot;
                     $elements[] = $entity;
                 }
@@ -122,7 +123,7 @@ class ManyToManyRelation extends AbstractRelation
         $elements = [];
         $pivotData = new \SplObjectStorage();
 
-        foreach (new Iterator($this->orm, $this->class, $data) as $pivot => $entity) {
+        foreach (new Iterator($this->orm, $this->targetRole, $data) as $pivot => $entity) {
             $pivotData[$entity] = $pivot;
             $elements[] = $entity;
         }
@@ -252,7 +253,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function pivotDatabase(): DatabaseInterface
     {
-        return $this->orm->getDatabase($this->class);
+        return $this->orm->getDatabase($this->targetRole);
     }
 
     /**

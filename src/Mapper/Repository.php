@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Entity;
+namespace Spiral\ORM\Mapper;
 
 use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Selector;
@@ -69,7 +69,7 @@ class Repository implements RepositoryInterface
      * @param callable $scope
      * @return Repository
      */
-    public function withScope(callable $scope): SourceInterface
+    public function withScope(callable $scope): self
     {
         $repository = clone $this;
         call_user_func($scope, $repository->selector);

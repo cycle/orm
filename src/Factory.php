@@ -56,7 +56,7 @@ class Factory implements FactoryInterface
     {
         return $this->factory->make($this->getSchema()->define($class, Schema::MAPPER), [
             'orm'    => $this->orm,
-            'class'  => $class,
+            'role'   => $class,
             'schema' => $this->getSchema()->define($class, Schema::SCHEMA)
         ]);
     }

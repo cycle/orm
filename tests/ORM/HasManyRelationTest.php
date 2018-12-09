@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Entity\Mapper;
+use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Loader\RelationLoader;
 use Spiral\ORM\Relation;
@@ -58,7 +58,7 @@ abstract class HasManyRelationTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->orm->withSchema(new Schema([
+        $this->orm = $this->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
                 Schema::MAPPER      => Mapper::class,

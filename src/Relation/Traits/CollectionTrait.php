@@ -27,7 +27,7 @@ trait CollectionTrait
     {
         $result = [];
         foreach ($data as $item) {
-            $result[] = $this->getORM()->make($this->class, $item, Node::LOADED);
+            $result[] = $this->getORM()->make($this->targetRole, $item, Node::LOADED);
         }
 
         return [new ArrayCollection($result), $result];

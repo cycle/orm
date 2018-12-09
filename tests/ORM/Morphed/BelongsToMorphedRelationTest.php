@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests\Morphed;
 
-use Spiral\ORM\Entity\Mapper;
+use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
@@ -80,7 +80,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->orm->withSchema(new Schema([
+        $this->orm = $this->withSchema(new Schema([
             User::class  => [
                 Schema::ALIAS       => 'user',
                 Schema::MAPPER      => Mapper::class,

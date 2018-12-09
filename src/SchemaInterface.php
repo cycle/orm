@@ -20,10 +20,11 @@ interface SchemaInterface
     public const PRIMARY_KEY  = 5;
     public const CAPTURE_KEYS = 6;
     public const COLUMNS      = 7;
-    public const SCHEMA       = 8;
-    public const RELATIONS    = 9;
-    public const EXTENDS      = 10;
-    public const CHILDREN     = 11;
+    public const COLUMN_TYPES = 8;
+    public const SCHEMA       = 9;
+    public const RELATIONS    = 10;
+    public const EXTENDS      = 11;
+    public const CHILDREN     = 12;
 
     /**
      * Define schema value.

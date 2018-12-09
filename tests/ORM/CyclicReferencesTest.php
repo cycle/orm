@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Entity\Mapper;
+use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -46,7 +46,7 @@ abstract class CyclicReferencesTest extends BaseTest
             'comment_id' => 'integer'
         ]);
 
-        $this->orm = $this->orm->withSchema(new Schema([
+        $this->orm = $this->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
                 Schema::MAPPER      => Mapper::class,

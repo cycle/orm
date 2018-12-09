@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Entity;
+namespace Spiral\ORM\Mapper;
 
 use Spiral\ORM\Exception\MapperException;
 use Spiral\ORM\MapperInterface;

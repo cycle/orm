@@ -11,7 +11,7 @@ namespace Spiral\ORM\Command\Database;
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\DatabaseCommand;
-use Spiral\ORM\Command\ScopedInterface;
+use Spiral\ORM\Command\ScopeCarrierInterface;
 use Spiral\ORM\Command\Traits\ContextTrait;
 use Spiral\ORM\Command\Traits\ErrorTrait;
 use Spiral\ORM\Command\Traits\ScopeTrait;
@@ -22,7 +22,7 @@ use Spiral\ORM\Exception\CommandException;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class Update extends DatabaseCommand implements ContextCarrierInterface, ScopedInterface
+class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
 {
     use ContextTrait, ScopeTrait, ErrorTrait;
 

@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relation\Traits;
 
 use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\ScopedInterface;
+use Spiral\ORM\Command\ScopeCarrierInterface;
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Node;
 
@@ -51,18 +51,18 @@ trait ContextTrait
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
      *
-     * @param Node            $from
-     * @param string          $fromKey
-     * @param ScopedInterface $carrier
-     * @param string          $toKey
-     * @return ScopedInterface
+     * @param Node                  $from
+     * @param string                $fromKey
+     * @param ScopeCarrierInterface $carrier
+     * @param string                $toKey
+     * @return ScopeCarrierInterface
      */
     protected function forwardScope(
         Node $from,
         string $fromKey,
-        ScopedInterface $carrier,
+        ScopeCarrierInterface $carrier,
         string $toKey
-    ): ScopedInterface {
+    ): ScopeCarrierInterface {
         $carrier->waitScope($toKey);
         $from->listen($fromKey, $carrier, $toKey, true, ConsumerInterface::SCOPE);
 

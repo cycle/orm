@@ -25,7 +25,7 @@ abstract class AbstractRelation implements RelationInterface
      */
     protected $orm;
 
-    protected $class;
+    protected $targetRole;
 
     protected $relation;
 
@@ -40,7 +40,7 @@ abstract class AbstractRelation implements RelationInterface
     public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
     {
         $this->orm = $orm;
-        $this->class = $class;
+        $this->targetRole = $class;
         $this->relation = $relation;
         $this->schema = $schema;
         $this->innerKey = $this->define(Relation::INNER_KEY);
@@ -58,7 +58,7 @@ abstract class AbstractRelation implements RelationInterface
     public function __toString()
     {
         // this is incorrect class
-        return sprintf("%s->%s", $this->class, $this->relation);
+        return sprintf("%s->%s", $this->targetRole, $this->relation);
     }
 
     public function isRequired(): bool
@@ -77,7 +77,7 @@ abstract class AbstractRelation implements RelationInterface
 
     public function init($data): array
     {
-        $item = $this->orm->make($this->class, $data, Node::LOADED);
+        $item = $this->orm->make($this->targetRole, $data, Node::LOADED);
 
         return [$item, $item];
     }
@@ -107,7 +107,7 @@ abstract class AbstractRelation implements RelationInterface
             return new Node(
                 Node::PROMISED,
                 $entity->__scope(),
-                $this->orm->getSchema()->define($this->class, Schema::ALIAS)
+                $this->orm->getSchema()->define($this->targetRole, Schema::ALIAS)
             );
         }
 
@@ -115,7 +115,7 @@ abstract class AbstractRelation implements RelationInterface
 
         if (is_null($state)) {
             $state = new Node(Node::NEW, [],
-                $this->orm->getSchema()->define($this->class, Schema::ALIAS)
+                $this->orm->getSchema()->define($this->targetRole, Schema::ALIAS)
             );
 
             $this->orm->getHeap()->attach($entity, $state);

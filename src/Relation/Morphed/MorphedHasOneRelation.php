@@ -45,7 +45,7 @@ class MorphedHasOneRelation extends HasOneRelation
             return [null, null];
         }
 
-        $p = new Promise\PromiseOne($this->orm, $this->class, [
+        $p = new Promise\PromiseOne($this->orm, $this->targetRole, [
             $this->outerKey => $innerKey,
             $this->morphKey => $point->getRole()
         ]);

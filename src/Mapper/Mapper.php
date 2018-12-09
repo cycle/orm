@@ -6,19 +6,19 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Entity;
+namespace Spiral\ORM\Mapper;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\Branch\Split;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\MapperInterface;
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Node;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
@@ -32,7 +32,7 @@ class Mapper implements MapperInterface
 
     protected $orm;
 
-    protected $class;
+    protected $role;
 
     protected $table;
 
@@ -47,17 +47,25 @@ class Mapper implements MapperInterface
      */
     private $hydrator;
 
-    public function __construct(ORMInterface $orm, $class)
+    public function __construct(ORMInterface $orm, string $role)
     {
         $this->orm = $orm;
-        $this->class = $class;
+        $this->role = $role;
 
         // todo: mass export
-        $this->columns = $this->orm->getSchema()->define($class, Schema::COLUMNS);
-        $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
-        $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
-        $this->children = $this->orm->getSchema()->define($class, Schema::CHILDREN) ?? [];
+        $this->columns = $this->orm->getSchema()->define($role, Schema::COLUMNS);
+        $this->table = $this->orm->getSchema()->define($role, Schema::TABLE);
+        $this->primaryKey = $this->orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $this->children = $this->orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
         $this->hydrator = new Reflection();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getRole(): string
+    {
+        return $this->role;
     }
 
     public function hydrate($entity, array $data)
@@ -70,11 +78,9 @@ class Mapper implements MapperInterface
         return $this->hydrator->extract($entity);
     }
 
-
-
     public function entityClass(array $data): string
     {
-        $class = $this->class;
+        $class = $this->role;
         if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
             $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
         }
@@ -82,7 +88,7 @@ class Mapper implements MapperInterface
         return $class;
     }
 
-    public function prepare(array $data): array
+    public function init(array $data): array
     {
         $class = $this->entityClass($data);
 
@@ -92,7 +98,7 @@ class Mapper implements MapperInterface
     public function getRepository(string $class = null): RepositoryInterface
     {
         // todo: child class select
-        return new Repository(new Selector($this->orm, $class ?? $this->class));
+        return new Repository(new Selector($this->orm, $class ?? $this->role));
     }
 
     // todo: need state as INPUT!!!!
@@ -159,7 +165,7 @@ class Mapper implements MapperInterface
         $columns = $this->getColumns($entity);
 
         $class = get_class($entity);
-        if ($class != $this->class) {
+        if ($class != $this->role) {
             // possibly children
             foreach ($this->children as $alias => $childClass) {
                 if ($childClass == $class) {

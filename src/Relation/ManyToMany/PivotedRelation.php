@@ -65,12 +65,12 @@ class PivotedRelation extends Relation\AbstractRelation
                 // todo: store pivot context as well!!! or NOT?
 
                 // todo: need easy way to get access to table
-                $tableName = $this->orm->getSchema()->define($this->class, Schema::TABLE);
+                $tableName = $this->orm->getSchema()->define($this->targetRole, Schema::TABLE);
 
                 // todo: i need parent entity name
-                $query = $this->orm->getDatabase($this->class)->select()->from($tableName);
+                $query = $this->orm->getDatabase($this->targetRole)->select()->from($tableName);
 
-                $loader = new ManyToManyLoader($this->orm, $this->class, $this->relation, $this->schema);
+                $loader = new ManyToManyLoader($this->orm, $this->targetRole, $this->relation, $this->schema);
 
                 $loader = $loader->withContext(
                     $loader,
@@ -85,7 +85,7 @@ class PivotedRelation extends Relation\AbstractRelation
                 $query = $loader->configureQuery($query, [$innerKey]);
 
                 $node = new PivotedRootNode(
-                    $this->orm->getSchema()->define($this->class, Schema::COLUMNS),
+                    $this->orm->getSchema()->define($this->targetRole, Schema::COLUMNS),
                     $this->schema[Relation::PIVOT_COLUMNS],
                     $this->schema[Relation::OUTER_KEY],
                     $this->schema[Relation::THOUGHT_INNER_KEY],
@@ -100,7 +100,7 @@ class PivotedRelation extends Relation\AbstractRelation
 
                 $elements = [];
                 $pivotData = new \SplObjectStorage();
-                foreach (new Iterator($this->orm, $this->class, $node->getResult()) as $pivot => $entity) {
+                foreach (new Iterator($this->orm, $this->targetRole, $node->getResult()) as $pivot => $entity) {
                     $elements[] = $entity;
                     $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::LOADED);
                 }
@@ -120,7 +120,7 @@ class PivotedRelation extends Relation\AbstractRelation
         $elements = [];
         $pivotData = new \SplObjectStorage();
 
-        foreach (new Iterator($this->orm, $this->class, $data) as $pivot => $entity) {
+        foreach (new Iterator($this->orm, $this->targetRole, $data) as $pivot => $entity) {
             $elements[] = $entity;
             $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::LOADED);
         }

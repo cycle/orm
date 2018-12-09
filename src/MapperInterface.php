@@ -12,17 +12,54 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Exception\MapperException;
 
+/**
+ * Provides basic capabilities for CRUD operations with given entity class (role).
+ */
 interface MapperInterface
 {
-    public function getRepository(string $class = null): RepositoryInterface;
+    // points to the scope which must be applied to all queries
+    public const SCOPE_DEFAULT = '@default';
 
-    // todo: need better stuff
+    /**
+     * Get role name mapper is responsible for.
+     *
+     * @return string
+     */
+    public function getRole(): string;
 
-    // todo: i don't like this
-    public function prepare(array $data): array;
+    /**
+     * Get repository associated with a given mapper.
+     *
+     * @return RepositoryInterface
+     */
+    public function getRepository(): RepositoryInterface;
 
+    /**
+     * Init empty entity object an return pre-filtered data (hydration will happen on a later stage). Must
+     * return tuple [entity, entityData].
+     *
+     * @param array $data
+     * @return array
+     */
+    public function init(array $data): array;
+
+    /**
+     * Hydrate entity with dataset.
+     *
+     * @param object $entity
+     * @param array  $data
+     * @return object
+     *
+     * @throws MapperException
+     */
     public function hydrate($entity, array $data);
 
+    /**
+     * Extract all values from the entity.
+     *
+     * @param object $entity
+     * @return array
+     */
     public function extract($entity): array;
 
     /**

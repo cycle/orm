@@ -18,9 +18,10 @@ use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
+use Spiral\ORM\Node;
 use Spiral\ORM\ORM;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Node;
+use Spiral\ORM\SchemaInterface;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
@@ -95,6 +96,18 @@ abstract class BaseTest extends TestCase
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
         $this->dbal = null;
+    }
+
+    /**
+     * Calculates missing parameters for typecasting.
+     *
+     * @param SchemaInterface $schema
+     * @return ORM|\Spiral\ORM\ORMInterface
+     */
+    public function withSchema(SchemaInterface $schema)
+    {
+        $this->orm = $this->orm->withSchema($schema);
+        return $this->orm;
     }
 
     /**

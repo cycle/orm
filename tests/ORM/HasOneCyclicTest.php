@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Entity\Mapper;
+use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
@@ -40,7 +40,7 @@ abstract class HasOneCyclicTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->orm->withSchema(new Schema([
+        $this->orm = $this->withSchema(new Schema([
             Cyclic::class => [
                 Schema::ALIAS        => 'cyclic',
                 Schema::MAPPER       => Mapper::class,

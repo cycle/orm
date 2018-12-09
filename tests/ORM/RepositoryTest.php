@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Entity\Mapper;
-use Spiral\ORM\Entity\Repository;
+use Spiral\ORM\Mapper\Mapper;
+use Spiral\ORM\Mapper\Repository;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
@@ -36,7 +36,7 @@ abstract class RepositoryTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->orm->withSchema(new Schema([
+        $this->orm = $this->withSchema(new Schema([
             User::class => [
                 Schema::ALIAS       => 'user',
                 Schema::MAPPER      => Mapper::class,

@@ -43,7 +43,7 @@ class MorphedHasManyRelation extends HasManyRelation
             return [new ArrayCollection(), null];
         }
 
-        $p = new Promise\PromiseMany($this->orm, $this->class, [
+        $p = new Promise\PromiseMany($this->orm, $this->targetRole, [
             $this->outerKey => $innerKey,
             $this->morphKey => $point->getRole()
         ]);

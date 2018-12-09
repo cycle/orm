@@ -223,7 +223,7 @@ class ORM implements ORMInterface
         $mapper = $this->getMapper($class);
 
         // init entity class and prepare data, todo: work it out
-        list($entity, $filtered) = $mapper->prepare($data);
+        list($entity, $filtered) = $mapper->init($data);
 
         // todo: i do not need primary key, but i do need to update paths in mapper
         $state = new Node($state, $filtered, $this->schema->define(get_class($entity), Schema::ALIAS));
@@ -272,6 +272,7 @@ class ORM implements ORMInterface
     public function __clone()
     {
         $this->mappers = [];
+        $this->typecasts = [];
         $this->relmaps = [];
     }
 
@@ -294,6 +295,20 @@ class ORM implements ORMInterface
         }
 
         return $paths;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getTypecast(string $class): MapperInterface
+    {
+        if (isset($this->typecasts[$class])) {
+            return $this->typecasts[$class];
+        }
+
+        return $this->typecasts[$class] = $this->typecast->withTypes(
+            $this->getSchema()->define($class, SchemaInterface::COLUMN_TYPES) ?? []
+        );
     }
 
     /**

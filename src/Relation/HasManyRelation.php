@@ -36,7 +36,7 @@ class HasManyRelation extends AbstractRelation
         }
 
         $p = new Promise\PromiseArray(
-            $this->orm->getMapper($this->class)->getRepository(),
+            $this->orm->getMapper($this->targetRole)->getRepository(),
             array_merge([$this->outerKey => $innerKey], $this->define(Relation::WHERE_SCOPE) ?? []),
             $this->define(Relation::ORDER_BY) ?? []
         );

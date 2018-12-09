@@ -10,12 +10,12 @@ namespace Spiral\ORM\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\DatabaseCommand;
-use Spiral\ORM\Command\ScopedInterface;
+use Spiral\ORM\Command\ScopeCarrierInterface;
 use Spiral\ORM\Command\Traits\ErrorTrait;
 use Spiral\ORM\Command\Traits\ScopeTrait;
 use Spiral\ORM\Exception\CommandException;
 
-class Delete extends DatabaseCommand implements ScopedInterface
+class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
     use ScopeTrait, ErrorTrait;
 

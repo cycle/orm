@@ -12,7 +12,7 @@ use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\DependencyInterface;
-use Spiral\ORM\Entity\ProxyFactoryInterface;
+use Spiral\ORM\Mapper\ProxyFactoryInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Node;
 use Spiral\ORM\Util\Promise;
@@ -34,17 +34,16 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->fetchOne($this->class, $scope, false))) {
+        if (!empty($e = $this->orm->fetchOne($this->targetRole, $scope, false))) {
             return [$e, $e];
         }
 
-        // todo: think about scopes.
-        $mapper = $this->orm->getMapper($this->class);
+        $mapper = $this->orm->getMapper($this->targetRole);
 
         if ($mapper instanceof ProxyFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {
-            $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
+            $p = new Promise\PromiseOne($this->orm, $this->targetRole, $scope);
         }
 
         return [$p, $p];

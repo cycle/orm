@@ -13,7 +13,7 @@ use Spiral\ORM\Context\ConsumerInterface;
 /**
  * Command indicates the ability to accept the forwarded scope values.
  */
-interface ScopedInterface extends CommandInterface, ConsumerInterface
+interface ScopeCarrierInterface extends CommandInterface, ConsumerInterface
 {
     /**
      * Wait for the scope value. Command must not be ready until the value come.

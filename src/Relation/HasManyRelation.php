@@ -16,7 +16,6 @@ use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
-use Spiral\ORM\SchemaInterface;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
@@ -36,11 +35,10 @@ class HasManyRelation extends AbstractRelation
             return [new ArrayCollection(), null];
         }
 
-        $p = new Promise\PromiseArray(
-            $this->orm->getSchema()->define($this->targetRole, SchemaInterface::ALIAS),
-            $this->orm->getMapper($this->targetRole)->getRepository(),
+        $p = new Promise\PromiseMany(
+            $this->getMapper(),
             array_merge([$this->outerKey => $innerKey], $this->define(Relation::WHERE_SCOPE) ?? []),
-            $this->define(Relation::ORDER_BY) ?? []
+            $this->schema[Relation::ORDER_BY] ?? []
         );
 
         return [new CollectionPromise($p), $p];

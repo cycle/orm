@@ -17,7 +17,7 @@ use Spiral\ORM\Selector;
 class Repository implements RepositoryInterface
 {
     /** @var Selector */
-    private $selector;
+    protected $selector;
 
     /**
      * Create repository linked to one specific selector.
@@ -60,21 +60,6 @@ class Repository implements RepositoryInterface
     public function find(array $where = []): Selector
     {
         return (clone $this->selector)->where($where);
-    }
-
-    /**
-     * Create new version of repository with scope defined by
-     * closure function.
-     *
-     * @param callable $scope
-     * @return Repository
-     */
-    public function withScope(callable $scope): self
-    {
-        $repository = clone $this;
-        call_user_func($scope, $repository->selector);
-
-        return $repository;
     }
 
     /**

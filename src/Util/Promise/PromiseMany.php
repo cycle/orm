@@ -8,42 +8,34 @@
 
 namespace Spiral\ORM\Util\Promise;
 
-
-use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Mapper\SelectableInterface;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\SchemaInterface;
 
+/**
+ * Promises the selection of the
+ */
 class PromiseMany implements PromiseInterface
 {
-    /**
-     * @invisible
-     * @var ORMInterface|null
-     */
-    private $orm;
-
-    /** @var string|null */
-    private $class;
+    /** @var SelectableInterface|null */
+    private $mapper;
 
     /** @var array */
-    private $scope;
+    private $scope = [];
 
-    private $orderBy;
+    /** @var array */
+    private $orderBy = [];
 
-    /** @var mixed */
-    private $result;
+    /** @var array */
+    private $result = [];
 
     /**
-     * PromiseMany constructor.
-     *
-     * @param ORMInterface $orm
-     * @param string       $class
-     * @param array        $scope
-     * @param array        $orderBy
+     * @param SelectableInterface $mapper
+     * @param array               $scope
+     * @param array               $orderBy
      */
-    public function __construct(ORMInterface $orm, string $class, array $scope, array $orderBy = [])
+    public function __construct(SelectableInterface $mapper, array $scope = [], array $orderBy = [])
     {
-        $this->orm = $orm;
-        $this->class = $class;
+        $this->mapper = $mapper;
         $this->scope = $scope;
         $this->orderBy = $orderBy;
     }
@@ -53,12 +45,15 @@ class PromiseMany implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->promise);
+        return empty($this->mapper);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function __role(): string
     {
-        return $this->orm->getSchema()->define($this->class, SchemaInterface::ALIAS);
+        return $this->mapper->getRole();
     }
 
     /**
@@ -74,16 +69,12 @@ class PromiseMany implements PromiseInterface
      */
     public function __resolve()
     {
-        if (!is_null($this->orm)) {
-            // todo: need it better
-            $scope = [];
-            foreach ($this->scope as $key => $value) {
-                $scope[str_replace('@.', '', $key)] = $value;
-            }
-
-            $this->result = $this->orm->getMapper($this->class)->getRepository()->findAll($scope);
-            $this->orm = null;
+        if (is_null($this->mapper)) {
+            return $this->result;
         }
+
+        $this->result = $this->mapper->getSelector()->where($this->scope)->orderBy($this->orderBy)->fetchAll();
+        $this->mapper = null;
 
         return $this->result;
     }

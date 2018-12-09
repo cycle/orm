@@ -39,8 +39,7 @@ class HasOneRelation extends AbstractRelation
             return [$e, $e];
         }
 
-        $mapper = $this->orm->getMapper($this->targetRole);
-
+        $mapper = $this->getMapper();
         if ($mapper instanceof ProxyFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {

@@ -10,10 +10,10 @@ namespace Spiral\ORM\Loader;
 
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\Traits\ColumnsTrait;
-use Spiral\ORM\TreeGenerator\AbstractNode;
-use Spiral\ORM\TreeGenerator\RootNode;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schema;
+use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\TreeGenerator\RootNode;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
@@ -45,11 +45,19 @@ class RootLoader extends AbstractLoader
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getAlias(): string
+    {
+        return $this->orm->getSchema()->define($this->class, Schema::ALIAS);
+    }
+
+    /**
      * Get primary key column identifier (aliased).
      *
      * @return string
      */
-    public function getPrimaryKey(): string
+    public function getPK(): string
     {
         return $this->getAlias() . '.' . $this->define(Schema::PRIMARY_KEY);
     }
@@ -66,10 +74,7 @@ class RootLoader extends AbstractLoader
         $loader = clone $this;
 
         // always include primary key
-        $loader->columns = array_merge(
-            [$loader->define(Schema::PRIMARY_KEY)],
-            $columns
-        );
+        $loader->columns = array_merge([$loader->define(Schema::PRIMARY_KEY)], $columns);
 
         return $loader;
     }
@@ -139,14 +144,6 @@ class RootLoader extends AbstractLoader
     protected function initNode(): AbstractNode
     {
         return new RootNode($this->getColumns(), $this->define(Schema::PRIMARY_KEY));
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function getAlias(): string
-    {
-        return $this->orm->getSchema()->define($this->class, Schema::ALIAS);
     }
 
     /**

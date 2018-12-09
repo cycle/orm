@@ -14,8 +14,8 @@ use Spiral\ORM\Exception\FactoryException;
 use Spiral\ORM\Exception\LoaderException;
 use Spiral\ORM\Loader\Traits\ChainTrait;
 use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\TreeGenerator\AbstractNode;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\TreeGenerator\AbstractNode;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
@@ -141,11 +141,8 @@ abstract class AbstractLoader implements LoaderInterface
      *
      * @throws LoaderException
      */
-    final public function loadRelation(
-        string $relation,
-        array $options,
-        bool $join = false
-    ): LoaderInterface {
+    final public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
+    {
         //Check if relation contain dot, i.e. relation chain
         if ($this->isChain($relation)) {
             return $this->loadChain($relation, $options, $join);

@@ -11,7 +11,7 @@ namespace Spiral\ORM;
 use Spiral\ORM\Loader\RootLoader;
 use Spiral\ORM\Loader\Scope\ScopeInterface;
 use Spiral\ORM\TreeGenerator\OutputNode;
-use Spiral\ORM\Util\AliasDecorator;
+use Spiral\ORM\Util\QueryWrapper;
 
 /**
  * Query builder and entity selector. Mocks SelectQuery.
@@ -94,9 +94,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function wherePK($id): self
     {
-        $this->getLoader()->getQuery()->where($this->getLoader()->getPrimaryKey(), $id);
-
-        return $this;
+        return $this->__call('where', [$this->getLoader()->getPK(), $id]);
     }
 
     /**
@@ -107,14 +105,12 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function count(string $column = null): int
     {
-        $loader = $this->getLoader();
         if (is_null($column)) {
             // @tuneyourserver solves the issue with counting on queries with joins.
-            $column = "DISTINCT({$loader->getPrimaryKey()})";
+            $column = sprintf("DISTINCT(%s)", $this->getLoader()->getPK());
         }
 
-        // todo: wrap column
-        return $loader->compileQuery()->count($column);
+        return $this->__call('count', compact('column'));
     }
 
     /**
@@ -126,14 +122,15 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function __call(string $name, array $arguments)
     {
-        // todo: alias wrapper
-        if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM'])) {
-            // one of aggregation requests
-            $result = call_user_func_array([$this->loader->compileQuery(), $name], $arguments);
-        } else {
-            // where condition or statement
-            $result = call_user_func_array([$this->loader->getQuery(), $name], $arguments);
+        $wrapper = new QueryWrapper($this->getLoader()->getAlias());
+
+        // aggregations
+        if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
+            return $wrapper->withTarget($this->loader->compileQuery())->__call($name, $arguments);
         }
+
+        // where condition or statement
+        $result = $wrapper->withTarget($this->loader->getQuery())->__call($name, $arguments);
 
         if ($result === $this->loader->getQuery()) {
             return $this;
@@ -344,7 +341,6 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function getIterator(): Iterator
     {
-        // todo: add cache
         return new Iterator($this->orm, $this->loader->getClass(), $this->fetchData());
     }
 

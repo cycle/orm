@@ -12,7 +12,7 @@ namespace Spiral\ORM\Util\Promise;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\RepositoryInterface;
 
-class PromiseArray implements PromiseInterface
+class PromiseArrayX implements PromiseInterface
 {
     /** @var RepositoryInterface|null */
     private $repository;

@@ -10,10 +10,9 @@ namespace Spiral\ORM\Util\Promise;
 
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\SchemaInterface;
 
 /**
- * Promises one class and resolves the result via ORM heap or entity repository.
+ * Promises one entity and resolves the result via ORM heap or entity repository.
  */
 class PromiseOne implements PromiseInterface
 {
@@ -21,27 +20,24 @@ class PromiseOne implements PromiseInterface
     private $orm;
 
     /** @var string|null */
-    private $class;
+    private $target;
 
     /** @var array */
     private $scope;
 
     /** @var mixed */
-    private $result;
-
-    private $mrole;
+    private $resolved;
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
+     * @param string       $target
      * @param array        $scope
      */
-    public function __construct(ORMInterface $orm, string $class, array $scope, $mrole = null)
+    public function __construct(ORMInterface $orm, string $target, array $scope)
     {
         $this->orm = $orm;
-        $this->class = $class;
+        $this->target = $target;
         $this->scope = $scope;
-        $this->mrole = $mrole;
     }
 
     /**
@@ -52,11 +48,12 @@ class PromiseOne implements PromiseInterface
         return empty($this->promise);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function __role(): string
     {
-
-
-        return $this->mrole ?? $this->orm->getSchema()->define($this->class, SchemaInterface::ALIAS);
+        return $this->target;
     }
 
     /**
@@ -73,10 +70,10 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $this->result = $this->orm->get($this->class, $this->scope, true);
+            $this->resolved = $this->orm->get($this->target, $this->scope, true);
             $this->orm = null;
         }
 
-        return $this->result;
+        return $this->resolved;
     }
 }

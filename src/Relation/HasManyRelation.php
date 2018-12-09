@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Relation;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\Branch\Condition;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\CommandInterface;
@@ -24,20 +25,56 @@ use Spiral\ORM\Util\Promise;
  */
 class HasManyRelation extends AbstractRelation
 {
-    use Traits\CollectionTrait;
+    /**
+     * Init relation state and entity collection.
+     *
+     * @param array $data
+     * @return array
+     */
+    public function init(array $data): array
+    {
+        $result = [];
+        foreach ($data as $item) {
+            $result[] = $this->orm->make($this->target, $item, Node::MANAGED);
+        }
+
+        return [new ArrayCollection($result), $result];
+    }
+
+    /**
+     * Convert entity data into array.
+     *
+     * @param mixed $data
+     * @return array|PromiseInterface
+     */
+    public function extract($data)
+    {
+        if ($data instanceof CollectionPromise && !$data->isInitialized()) {
+            return $data->toPromise();
+        }
+
+        if ($data instanceof Collection) {
+            return $data->toArray();
+        }
+
+        return is_array($data) ? $data : [];
+    }
 
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [new ArrayCollection(), null];
         }
 
         $p = new Promise\PromiseMany(
-            $this->getMapper(),
-            array_merge([$this->outerKey => $innerKey], $this->define(Relation::WHERE_SCOPE) ?? []),
+            $this->getMapper()->getSelector(),
+            [
+                $this->outerKey => $innerKey
+            ],
+            $this->schema[Relation::WHERE_SCOPE] ?? [],
             $this->schema[Relation::ORDER_BY] ?? []
         );
 

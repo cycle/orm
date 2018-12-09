@@ -10,23 +10,23 @@ namespace Spiral\ORM\Util\Collection;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Util\PivotedPromise;
+use Spiral\ORM\Util\Promise\PivotedPromiseInterface;
 
 /**
  * Collection at top of pivoted (entity + context entity) promise.
  */
 class PivotedCollectionPromise extends AbstractLazyCollection implements PivotedInterface, PromisedInterface
 {
-    /** @var PivotedPromise */
+    /** @var PivotedPromiseInterface */
     protected $promise;
 
     /** @var PivotedInterface */
     protected $collection;
 
     /**
-     * @param PivotedPromise $promise
+     * @param PivotedPromiseInterface $promise
      */
-    public function __construct(PivotedPromise $promise)
+    public function __construct(PivotedPromiseInterface $promise)
     {
         $this->promise = $promise;
     }
@@ -34,7 +34,7 @@ class PivotedCollectionPromise extends AbstractLazyCollection implements Pivoted
     /**
      * @inheritdoc
      */
-    public function getPromise(): PromiseInterface
+    public function toPromise(): PromiseInterface
     {
         return $this->promise;
     }

@@ -14,14 +14,14 @@ class Heap implements HeapInterface, \IteratorAggregate
     private $storage;
 
     /** @var array */
-    private $path = [];
+    private $paths = [];
 
     /**
      * Heap constructor.
      */
     public function __construct()
     {
-        $this->reset();
+        $this->clean();
     }
 
     /**
@@ -55,15 +55,25 @@ class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function attach($entity, Node $state, array $index = [])
+    public function find(string $role, string $key, $value)
     {
-        $this->storage->offsetSet($entity, $state);
+        return $this->paths[$role][$key][$value] ?? null;
+    }
 
-        foreach ($index as $path) {
-            $this->path[$path] = $entity;
+    /**
+     * @inheritdoc
+     */
+    public function attach($entity, Node $node, array $index = [])
+    {
+        $this->storage->offsetSet($entity, $node);
 
-            // todo: need better path approach
-            $this->path[get_class($entity)][$path] = $entity;
+        foreach ($index as $key) {
+            if (!isset($node->getData()[$key])) {
+                continue;
+            }
+
+            $this->paths[get_class($entity)][$key][$node->getData()[$key]] = $entity;
+            $this->paths[$node->getRole()][$key][$node->getData()[$key]] = $entity;
         }
     }
 
@@ -72,33 +82,47 @@ class Heap implements HeapInterface, \IteratorAggregate
      */
     public function detach($entity)
     {
-        $this->storage->offsetUnset($entity);
+        if (!$this->has($entity)) {
+            return;
+        }
 
-        // rare usage
-        $this->path = array_filter($this->path, function ($value) use ($entity) {
+        $node = $this->get($entity);
+
+        // erase all the indexes
+        if (isset($this->paths[$node->getRole()])) {
+            $keys = array_keys($this->paths[$node->getRole()]);
+            foreach ($keys as $key) {
+                unset($this->paths[$node->getRole()][$key][$node->getData()[$key]]);
+            }
+        }
+
+        // todo: DEPRECATE
+        $this->paths = array_filter($this->paths, function ($value) use ($entity) {
             return $value !== $entity;
         });
-    }
 
-    /**
-     * @inheritdoc
-     */
-    public function reset()
-    {
-        $this->path = [];
-        $this->storage = new \SplObjectStorage();
+        $this->storage->offsetUnset($entity);
     }
 
     public function hasPath(string $path)
     {
         // todo: this is fun, optimization is required
-        return isset($this->path[$path]);
+        return isset($this->paths[$path]);
     }
 
     // todo: this is fun
     public function getPath(string $path)
     {
-        return $this->path[$path];
+        return $this->paths[$path];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function clean()
+    {
+        $this->paths = [];
+        $this->storage = new \SplObjectStorage();
     }
 
     /**
@@ -106,6 +130,6 @@ class Heap implements HeapInterface, \IteratorAggregate
      */
     public function __destruct()
     {
-        $this->reset();
+        $this->clean();
     }
 }

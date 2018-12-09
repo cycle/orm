@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\TreeGenerator;
+namespace Spiral\ORM\Generator;
 
 /**
  * Indicates that node represent array sub-set. This interface would only change the default

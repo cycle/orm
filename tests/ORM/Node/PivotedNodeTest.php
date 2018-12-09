@@ -9,9 +9,9 @@
 namespace Spiral\ORM\Tests\Node;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\TreeGenerator\PivotedNode;
-use Spiral\ORM\TreeGenerator\PivotedRootNode;
-use Spiral\ORM\TreeGenerator\RootNode;
+use Spiral\ORM\Generator\PivotedNode;
+use Spiral\ORM\Generator\PivotedRootNode;
+use Spiral\ORM\Generator\RootNode;
 
 class PivotedNodeTest extends TestCase
 {

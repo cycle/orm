@@ -13,9 +13,8 @@ use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
-use Spiral\ORM\Mapper\ProxyFactoryInterface;
 use Spiral\ORM\Node;
-use Spiral\ORM\Util\Promise;
+use Spiral\ORM\Relation\Traits\PromiseOneTrait;
 
 /**
  * Provides ability to link to the parent object. Will claim branch up to the parent object and it's relations. To disable
@@ -23,30 +22,7 @@ use Spiral\ORM\Util\Promise;
  */
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
-    /**
-     * @inheritdoc
-     */
-    public function initPromise(Node $point): array
-    {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
-            return [null, null];
-        }
-
-        $scope = [$this->outerKey => $innerKey];
-
-        if (!empty($e = $this->orm->get($this->targetRole, $scope, false))) {
-            return [$e, $e];
-        }
-
-        $mapper = $this->getMapper();
-        if ($mapper instanceof ProxyFactoryInterface) {
-            $p = $mapper->initProxy($scope);
-        } else {
-            $p = new Promise\PromiseOne($this->orm, $this->targetRole, $scope);
-        }
-
-        return [$p, $p];
-    }
+    use PromiseOneTrait;
 
     /**
      * @inheritdoc

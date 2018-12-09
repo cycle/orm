@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Loader\RootLoader;
 use Spiral\ORM\Loader\Scope\ScopeInterface;
-use Spiral\ORM\TreeGenerator\OutputNode;
+use Spiral\ORM\Generator\OutputNode;
 use Spiral\ORM\Util\QueryWrapper;
 
 /**
@@ -323,7 +323,7 @@ class Selector implements \IteratorAggregate, \Countable
             return null;
         }
 
-        return $this->orm->make($this->loader->getClass(), $data[0], Node::MANAGED);
+        return $this->orm->make($this->loader->getRole(), $data[0], Node::MANAGED);
     }
 
     /**
@@ -341,7 +341,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function getIterator(): Iterator
     {
-        return new Iterator($this->orm, $this->loader->getClass(), $this->fetchData());
+        return new Iterator($this->orm, $this->loader->getRole(), $this->fetchData());
     }
 
     /**

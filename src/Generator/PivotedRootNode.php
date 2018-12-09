@@ -5,18 +5,16 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\TreeGenerator;
+namespace Spiral\ORM\Generator;
+
 
 use Spiral\ORM\Exception\NodeException;
 
 /**
- * Provides ability to parse columns of target table and map table all together.
+ * Similar to normal pivot node but does not require parent!
  */
-class PivotedNode extends AbstractNode implements ArrayInterface
+class PivotedRootNode extends OutputNode
 {
-    // Stores information about associated context data
-    public const PIVOT_DATA = '@pivot';
-
     /** @var array */
     private $pivotColumns = [];
 
@@ -40,7 +38,7 @@ class PivotedNode extends AbstractNode implements ArrayInterface
         string $innerPivotKey,
         string $outerPivotKey
     ) {
-        // pivot columns are always prior to table columns
+        //Pivot columns are always prior to table columns
         parent::__construct($columns, $outerKey);
 
         $this->pivotColumns = $pivotColumns;
@@ -53,21 +51,11 @@ class PivotedNode extends AbstractNode implements ArrayInterface
      */
     protected function push(array &$data)
     {
-        if (empty($this->parent)) {
-            throw new NodeException("Unable to register data tree, parent is missing.");
-        }
-
-        if (is_null($data[$this->outerKey])) {
-            //No data was loaded
+        if (is_null($data[PivotedNode::PIVOT_DATA][$this->outerPivotKey])) {
             return;
         }
 
-        $this->parent->mountArray(
-            $this->container,
-            $this->outerKey,
-            $data[self::PIVOT_DATA][$this->innerPivotKey],
-            $data
-        );
+        $this->result[] = &$data;
     }
 
     /**
@@ -78,9 +66,10 @@ class PivotedNode extends AbstractNode implements ArrayInterface
     protected function fetchData(int $dataOffset, array $line): array
     {
         return [
-                self::PIVOT_DATA => $this->pivotData($dataOffset, $line)
+                PivotedNode::PIVOT_DATA => $this->pivotData($dataOffset, $line)
             ] + parent::fetchData($dataOffset + count($this->pivotColumns), $line);
     }
+
 
     /**
      * Fetch record columns from query row, must use data offset to slice required part of query.
@@ -114,9 +103,8 @@ class PivotedNode extends AbstractNode implements ArrayInterface
      */
     protected function duplicateCriteria(array &$data): string
     {
-        $pivotData = $data[self::PIVOT_DATA];
+        $pivotData = $data[PivotedNode::PIVOT_DATA];
 
-        // unique row criteria
         return $pivotData[$this->innerPivotKey] . '.' . $pivotData[$this->outerPivotKey];
     }
 }

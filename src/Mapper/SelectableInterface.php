@@ -16,8 +16,8 @@ use Spiral\ORM\Selector;
 
 interface SelectableInterface extends MapperInterface
 {
-    // default selection scope
-    public const DEFAULT_SCOPE = '';
+    // points to the scope which must be applied to all queries
+    public const DEFAULT_SCOPE = '@default';
 
     /**
      * Get database associated with the entity.

@@ -27,7 +27,7 @@ class StateTest extends TestCase
         $s = new Node(Node::MANAGED, [], "parent");
         $c = new Node(Node::MANAGED, [], "child");
 
-        $s->listen('id', $c, 'user_id');
+        $s->forward('id', $c, 'user_id');
         $s->register('id', 1);
 
         $this->assertSame(1, $c->getData()['user_id']);
@@ -38,7 +38,7 @@ class StateTest extends TestCase
         $s = new Node(Node::MANAGED, ['id' => 1], "parent");
         $c = new Node(Node::MANAGED, [], "child");
 
-        $s->listen('id', $c, 'user_id');
+        $s->forward('id', $c, 'user_id');
 
         $this->assertSame(1, $c->getData()['user_id']);
     }
@@ -48,7 +48,7 @@ class StateTest extends TestCase
         $s = new Node(Node::MANAGED, ['id' => 1], "parent");
         $c = new Node(Node::MANAGED, [], "child");
 
-        $s->listen('id', $c, 'user_id', true);
+        $s->forward('id', $c, 'user_id', true);
 
         $this->assertSame(1, $c->getData()['user_id']);
     }

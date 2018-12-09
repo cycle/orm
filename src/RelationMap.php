@@ -17,10 +17,7 @@ use Spiral\ORM\Command\ContextCarrierInterface;
  */
 final class RelationMap
 {
-    /**
-     * @invisible
-     * @var ORMInterface
-     */
+    /** @var ORMInterface @internal */
     private $orm;
 
     /** @var RelationInterface[] */

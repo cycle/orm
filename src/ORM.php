@@ -74,6 +74,10 @@ class ORM implements ORMInterface
      */
     public function getMapper($entity): MapperInterface
     {
+        if (is_string($entity)) {
+            $entity = $this->schema->getClass($entity) ?? $entity;
+        }
+
         $entity = $this->resolveClass($entity);
 
         if (isset($this->mappers[$entity])) {
@@ -89,7 +93,7 @@ class ORM implements ORMInterface
      * @param string $entity
      * @return RelationMap
      */
-    public function getRelationMap($entity): RelationMap
+    public function getRelmap($entity): RelationMap
     {
         $entity = is_object($entity) ? get_class($entity) : $entity;
 
@@ -109,18 +113,14 @@ class ORM implements ORMInterface
 
     public function get(string $class, array $scope, bool $load = false)
     {
-        if (count($scope) === 1) {
-            $p = $class;
-            foreach ($scope as $k => $v) {
-                $p .= ':' . $k . '.' . $v;
-            }
-
-            if ($this->heap->hasPath($p)) {
-                return $this->heap->getPath($p);
+        foreach ($scope as $k => $v) {
+            if (!empty($e = $this->heap->find($class, $k, $v))) {
+                return $e;
             }
         }
 
         if ($load) {
+            $class = $this->schema->getClass($class) ?? $class;
             return $this->getMapper($class)->getRepository()->findOne($scope);
         }
 
@@ -194,48 +194,34 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function make(string $class, array $data, int $state = Node::NEW)
+    public function make(string $role, array $data, int $node = Node::NEW)
     {
         if ($data instanceof \Traversable) {
             $data = iterator_to_array($data);
         }
 
-        // todo: deal with alias
+        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+        $id = $data[$pk] ?? null;
 
-        if ($state !== Node::NEW) {
-            // locate already loaded entity reference
-            $entityID = $this->identify($class, $data);
+        $mapper = $this->getMapper($role);
 
-            $path = $class . ':' . $entityID;
-
-            if (!empty($entityID) && $this->heap->hasPath($path)) {
-                $existed = $this->heap->getPath($path);
-
-                if ($existed instanceof PromiseInterface) {
-                    return $existed;
-                }
-
-                // todo: optimize, avoid cyclic initiation ? do i have it?
-
-                // todo: can be promise
-                return $this->getMapper($existed)->hydrate(
-                    $existed,
-                    $this->getRelationMap($existed)->init($this->getHeap()->get($existed), $data)
-                );
+        if ($node !== Node::NEW && !empty($id)) {
+            if (!empty($e = $this->heap->find($role, $pk, $id))) {
+                // entity already been loaded, let's update it's relations with new context
+                return $mapper->hydrate($e, $this->getRelmap($e)->init($this->getHeap()->get($e), $data));
             }
         }
 
-        $mapper = $this->getMapper($class);
-
         // init entity class and prepare data, todo: work it out
-        list($entity, $filtered) = $mapper->init($data);
+        list($e, $filtered) = $mapper->init($data);
 
-        // todo: i do not need primary key, but i do need to update paths in mapper
-        $state = new Node($state, $filtered, $this->schema->define(get_class($entity), Schema::ALIAS));
-        $this->heap->attach($entity, $state, $this->getPaths($entity, $entityID ?? null, $data));
+        // todo: fix it (!)
+        $node = new Node($node, $filtered, $this->schema->define(get_class($e), Schema::ALIAS));
+
+        $this->heap->attach($e, $node, $this->getIndexes($e));
 
         // hydrate entity with it's data, relations and proxies
-        return $mapper->hydrate($entity, $this->getRelationMap($entity)->init($state, $filtered));
+        return $mapper->hydrate($e, $this->getRelmap($e)->init($node, $filtered));
     }
 
     public function queueStore($entity, int $mode = 0): ContextCarrierInterface
@@ -252,7 +238,7 @@ class ORM implements ORMInterface
         // TODO: RESET HANDLERS
 
         // todo: optimize it
-        $cmd = $this->getRelationMap($entity)->queueRelations(
+        $cmd = $this->getRelmap($entity)->queueRelations(
             $cmd,
             $entity,
             $state = $this->getHeap()->get($entity),
@@ -281,39 +267,12 @@ class ORM implements ORMInterface
         $this->relmaps = [];
     }
 
-    protected function getPaths($entity, $entityID, array $data): array
+    protected function getIndexes($entity): array
     {
-        if (is_null($entityID)) {
-            return [];
-        }
-
+        $pk = $this->schema->define(get_class($entity), Schema::PRIMARY_KEY);
         $keys = $this->schema->define(get_class($entity), Schema::CAPTURE_KEYS) ?? [];
 
-        $paths = [get_class($entity) . ':' . $entityID];
-        $paths[] = get_class($entity) . ':' . $this->schema->define(get_class($entity),
-                Schema::PRIMARY_KEY) . '.' . $entityID;
-
-        foreach ($keys as $key) {
-            if (!empty($data[$key])) {
-                $paths[] = get_class($entity) . ':' . $key . '.' . $data[$key];
-            }
-        }
-
-        return $paths;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function getTypecast(string $class): MapperInterface
-    {
-        if (isset($this->typecasts[$class])) {
-            return $this->typecasts[$class];
-        }
-
-        return $this->typecasts[$class] = $this->typecast->withTypes(
-            $this->getSchema()->define($class, SchemaInterface::COLUMN_TYPES) ?? []
-        );
+        return array_merge([$pk], $keys);
     }
 
     /**
@@ -332,6 +291,11 @@ class ORM implements ORMInterface
         }
 
         return null;
+    }
+
+    protected function getInitPaths(string $class, array $data): array
+    {
+
     }
 
     protected function resolveClass($entity): string

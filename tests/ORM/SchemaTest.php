@@ -50,33 +50,4 @@ class SchemaTest extends TestCase
 
         $this->assertNull($schema->define(User::class, 2));
     }
-
-    public function testRelationsSchema()
-    {
-        $schema = new Schema([
-            User::class => [
-                Schema::RELATIONS => [
-                    1 => ['value']
-                ]
-            ]
-        ]);
-
-        $this->assertSame(['value'], $schema->defineRelation(User::class, 1));
-    }
-
-    /**
-     * @expectedException \Spiral\ORM\Exception\SchemaException
-     */
-    public function testSchemaException3()
-    {
-        $schema = new Schema([
-            User::class => [
-                Schema::RELATIONS => [
-                    1 => ['value']
-                ]
-            ]
-        ]);
-
-        $schema->defineRelation(User::class, 2);
-    }
 }

@@ -49,16 +49,16 @@ class Mapper implements MapperInterface, SelectableInterface
      */
     private $hydrator;
 
-    public function __construct(ORMInterface $orm, string $role)
+    public function __construct(ORMInterface $orm, string $class)
     {
         $this->orm = $orm;
-        $this->role = $role;
+        $this->role = $class;
 
         // todo: mass export
-        $this->columns = $this->orm->getSchema()->define($role, Schema::COLUMNS);
-        $this->table = $this->orm->getSchema()->define($role, Schema::TABLE);
-        $this->primaryKey = $this->orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $this->children = $this->orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
+        $this->columns = $this->orm->getSchema()->define($class, Schema::COLUMNS);
+        $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
+        $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
+        $this->children = $this->orm->getSchema()->define($class, Schema::CHILDREN) ?? [];
         $this->hydrator = new Reflection();
     }
 
@@ -237,7 +237,7 @@ class Mapper implements MapperInterface, SelectableInterface
         $state->setData($cData);
 
         // todo: scope prefix (call immediatelly?)
-        $state->listen($this->primaryKey, $update, $this->primaryKey, true, ConsumerInterface::SCOPE);
+        $state->forward($this->primaryKey, $update, $this->primaryKey, true, ConsumerInterface::SCOPE);
 
         return $update;
     }
@@ -250,7 +250,7 @@ class Mapper implements MapperInterface, SelectableInterface
         $state->getState()->decClaim();
 
         $delete->waitScope($this->primaryKey);
-        $state->listen($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
+        $state->forward($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
 
         // todo: this must be changed (CORRECT?) BUT HOW?
         //  $delete->onComplete(function () use ($entity) {

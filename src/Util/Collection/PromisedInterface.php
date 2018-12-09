@@ -21,5 +21,5 @@ interface PromisedInterface extends Collection
      *
      * @return PromiseInterface
      */
-    public function getPromise(): PromiseInterface;
+    public function toPromise(): PromiseInterface;
 }

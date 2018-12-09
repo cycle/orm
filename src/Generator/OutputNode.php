@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\TreeGenerator;
+namespace Spiral\ORM\Generator;
 
 /**
  * Provides ability to fetch node context.

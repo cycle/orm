@@ -113,14 +113,14 @@ class State implements ConsumerInterface, ProducerInterface
     /**
      * @inheritdoc
      */
-    public function listen(
+    public function forward(
         string $key,
-        ConsumerInterface $acceptor,
+        ConsumerInterface $consumer,
         string $target,
         bool $trigger = false,
         int $stream = ConsumerInterface::DATA
     ) {
-        $this->listeners[$key][] = [$acceptor, $target, $stream];
+        $this->listeners[$key][] = [$consumer, $target, $stream];
 
         if ($trigger || !empty($this->data[$key])) {
             $this->register($key, $this->data[$key] ?? null, false, $stream);

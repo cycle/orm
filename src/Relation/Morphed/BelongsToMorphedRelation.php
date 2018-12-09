@@ -10,10 +10,10 @@ namespace Spiral\ORM\Relation\Morphed;
 
 
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
+use Spiral\ORM\Mapper\ProxyFactoryInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\BelongsToRelation;
 use Spiral\ORM\Util\Promise;
@@ -25,106 +25,62 @@ class BelongsToMorphedRelation extends BelongsToRelation
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
-     * @param string       $relation
+     * @param string       $target
+     * @param string       $name
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $class, $relation, $schema);
-        $this->morphKey = $this->define(Relation::MORPH_KEY);
+        parent::__construct($orm, $name, $target, $schema);
+        $this->morphKey = $schema[Relation::MORPH_KEY] ?? null;
     }
 
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $point): array
+    public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [null, null];
         }
 
-        // parent class (todo: i don't need it!!!!!!!! use aliases directly)
-        // todo: yeeeep, need aliases directly
-
-        $parentClass = $this->orm->getSchema()->getClass($this->fetchKey($point, $this->morphKey));
-
+        $target = $this->fetchKey($parentNode, $this->morphKey);
         $scope = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->get($parentClass, $scope, false))) {
+        if (!empty($e = $this->orm->get($target, $scope, false))) {
             return [$e, $e];
         }
 
+        $mapper = $this->getMapper($target);
+        if ($mapper instanceof ProxyFactoryInterface) {
+            $p = $mapper->initProxy($scope);
+        } else {
+            $p = new Promise\PromiseOne($this->orm, $target, $scope);
+        }
 
-        //        // todo: i don't like carrying alias in a context (!!!!)
-        //        // this is not right (!!)
-        $pr = new Promise(
-            $this->fetchKey($point, $this->morphKey),
-            [
-                $this->outerKey => $innerKey,
-                $this->morphKey => $this->fetchKey($point, $this->morphKey)
-            ]
-            , function ($context) use ($innerKey) {
-
-            $parentClass = $this->orm->getSchema()->getClass($context[$this->morphKey]);
-
-            if ($this->orm->getHeap()->hasPath("{$parentClass}:$innerKey")) {
-                // todo: has it!
-                $i = $this->orm->getHeap()->getPath("{$parentClass}:$innerKey");
-                return $i;
-            }
-
-            // todo: optimize
-            return $this->orm->getMapper($parentClass)->getRepository()->findOne([
-                $this->outerKey => $context[$this->outerKey]
-            ]);
-        });
-
-        return [$pr, $pr];
+        return [$p, $p];
     }
 
     /**
      * @inheritdoc
      */
-    public function queue(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
-        $store = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
-
-        // todo: use forward as well
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
+        $wrappedStore = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
 
         if (is_null($related)) {
             if ($this->fetchKey($parentNode, $this->morphKey) !== null) {
                 $parentStore->register($this->morphKey, null, true);
-                $parentNode->setData([$this->morphKey => null]);
+                $parentNode->register($this->morphKey, null, true);
             }
         } else {
             $relState = $this->getNode($related);
             if ($this->fetchKey($parentNode, $this->morphKey) != $relState->getRole()) {
                 $parentStore->register($this->morphKey, $relState->getRole(), true);
-                $parentNode->setData([$this->morphKey => $relState->getRole()]);
+                $parentNode->register($this->morphKey, $relState->getRole(), true);
             }
         }
 
-        return $store;
-    }
-
-    protected function getNode($entity, int $claim = 0): ?Node
-    {
-        if ($entity instanceof PromiseInterface) {
-            $scope = $entity->__scope();
-
-            return new Node(
-                Node::PROMISED,
-                [$this->outerKey => $scope[$this->outerKey]],
-                $scope[$this->morphKey]
-            );
-        }
-
-        return parent::getNode($entity, $claim);
+        return $wrappedStore;
     }
 }

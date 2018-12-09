@@ -12,6 +12,7 @@ use Spiral\ORM\Exception\SchemaException;
 
 interface SchemaInterface
 {
+    public const ENTITY       = -1;
     public const ALIAS        = 0;
     public const MAPPER       = 1;
     public const SOURCE       = 2;

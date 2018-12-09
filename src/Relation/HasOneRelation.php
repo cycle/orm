@@ -13,41 +13,16 @@ use Spiral\ORM\Command\Branch\ContextSequence;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Mapper\ProxyFactoryInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Util\Promise;
+use Spiral\ORM\Relation\Traits\PromiseOneTrait;
 
 /**
  * Provides the ability to own and forward context values to child entity.
  */
 class HasOneRelation extends AbstractRelation
 {
-    /**
-     * @inheritdoc
-     */
-    public function initPromise(Node $point): array
-    {
-        if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
-            // nothing to be promising
-            return [null, null];
-        }
-
-        $scope = [$this->outerKey => $innerKey];
-
-        if (!empty($e = $this->orm->get($this->targetRole, $scope, false))) {
-            return [$e, $e];
-        }
-
-        $mapper = $this->getMapper();
-        if ($mapper instanceof ProxyFactoryInterface) {
-            $p = $mapper->initProxy($scope);
-        } else {
-            $p = new Promise\PromiseOne($this->orm, $this->targetRole, $scope);
-        }
-
-        return [$p, $p];
-    }
+    use PromiseOneTrait;
 
     /**
      * @inheritdoc
@@ -101,11 +76,11 @@ class HasOneRelation extends AbstractRelation
      */
     protected function deleteOriginal($original): CommandInterface
     {
-        $point = $this->getNode($original);
+        $relNode = $this->getNode($original);
 
         // only delete original child when no other objects claim it
-        return new Condition($this->orm->queueDelete($original), function () use ($point) {
-            return !$point->getState()->hasClaims();
+        return new Condition($this->orm->queueDelete($original), function () use ($relNode) {
+            return !$relNode->getState()->hasClaims();
         });
     }
 }

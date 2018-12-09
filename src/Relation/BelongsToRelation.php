@@ -8,15 +8,19 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\DependencyInterface;
+use Spiral\ORM\Entity\ProxyFactoryInterface;
 use Spiral\ORM\Exception\Relation\NullException;
 use Spiral\ORM\Node;
 use Spiral\ORM\Util\Promise;
 
-// todo: what is the difference with refers to?
+/**
+ * Provides ability to link to the parent object. Will claim branch up to the parent object and it's relations. To disable
+ * branch walk-though use RefersTo relation.
+ */
 class BelongsToRelation extends AbstractRelation implements DependencyInterface
 {
     /**
@@ -34,7 +38,14 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
             return [$e, $e];
         }
 
-        $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
+        // todo: think about scopes.
+        $mapper = $this->orm->getMapper($this->class);
+
+        if ($mapper instanceof ProxyFactoryInterface) {
+            $p = $mapper->initProxy($scope);
+        } else {
+            $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
+        }
 
         return [$p, $p];
     }

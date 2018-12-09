@@ -8,9 +8,9 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Nil;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Node;
@@ -55,6 +55,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $related,
         $original
     ): CommandInterface {
+
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             if (!is_null($original)) {

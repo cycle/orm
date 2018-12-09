@@ -216,7 +216,8 @@ class Mapper implements MapperInterface, SelectableInterface
         unset($columns[$this->primaryKey]);
 
         $insert = new Insert($this->orm->getDatabase($entity), $this->table, $columns);
-        $insert->onInsert($state, $this->primaryKey);
+
+        $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
 
         return $insert;
     }

@@ -32,7 +32,7 @@ class State implements ConsumerInterface, ProducerInterface
     private $command;
 
     /** @var ContextCarrierInterface[] */
-    private $listeners;
+    private $consumers;
 
     /**
      * @param int   $state
@@ -120,7 +120,7 @@ class State implements ConsumerInterface, ProducerInterface
         bool $trigger = false,
         int $stream = ConsumerInterface::DATA
     ) {
-        $this->listeners[$key][] = [$consumer, $target, $stream];
+        $this->consumers[$key][] = [$consumer, $target, $stream];
 
         if ($trigger || !empty($this->data[$key])) {
             $this->register($key, $this->data[$key] ?? null, false, $stream);
@@ -143,11 +143,11 @@ class State implements ConsumerInterface, ProducerInterface
         $this->data[$key] = $value;
 
         // cascade
-        if (!empty($this->listeners[$key])) {
-            foreach ($this->listeners[$key] as $id => $listener) {
+        if (!empty($this->consumers[$key])) {
+            foreach ($this->consumers[$key] as $id => $consumer) {
                 /** @var ConsumerInterface $acc */
-                $acc = $listener[0];
-                $acc->register($listener[1], $value, $update, $listener[2]);
+                $acc = $consumer[0];
+                $acc->register($consumer[1], $value, $update, $consumer[2]);
                 $update = false;
             }
         }

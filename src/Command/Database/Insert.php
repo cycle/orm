@@ -14,11 +14,13 @@ use Spiral\ORM\Command\DatabaseCommand;
 use Spiral\ORM\Command\Traits\ContextTrait;
 use Spiral\ORM\Command\Traits\ErrorTrait;
 use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\ORM\Context\ProducerInterface;
+use Spiral\ORM\Exception\CommandException;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class Insert extends DatabaseCommand implements ContextCarrierInterface
+class Insert extends DatabaseCommand implements ContextCarrierInterface, ProducerInterface
 {
     use ContextTrait, ErrorTrait;
 
@@ -27,6 +29,9 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface
 
     /** @var array */
     private $data;
+
+    /** @var ConsumerInterface[] */
+    protected $consumers = [];
 
     /**
      * @param DatabaseInterface $db
@@ -45,6 +50,25 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface
     public function isReady(): bool
     {
         return empty($this->waitContext);
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * Only triggers after command execution!
+     */
+    public function forward(
+        string $key,
+        ConsumerInterface $consumer,
+        string $target,
+        bool $trigger = false,
+        int $stream = ConsumerInterface::DATA
+    ) {
+        if ($trigger) {
+            throw new CommandException("Insert command can only forward keys after the execution");
+        }
+
+        $this->consumers[$key][] = [$consumer, $target, $stream];
     }
 
     /**
@@ -70,30 +94,28 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface
     }
 
     /**
-     * @todo improve
-     * @invisible
-     * @var ConsumerInterface
-     */
-    private $target;
-    private $sequence;
-
-    public function onInsert($target, $column)
-    {
-        $this->target = $target;
-        $this->sequence = $column;
-    }
-
-    /**
      * Insert data into associated table.
      */
     public function execute()
     {
-        $insertID = $this->db->insert($this->table)->values($this->getData())->run();
+        $update = true;
+        $data = $this->getData();
+        $insertID = $this->db->insert($this->table)->values($data)->run();
 
-        // todo: forwarding keys
+        foreach ($this->consumers as $key => $consumers) {
+            foreach ($consumers as $id => $consumer) {
+                /** @var ConsumerInterface $acc */
+                $acc = $consumer[0];
 
-        if (!empty($this->target)) {
-            $this->target->register($this->sequence, $insertID);
+                if ($key == self::INSERT_ID) {
+                    $value = $insertID;
+                } else {
+                    $value = $data[$key] ?? null;
+                }
+
+                $acc->register($consumer[1], $value, $update, $consumer[2]);
+                $update = false;
+            }
         }
 
         parent::execute();

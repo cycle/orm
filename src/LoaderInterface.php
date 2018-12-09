@@ -22,7 +22,7 @@ interface LoaderInterface
      *
      * @return string
      */
-    public function getRole(): string;
+    public function getTarget(): string;
 
     /**
      * Declare loader context, parent will declare TreeParser where loader can mount his data, in

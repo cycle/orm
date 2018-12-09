@@ -323,7 +323,7 @@ class Selector implements \IteratorAggregate, \Countable
             return null;
         }
 
-        return $this->orm->make($this->loader->getRole(), $data[0], Node::MANAGED);
+        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED);
     }
 
     /**
@@ -341,7 +341,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function getIterator(): Iterator
     {
-        return new Iterator($this->orm, $this->loader->getRole(), $this->fetchData());
+        return new Iterator($this->orm, $this->loader->getTarget(), $this->fetchData());
     }
 
     /**

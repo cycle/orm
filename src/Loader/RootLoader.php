@@ -31,11 +31,11 @@ class RootLoader extends AbstractLoader
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
+     * @param string       $target
      */
-    public function __construct(ORMInterface $orm, string $class)
+    public function __construct(ORMInterface $orm, string $target)
     {
-        parent::__construct($orm, $class);
+        parent::__construct($orm, $target);
 
         $this->query = $this->getDatabase()->select()->from(sprintf(
             "%s AS %s",
@@ -49,7 +49,7 @@ class RootLoader extends AbstractLoader
      */
     public function getAlias(): string
     {
-        return $this->orm->getSchema()->define($this->role, Schema::ALIAS);
+        return $this->orm->getSchema()->define($this->target, Schema::ALIAS);
     }
 
     /**

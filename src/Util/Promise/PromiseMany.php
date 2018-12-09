@@ -58,7 +58,7 @@ class PromiseMany implements PromiseInterface
      */
     public function __role(): string
     {
-        return $this->selector->getLoader()->getRole();
+        return $this->selector->getLoader()->getTarget();
     }
 
     /**

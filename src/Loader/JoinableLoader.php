@@ -49,14 +49,14 @@ abstract class JoinableLoader extends AbstractLoader
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
-     * @param string       $relation
+     * @param string       $name
+     * @param string       $target
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $class);
-        $this->relation = $relation;
+        parent::__construct($orm, $target);
+        $this->relation = $name;
         $this->schema = $schema;
     }
 
@@ -179,7 +179,7 @@ abstract class JoinableLoader extends AbstractLoader
 
         // apply the global scope
         if (!empty($this->options['using'])) {
-            $mapper = $this->orm->getMapper($this->role);
+            $mapper = $this->orm->getMapper($this->target);
             if ($mapper instanceof SelectableInterface) {
                 if (!empty($scope = $mapper->getScope())) {
                     $query = $scope->apply($query);

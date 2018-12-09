@@ -10,14 +10,14 @@ namespace Spiral\ORM\Loader\Relation;
 
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
+use Spiral\ORM\Generator\AbstractNode;
+use Spiral\ORM\Generator\PivotedNode;
 use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Loader\Traits\ConstrainTrait;
 use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Generator\AbstractNode;
-use Spiral\ORM\Generator\PivotedNode;
 
 class ManyToManyLoader extends JoinableLoader
 {
@@ -29,22 +29,22 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'method'     => self::POSTLOAD,
-        'minify'     => true,
-        'alias'      => null,
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'alias' => null,
         'pivotAlias' => null,
-        'using'      => null,
-        'where'      => null,
+        'using' => null,
+        'where' => null,
         'wherePivot' => null,
-        'orderBy'    => [],
+        'orderBy' => [],
     ];
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $class, $relation, $schema);
+        parent::__construct($orm, $name, $target, $schema);
         $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
         $this->options['where'] = $schema[Relation::WHERE_SCOPE] ?? [];
         $this->options['wherePivot'] = $schema[Relation::PIVOT_SCOPE] ?? [];

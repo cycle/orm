@@ -26,7 +26,7 @@ class MorphedHasOneLoader extends HasOneLoader
      */
     protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        $parentAlias = $this->orm->getSchema()->define($this->parent->getRole(), Schema::ALIAS);
+        $parentAlias = $this->orm->getSchema()->define($this->parent->getTarget(), Schema::ALIAS);
 
         return $this->setWhere(
             parent::configureQuery($query, $outerKeys),

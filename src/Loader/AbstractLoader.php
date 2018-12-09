@@ -50,7 +50,7 @@ abstract class AbstractLoader implements LoaderInterface
     protected $orm;
 
     /** @var string */
-    protected $role;
+    protected $target;
 
     /** @var array */
     protected $options = [];
@@ -66,20 +66,20 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
+     * @param string       $target
      */
-    public function __construct(ORMInterface $orm, string $class)
+    public function __construct(ORMInterface $orm, string $target)
     {
         $this->orm = $orm;
-        $this->role = $class;
+        $this->target = $target;
     }
 
     /**
      * @return string
      */
-    public function getRole(): string
+    public function getTarget(): string
     {
-        return $this->role;
+        return $this->target;
     }
 
     /**
@@ -89,7 +89,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function getDatabase(): DatabaseInterface
     {
-        return $this->orm->getDatabase($this->role);
+        return $this->orm->getDatabase($this->target);
     }
 
     /**
@@ -175,7 +175,7 @@ abstract class AbstractLoader implements LoaderInterface
 
         try {
             //Creating new loader.
-            $loader = $this->orm->getFactory()->loader($this->role, $relation);
+            $loader = $this->orm->getFactory()->loader($this->target, $relation);
         } catch (FactoryException $e) {
             throw new LoaderException(
                 "Unable to create loader: %s" . $e->getMessage(),
@@ -288,6 +288,6 @@ abstract class AbstractLoader implements LoaderInterface
      */
     protected function define(int $property)
     {
-        return $this->orm->getSchema()->define($this->role, $property);
+        return $this->orm->getSchema()->define($this->target, $property);
     }
 }

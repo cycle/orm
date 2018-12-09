@@ -10,14 +10,14 @@ namespace Spiral\ORM\Loader\Relation;
 
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
+use Spiral\ORM\Generator\AbstractNode;
+use Spiral\ORM\Generator\ArrayNode;
 use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Loader\Traits\ConstrainTrait;
 use Spiral\ORM\Loader\Traits\WhereTrait;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Generator\AbstractNode;
-use Spiral\ORM\Generator\ArrayNode;
 
 class HasManyLoader extends JoinableLoader
 {
@@ -40,9 +40,9 @@ class HasManyLoader extends JoinableLoader
     /**
      * {@inheritdoc}
      */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $class, $relation, $schema);
+        parent::__construct($orm, $name, $target, $schema);
         $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
         $this->options['where'] = $schema[Relation::WHERE_SCOPE] ?? [];
     }

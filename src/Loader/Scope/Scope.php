@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector;
+namespace Spiral\ORM\Loader\Scope;
 
-use Spiral\ORM\Selector;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Simple where and orderBy scope for the selections.
@@ -34,8 +34,8 @@ class Scope implements ScopeInterface
     /**
      * @inheritdoc
      */
-    public function apply(Selector $selector)
+    public function apply(SelectQuery $query): SelectQuery
     {
-        $selector->where($this->where)->orderBy($this->orderBy);
+        return $query->where($this->where)->orderBy($this->orderBy);
     }
 }

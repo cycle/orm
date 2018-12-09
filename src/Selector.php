@@ -9,8 +9,9 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Loader\RootLoader;
-use Spiral\ORM\Selector\ScopeInterface;
+use Spiral\ORM\Loader\Scope\ScopeInterface;
 use Spiral\ORM\TreeGenerator\OutputNode;
+use Spiral\ORM\Util\AliasDecorator;
 
 /**
  * Query builder and entity selector. Mocks SelectQuery.
@@ -39,6 +40,9 @@ class Selector implements \IteratorAggregate, \Countable
     /** @var ORMInterface */
     private $orm;
 
+    /** @var MapperInterface */
+    private $mapper;
+
     /** @var LoaderInterface */
     private $loader;
 
@@ -49,6 +53,7 @@ class Selector implements \IteratorAggregate, \Countable
     public function __construct(ORMInterface $orm, string $class)
     {
         $this->orm = $orm;
+        $this->mapper = $orm->getMapper($class);
         $this->loader = new RootLoader($orm, $class);
     }
 
@@ -61,7 +66,22 @@ class Selector implements \IteratorAggregate, \Countable
     public function withScope(ScopeInterface $scope): self
     {
         $selector = clone $this;
-        $scope->apply($selector);
+        $scope->apply($selector->loader->getQuery());
+
+        return $selector;
+    }
+
+    /**
+     * Columns to be selected, please note, primary key will always be included, DO not include
+     * column aliases in here, aliases will be added automatically.
+     *
+     * @param array $columns
+     * @return self
+     */
+    public function withColumns(array $columns): self
+    {
+        $selector = clone $this;
+        $selector->loader = $selector->loader->withColumns($columns);
 
         return $selector;
     }
@@ -93,6 +113,7 @@ class Selector implements \IteratorAggregate, \Countable
             $column = "DISTINCT({$loader->getPrimaryKey()})";
         }
 
+        // todo: wrap column
         return $loader->compileQuery()->count($column);
     }
 
@@ -119,21 +140,6 @@ class Selector implements \IteratorAggregate, \Countable
         }
 
         return $result;
-    }
-
-    /**
-     * Columns to be selected, please note, primary key will always be included, DO not include
-     * column aliases in here, aliases will be added automatically.
-     *
-     * @param array $columns
-     * @return self
-     */
-    public function withColumns(array $columns): self
-    {
-        $selector = clone $this;
-        $selector->loader = $selector->loader->withColumns($columns);
-
-        return $selector;
     }
 
     /**

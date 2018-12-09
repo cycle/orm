@@ -42,7 +42,7 @@ interface SelectableInterface
      * Return named Selector scope or return null.
      *
      * @param string $name
-     * @return ScopeInterface|null
+     * @return Selector\ScopeInterface|null
      */
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface;
+    public function getScope(string $name = self::DEFAULT_SCOPE): ?Selector\ScopeInterface;
 }

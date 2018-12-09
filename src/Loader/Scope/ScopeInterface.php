@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector;
+namespace Spiral\ORM\Loader\Scope;
 
-use Spiral\ORM\Selector;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to modify the selector.
@@ -16,7 +16,8 @@ use Spiral\ORM\Selector;
 interface ScopeInterface
 {
     /**
-     * @param Selector $selector
+     * @param SelectQuery $query
+     * @return SelectQuery
      */
-    public function apply(Selector $selector);
+    public function apply(SelectQuery $query): SelectQuery;
 }

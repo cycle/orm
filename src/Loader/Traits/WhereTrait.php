@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Loader\Traits;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Util\AliasDecorator;
+use Spiral\ORM\Util\QueryWrapper;
 
 /**
  * Provides the ability to configure relation specific where conditions.
@@ -30,8 +30,6 @@ trait WhereTrait
             return $query;
         }
 
-        $decorator = new AliasDecorator($query, $target, $table);
-        $decorator->where($where);
-        return $query;
+        return (new QueryWrapper($table))->withQuery($query, $target)->where($where);
     }
 }

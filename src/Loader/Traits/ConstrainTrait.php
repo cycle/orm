@@ -9,7 +9,7 @@ namespace Spiral\ORM\Loader\Traits;
 
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Util\AliasDecorator;
+use Spiral\ORM\Util\QueryWrapper;
 
 /**
  * Provides ability to set LIMIT and ORDER BY in relation loaders.
@@ -23,8 +23,7 @@ trait ConstrainTrait
     private function configureWindow(SelectQuery $query, array $orderBy)
     {
         if (!empty($orderBy)) {
-            $decorator = new AliasDecorator($query, 'where', $this->getAlias());
-            $decorator->orderBy($orderBy);
+            (new QueryWrapper($this->getAlias()))->withQuery($query)->orderBy($orderBy);
         }
     }
 

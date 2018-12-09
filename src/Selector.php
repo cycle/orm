@@ -8,9 +8,9 @@
 
 namespace Spiral\ORM;
 
+use Spiral\ORM\Generator\OutputNode;
 use Spiral\ORM\Loader\RootLoader;
 use Spiral\ORM\Loader\Scope\ScopeInterface;
-use Spiral\ORM\Generator\OutputNode;
 use Spiral\ORM\Util\QueryWrapper;
 
 /**
@@ -110,7 +110,7 @@ class Selector implements \IteratorAggregate, \Countable
             $column = sprintf("DISTINCT(%s)", $this->getLoader()->getPK());
         }
 
-        return $this->__call('count', compact('column'));
+        return $this->__call('count', [$column]);
     }
 
     /**
@@ -126,11 +126,11 @@ class Selector implements \IteratorAggregate, \Countable
 
         // aggregations
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            return $wrapper->withTarget($this->loader->compileQuery())->__call($name, $arguments);
+            return $wrapper->withQuery($this->loader->compileQuery())->__call($name, $arguments);
         }
 
         // where condition or statement
-        $result = $wrapper->withTarget($this->loader->getQuery())->__call($name, $arguments);
+        $result = $wrapper->withQuery($this->loader->getQuery())->__call($name, $arguments);
 
         if ($result === $this->loader->getQuery()) {
             return $this;

@@ -48,7 +48,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queueRelation(
+    public function queue(
         ContextCarrierInterface $parentStore,
         $parentEntity,
         Node $parentNode,
@@ -64,7 +64,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new Nil();
         }
 
-        $relState = $this->getPoint($related, +1);
+        $relState = $this->getNode($related, +1);
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relState, $this->outerKey))) {
@@ -79,7 +79,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // todo: use queue store? merge with belongs to?
 
-        $relState = $this->getPoint($related);
+        $relState = $this->getNode($related);
 
         /*
          * REMEMBER THE CYCLES!!!!
@@ -106,7 +106,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         $primaryKey = $this->orm->getSchema()->define(get_class($parentEntity), Schema::PRIMARY_KEY);
         $this->forwardScope($parentNode, $primaryKey, $update, $primaryKey);
-        $this->addDependency($this->getPoint($related), $this->outerKey, $update, $parentNode, $this->innerKey);
+        $this->forwardContext($this->getNode($related), $this->outerKey, $update, $parentNode, $this->innerKey);
 
         return $update;
     }

@@ -8,15 +8,19 @@
 
 namespace Spiral\ORM\Relation;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Condition;
-use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\Branch\ContextSequence;
+use Spiral\ORM\Command\Branch\Nil;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
+use Spiral\ORM\Entity\ProxyFactoryInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Util\Promise;
 
+/**
+ * Provides the ability to own and forward context values to child entity.
+ */
 class HasOneRelation extends AbstractRelation
 {
     /**
@@ -25,6 +29,7 @@ class HasOneRelation extends AbstractRelation
     public function initPromise(Node $point): array
     {
         if (empty($innerKey = $this->fetchKey($point, $this->innerKey))) {
+            // nothing to be promising
             return [null, null];
         }
 
@@ -34,7 +39,13 @@ class HasOneRelation extends AbstractRelation
             return [$e, $e];
         }
 
-        $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
+        $mapper = $this->orm->getMapper($this->class);
+
+        if ($mapper instanceof ProxyFactoryInterface) {
+            $p = $mapper->initProxy($scope);
+        } else {
+            $p = new Promise\PromiseOne($this->orm, $this->class, $scope);
+        }
 
         return [$p, $p];
     }
@@ -42,48 +53,43 @@ class HasOneRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queueRelation(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
-        $sequence = new ContextSequence();
-
-        if (!empty($original) && $related !== $original) {
-            if ($original instanceof PromiseInterface) {
-                $original = $original->__resolve();
-            }
-
-            if (!empty($original)) {
-                $sequence->addCommand($this->deleteOriginal($original));
-            }
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
+        if ($original instanceof PromiseInterface) {
+            $original = $original->__resolve();
         }
 
-        // todo: unify?
         if ($related instanceof PromiseInterface) {
             $related = $related->__resolve();
         }
 
-        // todo: make it better
-        if (empty($related)) {
-            if (count($sequence) === 0) {
+        if (is_null($related)) {
+            if ($related === $original) {
+                // no changes
                 return new Nil();
             }
 
-            // nothing to persist
-            return $sequence;
+            if (!is_null($original)) {
+                return $this->deleteOriginal($original);
+            }
         }
 
-        // store command with dependency on parent key
-        $sequence->addPrimary($this->addDependency(
+        // store command with mounted context paths
+        $relStore = $this->forwardContext(
             $parentNode,
             $this->innerKey,
             $this->orm->queueStore($related),
-            $this->getPoint($related, +1),
+            $this->getNode($related, +1),
             $this->outerKey
-        ));
+        );
+
+        if (is_null($original)) {
+            return $relStore;
+        }
+
+        $sequence = new ContextSequence();
+        $sequence->addCommand($this->deleteOriginal($original));
+        $sequence->addPrimary($relStore);
 
         return $sequence;
     }
@@ -96,7 +102,7 @@ class HasOneRelation extends AbstractRelation
      */
     protected function deleteOriginal($original): CommandInterface
     {
-        $point = $this->getPoint($original);
+        $point = $this->getNode($original);
 
         // only delete original child when no other objects claim it
         return new Condition($this->orm->queueDelete($original), function () use ($point) {

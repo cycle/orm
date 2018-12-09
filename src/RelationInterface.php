@@ -23,7 +23,7 @@ interface RelationInterface
 
     public function extract($value);
 
-    public function queueRelation(
+    public function queue(
         ContextCarrierInterface $parentStore,
         $parentEntity,
         Node $parentNode,

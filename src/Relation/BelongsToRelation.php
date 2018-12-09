@@ -42,7 +42,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queueRelation(
+    public function queue(
         ContextCarrierInterface $parentStore,
         $parentEntity,
         Node $parentNode,
@@ -63,9 +63,9 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
         }
 
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getPoint($related, +1);
+        $relState = $this->getNode($related, +1);
 
-        $this->addDependency($relState, $this->outerKey, $parentStore, $parentNode, $this->innerKey);
+        $this->forwardContext($relState, $this->outerKey, $parentStore, $parentNode, $this->innerKey);
 
         return $relStore;
     }

@@ -54,21 +54,21 @@ class MorphedHasManyRelation extends HasManyRelation
     /**
      * Persist related object.
      *
-     * @param Node   $parent
+     * @param Node   $parentNode
      * @param object $related
      * @return ContextCarrierInterface
      */
-    protected function queueStore(Node $parent, $related): ContextCarrierInterface
+    protected function queueStore(Node $parentNode, $related): ContextCarrierInterface
     {
-        $store = parent::queueStore($parent, $related);
+        $store = parent::queueStore($parentNode, $related);
 
-        $relState = $this->getPoint($related);
-        if ($this->fetchKey($relState, $this->morphKey) != $parent->getRole()) {
+        $relState = $this->getNode($related);
+        if ($this->fetchKey($relState, $this->morphKey) != $parentNode->getRole()) {
             // polish it
-            $store->register($this->morphKey, $parent->getRole(), true);
+            $store->register($this->morphKey, $parentNode->getRole(), true);
 
             // todo: update store only?
-            $relState->setData([$this->morphKey => $parent->getRole()]);
+            $relState->setData([$this->morphKey => $parentNode->getRole()]);
         }
 
         return $store;

@@ -9,16 +9,19 @@
 namespace Spiral\ORM\Relation;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\Branch\Condition;
 use Spiral\ORM\Command\Branch\Sequence;
+use Spiral\ORM\Command\CommandInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Node;
 use Spiral\ORM\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\Promise;
 
+/**
+ * Provides the ability to own the collection of entities.
+ */
 class HasManyRelation extends AbstractRelation
 {
     use Traits\CollectionTrait;
@@ -32,10 +35,9 @@ class HasManyRelation extends AbstractRelation
             return [new ArrayCollection(), null];
         }
 
-        // todo: where scope
         $p = new Promise\PromiseArray(
             $this->orm->getMapper($this->class)->getRepository(),
-            [$this->outerKey => $innerKey] + ($this->define(Relation::WHERE_SCOPE) ?? []),
+            array_merge([$this->outerKey => $innerKey], $this->define(Relation::WHERE_SCOPE) ?? []),
             $this->define(Relation::ORDER_BY) ?? []
         );
 
@@ -45,26 +47,14 @@ class HasManyRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queueRelation(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
-
-        // todo: i can do quick compare here?
-        // todo: why there is so many todos?
-
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
         if ($related instanceof PromiseInterface) {
-            // todo: resolve both original and related
             $related = $related->__resolve();
         }
 
         if ($original instanceof PromiseInterface) {
-            // todo: check consecutive changes
             $original = $original->__resolve();
-            // todo: state->setRelation (!!!!!!)
         }
 
         $sequence = new Sequence();
@@ -74,7 +64,7 @@ class HasManyRelation extends AbstractRelation
         }
 
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $sequence->addCommand($this->queueDelete($parentNode, $item));
+            $sequence->addCommand($this->queueDelete($item));
         }
 
         return $sequence;
@@ -97,16 +87,22 @@ class HasManyRelation extends AbstractRelation
     /**
      * Persist related object.
      *
-     * @param Node   $parent
+     * @param Node   $parentNode
      * @param object $related
-     * @return ContextCarrierInterface
+     * @return CC
      */
-    protected function queueStore(Node $parent, $related): ContextCarrierInterface
+    protected function queueStore(Node $parentNode, $related): CC
     {
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getPoint($related, +1);
+        $relNode = $this->getNode($related, +1);
 
-        $this->addDependency($parent, $this->innerKey, $relStore, $relState, $this->outerKey);
+        $this->forwardContext(
+            $parentNode,
+            $this->innerKey,
+            $relStore,
+            $relNode,
+            $this->outerKey
+        );
 
         return $relStore;
     }
@@ -114,19 +110,15 @@ class HasManyRelation extends AbstractRelation
     /**
      * Remove one of related objects.
      *
-     * @param Node   $parent
      * @param object $related
      * @return CommandInterface
      */
-    protected function queueDelete(Node $parent, $related): CommandInterface
+    protected function queueDelete($related): CommandInterface
     {
-        $origState = $this->getPoint($related);
+        $relNode = $this->getNode($related);
 
-        return new Condition(
-            $this->orm->queueDelete($related),
-            function () use ($origState) {
-                return !$origState->getState()->hasClaims();
-            }
-        );
+        return new Condition($this->orm->queueDelete($related), function () use ($relNode) {
+            return !$relNode->getState()->hasClaims();
+        });
     }
 }

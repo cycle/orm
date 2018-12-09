@@ -10,10 +10,10 @@ namespace Spiral\ORM\Relation\Traits;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Util\Collection\CollectionPromise;
+use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Node;
+use Spiral\ORM\Util\Collection\CollectionPromise;
 
 trait CollectionTrait
 {

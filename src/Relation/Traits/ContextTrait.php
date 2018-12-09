@@ -29,7 +29,7 @@ trait ContextTrait
      * @param string                  $toKey
      * @return ContextCarrierInterface
      */
-    protected function addDependency(
+    protected function forwardContext(
         Node $from,
         string $fromKey,
         ContextCarrierInterface $carrier,

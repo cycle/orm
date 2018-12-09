@@ -85,14 +85,14 @@ class BelongsToMorphedRelation extends BelongsToRelation
     /**
      * @inheritdoc
      */
-    public function queueRelation(
+    public function queue(
         ContextCarrierInterface $parentStore,
         $parentEntity,
         Node $parentNode,
         $related,
         $original
     ): CommandInterface {
-        $store = parent::queueRelation($parentStore, $parentEntity, $parentNode, $related, $original);
+        $store = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
 
         // todo: use forward as well
 
@@ -102,7 +102,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
                 $parentNode->setData([$this->morphKey => null]);
             }
         } else {
-            $relState = $this->getPoint($related);
+            $relState = $this->getNode($related);
             if ($this->fetchKey($parentNode, $this->morphKey) != $relState->getRole()) {
                 $parentStore->register($this->morphKey, $relState->getRole(), true);
                 $parentNode->setData([$this->morphKey => $relState->getRole()]);
@@ -112,7 +112,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
         return $store;
     }
 
-    protected function getPoint($entity, int $claim = 0): ?Node
+    protected function getNode($entity, int $claim = 0): ?Node
     {
         if ($entity instanceof PromiseInterface) {
             $scope = $entity->__scope();
@@ -124,6 +124,6 @@ class BelongsToMorphedRelation extends BelongsToRelation
             );
         }
 
-        return parent::getPoint($entity, $claim);
+        return parent::getNode($entity, $claim);
     }
 }

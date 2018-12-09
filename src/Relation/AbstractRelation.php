@@ -97,7 +97,7 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[$key] ?? null;
     }
 
-    protected function getPoint($entity, int $claim = 0): ?Node
+    protected function getNode($entity, int $claim = 0): ?Node
     {
         if (is_null($entity)) {
             return null;

@@ -9,13 +9,11 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Command\Branch\ContextSequence;
-use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
 
 /**
- * Generates set of linked commands required to persis or delete given dependency graph. Each
- * RelationMap is specific to one instance class (type).
+ * Manages the graph of relations and generates command branches.
  */
 final class RelationMap
 {
@@ -174,23 +172,18 @@ final class RelationMap
         $related,
         $original
     ): ?CommandInterface {
-        if ($related instanceof PromiseInterface && $related === $original) {
+        if (($related instanceof PromiseInterface || is_null($related)) && $related === $original) {
             // no changes in non changed promised relation
             return null;
         }
 
-        $relStore = $relation->queueRelation(
+        $relStore = $relation->queue(
             $parentStore,
             $parentEntity,
             $parentNode,
             $related,
             $original
         );
-
-        if ($relStore instanceof Sequence && count($relStore) === 1) {
-            // simplify the branch
-            $relStore = current($relStore->getCommands());
-        }
 
         // update current relation state
         $parentNode->getState()->setRelation($relation->getName(), $related);

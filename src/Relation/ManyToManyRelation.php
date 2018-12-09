@@ -152,7 +152,7 @@ class ManyToManyRelation extends AbstractRelation
      * @param ContextStorage $related
      * @param ContextStorage $original
      */
-    public function queueRelation(
+    public function queue(
         ContextCarrierInterface $parentStore,
         $parentEntity,
         Node $parentNode,
@@ -217,7 +217,7 @@ class ManyToManyRelation extends AbstractRelation
         $sync->waitContext($this->thoughtOuterKey, true);
 
         $state->listen($this->innerKey, $sync, $this->thoughtInnerKey, true);
-        $this->getPoint($related)->listen($this->outerKey, $sync, $this->thoughtOuterKey, true);
+        $this->getNode($related)->listen($this->outerKey, $sync, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -235,7 +235,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function unlink(Node $state, $related): CommandInterface
     {
-        $relState = $this->getPoint($related);
+        $relState = $this->getNode($related);
 
         $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
         $delete->waitScope($this->thoughtOuterKey);

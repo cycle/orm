@@ -157,7 +157,7 @@ class PivotedRelation extends Relation\AbstractRelation
      * @param ContextStorage $related
      * @param ContextStorage $original
      */
-    public function queueRelation(
+    public function queue(
         ContextCarrierInterface $parentStore,
         $parentEntity,
         Node $parentNode,
@@ -214,7 +214,7 @@ class PivotedRelation extends Relation\AbstractRelation
     protected function link(Node $state, $related, $pivot, ContextStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
-        $relState = $this->getPoint($related, +1);
+        $relState = $this->getNode($related, +1);
 
         if (!is_object($pivot)) {
             // first time initialization
@@ -223,10 +223,10 @@ class PivotedRelation extends Relation\AbstractRelation
 
         // defer the insert until pivot keys are resolved
         $pivotStore = $this->orm->queueStore($pivot);
-        $pivotState = $this->getPoint($pivot);
+        $pivotState = $this->getNode($pivot);
 
-        $this->addDependency($state, $this->innerKey, $pivotStore, $pivotState, $this->thoughtInnerKey);
-        $this->addDependency($relState, $this->outerKey, $pivotStore, $pivotState, $this->thoughtOuterKey);
+        $this->forwardContext($state, $this->innerKey, $pivotStore, $pivotState, $this->thoughtInnerKey);
+        $this->forwardContext($relState, $this->outerKey, $pivotStore, $pivotState, $this->thoughtOuterKey);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);

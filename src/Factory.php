@@ -56,7 +56,7 @@ class Factory implements FactoryInterface
     {
         return $this->factory->make($this->getSchema()->define($class, Schema::MAPPER), [
             'orm'    => $this->orm,
-            'role'   => $class,
+            'class'  => $class,
             'schema' => $this->getSchema()->define($class, Schema::SCHEMA)
         ]);
     }
@@ -88,11 +88,10 @@ class Factory implements FactoryInterface
         $type = $schema[Relation::TYPE];
 
         return $this->config->getRelation($type)->resolve($this->factory, [
-            'orm'         => $this->orm,
-            'entityClass' => $class,
-            'class'       => $schema[Relation::TARGET],
-            'relation'    => $relation,
-            'schema'      => $schema[Relation::SCHEMA]
+            'orm'      => $this->orm,
+            'relation' => $relation,
+            'target'   => $schema[Relation::TARGET],
+            'schema'   => $schema[Relation::SCHEMA]
         ]);
     }
 

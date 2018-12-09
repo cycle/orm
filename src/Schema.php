@@ -26,6 +26,31 @@ final class Schema implements SchemaInterface
     public function __construct(array $schema)
     {
         $this->schema = $schema;
+
+
+        $add = [];
+        // fixing stuff
+        foreach ($this->schema as $k => &$item) {
+            $item[self::ENTITY] = $k;
+
+            if (isset($item[self::RELATIONS])) {
+                foreach ($item[self::RELATIONS] as &$rel) {
+                    if (isset($this->schema[$rel[Relation::TARGET]][self::ALIAS])) {
+                        $rel[Relation::TARGET] = $this->schema[$rel[Relation::TARGET]][self::ALIAS];
+                    }
+
+                    unset($rel);
+                }
+            }
+
+            if (isset($item[self::ALIAS])) {
+                $add[$item[self::ALIAS]] = $item;
+            }
+
+            unset($item);
+        }
+
+        $this->schema = $this->schema + $add;
     }
 
     /**

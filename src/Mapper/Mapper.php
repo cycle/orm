@@ -49,16 +49,16 @@ class Mapper implements MapperInterface, SelectableInterface
      */
     private $hydrator;
 
-    public function __construct(ORMInterface $orm, string $role)
+    public function __construct(ORMInterface $orm, string $class)
     {
         $this->orm = $orm;
-        $this->role = $role;
+        $this->role = $class;
 
         // todo: mass export
-        $this->columns = $this->orm->getSchema()->define($role, Schema::COLUMNS);
-        $this->table = $this->orm->getSchema()->define($role, Schema::TABLE);
-        $this->primaryKey = $this->orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $this->children = $this->orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
+        $this->columns = $this->orm->getSchema()->define($class, Schema::COLUMNS);
+        $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
+        $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
+        $this->children = $this->orm->getSchema()->define($class, Schema::CHILDREN) ?? [];
         $this->hydrator = new Reflection();
     }
 

@@ -18,8 +18,8 @@ use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Iterator;
-use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Loader\JoinableLoader;
+use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -39,13 +39,13 @@ class ManyToManyRelation extends AbstractRelation
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
+     * @param string       $target
      * @param string       $relation
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    public function __construct(ORMInterface $orm, string $relation, string $target, array $schema)
     {
-        parent::__construct($orm, $class, $relation, $schema);
+        parent::__construct($orm, $relation, $target, $schema);
 
         $this->thoughtInnerKey = $this->define(Relation::THOUGHT_INNER_KEY);
         $this->thoughtOuterKey = $this->define(Relation::THOUGHT_OUTER_KEY);

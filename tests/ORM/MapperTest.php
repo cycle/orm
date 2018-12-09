@@ -8,11 +8,11 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap;
+use Spiral\ORM\Mapper\Mapper;
+use Spiral\ORM\Node;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\Node;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;

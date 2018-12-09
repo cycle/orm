@@ -26,14 +26,14 @@ class MorphedHasOneRelation extends HasOneRelation
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
+     * @param string       $target
      * @param string       $relation
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    public function __construct(ORMInterface $orm, string $relation, string $target, array $schema)
     {
-        parent::__construct($orm, $class, $relation, $schema);
-        $this->morphKey = $this->define(Relation::MORPH_KEY);
+        parent::__construct($orm, $relation, $target, $schema);
+        $this->morphKey = $schema[Relation::MORPH_KEY] ?? null;
     }
 
     /**

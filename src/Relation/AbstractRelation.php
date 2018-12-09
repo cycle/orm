@@ -40,14 +40,14 @@ abstract class AbstractRelation implements RelationInterface
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
      * @param string       $relation
+     * @param string       $target
      * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $class, string $relation, array $schema)
+    public function __construct(ORMInterface $orm, string $relation, string $target, array $schema)
     {
         $this->orm = $orm;
-        $this->targetRole = $class;
+        $this->targetRole = $target;
         $this->relation = $relation;
         $this->schema = $schema;
 

@@ -74,6 +74,10 @@ class ORM implements ORMInterface
      */
     public function getMapper($entity): MapperInterface
     {
+        if (is_string($entity)) {
+            $entity = $this->schema->getClass($entity) ?? $entity;
+        }
+
         $entity = $this->resolveClass($entity);
 
         if (isset($this->mappers[$entity])) {
@@ -116,6 +120,7 @@ class ORM implements ORMInterface
         }
 
         if ($load) {
+            $class = $this->schema->getClass($class) ?? $class;
             return $this->getMapper($class)->getRepository()->findOne($scope);
         }
 

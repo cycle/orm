@@ -127,12 +127,12 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public function listen(
         string $key,
-        ConsumerInterface $acceptor,
+        ConsumerInterface $consumer,
         string $target,
         bool $trigger = false,
         int $stream = self::DATA
     ) {
-        $this->getState()->listen($key, $acceptor, $target, $trigger, $stream);
+        $this->getState()->listen($key, $consumer, $target, $trigger, $stream);
     }
 
     /**

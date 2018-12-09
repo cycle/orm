@@ -13,11 +13,11 @@ use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\JoinableLoader;
 use Spiral\ORM\Loader\Traits\ConstrainTrait;
 use Spiral\ORM\Loader\Traits\WhereTrait;
-use Spiral\ORM\TreeGenerator\AbstractNode;
-use Spiral\ORM\TreeGenerator\PivotedNode;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
+use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\TreeGenerator\PivotedNode;
 
 class ManyToManyLoader extends JoinableLoader
 {

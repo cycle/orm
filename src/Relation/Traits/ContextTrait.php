@@ -35,10 +35,10 @@ trait ContextTrait
         $carrier->waitContext($toKey, $this->isRequired());
 
         // forward key from state to the command (on change)
-        $to->listen($toKey, $carrier, $toKey);
+        $to->forward($toKey, $carrier, $toKey);
 
         // link 2 keys and trigger cascade falling right now (if exists)
-        $from->listen($fromKey, $to, $toKey, true);
+        $from->forward($fromKey, $to, $toKey, true);
 
         return $carrier;
     }
@@ -56,7 +56,7 @@ trait ContextTrait
     protected function forwardScope(Node $from, string $fromKey, CS $carrier, string $toKey): CS
     {
         $carrier->waitScope($toKey);
-        $from->listen($fromKey, $carrier, $toKey, true, ConsumerInterface::SCOPE);
+        $from->forward($fromKey, $carrier, $toKey, true, ConsumerInterface::SCOPE);
 
         return $carrier;
     }

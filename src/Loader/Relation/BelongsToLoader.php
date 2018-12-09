@@ -11,10 +11,10 @@ namespace Spiral\ORM\Loader\Relation;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\JoinableLoader;
-use Spiral\ORM\TreeGenerator\AbstractNode;
-use Spiral\ORM\TreeGenerator\SingularNode;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
+use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\TreeGenerator\SingularNode;
 
 /**
  * Load parent data. Similar to HasOne but use POSTLOAD as default method.

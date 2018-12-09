@@ -237,7 +237,7 @@ class Mapper implements MapperInterface, SelectableInterface
         $state->setData($cData);
 
         // todo: scope prefix (call immediatelly?)
-        $state->listen($this->primaryKey, $update, $this->primaryKey, true, ConsumerInterface::SCOPE);
+        $state->forward($this->primaryKey, $update, $this->primaryKey, true, ConsumerInterface::SCOPE);
 
         return $update;
     }
@@ -250,7 +250,7 @@ class Mapper implements MapperInterface, SelectableInterface
         $state->getState()->decClaim();
 
         $delete->waitScope($this->primaryKey);
-        $state->listen($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
+        $state->forward($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
 
         // todo: this must be changed (CORRECT?) BUT HOW?
         //  $delete->onComplete(function () use ($entity) {

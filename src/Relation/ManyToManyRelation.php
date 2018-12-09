@@ -13,21 +13,18 @@ use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Iterator;
-use Spiral\ORM\Loader\JoinableLoader;
-use Spiral\ORM\Loader\Relation\ManyToManyLoader;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
-use Spiral\ORM\TreeGenerator\PivotedRootNode;
+use Spiral\ORM\Relation\ManyToMany\PivotedPromise;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
-use Spiral\ORM\Util\PivotedPromise;
+use Spiral\ORM\Util\Promise\PivotedPromiseInterface;
 
 class ManyToManyRelation extends AbstractRelation
 {
@@ -46,74 +43,23 @@ class ManyToManyRelation extends AbstractRelation
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-
         $this->thoughtInnerKey = $this->schema[Relation::THOUGHT_INNER_KEY] ?? null;
         $this->thoughtOuterKey = $this->schema[Relation::THOUGHT_OUTER_KEY] ?? null;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function initPromise(Node $parentNode): array
     {
         if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
-            return [null, null];
+            return [new ArrayCollection(), null];
         }
 
-        // todo: context promise (!)
-        $pr = new PivotedPromise(
-            $this->target,
-            [$this->outerKey => $innerKey],
-            function () use ($innerKey) {
-                // todo: store pivot context as well!!! or NOT?
+        // will take care of all the loading and scoping
+        $p = new PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
 
-
-                // repository won't work here
-
-                // todo: need easy way to get access to table
-                $tableName = $this->orm->getSchema()->define($this->target, Schema::TABLE);
-
-                // todo: i need parent entity name
-                $query = $this->orm->getDatabase($this->target)->select()->from($tableName);
-
-                $loader = new ManyToManyLoader($this->orm, $this->target, $this->name, $this->schema);
-
-                $loader = $loader->withContext(
-                    $loader,
-                    [
-                        'alias'      => $tableName,
-                        'pivotAlias' => $tableName . '_pivot',
-                        'method'     => JoinableLoader::POSTLOAD
-                    ]
-                );
-
-                /** @var ManyToManyLoader $loader */
-                $query = $loader->configureQuery($query, [$innerKey]);
-
-                $node = new PivotedRootNode(
-                    $this->orm->getSchema()->define($this->target, Schema::COLUMNS),
-                    $this->schema[Relation::PIVOT_COLUMNS],
-                    $this->schema[Relation::OUTER_KEY],
-                    $this->schema[Relation::THOUGHT_INNER_KEY],
-                    $this->schema[Relation::THOUGHT_OUTER_KEY]
-                );
-
-                $iterator = $query->getIterator();
-                foreach ($iterator as $row) {
-                    $node->parseRow(0, $row);
-                }
-                $iterator->close();
-
-
-                $elements = [];
-                $pivotData = new \SplObjectStorage();
-                foreach (new Iterator($this->orm, $this->target, $node->getResult()) as $pivot => $entity) {
-                    $pivotData[$entity] = $pivot;
-                    $elements[] = $entity;
-                }
-
-                return new ContextStorage($elements, $pivotData);
-            }
-        );
-
-        return [new CollectionPromise($pr), $pr];
+        return [new CollectionPromise($p), $p];
     }
 
     /**
@@ -154,42 +100,29 @@ class ManyToManyRelation extends AbstractRelation
      * @param ContextStorage $related
      * @param ContextStorage $original
      */
-    public function queue(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        $related,
-        $original
-    ): CommandInterface {
+    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    {
         $original = $original ?? new ContextStorage();
 
-        if ($related instanceof PivotedPromise) {
-            // todo: unify?
+        if ($related instanceof PivotedPromiseInterface) {
             $related = $related->__resolveContext();
         }
 
-        if ($original instanceof PivotedPromise) {
-            // todo: check consecutive changes
+        if ($original instanceof PivotedPromiseInterface) {
             $original = $original->__resolveContext();
-            // todo: state->setRelation (!!!!!!)
-            // YYEEAH?
         }
 
         $sequence = new Sequence();
 
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
-            $sequence->addCommand(
-                $this->link($parentNode, $item, $original->has($item))
-            );
+            $sequence->addCommand($this->link($parentNode, $item, $original->has($item)));
         }
 
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
-                $sequence->addCommand(
-                    $this->unlink($parentNode, $item)
-                );
+                $sequence->addCommand($this->unlink($parentNode, $item));
             }
         }
 
@@ -199,12 +132,12 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node   $state
+     * @param Node   $node
      * @param object $related
      * @param bool   $exists
      * @return CommandInterface
      */
-    protected function link(Node $state, $related, $exists): CommandInterface
+    protected function link(Node $node, $related, $exists): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
 
@@ -218,8 +151,8 @@ class ManyToManyRelation extends AbstractRelation
         $sync->waitContext($this->thoughtInnerKey, true);
         $sync->waitContext($this->thoughtOuterKey, true);
 
-        $state->listen($this->innerKey, $sync, $this->thoughtInnerKey, true);
-        $this->getNode($related)->listen($this->outerKey, $sync, $this->thoughtOuterKey, true);
+        $node->forward($this->innerKey, $sync, $this->thoughtInnerKey, true);
+        $this->getNode($related)->forward($this->outerKey, $sync, $this->thoughtOuterKey, true);
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
@@ -231,20 +164,33 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Remove the connection between two objects.
      *
-     * @param Node   $state
+     * @param Node   $node
      * @param object $related
      * @return CommandInterface
      */
-    protected function unlink(Node $state, $related): CommandInterface
+    protected function unlink(Node $node, $related): CommandInterface
     {
-        $relState = $this->getNode($related);
+        $relNode = $this->getNode($related);
 
         $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
         $delete->waitScope($this->thoughtOuterKey);
         $delete->waitScope($this->thoughtInnerKey);
 
-        $state->listen($this->innerKey, $delete, $this->thoughtInnerKey, true, ConsumerInterface::SCOPE);
-        $relState->listen($this->outerKey, $delete, $this->thoughtOuterKey, true, ConsumerInterface::SCOPE);
+        $node->forward(
+            $this->innerKey
+            , $delete,
+            $this->thoughtInnerKey,
+            true,
+            ConsumerInterface::SCOPE
+        );
+
+        $relNode->forward(
+            $this->outerKey,
+            $delete,
+            $this->thoughtOuterKey,
+            true,
+            ConsumerInterface::SCOPE
+        );
 
         return $delete;
     }
@@ -254,7 +200,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function pivotDatabase(): DatabaseInterface
     {
-        return $this->orm->getDatabase($this->target);
+        return $this->getMapper()->getDatabase();
     }
 
     /**

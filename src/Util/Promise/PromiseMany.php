@@ -29,7 +29,7 @@ class PromiseMany implements PromiseInterface
     private $orderBy = [];
 
     /** @var array */
-    private $result = [];
+    private $resolved = [];
 
     /**
      * @param Selector $selector
@@ -37,12 +37,8 @@ class PromiseMany implements PromiseInterface
      * @param array    $whereScope
      * @param array    $orderBy
      */
-    public function __construct(
-        Selector $selector,
-        array $scope = [],
-        array $whereScope = [],
-        array $orderBy = []
-    ) {
+    public function __construct(Selector $selector, array $scope = [], array $whereScope = [], array $orderBy = [])
+    {
         $this->selector = $selector;
         $this->scope = $scope;
         $this->whereScope = $whereScope;
@@ -79,16 +75,16 @@ class PromiseMany implements PromiseInterface
     public function __resolve()
     {
         if (is_null($this->selector)) {
-            return $this->result;
+            return $this->resolved;
         }
 
-        $this->result = $this->selector
+        $this->resolved = $this->selector
             ->where($this->scope + $this->whereScope)
             ->orderBy($this->orderBy)
             ->fetchAll();
 
         $this->selector = null;
 
-        return $this->result;
+        return $this->resolved;
     }
 }

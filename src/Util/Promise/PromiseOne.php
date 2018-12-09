@@ -26,7 +26,7 @@ class PromiseOne implements PromiseInterface
     private $scope;
 
     /** @var mixed */
-    private $result;
+    private $resolved;
 
     /**
      * @param ORMInterface $orm
@@ -70,10 +70,10 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $this->result = $this->orm->get($this->target, $this->scope, true);
+            $this->resolved = $this->orm->get($this->target, $this->scope, true);
             $this->orm = null;
         }
 
-        return $this->result;
+        return $this->resolved;
     }
 }

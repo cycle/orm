@@ -113,7 +113,7 @@ class State implements ConsumerInterface, ProducerInterface
     /**
      * @inheritdoc
      */
-    public function listen(
+    public function forward(
         string $key,
         ConsumerInterface $consumer,
         string $target,

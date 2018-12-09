@@ -11,10 +11,10 @@ namespace Spiral\ORM\Loader\Relation;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\ORM\Loader\JoinableLoader;
-use Spiral\ORM\TreeGenerator\AbstractNode;
-use Spiral\ORM\TreeGenerator\SingularNode;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
+use Spiral\ORM\TreeGenerator\AbstractNode;
+use Spiral\ORM\TreeGenerator\SingularNode;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.

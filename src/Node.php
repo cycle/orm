@@ -125,14 +125,14 @@ final class Node implements ProducerInterface, ConsumerInterface
     /**
      * @inheritdoc
      */
-    public function listen(
+    public function forward(
         string $key,
         ConsumerInterface $consumer,
         string $target,
         bool $trigger = false,
         int $stream = self::DATA
     ) {
-        $this->getState()->listen($key, $consumer, $target, $trigger, $stream);
+        $this->getState()->forward($key, $consumer, $target, $trigger, $stream);
     }
 
     /**

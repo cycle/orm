@@ -23,7 +23,7 @@ interface ProducerInterface
      * @param bool              $trigger  When set to true forwarder is allowed to send key immediately.
      * @param int               $stream   One of the context types (data context, scope context).
      */
-    public function listen(
+    public function forward(
         string $key,
         ConsumerInterface $consumer,
         string $target,

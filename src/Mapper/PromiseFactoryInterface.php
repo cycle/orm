@@ -9,13 +9,12 @@
 namespace Spiral\ORM\Mapper;
 
 use Spiral\ORM\Exception\MapperException;
-use Spiral\ORM\MapperInterface;
 use Spiral\ORM\PromiseInterface;
 
 /**
  * Provides mapper ability to initiate proxied version of it's entities.
  */
-interface ProxyFactoryInterface extends MapperInterface
+interface PromiseFactoryInterface
 {
     /**
      * Create entity proxy.

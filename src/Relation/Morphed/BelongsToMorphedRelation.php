@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation\Morphed;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Mapper\ProxyFactoryInterface;
+use Spiral\ORM\Mapper\PromiseFactoryInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Relation;
@@ -52,7 +52,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
         }
 
         $mapper = $this->getMapper($target);
-        if ($mapper instanceof ProxyFactoryInterface) {
+        if ($mapper instanceof PromiseFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {
             $p = new Promise\PromiseOne($this->orm, $target, $scope);

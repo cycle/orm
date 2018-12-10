@@ -11,10 +11,9 @@ namespace Spiral\ORM\Mapper;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Loader\Scope\ScopeInterface;
-use Spiral\ORM\MapperInterface;
 use Spiral\ORM\Selector;
 
-interface SelectableInterface extends MapperInterface
+interface SelectableInterface
 {
     // points to the scope which must be applied to all queries
     public const DEFAULT_SCOPE = '@default';

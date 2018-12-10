@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Relation\Traits;
 
-use Spiral\ORM\Mapper\ProxyFactoryInterface;
+use Spiral\ORM\Mapper\PromiseFactoryInterface;
 use Spiral\ORM\Node;
 use Spiral\ORM\Util\Promise\PromiseOne;
 
@@ -32,7 +32,7 @@ trait PromiseOneTrait
         }
 
         $mapper = $this->getMapper();
-        if ($mapper instanceof ProxyFactoryInterface) {
+        if ($mapper instanceof PromiseFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {
             $p = new PromiseOne($this->orm, $this->target, $scope);

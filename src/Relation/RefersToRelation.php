@@ -38,7 +38,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
             return new Nil();
         }
 
-        $relNode = $this->getNode($related, +1);
+        $relNode = $this->getNode($related);
 
         // related object exists, we can update key immediately
         if (!empty($outerKey = $this->fetchKey($relNode, $this->outerKey))) {

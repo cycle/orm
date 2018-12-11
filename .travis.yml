@@ -39,9 +39,9 @@ jobs:
         - docker-compose up -d
         - cd ..
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/SQLite
-        - vendor/bin/phpunit tests/ORM/Driver/MySQL
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+        - vendor/bin/phpunit tests/Cycle/Driver/SQLite
+        - vendor/bin/phpunit tests/Cycle/Driver/MySQL
+        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
 
 #    # Testing various PostgresSQL version
 #    - stage: Test

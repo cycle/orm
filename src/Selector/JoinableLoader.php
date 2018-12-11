@@ -8,12 +8,12 @@
 
 namespace Spiral\Cycle\Selector;
 
-use Spiral\Database\Query\SelectQuery;
 use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\Traits\ColumnsTrait;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
@@ -69,7 +69,7 @@ abstract class JoinableLoader extends AbstractLoader
          */
         $loader = parent::withContext($parent, $options);
 
-        if ($loader->getDatabase() !== $parent->getDatabase()) {
+        if ($loader->getSource()->getDatabase() !== $parent->getSource()->getDatabase()) {
             if ($loader->isJoined()) {
                 throw new LoaderException("Unable to join tables located in different databases");
             }
@@ -193,7 +193,7 @@ abstract class JoinableLoader extends AbstractLoader
      */
     protected function initQuery(): SelectQuery
     {
-        return $this->getDatabase()->select()->from($this->getJoinTable());
+        return $this->getSource()->getDatabase()->select()->from($this->getJoinTable());
     }
 
     /**

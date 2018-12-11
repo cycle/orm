@@ -8,12 +8,12 @@
 
 namespace Spiral\Cycle\Selector;
 
-use Spiral\Database\Query\SelectQuery;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\RootNode;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\Traits\ColumnsTrait;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
@@ -37,7 +37,7 @@ class RootLoader extends AbstractLoader
     {
         parent::__construct($orm, $target);
 
-        $this->query = $this->getDatabase()->select()->from(sprintf(
+        $this->query = $this->getSource()->getDatabase()->select()->from(sprintf(
             "%s AS %s",
             $this->define(Schema::TABLE),
             $this->getAlias()

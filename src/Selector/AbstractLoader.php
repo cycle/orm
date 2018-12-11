@@ -8,13 +8,12 @@
 
 namespace Spiral\Cycle\Selector;
 
-use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Query\SelectQuery;
 use Spiral\Cycle\Exception\FactoryException;
 use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Selector\Traits\ChainTrait;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
@@ -45,7 +44,7 @@ abstract class AbstractLoader implements LoaderInterface
     public const JOIN      = 3;
     public const LEFT_JOIN = 4;
 
-    /** @var ORMInterface @invisible */
+    /** @var ORMInterface @internal */
     protected $orm;
 
     /** @var string */
@@ -60,7 +59,7 @@ abstract class AbstractLoader implements LoaderInterface
     /** @var AbstractLoader[] */
     protected $join = [];
 
-    /** @var AbstractLoader @invisible */
+    /** @var AbstractLoader @internal */
     protected $parent;
 
     /**
@@ -82,13 +81,13 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
-     * Database associated with the loader.
+     * Data source associated with the loader.
      *
-     * @return DatabaseInterface
+     * @return SourceInterface
      */
-    public function getDatabase(): DatabaseInterface
+    public function getSource(): SourceInterface
     {
-        return $this->orm->getDatabase($this->target);
+        return $this->orm->getMapper($this->target);
     }
 
     /**

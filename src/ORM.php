@@ -8,8 +8,6 @@
 
 namespace Spiral\Cycle;
 
-use Spiral\Database\DatabaseInterface;
-use Spiral\Database\DatabaseManager;
 use Spiral\Cycle\Command\Branch\Nil;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
@@ -19,6 +17,7 @@ use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Database\DatabaseManager;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -60,18 +59,6 @@ class ORM implements ORMInterface
     public function getDBAL(): DatabaseManager
     {
         return $this->dbal;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getDatabase($entity): DatabaseInterface
-    {
-        $entity = $this->resolveClass($entity);
-
-        return $this->dbal->database(
-            $this->getSchema()->define($entity, Schema::DATABASE)
-        );
     }
 
     /**

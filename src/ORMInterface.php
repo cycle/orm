@@ -8,13 +8,12 @@
 
 namespace Spiral\Cycle;
 
-use Spiral\Database\DatabaseInterface;
-use Spiral\Database\DatabaseManager;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
+use Spiral\Database\DatabaseManager;
 
 interface ORMInterface
 {
@@ -23,11 +22,6 @@ interface ORMInterface
     public function make(string $role, array $data, int $node = Node::NEW);
 
     public function getDBAL(): DatabaseManager;
-
-    /**
-     * @deprecated
-     */
-    public function getDatabase($entity): DatabaseInterface;
 
     public function getMapper($entity): MapperInterface;
 

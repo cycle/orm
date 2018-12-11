@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation;
+namespace Spiral\Cycle\Relation;
 
-use Spiral\ORM\Command\Branch\Nil;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Exception\Relation\NullException;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Relation\Traits\PromiseOneTrait;
+use Spiral\Cycle\Command\Branch\Nil;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Exception\Relation\NullException;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Relation\Traits\PromiseOneTrait;
 
 /**
  * Provides ability to link to the parent object. Will claim branch up to the parent object and it's relations. To disable

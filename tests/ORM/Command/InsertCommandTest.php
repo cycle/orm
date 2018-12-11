@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Command;
+namespace Spiral\Cycle\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\Insert;
+use Spiral\Cycle\Command\Database\Insert;
 
 class InsertCommandTest extends TestCase
 {

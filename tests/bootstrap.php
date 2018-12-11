@@ -11,10 +11,10 @@ ini_set('display_errors', true);
 //Composer
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-\Spiral\ORM\Tests\BaseTest::$config = [
+\Spiral\Cycle\Tests\BaseTest::$config = [
     'debug'     => false,
     'strict'    => true,
-    'benchmark' => false,
+    'benchmark' => true,
     'sqlite'    => [
         'driver' => \Spiral\Database\Driver\SQLite\SQLiteDriver::class,
         'check'  => function () {
@@ -65,7 +65,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 if (!empty(getenv('DB'))) {
     switch (getenv('DB')) {
         case 'postgres':
-            \Spiral\ORM\Tests\BaseTest::$config = [
+            \Spiral\Cycle\Tests\BaseTest::$config = [
                 'debug'    => false,
                 'postgres' => [
                     'driver' => \Spiral\Database\Driver\Postgres\PostgresDriver::class,
@@ -80,7 +80,7 @@ if (!empty(getenv('DB'))) {
             break;
 
         case 'mysql':
-            \Spiral\ORM\Tests\BaseTest::$config = [
+            \Spiral\Cycle\Tests\BaseTest::$config = [
                 'debug' => false,
                 'mysql' => [
                     'driver' => \Spiral\Database\Driver\MySQL\MySQLDriver::class,
@@ -95,7 +95,7 @@ if (!empty(getenv('DB'))) {
             break;
 
         case 'mariadb':
-            \Spiral\ORM\Tests\BaseTest::$config = [
+            \Spiral\Cycle\Tests\BaseTest::$config = [
                 'debug' => false,
                 'mysql' => [
                     'driver' => \Spiral\Database\Driver\MySQL\MySQLDriver::class,

@@ -6,16 +6,16 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Morphed;
+namespace Spiral\Cycle\Relation\Morphed;
 
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Mapper\PromiseFactoryInterface;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Promise\PromiseOne;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Relation\BelongsToRelation;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\PromiseFactoryInterface;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Promise\PromiseOne;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Relation\BelongsToRelation;
 
 class BelongsToMorphedRelation extends BelongsToRelation
 {

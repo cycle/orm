@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\Cycle\Tests\Driver\Postgres;
 
-class HasOnePromiseTest extends \Spiral\ORM\Tests\HasOnePromiseTest 
+class HasOnePromiseTest extends \Spiral\Cycle\Tests\HasOnePromiseTest
 { 
     const DRIVER = "postgres"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class BelongsToPromiseTest extends \Spiral\ORM\Tests\BelongsToPromiseTest 
+class BelongsToPromiseTest extends \Spiral\Cycle\Tests\BelongsToPromiseTest
 { 
     const DRIVER = "sqlserver"; 
 }

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Pivoted;
+namespace Spiral\Cycle\Relation\Pivoted;
 
 /**
  * Carry information about ordered list of entities and associated pivot context.

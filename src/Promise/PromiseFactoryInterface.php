@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Mapper;
+namespace Spiral\Cycle\Mapper;
 
-use Spiral\ORM\Exception\MapperException;
-use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\Cycle\Exception\MapperException;
+use Spiral\Cycle\Promise\PromiseInterface;
 
 /**
  * Provides mapper ability to initiate proxied version of it's entities.

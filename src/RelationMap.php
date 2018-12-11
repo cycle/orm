@@ -6,15 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
-use Spiral\ORM\Command\Branch\ContextSequence;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Promise\PromiseInterface;
-use Spiral\ORM\Relation\DependencyInterface;
-use Spiral\ORM\Relation\RelationInterface;
+use Spiral\Cycle\Command\Branch\ContextSequence;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Relation\DependencyInterface;
+use Spiral\Cycle\Relation\RelationInterface;
 
 /**
  * Manages the graph of relations and generates command branches.

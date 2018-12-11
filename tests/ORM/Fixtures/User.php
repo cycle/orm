@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures;
+namespace Spiral\Cycle\Tests\Fixtures;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Relation\Pivoted\PivotedCollection;
+use Spiral\Cycle\Relation\Pivoted\PivotedCollection;
 
 class User implements ImagedInterface
 {

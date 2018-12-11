@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Schema;
+namespace Spiral\Cycle\Schema;
 
 class NullLocator implements LocatorInterface
 {

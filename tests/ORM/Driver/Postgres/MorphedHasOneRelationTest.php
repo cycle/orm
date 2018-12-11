@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\Cycle\Tests\Driver\Postgres;
 
-class MorphedHasOneRelationTest extends \Spiral\ORM\Tests\Morphed\MorphedHasOneRelationTest 
+class MorphedHasOneRelationTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasOneRelationTest
 { 
     const DRIVER = "postgres"; 
 }

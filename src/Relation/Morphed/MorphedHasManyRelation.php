@@ -6,16 +6,16 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Morphed;
+namespace Spiral\Cycle\Relation\Morphed;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Promise\PromiseMany;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Relation\HasManyRelation;
-use Spiral\ORM\Promise\Collection\CollectionPromise;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Promise\PromiseMany;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Relation\HasManyRelation;
+use Spiral\Cycle\Promise\Collection\CollectionPromise;
 
 class MorphedHasManyRelation extends HasManyRelation
 {

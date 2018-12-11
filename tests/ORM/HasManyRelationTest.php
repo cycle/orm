@@ -6,20 +6,20 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Heap\Heap;
-use Spiral\ORM\Selector\JoinableLoader;
-use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Selector;
-use Spiral\ORM\Tests\Fixtures\Comment;
-use Spiral\ORM\Tests\Fixtures\User;
-use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Mapper\Mapper;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector;
+use Spiral\Cycle\Tests\Fixtures\Comment;
+use Spiral\Cycle\Tests\Fixtures\User;
+use Spiral\Cycle\Tests\Traits\TableTrait;
+use Spiral\Cycle\Transaction;
 
 abstract class HasManyRelationTest extends BaseTest
 {

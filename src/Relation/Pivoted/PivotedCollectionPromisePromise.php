@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Pivoted;
+namespace Spiral\Cycle\Relation\Pivoted;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
-use Spiral\ORM\Promise\Collection\CollectionPromiseInterface;
-use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
+use Spiral\Cycle\Promise\PromiseInterface;
 
 /**
  * Collection at top of pivoted (entity + context entity) promise.

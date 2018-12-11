@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Tests\Fixtures\Profile;
-use Spiral\ORM\Tests\Fixtures\User;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Tests\Fixtures\Profile;
+use Spiral\Cycle\Tests\Fixtures\User;
 
 class SchemaTest extends TestCase
 {
@@ -27,7 +27,7 @@ class SchemaTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exception\SchemaException
+     * @expectedException \Spiral\Cycle\Exception\SchemaException
      */
     public function testSchemaException()
     {

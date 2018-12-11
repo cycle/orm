@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation;
+namespace Spiral\Cycle\Relation;
 
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Exception\RelationException;
-use Spiral\ORM\Heap\Node;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Exception\RelationException;
+use Spiral\Cycle\Heap\Node;
 
 /**
  * Manages single branch type between parent entity and other objects.

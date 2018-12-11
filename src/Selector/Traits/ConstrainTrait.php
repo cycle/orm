@@ -5,10 +5,10 @@
  * @author    Wolfy-J
  */
 
-namespace Spiral\ORM\Selector\Traits;
+namespace Spiral\Cycle\Selector\Traits;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Selector\QueryWrapper;
+use Spiral\Cycle\Selector\QueryWrapper;
 
 /**
  * Provides ability to set LIMIT and ORDER BY in relation loaders.

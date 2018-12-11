@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Heap;
+namespace Spiral\Cycle\Heap;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Context\ProducerInterface;
-use Spiral\ORM\Heap\Traits\ClaimTrait;
-use Spiral\ORM\Heap\Traits\RelationTrait;
-use Spiral\ORM\Heap\Traits\VisitorTrait;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Context\ConsumerInterface;
+use Spiral\Cycle\Context\ProducerInterface;
+use Spiral\Cycle\Heap\Traits\ClaimTrait;
+use Spiral\Cycle\Heap\Traits\RelationTrait;
+use Spiral\Cycle\Heap\Traits\VisitorTrait;
 
 /**
  * Current node state.

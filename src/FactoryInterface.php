@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
-use Spiral\ORM\Mapper\MapperInterface;
-use Spiral\ORM\Relation\RelationInterface;
-use Spiral\ORM\Selector\LoaderInterface;
+use Spiral\Cycle\Mapper\MapperInterface;
+use Spiral\Cycle\Relation\RelationInterface;
+use Spiral\Cycle\Selector\LoaderInterface;
 
 interface FactoryInterface
 {

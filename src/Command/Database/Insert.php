@@ -6,16 +6,16 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Database;
+namespace Spiral\Cycle\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\DatabaseCommand;
-use Spiral\ORM\Command\Traits\ContextTrait;
-use Spiral\ORM\Command\Traits\ErrorTrait;
-use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Context\ProducerInterface;
-use Spiral\ORM\Exception\CommandException;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Command\DatabaseCommand;
+use Spiral\Cycle\Command\Traits\ContextTrait;
+use Spiral\Cycle\Command\Traits\ErrorTrait;
+use Spiral\Cycle\Context\ConsumerInterface;
+use Spiral\Cycle\Context\ProducerInterface;
+use Spiral\Cycle\Exception\CommandException;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.

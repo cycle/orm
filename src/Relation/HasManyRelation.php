@@ -6,19 +6,19 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation;
+namespace Spiral\Cycle\Relation;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Command\Branch\Condition;
-use Spiral\ORM\Command\Branch\Sequence;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Promise\PromiseInterface;
-use Spiral\ORM\Promise\PromiseMany;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Promise\Collection\CollectionPromise;
+use Spiral\Cycle\Command\Branch\Condition;
+use Spiral\Cycle\Command\Branch\Sequence;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Promise\PromiseMany;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Promise\Collection\CollectionPromise;
 
 /**
  * Provides the ability to own the collection of entities.

@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Mapper;
+namespace Spiral\Cycle\Mapper;
 
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Exception\MapperException;
-use Spiral\ORM\Heap\Node;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Exception\MapperException;
+use Spiral\Cycle\Heap\Node;
 
 /**
  * Provides basic capabilities for CRUD operations with given entity class (role).

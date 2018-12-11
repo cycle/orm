@@ -5,9 +5,9 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Parser;
+namespace Spiral\Cycle\Parser;
 
-use Spiral\ORM\Exception\NodeException;
+use Spiral\Cycle\Exception\NodeException;
 
 /**
  * Node with ability to push it's data into referenced tree location.

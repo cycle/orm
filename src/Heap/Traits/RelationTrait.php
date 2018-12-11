@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Heap\Traits;
+namespace Spiral\Cycle\Heap\Traits;
 
 trait RelationTrait
 {

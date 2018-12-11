@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\Cycle\Tests\Driver\Postgres;
 
-class InverseRelationTest extends \Spiral\ORM\Tests\InverseRelationTest 
+class InverseRelationTest extends \Spiral\Cycle\Tests\InverseRelationTest
 { 
     const DRIVER = "postgres"; 
 }

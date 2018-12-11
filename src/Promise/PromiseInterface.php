@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Promise;
+namespace Spiral\Cycle\Promise;
 
 /**
  * Promises some related data.

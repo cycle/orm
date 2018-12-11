@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
 /**
  * Transaction aggregates set of commands declared by entities and executes them all together.

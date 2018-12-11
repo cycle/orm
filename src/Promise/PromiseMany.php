@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Promise;
+namespace Spiral\Cycle\Promise;
 
-use Spiral\ORM\Selector;
+use Spiral\Cycle\Selector;
 
 /**
  * Promises the selection of the

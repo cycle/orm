@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Exception\Schema;
+namespace Spiral\Cycle\Exception\Schema;
 
-use Spiral\ORM\Exception\SchemaException;
+use Spiral\Cycle\Exception\SchemaException;
 
 class LocatorException extends SchemaException
 {

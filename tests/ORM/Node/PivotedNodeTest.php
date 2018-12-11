@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Node;
+namespace Spiral\Cycle\Tests\Node;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Parser\PivotedNode;
-use Spiral\ORM\Parser\PivotedRootNode;
-use Spiral\ORM\Parser\RootNode;
+use Spiral\Cycle\Parser\PivotedNode;
+use Spiral\Cycle\Parser\PivotedRootNode;
+use Spiral\Cycle\Parser\RootNode;
 
 class PivotedNodeTest extends TestCase
 {

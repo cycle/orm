@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Pivoted;
+namespace Spiral\Cycle\Relation\Pivoted;
 
 use Doctrine\Common\Collections\Collection;
 

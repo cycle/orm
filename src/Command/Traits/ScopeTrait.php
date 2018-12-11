@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Command\Traits;
+namespace Spiral\Cycle\Command\Traits;
 
 trait ScopeTrait
 {

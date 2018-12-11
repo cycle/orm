@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Command;
+namespace Spiral\Cycle\Command;
 
 /**
  * Represent one or multiple operations in transaction.

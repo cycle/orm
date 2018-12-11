@@ -6,20 +6,20 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Mapper;
+namespace Spiral\Cycle\Mapper;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Branch\Split;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Command\Database\Delete;
-use Spiral\ORM\Command\Database\Insert;
-use Spiral\ORM\Command\Database\Update;
-use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Selector;
+use Spiral\Cycle\Command\Branch\Split;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Command\Database\Delete;
+use Spiral\Cycle\Command\Database\Insert;
+use Spiral\Cycle\Command\Database\Update;
+use Spiral\Cycle\Context\ConsumerInterface;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 

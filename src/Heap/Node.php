@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Heap;
+namespace Spiral\Cycle\Heap;
 
-use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Context\ProducerInterface;
-use Spiral\ORM\Heap\Traits\RelationTrait;
+use Spiral\Cycle\Context\ConsumerInterface;
+use Spiral\Cycle\Context\ProducerInterface;
+use Spiral\Cycle\Heap\Traits\RelationTrait;
 
 /**
  * Node (metadata) carries meta information about entitey state, changes forwards data to other points thought

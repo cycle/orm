@@ -1,5 +1,5 @@
 {
-  "name": "spiral/orm",
+  "name": "spiral/cycle",
   "type": "library",
   "description": "DataMapper ORM with ActiveRecord capabilities designed for long-running processes",
   "require": {
@@ -18,12 +18,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Spiral\\ORM\\": "src/"
+      "Spiral\\Cycle\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Spiral\\ORM\\Tests\\": "tests/ORM/"
+      "Spiral\\Cycle\\Tests\\": "tests/ORM/"
     }
   }
 }

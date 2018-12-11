@@ -6,17 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Command;
+namespace Spiral\Cycle\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\Delete;
+use Spiral\Cycle\Command\Database\Delete;
 
 class DeleteCommandTest extends TestCase
 {
     /**
-     * @expectedException \Spiral\ORM\Exception\CommandException
+     * @expectedException \Spiral\Cycle\Exception\CommandException
      */
     public function testNoScope()
     {

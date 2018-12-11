@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
@@ -18,13 +18,13 @@ use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
-use Spiral\ORM\Promise\Collection\CollectionPromise;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\ORM;
-use Spiral\ORM\Promise\PromiseInterface;
-use Spiral\ORM\Relation\Pivoted\PivotedCollectionInterface;
-use Spiral\ORM\Relation\Pivoted\PivotedStorage;
-use Spiral\ORM\SchemaInterface;
+use Spiral\Cycle\Promise\Collection\CollectionPromise;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\ORM;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Relation\Pivoted\PivotedCollectionInterface;
+use Spiral\Cycle\Relation\Pivoted\PivotedStorage;
+use Spiral\Cycle\SchemaInterface;
 
 abstract class BaseTest extends TestCase
 {
@@ -100,7 +100,7 @@ abstract class BaseTest extends TestCase
      * Calculates missing parameters for typecasting.
      *
      * @param SchemaInterface $schema
-     * @return ORM|\Spiral\ORM\ORMInterface
+     * @return ORM|\Spiral\Cycle\ORMInterface
      */
     public function withSchema(SchemaInterface $schema)
     {
@@ -289,7 +289,7 @@ abstract class BaseTest extends TestCase
 
             $rValue = $relations[$name];
 
-            if ($rValue instanceof PivotedStorage || $rValue instanceof \Spiral\ORM\Relation\Pivoted\PivotedPromise) {
+            if ($rValue instanceof PivotedStorage || $rValue instanceof \Spiral\Cycle\Relation\Pivoted\PivotedPromise) {
                 // todo: implement PIVOT data verification
                 continue;
             }

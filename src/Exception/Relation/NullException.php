@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Exception\Relation;
+namespace Spiral\Cycle\Exception\Relation;
 
-use Spiral\ORM\Exception\RelationException;
+use Spiral\Cycle\Exception\RelationException;
 
 class NullException extends RelationException
 {

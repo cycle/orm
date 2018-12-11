@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Database;
+namespace Spiral\Cycle\Command\Database;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\DatabaseCommand;
-use Spiral\ORM\Command\ScopeCarrierInterface;
-use Spiral\ORM\Command\Traits\ErrorTrait;
-use Spiral\ORM\Command\Traits\ScopeTrait;
-use Spiral\ORM\Exception\CommandException;
+use Spiral\Cycle\Command\DatabaseCommand;
+use Spiral\Cycle\Command\ScopeCarrierInterface;
+use Spiral\Cycle\Command\Traits\ErrorTrait;
+use Spiral\Cycle\Command\Traits\ScopeTrait;
+use Spiral\Cycle\Exception\CommandException;
 
 class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {

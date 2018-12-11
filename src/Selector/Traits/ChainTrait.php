@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector\Traits;
+namespace Spiral\Cycle\Selector\Traits;
 
-use Spiral\ORM\Exception\LoaderException;
-use Spiral\ORM\Selector\LoaderInterface;
+use Spiral\Cycle\Exception\LoaderException;
+use Spiral\Cycle\Selector\LoaderInterface;
 
 trait ChainTrait
 {

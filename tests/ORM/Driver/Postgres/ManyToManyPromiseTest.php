@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\Cycle\Tests\Driver\Postgres;
 
-class ManyToManyPromiseTest extends \Spiral\ORM\Tests\ManyToManyPromiseTest 
+class ManyToManyPromiseTest extends \Spiral\Cycle\Tests\ManyToManyPromiseTest
 { 
     const DRIVER = "postgres"; 
 }

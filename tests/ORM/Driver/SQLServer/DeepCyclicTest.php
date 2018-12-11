@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class DeepCyclicTest extends \Spiral\ORM\Tests\DeepCyclicTest 
+class DeepCyclicTest extends \Spiral\Cycle\Tests\DeepCyclicTest
 { 
     const DRIVER = "sqlserver"; 
 }

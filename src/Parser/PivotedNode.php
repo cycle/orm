@@ -5,9 +5,9 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Parser;
+namespace Spiral\Cycle\Parser;
 
-use Spiral\ORM\Exception\NodeException;
+use Spiral\Cycle\Exception\NodeException;
 
 /**
  * Provides ability to parse columns of target table and map table all together.

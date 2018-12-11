@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Parser;
+namespace Spiral\Cycle\Parser;
 
 /**
  * Provides ability to fetch node context.

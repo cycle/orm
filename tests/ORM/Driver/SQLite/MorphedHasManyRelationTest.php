@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLite; 
+namespace Spiral\Cycle\Tests\Driver\SQLite;
 
-class MorphedHasManyRelationTest extends \Spiral\ORM\Tests\Morphed\MorphedHasManyRelationTest 
+class MorphedHasManyRelationTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyRelationTest
 { 
     const DRIVER = "sqlite"; 
 }

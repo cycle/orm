@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
-use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Mapper\Repository;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Tests\Fixtures\User;
-use Spiral\ORM\Tests\Traits\TableTrait;
+use Spiral\Cycle\Mapper\Mapper;
+use Spiral\Cycle\Mapper\Repository;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Tests\Fixtures\User;
+use Spiral\Cycle\Tests\Traits\TableTrait;
 
 abstract class RepositoryTest extends BaseTest
 {

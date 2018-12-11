@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class HasManyPromiseTest extends \Spiral\ORM\Tests\HasManyPromiseTest 
+class HasManyPromiseTest extends \Spiral\Cycle\Tests\HasManyPromiseTest
 { 
     const DRIVER = "sqlserver"; 
 }

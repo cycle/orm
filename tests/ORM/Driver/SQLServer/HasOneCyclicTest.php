@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class HasOneCyclicTest extends \Spiral\ORM\Tests\HasOneCyclicTest 
+class HasOneCyclicTest extends \Spiral\Cycle\Tests\HasOneCyclicTest
 { 
     const DRIVER = "sqlserver"; 
 }

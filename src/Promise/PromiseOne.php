@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Promise;
+namespace Spiral\Cycle\Promise;
 
-use Spiral\ORM\ORMInterface;
+use Spiral\Cycle\ORMInterface;
 
 /**
  * Promises one entity and resolves the result via ORM heap or entity repository.

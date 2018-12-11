@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Promise\Collection;
+namespace Spiral\Cycle\Promise\Collection;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\Cycle\Promise\PromiseInterface;
 
 /**
  * LazyLoading collection build at top of data promise.

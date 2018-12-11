@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Parser\Traits;
+namespace Spiral\Cycle\Parser\Traits;
 
 /**
  * Trait provides ability for Node to ensure that given data is unique in selection. Primary key

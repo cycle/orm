@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLite; 
+namespace Spiral\Cycle\Tests\Driver\SQLite;
 
-class MapperTest extends \Spiral\ORM\Tests\MapperTest 
+class MapperTest extends \Spiral\Cycle\Tests\MapperTest
 { 
     const DRIVER = "sqlite"; 
 }

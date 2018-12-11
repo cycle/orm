@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
 use Spiral\Database\Driver\DriverInterface;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\DatabaseCommand;
-use Spiral\ORM\Exception\TransactionException;
-use Spiral\ORM\Heap\Node;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\DatabaseCommand;
+use Spiral\Cycle\Exception\TransactionException;
+use Spiral\Cycle\Heap\Node;
 
 /**
  * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction

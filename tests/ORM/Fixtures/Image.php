@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures;
+namespace Spiral\Cycle\Tests\Fixtures;
 
 class Image
 {

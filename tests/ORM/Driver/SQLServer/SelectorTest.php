@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class SelectorTest extends \Spiral\ORM\Tests\SelectorTest 
+class SelectorTest extends \Spiral\Cycle\Tests\SelectorTest
 { 
     const DRIVER = "sqlserver"; 
 }

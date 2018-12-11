@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLite; 
+namespace Spiral\Cycle\Tests\Driver\SQLite;
 
-class DoubleLinkedTest extends \Spiral\ORM\Tests\DoubleLinkedTest 
+class DoubleLinkedTest extends \Spiral\Cycle\Tests\DoubleLinkedTest
 { 
     const DRIVER = "sqlite"; 
 }

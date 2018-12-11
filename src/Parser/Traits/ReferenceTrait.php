@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Parser\Traits;
+namespace Spiral\Cycle\Parser\Traits;
 
-use Spiral\ORM\Exception\NodeException;
+use Spiral\Cycle\Exception\NodeException;
 
 /**
  * Mounts given data piece into reference based data tree.

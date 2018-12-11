@@ -6,15 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Mapper\MapperInterface;
-use Spiral\ORM\Parser\OutputNode;
-use Spiral\ORM\Selector\LoaderInterface;
-use Spiral\ORM\Selector\QueryWrapper;
-use Spiral\ORM\Selector\RootLoader;
-use Spiral\ORM\Selector\ScopeInterface;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\MapperInterface;
+use Spiral\Cycle\Parser\OutputNode;
+use Spiral\Cycle\Selector\LoaderInterface;
+use Spiral\Cycle\Selector\QueryWrapper;
+use Spiral\Cycle\Selector\RootLoader;
+use Spiral\Cycle\Selector\ScopeInterface;
 
 /**
  * Query builder and entity selector. Mocks SelectQuery.

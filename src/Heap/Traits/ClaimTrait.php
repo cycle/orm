@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Heap\Traits;
+namespace Spiral\Cycle\Heap\Traits;
 
 /**
  * Provides ability to calculate number of object claims.

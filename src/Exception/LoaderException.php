@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Exception;
+namespace Spiral\Cycle\Exception;
 
 
 class LoaderException extends ORMException

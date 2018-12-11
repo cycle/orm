@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Command;
+namespace Spiral\Cycle\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Command\Branch\Nil;
-use Spiral\ORM\Command\Branch\ContextSequence;
-use Spiral\ORM\Command\Branch\Sequence;
-use Spiral\ORM\Command\Database\Insert;
+use Spiral\Cycle\Command\Branch\Nil;
+use Spiral\Cycle\Command\Branch\ContextSequence;
+use Spiral\Cycle\Command\Branch\Sequence;
+use Spiral\Cycle\Command\Database\Insert;
 
 class SequenceCommandTest extends TestCase
 {
@@ -41,7 +41,7 @@ class SequenceCommandTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exception\CommandException
+     * @expectedException \Spiral\Cycle\Exception\CommandException
      */
     public function testGetLeadingBad()
     {

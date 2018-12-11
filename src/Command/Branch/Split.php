@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Branch;
+namespace Spiral\Cycle\Command\Branch;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface;
 
 /**
  * Splits input context command into 2 destinations: original create command (usually insert) and delayed update command.

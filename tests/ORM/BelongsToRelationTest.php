@@ -6,21 +6,21 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
 use Spiral\Database\Injection\Parameter;
-use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap\Heap;
-use Spiral\ORM\Selector\JoinableLoader;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Selector;
-use Spiral\ORM\Tests\Fixtures\Nested;
-use Spiral\ORM\Tests\Fixtures\Profile;
-use Spiral\ORM\Tests\Fixtures\User;
-use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\Cycle\Mapper\Mapper;
+use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector;
+use Spiral\Cycle\Tests\Fixtures\Nested;
+use Spiral\Cycle\Tests\Fixtures\Profile;
+use Spiral\Cycle\Tests\Fixtures\User;
+use Spiral\Cycle\Tests\Traits\TableTrait;
+use Spiral\Cycle\Transaction;
 
 abstract class BelongsToRelationTest extends BaseTest
 {
@@ -392,7 +392,7 @@ abstract class BelongsToRelationTest extends BaseTest
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exception\Relation\NullException
+     * @expectedException \Spiral\Cycle\Exception\Relation\NullException
      */
     public function testSetNullException()
     {

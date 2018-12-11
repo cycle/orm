@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Mapper;
+namespace Spiral\Cycle\Mapper;
 
 /**
  * Defines ability to locate entities based on scope parameters.

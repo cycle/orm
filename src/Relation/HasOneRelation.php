@@ -6,16 +6,16 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation;
+namespace Spiral\Cycle\Relation;
 
-use Spiral\ORM\Command\Branch\Condition;
-use Spiral\ORM\Command\Branch\ContextSequence;
-use Spiral\ORM\Command\Branch\Nil;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Promise\PromiseInterface;
-use Spiral\ORM\Relation\Traits\PromiseOneTrait;
+use Spiral\Cycle\Command\Branch\Condition;
+use Spiral\Cycle\Command\Branch\ContextSequence;
+use Spiral\Cycle\Command\Branch\Nil;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Relation\Traits\PromiseOneTrait;
 
 /**
  * Provides the ability to own and forward context values to child entity.

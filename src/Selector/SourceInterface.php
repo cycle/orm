@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector;
+namespace Spiral\Cycle\Selector;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Selector;
+use Spiral\Cycle\Selector;
 
 interface SourceInterface
 {

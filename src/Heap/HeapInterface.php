@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Heap;
+namespace Spiral\Cycle\Heap;
 
 /**
  * Manages set of entities, their states and quick access though indexes.

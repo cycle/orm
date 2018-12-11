@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class InverseRelationTest extends \Spiral\ORM\Tests\InverseRelationTest 
+class InverseRelationTest extends \Spiral\Cycle\Tests\InverseRelationTest
 { 
     const DRIVER = "sqlserver"; 
 }

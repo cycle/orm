@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class TableRendererTest extends \Spiral\ORM\Tests\TableRendererTest 
+class TableRendererTest extends \Spiral\Cycle\Tests\TableRendererTest
 { 
     const DRIVER = "sqlserver"; 
 }

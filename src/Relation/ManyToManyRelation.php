@@ -6,21 +6,21 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation;
+namespace Spiral\Cycle\Relation;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Branch\Sequence;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Command\Database\Delete;
-use Spiral\ORM\Command\Database\Insert;
-use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Iterator;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Promise\PromiseInterface;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Relation\Pivoted;
+use Spiral\Cycle\Command\Branch\Sequence;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Command\Database\Delete;
+use Spiral\Cycle\Command\Database\Insert;
+use Spiral\Cycle\Context\ConsumerInterface;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Iterator;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Relation\Pivoted;
 
 class ManyToManyRelation extends AbstractRelation
 {

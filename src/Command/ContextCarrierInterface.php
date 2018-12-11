@@ -5,9 +5,9 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Command;
+namespace Spiral\Cycle\Command;
 
-use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\Cycle\Context\ConsumerInterface;
 
 /**
  * Command provide the ability to accept and carry the context to the persistence layer.

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\MySQL; 
+namespace Spiral\Cycle\Tests\Driver\MySQL;
 
-class DeepCyclicTest extends \Spiral\ORM\Tests\DeepCyclicTest 
+class DeepCyclicTest extends \Spiral\Cycle\Tests\DeepCyclicTest
 { 
     const DRIVER = "mysql"; 
 }

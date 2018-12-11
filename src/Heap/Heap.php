@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Heap;
+namespace Spiral\Cycle\Heap;
 
 class Heap implements HeapInterface, \IteratorAggregate
 {

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLite; 
+namespace Spiral\Cycle\Tests\Driver\SQLite;
 
-class HasManyConstrainsTest extends \Spiral\ORM\Tests\HasManyConstrainsTest 
+class HasManyConstrainsTest extends \Spiral\Cycle\Tests\HasManyConstrainsTest
 { 
     const DRIVER = "sqlite"; 
 }

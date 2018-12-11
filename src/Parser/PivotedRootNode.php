@@ -5,10 +5,10 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Parser;
+namespace Spiral\Cycle\Parser;
 
 
-use Spiral\ORM\Exception\NodeException;
+use Spiral\Cycle\Exception\NodeException;
 
 /**
  * Similar to normal pivot node but does not require parent!

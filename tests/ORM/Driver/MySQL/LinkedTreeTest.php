@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\MySQL; 
+namespace Spiral\Cycle\Tests\Driver\MySQL;
 
-class LinkedTreeTest extends \Spiral\ORM\Tests\LinkedTreeTest 
+class LinkedTreeTest extends \Spiral\Cycle\Tests\LinkedTreeTest
 { 
     const DRIVER = "mysql"; 
 }

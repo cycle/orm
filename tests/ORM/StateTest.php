@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Heap\Node;
+use Spiral\Cycle\Heap\Node;
 
 class StateTest extends TestCase
 {

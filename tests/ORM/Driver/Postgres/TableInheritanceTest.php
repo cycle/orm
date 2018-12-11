@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\Cycle\Tests\Driver\Postgres;
 
-class TableInheritanceTest extends \Spiral\ORM\Tests\TableInheritanceTest 
+class TableInheritanceTest extends \Spiral\Cycle\Tests\TableInheritanceTest
 { 
     const DRIVER = "postgres"; 
 }

@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Promise\Collection;
+namespace Spiral\Cycle\Promise\Collection;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\Cycle\Promise\PromiseInterface;
 
 /**
  * Indicates that collection has been build at top of promise.

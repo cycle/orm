@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Traits;
+namespace Spiral\Cycle\Relation\Traits;
 
-use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Command\ScopeCarrierInterface as CS;
-use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Heap\Node;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Command\ScopeCarrierInterface as CS;
+use Spiral\Cycle\Context\ConsumerInterface;
+use Spiral\Cycle\Heap\Node;
 
 /**
  * Provides the ability to set the promises for command context and scopes linked

@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Schema;
+namespace Spiral\Cycle\Tests\Schema;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Schema\EntityInterface;
-use Spiral\ORM\Schema\StaticLocator;
+use Spiral\Cycle\Schema\EntityInterface;
+use Spiral\Cycle\Schema\StaticLocator;
 
 class StaticLocatorTest extends TestCase
 {

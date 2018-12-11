@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Branch;
+namespace Spiral\Cycle\Command\Branch;
 
-use Spiral\ORM\Command\CommandInterface;
+use Spiral\Cycle\Command\CommandInterface;
 
 /**
  * Wraps multiple commands into one sequence.

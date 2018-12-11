@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\Cycle\Tests\Driver\Postgres;
 
-class DeepCyclicTest extends \Spiral\ORM\Tests\DeepCyclicTest 
+class DeepCyclicTest extends \Spiral\Cycle\Tests\DeepCyclicTest
 { 
     const DRIVER = "postgres"; 
 }

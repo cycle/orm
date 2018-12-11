@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Context;
+namespace Spiral\Cycle\Context;
 
 /**
  * Provides the ability to accept the forwarded key value.

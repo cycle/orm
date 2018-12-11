@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLServer; 
+namespace Spiral\Cycle\Tests\Driver\SQLServer;
 
-class BenchmarkDoubleLinkedTest extends \Spiral\ORM\Tests\Benchmark\BenchmarkDoubleLinkedTest
+class BenchmarkDoubleLinkedTest extends \Spiral\Cycle\Tests\Benchmark\BenchmarkDoubleLinkedTest
 { 
     const DRIVER = "sqlserver"; 
 }

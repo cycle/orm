@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Branch;
+namespace Spiral\Cycle\Command\Branch;
 
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Exception\CommandException;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Exception\CommandException;
 
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.

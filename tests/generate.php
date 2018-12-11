@@ -41,10 +41,10 @@ $databases = [
 
 echo "Generating test classes for all database types...\n";
 
-$classes = $tokenizer->classLocator()->getClasses(\Spiral\ORM\Tests\BaseTest::class);
+$classes = $tokenizer->classLocator()->getClasses(\Spiral\Cycle\Tests\BaseTest::class);
 
 foreach ($classes as $class) {
-    if (!$class->isAbstract() || $class->getName() == \Spiral\ORM\Tests\BaseTest::class) {
+    if (!$class->isAbstract() || $class->getName() == \Spiral\Cycle\Tests\BaseTest::class) {
         continue;
     }
 

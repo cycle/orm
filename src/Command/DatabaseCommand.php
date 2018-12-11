@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command;
+namespace Spiral\Cycle\Command;
 
 use Spiral\Database\DatabaseInterface;
 

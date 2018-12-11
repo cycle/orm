@@ -6,18 +6,18 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
-use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap\Heap;
-use Spiral\ORM\Promise\PromiseInterface;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Selector;
-use Spiral\ORM\Tests\Fixtures\Profile;
-use Spiral\ORM\Tests\Fixtures\User;
-use Spiral\ORM\Tests\Traits\TableTrait;
-use Spiral\ORM\Transaction;
+use Spiral\Cycle\Mapper\Mapper;
+use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector;
+use Spiral\Cycle\Tests\Fixtures\Profile;
+use Spiral\Cycle\Tests\Fixtures\User;
+use Spiral\Cycle\Tests\Traits\TableTrait;
+use Spiral\Cycle\Transaction;
 
 abstract class BelongsToPromiseTest extends BaseTest
 {

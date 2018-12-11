@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\MySQL; 
+namespace Spiral\Cycle\Tests\Driver\MySQL;
 
-class TableRendererTest extends \Spiral\ORM\Tests\TableRendererTest 
+class TableRendererTest extends \Spiral\Cycle\Tests\TableRendererTest
 { 
     const DRIVER = "mysql"; 
 }

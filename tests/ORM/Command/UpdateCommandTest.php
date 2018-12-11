@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Command;
+namespace Spiral\Cycle\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Database\Update;
-use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\Cycle\Command\Database\Update;
+use Spiral\Cycle\Context\ConsumerInterface;
 
 class UpdateCommandTest extends TestCase
 {
@@ -67,7 +67,7 @@ class UpdateCommandTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exception\CommandException
+     * @expectedException \Spiral\Cycle\Exception\CommandException
      */
     public function testNoScope()
     {

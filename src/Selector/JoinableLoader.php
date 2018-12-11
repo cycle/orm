@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector;
+namespace Spiral\Cycle\Selector;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Exception\LoaderException;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Parser\AbstractNode;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Selector\Traits\ColumnsTrait;
+use Spiral\Cycle\Exception\LoaderException;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Parser\AbstractNode;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector\Traits\ColumnsTrait;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.

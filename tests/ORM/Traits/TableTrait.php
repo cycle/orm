@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Traits;
+namespace Spiral\Cycle\Tests\Traits;
 
 use Spiral\Database\Database;
-use Spiral\ORM\Schema\Renderer;
+use Spiral\Cycle\Schema\Renderer;
 
 trait TableTrait
 {

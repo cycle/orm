@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests\Fixtures;
+namespace Spiral\Cycle\Tests\Fixtures;
 
-use Spiral\ORM\Relation\Pivoted\PivotedCollectionInterface;
+use Spiral\Cycle\Relation\Pivoted\PivotedCollectionInterface;
 
 class Post implements ImagedInterface
 {

@@ -6,19 +6,19 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Pivoted;
+namespace Spiral\Cycle\Relation\Pivoted;
 
-use Spiral\ORM\Exception\RelationException;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Iterator;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Parser\PivotedRootNode;
-use Spiral\ORM\Promise\PromiseInterface;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Selector\JoinableLoader;
-use Spiral\ORM\Selector\Loader\ManyToManyLoader;
-use Spiral\ORM\Selector\SourceInterface;
+use Spiral\Cycle\Exception\RelationException;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Iterator;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Parser\PivotedRootNode;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Selector\Loader\ManyToManyLoader;
+use Spiral\Cycle\Selector\SourceInterface;
 
 /**
  * Promise use loader to configure query and it's scope.

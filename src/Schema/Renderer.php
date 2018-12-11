@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Schema;
+namespace Spiral\Cycle\Schema;
 
 use Spiral\Database\Schema\AbstractColumn;
 use Spiral\Database\Schema\AbstractTable;
-use Spiral\ORM\Exception\Schema\DeclarationException;
+use Spiral\Cycle\Exception\Schema\DeclarationException;
 
 /**
  * Implements the ability to define column in AbstractSchema based on string representation and

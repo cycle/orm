@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector\Loader\Morphed;
+namespace Spiral\Cycle\Selector\Loader\Morphed;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Selector\Loader\HasOneLoader;
-use Spiral\ORM\Selector\Traits\WhereTrait;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
+use Spiral\Cycle\Selector\Loader\HasOneLoader;
+use Spiral\Cycle\Selector\Traits\WhereTrait;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
 
 /**
  * Creates an additional query constrain based on parent entity alias.

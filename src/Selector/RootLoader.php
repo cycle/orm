@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector;
+namespace Spiral\Cycle\Selector;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Parser\AbstractNode;
-use Spiral\ORM\Parser\RootNode;
-use Spiral\ORM\Schema;
-use Spiral\ORM\Selector\Traits\ColumnsTrait;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Parser\AbstractNode;
+use Spiral\Cycle\Parser\RootNode;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector\Traits\ColumnsTrait;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins

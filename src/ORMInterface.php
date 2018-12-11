@@ -6,15 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Heap\HeapInterface;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Mapper\MapperInterface;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Heap\HeapInterface;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\MapperInterface;
 
 interface ORMInterface
 {

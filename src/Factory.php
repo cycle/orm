@@ -6,15 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Spiral\ORM\Config\RelationConfig;
-use Spiral\ORM\Exception\FactoryException;
-use Spiral\ORM\Mapper\MapperInterface;
-use Spiral\ORM\Relation\RelationInterface;
-use Spiral\ORM\Selector\LoaderInterface;
+use Spiral\Cycle\Config\RelationConfig;
+use Spiral\Cycle\Exception\FactoryException;
+use Spiral\Cycle\Mapper\MapperInterface;
+use Spiral\Cycle\Relation\RelationInterface;
+use Spiral\Cycle\Selector\LoaderInterface;
 
 class Factory implements FactoryInterface
 {

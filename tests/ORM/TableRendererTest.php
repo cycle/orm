@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Tests;
+namespace Spiral\Cycle\Tests;
 
 use Spiral\Database\Schema\AbstractTable;
-use Spiral\ORM\Schema\Renderer;
+use Spiral\Cycle\Schema\Renderer;
 
 abstract class TableRendererTest extends BaseTest
 {
@@ -193,7 +193,7 @@ abstract class TableRendererTest extends BaseTest
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exception\Schema\DeclarationException
+     * @expectedException \Spiral\Cycle\Exception\Schema\DeclarationException
      */
     public function testRenderBadDeclaration()
     {
@@ -210,7 +210,7 @@ abstract class TableRendererTest extends BaseTest
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exception\Schema\DeclarationException
+     * @expectedException \Spiral\Cycle\Exception\Schema\DeclarationException
      */
     public function testRenderBadDeclaration2()
     {
@@ -227,7 +227,7 @@ abstract class TableRendererTest extends BaseTest
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exception\Schema\DeclarationException
+     * @expectedException \Spiral\Cycle\Exception\Schema\DeclarationException
      */
     public function testRenderBadDeclaration3()
     {

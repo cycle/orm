@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Parser\PivotedNode;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Parser\PivotedNode;
 
 /**
  * Iterates over given data-set and instantiates objects.

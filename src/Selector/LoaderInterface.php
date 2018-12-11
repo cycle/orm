@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector;
+namespace Spiral\Cycle\Selector;
 
-use Spiral\ORM\Exception\LoaderException;
-use Spiral\ORM\Parser\AbstractNode;
+use Spiral\Cycle\Exception\LoaderException;
+use Spiral\Cycle\Parser\AbstractNode;
 
 /**
  * Loaders provide the ability to create data tree based on set of nested queries or parse resulted

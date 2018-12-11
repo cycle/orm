@@ -6,19 +6,19 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\ORM\Command\Branch\Nil;
-use Spiral\ORM\Command\CommandInterface;
-use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Config\RelationConfig;
-use Spiral\ORM\Heap\Heap;
-use Spiral\ORM\Heap\HeapInterface;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Mapper\MapperInterface;
-use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\Cycle\Command\Branch\Nil;
+use Spiral\Cycle\Command\CommandInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Config\RelationConfig;
+use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Heap\HeapInterface;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\MapperInterface;
+use Spiral\Cycle\Promise\PromiseInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.

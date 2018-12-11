@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Config;
+namespace Spiral\Cycle\Config;
 
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
-use Spiral\ORM\Exception\ConfigException;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Selector;
+use Spiral\Cycle\Exception\ConfigException;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Selector;
 
 class RelationConfig extends InjectableConfig
 {

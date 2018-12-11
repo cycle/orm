@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLite; 
+namespace Spiral\Cycle\Tests\Driver\SQLite;
 
-class ManyToManyPromiseTest extends \Spiral\ORM\Tests\ManyToManyPromiseTest 
+class ManyToManyPromiseTest extends \Spiral\Cycle\Tests\ManyToManyPromiseTest
 { 
     const DRIVER = "sqlite"; 
 }

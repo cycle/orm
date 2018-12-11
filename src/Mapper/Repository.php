@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Mapper;
+namespace Spiral\Cycle\Mapper;
 
-use Spiral\ORM\Selector;
+use Spiral\Cycle\Selector;
 
 /**
  * Repository provides ability to load entities and construct queries.

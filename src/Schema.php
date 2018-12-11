@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM;
+namespace Spiral\Cycle;
 
-use Spiral\ORM\Exception\SchemaException;
+use Spiral\Cycle\Exception\SchemaException;
 
 /**
  * Provides access to compiled ORM schema.

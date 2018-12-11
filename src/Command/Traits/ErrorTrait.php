@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command\Traits;
+namespace Spiral\Cycle\Command\Traits;
 
 // describes why command has been locked up
 trait ErrorTrait

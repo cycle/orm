@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Command;
+namespace Spiral\Cycle\Command;
 
-use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\Cycle\Context\ConsumerInterface;
 
 /**
  * Command indicates the ability to accept the forwarded scope values.

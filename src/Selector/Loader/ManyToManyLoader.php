@@ -6,18 +6,18 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector\Loader;
+namespace Spiral\Cycle\Selector\Loader;
 
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Parser\AbstractNode;
-use Spiral\ORM\Parser\PivotedNode;
-use Spiral\ORM\Selector\JoinableLoader;
-use Spiral\ORM\Selector\Traits\ConstrainTrait;
-use Spiral\ORM\Selector\Traits\WhereTrait;
-use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
+use Spiral\Cycle\Parser\AbstractNode;
+use Spiral\Cycle\Parser\PivotedNode;
+use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Selector\Traits\ConstrainTrait;
+use Spiral\Cycle\Selector\Traits\WhereTrait;
+use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
 
 class ManyToManyLoader extends JoinableLoader
 {

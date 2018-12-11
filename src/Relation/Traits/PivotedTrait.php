@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Traits;
+namespace Spiral\Cycle\Relation\Traits;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Promise\Collection\CollectionPromiseInterface;
-use Spiral\ORM\Relation\Pivoted;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
+use Spiral\Cycle\Relation\Pivoted;
 
 trait PivotedTrait
 {

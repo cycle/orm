@@ -6,15 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Selector\Loader;
+namespace Spiral\Cycle\Selector\Loader;
 
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Parser\AbstractNode;
-use Spiral\ORM\Parser\SingularNode;
-use Spiral\ORM\Selector\JoinableLoader;
-use Spiral\ORM\Relation;
-use Spiral\ORM\Schema;
+use Spiral\Cycle\Parser\AbstractNode;
+use Spiral\Cycle\Parser\SingularNode;
+use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.

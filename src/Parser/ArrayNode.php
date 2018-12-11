@@ -5,9 +5,9 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Parser;
+namespace Spiral\Cycle\Parser;
 
-use Spiral\ORM\Exception\NodeException;
+use Spiral\Cycle\Exception\NodeException;
 
 /**
  * Parses multiple sub children and mount them under parent node.

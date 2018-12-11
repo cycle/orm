@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\MySQL; 
+namespace Spiral\Cycle\Tests\Driver\MySQL;
 
-class BenchmarkDoubleLinkedTest extends \Spiral\ORM\Tests\Benchmark\BenchmarkDoubleLinkedTest
+class BenchmarkDoubleLinkedTest extends \Spiral\Cycle\Tests\Benchmark\BenchmarkDoubleLinkedTest
 { 
     const DRIVER = "mysql"; 
 }

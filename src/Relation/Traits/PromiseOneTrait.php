@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\Traits;
+namespace Spiral\Cycle\Relation\Traits;
 
-use Spiral\ORM\Heap\Node;
-use Spiral\ORM\Mapper\PromiseFactoryInterface;
-use Spiral\ORM\Promise\PromiseOne;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\PromiseFactoryInterface;
+use Spiral\Cycle\Promise\PromiseOne;
 
 trait PromiseOneTrait
 {

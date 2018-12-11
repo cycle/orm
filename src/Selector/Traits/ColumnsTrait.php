@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\ORM\Selector\Traits;
+namespace Spiral\Cycle\Selector\Traits;
 
 use Spiral\Database\Query\SelectQuery;
 

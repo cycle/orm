@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\SQLite; 
+namespace Spiral\Cycle\Tests\Driver\SQLite;
 
-class BelongsToRelationTest extends \Spiral\ORM\Tests\BelongsToRelationTest 
+class BelongsToRelationTest extends \Spiral\Cycle\Tests\BelongsToRelationTest
 { 
     const DRIVER = "sqlite"; 
 }

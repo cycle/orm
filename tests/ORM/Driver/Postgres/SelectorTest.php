@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\ORM\Tests\Driver\Postgres; 
+namespace Spiral\Cycle\Tests\Driver\Postgres;
 
-class SelectorTest extends \Spiral\ORM\Tests\SelectorTest 
+class SelectorTest extends \Spiral\Cycle\Tests\SelectorTest
 { 
     const DRIVER = "postgres"; 
 }

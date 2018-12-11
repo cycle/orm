@@ -4,16 +4,16 @@
 
 Features:
 ---------
-- plain php classes support (DataMapper)
-- eager and lazy loading, promises and proxies
-- runtime configuration without code-generation
-- single table inheritanc
-- works with any data repository
+- pure DataMapper, any data source
+- ORM with many-to-many, many-thought-many and polimorphic relations
+- eager and lazy loading, auto joins, promises and proxies
+- runtime configuration with/without code-generation
+- single table inheritance
 - works with DAG and DG using IDDFS
-- one pass compiler approach for data trees generation
-- designed to work in long-running applications
-- MySQL, PostgresSQL, SQLServer, SQLite
-- in memory database mocks (SQLite)
-- ActiveRecord and custom base entity support 
-- custom relations, morphed over interface  and statically linked relations
+- persistance using command chains
+- one pass parser for query results
+- designed (immutable) to work in long-running applications (RoadRunner like)
+- supports MySQL, PostgresSQL, SQLServer, SQLite (full mock capability)
+- bare PHP classes, ActiveRecord-like classes, no classes at all 
+- query scopes, UUID, soft deletes, auto timestamps, events
 - compatible with Doctrine Collections, Symfony Events and Zend Hydrator

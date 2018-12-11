@@ -37,11 +37,9 @@ class RootLoader extends AbstractLoader
     {
         parent::__construct($orm, $target);
 
-        $this->query = $this->getSource()->getDatabase()->select()->from(sprintf(
-            "%s AS %s",
-            $this->define(Schema::TABLE),
-            $this->getAlias()
-        ));
+        $this->query = $this->getSource()->getDatabase()->select()->from(
+            sprintf("%s AS %s", $this->define(Schema::TABLE), $this->getAlias())
+        );
     }
 
     /**
@@ -94,7 +92,7 @@ class RootLoader extends AbstractLoader
      *
      * @return SelectQuery
      */
-    public function compileQuery(): SelectQuery
+    public function buildQuery(): SelectQuery
     {
         return $this->configureQuery(clone $this->query);
     }
@@ -102,19 +100,9 @@ class RootLoader extends AbstractLoader
     /**
      * {@inheritdoc}
      */
-    protected function configureQuery(SelectQuery $query): SelectQuery
-    {
-        return parent::configureQuery(
-            $this->mountColumns($query, true, '', true)
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function loadData(AbstractNode $node)
     {
-        $statement = $this->compileQuery()->run();
+        $statement = $this->buildQuery()->run();
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
         foreach ($statement as $row) {
@@ -137,6 +125,16 @@ class RootLoader extends AbstractLoader
         // todo: test scopes not being applied multiple times
         $this->query = clone $this->query;
         parent::__clone();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureQuery(SelectQuery $query): SelectQuery
+    {
+        return parent::configureQuery(
+            $this->mountColumns($query, true, '', true)
+        );
     }
 
     /**

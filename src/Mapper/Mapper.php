@@ -91,7 +91,7 @@ class Mapper implements MapperInterface, Selector\SourceInterface
     {
         $selector = new Selector($this->orm, $this->role);
         if (!empty($scope = $this->getScope(self::DEFAULT_SCOPE))) {
-            $selector = $selector->withScope($scope);
+            $selector = $selector->scope($scope);
         }
 
         return $selector;

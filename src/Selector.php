@@ -15,6 +15,7 @@ use Spiral\Cycle\Selector\LoaderInterface;
 use Spiral\Cycle\Selector\QueryWrapper;
 use Spiral\Cycle\Selector\RootLoader;
 use Spiral\Cycle\Selector\ScopeInterface;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Query builder and entity selector. Mocks SelectQuery.
@@ -70,27 +71,36 @@ class Selector implements \IteratorAggregate, \Countable
      * @param ScopeInterface $scope
      * @return Selector
      */
-    public function withScope(ScopeInterface $scope): self
+    public function scope(ScopeInterface $scope): self
     {
-        $selector = clone $this;
-        $scope->apply($selector->loader->getQuery());
+        $scope->apply($this->loader->getQuery());
 
-        return $selector;
+        return $this;
     }
 
     /**
      * Columns to be selected, please note, primary key will always be included, DO not include
      * column aliases in here, aliases will be added automatically.
      *
+     * @see buildQuery()
      * @param array $columns
      * @return self
      */
-    public function withColumns(array $columns): self
+    public function columns(array $columns): self
     {
-        $selector = clone $this;
-        $selector->loader = $selector->loader->withColumns($columns);
+        $this->loader = $this->loader->withColumns($columns);
 
-        return $selector;
+        return $this;
+    }
+
+    /**
+     * Compiled SQL query, changes in this query would not affect Selector state (but binded parameters will).
+     *
+     * @return SelectQuery
+     */
+    public function buildQuery(): SelectQuery
+    {
+        return $this->getLoader()->buildQuery();
     }
 
     /**
@@ -133,7 +143,7 @@ class Selector implements \IteratorAggregate, \Countable
 
         // aggregations
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            return $wrapper->withQuery($this->loader->compileQuery())->__call($name, $arguments);
+            return $wrapper->withQuery($this->loader->buildQuery())->__call($name, $arguments);
         }
 
         // where condition or statement
@@ -383,7 +393,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function sqlStatement(): string
     {
-        return $this->getLoader()->compileQuery()->sqlStatement();
+        return $this->buildQuery()->sqlStatement();
     }
 
     /**

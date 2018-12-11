@@ -257,11 +257,12 @@ class ORM implements ORMInterface
 
     public function queueDelete($entity, int $mode = 0): CommandInterface
     {
-        if ($entity instanceof PromiseInterface) {
+        $node = $this->getHeap()->get($entity);
+        if ($entity instanceof PromiseInterface || is_null($node)) {
             return new Nil();
         }
 
-        return $this->getMapper($entity)->queueDelete($this->getHeap()->get($entity), $entity);
+        return $this->getMapper($entity)->queueDelete($node, $entity);
     }
 
     /**
@@ -270,7 +271,6 @@ class ORM implements ORMInterface
     public function __clone()
     {
         $this->mappers = [];
-        $this->typecasts = [];
         $this->relmaps = [];
     }
 

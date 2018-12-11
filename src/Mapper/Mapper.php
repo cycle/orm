@@ -63,7 +63,7 @@ class Mapper implements MapperInterface, Selector\SourceInterface
      */
     public function getRole(): string
     {
-        return $this->role;
+        return $this->orm->getSchema()->define($this->role, Schema::ALIAS);
     }
 
 

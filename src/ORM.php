@@ -56,6 +56,7 @@ class ORM implements ORMInterface
         $this->factory = $factory ?? new Factory(RelationConfig::createDefault());
     }
 
+    // todo: do i need it? can i deal with it in mappers?
     public function getDBAL(): DatabaseManager
     {
         return $this->dbal;

@@ -8,8 +8,8 @@
 
 namespace Spiral\Cycle\Tests\Benchmark;
 
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Tests\BaseTest;
@@ -17,7 +17,11 @@ use Spiral\Cycle\Tests\Fixtures\Cyclic;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
 
-abstract class BenchmarkDoubleLinkedTest extends BaseTest
+if (!BaseTest::$config['benchmark']) {
+    return;
+}
+
+class BenchmarkDoubleLinkedTest extends BaseTest
 {
     use TableTrait;
 

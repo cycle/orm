@@ -9,12 +9,12 @@
 namespace Spiral\Cycle\Tests;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
+use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;

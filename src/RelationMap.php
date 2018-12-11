@@ -10,7 +10,7 @@ namespace Spiral\Cycle;
 
 use Spiral\Cycle\Command\Branch\ContextSequence;
 use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Command\ContextCarrierInterface as CC;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation\DependencyInterface;
@@ -84,19 +84,14 @@ final class RelationMap
     /**
      * Queue entity relations.
      *
-     * @param ContextCarrierInterface $parentStore
-     * @param object                  $parentEntity
-     * @param Node                    $parentNode
-     * @param array                   $parentData
-     * @return ContextCarrierInterface
+     * @param CC     $parentStore
+     * @param object $parentEntity
+     * @param Node   $parentNode
+     * @param array  $parentData
+     * @return CC
      */
-    public function queueRelations(
-        ContextCarrierInterface $parentStore,
-        $parentEntity,
-        Node $parentNode,
-        array $parentData
-    ): ContextCarrierInterface {
-
+    public function queueRelations(CC $parentStore, $parentEntity, Node $parentNode, array $parentData): CC
+    {
         $state = $parentNode->getState();
 
         $sequence = new ContextSequence();
@@ -156,16 +151,16 @@ final class RelationMap
     /**
      * Queue the relation.
      *
-     * @param ContextCarrierInterface $parentStore
-     * @param object                  $parentEntity
-     * @param Node                    $parentNode
-     * @param RelationInterface       $relation
-     * @param mixed                   $related
-     * @param mixed                   $original
+     * @param CC                $parentStore
+     * @param object            $parentEntity
+     * @param Node              $parentNode
+     * @param RelationInterface $relation
+     * @param mixed             $related
+     * @param mixed             $original
      * @return CommandInterface|null
      */
     private function queueRelation(
-        ContextCarrierInterface $parentStore,
+        CC $parentStore,
         $parentEntity,
         Node $parentNode,
         RelationInterface $relation,

@@ -8,10 +8,9 @@
 
 namespace Spiral\Cycle\Tests\Morphed;
 
-
 use Doctrine\Common\Collections\Collection;
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;

@@ -13,18 +13,18 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\LogLevel;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\ORM;
+use Spiral\Cycle\Promise\Collection\CollectionPromise;
+use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Relation\Pivoted\PivotedCollectionInterface;
+use Spiral\Cycle\Relation\Pivoted\PivotedStorage;
+use Spiral\Cycle\SchemaInterface;
 use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
-use Spiral\Cycle\Promise\Collection\CollectionPromise;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\ORM;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Relation\Pivoted\PivotedCollectionInterface;
-use Spiral\Cycle\Relation\Pivoted\PivotedStorage;
-use Spiral\Cycle\SchemaInterface;
 
 abstract class BaseTest extends TestCase
 {
@@ -36,6 +36,8 @@ abstract class BaseTest extends TestCase
 
     // cross test driver cache
     public static $driverCache = [];
+
+    protected static $lastORM;
 
     /** @var AbstractDriver */
     protected $driver;
@@ -69,10 +71,11 @@ abstract class BaseTest extends TestCase
             $this->getDriver()
         ));
 
-        $this->orm = new ORM($this->dbal);
+        $this->logger = new TestLogger();
+        $this->getDriver()->setLogger($this->logger);
 
         if (self::$config['debug']) {
-            $this->enableProfiling();
+            $this->logger->display();
         }
 
         $this->logger = new TestLogger();
@@ -81,6 +84,8 @@ abstract class BaseTest extends TestCase
         if (self::$config['debug']) {
             $this->logger->display();
         }
+
+        $this->orm = new ORM($this->dbal);
     }
 
     /**

@@ -6,25 +6,24 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\ManyToMany;
+namespace Spiral\ORM\Relation\Pivoted;
 
 use Spiral\ORM\Exception\RelationException;
 use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Parser\PivotedRootNode;
-use Spiral\ORM\Promise\PivotedPromiseInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector\JoinableLoader;
 use Spiral\ORM\Selector\Loader\ManyToManyLoader;
 use Spiral\ORM\Selector\SourceInterface;
-use Spiral\ORM\Util\ContextStorage;
 
 /**
  * Promise use loader to configure query and it's scope.
  */
-class PivotedPromise implements PivotedPromiseInterface
+class PivotedPromise implements PromiseInterface
 {
     /** @var ORMInterface */
     private $orm;
@@ -38,7 +37,7 @@ class PivotedPromise implements PivotedPromiseInterface
     /** @var mixed */
     private $innerKey;
 
-    /** @var null|ContextStorage */
+    /** @var null|PivotedStorage */
     private $resolved;
 
     /**
@@ -80,27 +79,9 @@ class PivotedPromise implements PivotedPromiseInterface
     }
 
     /**
-     * @inheritdoc
+     * @return PivotedStorage
      */
     public function __resolve()
-    {
-        return $this->__doResolve()->getElements();
-    }
-
-    /**
-     * Return promised pivot context.
-     *
-     * @return ContextStorage
-     */
-    public function __resolveContext(): ContextStorage
-    {
-        return $this->__doResolve();
-    }
-
-    /**
-     * @return ContextStorage
-     */
-    protected function __doResolve(): ContextStorage
     {
         if (is_null($this->orm)) {
             return $this->resolved;
@@ -144,7 +125,6 @@ class PivotedPromise implements PivotedPromiseInterface
         }
         $iterator->close();
 
-
         $elements = [];
         $pivotData = new \SplObjectStorage();
         foreach (new Iterator($this->orm, $this->target, $node->getResult()) as $pivot => $entity) {
@@ -161,7 +141,7 @@ class PivotedPromise implements PivotedPromiseInterface
             $elements[] = $entity;
         }
 
-        $this->resolved = new ContextStorage($elements, $pivotData);
+        $this->resolved = new PivotedStorage($elements, $pivotData);
         $this->orm = null;
 
         return $this->resolved;

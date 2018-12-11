@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util\Collection;
+namespace Spiral\ORM\Promise\Collection;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -15,7 +15,7 @@ use Spiral\ORM\Promise\PromiseInterface;
 /**
  * LazyLoading collection build at top of data promise.
  */
-class CollectionPromise extends AbstractLazyCollection implements PromisedInterface
+class CollectionPromise extends AbstractLazyCollection implements CollectionPromiseInterface
 {
     /** @var PromiseInterface */
     protected $promise;

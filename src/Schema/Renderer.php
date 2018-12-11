@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util;
+namespace Spiral\ORM\Schema;
 
 use Spiral\Database\Schema\AbstractColumn;
 use Spiral\Database\Schema\AbstractTable;
@@ -19,7 +19,7 @@ use Spiral\ORM\Exception\Schema\DeclarationException;
  * Attention, this class will try to guess default value if column is NOT NULL and no default
  * value provided by user.
  */
-final class TableRenderer
+final class Renderer
 {
     /**
      * Render columns in table based on string definition.

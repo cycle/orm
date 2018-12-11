@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests\Traits;
 
 use Spiral\Database\Database;
-use Spiral\ORM\Util\TableRenderer;
+use Spiral\ORM\Schema\Renderer;
 
 trait TableTrait
 {
@@ -21,7 +21,7 @@ trait TableTrait
     public function makeTable(string $table, array $columns, array $fk = [])
     {
         $schema = $this->getDatabase()->table($table)->getSchema();
-        $renderer = new TableRenderer();
+        $renderer = new Renderer();
         $renderer->renderColumns($schema, $columns, []);
 
 

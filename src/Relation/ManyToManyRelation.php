@@ -8,8 +8,6 @@
 
 namespace Spiral\ORM\Relation;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Spiral\Database\DatabaseInterface;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\CommandInterface;
@@ -20,14 +18,14 @@ use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Promise\PivotedPromiseInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 use Spiral\ORM\Relation;
-use Spiral\ORM\Relation\ManyToMany\PivotedPromise;
-use Spiral\ORM\Util\Collection\CollectionPromise;
-use Spiral\ORM\Util\ContextStorage;
+use Spiral\ORM\Relation\Pivoted;
 
 class ManyToManyRelation extends AbstractRelation
 {
+    use Relation\Traits\PivotedTrait;
+
     /** @var string */
     protected $thoughtInnerKey;
 
@@ -50,21 +48,6 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $parentNode): array
-    {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
-            return [new ArrayCollection(), null];
-        }
-
-        // will take care of all the loading and scoping
-        $p = new PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
-
-        return [new CollectionPromise($p), $p];
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function init(array $data): array
     {
         $elements = [];
@@ -75,41 +58,28 @@ class ManyToManyRelation extends AbstractRelation
             $elements[] = $entity;
         }
 
-        return [new ArrayCollection($elements), new ContextStorage($elements, $pivotData)];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function extract($data)
-    {
-        if ($data instanceof CollectionPromise && !$data->isInitialized()) {
-            return $data->toPromise();
-        }
-
-        if ($data instanceof Collection) {
-            return new ContextStorage($data->toArray());
-        }
-
-        return new ContextStorage();
+        return [
+            new Pivoted\PivotedCollection($elements, $pivotData),
+            new Pivoted\PivotedStorage($elements, $pivotData)
+        ];
     }
 
     /**
      * @inheritdoc
      *
-     * @param ContextStorage $related
-     * @param ContextStorage $original
+     * @param Pivoted\PivotedStorage $related
+     * @param Pivoted\PivotedStorage $original
      */
     public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
     {
-        $original = $original ?? new ContextStorage();
+        $original = $original ?? new Pivoted\PivotedStorage();
 
-        if ($related instanceof PivotedPromiseInterface) {
-            $related = $related->__resolveContext();
+        if ($related instanceof PromiseInterface) {
+            $related = $related->__resolve();
         }
 
-        if ($original instanceof PivotedPromiseInterface) {
-            $original = $original->__resolveContext();
+        if ($original instanceof PromiseInterface) {
+            $original = $original->__resolve();
         }
 
         $sequence = new Sequence();
@@ -200,6 +170,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function pivotDatabase(): DatabaseInterface
     {
+        // always expect entities to be located in a same database
         return $this->getSource()->getDatabase();
     }
 

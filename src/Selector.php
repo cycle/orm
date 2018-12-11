@@ -9,11 +9,12 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Mapper\MapperInterface;
 use Spiral\ORM\Parser\OutputNode;
 use Spiral\ORM\Selector\LoaderInterface;
+use Spiral\ORM\Selector\QueryWrapper;
 use Spiral\ORM\Selector\RootLoader;
 use Spiral\ORM\Selector\ScopeInterface;
-use Spiral\ORM\Util\QueryWrapper;
 
 /**
  * Query builder and entity selector. Mocks SelectQuery.
@@ -56,7 +57,10 @@ class Selector implements \IteratorAggregate, \Countable
     {
         // todo: unify it (!)
         $this->orm = $orm;
+
+        // todo: what do i want from the mapper?
         $this->mapper = $orm->getMapper($class);
+
         $this->loader = new RootLoader($orm, $class);
     }
 

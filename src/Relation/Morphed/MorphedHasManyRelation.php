@@ -15,7 +15,7 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Promise\PromiseMany;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasManyRelation;
-use Spiral\ORM\Util\Collection\CollectionPromise;
+use Spiral\ORM\Promise\Collection\CollectionPromise;
 
 class MorphedHasManyRelation extends HasManyRelation
 {

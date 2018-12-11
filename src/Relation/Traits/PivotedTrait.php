@@ -1,0 +1,52 @@
+<?php
+/**
+ * Spiral Framework.
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
+namespace Spiral\ORM\Relation\Traits;
+
+use Doctrine\Common\Collections\Collection;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Promise\Collection\CollectionPromiseInterface;
+use Spiral\ORM\Relation\Pivoted;
+
+trait PivotedTrait
+{
+    /**
+     * @inheritdoc
+     */
+    public function extract($data)
+    {
+        if ($data instanceof CollectionPromiseInterface && !$data->isInitialized()) {
+            return $data->toPromise();
+        }
+
+        if ($data instanceof Pivoted\PivotedCollectionInterface) {
+            return new Pivoted\PivotedStorage($data->toArray(), $data->getPivotContext());
+        }
+
+        if ($data instanceof Collection) {
+            return new Pivoted\PivotedStorage($data->toArray());
+        }
+
+        return new Pivoted\PivotedStorage();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function initPromise(Node $parentNode): array
+    {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+            return [new Pivoted\PivotedCollection(), null];
+        }
+
+        // will take care of all the loading and scoping
+        $p = new Pivoted\PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
+
+        return [new Pivoted\PivotedCollectionPromisePromise($p), $p];
+    }
+}

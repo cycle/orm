@@ -11,8 +11,8 @@ namespace Spiral\ORM\Config;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
 use Spiral\ORM\Exception\ConfigException;
-use Spiral\ORM\Selector;
 use Spiral\ORM\Relation;
+use Spiral\ORM\Selector;
 
 class RelationConfig extends InjectableConfig
 {
@@ -74,7 +74,7 @@ class RelationConfig extends InjectableConfig
             ],
             Relation::MANY_TO_MANY_PIVOTED => [
                 self::LOADER   => Selector\Loader\ManyToManyLoader::class,
-                self::RELATION => Relation\ManyToMany\PivotedRelation::class
+                self::RELATION => Relation\ManyThoughtManyRelation::class
             ],
             Relation::MORPHED_HAS_ONE      => [
                 self::LOADER   => Selector\Loader\Morphed\MorphedHasOneLoader::class,

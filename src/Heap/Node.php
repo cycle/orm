@@ -10,7 +10,7 @@ namespace Spiral\ORM\Heap;
 
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Context\ProducerInterface;
-use Spiral\ORM\Traits\RelationTrait;
+use Spiral\ORM\Heap\Traits\RelationTrait;
 
 /**
  * Node (metadata) carries meta information about entitey state, changes forwards data to other points thought

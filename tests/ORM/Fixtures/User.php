@@ -10,7 +10,7 @@ namespace Spiral\ORM\Tests\Fixtures;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\Util\Collection\PivotedCollection;
+use Spiral\ORM\Relation\Pivoted\PivotedCollection;
 
 class User implements ImagedInterface
 {

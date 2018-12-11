@@ -9,11 +9,11 @@
 namespace Spiral\ORM\Selector;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Selector\Traits\ColumnsTrait;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Schema;
 use Spiral\ORM\Parser\AbstractNode;
 use Spiral\ORM\Parser\RootNode;
+use Spiral\ORM\Schema;
+use Spiral\ORM\Selector\Traits\ColumnsTrait;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
@@ -134,6 +134,7 @@ class RootLoader extends AbstractLoader
      */
     public function __clone()
     {
+        // todo: test scopes not being applied multiple times
         $this->query = clone $this->query;
         parent::__clone();
     }

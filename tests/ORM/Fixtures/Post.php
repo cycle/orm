@@ -8,14 +8,14 @@
 
 namespace Spiral\ORM\Tests\Fixtures;
 
-
-use Spiral\ORM\Util\Collection\PivotedInterface;
+use Spiral\ORM\Relation\Pivoted\PivotedCollectionInterface;
 
 class Post implements ImagedInterface
 {
     public $title;
     public $content;
     public $image;
-    /** @var Comment[]|PivotedInterface */
+
+    /** @var Comment[]|PivotedCollectionInterface */
     public $comments;
 }

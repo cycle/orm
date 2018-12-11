@@ -18,14 +18,13 @@ use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\AbstractDriver;
 use Spiral\Database\Driver\AbstractHandler;
+use Spiral\ORM\Promise\Collection\CollectionPromise;
 use Spiral\ORM\Heap\Node;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\ORM\Relation\Pivoted\PivotedCollectionInterface;
+use Spiral\ORM\Relation\Pivoted\PivotedStorage;
 use Spiral\ORM\SchemaInterface;
-use Spiral\ORM\Util\Collection\CollectionPromise;
-use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
-use Spiral\ORM\Util\ContextStorage;
-use Spiral\ORM\Util\PivotedPromise;
 
 abstract class BaseTest extends TestCase
 {
@@ -290,12 +289,12 @@ abstract class BaseTest extends TestCase
 
             $rValue = $relations[$name];
 
-            if ($rValue instanceof ContextStorage || $rValue instanceof PivotedPromise) {
+            if ($rValue instanceof PivotedStorage || $rValue instanceof \Spiral\ORM\Relation\Pivoted\PivotedPromise) {
                 // todo: implement PIVOT data verification
                 continue;
             }
 
-            if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionPromise) {
+            if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionInterface) {
                 if (!$eValue->isInitialized()) {
                     $eValue = $eValue->toPromise();
                 } else {

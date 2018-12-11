@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util\Collection;
+namespace Spiral\ORM\Relation\Pivoted;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -14,7 +14,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
  * filtered.
  */
-class PivotedCollection extends ArrayCollection implements PivotedInterface
+class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
     /** @var \SplObjectStorage */
     protected $pivotContext;

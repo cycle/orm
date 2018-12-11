@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util\Collection;
+namespace Spiral\ORM\Promise\Collection;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Promise\PromiseInterface;
@@ -14,7 +14,7 @@ use Spiral\ORM\Promise\PromiseInterface;
 /**
  * Indicates that collection has been build at top of promise.
  */
-interface PromisedInterface extends Collection
+interface CollectionPromiseInterface extends Collection
 {
     /**
      * Promise associated with the collection.
@@ -22,4 +22,11 @@ interface PromisedInterface extends Collection
      * @return PromiseInterface
      */
     public function toPromise(): PromiseInterface;
+
+    /**
+     * Is the lazy collection already initialized?
+     *
+     * @return bool
+     */
+    public function isInitialized();
 }

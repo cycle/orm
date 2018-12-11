@@ -40,4 +40,13 @@ class Scope implements ScopeInterface
     {
         return $query->where($this->where)->orderBy($this->orderBy);
     }
+
+    public function loads(): array
+    {
+    }
+
+    public function with(): array
+    {
+    }
+
 }

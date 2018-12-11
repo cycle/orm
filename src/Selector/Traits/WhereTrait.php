@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Selector\Traits;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Util\QueryWrapper;
+use Spiral\ORM\Selector\QueryWrapper;
 
 /**
  * Provides the ability to configure relation specific where conditions.

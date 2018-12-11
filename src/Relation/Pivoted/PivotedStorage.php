@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util;
+namespace Spiral\ORM\Relation\Pivoted;
 
 /**
  * Carry information about ordered list of entities and associated pivot context.
  */
-final class ContextStorage
+final class PivotedStorage
 {
     /** @var array */
     private $elements;

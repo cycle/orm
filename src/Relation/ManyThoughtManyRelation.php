@@ -6,24 +6,22 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Relation\ManyToMany;
+namespace Spiral\ORM\Relation;
 
-use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Iterator;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Promise\PivotedPromiseInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 use Spiral\ORM\Relation;
-use Spiral\ORM\Util\Collection\PivotedCollection;
-use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
-use Spiral\ORM\Util\Collection\PivotedInterface;
-use Spiral\ORM\Util\ContextStorage;
+use Spiral\ORM\Relation\Pivoted;
 
-class PivotedRelation extends Relation\AbstractRelation
+class ManyThoughtManyRelation extends Relation\AbstractRelation
 {
+    use Relation\Traits\PivotedTrait;
+
     /** @var string|null */
     private $pivotEntity;
 
@@ -56,64 +54,32 @@ class PivotedRelation extends Relation\AbstractRelation
         $pivotData = new \SplObjectStorage();
 
         foreach (new Iterator($this->orm, $this->target, $data) as $pivot => $entity) {
-            $elements[] = $entity;
             $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
+            $elements[] = $entity;
         }
 
-        return [new PivotedCollection($elements, $pivotData), new ContextStorage($elements, $pivotData)];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function extract($data)
-    {
-        if ($data instanceof PivotedCollectionPromise && !$data->isInitialized()) {
-            return $data->toPromise();
-        }
-
-        if ($data instanceof PivotedInterface) {
-            return new ContextStorage($data->toArray(), $data->getPivotContext());
-        }
-
-        if ($data instanceof Collection) {
-            return new ContextStorage($data->toArray());
-        }
-
-        return new ContextStorage();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function initPromise(Node $parentNode): array
-    {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
-            return [null, null];
-        }
-
-        // will take care of all the loading and scoping
-        $p = new PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
-
-        return [new PivotedCollectionPromise($p), $p];
+        return [
+            new Pivoted\PivotedCollection($elements, $pivotData),
+            new Pivoted\PivotedStorage($elements, $pivotData)
+        ];
     }
 
     /**
      * @inheritdoc
      *
-     * @param ContextStorage $related
-     * @param ContextStorage $original
+     * @param Pivoted\PivotedStorage $related
+     * @param Pivoted\PivotedStorage $original
      */
     public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
     {
-        $original = $original ?? new ContextStorage();
+        $original = $original ?? new Pivoted\PivotedStorage();
 
-        if ($related instanceof PivotedPromiseInterface) {
-            $related = $related->__resolveContext();
+        if ($related instanceof PromiseInterface) {
+            $related = $related->__resolve();
         }
 
-        if ($original instanceof PivotedPromiseInterface) {
-            $original = $original->__resolveContext();
+        if ($original instanceof PromiseInterface) {
+            $original = $original->__resolve();
         }
 
         $sequence = new Sequence();
@@ -136,13 +102,13 @@ class PivotedRelation extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node           $parentNode
-     * @param object         $related
-     * @param object         $pivot
-     * @param ContextStorage $storage
+     * @param Node                   $parentNode
+     * @param object                 $related
+     * @param object                 $pivot
+     * @param Pivoted\PivotedStorage $storage
      * @return CommandInterface
      */
-    protected function link(Node $parentNode, $related, $pivot, ContextStorage $storage): CommandInterface
+    protected function link(Node $parentNode, $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);

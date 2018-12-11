@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util\Collection;
+namespace Spiral\ORM\Relation\Pivoted;
 
 use Doctrine\Common\Collections\Collection;
 
 /**
  * Carries pivot data associated with each element.
  */
-interface PivotedInterface extends Collection
+interface PivotedCollectionInterface extends Collection
 {
     /**
      * Return true if element has pivot data associated (can be null).

@@ -18,7 +18,7 @@ use Spiral\ORM\Tests\Fixtures\Comment;
 use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
-use Spiral\ORM\Util\Collection\CollectionPromise;
+use Spiral\ORM\Promise\Collection\CollectionPromise;
 
 abstract class HasManyPromiseTest extends BaseTest
 {

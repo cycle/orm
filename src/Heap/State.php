@@ -11,9 +11,9 @@ namespace Spiral\ORM\Heap;
 use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Context\ConsumerInterface;
 use Spiral\ORM\Context\ProducerInterface;
-use Spiral\ORM\Traits\ClaimTrait;
-use Spiral\ORM\Traits\RelationTrait;
-use Spiral\ORM\Traits\VisitorTrait;
+use Spiral\ORM\Heap\Traits\ClaimTrait;
+use Spiral\ORM\Heap\Traits\RelationTrait;
+use Spiral\ORM\Heap\Traits\VisitorTrait;
 
 /**
  * Current node state.

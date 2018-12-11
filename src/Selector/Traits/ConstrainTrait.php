@@ -8,7 +8,7 @@
 namespace Spiral\ORM\Selector\Traits;
 
 use Spiral\Database\Query\SelectQuery;
-use Spiral\ORM\Util\QueryWrapper;
+use Spiral\ORM\Selector\QueryWrapper;
 
 /**
  * Provides ability to set LIMIT and ORDER BY in relation loaders.

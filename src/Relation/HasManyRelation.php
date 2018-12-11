@@ -18,7 +18,7 @@ use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Promise\PromiseInterface;
 use Spiral\ORM\Promise\PromiseMany;
 use Spiral\ORM\Relation;
-use Spiral\ORM\Util\Collection\CollectionPromise;
+use Spiral\ORM\Promise\Collection\CollectionPromise;
 
 /**
  * Provides the ability to own the collection of entities.

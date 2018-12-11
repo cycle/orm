@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Traits;
+namespace Spiral\ORM\Heap\Traits;
 
 /**
  * Provides the ability to remember visited paths in dependency tree.

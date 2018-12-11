@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Util\Collection\PivotedInterface;
 use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Heap\Heap;
 use Spiral\ORM\Relation;
@@ -20,7 +19,7 @@ use Spiral\ORM\Tests\Fixtures\User;
 use Spiral\ORM\Tests\Traits\TableTrait;
 use Spiral\ORM\Transaction;
 
-abstract class ManyToPivotedPromiseTest extends BaseTest
+abstract class ManyThoughtManyRelationTest extends BaseTest
 {
     use TableTrait;
 
@@ -183,17 +182,13 @@ abstract class ManyToPivotedPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->fetchAll();
+        list($a, $b) = $selector->load('tags')->fetchAll();
 
-        $this->captureReadQueries();
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
-        $this->assertNumReads(2);
 
-        $this->captureReadQueries();
-
-        $this->assertInstanceOf(PivotedInterface::class, $a->tags);
-        $this->assertInstanceOf(PivotedInterface::class, $b->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
 
         $this->assertTrue($a->tags->hasPivot($a->tags[0]));
         $this->assertTrue($a->tags->hasPivot($a->tags[1]));
@@ -210,26 +205,115 @@ abstract class ManyToPivotedPromiseTest extends BaseTest
         $this->assertEquals('primary', $a->tags->getPivot($a->tags[0])->as);
         $this->assertEquals('secondary', $a->tags->getPivot($a->tags[1])->as);
         $this->assertEquals('primary', $b->tags->getPivot($b->tags[0])->as);
-        $this->assertNumReads(0);
     }
 
-    public function testNoQueries()
+    public function testCreateWithManyToManyCascadeNoContext()
     {
-        $selector = new Selector($this->orm, User::class);
-        /**
-         * @var User $a
-         * @var User $b
-         */
-        list($a, $b) = $selector->fetchAll();
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
 
-        $this->captureReadQueries();
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->store($u);
         $tr->run();
 
-        $this->assertNumReads(0);
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
+    }
+
+    public function testCreateWithManyToManyPivotContextArray()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags->add($t);
+        $u->tags->setPivot($t, ['as' => 'super']);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
+        $this->assertSame('super', $u->tags->getPivot($u->tags[0])->as);
+    }
+
+    public function testCreateWithManyToManyNoWrites()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags->add($t);
+        $u->tags->setPivot($t, ['as' => 'super']);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Selector($this->orm, User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+        $this->assertNumWrites(0);
+    }
+
+    public function testCreateWithManyToManyPivotContext()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $pc = new TagContext();
+        $pc->as = 'super';
+
+        $u->tags->add($t);
+        $u->tags->setPivot($t, $pc);
+
+        $tr = new Transaction($this->orm);
+        $tr->store($u);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
+        $this->assertSame('super', $u->tags->getPivot($u->tags[0])->as);
     }
 
     public function testUnlinkManyToManyAndReplaceSome()
@@ -241,10 +325,9 @@ abstract class ManyToPivotedPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->fetchAll();
+        list($a, $b) = $selector->load('tags')->fetchAll();
 
         $a->tags->remove(0);
-
         $a->tags->add($tagSelector->wherePK(3)->fetchOne());
         $a->tags->getPivot($a->tags[1])->as = "new";
 

@@ -6,27 +6,27 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util\Collection;
+namespace Spiral\ORM\Relation\Pivoted;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
-use Spiral\ORM\Promise\PivotedPromiseInterface;
+use Spiral\ORM\Promise\Collection\CollectionPromiseInterface;
 use Spiral\ORM\Promise\PromiseInterface;
 
 /**
  * Collection at top of pivoted (entity + context entity) promise.
  */
-class PivotedCollectionPromise extends AbstractLazyCollection implements PivotedInterface, PromisedInterface
+class PivotedCollectionPromisePromise extends AbstractLazyCollection implements CollectionPromiseInterface, PivotedCollectionInterface
 {
-    /** @var PivotedPromiseInterface */
+    /** @var PivotedPromise */
     protected $promise;
 
-    /** @var PivotedInterface */
+    /** @var PivotedCollectionInterface */
     protected $collection;
 
     /**
-     * @param PivotedPromiseInterface $promise
+     * @param PivotedPromise $promise
      */
-    public function __construct(PivotedPromiseInterface $promise)
+    public function __construct(PivotedPromise $promise)
     {
         $this->promise = $promise;
     }
@@ -80,7 +80,7 @@ class PivotedCollectionPromise extends AbstractLazyCollection implements Pivoted
      */
     protected function doInitialize()
     {
-        $storage = $this->promise->__resolveContext();
+        $storage = $this->promise->__resolve();
         $this->collection = new PivotedCollection($storage->getElements(), $storage->getContext());
     }
 }

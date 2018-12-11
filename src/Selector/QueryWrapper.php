@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\ORM\Util;
+namespace Spiral\ORM\Selector;
 
 use Spiral\Database\Query\SelectQuery;
 

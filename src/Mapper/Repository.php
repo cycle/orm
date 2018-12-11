@@ -8,7 +8,6 @@
 
 namespace Spiral\ORM\Mapper;
 
-use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Selector;
 
 /**

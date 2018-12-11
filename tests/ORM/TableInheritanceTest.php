@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap;
+use Spiral\ORM\Heap\Heap;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Tests\Fixtures\Admin;

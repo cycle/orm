@@ -9,12 +9,12 @@
 namespace Spiral\ORM\Tests;
 
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap;
-use Spiral\ORM\Loader\JoinableLoader;
+use Spiral\ORM\Heap\Heap;
+use Spiral\ORM\Selector\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
-use Spiral\ORM\Node;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Tests\Fixtures\Nested;
 use Spiral\ORM\Tests\Fixtures\Profile;
 use Spiral\ORM\Tests\Fixtures\User;

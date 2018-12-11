@@ -8,9 +8,11 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Generator\OutputNode;
-use Spiral\ORM\Loader\RootLoader;
-use Spiral\ORM\Loader\Scope\ScopeInterface;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Parser\OutputNode;
+use Spiral\ORM\Selector\LoaderInterface;
+use Spiral\ORM\Selector\RootLoader;
+use Spiral\ORM\Selector\ScopeInterface;
 use Spiral\ORM\Util\QueryWrapper;
 
 /**
@@ -52,6 +54,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function __construct(ORMInterface $orm, string $class)
     {
+        // todo: unify it (!)
         $this->orm = $orm;
         $this->mapper = $orm->getMapper($class);
         $this->loader = new RootLoader($orm, $class);

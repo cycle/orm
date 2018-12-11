@@ -10,7 +10,7 @@ namespace Spiral\ORM\Util\Collection;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 
 /**
  * LazyLoading collection build at top of data promise.

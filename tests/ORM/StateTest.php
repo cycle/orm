@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\ORM\Node;
+use Spiral\ORM\Heap\Node;
 
 class StateTest extends TestCase
 {

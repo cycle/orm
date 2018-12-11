@@ -11,7 +11,7 @@ namespace Spiral\ORM\Config;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
 use Spiral\ORM\Exception\ConfigException;
-use Spiral\ORM\Loader;
+use Spiral\ORM\Selector;
 use Spiral\ORM\Relation;
 
 class RelationConfig extends InjectableConfig
@@ -53,35 +53,35 @@ class RelationConfig extends InjectableConfig
     {
         return new static([
             Relation::HAS_ONE              => [
-                self::LOADER   => Loader\Relation\HasOneLoader::class,
+                self::LOADER   => Selector\Loader\HasOneLoader::class,
                 self::RELATION => Relation\HasOneRelation::class
             ],
             Relation::BELONGS_TO           => [
-                self::LOADER   => Loader\Relation\BelongsToLoader::class,
+                self::LOADER   => Selector\Loader\BelongsToLoader::class,
                 self::RELATION => Relation\BelongsToRelation::class
             ],
             Relation::REFERS_TO            => [
-                self::LOADER   => Loader\Relation\BelongsToLoader::class,
+                self::LOADER   => Selector\Loader\BelongsToLoader::class,
                 self::RELATION => Relation\RefersToRelation::class
             ],
             Relation::HAS_MANY             => [
-                self::LOADER   => Loader\Relation\HasManyLoader::class,
+                self::LOADER   => Selector\Loader\HasManyLoader::class,
                 self::RELATION => Relation\HasManyRelation::class
             ],
             Relation::MANY_TO_MANY         => [
-                self::LOADER   => Loader\Relation\ManyToManyLoader::class,
+                self::LOADER   => Selector\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyToManyRelation::class
             ],
             Relation::MANY_TO_MANY_PIVOTED => [
-                self::LOADER   => Loader\Relation\ManyToManyLoader::class,
+                self::LOADER   => Selector\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyToMany\PivotedRelation::class
             ],
             Relation::MORPHED_HAS_ONE      => [
-                self::LOADER   => Loader\Relation\Morphed\MorphedHasOneLoader::class,
+                self::LOADER   => Selector\Loader\Morphed\MorphedHasOneLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasOneRelation::class
             ],
             Relation::MORPHED_HAS_MANY     => [
-                self::LOADER   => Loader\Relation\Morphed\MorphedHasManyLoader::class,
+                self::LOADER   => Selector\Loader\Morphed\MorphedHasManyLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasManyRelation::class
             ],
             Relation::BELONGS_TO_MORPHED   => [

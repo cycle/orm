@@ -9,8 +9,8 @@
 namespace Spiral\ORM\Util\Collection;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
-use Spiral\ORM\PromiseInterface;
-use Spiral\ORM\Util\Promise\PivotedPromiseInterface;
+use Spiral\ORM\Promise\PivotedPromiseInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 
 /**
  * Collection at top of pivoted (entity + context entity) promise.

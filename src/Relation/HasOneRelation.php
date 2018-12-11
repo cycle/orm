@@ -13,8 +13,8 @@ use Spiral\ORM\Command\Branch\ContextSequence;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Node;
-use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Promise\PromiseInterface;
 use Spiral\ORM\Relation\Traits\PromiseOneTrait;
 
 /**

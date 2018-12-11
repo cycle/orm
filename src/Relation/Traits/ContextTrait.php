@@ -11,7 +11,7 @@ namespace Spiral\ORM\Relation\Traits;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Command\ScopeCarrierInterface as CS;
 use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Node;
+use Spiral\ORM\Heap\Node;
 
 /**
  * Provides the ability to set the promises for command context and scopes linked

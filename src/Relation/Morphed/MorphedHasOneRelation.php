@@ -10,12 +10,12 @@ namespace Spiral\ORM\Relation\Morphed;
 
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Mapper\PromiseFactoryInterface;
-use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Promise\PromiseOne;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasOneRelation;
-use Spiral\ORM\Util\Promise;
 
 /**
  * Inverted version of belongs to morphed.
@@ -51,11 +51,11 @@ class MorphedHasOneRelation extends HasOneRelation
             $this->morphKey => $parentNode->getRole()
         ];
 
-        $mapper = $this->getMapper();
+        $mapper = $this->getSource();
         if ($mapper instanceof PromiseFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {
-            $p = new Promise\PromiseOne($this->orm, $this->target, $scope);
+            $p = new PromiseOne($this->orm, $this->target, $scope);
         }
 
         return [$p, $p];

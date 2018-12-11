@@ -17,14 +17,14 @@ use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Context\ConsumerInterface;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Iterator;
-use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Promise\PivotedPromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\ManyToMany\PivotedPromise;
 use Spiral\ORM\Util\Collection\CollectionPromise;
 use Spiral\ORM\Util\ContextStorage;
-use Spiral\ORM\Util\Promise\PivotedPromiseInterface;
 
 class ManyToManyRelation extends AbstractRelation
 {
@@ -200,7 +200,7 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function pivotDatabase(): DatabaseInterface
     {
-        return $this->getMapper()->getDatabase();
+        return $this->getSource()->getDatabase();
     }
 
     /**

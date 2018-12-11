@@ -8,9 +8,9 @@
 
 namespace Spiral\ORM\Relation\Traits;
 
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Mapper\PromiseFactoryInterface;
-use Spiral\ORM\Node;
-use Spiral\ORM\Util\Promise\PromiseOne;
+use Spiral\ORM\Promise\PromiseOne;
 
 trait PromiseOneTrait
 {
@@ -31,7 +31,7 @@ trait PromiseOneTrait
             return [$e, $e];
         }
 
-        $mapper = $this->getMapper();
+        $mapper = $this->getSource();
         if ($mapper instanceof PromiseFactoryInterface) {
             $p = $mapper->initProxy($scope);
         } else {

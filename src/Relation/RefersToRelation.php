@@ -12,8 +12,7 @@ use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
 use Spiral\ORM\Command\Database\Update;
-use Spiral\ORM\DependencyInterface;
-use Spiral\ORM\Node;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Relation\Traits\PromiseOneTrait;
 use Spiral\ORM\Schema;
 
@@ -52,8 +51,8 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
 
         // update parent entity once related instance is able to provide us context key
         $update = new Update(
-            $this->getMapper($parentNode->getRole())->getDatabase(),
-            $this->getMapper($parentNode->getRole())->getTable()
+            $this->getSource($parentNode->getRole())->getDatabase(),
+            $this->getSource($parentNode->getRole())->getTable()
         );
 
         // fastest way to identify the entity

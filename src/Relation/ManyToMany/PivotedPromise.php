@@ -9,17 +9,17 @@
 namespace Spiral\ORM\Relation\ManyToMany;
 
 use Spiral\ORM\Exception\RelationException;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Iterator;
-use Spiral\ORM\Loader\JoinableLoader;
-use Spiral\ORM\Loader\Relation\ManyToManyLoader;
-use Spiral\ORM\Mapper\SelectableInterface;
-use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Parser\PivotedRootNode;
+use Spiral\ORM\Promise\PivotedPromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
-use Spiral\ORM\Generator\PivotedRootNode;
+use Spiral\ORM\Selector\JoinableLoader;
+use Spiral\ORM\Selector\Loader\ManyToManyLoader;
+use Spiral\ORM\Selector\SourceInterface;
 use Spiral\ORM\Util\ContextStorage;
-use Spiral\ORM\Util\Promise\PivotedPromiseInterface;
 
 /**
  * Promise use loader to configure query and it's scope.
@@ -107,7 +107,7 @@ class PivotedPromise implements PivotedPromiseInterface
         }
 
         $mapper = $this->orm->getMapper($this->target);
-        if (!$mapper instanceof SelectableInterface) {
+        if (!$mapper instanceof SourceInterface) {
             throw new RelationException("ManyToMany relation can only work with SelectableInterface mappers");
         }
 

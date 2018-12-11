@@ -10,12 +10,12 @@ namespace Spiral\ORM\Relation\Morphed;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\ORM\Command\ContextCarrierInterface;
-use Spiral\ORM\Node;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Promise\PromiseMany;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Relation\HasManyRelation;
 use Spiral\ORM\Util\Collection\CollectionPromise;
-use Spiral\ORM\Util\Promise;
 
 class MorphedHasManyRelation extends HasManyRelation
 {
@@ -43,8 +43,8 @@ class MorphedHasManyRelation extends HasManyRelation
             return [new ArrayCollection(), null];
         }
 
-        $p = new Promise\PromiseMany(
-            $this->getMapper()->getSelector(),
+        $p = new PromiseMany(
+            $this->getSource()->getSelector(),
             [
                 $this->outerKey => $innerKey,
                 $this->morphKey => $parentNode->getRole(),

@@ -11,6 +11,10 @@ namespace Spiral\ORM;
 use Spiral\ORM\Command\Branch\ContextSequence;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\ORM\Relation\DependencyInterface;
+use Spiral\ORM\Relation\RelationInterface;
 
 /**
  * Manages the graph of relations and generates command branches.
@@ -45,33 +49,33 @@ final class RelationMap
     /**
      * Init relation data in entity data and entity state.
      *
-     * @param Node  $state
+     * @param Node  $node
      * @param array $data
      * @return array
      */
-    public function init(Node $state, array $data): array
+    public function init(Node $node, array $data): array
     {
         foreach ($this->relations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
-                if ($state->hasRelation($name)) {
+                if ($node->hasRelation($name)) {
                     continue;
                 }
 
-                list($data[$name], $orig) = $relation->initPromise($state);
-                $state->setRelation($name, $orig);
+                list($data[$name], $orig) = $relation->initPromise($node);
+                $node->setRelation($name, $orig);
                 continue;
             }
 
             $item = $data[$name];
             if (is_object($item) || is_null($item)) {
                 // cyclic initialization
-                $state->setRelation($name, $item);
+                $node->setRelation($name, $item);
                 continue;
             }
 
             // init relation for the entity and for state and the same time
             list($data[$name], $orig) = $relation->init($item);
-            $state->setRelation($name, $orig);
+            $node->setRelation($name, $orig);
         }
 
         return $data;

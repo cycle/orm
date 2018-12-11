@@ -12,15 +12,15 @@ use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Iterator;
-use Spiral\ORM\Node;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Promise\PivotedPromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Util\Collection\PivotedCollection;
 use Spiral\ORM\Util\Collection\PivotedCollectionPromise;
 use Spiral\ORM\Util\Collection\PivotedInterface;
 use Spiral\ORM\Util\ContextStorage;
-use Spiral\ORM\Util\Promise\PivotedPromiseInterface;
 
 class PivotedRelation extends Relation\AbstractRelation
 {

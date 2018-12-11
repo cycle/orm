@@ -12,6 +12,9 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
+use Spiral\ORM\Heap\HeapInterface;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Mapper\MapperInterface;
 
 interface ORMInterface
 {
@@ -21,6 +24,9 @@ interface ORMInterface
 
     public function getDBAL(): DatabaseManager;
 
+    /**
+     * @deprecated
+     */
     public function getDatabase($entity): DatabaseInterface;
 
     public function getMapper($entity): MapperInterface;
@@ -30,7 +36,6 @@ interface ORMInterface
     public function getFactory(): FactoryInterface;
 
     public function getHeap(): ?HeapInterface;
-
 
     public function queueStore($entity, int $mode = 0): ContextCarrierInterface;
 

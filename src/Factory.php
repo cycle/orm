@@ -12,6 +12,9 @@ use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\ORM\Config\RelationConfig;
 use Spiral\ORM\Exception\FactoryException;
+use Spiral\ORM\Mapper\MapperInterface;
+use Spiral\ORM\Relation\RelationInterface;
+use Spiral\ORM\Selector\LoaderInterface;
 
 class Factory implements FactoryInterface
 {
@@ -40,7 +43,7 @@ class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function withConfigured(ORMInterface $orm, SchemaInterface $schema): FactoryInterface
+    public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface
     {
         $factory = clone $this;
         $factory->orm = $orm;

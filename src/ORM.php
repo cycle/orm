@@ -14,6 +14,11 @@ use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
 use Spiral\ORM\Config\RelationConfig;
+use Spiral\ORM\Heap\Heap;
+use Spiral\ORM\Heap\HeapInterface;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Mapper\MapperInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -134,7 +139,7 @@ class ORM implements ORMInterface
     {
         $orm = clone $this;
         $orm->schema = $schema;
-        $orm->factory = $orm->factory->withConfigured($orm, $orm->schema);
+        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
 
         return $orm;
     }
@@ -146,7 +151,7 @@ class ORM implements ORMInterface
     {
         if (empty($this->schema)) {
             $this->schema = $this->loadSchema();
-            $this->factory = $this->factory->withConfigured($this, $this->schema);
+            $this->factory = $this->factory->withContext($this, $this->schema);
         }
 
         return $this->schema;
@@ -158,7 +163,7 @@ class ORM implements ORMInterface
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
-        $orm->factory = $factory->withConfigured($orm, $orm->schema);
+        $orm->factory = $factory->withContext($orm, $orm->schema);
 
         return $orm;
     }
@@ -178,7 +183,7 @@ class ORM implements ORMInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
-        $orm->factory = $orm->factory->withConfigured($orm, $orm->schema);
+        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
 
         return $orm;
     }
@@ -234,16 +239,18 @@ class ORM implements ORMInterface
         }
 
         $m = $this->getMapper($entity);
-        $cmd = $m->queueStore($entity);
+
+        $node = $this->getHeap()->get($entity);
+        if (empty($node)) {
+            $node = new Node(Node::NEW, [], $m->getRole());
+            $this->getHeap()->attach($entity, $node);
+        }
+
+        $cmd = $m->queueStore($node, $entity);
         // TODO: RESET HANDLERS
 
         // todo: optimize it
-        $cmd = $this->getRelmap($entity)->queueRelations(
-            $cmd,
-            $entity,
-            $state = $this->getHeap()->get($entity),
-            $m->extract($entity)
-        );
+        $cmd = $this->getRelmap($entity)->queueRelations($cmd, $entity, $node, $m->extract($entity));
 
         return $cmd;
     }
@@ -254,7 +261,7 @@ class ORM implements ORMInterface
             return new Nil();
         }
 
-        return $this->getMapper($entity)->queueDelete($entity);
+        return $this->getMapper($entity)->queueDelete($this->getHeap()->get($entity), $entity);
     }
 
     /**
@@ -291,11 +298,6 @@ class ORM implements ORMInterface
         }
 
         return null;
-    }
-
-    protected function getInitPaths(string $class, array $data): array
-    {
-
     }
 
     protected function resolveClass($entity): string

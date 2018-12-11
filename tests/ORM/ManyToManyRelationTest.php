@@ -10,8 +10,8 @@ namespace Spiral\ORM\Tests;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap;
-use Spiral\ORM\Loader\JoinableLoader;
+use Spiral\ORM\Heap\Heap;
+use Spiral\ORM\Selector\JoinableLoader;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;

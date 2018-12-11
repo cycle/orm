@@ -11,9 +11,8 @@ namespace Spiral\ORM\Relation;
 use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\DependencyInterface;
 use Spiral\ORM\Exception\Relation\NullException;
-use Spiral\ORM\Node;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\Relation\Traits\PromiseOneTrait;
 
 /**

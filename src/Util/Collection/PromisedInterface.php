@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Util\Collection;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 
 /**
  * Indicates that collection has been build at top of promise.

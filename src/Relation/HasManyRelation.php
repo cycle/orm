@@ -14,11 +14,11 @@ use Spiral\ORM\Command\Branch\Condition;
 use Spiral\ORM\Command\Branch\Sequence;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface as CC;
-use Spiral\ORM\Node;
-use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Promise\PromiseInterface;
+use Spiral\ORM\Promise\PromiseMany;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Util\Collection\CollectionPromise;
-use Spiral\ORM\Util\Promise;
 
 /**
  * Provides the ability to own the collection of entities.
@@ -69,8 +69,8 @@ class HasManyRelation extends AbstractRelation
             return [new ArrayCollection(), null];
         }
 
-        $p = new Promise\PromiseMany(
-            $this->getMapper()->getSelector(),
+        $p = new PromiseMany(
+            $this->getSource()->getSelector(),
             [
                 $this->outerKey => $innerKey
             ],

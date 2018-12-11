@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Tests\Benchmark;
 
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap;
+use Spiral\ORM\Heap\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Tests\BaseTest;

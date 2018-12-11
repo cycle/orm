@@ -9,7 +9,6 @@
 namespace Spiral\ORM\Mapper;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\ORM\Command\Branch\Nil;
 use Spiral\ORM\Command\Branch\Split;
 use Spiral\ORM\Command\CommandInterface;
 use Spiral\ORM\Command\ContextCarrierInterface;
@@ -17,17 +16,14 @@ use Spiral\ORM\Command\Database\Delete;
 use Spiral\ORM\Command\Database\Insert;
 use Spiral\ORM\Command\Database\Update;
 use Spiral\ORM\Context\ConsumerInterface;
-use Spiral\ORM\Loader\Scope\ScopeInterface;
-use Spiral\ORM\MapperInterface;
-use Spiral\ORM\Node;
+use Spiral\ORM\Heap\Node;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\RepositoryInterface;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 
-class Mapper implements MapperInterface, SelectableInterface
+class Mapper implements MapperInterface, Selector\SourceInterface
 {
     // system column to store entity type
     public const ENTITY_TYPE = '_type';
@@ -101,7 +97,7 @@ class Mapper implements MapperInterface, SelectableInterface
         return $selector;
     }
 
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface
+    public function getScope(string $name = self::DEFAULT_SCOPE): ?Selector\ScopeInterface
     {
         return null;
     }
@@ -132,32 +128,32 @@ class Mapper implements MapperInterface, SelectableInterface
     }
 
     // todo: need state as INPUT!!!!
-    public function queueStore($entity): ContextCarrierInterface
+    public function queueStore(Node $node, $entity): ContextCarrierInterface
     {
-        /** @var Node $point */
-        $point = $this->orm->getHeap()->get($entity);
-        if (is_null($point)) {
-            // todo: do we need to track PK?
-            $point = new Node(
-                Node::NEW,
-                [],
-                $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
-            );
-            $this->orm->getHeap()->attach($entity, $point);
-        }
+        //        /** @var Node $point */
+        //        $point = $this->orm->getHeap()->get($entity);
+        //        if (is_null($point)) {
+        //            // todo: do we need to track PK?
+        //            $point = new Node(
+        //                Node::NEW,
+        //                [],
+        //                $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
+        //            );
+        //            $this->orm->getHeap()->attach($entity, $point);
+        //        }
 
-        if ($point == null || $point->getStatus() == Node::NEW) {
-            $cmd = $this->queueCreate($entity, $point);
-            $point->getState()->setCommand($cmd);
+        if ($node == null || $node->getStatus() == Node::NEW) {
+            $cmd = $this->queueCreate($entity, $node);
+            $node->getState()->setCommand($cmd);
 
             return $cmd;
         }
 
-        $lastCommand = $point->getState()->getCommand();
+        $lastCommand = $node->getState()->getCommand();
 
         if (empty($lastCommand)) {
             // todo: check multiple update commands working within the split (!)
-            return $this->queueUpdate($entity, $point);
+            return $this->queueUpdate($entity, $node);
         }
 
         if ($lastCommand instanceof Split) {
@@ -165,23 +161,36 @@ class Mapper implements MapperInterface, SelectableInterface
         }
 
         // todo: do i like it?
-        $split = new Split($lastCommand, $this->queueUpdate($entity, $point));
-        $point->getState()->setCommand($split);
+        $split = new Split($lastCommand, $this->queueUpdate($entity, $node));
+        $node->getState()->setCommand($split);
 
         return $split;
     }
 
-    public function queueDelete($entity): CommandInterface
+    public function queueDelete(Node $node, $entity): CommandInterface
     {
-        $state = $this->orm->getHeap()->get($entity);
-        if ($state == null) {
-            // todo: this should not happen, todo: need nullable delete
-            return new Nil();
-        }
+        //        $node = $this->orm->getHeap()->get($entity);
+        //        if ($node == null) {
+        //            // todo: this should not happen, todo: need nullable delete
+        //            return new Nil();
+        //        }
 
         // todo: delete relations as well
 
-        return $this->buildDelete($entity, $state);
+        $delete = new Delete($this->orm->getDatabase($entity), $this->table);
+
+        $node->setStatus(Node::SCHEDULED_DELETE);
+        $node->getState()->decClaim();
+
+        $delete->waitScope($this->primaryKey);
+        $node->forward($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
+
+        // todo: this must be changed (CORRECT?) BUT HOW?
+        //  $delete->onComplete(function () use ($entity) {
+        //      $this->orm->getHeap()->detach($entity);
+        //  });
+
+        return $delete;
     }
 
     protected function getColumns($entity): array
@@ -241,23 +250,5 @@ class Mapper implements MapperInterface, SelectableInterface
         $state->forward($this->primaryKey, $update, $this->primaryKey, true, ConsumerInterface::SCOPE);
 
         return $update;
-    }
-
-    protected function buildDelete($entity, Node $state): CommandInterface
-    {
-        $delete = new Delete($this->orm->getDatabase($entity), $this->table);
-
-        $state->setStatus(Node::SCHEDULED_DELETE);
-        $state->getState()->decClaim();
-
-        $delete->waitScope($this->primaryKey);
-        $state->forward($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
-
-        // todo: this must be changed (CORRECT?) BUT HOW?
-        //  $delete->onComplete(function () use ($entity) {
-        //      $this->orm->getHeap()->detach($entity);
-        //  });
-
-        return $delete;
     }
 }

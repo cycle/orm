@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Tests;
 
-use Spiral\ORM\Heap;
+use Spiral\ORM\Heap\Heap;
 use Spiral\ORM\Mapper\Mapper;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;

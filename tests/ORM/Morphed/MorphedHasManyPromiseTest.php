@@ -11,7 +11,7 @@ namespace Spiral\ORM\Tests\Morphed;
 
 use Doctrine\Common\Collections\Collection;
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\Heap;
+use Spiral\ORM\Heap\Heap;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Selector;

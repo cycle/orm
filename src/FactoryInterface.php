@@ -8,9 +8,13 @@
 
 namespace Spiral\ORM;
 
+use Spiral\ORM\Mapper\MapperInterface;
+use Spiral\ORM\Relation\RelationInterface;
+use Spiral\ORM\Selector\LoaderInterface;
+
 interface FactoryInterface
 {
-    public function withConfigured(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
+    public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
 
     public function mapper(string $class): MapperInterface;
 

@@ -8,9 +8,9 @@
 
 namespace Spiral\ORM\Tests\Morphed;
 
-use Spiral\ORM\Heap;
+use Spiral\ORM\Heap\Heap;
 use Spiral\ORM\Mapper\Mapper;
-use Spiral\ORM\PromiseInterface;
+use Spiral\ORM\Promise\PromiseInterface;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Schema;
 use Spiral\ORM\Tests\BaseTest;

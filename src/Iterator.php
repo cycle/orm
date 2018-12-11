@@ -8,7 +8,8 @@
 
 namespace Spiral\ORM;
 
-use Spiral\ORM\Generator\PivotedNode;
+use Spiral\ORM\Heap\Node;
+use Spiral\ORM\Parser\PivotedNode;
 
 /**
  * Iterates over given data-set and instantiates objects.

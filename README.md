@@ -9,7 +9,7 @@ Features:
 - eager and lazy loading, auto joins, promises and proxies
 - runtime configuration with/without code-generation
 - single table inheritance
-- works with directed graphs using IDDFS
+- works with directed graphs, cyclic graphs using IDDFS
 - persistance using command chains
 - one pass parser for query results
 - designed (immutable) to work in long-running applications (RoadRunner like)

@@ -98,7 +98,6 @@ abstract class SelectorTest extends BaseTest
         $s = new Selector($this->orm, User::class);
         $s->load('comments', ['method' => JoinableLoader::INLOAD]);
 
-
 //        $this->assertSQL('SELECT
 //"user"."id" AS "c0", "user"."email" AS "c1", "user"."balance" AS "c2", "d123"."id" AS "c3", "d123"."user_id" AS "c4", "d123"."level" AS "c5", "d123"."message" AS "c6"
 //FROM "user" AS "user"

@@ -38,7 +38,8 @@ final class Iterator implements \IteratorAggregate
     }
 
     /**
-     * Generate over data. Pivoted data would be returned as key value if set.
+     * Generate entities using incoming data stream. Pivoted data would be
+     * returned as key value if set.
      *
      * @return \Generator
      */

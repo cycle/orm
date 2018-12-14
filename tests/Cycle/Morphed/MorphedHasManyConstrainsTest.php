@@ -6,18 +6,19 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Tests;
+namespace Spiral\Cycle\Tests\Morphed;
 
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Tests\BaseTest;
 use Spiral\Cycle\Tests\Fixtures\Comment;
+use Spiral\Cycle\Tests\Fixtures\Post;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
-abstract class HasManyConstrainsTest extends BaseTest
+abstract class MorphedHasManyConstrainsTest extends BaseTest
 {
     use TableTrait;
 
@@ -39,23 +40,48 @@ abstract class HasManyConstrainsTest extends BaseTest
             ]
         );
 
-        $this->makeTable('comment', [
+        $this->makeTable('post', [
             'id'      => 'primary',
-            'user_id' => 'integer',
-            'level'   => 'integer',
-            'message' => 'string'
+            'user_id' => 'integer,nullable',
+            'title'   => 'string',
+            'content' => 'string'
+        ]);
+
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['title', 'user_id', 'content'],
+            [
+                ['post 1', 1, 'post 1 body'],
+                ['post 2', 1, 'post 2 body'],
+                ['post 3', 2, 'post 3 body'],
+                ['post 4', 2, 'post 4 body'],
+            ]
+        );
+
+        $this->makeTable('comment', [
+            'id'          => 'primary',
+            'parent_id'   => 'integer',
+            'parent_type' => 'string',
+            'level'       => 'int',
+            'message'     => 'string'
         ]);
 
         $this->getDatabase()->table('comment')->insertMultiple(
-            ['user_id', 'level', 'message'],
+            ['parent_id', 'parent_type', 'level', 'message',],
             [
-                [1, 1, 'msg 1'],
-                [1, 2, 'msg 2'],
-                [1, 3, 'msg 3'],
-                [1, 4, 'msg 4'],
-                [2, 1, 'msg 2.1'],
-                [2, 2, 'msg 2.2'],
-                [2, 3, 'msg 2.3'],
+                [1, 'user', 1, 'msg 1'],
+                [1, 'user', 2, 'msg 2'],
+                [1, 'user', 3, 'msg 3'],
+                [1, 'user', 4, 'msg 4'],
+                [2, 'user', 1, 'msg 2.1'],
+                [2, 'user', 2, 'msg 2.2'],
+                [2, 'user', 3, 'msg 2.3'],
+                [1, 'post', 1, 'p.msg 1'],
+                [1, 'post', 2, 'p.msg 2'],
+                [1, 'post', 3, 'p.msg 3'],
+                [1, 'post', 4, 'p.msg 4'],
+                [2, 'post', 1, 'p.msg 2.1'],
+                [2, 'post', 2, 'p.msg 2.2'],
+                [2, 'post', 3, 'p.msg 2.3'],
             ]
         );
     }
@@ -102,6 +128,71 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
+    public function testOrderedPosts()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY => ['@.level' => 'DESC'],
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, Post::class))->load('comments')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('p.msg 4', $a->comments[0]->message);
+        $this->assertSame('p.msg 3', $a->comments[1]->message);
+        $this->assertSame('p.msg 2', $a->comments[2]->message);
+        $this->assertSame('p.msg 1', $a->comments[3]->message);
+
+        $this->assertSame('p.msg 2.3', $b->comments[0]->message);
+        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
+        $this->assertSame('p.msg 2.1', $b->comments[2]->message);
+    }
+
+    public function testOrderedPostsASC()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY => ['@.level' => 'ASC'],
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, Post::class))->load('comments')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('p.msg 4', $a->comments[3]->message);
+        $this->assertSame('p.msg 3', $a->comments[2]->message);
+        $this->assertSame('p.msg 2', $a->comments[1]->message);
+        $this->assertSame('p.msg 1', $a->comments[0]->message);
+
+        $this->assertSame('p.msg 2.3', $b->comments[2]->message);
+        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
+        $this->assertSame('p.msg 2.1', $b->comments[0]->message);
+    }
+
+    public function testOrderedInload()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY => ['@.level' => 'DESC'],
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
+            'method' => Selector\JoinableLoader::INLOAD
+        ])->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[2]->message);
+        $this->assertSame('msg 1', $a->comments[3]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        $this->assertSame('msg 2.1', $b->comments[2]->message);
+    }
+
     public function testOrderedASCInload()
     {
         $this->orm = $this->withCommentsSchema([
@@ -109,7 +200,7 @@ abstract class HasManyConstrainsTest extends BaseTest
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
-            'method' => JoinableLoader::INLOAD
+            'method' => Selector\JoinableLoader::INLOAD
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->comments);
@@ -123,6 +214,52 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.3', $b->comments[2]->message);
         $this->assertSame('msg 2.2', $b->comments[1]->message);
         $this->assertSame('msg 2.1', $b->comments[0]->message);
+    }
+
+    public function testOrderedPostsInload()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY => ['@.level' => 'DESC'],
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, Post::class))->load('comments', [
+            'method' => Selector\JoinableLoader::INLOAD
+        ])->orderBy('post.id', 'ASC')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('p.msg 4', $a->comments[0]->message);
+        $this->assertSame('p.msg 3', $a->comments[1]->message);
+        $this->assertSame('p.msg 2', $a->comments[2]->message);
+        $this->assertSame('p.msg 1', $a->comments[3]->message);
+
+        $this->assertSame('p.msg 2.3', $b->comments[0]->message);
+        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
+        $this->assertSame('p.msg 2.1', $b->comments[2]->message);
+    }
+
+    public function testOrderedPostsASCInload()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY => ['@.level' => 'ASC'],
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, Post::class))->load('comments', [
+            'method' => Selector\JoinableLoader::INLOAD
+        ])->orderBy('post.id', 'ASC')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('p.msg 4', $a->comments[3]->message);
+        $this->assertSame('p.msg 3', $a->comments[2]->message);
+        $this->assertSame('p.msg 2', $a->comments[1]->message);
+        $this->assertSame('p.msg 1', $a->comments[0]->message);
+
+        $this->assertSame('p.msg 2.3', $b->comments[2]->message);
+        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
+        $this->assertSame('p.msg 2.1', $b->comments[0]->message);
     }
 
     public function testOrderedPromisedASC()
@@ -184,6 +321,67 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
+    public function testPostOrderedPromisedASC()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY => ['@.level' => 'ASC'],
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, Post::class))->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('p.msg 4', $a->comments[3]->message);
+        $this->assertSame('p.msg 3', $a->comments[2]->message);
+        $this->assertSame('p.msg 2', $a->comments[1]->message);
+        $this->assertSame('p.msg 1', $a->comments[0]->message);
+
+        $this->assertSame('p.msg 2.3', $b->comments[2]->message);
+        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
+        $this->assertSame('p.msg 2.1', $b->comments[0]->message);
+    }
+
+    public function testPostOrderedAndWhere()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY    => ['@.level' => 'ASC'],
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, Post::class))->load('comments')->fetchAll();
+
+        $this->assertCount(3, $a->comments);
+        $this->assertCount(2, $b->comments);
+
+        $this->assertSame('p.msg 4', $a->comments[2]->message);
+        $this->assertSame('p.msg 3', $a->comments[1]->message);
+        $this->assertSame('p.msg 2', $a->comments[0]->message);
+        $this->assertSame('p.msg 2.3', $b->comments[1]->message);
+        $this->assertSame('p.msg 2.2', $b->comments[0]->message);
+    }
+
+    public function testPostOrderedAndWherePromised()
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::ORDER_BY    => ['@.level' => 'ASC'],
+            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+        ]);
+
+        list($a, $b) = (new Selector($this->orm, Post::class))->fetchAll();
+
+        $this->captureReadQueries();
+        $this->assertCount(3, $a->comments);
+        $this->assertCount(2, $b->comments);
+        $this->assertNumReads(2);
+
+        $this->assertSame('p.msg 4', $a->comments[2]->message);
+        $this->assertSame('p.msg 3', $a->comments[1]->message);
+        $this->assertSame('p.msg 2', $a->comments[0]->message);
+        $this->assertSame('p.msg 2.3', $b->comments[1]->message);
+        $this->assertSame('p.msg 2.2', $b->comments[0]->message);
+    }
+
     public function testOrderedAndWhereReversed()
     {
         $this->orm = $this->withCommentsSchema([
@@ -211,7 +409,7 @@ abstract class HasManyConstrainsTest extends BaseTest
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
-            'method' => JoinableLoader::INLOAD
+            'method' => Selector\JoinableLoader::INLOAD
         ])->fetchAll();
 
         $this->assertCount(3, $a->comments);
@@ -274,7 +472,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
             'orderBy' => ['@.level' => 'DESC'],
-            'method'  => JoinableLoader::INLOAD
+            'method'  => Selector\JoinableLoader::INLOAD
         ])->fetchAll();
 
         $this->assertCount(3, $a->comments);
@@ -316,7 +514,7 @@ abstract class HasManyConstrainsTest extends BaseTest
         // overwrites default one
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
             'where'  => ['@.level' => 1],
-            'method' => JoinableLoader::INLOAD
+            'method' => Selector\JoinableLoader::INLOAD
         ])->fetchAll();
 
         $this->assertCount(1, $a->comments);
@@ -379,7 +577,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // do not allow limits with joined and loaded relations
         (new Selector($this->orm, User::class))
-            ->load('comments', ['method' => JoinableLoader::INLOAD])
+            ->load('comments', ['method' => Selector\JoinableLoader::INLOAD])
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
@@ -392,7 +590,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // sort by users and then by comments and only include comments with level > 3
         $res = (new Selector($this->orm, User::class))->load('comments', [
-            'method' => JoinableLoader::INLOAD
+            'method' => Selector\JoinableLoader::INLOAD
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
         $this->assertCount(2, $res);
@@ -416,7 +614,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // sort by users and then by comments and only include comments with level > 3
         $res = (new Selector($this->orm, User::class))->load('comments', [
-            'method'  => JoinableLoader::INLOAD,
+            'method'  => Selector\JoinableLoader::INLOAD,
             'orderBy' => ['@.level' => 'ASC']
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
@@ -444,7 +642,7 @@ abstract class HasManyConstrainsTest extends BaseTest
 
         // sort by users and then by comments and only include comments with level > 3
         (new Selector($this->orm, User::class))->load('comments', [
-            'method'  => JoinableLoader::INLOAD,
+            'method'  => Selector\JoinableLoader::INLOAD,
             'orderBy' => ['@.column' => 'ASC']
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
@@ -462,14 +660,36 @@ abstract class HasManyConstrainsTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
                                 Relation::CASCADE   => true,
                                 Relation::INNER_KEY => 'id',
-                                Relation::OUTER_KEY => 'user_id',
+                                Relation::OUTER_KEY => 'parent_id',
+                                Relation::MORPH_KEY => 'parent_type',
                             ] + $relationSchema,
                     ]
+                ]
+            ],
+            Post::class    => [
+                Schema::ALIAS       => 'post',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'post',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'comments' => [
+                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                                Relation::CASCADE   => true,
+                                Relation::INNER_KEY => 'id',
+                                Relation::OUTER_KEY => 'parent_id',
+                                Relation::MORPH_KEY => 'parent_type',
+                            ] + $relationSchema,
+                    ],
                 ]
             ],
             Comment::class => [
@@ -478,7 +698,7 @@ abstract class HasManyConstrainsTest extends BaseTest
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'message', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ]

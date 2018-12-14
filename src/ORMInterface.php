@@ -13,7 +13,6 @@ use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
-use Spiral\Database\DatabaseManager;
 
 /**
  * Provide the access to all ORM services.

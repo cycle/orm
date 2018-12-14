@@ -64,9 +64,9 @@ class ContextSequence extends Sequence implements ContextCarrierInterface
     public function register(
         string $key,
         $value,
-        bool $update = false,
+        bool $fresh = false,
         int $stream = self::DATA
     ) {
-        $this->getPrimary()->register($key, $value, $update, $stream);
+        $this->getPrimary()->register($key, $value, $fresh, $stream);
     }
 }

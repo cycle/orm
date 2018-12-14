@@ -92,11 +92,11 @@ class Split implements ContextCarrierInterface, \IteratorAggregate
     public function register(
         string $key,
         $value,
-        bool $update = false,
+        bool $fresh = false,
         int $stream = self::DATA
     ) {
         if (isset($this->contextPath[$key])) {
-            $this->contextPath[$key]->register($key, $value, $update, $stream);
+            $this->contextPath[$key]->register($key, $value, $fresh, $stream);
         }
     }
 

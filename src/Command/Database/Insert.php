@@ -74,9 +74,9 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface, Produce
     /**
      * @inheritdoc
      */
-    public function register(string $key, $value, bool $update = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
     {
-        if ($update || !is_null($value)) {
+        if ($fresh || !is_null($value)) {
             $this->freeContext($key);
         }
 

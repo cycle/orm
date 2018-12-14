@@ -11,7 +11,7 @@ namespace Spiral\Cycle\Relation\Morphed;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface as CC;
 use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\PromiseFactoryInterface;
+use Spiral\Cycle\Mapper\ProxyFactoryInterface;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseOne;
 use Spiral\Cycle\Relation;
@@ -54,7 +54,7 @@ class MorphedHasOneRelation extends HasOneRelation
         $p = new PromiseOne($this->orm, $this->target, $scope);
 
         $m = $this->getSource();
-        if ($m instanceof PromiseFactoryInterface) {
+        if ($m instanceof ProxyFactoryInterface) {
             $p = $m->makeProxy($p);
         }
 

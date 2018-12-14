@@ -14,7 +14,7 @@ use Spiral\Cycle\Promise\PromiseInterface;
 /**
  * Provides mapper ability to initiate proxied version of it's entities.
  */
-interface PromiseFactoryInterface
+interface ProxyFactoryInterface
 {
     /**
      * Create entity proxy.

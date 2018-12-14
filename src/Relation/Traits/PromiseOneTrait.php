@@ -9,7 +9,7 @@
 namespace Spiral\Cycle\Relation\Traits;
 
 use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\PromiseFactoryInterface;
+use Spiral\Cycle\Mapper\ProxyFactoryInterface;
 use Spiral\Cycle\Promise\PromiseOne;
 
 trait PromiseOneTrait
@@ -34,7 +34,7 @@ trait PromiseOneTrait
         $p = new PromiseOne($this->orm, $this->target, $scope);
 
         $m = $this->getSource();
-        if ($m instanceof PromiseFactoryInterface) {
+        if ($m instanceof ProxyFactoryInterface) {
             $p = $m->makeProxy($p);
         }
 

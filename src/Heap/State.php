@@ -133,11 +133,11 @@ class State implements ConsumerInterface, ProducerInterface
     public function register(
         string $key,
         $value,
-        bool $update = false,
+        bool $fresh = false,
         int $stream = self::DATA
     ) {
-        if (!$update) {
-            $update = ($this->data[$key] ?? null) != $value;
+        if (!$fresh) {
+            $fresh = ($this->data[$key] ?? null) != $value;
         }
 
         $this->data[$key] = $value;
@@ -147,8 +147,8 @@ class State implements ConsumerInterface, ProducerInterface
             foreach ($this->consumers[$key] as $id => $consumer) {
                 /** @var ConsumerInterface $acc */
                 $acc = $consumer[0];
-                $acc->register($consumer[1], $value, $update, $consumer[2]);
-                $update = false;
+                $acc->register($consumer[1], $value, $fresh, $consumer[2]);
+                $fresh = false;
             }
         }
     }

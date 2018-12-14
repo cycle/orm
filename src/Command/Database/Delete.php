@@ -57,10 +57,10 @@ class Delete extends DatabaseCommand implements ScopeCarrierInterface
     public function register(
         string $key,
         $value,
-        bool $update = false,
+        bool $fresh = false,
         int $stream = self::DATA
     ) {
-        if ($update || !is_null($value)) {
+        if ($fresh || !is_null($value)) {
             $this->freeScope($key);
         }
 

@@ -35,7 +35,7 @@ final class Nil implements ContextCarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function register(string $key, $value, bool $update = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
     {
         // nothing to do
     }

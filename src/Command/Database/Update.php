@@ -102,7 +102,7 @@ class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCa
     /**
      * @inheritdoc
      */
-    public function register(string $key, $value, bool $update = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
     {
         if ($stream == self::SCOPE) {
             if (empty($value)) {
@@ -115,11 +115,11 @@ class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCa
             return;
         }
 
-        if ($update || !is_null($value)) {
+        if ($fresh || !is_null($value)) {
             $this->freeContext($key);
         }
 
-        if ($update) {
+        if ($fresh) {
             // we only accept context when context has changed to avoid un-necessary
             // update commands
             $this->setContext($key, $value);

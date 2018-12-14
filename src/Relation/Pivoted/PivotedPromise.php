@@ -16,6 +16,7 @@ use Spiral\Cycle\Parser\PivotedRootNode;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector;
 use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Selector\Loader\ManyToManyLoader;
 use Spiral\Cycle\Selector\SourceInterface;
@@ -87,25 +88,26 @@ class PivotedPromise implements PromiseInterface
             return $this->resolved;
         }
 
-        $mapper = $this->orm->getMapper($this->target);
-        if (!$mapper instanceof SourceInterface) {
+        $source = $this->orm->getMapper($this->target);
+        if (!$source instanceof SourceInterface) {
             throw new RelationException("ManyToMany relation can only work with SelectableInterface mappers");
         }
 
-        $query = $mapper->getSelector()->getLoader()->getQuery();
+        $selector = new Selector($this->orm, $this->target);
+        $query = $selector->getLoader()->getQuery();
 
         // responsible for all the scoping
         $loader = new ManyToManyLoader(
             $this->orm,
             $this->target,
-            $mapper->getTable(),
+            $source->getTable(),
             $this->relationSchema
         );
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'alias'      => $mapper->getTable(),
-            'pivotAlias' => $mapper->getTable() . '_pivot',
+            'alias'      => $source->getTable(),
+            'pivotAlias' => $source->getTable() . '_pivot',
             'method'     => JoinableLoader::POSTLOAD
         ]);
 

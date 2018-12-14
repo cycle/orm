@@ -14,5 +14,4 @@ namespace Spiral\Cycle\Mapper\Traits;
 trait SourceTrait
 {
 
-
 }

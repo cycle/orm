@@ -30,13 +30,13 @@ class PromiseOne implements PromiseInterface
     /**
      * @param ORMInterface $orm
      * @param string       $target
-     * @param array        $scope
+     * @param array        $queryScope
      */
-    public function __construct(ORMInterface $orm, string $target, array $scope)
+    public function __construct(ORMInterface $orm, string $target, array $queryScope)
     {
         $this->orm = $orm;
         $this->target = $target;
-        $this->scope = $scope;
+        $this->scope = $queryScope;
     }
 
     /**

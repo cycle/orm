@@ -8,7 +8,6 @@
 
 namespace Spiral\Cycle\Selector;
 
-use Spiral\Cycle\Selector;
 use Spiral\Database\DatabaseInterface;
 
 /**
@@ -32,14 +31,6 @@ interface SourceInterface
      * @return string
      */
     public function getTable(): string;
-
-    /**
-     * Get initial entity selector. Must include applied scope. Must never return existed entity.
-     *
-     * @deprecated
-     * @return Selector
-     */
-    public function getSelector(): Selector;
 
     /**
      * Return named Selector scope or return null.

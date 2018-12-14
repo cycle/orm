@@ -8,15 +8,21 @@
 
 namespace Spiral\Cycle\Promise;
 
+use Spiral\Cycle\Exception\RelationException;
+use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Selector;
+use Spiral\Cycle\Selector\SourceInterface;
 
 /**
  * Promises the selection of the
  */
 class PromiseMany implements PromiseInterface
 {
-    /** @var Selector|null */
-    private $selector;
+    /** @var ORMInterface */
+    private $orm;
+
+    /** @var string */
+    private $target;
 
     /** @var array */
     private $scope = [];
@@ -31,15 +37,22 @@ class PromiseMany implements PromiseInterface
     private $resolved = [];
 
     /**
-     * @param Selector $selector
-     * @param array    $scope
-     * @param array    $whereScope
-     * @param array    $orderBy
+     * @param ORMInterface $orm
+     * @param string       $target
+     * @param array        $queryScope
+     * @param array        $whereScope
+     * @param array        $orderBy
      */
-    public function __construct(Selector $selector, array $scope = [], array $whereScope = [], array $orderBy = [])
-    {
-        $this->selector = $selector;
-        $this->scope = $scope;
+    public function __construct(
+        ORMInterface $orm,
+        string $target,
+        array $queryScope = [],
+        array $whereScope = [],
+        array $orderBy = []
+    ) {
+        $this->orm = $orm;
+        $this->target = $target;
+        $this->scope = $queryScope;
         $this->whereScope = $whereScope;
         $this->orderBy = $orderBy;
     }
@@ -57,7 +70,7 @@ class PromiseMany implements PromiseInterface
      */
     public function __role(): string
     {
-        return $this->selector->getLoader()->getTarget();
+        return $this->target;
     }
 
     /**
@@ -73,16 +86,20 @@ class PromiseMany implements PromiseInterface
      */
     public function __resolve()
     {
-        if (is_null($this->selector)) {
+        if (is_null($this->orm)) {
             return $this->resolved;
         }
 
-        $this->resolved = $this->selector
-            ->where($this->scope + $this->whereScope)
-            ->orderBy($this->orderBy)
-            ->fetchAll();
+        $source = $this->orm->getMapper($this->target);
+        if (!$source instanceof SourceInterface) {
+            throw new RelationException("ManyToMany relation can only work with SelectableInterface mappers");
+        }
 
-        $this->selector = null;
+        $selector = new Selector($this->orm, $this->target);
+        $selector->where($this->scope + $this->whereScope)->orderBy($this->orderBy);
+
+        $this->resolved = $selector->fetchAll();
+        $this->orm = null;
 
         return $this->resolved;
     }

@@ -12,10 +12,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Promise\Collection\CollectionPromise;
 use Spiral\Cycle\Promise\PromiseMany;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Relation\HasManyRelation;
-use Spiral\Cycle\Promise\Collection\CollectionPromise;
 
 class MorphedHasManyRelation extends HasManyRelation
 {
@@ -44,7 +44,8 @@ class MorphedHasManyRelation extends HasManyRelation
         }
 
         $p = new PromiseMany(
-            $this->getSource()->getSelector(),
+            $this->orm,
+            $this->target,
             [
                 $this->outerKey => $innerKey,
                 $this->morphKey => $parentNode->getRole(),

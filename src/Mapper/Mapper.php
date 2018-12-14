@@ -16,23 +16,20 @@ use Spiral\Cycle\Command\Database\Insert;
 use Spiral\Cycle\Command\Database\Update;
 use Spiral\Cycle\Context\ConsumerInterface;
 use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
-use Spiral\Database\DatabaseInterface;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\Reflection;
 
-class Mapper implements MapperInterface, Selector\SourceInterface
+class Mapper extends Source implements MapperInterface
 {
     // system column to store entity type
     public const ENTITY_TYPE = '_type';
 
-    protected $orm;
-
+    /** @var string */
     protected $role;
-
-    protected $table;
 
     protected $primaryKey;
 
@@ -47,13 +44,19 @@ class Mapper implements MapperInterface, Selector\SourceInterface
 
     public function __construct(ORMInterface $orm, string $class)
     {
-        $this->orm = $orm;
+        parent::__construct(
+            $orm,
+            $orm->getSchema()->define($class, Schema::DATABASE),
+            $orm->getSchema()->define($class, Schema::TABLE)
+        );
+
         $this->role = $class;
 
+        // todo: make it better
         $this->columns = $this->orm->getSchema()->define($class, Schema::COLUMNS);
-        $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
         $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
         $this->children = $this->orm->getSchema()->define($class, Schema::CHILDREN) ?? [];
+
         $this->hydrator = new Reflection();
     }
 
@@ -65,59 +68,17 @@ class Mapper implements MapperInterface, Selector\SourceInterface
         return $this->orm->getSchema()->define($this->role, Schema::ALIAS);
     }
 
-    public function entityClass(array $data): string
+    /**
+     * @inheritdoc
+     */
+    public function getRepository(): RepositoryInterface
     {
-        $class = $this->role;
-        if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
-            $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
-        }
-
-        return $class;
+        return new Repository(new Selector($this->orm, $this->role));
     }
 
-    public function getDatabase(): DatabaseInterface
-    {
-        return $this->orm->getDBAL()->database($this->orm->getSchema()->define($this->role, Schema::DATABASE));
-    }
-
-    public function getTable(): string
-    {
-        return $this->table;
-    }
-
-    public function getSelector(): Selector
-    {
-        $selector = new Selector($this->orm, $this->role);
-        if (!empty($scope = $this->getScope(self::DEFAULT_SCOPE))) {
-            $selector = $selector->scope($scope);
-        }
-
-        return $selector;
-    }
-
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?Selector\ScopeInterface
-    {
-        return null;
-    }
-
-    public function hydrate($entity, array $data)
-    {
-        return $this->hydrator->hydrate($data, $entity);
-    }
-
-    public function extract($entity): array
-    {
-        return $this->hydrator->extract($entity);
-    }
-
-
-    public function getRepository(string $class = null): RepositoryInterface
-    {
-        // todo: child class select
-        return new Repository(new Selector($this->orm, $class ?? $this->role));
-    }
-
-
+    /**
+     * @inheritdoc
+     */
     public function init(array $data): array
     {
         $class = $this->entityClass($data);
@@ -125,82 +86,137 @@ class Mapper implements MapperInterface, Selector\SourceInterface
         return [new $class, $data];
     }
 
-    // todo: need state as INPUT!!!!
+    /**
+     * @inheritdoc
+     */
+    public function hydrate($entity, array $data)
+    {
+        return $this->hydrator->hydrate($data, $entity);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function extract($entity): array
+    {
+        return $this->hydrator->extract($entity);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function queueStore($entity, Node $node): ContextCarrierInterface
     {
-        //        /** @var Node $point */
-        //        $point = $this->orm->getHeap()->get($entity);
-        //        if (is_null($point)) {
-        //            // todo: do we need to track PK?
-        //            $point = new Node(
-        //                Node::NEW,
-        //                [],
-        //                $this->orm->getSchema()->define(get_class($entity), Schema::ALIAS)
-        //            );
-        //            $this->orm->getHeap()->attach($entity, $point);
-        //        }
-
-        if ($node == null || $node->getStatus() == Node::NEW) {
-            $cmd = $this->queueCreate($entity, $node);
+        if ($node->getStatus() == Node::NEW) {
+            $cmd = $this->queueCreate($entity, $node->getState());
             $node->getState()->setCommand($cmd);
 
             return $cmd;
         }
 
         $lastCommand = $node->getState()->getCommand();
-
         if (empty($lastCommand)) {
-            // todo: check multiple update commands working within the split (!)
-            return $this->queueUpdate($entity, $node);
+            return $this->queueUpdate($entity, $node->getState());
         }
 
-        if ($lastCommand instanceof Split) {
+        if ($lastCommand instanceof Split || $lastCommand instanceof Update) {
             return $lastCommand;
         }
 
-        // todo: do i like it?
-        $split = new Split($lastCommand, $this->queueUpdate($entity, $node));
+        // in cases where we have to update new entity we can merge two commands into one
+        $split = new Split($lastCommand, $this->queueUpdate($entity, $node->getState()));
         $node->getState()->setCommand($split);
 
         return $split;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function queueDelete($entity, Node $node): CommandInterface
     {
-        //        $node = $this->orm->getHeap()->get($entity);
-        //        if ($node == null) {
-        //            // todo: this should not happen, todo: need nullable delete
-        //            return new Nil();
-        //        }
-
-        // todo: delete relations as well
-
         $delete = new Delete($this->getDatabase(), $this->table);
-
-        $node->setStatus(Node::SCHEDULED_DELETE);
+        $node->getState()->setStatus(Node::SCHEDULED_DELETE);
         $node->getState()->decClaim();
 
         $delete->waitScope($this->primaryKey);
-        $node->forward($this->primaryKey, $delete, $this->primaryKey, true, ConsumerInterface::SCOPE);
-
-        // todo: this must be changed (CORRECT?) BUT HOW?
-        //  $delete->onComplete(function () use ($entity) {
-        //      $this->orm->getHeap()->detach($entity);
-        //  });
+        $node->forward(
+            $this->primaryKey,
+            $delete,
+            $this->primaryKey,
+            true,
+            ConsumerInterface::SCOPE
+        );
 
         return $delete;
     }
 
-    protected function getColumns($entity): array
+    /**
+     * Generate command or chain of commands needed to insert entity into the database.
+     *
+     * @param object $entity
+     * @param State  $state
+     * @return ContextCarrierInterface
+     */
+    protected function queueCreate($entity, State $state): ContextCarrierInterface
     {
-        return array_intersect_key($this->extract($entity), array_flip($this->columns));
+        $columns = $this->fetchColumns($entity);
+
+        // sync the state
+        $state->setStatus(Node::SCHEDULED_INSERT);
+        $state->setData($columns);
+
+        // todo: ID generation on client-side (!)
+        unset($columns[$this->primaryKey]);
+
+        $insert = new Insert($this->getDatabase(), $this->table, $columns);
+        $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
+
+        return $insert;
     }
 
-    // todo: state must not be null
-    protected function queueCreate($entity, Node &$state = null): ContextCarrierInterface
+    /**
+     * Generate command or chain of commands needed to update entity in the database.
+     *
+     * @param object $entity
+     * @param State  $state
+     * @return ContextCarrierInterface
+     */
+    protected function queueUpdate($entity, State $state): ContextCarrierInterface
     {
-        $columns = $this->getColumns($entity);
+        $data = $this->fetchColumns($entity);
 
+        // in a future mapper must support solid states
+        $changes = array_diff($data, $state->getData());
+        unset($changes[$this->primaryKey]);
+
+        $update = new Update($this->getDatabase(), $this->table, $changes);
+        $state->setStatus(Node::SCHEDULED_UPDATE);
+        $state->setData($changes);
+
+        // when update command is required for non created entity
+        $state->forward(
+            $this->primaryKey,
+            $update,
+            $this->primaryKey,
+            true,
+            ConsumerInterface::SCOPE
+        );
+
+        return $update;
+    }
+
+    /**
+     * Get entity columns.
+     *
+     * @param object $entity
+     * @return array
+     */
+    protected function fetchColumns($entity): array
+    {
+        $columns = array_intersect_key($this->extract($entity), array_flip($this->columns));
+
+        // todo: better?
         $class = get_class($entity);
         if ($class != $this->role) {
             // possibly children
@@ -209,44 +225,19 @@ class Mapper implements MapperInterface, Selector\SourceInterface
                     $columns[self::ENTITY_TYPE] = $alias;
                 }
             }
-
-            // todo: what is that?
-            // todo: exception
         }
 
-        // to the point
-        $state->setData($columns);
-
-        $state->setStatus(Node::SCHEDULED_INSERT);
-
-        // todo: this is questionable (what if ID not autogenerated)
-        unset($columns[$this->primaryKey]);
-
-        $insert = new Insert($this->getDatabase(), $this->table, $columns);
-
-        $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
-
-        return $insert;
+        return $columns;
     }
 
-    protected function queueUpdate($entity, Node $state): ContextCarrierInterface
+    // todo: polish
+    protected function entityClass(array $data): string
     {
-        $eData = $this->getColumns($entity);
-        $oData = $state->getData();
-        $cData = array_diff($eData, $oData);
+        $class = $this->role;
+        if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
+            $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
+        }
 
-        // todo: pack changes (???) depends on mode (USE ALL FOR NOW)
-
-        // todo: this part is weird
-        unset($cData[$this->primaryKey]);
-
-        $update = new Update($this->getDatabase(), $this->table, $cData);
-        $state->setStatus(Node::SCHEDULED_UPDATE);
-        $state->setData($cData);
-
-        // todo: scope prefix (call immediatelly?)
-        $state->forward($this->primaryKey, $update, $this->primaryKey, true, ConsumerInterface::SCOPE);
-
-        return $update;
+        return $class;
     }
 }

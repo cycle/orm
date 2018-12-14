@@ -53,13 +53,6 @@ interface ORMInterface
     public function getFactory(): FactoryInterface;
 
     /**
-     * Get associated DatabaseManager.
-     *
-     * @return DatabaseManager
-     */
-    public function getDBAL(): DatabaseManager;
-
-    /**
      * Get ORM relation and entity schema provider.
      *
      * @return SchemaInterface

@@ -19,13 +19,15 @@ interface SchemaInterface
     public const DATABASE     = 3;
     public const TABLE        = 4;
     public const PRIMARY_KEY  = 5;
-    public const CAPTURE_KEYS = 6;
+    public const FIND_BY_KEYS = 6;
     public const COLUMNS      = 7;
     public const COLUMN_TYPES = 8;
     public const SCHEMA       = 9;
     public const RELATIONS    = 10;
     public const EXTENDS      = 11;
     public const CHILDREN     = 12;
+
+    public function defines(string $role): bool;
 
     /**
      * Define schema value.

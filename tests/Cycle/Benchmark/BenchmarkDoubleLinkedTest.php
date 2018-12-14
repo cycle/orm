@@ -47,7 +47,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
                 Schema::DATABASE     => 'default',
                 Schema::TABLE        => 'cyclic',
                 Schema::PRIMARY_KEY  => 'id',
-                Schema::CAPTURE_KEYS => ['parent_id'],
+                Schema::FIND_BY_KEYS => ['parent_id'],
                 Schema::COLUMNS      => ['id', 'parent_id', 'name'],
                 Schema::SCHEMA       => [],
                 Schema::RELATIONS    => [

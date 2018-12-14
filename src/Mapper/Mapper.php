@@ -34,6 +34,9 @@ class Mapper extends Source implements MapperInterface
     /** @var string */
     private $role;
 
+    protected $orm;
+
+    protected $schema;
 
     protected $primaryKey;
 
@@ -48,8 +51,11 @@ class Mapper extends Source implements MapperInterface
 
     public function __construct(ORMInterface $orm, string $role)
     {
+        $this->orm = $orm;
+        $this->schema = $orm->getSchema();
+
         parent::__construct(
-            $orm,
+            $orm->getFactory(),
             $orm->getSchema()->define($role, Schema::DATABASE),
             $orm->getSchema()->define($role, Schema::TABLE)
         );
@@ -92,7 +98,9 @@ class Mapper extends Source implements MapperInterface
      */
     public function init(array $data): array
     {
-        $class = $this->entityClass($data);
+        $class = $this->resolveClass($data);
+
+        // filter data
 
         return [new $class, $data];
     }
@@ -205,7 +213,7 @@ class Mapper extends Source implements MapperInterface
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
 
-        // when update command is required for non created entity
+        // we are trying to update entity without PK right now
         $state->forward(
             $this->primaryKey,
             $update,
@@ -227,13 +235,13 @@ class Mapper extends Source implements MapperInterface
     {
         $columns = array_intersect_key($this->extract($entity), array_flip($this->columns));
 
-        // todo: better?
         $class = get_class($entity);
         if ($class != $this->role) {
-            // possibly children
+            // inheritance
             foreach ($this->children as $alias => $childClass) {
                 if ($childClass == $class) {
                     $columns[self::ENTITY_TYPE] = $alias;
+                    break;
                 }
             }
         }
@@ -241,8 +249,13 @@ class Mapper extends Source implements MapperInterface
         return $columns;
     }
 
-    // todo: polish
-    protected function entityClass(array $data): string
+    /**
+     * Classname to represent entity.
+     *
+     * @param array $data
+     * @return string
+     */
+    protected function resolveClass(array $data): string
     {
         $class = $this->role;
         if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {

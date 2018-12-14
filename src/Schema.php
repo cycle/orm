@@ -53,6 +53,11 @@ final class Schema implements SchemaInterface
         $this->schema = $this->schema + $add;
     }
 
+    public function defines(string $role): bool
+    {
+        return array_key_exists($role, $this->schema);
+    }
+
     /**
      * @inheritdoc
      */

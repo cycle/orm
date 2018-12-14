@@ -8,7 +8,7 @@
 
 namespace Spiral\Cycle\Mapper;
 
-use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\FactoryInterface;
 use Spiral\Cycle\Selector\ScopeInterface;
 use Spiral\Cycle\Selector\SourceInterface;
 use Spiral\Database\DatabaseInterface;
@@ -21,17 +21,17 @@ class Source implements SourceInterface
     /** @var string */
     private $table;
 
-    /** @var ORMInterface @internal */
-    protected $orm;
+    /** @var FactoryInterface @internal */
+    private $factory;
 
     /**
-     * @param ORMInterface $orm
-     * @param string       $database
-     * @param string       $table
+     * @param FactoryInterface $orm
+     * @param string           $database
+     * @param string           $table
      */
-    public function __construct(ORMInterface $orm, string $database, string $table)
+    public function __construct(FactoryInterface $orm, string $database, string $table)
     {
-        $this->orm = $orm;
+        $this->factory = $orm;
         $this->database = $database;
         $this->table = $table;
     }
@@ -41,7 +41,7 @@ class Source implements SourceInterface
      */
     public function getDatabase(): DatabaseInterface
     {
-        return $this->orm->getDBAL()->database($this->database);
+        return $this->factory->database($this->database);
     }
 
     /**

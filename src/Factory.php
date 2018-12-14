@@ -15,6 +15,8 @@ use Spiral\Cycle\Exception\FactoryException;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Relation\RelationInterface;
 use Spiral\Cycle\Selector\LoaderInterface;
+use Spiral\Database\DatabaseInterface;
+use Spiral\Database\DatabaseManager;
 
 class Factory implements FactoryInterface
 {
@@ -24,6 +26,9 @@ class Factory implements FactoryInterface
     /** @var CoreFactory */
     private $factory;
 
+    /** @var DatabaseManager */
+    private $dbal;
+
     /** @var ORMInterface */
     private $orm;
 
@@ -31,13 +36,23 @@ class Factory implements FactoryInterface
     private $schema;
 
     /**
+     * @param DatabaseManager  $dbal
      * @param RelationConfig   $config
      * @param CoreFactory|null $factory
      */
-    public function __construct(RelationConfig $config, CoreFactory $factory = null)
+    public function __construct(DatabaseManager $dbal, RelationConfig $config, CoreFactory $factory = null)
     {
+        $this->dbal = $dbal;
         $this->config = $config;
         $this->factory = $factory ?? new Container();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function database(string $name = null): DatabaseInterface
+    {
+        return $this->dbal->database($name);
     }
 
     /**

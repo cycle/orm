@@ -95,7 +95,7 @@ abstract class HasOnePromiseTest extends BaseTest
                 Schema::DATABASE     => 'default',
                 Schema::TABLE        => 'profile',
                 Schema::PRIMARY_KEY  => 'id',
-                Schema::CAPTURE_KEYS => ['user_id'],
+                Schema::FIND_BY_KEYS => ['user_id'],
                 Schema::COLUMNS      => ['id', 'user_id', 'image'],
                 Schema::SCHEMA       => [],
                 Schema::RELATIONS    => [

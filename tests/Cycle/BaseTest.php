@@ -13,6 +13,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\LogLevel;
+use Spiral\Cycle\Config\RelationConfig;
+use Spiral\Cycle\Factory;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORM;
 use Spiral\Cycle\Promise\Collection\CollectionPromise;
@@ -85,7 +87,10 @@ abstract class BaseTest extends TestCase
             $this->logger->display();
         }
 
-        $this->orm = new ORM($this->dbal);
+        $this->orm = new ORM(new Factory(
+            $this->dbal,
+            RelationConfig::getDefault()
+        ));
     }
 
     /**

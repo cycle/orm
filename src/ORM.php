@@ -11,13 +11,12 @@ namespace Spiral\Cycle;
 use Spiral\Cycle\Command\Branch\Nil;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Config\RelationConfig;
+use Spiral\Cycle\Exception\ORMException;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Database\DatabaseManager;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -27,14 +26,11 @@ class ORM implements ORMInterface
     // Memory section to store ORM schema.
     protected const MEMORY = 'orm.schema';
 
-    /** @var HeapInterface */
-    private $heap;
-
-    /** @var DatabaseManager */
-    private $dbal;
-
     /** @var FactoryInterface */
     private $factory;
+
+    /** @var HeapInterface */
+    private $heap;
 
     /** @var SchemaInterface */
     private $schema;
@@ -45,15 +41,16 @@ class ORM implements ORMInterface
     /** @var RelationMap[] */
     private $relmaps = [];
 
+    /** @var array */
+    private $indexes = [];
+
     /**
-     * @param DatabaseManager       $dbal
-     * @param FactoryInterface|null $factory
+     * @param FactoryInterface $factory
      */
-    public function __construct(DatabaseManager $dbal, FactoryInterface $factory = null)
+    public function __construct(FactoryInterface $factory)
     {
+        $this->factory = $factory;
         $this->heap = new Heap();
-        $this->dbal = $dbal;
-        $this->factory = $factory ?? new Factory(RelationConfig::makeDefault());
     }
 
     /**
@@ -80,7 +77,7 @@ class ORM implements ORMInterface
      */
     public function make(string $role, array $data, int $node = Node::NEW)
     {
-        $mapper = $this->getMapper($role);
+        $m = $this->getMapper($role);
 
         // unique entity identifier
         $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
@@ -91,19 +88,19 @@ class ORM implements ORMInterface
                 $node = $this->getHeap()->get($e);
 
                 // entity already been loaded, let's update it's relations with new context
-                return $mapper->hydrate($e, $this->getRelmap($role)->init($node, $data));
+                return $m->hydrate($e, $this->getRelmap($role)->init($node, $data));
             }
         }
 
         // init entity class and prepared (typecasted) data
-        list($e, $prepared) = $mapper->init($data);
+        list($e, $prepared) = $m->init($data);
 
-        $node = new Node($node, $prepared, $mapper->getRole());
+        $node = new Node($node, $prepared, $m->getRole());
 
-        $this->heap->attach($e, $node, $this->getIndexes($e));
+        $this->heap->attach($e, $node, $this->getIndexes($m->getRole()));
 
         // hydrate entity with it's data, relations and proxies
-        return $mapper->hydrate($e, $this->getRelmap($role)->init($node, $prepared));
+        return $m->hydrate($e, $this->getRelmap($role)->init($node, $prepared));
     }
 
     /**
@@ -123,14 +120,6 @@ class ORM implements ORMInterface
     public function getFactory(): FactoryInterface
     {
         return $this->factory;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getDBAL(): DatabaseManager
-    {
-        return $this->dbal;
     }
 
     /**
@@ -188,13 +177,13 @@ class ORM implements ORMInterface
         }
 
         // todo: resolve role
-        $entity = $this->resolveClass($entity);
+        $entity = $this->getRole($entity);
 
         if (isset($this->mappers[$entity])) {
             return $this->mappers[$entity];
         }
 
-        return $this->mappers[$entity] = $this->getFactory()->mapper($entity);
+        return $this->mappers[$entity] = $this->factory->mapper($entity);
     }
 
     /**
@@ -251,32 +240,52 @@ class ORM implements ORMInterface
     {
         $this->mappers = [];
         $this->relmaps = [];
+        $this->indexes = [];
     }
 
     /**
      * Get list of keys entity must be indexed in a Heap by.
      *
-     * @param object $entity
+     * @param string $role
      * @return array
      */
-    protected function getIndexes($entity): array
+    protected function getIndexes(string $role): array
     {
-        $pk = $this->schema->define(get_class($entity), Schema::PRIMARY_KEY);
-        $keys = $this->schema->define(get_class($entity), Schema::CAPTURE_KEYS) ?? [];
+        if (isset($this->indexes[$role])) {
+            return $this->indexes[$role];
+        }
 
-        return array_merge([$pk], $keys);
+        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+        $keys = $this->schema->define($role, Schema::FIND_BY_KEYS) ?? [];
+
+        return $this->indexes[$role] = array_merge([$pk], $keys);
     }
 
-    // todo: think about it
-    protected function resolveClass($entity): string
+    /**
+     * Get the role of a given entity.
+     *
+     * @param object|string $entity
+     * @return string
+     */
+    protected function getRole($entity): string
     {
-        //if ($entity instanceof PromiseInterface) {
-        // fallback to the promise class
-        //}
+        if ($entity instanceof PromiseInterface) {
+            return $entity->__role();
+        }
 
-        $entity = is_object($entity) ? get_class($entity) : $entity;
+        $class = is_object($entity) ? get_class($entity) : $entity;
 
-        return $this->getSchema()->define($entity, Schema::EXTENDS) ?? $entity;
+        if ($this->schema->defines($class)) {
+            // check if class is being inherited
+            return $this->schema->define($class, Schema::EXTENDS) ?? $class;
+        }
+
+        // use role associated with the node (for roles without specific class)
+        if (!empty($node = $this->heap->get($entity))) {
+            return $node->getRole();
+        }
+
+        throw new ORMException("Undefined class {$class}");
     }
 
     /**

@@ -546,7 +546,6 @@ abstract class ManyToManyConstrainsTest extends BaseTest
         $this->assertSame('another@world.com', $res[1]->email);
     }
 
-
     public function testLimitParentSelection()
     {
         $this->orm = $this->withTagSchema([]);

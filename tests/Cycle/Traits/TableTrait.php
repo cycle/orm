@@ -24,7 +24,6 @@ trait TableTrait
         $renderer = new Renderer();
         $renderer->renderColumns($schema, $columns, []);
 
-
         foreach ($fk as $column => $options) {
             $schema->foreignKey($column)->references($options['table'], $options['column']);
         }

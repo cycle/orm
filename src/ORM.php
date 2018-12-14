@@ -189,7 +189,7 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function queueStore($entity, int $mode = self::MODE_CASCADE): ContextCarrierInterface
+    public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
     {
         if ($entity instanceof PromiseInterface) {
             // we do not expect to store promises
@@ -206,7 +206,7 @@ class ORM implements ORMInterface
         }
 
         $cmd = $m->queueStore($entity, $node);
-        if (!$mode == self::MODE_CASCADE) {
+        if (!$mode == TransactionInterface::MODE_CASCADE) {
             return $cmd;
         }
 
@@ -222,7 +222,7 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function queueDelete($entity, int $mode = self::MODE_CASCADE): CommandInterface
+    public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
     {
         $node = $this->heap->get($entity);
         if ($entity instanceof PromiseInterface || is_null($node)) {

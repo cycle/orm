@@ -19,10 +19,6 @@ use Spiral\Cycle\Mapper\MapperInterface;
  */
 interface ORMInterface
 {
-    // how to store/delete entity
-    public const MODE_CASCADE     = 0;
-    public const MODE_ENTITY_ONLY = 1;
-
     /**
      * Get entity from the Heap or automatically load it using it's mapper.
      *
@@ -80,7 +76,7 @@ interface ORMInterface
      * @param int    $mode
      * @return ContextCarrierInterface
      */
-    public function queueStore($entity, int $mode = self::MODE_CASCADE): ContextCarrierInterface;
+    public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface;
 
     /**
      * Generate commands required to delete the entity.
@@ -89,5 +85,5 @@ interface ORMInterface
      * @param int    $mode
      * @return CommandInterface
      */
-    public function queueDelete($entity, int $mode = self::MODE_CASCADE): CommandInterface;
+    public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface;
 }

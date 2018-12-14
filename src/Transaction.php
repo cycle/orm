@@ -45,7 +45,7 @@ final class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    public function persist($entity, int $mode = ORMInterface::MODE_CASCADE)
+    public function persist($entity, int $mode = self::MODE_CASCADE)
     {
         if ($this->known->offsetExists($entity)) {
             return;
@@ -58,7 +58,7 @@ final class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    public function delete($entity, int $mode = ORMInterface::MODE_CASCADE)
+    public function delete($entity, int $mode = self::MODE_CASCADE)
     {
         if ($this->known->offsetExists($entity)) {
             return;

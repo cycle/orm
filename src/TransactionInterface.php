@@ -13,19 +13,25 @@ namespace Spiral\Cycle;
  */
 interface TransactionInterface
 {
+    // how to store/delete entity
+    public const MODE_CASCADE     = 0;
+    public const MODE_ENTITY_ONLY = 1;
+
     /**
      * Persist the entity.
      *
      * @param object $entity
+     * @param int    $mode
      */
-    public function persist($entity);
+    public function persist($entity, int $mode = self::MODE_CASCADE);
 
     /**
      * Delete entity from the database.
      *
      * @param object $entity
+     * @param int    $mode
      */
-    public function delete($entity);
+    public function delete($entity, int $mode = self::MODE_CASCADE);
 
     /**
      * Execute all nested commands in transaction, if failed - transaction MUST automatically

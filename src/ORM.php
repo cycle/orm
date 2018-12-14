@@ -269,10 +269,6 @@ class ORM implements ORMInterface
      */
     protected function getRole($entity): string
     {
-        if ($entity instanceof PromiseInterface) {
-            return $entity->__role();
-        }
-
         $class = is_object($entity) ? get_class($entity) : $entity;
 
         if ($this->schema->defines($class)) {

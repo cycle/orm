@@ -50,11 +50,11 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [$e, $e];
         }
 
-        $mapper = $this->getSource($target);
-        if ($mapper instanceof PromiseFactoryInterface) {
-            $p = $mapper->initProxy($scope);
-        } else {
-            $p = new PromiseOne($this->orm, $target, $scope);
+        $p = new PromiseOne($this->orm, $target, $scope);
+
+        $m = $this->getSource($target);
+        if ($m instanceof PromiseFactoryInterface) {
+            $p = $m->initProxy($p);
         }
 
         return [$p, $p];

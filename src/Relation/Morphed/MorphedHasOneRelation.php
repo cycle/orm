@@ -51,11 +51,11 @@ class MorphedHasOneRelation extends HasOneRelation
             $this->morphKey => $parentNode->getRole()
         ];
 
-        $mapper = $this->getSource();
-        if ($mapper instanceof PromiseFactoryInterface) {
-            $p = $mapper->initProxy($scope);
-        } else {
-            $p = new PromiseOne($this->orm, $this->target, $scope);
+        $p = new PromiseOne($this->orm, $this->target, $scope);
+
+        $m = $this->getSource();
+        if ($m instanceof PromiseFactoryInterface) {
+            $p = $m->initProxy($p);
         }
 
         return [$p, $p];

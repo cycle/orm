@@ -16,7 +16,7 @@ interface FactoryInterface
 {
     public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
 
-    public function mapper(string $class): MapperInterface;
+    public function mapper(string $role): MapperInterface;
 
     public function loader(string $class, string $relation): LoaderInterface;
 

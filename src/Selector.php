@@ -59,10 +59,10 @@ class Selector implements \IteratorAggregate, \Countable
     /**
      * Create new Selector with applied scope.
      *
-     * @param ScopeInterface $scope
+     * @param ScopeInterface|null $scope
      * @return Selector
      */
-    public function scope(ScopeInterface $scope): self
+    public function scope(ScopeInterface $scope = null): self
     {
         $this->loader = $this->loader->withScope($scope);
 

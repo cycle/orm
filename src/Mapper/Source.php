@@ -15,14 +15,14 @@ use Spiral\Database\DatabaseInterface;
 
 class Source implements SourceInterface
 {
+    /** @var string */
+    private $database;
+
+    /** @var string */
+    private $table;
+
     /** @var ORMInterface @internal */
     protected $orm;
-
-    /** @var string */
-    protected $database;
-
-    /** @var string */
-    protected $table;
 
     /**
      * @param ORMInterface $orm

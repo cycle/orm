@@ -55,12 +55,12 @@ class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function mapper(string $class): MapperInterface
+    public function mapper(string $role): MapperInterface
     {
-        return $this->factory->make($this->getSchema()->define($class, Schema::MAPPER), [
+        return $this->factory->make($this->getSchema()->define($role, Schema::MAPPER), [
             'orm'    => $this->orm,
-            'class'  => $class,
-            'schema' => $this->getSchema()->define($class, Schema::SCHEMA)
+            'role'   => $role,
+            'schema' => $this->getSchema()->define($role, Schema::SCHEMA)
         ]);
     }
 

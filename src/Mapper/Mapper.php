@@ -28,8 +28,12 @@ class Mapper extends Source implements MapperInterface
     // system column to store entity type
     public const ENTITY_TYPE = '_type';
 
+    /** @var null|RepositoryInterface */
+    private $repository;
+
     /** @var string */
-    protected $role;
+    private $role;
+
 
     protected $primaryKey;
 
@@ -42,20 +46,20 @@ class Mapper extends Source implements MapperInterface
      */
     private $hydrator;
 
-    public function __construct(ORMInterface $orm, string $class)
+    public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct(
             $orm,
-            $orm->getSchema()->define($class, Schema::DATABASE),
-            $orm->getSchema()->define($class, Schema::TABLE)
+            $orm->getSchema()->define($role, Schema::DATABASE),
+            $orm->getSchema()->define($role, Schema::TABLE)
         );
 
-        $this->role = $class;
+        $this->role = $role;
 
         // todo: make it better
-        $this->columns = $this->orm->getSchema()->define($class, Schema::COLUMNS);
-        $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
-        $this->children = $this->orm->getSchema()->define($class, Schema::CHILDREN) ?? [];
+        $this->columns = $this->orm->getSchema()->define($role, Schema::COLUMNS);
+        $this->primaryKey = $this->orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $this->children = $this->orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
 
         $this->hydrator = new Reflection();
     }
@@ -73,7 +77,14 @@ class Mapper extends Source implements MapperInterface
      */
     public function getRepository(): RepositoryInterface
     {
-        return new Repository(new Selector($this->orm, $this->role));
+        if (!empty($this->repository)) {
+            return $this->repository;
+        }
+
+        $selector = new Selector($this->orm, $this->role);
+        $selector->scope($this->getScope(self::DEFAULT_SCOPE));
+
+        return $this->repository = new Repository($selector);
     }
 
     /**
@@ -135,7 +146,7 @@ class Mapper extends Source implements MapperInterface
      */
     public function queueDelete($entity, Node $node): CommandInterface
     {
-        $delete = new Delete($this->getDatabase(), $this->table);
+        $delete = new Delete($this->getDatabase(), $this->getTable());
         $node->getState()->setStatus(Node::SCHEDULED_DELETE);
         $node->getState()->decClaim();
 
@@ -169,7 +180,7 @@ class Mapper extends Source implements MapperInterface
         // todo: ID generation on client-side (!)
         unset($columns[$this->primaryKey]);
 
-        $insert = new Insert($this->getDatabase(), $this->table, $columns);
+        $insert = new Insert($this->getDatabase(), $this->getTable(), $columns);
         $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
 
         return $insert;
@@ -190,7 +201,7 @@ class Mapper extends Source implements MapperInterface
         $changes = array_diff($data, $state->getData());
         unset($changes[$this->primaryKey]);
 
-        $update = new Update($this->getDatabase(), $this->table, $changes);
+        $update = new Update($this->getDatabase(), $this->getTable(), $changes);
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
 

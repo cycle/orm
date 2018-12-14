@@ -224,7 +224,6 @@ abstract class HasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-
     public function testOrderedAndWhereReversedPromised()
     {
         $this->orm = $this->withCommentsSchema([

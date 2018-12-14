@@ -80,9 +80,10 @@ class ManyToManyLoader extends JoinableLoader
                 $this->pivotKey(Relation::THOUGHT_INNER_KEY),
                 new Parameter($outerKeys)
             );
-
-            $this->configureWindow($query, $this->options['orderBy']);
         }
+
+        // order and where window configuration
+        $this->configureWindow($query, $this->options['orderBy']);
 
         // when relation is joined we will use ON statements, when not - normal WHERE
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';

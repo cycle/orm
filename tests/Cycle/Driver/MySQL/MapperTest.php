@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\MySQL;
+namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class MapperTest extends \Spiral\Cycle\Tests\MapperTest
+class MapperTest extends \Spiral\Cycle\Tests\MapperTest 
 { 
     const DRIVER = "mysql"; 
 }

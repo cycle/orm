@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\Postgres;
+namespace Spiral\Cycle\Tests\Driver\Postgres; 
 
-class LinkedTreeTest extends \Spiral\Cycle\Tests\LinkedTreeTest
+class LinkedTreeTest extends \Spiral\Cycle\Tests\LinkedTreeTest 
 { 
     const DRIVER = "postgres"; 
 }

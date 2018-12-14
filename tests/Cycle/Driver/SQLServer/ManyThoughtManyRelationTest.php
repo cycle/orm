@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\SQLServer;
+namespace Spiral\Cycle\Tests\Driver\SQLServer; 
 
-class ManyThoughtManyRelationTest extends \Spiral\Cycle\Tests\ManyThoughtManyRelationTest
+class ManyThoughtManyRelationTest extends \Spiral\Cycle\Tests\ManyThoughtManyRelationTest 
 { 
     const DRIVER = "sqlserver"; 
 }

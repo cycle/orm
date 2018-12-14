@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\Postgres;
+namespace Spiral\Cycle\Tests\Driver\Postgres; 
 
-class TableRendererTest extends \Spiral\Cycle\Tests\TableRendererTest
+class TableRendererTest extends \Spiral\Cycle\Tests\TableRendererTest 
 { 
     const DRIVER = "postgres"; 
 }

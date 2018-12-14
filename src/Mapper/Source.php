@@ -57,7 +57,6 @@ class Source implements SourceInterface
      */
     public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface
     {
-        // todo: implement
         return null;
     }
 }

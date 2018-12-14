@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\MySQL;
+namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class HasOneCyclicTest extends \Spiral\Cycle\Tests\HasOneCyclicTest
+class HasOneCyclicTest extends \Spiral\Cycle\Tests\HasOneCyclicTest 
 { 
     const DRIVER = "mysql"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\SQLServer;
+namespace Spiral\Cycle\Tests\Driver\SQLServer; 
 
-class MorphedHasManyRelationTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyRelationTest
+class MorphedHasManyRelationTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyRelationTest 
 { 
     const DRIVER = "sqlserver"; 
 }

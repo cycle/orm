@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\SQLite;
+namespace Spiral\Cycle\Tests\Driver\SQLite; 
 
-class HasManyPromiseTest extends \Spiral\Cycle\Tests\HasManyPromiseTest
+class HasManyPromiseTest extends \Spiral\Cycle\Tests\HasManyPromiseTest 
 { 
     const DRIVER = "sqlite"; 
 }

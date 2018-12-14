@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\Postgres;
+namespace Spiral\Cycle\Tests\Driver\Postgres; 
 
-class BelongsToRelationTest extends \Spiral\Cycle\Tests\BelongsToRelationTest
+class BelongsToRelationTest extends \Spiral\Cycle\Tests\BelongsToRelationTest 
 { 
     const DRIVER = "postgres"; 
 }

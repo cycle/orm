@@ -21,7 +21,7 @@ if (!BaseTest::$config['benchmark']) {
     return;
 }
 
-class BenchmarkDoubleLinkedTest extends BaseTest
+abstract class BenchmarkDoubleLinkedTest extends BaseTest
 {
     use TableTrait;
 

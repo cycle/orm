@@ -22,20 +22,20 @@ $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
 
 $databases = [
     'sqlite'    => [
-        'namespace' => 'Spiral\ORM\Tests\Driver\SQLite',
-        'directory' => __DIR__ . '/ORM/Driver/SQLite/'
+        'namespace' => 'Spiral\Cycle\Tests\Driver\SQLite',
+        'directory' => __DIR__ . '/Cycle/Driver/SQLite/'
     ],
     'mysql'     => [
-        'namespace' => 'Spiral\ORM\Tests\Driver\MySQL',
-        'directory' => __DIR__ . '/ORM/Driver/MySQL/'
+        'namespace' => 'Spiral\Cycle\Tests\Driver\MySQL',
+        'directory' => __DIR__ . '/Cycle/Driver/MySQL/'
     ],
     'postgres'  => [
-        'namespace' => 'Spiral\ORM\Tests\Driver\Postgres',
-        'directory' => __DIR__ . '/ORM/Driver/Postgres/'
+        'namespace' => 'Spiral\Cycle\Tests\Driver\Postgres',
+        'directory' => __DIR__ . '/Cycle/Driver/Postgres/'
     ],
     'sqlserver' => [
-        'namespace' => 'Spiral\ORM\Tests\Driver\SQLServer',
-        'directory' => __DIR__ . '/ORM/Driver/SQLServer/'
+        'namespace' => 'Spiral\Cycle\Tests\Driver\SQLServer',
+        'directory' => __DIR__ . '/Cycle/Driver/SQLServer/'
     ]
 ];
 

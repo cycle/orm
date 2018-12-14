@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\SQLite;
+namespace Spiral\Cycle\Tests\Driver\SQLite; 
 
-class TableInheritanceTest extends \Spiral\Cycle\Tests\TableInheritanceTest
+class TableInheritanceTest extends \Spiral\Cycle\Tests\TableInheritanceTest 
 { 
     const DRIVER = "sqlite"; 
 }

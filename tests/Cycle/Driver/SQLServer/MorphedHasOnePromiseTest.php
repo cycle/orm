@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\SQLServer;
+namespace Spiral\Cycle\Tests\Driver\SQLServer; 
 
-class MorphedHasOnePromiseTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasOnePromiseTest
+class MorphedHasOnePromiseTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasOnePromiseTest 
 { 
     const DRIVER = "sqlserver"; 
 }

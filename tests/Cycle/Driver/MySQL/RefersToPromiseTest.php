@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\MySQL;
+namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class RefersToPromiseTest extends \Spiral\Cycle\Tests\RefersToPromiseTest
+class RefersToPromiseTest extends \Spiral\Cycle\Tests\RefersToPromiseTest 
 { 
     const DRIVER = "mysql"; 
 }

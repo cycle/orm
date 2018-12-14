@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\MySQL;
+namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class SelectorTest extends \Spiral\Cycle\Tests\SelectorTest
+class SelectorTest extends \Spiral\Cycle\Tests\SelectorTest 
 { 
     const DRIVER = "mysql"; 
 }

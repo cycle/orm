@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\MySQL;
+namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class MorphedHasOnePromiseTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasOnePromiseTest
+class MorphedHasOnePromiseTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasOnePromiseTest 
 { 
     const DRIVER = "mysql"; 
 }

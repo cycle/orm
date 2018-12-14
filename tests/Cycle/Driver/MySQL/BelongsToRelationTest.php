@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Spiral\Cycle\Tests\Driver\MySQL;
+namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class BelongsToRelationTest extends \Spiral\Cycle\Tests\BelongsToRelationTest
+class BelongsToRelationTest extends \Spiral\Cycle\Tests\BelongsToRelationTest 
 { 
     const DRIVER = "mysql"; 
 }

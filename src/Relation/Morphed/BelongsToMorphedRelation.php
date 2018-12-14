@@ -54,7 +54,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
 
         $m = $this->getSource($target);
         if ($m instanceof PromiseFactoryInterface) {
-            $p = $m->initProxy($p);
+            $p = $m->makeProxy($p);
         }
 
         return [$p, $p];

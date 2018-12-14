@@ -24,5 +24,5 @@ interface PromiseFactoryInterface
      *
      * @throws MapperException
      */
-    public function initProxy(PromiseInterface $promise): ?PromiseInterface;
+    public function makeProxy(PromiseInterface $promise): ?PromiseInterface;
 }

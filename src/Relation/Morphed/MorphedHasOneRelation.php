@@ -55,7 +55,7 @@ class MorphedHasOneRelation extends HasOneRelation
 
         $m = $this->getSource();
         if ($m instanceof PromiseFactoryInterface) {
-            $p = $m->initProxy($p);
+            $p = $m->makeProxy($p);
         }
 
         return [$p, $p];

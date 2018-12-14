@@ -8,7 +8,6 @@
 
 namespace Spiral\Cycle\Relation;
 
-use Spiral\Database\DatabaseInterface;
 use Spiral\Cycle\Command\Branch\Sequence;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface as CC;
@@ -21,6 +20,7 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Relation\Pivoted;
+use Spiral\Database\DatabaseInterface;
 
 class ManyToManyRelation extends AbstractRelation
 {

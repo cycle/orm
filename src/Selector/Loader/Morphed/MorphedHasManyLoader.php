@@ -8,11 +8,11 @@
 
 namespace Spiral\Cycle\Selector\Loader\Morphed;
 
-use Spiral\Database\Query\SelectQuery;
-use Spiral\Cycle\Selector\Loader\HasManyLoader;
-use Spiral\Cycle\Selector\Traits\WhereTrait;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector\Loader\HasManyLoader;
+use Spiral\Cycle\Selector\Traits\WhereTrait;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Creates an additional query constrain based on parent entity alias.

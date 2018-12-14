@@ -28,7 +28,7 @@ class BelongsToLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'scope' => SourceInterface::DEFAULT_SCOPE,
+        'scope'  => SourceInterface::DEFAULT_SCOPE,
         'method' => self::POSTLOAD,
         'minify' => true,
         'alias'  => null,

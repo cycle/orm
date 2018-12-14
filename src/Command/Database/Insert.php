@@ -8,7 +8,6 @@
 
 namespace Spiral\Cycle\Command\Database;
 
-use Spiral\Database\DatabaseInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Command\DatabaseCommand;
 use Spiral\Cycle\Command\Traits\ContextTrait;
@@ -16,6 +15,7 @@ use Spiral\Cycle\Command\Traits\ErrorTrait;
 use Spiral\Cycle\Context\ConsumerInterface;
 use Spiral\Cycle\Context\ProducerInterface;
 use Spiral\Cycle\Exception\CommandException;
+use Spiral\Database\DatabaseInterface;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.

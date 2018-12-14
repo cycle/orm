@@ -8,7 +8,6 @@
 
 namespace Spiral\Cycle\Command\Database;
 
-use Spiral\Database\DatabaseInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Command\DatabaseCommand;
 use Spiral\Cycle\Command\ScopeCarrierInterface;
@@ -16,6 +15,7 @@ use Spiral\Cycle\Command\Traits\ContextTrait;
 use Spiral\Cycle\Command\Traits\ErrorTrait;
 use Spiral\Cycle\Command\Traits\ScopeTrait;
 use Spiral\Cycle\Exception\CommandException;
+use Spiral\Database\DatabaseInterface;
 
 /**
  * Update data CAN be modified by parent commands using context.

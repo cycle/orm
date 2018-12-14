@@ -8,8 +8,8 @@
 
 namespace Spiral\Cycle\Selector\Traits;
 
-use Spiral\Database\Query\SelectQuery;
 use Spiral\Cycle\Selector\QueryWrapper;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to configure relation specific where conditions.

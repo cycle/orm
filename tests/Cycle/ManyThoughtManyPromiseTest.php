@@ -224,8 +224,8 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
         $this->captureReadQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertNumReads(0);
@@ -262,8 +262,8 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertNumWrites(6);
@@ -271,8 +271,8 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertNumWrites(0);

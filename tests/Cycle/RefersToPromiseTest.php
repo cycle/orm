@@ -180,7 +180,7 @@ abstract class RefersToPromiseTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($p);
+        $tr->persist($p);
         $tr->run();
         $this->assertNumWrites(0);
     }
@@ -202,7 +202,7 @@ abstract class RefersToPromiseTest extends BaseTest
         $this->captureReadQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($np);
+        $tr->persist($np);
         $tr->run();
 
         $this->assertNumWrites(1);

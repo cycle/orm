@@ -99,7 +99,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->assertNumWrites(3);
@@ -125,7 +125,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->assertNumWrites(3);
@@ -137,7 +137,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u2);
+        $tr->persist($u2);
         $tr->run();
         $this->assertNumWrites(1);
 
@@ -156,7 +156,7 @@ abstract class RefersToRelationTest extends BaseTest
 
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $c = new Comment();
@@ -167,7 +167,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->assertNumWrites(2);
@@ -194,7 +194,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->lastComment = $c;
         try {
             $tr = new Transaction($this->orm);
-            $tr->store($u);
+            $tr->persist($u);
             $tr->run();
         } catch (\Throwable $e) {
             throw $e;
@@ -214,7 +214,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->comments->add($c);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -227,7 +227,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->lastComment = $u->comments[0];
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $s = new Selector($this->orm, User::class);
@@ -251,7 +251,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(3);
 
@@ -267,7 +267,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(1);
 

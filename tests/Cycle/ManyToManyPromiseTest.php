@@ -193,8 +193,8 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertNumReads(0);
@@ -223,8 +223,8 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $b->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);

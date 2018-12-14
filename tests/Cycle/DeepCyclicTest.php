@@ -86,11 +86,11 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c1);
-        $tr->store($c2);
-        $tr->store($c3);
-        $tr->store($c4);
-        $tr->store($c5);
+        $tr->persist($c1);
+        $tr->persist($c2);
+        $tr->persist($c3);
+        $tr->persist($c4);
+        $tr->persist($c5);
         $tr->run();
 
         // 5 inserts and 2 loops
@@ -138,8 +138,8 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c1);
-        $tr->store($c2);
+        $tr->persist($c1);
+        $tr->persist($c2);
         $tr->run();
 
         // 5 inserts and 2 loops
@@ -187,8 +187,8 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c5);
-        $tr->store($c4);
+        $tr->persist($c5);
+        $tr->persist($c4);
         $tr->run();
 
         // 5 inserts and 2 loops
@@ -238,11 +238,11 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c1);
-        $tr->store($c2);
-        $tr->store($c3);
-        $tr->store($c4);
-        $tr->store($c5);
+        $tr->persist($c1);
+        $tr->persist($c2);
+        $tr->persist($c3);
+        $tr->persist($c4);
+        $tr->persist($c5);
         $tr->run();
 
         // 5 inserts and 2 loops

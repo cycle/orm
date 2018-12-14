@@ -80,8 +80,8 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c1);
-        $tr->store($c2);
+        $tr->persist($c1);
+        $tr->persist($c2);
         $tr->run();
 
         // 2 inserts + 1 update
@@ -98,8 +98,8 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertNumWrites(0);
@@ -121,8 +121,8 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c1);
-        $tr->store($c2);
+        $tr->persist($c1);
+        $tr->persist($c2);
         $tr->run();
 
         // 2 inserts, 2 updates
@@ -149,7 +149,7 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c1);
+        $tr->persist($c1);
         $tr->run();
         $this->assertNumWrites(2);
 

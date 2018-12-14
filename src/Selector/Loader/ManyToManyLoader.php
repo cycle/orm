@@ -8,16 +8,17 @@
 
 namespace Spiral\Cycle\Selector\Loader;
 
-use Spiral\Database\Injection\Parameter;
-use Spiral\Database\Query\SelectQuery;
+use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\PivotedNode;
-use Spiral\Cycle\Selector\JoinableLoader;
-use Spiral\Cycle\Selector\Traits\ConstrainTrait;
-use Spiral\Cycle\Selector\Traits\WhereTrait;
-use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Selector\SourceInterface;
+use Spiral\Cycle\Selector\Traits\ConstrainTrait;
+use Spiral\Cycle\Selector\Traits\WhereTrait;
+use Spiral\Database\Injection\Parameter;
+use Spiral\Database\Query\SelectQuery;
 
 class ManyToManyLoader extends JoinableLoader
 {
@@ -29,14 +30,15 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'method' => self::POSTLOAD,
-        'minify' => true,
-        'alias' => null,
+        'scope'      => SourceInterface::DEFAULT_SCOPE,
+        'method'     => self::POSTLOAD,
+        'minify'     => true,
+        'alias'      => null,
         'pivotAlias' => null,
-        'using' => null,
-        'where' => null,
+        'using'      => null,
+        'where'      => null,
         'wherePivot' => null,
-        'orderBy' => [],
+        'orderBy'    => [],
     ];
 
     /**

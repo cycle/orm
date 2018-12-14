@@ -37,9 +37,13 @@ class RootLoader extends AbstractLoader
     {
         parent::__construct($orm, $target);
 
-        $this->query = $this->getSource()->getDatabase()->select()->from(
-            sprintf("%s AS %s", $this->define(Schema::TABLE), $this->getAlias())
+        $source = $this->getSource();
+
+        $this->query = $source->getDatabase()->select()->from(
+            sprintf("%s AS %s", $source->getTable(), $this->getAlias())
         );
+
+        $this->scope = $source->getScope(SourceInterface::DEFAULT_SCOPE);
     }
 
     /**
@@ -122,7 +126,6 @@ class RootLoader extends AbstractLoader
      */
     public function __clone()
     {
-        // todo: test scopes not being applied multiple times
         $this->query = clone $this->query;
         parent::__clone();
     }

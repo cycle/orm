@@ -13,6 +13,7 @@ use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Selector\Traits\ChainTrait;
+use Spiral\Cycle\Selector\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -36,7 +37,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait;
+    use ChainTrait, ScopeTrait;
 
     // Loading methods for data loaders.
     public const INLOAD    = 1;
@@ -51,7 +52,9 @@ abstract class AbstractLoader implements LoaderInterface
     protected $target;
 
     /** @var array */
-    protected $options = [];
+    protected $options = [
+        'scope' => SourceInterface::DEFAULT_SCOPE,
+    ];
 
     /** @var LoaderInterface[] */
     protected $load = [];
@@ -87,7 +90,12 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function getSource(): SourceInterface
     {
-        return $this->orm->getMapper($this->target);
+        $mapper = $this->orm->getMapper($this->target);
+        if (!$mapper instanceof SourceInterface) {
+            throw new LoaderException("Unable to use mapper " . get_class($mapper) . " as SQL source");
+        }
+
+        return $mapper;
     }
 
     /**
@@ -118,6 +126,10 @@ abstract class AbstractLoader implements LoaderInterface
         $loader = clone $this;
         $loader->parent = $parent;
         $loader->options = $options + $this->options;
+
+        if (!empty($options['scope'])) {
+            $this->scope = $this->getSource()->getScope($options['scope']);
+        }
 
         return $loader;
     }
@@ -273,6 +285,10 @@ abstract class AbstractLoader implements LoaderInterface
 
         foreach ($this->join as $loader) {
             $query = $loader->configureQuery(clone $query);
+        }
+
+        if (!empty($this->scope)) {
+            $this->scope->apply($query, $this);
         }
 
         return $query;

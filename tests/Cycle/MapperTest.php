@@ -155,13 +155,13 @@ abstract class MapperTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -180,7 +180,7 @@ abstract class MapperTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
 
         $e->balance = 400;
 

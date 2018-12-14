@@ -11,11 +11,9 @@ namespace Spiral\Cycle\Selector;
 use Spiral\Database\Query\SelectQuery;
 
 /**
- * Simple where and orderBy scope for the selections.
- *
- * @todo i want other scopes as well
+ * Provides the ability to scope query and load necessary relations into the loader.
  */
-class Scope implements ScopeInterface
+class QueryScope implements ScopeInterface
 {
     /** @var array */
     private $where = [];
@@ -36,17 +34,8 @@ class Scope implements ScopeInterface
     /**
      * @inheritdoc
      */
-    public function apply(SelectQuery $query): SelectQuery
+    public function apply(SelectQuery $query, AbstractLoader $loader)
     {
-        return $query->where($this->where)->orderBy($this->orderBy);
+        $query->where($this->where)->orderBy($this->orderBy);
     }
-
-    public function loads(): array
-    {
-    }
-
-    public function with(): array
-    {
-    }
-
 }

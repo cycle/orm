@@ -328,8 +328,8 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
         $this->assertNumWrites(0);
     }
@@ -344,15 +344,15 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -375,16 +375,16 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -410,14 +410,14 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -441,14 +441,14 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($p);
+        $tr->persist($p);
         $tr->run();
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($p);
+        $tr->persist($p);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -471,8 +471,8 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($p);
+        $tr->persist($u);
+        $tr->persist($p);
         $tr->run();
         $this->assertNumWrites(2);
 
@@ -495,16 +495,16 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($p);
+        $tr->persist($u);
+        $tr->persist($p);
         $tr->run();
         $this->assertNumWrites(2);
 
         // no changes expected
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($p);
+        $tr->persist($u);
+        $tr->persist($p);
         $tr->run();
         $this->assertNumWrites(0);
 

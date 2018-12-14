@@ -63,22 +63,22 @@ interface MapperInterface
     /**
      * Initiate chain of commands require to store object and it's data into persistent storage.
      *
-     * @param Node   $node
      * @param object $entity
+     * @param Node   $node
      * @return ContextCarrierInterface
      *
      * @throws MapperException
      */
-    public function queueStore(Node $node, $entity): ContextCarrierInterface;
+    public function queueStore($entity, Node $node): ContextCarrierInterface;
 
     /**
      * Initiate sequence of of commands required to delete object from the persistent storage.
      *
-     * @param Node   $node
      * @param object $entity
+     * @param Node   $node
      * @return CommandInterface
      *
      * @throws MapperException
      */
-    public function queueDelete(Node $node, $entity): CommandInterface;
+    public function queueDelete($entity, Node $node): CommandInterface;
 }

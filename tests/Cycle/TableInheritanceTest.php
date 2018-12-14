@@ -121,8 +121,8 @@ abstract class TableInheritanceTest extends BaseTest
         $a->permissions = '~';
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($a);
+        $tr->persist($u);
+        $tr->persist($a);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);

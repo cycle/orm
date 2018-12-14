@@ -8,9 +8,12 @@
 
 namespace Spiral\Cycle\Selector;
 
-use Spiral\Database\DatabaseInterface;
 use Spiral\Cycle\Selector;
+use Spiral\Database\DatabaseInterface;
 
+/**
+ * Defines the access to the SQL database.
+ */
 interface SourceInterface
 {
     // points to the scope which must be applied to all queries

@@ -196,7 +196,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->image = "magic.gif";
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $this->assertEquals(3, $e->id);
@@ -219,7 +219,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->image = "secondary.gif";
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $selector = new Selector($this->orm, User::class);
@@ -258,7 +258,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->image = "secondary.gif";
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         // Re-select
@@ -273,13 +273,13 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
         $tr = new Transaction($orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -299,7 +299,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile = null;
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -318,7 +318,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->image = 'new.jpg';
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $this->assertFalse($this->orm->getHeap()->has($oP));
@@ -343,8 +343,8 @@ abstract class HasOneRelationTest extends BaseTest
         list($b->profile, $a->profile) = [$a->profile, null];
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertTrue($this->orm->getHeap()->has($b->profile));
@@ -366,7 +366,7 @@ abstract class HasOneRelationTest extends BaseTest
         $b->profile->image = "secondary.gif";
 
         $tr = new Transaction($this->orm);
-        $tr->store($b);
+        $tr->persist($b);
         $tr->run();
 
         // reset state
@@ -380,8 +380,8 @@ abstract class HasOneRelationTest extends BaseTest
         list($a->profile, $b->profile) = [$b->profile, $a->profile];
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         // reset state
@@ -462,7 +462,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->nested->label = 'new-label';
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -480,7 +480,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->nested->label = 'another';
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -498,7 +498,7 @@ abstract class HasOneRelationTest extends BaseTest
         $e->profile->nested->label = 'another';
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -507,7 +507,7 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
         $this->assertNumWrites(0);
     }

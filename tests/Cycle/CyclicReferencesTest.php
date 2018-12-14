@@ -144,7 +144,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->assertNumWrites(4);
@@ -152,7 +152,7 @@ abstract class CyclicReferencesTest extends BaseTest
         // no changes!
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -196,8 +196,8 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($u2);
+        $tr->persist($u);
+        $tr->persist($u2);
         $tr->run();
 
         $this->assertNumWrites(6);
@@ -205,8 +205,8 @@ abstract class CyclicReferencesTest extends BaseTest
         // no changes!
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($u2);
+        $tr->persist($u);
+        $tr->persist($u2);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -278,8 +278,8 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($u2);
+        $tr->persist($u);
+        $tr->persist($u2);
         $tr->run();
 
         $this->assertNumWrites(10);
@@ -287,8 +287,8 @@ abstract class CyclicReferencesTest extends BaseTest
         // no changes!
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($u2);
+        $tr->persist($u);
+        $tr->persist($u2);
         $tr->run();
         $this->assertNumWrites(0);
     }

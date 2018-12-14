@@ -8,11 +8,11 @@
 
 namespace Spiral\Cycle;
 
-use Spiral\Database\Driver\DriverInterface;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\DatabaseCommand;
 use Spiral\Cycle\Exception\TransactionException;
 use Spiral\Cycle\Heap\Node;
+use Spiral\Database\Driver\DriverInterface;
 
 /**
  * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
@@ -30,7 +30,7 @@ final class Transaction implements TransactionInterface
     private $known;
 
     /** @var array */
-    private $store = [];
+    private $persist = [];
 
     /** @var array */
     private $delete = [];
@@ -45,27 +45,27 @@ final class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    public function store($entity)
+    public function persist($entity, int $mode = ORMInterface::MODE_CASCADE)
     {
         if ($this->known->offsetExists($entity)) {
             return;
         }
         $this->known->offsetSet($entity, true);
 
-        $this->store[] = $entity;
+        $this->persist[] = [$entity, $mode];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete($entity)
+    public function delete($entity, int $mode = ORMInterface::MODE_CASCADE)
     {
         if ($this->known->offsetExists($entity)) {
             return;
         }
         $this->known->offsetSet($entity, true);
 
-        $this->delete[] = $entity;
+        $this->delete[] = [$entity, $mode];
     }
 
     /**
@@ -147,7 +147,7 @@ final class Transaction implements TransactionInterface
         }
 
         // resetting the scope
-        $this->store = $this->delete = [];
+        $this->persist = $this->delete = [];
         $this->known = new \SplObjectStorage();
     }
 
@@ -156,12 +156,13 @@ final class Transaction implements TransactionInterface
      */
     protected function syncHeap()
     {
-        foreach ($this->orm->getHeap() as $entity) {
-            $node = $this->orm->getHeap()->get($entity);
+        $heap = $this->orm->getHeap();
+        foreach ($heap as $entity) {
+            $node = $heap->get($entity);
 
             // marked as being deleted and has no external claims (GC like approach)
             if ($node->getStatus() == Node::SCHEDULED_DELETE && !$node->getState()->hasClaims()) {
-                $this->orm->getHeap()->detach($entity);
+                $heap->detach($entity);
                 continue;
             }
 
@@ -175,8 +176,9 @@ final class Transaction implements TransactionInterface
      */
     protected function resetHeap()
     {
-        foreach ($this->orm->getHeap() as $entity) {
-            $this->orm->getHeap()->get($entity)->resetState();
+        $heap = $this->orm->getHeap();
+        foreach ($heap as $entity) {
+            $heap->get($entity)->resetState();
         }
     }
 
@@ -188,14 +190,14 @@ final class Transaction implements TransactionInterface
     protected function initCommands(): array
     {
         $commands = [];
-        foreach ($this->store as $entity) {
-            $commands[] = $this->orm->queueStore($entity);
+        foreach ($this->persist as $pair) {
+            $commands[] = $this->orm->queueStore($pair[0], $pair[1]);
         }
 
         // other commands?
 
-        foreach ($this->delete as $entity) {
-            $commands[] = $this->orm->queueDelete($entity);
+        foreach ($this->delete as $pair) {
+            $commands[] = $this->orm->queueDelete($pair[0], $pair[1]);
         }
 
         return $commands;

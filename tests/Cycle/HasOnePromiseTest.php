@@ -199,7 +199,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(0);
     }
@@ -215,7 +215,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->captureReadQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
+        $tr->persist($a);
         $tr->run();
 
         // load related entity
@@ -244,8 +244,8 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->captureReadQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         // load both promises
@@ -274,7 +274,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->captureReadQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($b);
+        $tr->persist($b);
         $tr->run();
 
         // load both promises

@@ -49,7 +49,7 @@ class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::SCHEMA]);
     }
 
-    public static function createDefault()
+    public static function makeDefault()
     {
         return new static([
             Relation::HAS_ONE              => [

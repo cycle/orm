@@ -32,11 +32,12 @@ abstract class JoinableLoader extends AbstractLoader
      * @var array
      */
     protected $options = [
-        'method' => null, // load method, see AbstractLoader constants
-        'minify' => true, // when true all loader columns will be minified (only for loading)
-        'alias'  => null, // table alias
-        'using'  => null, // alias used by another relation
-        'where'  => null, // where conditions (if any)
+        'scope'  => SourceInterface::DEFAULT_SCOPE, // scope to be used for the relation
+        'method' => null,                           // load method, see AbstractLoader constants
+        'minify' => true,                           // when true all loader columns will be minified (only for loading)
+        'alias'  => null,                           // table alias
+        'using'  => null,                           // alias used by another relation
+        'where'  => null,                           // where conditions (if any)
     ];
 
     /** @var string */
@@ -174,13 +175,8 @@ abstract class JoinableLoader extends AbstractLoader
         }
 
         // apply the global scope
-        if (!empty($this->options['using'])) {
-            $mapper = $this->orm->getMapper($this->target);
-            if ($mapper instanceof SourceInterface) {
-                if (!empty($scope = $mapper->getScope())) {
-                    $query = $scope->apply($query);
-                }
-            }
+        if (!empty($this->options['using']) && !empty($this->scope)) {
+            throw new LoaderException("Combination of scope and `using` source is ambiguous");
         }
 
         return parent::configureQuery($query);

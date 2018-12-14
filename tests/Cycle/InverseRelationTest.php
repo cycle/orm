@@ -164,7 +164,7 @@ abstract class InverseRelationTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->assertNumWrites(2);

@@ -53,71 +53,84 @@ class ORM implements ORMInterface
     {
         $this->heap = new Heap();
         $this->dbal = $dbal;
-        $this->factory = $factory ?? new Factory(RelationConfig::createDefault());
-    }
-
-    // todo: do i need it? can i deal with it in mappers?
-    public function getDBAL(): DatabaseManager
-    {
-        return $this->dbal;
+        $this->factory = $factory ?? new Factory(RelationConfig::makeDefault());
     }
 
     /**
      * @inheritdoc
      */
-    public function getMapper($entity): MapperInterface
-    {
-        if (is_string($entity)) {
-            $entity = $this->schema->getClass($entity) ?? $entity;
-        }
-
-        $entity = $this->resolveClass($entity);
-
-        if (isset($this->mappers[$entity])) {
-            return $this->mappers[$entity];
-        }
-
-        return $this->mappers[$entity] = $this->getFactory()->mapper($entity);
-    }
-
-    /**
-     * Get relation map associated with the given class.
-     *
-     * @param string $entity
-     * @return RelationMap
-     */
-    public function getRelmap($entity): RelationMap
-    {
-        $entity = is_object($entity) ? get_class($entity) : $entity;
-
-        if (isset($this->relmaps[$entity])) {
-            return $this->relmaps[$entity];
-        }
-
-        $relations = [];
-
-        $names = array_keys($this->getSchema()->define($entity, Schema::RELATIONS));
-        foreach ($names as $relation) {
-            $relations[$relation] = $this->getFactory()->relation($entity, $relation);
-        }
-
-        return $this->relmaps[$entity] = new RelationMap($this, $relations);
-    }
-
-    public function get(string $class, array $scope, bool $load = false)
+    public function get(string $role, array $scope, bool $load = false)
     {
         foreach ($scope as $k => $v) {
-            if (!empty($e = $this->heap->find($class, $k, $v))) {
+            if (!empty($e = $this->heap->find($role, $k, $v))) {
                 return $e;
             }
         }
 
         if ($load) {
-            $class = $this->schema->getClass($class) ?? $class;
-            return $this->getMapper($class)->getRepository()->findOne($scope);
+            $role = $this->schema->getClass($role) ?? $role;
+            return $this->getMapper($role)->getRepository()->findOne($scope);
         }
 
         return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function make(string $role, array $data, int $node = Node::NEW)
+    {
+        $mapper = $this->getMapper($role);
+
+        // unique entity identifier
+        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+        $id = $data[$pk] ?? null;
+
+        if ($node !== Node::NEW && !empty($id)) {
+            if (!empty($e = $this->heap->find($role, $pk, $id))) {
+                $node = $this->getHeap()->get($e);
+
+                // entity already been loaded, let's update it's relations with new context
+                return $mapper->hydrate($e, $this->getRelmap($role)->init($node, $data));
+            }
+        }
+
+        // init entity class and prepared (typecasted) data
+        list($e, $prepared) = $mapper->init($data);
+
+        $node = new Node($node, $prepared, $mapper->getRole());
+
+        $this->heap->attach($e, $node, $this->getIndexes($e));
+
+        // hydrate entity with it's data, relations and proxies
+        return $mapper->hydrate($e, $this->getRelmap($role)->init($node, $prepared));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withFactory(FactoryInterface $factory): ORMInterface
+    {
+        $orm = clone $this;
+        $orm->factory = $factory->withContext($orm, $orm->schema);
+
+        return $orm;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFactory(): FactoryInterface
+    {
+        return $this->factory;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getDBAL(): DatabaseManager
+    {
+        return $this->dbal;
     }
 
     /**
@@ -148,25 +161,6 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function withFactory(FactoryInterface $factory): ORMInterface
-    {
-        $orm = clone $this;
-        $orm->factory = $factory->withContext($orm, $orm->schema);
-
-        return $orm;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getFactory(): FactoryInterface
-    {
-        return $this->factory;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
         $orm = clone $this;
@@ -187,70 +181,67 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function make(string $role, array $data, int $node = Node::NEW)
+    public function getMapper($entity): MapperInterface
     {
-        if ($data instanceof \Traversable) {
-            $data = iterator_to_array($data);
+        if (is_string($entity)) {
+            $entity = $this->schema->getClass($entity) ?? $entity;
         }
 
-        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-        $id = $data[$pk] ?? null;
+        // todo: resolve role
+        $entity = $this->resolveClass($entity);
 
-        $mapper = $this->getMapper($role);
-
-        if ($node !== Node::NEW && !empty($id)) {
-            if (!empty($e = $this->heap->find($role, $pk, $id))) {
-                // entity already been loaded, let's update it's relations with new context
-                return $mapper->hydrate($e, $this->getRelmap($e)->init($this->getHeap()->get($e), $data));
-            }
+        if (isset($this->mappers[$entity])) {
+            return $this->mappers[$entity];
         }
 
-        // init entity class and prepare data, todo: work it out
-        list($e, $filtered) = $mapper->init($data);
-
-        // todo: fix it (!)
-        $node = new Node($node, $filtered, $this->schema->define(get_class($e), Schema::ALIAS));
-
-        $this->heap->attach($e, $node, $this->getIndexes($e));
-
-        // hydrate entity with it's data, relations and proxies
-        return $mapper->hydrate($e, $this->getRelmap($e)->init($node, $filtered));
+        return $this->mappers[$entity] = $this->getFactory()->mapper($entity);
     }
 
-    public function queueStore($entity, int $mode = 0): ContextCarrierInterface
+    /**
+     * @inheritdoc
+     */
+    public function queueStore($entity, int $mode = self::MODE_CASCADE): ContextCarrierInterface
     {
-        // todo: NICE?
-
         if ($entity instanceof PromiseInterface) {
-            // todo: i don't like you
+            // we do not expect to store promises
             return new Nil();
         }
 
         $m = $this->getMapper($entity);
 
-        $node = $this->getHeap()->get($entity);
-        if (empty($node)) {
+        $node = $this->heap->get($entity);
+        if (is_null($node)) {
+            // automatic entity registration
             $node = new Node(Node::NEW, [], $m->getRole());
-            $this->getHeap()->attach($entity, $node);
+            $this->heap->attach($entity, $node);
         }
 
-        $cmd = $m->queueStore($node, $entity);
-        // TODO: RESET HANDLERS
+        $cmd = $m->queueStore($entity, $node);
+        if (!$mode == self::MODE_CASCADE) {
+            return $cmd;
+        }
 
-        // todo: optimize it
-        $cmd = $this->getRelmap($entity)->queueRelations($cmd, $entity, $node, $m->extract($entity));
-
-        return $cmd;
+        // generate set of commands required to store entity relations
+        return $this->getRelmap($node->getRole())->queueRelations(
+            $cmd,
+            $entity,
+            $node,
+            $m->extract($entity)
+        );
     }
 
-    public function queueDelete($entity, int $mode = 0): CommandInterface
+    /**
+     * @inheritdoc
+     */
+    public function queueDelete($entity, int $mode = self::MODE_CASCADE): CommandInterface
     {
-        $node = $this->getHeap()->get($entity);
+        $node = $this->heap->get($entity);
         if ($entity instanceof PromiseInterface || is_null($node)) {
+            // nothing to do
             return new Nil();
         }
 
-        return $this->getMapper($entity)->queueDelete($node, $entity);
+        return $this->getMapper($node->getRole())->queueDelete($entity, $node);
     }
 
     /**
@@ -262,6 +253,12 @@ class ORM implements ORMInterface
         $this->relmaps = [];
     }
 
+    /**
+     * Get list of keys entity must be indexed in a Heap by.
+     *
+     * @param object $entity
+     * @return array
+     */
     protected function getIndexes($entity): array
     {
         $pk = $this->schema->define(get_class($entity), Schema::PRIMARY_KEY);
@@ -270,24 +267,7 @@ class ORM implements ORMInterface
         return array_merge([$pk], $keys);
     }
 
-    /**
-     * Return value to uniquely identify given entity data. Most likely PrimaryKey value.
-     *
-     * @param string $class
-     * @param array  $data
-     * @return string|int|null
-     */
-    protected function identify(string $class, array $data)
-    {
-        $pk = $this->getSchema()->define($class, Schema::PRIMARY_KEY);
-
-        if (isset($data[$pk])) {
-            return $data[$pk];
-        }
-
-        return null;
-    }
-
+    // todo: think about it
     protected function resolveClass($entity): string
     {
         //if ($entity instanceof PromiseInterface) {
@@ -297,6 +277,30 @@ class ORM implements ORMInterface
         $entity = is_object($entity) ? get_class($entity) : $entity;
 
         return $this->getSchema()->define($entity, Schema::EXTENDS) ?? $entity;
+    }
+
+    /**
+     * Get relation map associated with the given class.
+     *
+     * @param string $entity
+     * @return RelationMap
+     */
+    protected function getRelmap($entity): RelationMap
+    {
+        $entity = is_object($entity) ? get_class($entity) : $entity;
+
+        if (isset($this->relmaps[$entity])) {
+            return $this->relmaps[$entity];
+        }
+
+        $relations = [];
+
+        $names = array_keys($this->schema->define($entity, Schema::RELATIONS));
+        foreach ($names as $relation) {
+            $relations[$relation] = $this->factory->relation($entity, $relation);
+        }
+
+        return $this->relmaps[$entity] = new RelationMap($this, $relations);
     }
 
     protected function loadSchema(): SchemaInterface

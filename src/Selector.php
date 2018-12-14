@@ -9,7 +9,6 @@
 namespace Spiral\Cycle;
 
 use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Parser\OutputNode;
 use Spiral\Cycle\Selector\LoaderInterface;
 use Spiral\Cycle\Selector\QueryWrapper;
@@ -44,25 +43,17 @@ class Selector implements \IteratorAggregate, \Countable
     /** @var ORMInterface */
     private $orm;
 
-    /** @var MapperInterface */
-    private $mapper;
-
     /** @var LoaderInterface */
     private $loader;
 
     /**
      * @param ORMInterface $orm
-     * @param string       $class
+     * @param string       $role
      */
-    public function __construct(ORMInterface $orm, string $class)
+    public function __construct(ORMInterface $orm, string $role)
     {
-        // todo: unify it (!)
         $this->orm = $orm;
-
-        // todo: what do i want from the mapper?
-        $this->mapper = $orm->getMapper($class);
-
-        $this->loader = new RootLoader($orm, $class);
+        $this->loader = new RootLoader($orm, $role);
     }
 
     /**
@@ -73,7 +64,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function scope(ScopeInterface $scope): self
     {
-        $scope->apply($this->loader->getQuery());
+        $this->loader = $this->loader->withScope($scope);
 
         return $this;
     }

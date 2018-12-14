@@ -18,7 +18,7 @@ interface TransactionInterface
      *
      * @param object $entity
      */
-    public function store($entity);
+    public function persist($entity);
 
     /**
      * Delete entity from the database.

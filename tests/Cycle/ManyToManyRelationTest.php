@@ -236,7 +236,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -259,12 +259,12 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(0);
 
@@ -274,7 +274,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(0);
     }
@@ -291,8 +291,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($t);
-        $tr->store($u);
+        $tr->persist($t);
+        $tr->persist($u);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -315,8 +315,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($t);
+        $tr->persist($u);
+        $tr->persist($t);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -344,8 +344,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u2->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
-        $tr->store($u2);
+        $tr->persist($u);
+        $tr->persist($u2);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -385,8 +385,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         $b->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);

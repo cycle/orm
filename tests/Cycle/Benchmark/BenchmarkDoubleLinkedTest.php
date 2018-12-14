@@ -87,7 +87,7 @@ class BenchmarkDoubleLinkedTest extends BaseTest
             $c1->name = "self-reference";
             $c1->cyclic = $c1;
 
-            $tr->store($c1);
+            $tr->persist($c1);
         }
 
         $tr->run();
@@ -104,7 +104,7 @@ class BenchmarkDoubleLinkedTest extends BaseTest
             $c1->name = "self-reference";
             $c1->other = $c1;
 
-            $tr->store($c1);
+            $tr->persist($c1);
         }
 
         $tr->run();
@@ -122,7 +122,7 @@ class BenchmarkDoubleLinkedTest extends BaseTest
             $c1->cyclic = $c1;
             $c1->other = $c1;
 
-            $tr->store($c1);
+            $tr->persist($c1);
         }
 
         $tr->run();

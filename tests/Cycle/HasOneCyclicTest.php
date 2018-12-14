@@ -120,7 +120,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $c->name = 'updated';
 
         $tr = new Transaction($this->orm);
-        $tr->store($c);
+        $tr->persist($c);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), Cyclic::class);
@@ -146,7 +146,7 @@ abstract class HasOneCyclicTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($c);
+        $tr->persist($c);
         $tr->run();
         $this->assertNumWrites(2);
 

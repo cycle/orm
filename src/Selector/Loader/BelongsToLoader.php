@@ -8,13 +8,14 @@
 
 namespace Spiral\Cycle\Selector\Loader;
 
-use Spiral\Database\Injection\Parameter;
-use Spiral\Database\Query\SelectQuery;
-use Spiral\Cycle\Selector\JoinableLoader;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Schema;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\SingularNode;
+use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
+use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Selector\SourceInterface;
+use Spiral\Database\Injection\Parameter;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Load parent data. Similar to HasOne but use POSTLOAD as default method.
@@ -27,6 +28,7 @@ class BelongsToLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
+        'scope' => SourceInterface::DEFAULT_SCOPE,
         'method' => self::POSTLOAD,
         'minify' => true,
         'alias'  => null,

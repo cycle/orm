@@ -50,7 +50,6 @@ class Mapper implements MapperInterface, Selector\SourceInterface
         $this->orm = $orm;
         $this->role = $class;
 
-        // todo: mass export
         $this->columns = $this->orm->getSchema()->define($class, Schema::COLUMNS);
         $this->table = $this->orm->getSchema()->define($class, Schema::TABLE);
         $this->primaryKey = $this->orm->getSchema()->define($class, Schema::PRIMARY_KEY);
@@ -65,7 +64,6 @@ class Mapper implements MapperInterface, Selector\SourceInterface
     {
         return $this->orm->getSchema()->define($this->role, Schema::ALIAS);
     }
-
 
     public function entityClass(array $data): string
     {
@@ -128,7 +126,7 @@ class Mapper implements MapperInterface, Selector\SourceInterface
     }
 
     // todo: need state as INPUT!!!!
-    public function queueStore(Node $node, $entity): ContextCarrierInterface
+    public function queueStore($entity, Node $node): ContextCarrierInterface
     {
         //        /** @var Node $point */
         //        $point = $this->orm->getHeap()->get($entity);
@@ -167,7 +165,7 @@ class Mapper implements MapperInterface, Selector\SourceInterface
         return $split;
     }
 
-    public function queueDelete(Node $node, $entity): CommandInterface
+    public function queueDelete($entity, Node $node): CommandInterface
     {
         //        $node = $this->orm->getHeap()->get($entity);
         //        if ($node == null) {

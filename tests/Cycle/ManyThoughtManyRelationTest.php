@@ -219,7 +219,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $u->tags->add($t);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -245,7 +245,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $u->tags->setPivot($t, ['as' => 'super']);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -272,7 +272,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $u->tags->setPivot($t, ['as' => 'super']);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -281,7 +281,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
         $this->assertNumWrites(0);
     }
@@ -302,7 +302,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $u->tags->setPivot($t, $pc);
 
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -346,8 +346,8 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertNumWrites(6);
@@ -355,8 +355,8 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
 
         $this->assertNumWrites(0);

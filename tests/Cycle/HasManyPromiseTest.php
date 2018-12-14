@@ -159,7 +159,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $this->captureReadQueries();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->assertNumWrites(0);
@@ -174,7 +174,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $this->captureReadQueries();
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u);
+        $tr->persist($u);
         $tr->run();
 
         $this->assertNumWrites(0);
@@ -191,7 +191,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $e->comments->remove(1);
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -219,7 +219,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $e->comments->add($c);
 
         $tr = new Transaction($this->orm);
-        $tr->store($e);
+        $tr->persist($e);
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
@@ -258,16 +258,16 @@ abstract class HasManyPromiseTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($a);
-        $tr->store($b);
+        $tr->persist($a);
+        $tr->persist($b);
         $tr->run();
         $this->assertNumWrites(0);
 

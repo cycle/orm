@@ -149,8 +149,8 @@ abstract class LinkedTreeTest extends BaseTest
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
-        $tr->store($u1);
-        $tr->store($u2);
+        $tr->persist($u1);
+        $tr->persist($u2);
         $tr->run();
 
         $this->assertNumWrites(3);

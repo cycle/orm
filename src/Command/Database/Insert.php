@@ -55,7 +55,7 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface, Produce
     /**
      * @inheritdoc
      *
-     * Only triggers after command execution!
+     * Triggers only after command execution!
      */
     public function forward(
         string $key,
@@ -104,8 +104,8 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface, Produce
 
         foreach ($this->consumers as $key => $consumers) {
             foreach ($consumers as $id => $consumer) {
-                /** @var ConsumerInterface $acc */
-                $acc = $consumer[0];
+                /** @var ConsumerInterface $cn */
+                $cn = $consumer[0];
 
                 if ($key == self::INSERT_ID) {
                     $value = $insertID;
@@ -113,7 +113,7 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface, Produce
                     $value = $data[$key] ?? null;
                 }
 
-                $acc->register($consumer[1], $value, $update, $consumer[2]);
+                $cn->register($consumer[1], $value, $update, $consumer[2]);
                 $update = false;
             }
         }

@@ -116,14 +116,14 @@ class Selector implements \IteratorAggregate, \Countable
     {
 
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            $proxy = new QueryProxy($this->loader->buildQuery(), $this->loader);
+            $proxy = new QueryProxy($this->orm, $this->loader->buildQuery(), $this->loader);
 
             // aggregations
             return $proxy->__call($name, $arguments);
         }
 
         // where condition or statement
-        $proxy = new QueryProxy($this->loader->getQuery(), $this->loader);
+        $proxy = new QueryProxy($this->orm, $this->loader->getQuery(), $this->loader);
 
         $result = $proxy->__call($name, $arguments);
         if ($result instanceof QueryProxy) {

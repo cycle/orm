@@ -9,8 +9,10 @@
 namespace Spiral\Cycle\Selector;
 
 use Spiral\Cycle\Exception\LoaderException;
+use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
+use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\Traits\ColumnsTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -167,13 +169,29 @@ abstract class JoinableLoader extends AbstractLoader
     }
 
     /**
-     * Get load method.
+     * Create condition to point relation to the given outerKey or entity node.
      *
-     * @return int
+     * @param mixed|Node $node
+     * @return array
      */
-    protected function getMethod(): int
+    protected function makeConstrain($node): array
     {
-        return $this->options['method'];
+        $innerKey = $this->localKey($this->define(Relation::INNER_KEY));
+        $outerKey = $this->define(Relation::OUTER_KEY);
+
+        if (!$node instanceof Node) {
+            return [$innerKey => $node];
+        }
+
+        if ($node->getRole() != $this->target) {
+            throw new LoaderException("Unable to point {$this} to `{$node->getRole()}`");
+        }
+
+        if (!array_key_exists($outerKey, $node->getData())) {
+            throw new LoaderException("Unable to point {$this} to `{$node->getRole()}`, outerKey value not found");
+        }
+
+        return [$innerKey => $node->getData()[$outerKey]];
     }
 
     /**
@@ -206,6 +224,16 @@ abstract class JoinableLoader extends AbstractLoader
     }
 
     /**
+     * Get load method.
+     *
+     * @return int
+     */
+    protected function getMethod(): int
+    {
+        return $this->options['method'];
+    }
+
+    /**
      * Apply scope with specific where target.
      *
      * @param SelectQuery $query
@@ -214,7 +242,7 @@ abstract class JoinableLoader extends AbstractLoader
     protected function applyScope(SelectQuery $query): SelectQuery
     {
         if (!empty($this->scope)) {
-            $proxy = new QueryProxy($query, $this);
+            $proxy = new QueryProxy($this->orm, $query, $this);
             $proxy->setTarget($this->isJoined() ? 'onWhere' : 'where');
 
             $this->scope->apply($proxy);

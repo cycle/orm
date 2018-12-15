@@ -30,7 +30,7 @@ trait WhereTrait
             return $query;
         }
 
-        $proxy = new QueryProxy($query, $this);
+        $proxy = new QueryProxy($this->orm, $query, $this);
         $proxy->setTarget($target)->where($where);
 
         return $proxy->getQuery();

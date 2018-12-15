@@ -8,6 +8,7 @@
 
 namespace Spiral\Cycle\Selector;
 
+use Spiral\Cycle\ORMInterface;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -43,10 +44,11 @@ class QueryProxy
     private $forward;
 
     /**
+     * @param ORMInterface   $orm
      * @param SelectQuery    $query
      * @param AbstractLoader $loader
      */
-    public function __construct(SelectQuery $query, AbstractLoader $loader)
+    public function __construct(ORMInterface $orm, SelectQuery $query, AbstractLoader $loader)
     {
         $this->query = $query;
         $this->loader = $loader;
@@ -109,9 +111,6 @@ class QueryProxy
     protected function proxy($where)
     {
         // todo: this require a lot of tests
-
-
-
 
         if (is_string($where)) {
             if (strpos($where, '.') === false) {

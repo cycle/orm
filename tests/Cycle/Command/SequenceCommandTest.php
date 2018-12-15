@@ -10,8 +10,8 @@ namespace Spiral\Cycle\Tests\Command;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\Cycle\Command\Branch\Nil;
 use Spiral\Cycle\Command\Branch\ContextSequence;
+use Spiral\Cycle\Command\Branch\Nil;
 use Spiral\Cycle\Command\Branch\Sequence;
 use Spiral\Cycle\Command\Database\Insert;
 
@@ -38,6 +38,12 @@ class SequenceCommandTest extends TestCase
         $command->execute();
         $command->complete();
         $command->rollBack();
+    }
+
+    public function testNeverExecuted()
+    {
+        $command = new Sequence();
+        $this->assertFalse($command->isExecuted());
     }
 
     /**

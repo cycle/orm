@@ -9,6 +9,7 @@
 namespace Spiral\Cycle\Selector\Traits;
 
 use Spiral\Cycle\Exception\LoaderException;
+use Spiral\Cycle\Selector\AbstractLoader;
 use Spiral\Cycle\Selector\LoaderInterface;
 
 trait ChainTrait
@@ -42,7 +43,7 @@ trait ChainTrait
         // chain of relations provided (relation.nestedRelation)
         $child = $this->loadRelation(substr($chain, 0, $position), [], $join);
 
-        if (!$child instanceof self) {
+        if (!$child instanceof AbstractLoader) {
             throw new LoaderException(
                 sprintf("Loader '%s' does not support chain relation loading", get_class($child))
             );

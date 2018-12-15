@@ -40,15 +40,6 @@ class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::RELATION]);
     }
 
-    public function getSchema($type): Autowire
-    {
-        if (!isset($this->config[$type][self::SCHEMA])) {
-            throw new ConfigException("Unable to get relation schema `{$type}`.");
-        }
-
-        return new Autowire($this->config[$type][self::SCHEMA]);
-    }
-
     public static function getDefault()
     {
         return new static([

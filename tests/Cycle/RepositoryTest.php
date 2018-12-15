@@ -66,6 +66,14 @@ abstract class RepositoryTest extends BaseTest
         $this->assertEquals(200.0, $result[1]->balance);
     }
 
+    public function testCloned()
+    {
+        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r2 = clone $r;
+
+        $this->assertNotSame($r->find(), $r2->find());
+    }
+
     public function testFindOne()
     {
         $r = $this->orm->getMapper(User::class)->getRepository();

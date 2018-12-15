@@ -77,6 +77,7 @@ abstract class HasManyPromiseTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
+                            Relation::ORDER_BY  => ['@.id' => 'ASC']
                         ],
                     ]
                 ]
@@ -89,7 +90,7 @@ abstract class HasManyPromiseTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [],
             ]
         ]));
     }

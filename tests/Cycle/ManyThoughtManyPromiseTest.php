@@ -97,6 +97,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
                             Relation::THOUGHT_OUTER_KEY => 'tag_id',
+                            Relation::ORDER_BY          => ['@.id' => 'ASC']
                         ],
                     ]
                 ]

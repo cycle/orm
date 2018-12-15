@@ -37,12 +37,7 @@ class RootLoader extends AbstractLoader
     public function __construct(ORMInterface $orm, string $target)
     {
         parent::__construct($orm, $target);
-
-        $source = $this->getSource();
-
-        $this->query = $source->getDatabase()->select()->from(
-            sprintf("%s AS %s", $source->getTable(), $this->getAlias())
-        );
+        $this->query = $this->getSource()->getDatabase()->select()->from($this->getSourceTable());
     }
 
     /**
@@ -174,5 +169,13 @@ class RootLoader extends AbstractLoader
     protected function getColumns(): array
     {
         return $this->columns ?? $this->define(Schema::COLUMNS);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSourceTable(): string
+    {
+        return sprintf("%s AS %s", $this->getSource()->getTable(), $this->getAlias());
     }
 }

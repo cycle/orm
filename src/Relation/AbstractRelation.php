@@ -88,14 +88,6 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function initPromise(Node $parentNode): array
-    {
-        return [null, null];
-    }
-
-    /**
      * @return string
      */
     public function __toString()
@@ -166,7 +158,7 @@ abstract class AbstractRelation implements RelationInterface
     {
         $mapper = $this->orm->getMapper($role ?? $this->target);
         if (!$mapper instanceof SourceInterface) {
-            throw new RelationException("Relation {$this} can only with with SelectableInterface mappers");
+            throw new RelationException("Relation {$this} can only with with `SourceInterface` mapper");
         }
 
         return $mapper;

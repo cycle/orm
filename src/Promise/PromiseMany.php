@@ -18,7 +18,7 @@ use Spiral\Cycle\Selector\SourceInterface;
  */
 class PromiseMany implements PromiseInterface
 {
-    /** @var ORMInterface */
+    /** @var ORMInterface @internal */
     private $orm;
 
     /** @var string */
@@ -62,7 +62,7 @@ class PromiseMany implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->selector);
+        return empty($this->orm);
     }
 
     /**

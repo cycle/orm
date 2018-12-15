@@ -8,17 +8,18 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Mapper\Mapper;
+use Spiral\Cycle\Promise\Collection\CollectionPromise;
+use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
+use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
-use Spiral\Cycle\Promise\Collection\CollectionPromise;
 
 abstract class HasManyPromiseTest extends BaseTest
 {
@@ -138,6 +139,51 @@ abstract class HasManyPromiseTest extends BaseTest
         $this->assertCount(3, $u->comments);
         $this->assertInstanceOf(Comment::class, $u->comments[0]);
         $this->assertNumReads(1);
+
+        $this->assertInstanceOf(PromiseInterface::class, $u->comments->getPromise());
+    }
+
+    public function testHasManyPromiseLoaded()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $u = $selector->wherePK(1)->fetchOne();
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
+        $this->assertNumReads(0);
+
+        /** @var PromiseInterface $p */
+        $this->assertFalse($p->__loaded());
+        $this->assertInternalType('array', $p->__resolve());
+        $this->assertTrue($p->__loaded());
+    }
+
+    public function testHasManyPromiseRole()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $u = $selector->wherePK(1)->fetchOne();
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
+        $this->assertNumReads(0);
+
+        /** @var PromiseInterface $p */
+        $this->assertSame('comment', $p->__role());
+    }
+
+    public function testHasManyPromiseScope()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $u = $selector->wherePK(1)->fetchOne();
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
+        $this->assertNumReads(0);
+
+        /** @var PromiseInterface $p */
+        $this->assertEquals([
+            'user_id' => 1
+        ], $p->__scope());
     }
 
     public function testPromisedEmpty()

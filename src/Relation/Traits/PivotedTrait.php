@@ -21,7 +21,7 @@ trait PivotedTrait
     public function extract($data)
     {
         if ($data instanceof CollectionPromiseInterface && !$data->isInitialized()) {
-            return $data->toPromise();
+            return $data->getPromise();
         }
 
         if ($data instanceof Pivoted\PivotedCollectionInterface) {

@@ -21,7 +21,7 @@ interface CollectionPromiseInterface extends Collection
      *
      * @return PromiseInterface
      */
-    public function toPromise(): PromiseInterface;
+    public function getPromise(): PromiseInterface;
 
     /**
      * Is the lazy collection already initialized?

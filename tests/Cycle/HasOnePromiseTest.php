@@ -8,8 +8,8 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
@@ -166,6 +166,46 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNumReads(0);
 
         $this->assertEquals('image.png', $a->profile->__resolve()->image);
+    }
+
+    public function testOnePromiseLoaded()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $selector->orderBy('user.id');
+        list($a, $b) = $selector->fetchAll();
+
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
+
+        $this->assertFalse($a->profile->__loaded());
+        $this->assertInstanceOf(Profile::class, $a->profile->__resolve());
+        $this->assertTrue($a->profile->__loaded());
+    }
+
+    public function testOnePromiseRole()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $selector->orderBy('user.id');
+        list($a, $b) = $selector->fetchAll();
+
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
+
+        $this->assertSame('profile', $a->profile->__role());
+    }
+
+    public function testOnePromiseScope()
+    {
+        $selector = new Selector($this->orm, User::class);
+        $selector->orderBy('user.id');
+        list($a, $b) = $selector->fetchAll();
+
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
+
+        $this->assertEquals([
+            'user_id' => 1
+        ], $a->profile->__scope());
     }
 
     public function testFetchPromisesFromHeap()

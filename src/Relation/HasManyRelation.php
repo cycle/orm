@@ -50,7 +50,7 @@ class HasManyRelation extends AbstractRelation
     public function extract($data)
     {
         if ($data instanceof CollectionPromise && !$data->isInitialized()) {
-            return $data->toPromise();
+            return $data->getPromise();
         }
 
         if ($data instanceof Collection) {

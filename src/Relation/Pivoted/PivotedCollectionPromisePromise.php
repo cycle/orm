@@ -34,7 +34,7 @@ class PivotedCollectionPromisePromise extends AbstractLazyCollection implements 
     /**
      * @inheritdoc
      */
-    public function toPromise(): PromiseInterface
+    public function getPromise(): PromiseInterface
     {
         return $this->promise;
     }

@@ -44,7 +44,7 @@ class PromiseOne implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->promise);
+        return empty($this->orm);
     }
 
     /**

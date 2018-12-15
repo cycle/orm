@@ -18,6 +18,13 @@ use Spiral\Cycle\Parser\AbstractNode;
 interface LoaderInterface
 {
     /**
+     * Return the relation alias.
+     *
+     * @return string
+     */
+    public function getAlias(): string;
+
+    /**
      * Loader specific entity class.
      *
      * @return string

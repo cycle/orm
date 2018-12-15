@@ -61,7 +61,7 @@ abstract class AbstractLoader implements LoaderInterface
     /** @var AbstractLoader[] */
     protected $join = [];
 
-    /** @var AbstractLoader @internal */
+    /** @var LoaderInterface @internal */
     protected $parent;
 
     /**
@@ -73,13 +73,6 @@ abstract class AbstractLoader implements LoaderInterface
         $this->orm = $orm;
         $this->target = $target;
     }
-
-    /**
-     * Table alias of the loader.
-     *
-     * @return string
-     */
-    abstract public function getAlias(): string;
 
     /**
      * @return string
@@ -109,18 +102,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
-        if (!$parent instanceof AbstractLoader) {
-            throw new LoaderException(sprintf(
-                "Loader of type '%s' can not accept parent '%s'",
-                get_class($this),
-                get_class($parent)
-            ));
-        }
-
-        /*
-         * This scary construction simply checks if input array has keys which do not present in a
-         * current set of options (i.e. default options, i.e. current options).
-         */
+        // check that given options are known
         if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
             throw new LoaderException(sprintf(
                 "Relation %s does not support option: %s",

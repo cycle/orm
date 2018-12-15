@@ -72,7 +72,7 @@ abstract class DatabaseMapper extends Source implements MapperInterface
      */
     public function getRole(): string
     {
-        // todo: return current role (!)
+        // todo: return current role (!) CRITICAL TO MOVE FORWARD
         return $this->orm->getSchema()->define($this->role, Schema::ALIAS);
     }
 

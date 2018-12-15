@@ -15,7 +15,7 @@ use Zend\Hydrator;
  * Provide the ability to carry data over the specific class instances. Supports table inheritance using
  * hidden entity field.
  */
-class Mapper extends AbstractMapper
+class Mapper extends DatabaseMapper
 {
     // system column to store entity type
     public const ENTITY_TYPE = '_type';

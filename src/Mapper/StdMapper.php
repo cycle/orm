@@ -11,7 +11,7 @@ namespace Spiral\Cycle\Mapper;
 /**
  * Provide the ability to carry data over the StdClass objects.
  */
-abstract class StdMapper extends AbstractMapper
+abstract class StdMapper extends DatabaseMapper
 {
 
 }

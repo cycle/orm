@@ -23,9 +23,9 @@ use Spiral\Cycle\Selector;
 use Spiral\Cycle\Selector\Source;
 
 /**
- * Basic object mapper with ability to work with abstract entity carrier.
+ * Provides basic capabilities to work with entities persisted in SQL databases.
  */
-abstract class AbstractMapper extends Source implements MapperInterface
+abstract class DatabaseMapper extends Source implements MapperInterface
 {
     /** @var null|RepositoryInterface */
     protected $repository;

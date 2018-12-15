@@ -77,6 +77,7 @@ abstract class HasManyRelationTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
+                            Relation::ORDER_BY  => ['@.id' => 'ASC']
                         ],
                     ]
                 ]

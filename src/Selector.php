@@ -114,17 +114,19 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function __call(string $name, array $arguments)
     {
-        $proxy = new QueryProxy($this->getLoader()->getAlias());
 
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
+            $proxy = new QueryProxy($this->loader->buildQuery(), $this->loader);
+
             // aggregations
-            return $proxy->withQuery($this->loader->buildQuery())->__call($name, $arguments);
+            return $proxy->__call($name, $arguments);
         }
 
         // where condition or statement
-        $result = $proxy->withQuery($this->loader->getQuery())->__call($name, $arguments);
+        $proxy = new QueryProxy($this->loader->getQuery(), $this->loader);
 
-        if ($result instanceof SelectQuery) {
+        $result = $proxy->__call($name, $arguments);
+        if ($result instanceof QueryProxy) {
             return $this;
         }
 

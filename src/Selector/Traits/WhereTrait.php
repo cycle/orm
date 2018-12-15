@@ -30,6 +30,9 @@ trait WhereTrait
             return $query;
         }
 
-        return (new QueryProxy($table))->withQuery($query, $target)->where($where);
+        $proxy = new QueryProxy($query, $this);
+        $proxy->setTarget($target)->where($where);
+
+        return $proxy->getQuery();
     }
 }

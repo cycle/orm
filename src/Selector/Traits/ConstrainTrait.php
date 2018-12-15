@@ -22,7 +22,7 @@ trait ConstrainTrait
     private function configureWindow(SelectQuery $query, array $orderBy)
     {
         if (!empty($orderBy)) {
-            (new QueryProxy($this->getAlias()))->withQuery($query)->orderBy($orderBy);
+            (new QueryProxy($query, $this))->orderBy($orderBy);
         }
     }
 

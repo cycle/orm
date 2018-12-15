@@ -46,8 +46,7 @@ trait ScopeTrait
     protected function applyScope(SelectQuery $query): SelectQuery
     {
         if (!empty($this->scope)) {
-            $router = new QueryProxy($this->getAlias());
-            $this->scope->apply($router->withQuery($query));
+            $this->scope->apply(new QueryProxy($query, $this));
         }
 
         return $query;

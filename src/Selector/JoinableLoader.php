@@ -214,8 +214,10 @@ abstract class JoinableLoader extends AbstractLoader
     protected function applyScope(SelectQuery $query): SelectQuery
     {
         if (!empty($this->scope)) {
-            $router = new QueryProxy($this->getAlias());
-            $this->scope->apply($router->withQuery($query, $this->isJoined() ? 'onWhere' : 'where'));
+            $proxy = new QueryProxy($query, $this);
+            $proxy->setTarget($this->isJoined() ? 'onWhere' : 'where');
+
+            $this->scope->apply($proxy);
         }
 
         return $query;

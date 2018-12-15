@@ -14,10 +14,9 @@ namespace Spiral\Cycle\Selector;
 interface ScopeInterface
 {
     /**
-     * Configure query and loader with needed conditions, queries or additional relations.
+     * Configure query and loader pair using proxy strategy.
      *
-     * @param QueryProxy $query
+     * @param QueryProxy $proxy
      */
-    // todo: we can create proxy inside
-    public function apply(QueryProxy $query);
+    public function apply(QueryProxy $proxy);
 }

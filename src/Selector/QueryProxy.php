@@ -30,50 +30,39 @@ use Spiral\Database\Query\SelectQuery;
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
- *
- * @todo IMPROVE!!! FOR SCOPES AND OTHER STUFF!
  */
 class QueryProxy
 {
-    /** @var string */
-    private $alias;
-
     /** @var null|SelectQuery */
     private $query;
+
+    /** @var AbstractLoader */
+    private $loader;
 
     /** @var string|null */
     private $forward;
 
     /**
-     * @param string $alias
+     * @param SelectQuery    $query
+     * @param AbstractLoader $loader
      */
-    public function __construct(string $alias)
+    public function __construct(SelectQuery $query, AbstractLoader $loader)
     {
-        $this->alias = $alias;
+        $this->query = $query;
+        $this->loader = $loader;
     }
 
     /**
-     * @return string
-     */
-    public function getAlias(): string
-    {
-        return $this->alias;
-    }
-
-    /**
-     * Link wrapper to the given target (query or selector).
+     * Set query method prefix for all "where" queries. Can route "where" to "onWhere".
      *
-     * @param SelectQuery $target
-     * @param string      $forward Automatically forward "where" queries to another target.
+     * @param string $forward
      * @return QueryProxy
      */
-    public function withQuery(SelectQuery $target, string $forward = null): self
+    public function setTarget(string $forward = null): self
     {
-        $wrapper = clone $this;
-        $wrapper->query = $target;
-        $wrapper->forward = $forward;
+        $this->forward = $forward;
 
-        return $wrapper;
+        return $this;
     }
 
     /**
@@ -99,11 +88,18 @@ class QueryProxy
         if (count($args) > 0 && $args[0] instanceof \Closure) {
             call_user_func($args[0], $this);
 
-            return $this->query;
+            $result = $this->query;
+        } else {
+
+            // prepare arguments
+            $result = call_user_func_array([$this->query, $this->forwardCall($name)], $this->prepare($args));
         }
 
-        // prepare arguments
-        return call_user_func_array([$this->query, $this->forwardCall($name)], $this->prepare($args));
+        if ($result === $this->query) {
+            return $this;
+        }
+
+        return $result;
     }
 
     /**
@@ -117,10 +113,10 @@ class QueryProxy
         if (is_string($where)) {
             if (strpos($where, '.') === false) {
                 // always mount alias
-                return sprintf("%s.%s", $this->alias, $where);
+                return sprintf("%s.%s", $this->loader->getAlias(), $where);
             }
 
-            return str_replace('@', $this->alias, $where);
+            return str_replace('@', $this->loader->getAlias(), $where);
         }
 
         if (!is_array($where)) {
@@ -130,7 +126,7 @@ class QueryProxy
         $result = [];
         foreach ($where as $column => $value) {
             if (is_string($column) && !is_int($column)) {
-                $column = str_replace('@', $this->alias, $column);
+                $column = str_replace('@', $this->loader->getAlias(), $column);
             }
 
             $result[$column] = !is_array($value) ? $value : $this->prepare($value);

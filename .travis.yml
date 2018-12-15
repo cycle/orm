@@ -53,7 +53,7 @@ jobs:
       before_install:
         - psql -c 'create database spiral;' -U postgres
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
 
     - stage: Test
       php: 7.2
@@ -64,7 +64,7 @@ jobs:
       before_install:
         - psql -c 'create database spiral;' -U postgres
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
 
     - stage: Test
       php: 7.2
@@ -75,7 +75,7 @@ jobs:
       before_install:
         - psql -c 'create database spiral;' -U postgres
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
 
     - stage: Test
       php: 7.2
@@ -86,7 +86,7 @@ jobs:
       before_install:
         - psql -c 'create database spiral;' -U postgres
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
 
     - stage: Test
       php: 7.2
@@ -97,7 +97,7 @@ jobs:
       before_install:
         - psql -c 'create database spiral;' -U postgres
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
 
     - stage: Test
       php: 7.2
@@ -109,7 +109,7 @@ jobs:
         - bash ./tests/install-pgsql-10.sh
         - psql -c 'create database spiral;' -U postgres
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
+        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
 
     # MariaDB
     - stage: Test
@@ -122,7 +122,7 @@ jobs:
         - sudo bash ./tests/fix-binlog.sh
         - mysql -e 'CREATE DATABASE spiral;'
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/MySQL
+        - vendor/bin/phpunit tests/Cycle/Driver/MySQL
 
     - stage: Test
       php: 7.2
@@ -133,7 +133,7 @@ jobs:
       before_install:
         - mysql -e 'CREATE DATABASE spiral;'
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/MySQL
+        - vendor/bin/phpunit tests/Cycle/Driver/MySQL
 
     - stage: Test
       php: 7.2
@@ -144,7 +144,7 @@ jobs:
       before_install:
         - mysql -e 'CREATE DATABASE spiral;'
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/MySQL
+        - vendor/bin/phpunit tests/Cycle/Driver/MySQL
 
     # MySQL 5.7
     - stage: Test
@@ -164,4 +164,4 @@ jobs:
         - sudo service mysql restart
         - mysql -u root -proot -e 'CREATE DATABASE spiral;'
       script:
-        - vendor/bin/phpunit tests/ORM/Driver/MySQL
+        - vendor/bin/phpunit tests/Cycle/Driver/MySQL

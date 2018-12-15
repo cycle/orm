@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Tests\Node;
+namespace Spiral\Cycle\Tests\Parser;
 
 use PHPUnit\Framework\TestCase;
 use Spiral\Cycle\Parser\ArrayNode;
@@ -138,7 +138,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Cycle\Exception\NodeException
+     * @expectedException \Spiral\Cycle\Exception\ParserException
      */
     public function testGetReferencesWithoutParent()
     {
@@ -209,7 +209,40 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Cycle\Exception\NodeException
+     * @expectedException \Spiral\Cycle\Exception\ParserException
+     */
+    public function testSingularInvalidReference()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->linkNode('balance', $child = new SingularNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        ));
+
+        $data = [
+            [1, 'email@gmail.com'],
+            [2, 'other@gmail.com'],
+            [3, 'third@gmail.com'],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+
+        $childData = [
+            [1, 1, 100],
+            [2, -1, 200]
+        ];
+
+        foreach ($childData as $row) {
+            $child->parseRow(0, $row);
+        }
+    }
+
+    /**
+     * @expectedException \Spiral\Cycle\Exception\ParserException
      */
     public function testInvalidColumnCount()
     {
@@ -246,7 +279,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Cycle\Exception\NodeException
+     * @expectedException \Spiral\Cycle\Exception\ParserException
      */
     public function testGetUndefinedNode()
     {
@@ -255,7 +288,7 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Cycle\Exception\NodeException
+     * @expectedException \Spiral\Cycle\Exception\ParserException
      */
     public function testSingularParseWithoutParent()
     {
@@ -327,8 +360,42 @@ class NodeTest extends TestCase
         ], $node->getResult());
     }
 
+
     /**
-     * @expectedException \Spiral\Cycle\Exception\NodeException
+     * @expectedException \Spiral\Cycle\Exception\ParserException
+     */
+    public function testArrayInvalidReference()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->linkNode('balance', $child = new ArrayNode(
+            ['id', 'user_id', 'balance'],
+            'id',
+            'user_id',
+            'id'
+        ));
+
+        $data = [
+            [1, 'email@gmail.com'],
+            [2, 'other@gmail.com'],
+            [3, 'third@gmail.com'],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+
+        $childData = [
+            [1, 1, 100],
+            [2, -1, 200]
+        ];
+
+        foreach ($childData as $row) {
+            $child->parseRow(0, $row);
+        }
+    }
+
+    /**
+     * @expectedException \Spiral\Cycle\Exception\ParserException
      */
     public function testArrayWithoutParent()
     {

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Tests\Node;
+namespace Spiral\Cycle\Tests\Parser;
 
 use PHPUnit\Framework\TestCase;
 use Spiral\Cycle\Parser\PivotedNode;
@@ -142,5 +142,84 @@ class PivotedNodeTest extends TestCase
                 'roles' => [],
             ],
         ], $node->getResult());
+    }
+
+    /**
+     * @expectedException \Spiral\Cycle\Exception\ParserException
+     */
+    public function testNestedInvalidCount()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->joinNode('roles', new PivotedNode(
+            ['id', 'name'],
+            ['user_id', 'role_id', 'added'],
+            'id',
+            'user_id',
+            'role_id'
+        ));
+
+        $data = [
+            [1, 'email@gmail.com', 1, 1, 'yesterday', 1, 'admin'],
+            [2, 'other@gmail.com', 2, 1, 'today', 1, 'admin'],
+            [2, 'other@gmail.com', 2, 2, 'today', 2, 'moderator'],
+            [2, 'other@gmail.com', 2, 3, 'last-week', 3, 'super-admin'],
+            [3, 'third@gmail.com', null, null, null, null, null],
+            [3, 'third@gmail.com', null, null, null, null],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+    }
+
+    /**
+     * @expectedException \Spiral\Cycle\Exception\ParserException
+     */
+    public function testNoParent()
+    {
+        $node = new PivotedNode(
+            ['id', 'name'],
+            ['user_id', 'role_id', 'added'],
+            'id',
+            'user_id',
+            'role_id'
+        );
+
+        $data = [
+            [1, 'email@gmail.com', 1, 1, 'yesterday', 1, 'admin'],
+            [2, 'other@gmail.com', 2, 1, 'today', 1, 'admin'],
+            [2, 'other@gmail.com', 2, 2, 'today', 2, 'moderator'],
+            [2, 'other@gmail.com', 2, 3, 'last-week', 3, 'super-admin'],
+            [3, 'third@gmail.com', null, null, null, null, null],
+            [3, 'third@gmail.com', null, null, null, null],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+    }
+
+    /**
+     * @expectedException \Spiral\Cycle\Exception\ParserException
+     */
+    public function testInvalidDataCount()
+    {
+        $node = new PivotedRootNode(
+            ['id', 'email'],
+            ['user_id', 'rule_id'],
+            'id',
+            'user_id',
+            'rule_id'
+        );
+
+        $data = [
+            [1, 2, 1, 'email@gmail.com'],
+            [2, 2, 2, 'other@gmail.com'],
+            [2, 3, 2],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
     }
 }

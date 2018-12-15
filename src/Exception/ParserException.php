@@ -8,7 +8,7 @@
 
 namespace Spiral\Cycle\Exception;
 
-class NodeException extends ORMException
+class ParserException extends ORMException
 {
 
 }

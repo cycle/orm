@@ -7,7 +7,7 @@
 
 namespace Spiral\Cycle\Parser;
 
-use Spiral\Cycle\Exception\NodeException;
+use Spiral\Cycle\Exception\ParserException;
 
 /**
  * Parses multiple sub children and mount them under parent node.
@@ -37,7 +37,7 @@ class ArrayNode extends AbstractNode implements ArrayInterface
     protected function push(array &$data)
     {
         if (empty($this->parent)) {
-            throw new NodeException("Unable to register data tree, parent is missing.");
+            throw new ParserException("Unable to register data tree, parent is missing.");
         }
 
         if (is_null($data[$this->innerKey])) {

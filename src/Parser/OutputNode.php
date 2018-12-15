@@ -20,6 +20,14 @@ abstract class OutputNode extends AbstractNode
     protected $result = [];
 
     /**
+     * {@inheritdoc}
+     */
+    protected function push(array &$data)
+    {
+        $this->result[] = &$data;
+    }
+
+    /**
      * Get resulted data tree.
      *
      * @return array

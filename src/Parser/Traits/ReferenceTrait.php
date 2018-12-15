@@ -8,7 +8,7 @@
 
 namespace Spiral\Cycle\Parser\Traits;
 
-use Spiral\Cycle\Exception\NodeException;
+use Spiral\Cycle\Exception\ParserException;
 
 /**
  * Mounts given data piece into reference based data tree.
@@ -51,12 +51,12 @@ trait ReferenceTrait
      * @param mixed  $criteria
      * @param array  $data
      *
-     * @throws NodeException
+     * @throws ParserException
      */
     final protected function mount(string $container, string $key, $criteria, array &$data)
     {
         if (!array_key_exists($criteria, $this->references[$key])) {
-            throw new NodeException("Undefined reference `{$key}`.`{$criteria}`.");
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`.");
         }
 
         foreach ($this->references[$key][$criteria] as &$subset) {
@@ -92,12 +92,12 @@ trait ReferenceTrait
      * @param mixed  $criteria
      * @param array  $data
      *
-     * @throws NodeException
+     * @throws ParserException
      */
     final protected function mountArray(string $container, string $key, $criteria, array &$data)
     {
         if (!array_key_exists($criteria, $this->references[$key])) {
-            throw new NodeException("Undefined reference `{$key}`.`{$criteria}`.");
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`.");
         }
 
         foreach ($this->references[$key][$criteria] as &$subset) {
@@ -115,12 +115,12 @@ trait ReferenceTrait
      *
      * @param string $key
      *
-     * @throws NodeException
+     * @throws ParserException
      */
     final protected function trackReference(string $key)
     {
         if (!in_array($key, $this->columns)) {
-            throw new NodeException(
+            throw new ParserException(
                 "Unable to create reference, key `{$key}` does not exist."
             );
         }

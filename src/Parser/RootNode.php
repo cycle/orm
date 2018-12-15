@@ -21,12 +21,4 @@ class RootNode extends OutputNode
         parent::__construct($columns, null);
         $this->setDuplicateCriteria($primaryKey);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function push(array &$data)
-    {
-        $this->result[] = &$data;
-    }
 }

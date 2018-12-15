@@ -8,7 +8,7 @@
 namespace Spiral\Cycle\Parser;
 
 
-use Spiral\Cycle\Exception\NodeException;
+use Spiral\Cycle\Exception\ParserException;
 
 /**
  * Similar to normal pivot node but does not require parent!
@@ -48,18 +48,6 @@ class PivotedRootNode extends OutputNode
 
     /**
      * {@inheritdoc}
-     */
-    protected function push(array &$data)
-    {
-        if (is_null($data[PivotedNode::PIVOT_DATA][$this->outerPivotKey])) {
-            return;
-        }
-
-        $this->result[] = &$data;
-    }
-
-    /**
-     * {@inheritdoc}
      *
      * Method fetches pivot data into sub-array with key "@pivot".
      */
@@ -87,7 +75,7 @@ class PivotedRootNode extends OutputNode
                 array_slice($line, $dataOffset, count($this->pivotColumns))
             );
         } catch (\Exception $e) {
-            throw new NodeException(
+            throw new ParserException(
                 "Unable to parse incoming row: " . $e->getMessage(),
                 $e->getCode(),
                 $e

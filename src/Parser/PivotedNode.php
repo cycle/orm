@@ -7,7 +7,7 @@
 
 namespace Spiral\Cycle\Parser;
 
-use Spiral\Cycle\Exception\NodeException;
+use Spiral\Cycle\Exception\ParserException;
 
 /**
  * Provides ability to parse columns of target table and map table all together.
@@ -54,7 +54,7 @@ class PivotedNode extends AbstractNode implements ArrayInterface
     protected function push(array &$data)
     {
         if (empty($this->parent)) {
-            throw new NodeException("Unable to register data tree, parent is missing.");
+            throw new ParserException("Unable to register data tree, parent is missing.");
         }
 
         if (is_null($data[$this->outerKey])) {
@@ -98,7 +98,7 @@ class PivotedNode extends AbstractNode implements ArrayInterface
                 array_slice($line, $dataOffset, count($this->pivotColumns))
             );
         } catch (\Exception $e) {
-            throw new NodeException(
+            throw new ParserException(
                 "Unable to parse incoming row: " . $e->getMessage(),
                 $e->getCode(),
                 $e

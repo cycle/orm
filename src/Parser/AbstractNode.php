@@ -7,7 +7,7 @@
 
 namespace Spiral\Cycle\Parser;
 
-use Spiral\Cycle\Exception\NodeException;
+use Spiral\Cycle\Exception\ParserException;
 use Spiral\Cycle\Parser\Traits\DuplicateTrait;
 use Spiral\Cycle\Parser\Traits\ReferenceTrait;
 
@@ -142,12 +142,12 @@ abstract class AbstractNode
      *
      * @return array
      *
-     * @throws NodeException
+     * @throws ParserException
      */
     public function getReferences(): array
     {
         if (empty($this->parent)) {
-            throw new NodeException("Unable to aggregate reference values, parent is missing");
+            throw new ParserException("Unable to aggregate reference values, parent is missing");
         }
 
         if (empty($this->parent->references[$this->outerKey])) {
@@ -164,7 +164,7 @@ abstract class AbstractNode
      * @param string       $container
      * @param AbstractNode $node
      *
-     * @throws NodeException
+     * @throws ParserException
      */
     final public function linkNode(string $container, AbstractNode $node)
     {
@@ -184,7 +184,7 @@ abstract class AbstractNode
      * @param string       $container
      * @param AbstractNode $node
      *
-     * @throws NodeException
+     * @throws ParserException
      */
     final public function joinNode(string $container, AbstractNode $node)
     {
@@ -198,12 +198,12 @@ abstract class AbstractNode
      * @param string $container
      * @return AbstractNode
      *
-     * @throws NodeException
+     * @throws ParserException
      */
     final public function getNode(string $container): AbstractNode
     {
         if (!isset($this->nodes[$container])) {
-            throw new NodeException("Undefined node {$container}.");
+            throw new ParserException("Undefined node {$container}.");
         }
 
         return $this->nodes[$container];
@@ -243,7 +243,7 @@ abstract class AbstractNode
                 array_slice($line, $dataOffset, count($this->columns))
             );
         } catch (\Exception $e) {
-            throw new NodeException(
+            throw new ParserException(
                 "Unable to parse incoming row: " . $e->getMessage(),
                 $e->getCode(),
                 $e

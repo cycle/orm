@@ -48,6 +48,8 @@ abstract class LinkedTreeTest extends BaseTest
             'label'    => 'string'
         ]);
 
+        $this->makeFK('nested', 'user_id', 'user', 'id');
+
         $this->getDatabase()->table('nested')->insertMultiple(
             ['user_id', 'owner_id', 'label'],
             [

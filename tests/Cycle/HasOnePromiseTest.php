@@ -34,6 +34,21 @@ abstract class HasOnePromiseTest extends BaseTest
             'balance' => 'float'
         ]);
 
+        $this->makeTable('profile', [
+            'id'      => 'primary',
+            'user_id' => 'integer',
+            'image'   => 'string'
+        ]);
+
+        $this->makeTable('nested', [
+            'id'         => 'primary',
+            'profile_id' => 'integer',
+            'label'      => 'string'
+        ]);
+
+        $this->makeFK('profile', 'user_id', 'user', 'id');
+        $this->makeFK('nested', 'profile_id', 'profile', 'id');
+
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
             [
@@ -42,12 +57,6 @@ abstract class HasOnePromiseTest extends BaseTest
             ]
         );
 
-        $this->makeTable('profile', [
-            'id'      => 'primary',
-            'user_id' => 'integer',
-            'image'   => 'string'
-        ]);
-
         $this->getDatabase()->table('profile')->insertMultiple(
             ['user_id', 'image'],
             [
@@ -55,11 +64,6 @@ abstract class HasOnePromiseTest extends BaseTest
             ]
         );
 
-        $this->makeTable('nested', [
-            'id'         => 'primary',
-            'profile_id' => 'integer',
-            'label'      => 'string'
-        ]);
 
         $this->getDatabase()->table('nested')->insertMultiple(
             ['profile_id', 'label'],

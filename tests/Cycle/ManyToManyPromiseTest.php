@@ -8,9 +8,9 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
+use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
@@ -33,6 +33,21 @@ abstract class ManyToManyPromiseTest extends BaseTest
             'balance' => 'float'
         ]);
 
+        $this->makeTable('tag', [
+            'id'   => 'primary',
+            'name' => 'string'
+        ]);
+
+        $this->makeTable('tag_user_map', [
+            'id'      => 'primary',
+            'user_id' => 'integer',
+            'tag_id'  => 'integer',
+            'as'      => 'string,nullable'
+        ]);
+
+        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
+        $this->makeFK('tag_user_map', 'user_id', 'tag', 'id');
+
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
             [
@@ -40,11 +55,6 @@ abstract class ManyToManyPromiseTest extends BaseTest
                 ['another@world.com', 200],
             ]
         );
-
-        $this->makeTable('tag', [
-            'id'   => 'primary',
-            'name' => 'string'
-        ]);
 
         $this->getDatabase()->table('tag')->insertMultiple(
             ['name'],
@@ -54,11 +64,6 @@ abstract class ManyToManyPromiseTest extends BaseTest
                 ['tag c'],
             ]
         );
-
-        $this->makeTable('tag_user_map', [
-            'user_id' => 'integer',
-            'tag_id'  => 'integer'
-        ]);
 
         $this->getDatabase()->table('tag_user_map')->insertMultiple(
             ['user_id', 'tag_id'],

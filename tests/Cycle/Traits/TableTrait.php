@@ -8,8 +8,9 @@
 
 namespace Spiral\Cycle\Tests\Traits;
 
-use Spiral\Database\Database;
 use Spiral\Cycle\Schema\Renderer;
+use Spiral\Database\Database;
+use Spiral\Database\ForeignKeyInterface;
 
 trait TableTrait
 {
@@ -28,6 +29,27 @@ trait TableTrait
             $schema->foreignKey($column)->references($options['table'], $options['column']);
         }
 
+        $schema->save();
+    }
+
+    /**
+     * @param string $from
+     * @param string $fromKey
+     * @param string $to
+     * @param string $toTable
+     * @param string $onDelete
+     * @param string $onUpdate
+     */
+    public function makeFK(
+        string $from,
+        string $fromKey,
+        string $to,
+        string $toTable,
+        string $onDelete = ForeignKeyInterface::CASCADE,
+        string $onUpdate = ForeignKeyInterface::CASCADE
+    ) {
+        $schema = $this->getDatabase()->table($from)->getSchema();
+        $schema->foreignKey($fromKey)->references($to, $toTable)->onDelete($onDelete)->onUpdate($onUpdate);
         $schema->save();
     }
 

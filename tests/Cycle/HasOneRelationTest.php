@@ -8,13 +8,13 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
-use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Nested;
 use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -35,6 +35,21 @@ abstract class HasOneRelationTest extends BaseTest
             'balance' => 'float'
         ]);
 
+        $this->makeTable('profile', [
+            'id'      => 'primary',
+            'user_id' => 'integer',
+            'image'   => 'string'
+        ]);
+
+        $this->makeTable('nested', [
+            'id'         => 'primary',
+            'profile_id' => 'integer',
+            'label'      => 'string'
+        ]);
+
+        $this->makeFK('profile', 'user_id', 'user', 'id');
+        $this->makeFK('nested', 'profile_id', 'profile', 'id');
+
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
             [
@@ -43,12 +58,6 @@ abstract class HasOneRelationTest extends BaseTest
             ]
         );
 
-        $this->makeTable('profile', [
-            'id'      => 'primary',
-            'user_id' => 'integer',
-            'image'   => 'string'
-        ]);
-
         $this->getDatabase()->table('profile')->insertMultiple(
             ['user_id', 'image'],
             [
@@ -56,11 +65,6 @@ abstract class HasOneRelationTest extends BaseTest
             ]
         );
 
-        $this->makeTable('nested', [
-            'id'         => 'primary',
-            'profile_id' => 'integer',
-            'label'      => 'string'
-        ]);
 
         $this->getDatabase()->table('nested')->insertMultiple(
             ['profile_id', 'label'],

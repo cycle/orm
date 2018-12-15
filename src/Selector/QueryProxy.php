@@ -86,15 +86,13 @@ class QueryProxy
     {
         $args = array_values($args);
         if (count($args) > 0 && $args[0] instanceof \Closure) {
+            // $query->where(function($q) { ...
             call_user_func($args[0], $this);
-
-            $result = $this->query;
-        } else {
-
-            // prepare arguments
-            $result = call_user_func_array([$this->query, $this->forwardCall($name)], $this->prepare($args));
+            return $this;
         }
 
+        // prepare arguments
+        $result = call_user_func_array($this->targetFunc($name), $this->proxy($args));
         if ($result === $this->query) {
             return $this;
         }
@@ -108,8 +106,13 @@ class QueryProxy
      * @param mixed $where
      * @return mixed
      */
-    protected function prepare($where)
+    protected function proxy($where)
     {
+        // todo: this require a lot of tests
+
+
+
+
         if (is_string($where)) {
             if (strpos($where, '.') === false) {
                 // always mount alias
@@ -129,7 +132,7 @@ class QueryProxy
                 $column = str_replace('@', $this->loader->getAlias(), $column);
             }
 
-            $result[$column] = !is_array($value) ? $value : $this->prepare($value);
+            $result[$column] = !is_array($value) ? $value : $this->proxy($value);
         }
 
         return $result;
@@ -139,9 +142,9 @@ class QueryProxy
      * Replace target where call with another compatible method (for example join or having).
      *
      * @param string $call
-     * @return string
+     * @return callable
      */
-    protected function forwardCall(string $call): string
+    protected function targetFunc(string $call): callable
     {
         if ($this->forward != null) {
             switch (strtolower($call)) {
@@ -157,6 +160,6 @@ class QueryProxy
             }
         }
 
-        return $call;
+        return [$this->query, $call];
     }
 }

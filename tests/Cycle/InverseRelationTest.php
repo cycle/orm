@@ -46,6 +46,8 @@ abstract class InverseRelationTest extends BaseTest
             'image'   => 'string'
         ]);
 
+        $this->makeFK('profile', 'user_id', 'user', 'id');
+
         $this->getDatabase()->table('profile')->insertMultiple(
             ['user_id', 'image'],
             [

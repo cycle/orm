@@ -12,11 +12,12 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
+use Spiral\Cycle\Selector\ScopeInterface;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
-abstract class ScopeTest extends BaseTest
+abstract class HasManyScopeTest extends BaseTest
 {
     use TableTrait;
 
@@ -243,5 +244,168 @@ abstract class ScopeTest extends BaseTest
         $this->assertSame('msg 3', $a->comments[1]->message);
 
         $this->assertSame('msg 2.3', $b->comments[0]->message);
+    }
+
+    public function testScopeViaMapperRelation()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class    => [
+                Schema::ALIAS       => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'comments' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
+            ],
+            Comment::class => [
+                Schema::ALIAS       => 'comment',
+                Schema::MAPPER      => HasManyScopeTestMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ]));
+
+        $s = new Selector($this->orm, User::class);
+        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+
+        $res = $s->load('comments')->fetchAll();
+
+        list($b, $a) = $res;
+
+        $this->assertCount(2, $a->comments);
+        $this->assertCount(1, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+    }
+
+    public function testScopeViaMapperRelationInload()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class    => [
+                Schema::ALIAS       => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'comments' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
+            ],
+            Comment::class => [
+                Schema::ALIAS       => 'comment',
+                Schema::MAPPER      => HasManyScopeTestMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ]));
+
+        $s = new Selector($this->orm, User::class);
+        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+
+        $res = $s->load('comments', [
+            'method' => Selector\JoinableLoader::INLOAD,
+        ])->fetchAll();
+
+        list($b, $a) = $res;
+
+        $this->assertCount(2, $a->comments);
+        $this->assertCount(1, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+    }
+
+    public function testScopeViaMapperRelationPromise()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class    => [
+                Schema::ALIAS       => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'comments' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
+            ],
+            Comment::class => [
+                Schema::ALIAS       => 'comment',
+                Schema::MAPPER      => HasManyScopeTestMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ]));
+
+        $s = new Selector($this->orm, User::class);
+        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+
+        $res = $s->fetchAll();
+
+        list($b, $a) = $res;
+
+        $this->assertCount(2, $a->comments);
+        $this->assertCount(1, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+    }
+}
+
+class HasManyScopeTestMapper extends Mapper
+{
+    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface
+    {
+        return new Selector\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
     }
 }

@@ -8,19 +8,19 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Database\Injection\Parameter;
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
-use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
+use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Nested;
 use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
+use Spiral\Database\Injection\Parameter;
 
 abstract class BelongsToRelationTest extends BaseTest
 {
@@ -71,6 +71,9 @@ abstract class BelongsToRelationTest extends BaseTest
                 [1, 'nested-label'],
             ]
         );
+
+        $this->makeFK('profile', 'user_id', 'user', 'id');
+        $this->makeFK('nested', 'profile_id', 'profile', 'id');
 
         $this->orm = $this->withSchema(new Schema([
             User::class    => [

@@ -33,18 +33,26 @@ abstract class RefersToPromiseTest extends BaseTest
             'balance' => 'float'
         ]);
 
+        $this->makeTable('profile', [
+            'id'      => 'primary',
+            'user_id' => 'integer,null',
+            'image'   => 'string'
+        ]);
+
+        $this->makeTable('nested', [
+            'id'         => 'primary',
+            'profile_id' => 'integer',
+            'label'      => 'string'
+        ]);
+
+        $this->makeFK('nested', 'profile_id', 'profile', 'id');
+
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
             [
                 ['hello@world.com', 100],
             ]
         );
-
-        $this->makeTable('profile', [
-            'id'      => 'primary',
-            'user_id' => 'integer,null',
-            'image'   => 'string'
-        ]);
 
         $this->getDatabase()->table('profile')->insertMultiple(
             ['user_id', 'image'],
@@ -54,12 +62,6 @@ abstract class RefersToPromiseTest extends BaseTest
                 [null, 'third.png'],
             ]
         );
-
-        $this->makeTable('nested', [
-            'id'         => 'primary',
-            'profile_id' => 'integer',
-            'label'      => 'string'
-        ]);
 
         $this->getDatabase()->table('nested')->insertMultiple(
             ['profile_id', 'label'],

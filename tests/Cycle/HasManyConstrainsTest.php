@@ -46,6 +46,8 @@ abstract class HasManyConstrainsTest extends BaseTest
             'message' => 'string'
         ]);
 
+        $this->makeFK('comment', 'user_id', 'user', 'id');
+
         $this->getDatabase()->table('comment')->insertMultiple(
             ['user_id', 'level', 'message'],
             [

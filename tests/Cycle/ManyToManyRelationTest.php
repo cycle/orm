@@ -35,6 +35,21 @@ abstract class ManyToManyRelationTest extends BaseTest
             'balance' => 'float'
         ]);
 
+        $this->makeTable('tag', [
+            'id'   => 'primary',
+            'name' => 'string'
+        ]);
+
+        $this->makeTable('tag_user_map', [
+            'id'      => 'primary',
+            'user_id' => 'integer',
+            'tag_id'  => 'integer',
+            'as'      => 'string,nullable'
+        ]);
+
+        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
+        $this->makeFK('tag_user_map', 'user_id', 'tag', 'id');
+
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
             [
@@ -42,11 +57,6 @@ abstract class ManyToManyRelationTest extends BaseTest
                 ['another@world.com', 200],
             ]
         );
-
-        $this->makeTable('tag', [
-            'id'   => 'primary',
-            'name' => 'string'
-        ]);
 
         $this->getDatabase()->table('tag')->insertMultiple(
             ['name'],
@@ -56,11 +66,6 @@ abstract class ManyToManyRelationTest extends BaseTest
                 ['tag c'],
             ]
         );
-
-        $this->makeTable('tag_user_map', [
-            'user_id' => 'integer',
-            'tag_id'  => 'integer'
-        ]);
 
         $this->getDatabase()->table('tag_user_map')->insertMultiple(
             ['user_id', 'tag_id'],

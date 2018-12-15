@@ -46,6 +46,10 @@ abstract class CyclicReferencesTest extends BaseTest
             'comment_id' => 'integer'
         ]);
 
+        $this->makeFK('comment', 'user_id', 'user', 'id');
+        $this->makeFK('favorites_map', 'user_id', 'user', 'id');
+        $this->makeFK('favorites_map', 'comment_id', 'comment', 'id');
+
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',

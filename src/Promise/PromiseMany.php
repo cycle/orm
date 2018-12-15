@@ -96,6 +96,8 @@ class PromiseMany implements PromiseInterface
         }
 
         $selector = new Selector($this->orm, $this->target);
+        $selector->scope($source->getScope(Selector\Source::DEFAULT_SCOPE));
+
         $selector->where($this->scope + $this->whereScope)->orderBy($this->orderBy);
 
         $this->resolved = $selector->fetchAll();

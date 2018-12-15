@@ -93,16 +93,13 @@ class PivotedPromise implements PromiseInterface
             throw new RelationException("ManyToMany relation can only work with SelectableInterface mappers");
         }
 
-        $selector = new Selector($this->orm, $this->target);
-        $query = $selector->getLoader()->buildQuery();
+        // getting scoped query
+        $root = new Selector\RootLoader($this->orm, $this->target);
+        $root->setScope($source->getScope(Selector\Source::DEFAULT_SCOPE));
+        $query = $root->buildQuery();
 
         // responsible for all the scoping
-        $loader = new ManyToManyLoader(
-            $this->orm,
-            $this->target,
-            $source->getTable(),
-            $this->relationSchema
-        );
+        $loader = new ManyToManyLoader($this->orm, $this->target, $source->getTable(), $this->relationSchema);
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [

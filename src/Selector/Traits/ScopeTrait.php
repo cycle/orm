@@ -9,7 +9,9 @@
 namespace Spiral\Cycle\Selector\Traits;
 
 use Spiral\Cycle\Selector\AbstractLoader;
+use Spiral\Cycle\Selector\QueryProxy;
 use Spiral\Cycle\Selector\ScopeInterface;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to assign the scope to the AbstractLoader.
@@ -30,5 +32,24 @@ trait ScopeTrait
         $this->scope = $scope;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    abstract public function getAlias(): string;
+
+    /**
+     * @param SelectQuery $query
+     * @return SelectQuery
+     */
+    protected function applyScope(SelectQuery $query): SelectQuery
+    {
+        if (!empty($this->scope)) {
+            $router = new QueryProxy($this->getAlias());
+            $this->scope->apply($router->withQuery($query));
+        }
+
+        return $query;
     }
 }

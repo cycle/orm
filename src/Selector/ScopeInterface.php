@@ -18,5 +18,6 @@ interface ScopeInterface
      *
      * @param QueryProxy $query
      */
+    // todo: we can create proxy inside
     public function apply(QueryProxy $query);
 }

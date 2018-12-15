@@ -13,7 +13,6 @@ use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\RootNode;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\Traits\ColumnsTrait;
-use Spiral\Cycle\Selector\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -22,7 +21,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 class RootLoader extends AbstractLoader
 {
-    use ColumnsTrait, ScopeTrait;
+    use ColumnsTrait;
 
     /** @var null|array */
     private $columns = null;
@@ -127,12 +126,9 @@ class RootLoader extends AbstractLoader
      */
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
-        if (!empty($this->scope)) {
-            $router = new QueryProxy($this->getAlias());
-            $this->scope->apply($router->withQuery($query));
-        }
-
-        return parent::configureQuery($this->mountColumns($query, true, '', true));
+        return parent::configureQuery(
+            $this->mountColumns($query, true, '', true)
+        );
     }
 
     /**

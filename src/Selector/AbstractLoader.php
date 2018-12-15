@@ -13,6 +13,7 @@ use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Selector\Traits\ChainTrait;
+use Spiral\Cycle\Selector\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -36,7 +37,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait;
+    use ChainTrait, ScopeTrait;
 
     // Loading methods for data loaders.
     public const INLOAD    = 1;
@@ -243,6 +244,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
+        $query = $this->applyScope(clone $query);
         foreach ($this->load as $loader) {
             if ($loader instanceof JoinableLoader && $loader->isJoined()) {
                 $query = $loader->configureQuery(clone $query);

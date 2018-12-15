@@ -13,7 +13,6 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\Traits\ColumnsTrait;
-use Spiral\Cycle\Selector\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -21,7 +20,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class JoinableLoader extends AbstractLoader
 {
-    use ColumnsTrait, ScopeTrait;
+    use ColumnsTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -203,12 +202,23 @@ abstract class JoinableLoader extends AbstractLoader
             throw new LoaderException("Combination of scope and `using` source is ambiguous");
         }
 
+        return parent::configureQuery($query);
+    }
+
+    /**
+     * Apply scope with specific where target.
+     *
+     * @param SelectQuery $query
+     * @return SelectQuery
+     */
+    protected function applyScope(SelectQuery $query): SelectQuery
+    {
         if (!empty($this->scope)) {
             $router = new QueryProxy($this->getAlias());
             $this->scope->apply($router->withQuery($query, $this->isJoined() ? 'onWhere' : 'where'));
         }
 
-        return parent::configureQuery($query);
+        return $query;
     }
 
     /**

@@ -11,27 +11,26 @@ namespace Spiral\Cycle;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Parser\OutputNode;
 use Spiral\Cycle\Selector\LoaderInterface;
-use Spiral\Cycle\Selector\QueryWrapper;
+use Spiral\Cycle\Selector\QueryMapper;
 use Spiral\Cycle\Selector\RootLoader;
 use Spiral\Cycle\Selector\ScopeInterface;
 use Spiral\Database\Query\SelectQuery;
 
 /**
- * Query builder and entity selector. Mocks SelectQuery.
+ * Query builder and entity selector. Mocks SelectQuery. Attention, Selector does not mount RootLoader scope by default.
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
+ * @method $this distinct()
  * @method $this where(...$args);
  * @method $this andWhere(...$args);
  * @method $this orWhere(...$args);
- *
  * @method $this having(...$args);
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
- *
  * @method $this orderBy($expression, $direction = 'ASC');
- *
- * @method $this distinct()
+ * @method $this limit(int $limit)
+ * @method $this offset(int $offset)
  *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
@@ -130,7 +129,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function __call(string $name, array $arguments)
     {
-        $wrapper = new QueryWrapper($this->getLoader()->getAlias());
+        $wrapper = new QueryMapper($this->getLoader()->getAlias());
 
         // aggregations
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
@@ -140,7 +139,8 @@ class Selector implements \IteratorAggregate, \Countable
         // where condition or statement
         $result = $wrapper->withQuery($this->loader->getQuery())->__call($name, $arguments);
 
-        if ($result === $this->loader->getQuery()) {
+        if ($result instanceof SelectQuery) {
+            $this->loader = $this->loader->withQuery($result);
             return $this;
         }
 
@@ -206,7 +206,7 @@ class Selector implements \IteratorAggregate, \Countable
     public function load($relation, array $options = []): self
     {
         if (is_string($relation)) {
-            $this->loader->loadRelation($relation, $options);
+            $this->loader = $this->loader->withRelation($relation, $options);
 
             return $this;
         }
@@ -297,7 +297,7 @@ class Selector implements \IteratorAggregate, \Countable
     public function with($relation, array $options = []): self
     {
         if (is_string($relation)) {
-            $this->loader->loadRelation($relation, $options, true);
+            $this->loader = $this->loader->withRelation($relation, $options, true);
 
             return $this;
         }

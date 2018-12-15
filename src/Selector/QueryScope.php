@@ -8,8 +8,6 @@
 
 namespace Spiral\Cycle\Selector;
 
-use Spiral\Database\Query\SelectQuery;
-
 /**
  * Provides the ability to scope query and load necessary relations into the loader.
  */
@@ -34,8 +32,9 @@ class QueryScope implements ScopeInterface
     /**
      * @inheritdoc
      */
-    public function apply(SelectQuery $query, AbstractLoader $loader)
+    public function apply(QueryMapper $query)
     {
-        $query->where($this->where)->orderBy($this->orderBy);
+        $query->where($this->where);
+        $query->orderBy($this->orderBy);
     }
 }

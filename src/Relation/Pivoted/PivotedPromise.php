@@ -94,7 +94,7 @@ class PivotedPromise implements PromiseInterface
         }
 
         $selector = new Selector($this->orm, $this->target);
-        $query = $selector->getLoader()->getQuery();
+        $query = $selector->getLoader()->buildQuery();
 
         // responsible for all the scoping
         $loader = new ManyToManyLoader(

@@ -13,6 +13,7 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\Traits\ColumnsTrait;
+use Spiral\Cycle\Selector\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -20,7 +21,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class JoinableLoader extends AbstractLoader
 {
-    use ColumnsTrait;
+    use ColumnsTrait, ScopeTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -56,6 +57,25 @@ abstract class JoinableLoader extends AbstractLoader
     }
 
     /**
+     * Relation table alias.
+     *
+     * @return string
+     */
+    public function getAlias(): string
+    {
+        if (!empty($this->options['using'])) {
+            //We are using another relation (presumably defined by with() to load data).
+            return $this->options['using'];
+        }
+
+        if (!empty($this->options['alias'])) {
+            return $this->options['alias'];
+        }
+
+        throw new LoaderException("Unable to resolve loader alias");
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
@@ -79,6 +99,14 @@ abstract class JoinableLoader extends AbstractLoader
 
         //Calculate table alias
         $loader->options['alias'] = $loader->calculateAlias($parent);
+        if (!empty($loader->options['scope'])) {
+            if ($loader->options['scope'] instanceof ScopeInterface) {
+                $loader->scope = $loader->options['scope'];
+            } else {
+                // we have to automatically constrain the loader query
+                $loader->scope = $this->getSource()->getScope($loader->options['scope']);
+            }
+        }
 
         return $loader;
     }
@@ -175,6 +203,11 @@ abstract class JoinableLoader extends AbstractLoader
             throw new LoaderException("Combination of scope and `using` source is ambiguous");
         }
 
+        if (!empty($this->scope)) {
+            $router = new QueryMapper($this->getAlias());
+            $this->scope->apply($router->withQuery($query, $this->isJoined() ? 'onWhere' : 'where'));
+        }
+
         return parent::configureQuery($query);
     }
 
@@ -256,25 +289,6 @@ abstract class JoinableLoader extends AbstractLoader
     protected function getJoinTable(): string
     {
         return "{$this->define(Schema::TABLE)} AS {$this->getAlias()}";
-    }
-
-    /**
-     * Relation table alias.
-     *
-     * @return string
-     */
-    protected function getAlias(): string
-    {
-        if (!empty($this->options['using'])) {
-            //We are using another relation (presumably defined by with() to load data).
-            return $this->options['using'];
-        }
-
-        if (!empty($this->options['alias'])) {
-            return $this->options['alias'];
-        }
-
-        throw new LoaderException("Unable to resolve loader alias");
     }
 
     /**

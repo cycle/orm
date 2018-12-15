@@ -15,21 +15,25 @@ use Spiral\Database\Query\SelectQuery;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method SelectQuery where(...$args);
- * @method SelectQuery andWhere(...$args);
- * @method SelectQuery orWhere(...$args);
- * @method SelectQuery having(...$args);
- * @method SelectQuery andHaving(...$args);
- * @method SelectQuery orHaving(...$args);
- * @method SelectQuery orderBy($expression, $direction = 'ASC');
- * @method SelectQuery distinct()
+ * @method QueryMapper distinct()
+ * @method QueryMapper where(...$args);
+ * @method QueryMapper andWhere(...$args);
+ * @method QueryMapper orWhere(...$args);
+ * @method QueryMapper having(...$args);
+ * @method QueryMapper andHaving(...$args);
+ * @method QueryMapper orHaving(...$args);
+ * @method QueryMapper orderBy($expression, $direction = 'ASC');
+ * @method QueryMapper limit(int $limit)
+ * @method QueryMapper offset(int $offset)
  *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
+ *
+ * @todo IMPROVE!!! FOR SCOPES AND OTHER STUFF!
  */
-class QueryWrapper
+class QueryMapper
 {
     /** @var string */
     private $alias;
@@ -49,11 +53,19 @@ class QueryWrapper
     }
 
     /**
+     * @return string
+     */
+    public function getAlias(): string
+    {
+        return $this->alias;
+    }
+
+    /**
      * Link wrapper to the given target (query or selector).
      *
      * @param SelectQuery $target
      * @param string      $forward Automatically forward "where" queries to another target.
-     * @return QueryWrapper
+     * @return QueryMapper
      */
     public function withQuery(SelectQuery $target, string $forward = null): self
     {
@@ -62,6 +74,16 @@ class QueryWrapper
         $wrapper->forward = $forward;
 
         return $wrapper;
+    }
+
+    /**
+     * Get currently associated query.
+     *
+     * @return SelectQuery|null
+     */
+    public function getQuery(): ?SelectQuery
+    {
+        return $this->query;
     }
 
     /**

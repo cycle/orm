@@ -13,6 +13,7 @@ use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\RootNode;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\Traits\ColumnsTrait;
+use Spiral\Cycle\Selector\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -21,7 +22,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 class RootLoader extends AbstractLoader
 {
-    use ColumnsTrait;
+    use ColumnsTrait, ScopeTrait;
 
     /** @var null|array */
     private $columns = null;
@@ -42,8 +43,6 @@ class RootLoader extends AbstractLoader
         $this->query = $source->getDatabase()->select()->from(
             sprintf("%s AS %s", $source->getTable(), $this->getAlias())
         );
-
-        $this->scope = $source->getScope(SourceInterface::DEFAULT_SCOPE);
     }
 
     /**
@@ -51,7 +50,7 @@ class RootLoader extends AbstractLoader
      */
     public function getAlias(): string
     {
-        return $this->orm->getSchema()->define($this->target, Schema::ALIAS);
+        return $this->orm->getMapper($this->target)->getRole();
     }
 
     /**
@@ -82,13 +81,27 @@ class RootLoader extends AbstractLoader
     }
 
     /**
-     * Return base query associated with the loader. Mutable.
+     * Associate new query with the loader.
+     *
+     * @param SelectQuery $query
+     * @return RootLoader
+     */
+    public function withQuery(SelectQuery $query): self
+    {
+        $loader = clone $this;
+        $loader->query = $query;
+
+        return $loader;
+    }
+
+    /**
+     * Return base query associated with the loader.
      *
      * @return SelectQuery
      */
     public function getQuery(): SelectQuery
     {
-        return $this->query;
+        return clone $this->query;
     }
 
     /**
@@ -98,7 +111,7 @@ class RootLoader extends AbstractLoader
      */
     public function buildQuery(): SelectQuery
     {
-        return $this->configureQuery(clone $this->query);
+        return $this->configureQuery($this->getQuery());
     }
 
     /**
@@ -135,9 +148,16 @@ class RootLoader extends AbstractLoader
      */
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
-        return parent::configureQuery(
+        if (!empty($this->scope)) {
+            $router = new QueryMapper($this->getAlias());
+            $this->scope->apply($router->withQuery($query));
+        }
+
+        $query = parent::configureQuery(
             $this->mountColumns($query, true, '', true)
         );
+
+        return $query;
     }
 
     /**

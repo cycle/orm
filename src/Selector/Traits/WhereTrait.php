@@ -8,7 +8,7 @@
 
 namespace Spiral\Cycle\Selector\Traits;
 
-use Spiral\Cycle\Selector\QueryWrapper;
+use Spiral\Cycle\Selector\QueryMapper;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -30,6 +30,6 @@ trait WhereTrait
             return $query;
         }
 
-        return (new QueryWrapper($table))->withQuery($query, $target)->where($where);
+        return (new QueryMapper($table))->withQuery($query, $target)->where($where);
     }
 }

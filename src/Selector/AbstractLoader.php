@@ -13,7 +13,6 @@ use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Selector\Traits\ChainTrait;
-use Spiral\Cycle\Selector\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -37,7 +36,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait, ScopeTrait;
+    use ChainTrait;
 
     // Loading methods for data loaders.
     public const INLOAD    = 1;
@@ -127,10 +126,6 @@ abstract class AbstractLoader implements LoaderInterface
         $loader->parent = $parent;
         $loader->options = $options + $this->options;
 
-        if (!empty($options['scope'])) {
-            $this->scope = $this->getSource()->getScope($options['scope']);
-        }
-
         return $loader;
     }
 
@@ -141,60 +136,20 @@ abstract class AbstractLoader implements LoaderInterface
      * Method support chain initiation via dot notation. Method will return already exists loader if
      * such presented.
      *
-     * @see RecordSelector::load()
-     *
+     * @see Selector::load()
      * @param string $relation Relation name, or chain of relations separated by.
      * @param array  $options  Loader options (to be applied to last chain element only).
      * @param bool   $join     When set to true loaders will be forced into JOIN mode.
-     *
      * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
      */
-    final public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
+    final public function withRelation(string $relation, array $options, bool $join = false): LoaderInterface
     {
-        //Check if relation contain dot, i.e. relation chain
-        if ($this->isChain($relation)) {
-            return $this->loadChain($relation, $options, $join);
-        }
+        $loader = clone $this;
+        $loader->loadRelation($relation, $options, $join);
 
-        /*
-         * Joined loaders must be isolated from normal loaders due they would not load any data
-         * and will only modify SelectQuery.
-         */
-        if (!$join) {
-            $loaders = &$this->load;
-        } else {
-            $loaders = &$this->join;
-        }
-
-        if ($join) {
-            if (
-                empty($options['method'])
-                || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])
-            ) {
-                //Let's tell our loaded that it's method is JOIN (forced)
-                $options['method'] = self::JOIN;
-            }
-        }
-
-        if (isset($loaders[$relation])) {
-            //Overwriting existed loader options
-            return $loaders[$relation] = $loaders[$relation]->withContext($this, $options);
-        }
-
-        try {
-            //Creating new loader.
-            $loader = $this->orm->getFactory()->loader($this->target, $relation);
-        } catch (FactoryException $e) {
-            throw new LoaderException(
-                "Unable to create loader: %s" . $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
-
-        return $loaders[$relation] = $loader->withContext($this, $options);
+        return $loader;
     }
 
     /**
@@ -255,7 +210,7 @@ abstract class AbstractLoader implements LoaderInterface
      *
      * @return string
      */
-    abstract protected function getAlias(): string;
+    abstract public function getAlias(): string;
 
     /**
      * List of columns associated with the loader.
@@ -272,6 +227,62 @@ abstract class AbstractLoader implements LoaderInterface
     abstract protected function initNode(): AbstractNode;
 
     /**
+     * Load the relation.
+     *
+     * @param string $relation Relation name, or chain of relations separated by.
+     * @param array  $options  Loader options (to be applied to last chain element only).
+     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
+     * @return LoaderInterface Must return loader for a requested relation.
+     *
+     * @throws LoaderException
+     */
+    final protected function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
+    {
+        //Check if relation contain dot, i.e. relation chain
+        if ($this->isChain($relation)) {
+            return $this->loadChain($relation, $options, $join);
+        }
+
+        /*
+         * Joined loaders must be isolated from normal loaders due they would not load any data
+         * and will only modify SelectQuery.
+         */
+        if (!$join) {
+            $loaders = &$this->load;
+        } else {
+            $loaders = &$this->join;
+        }
+
+        if ($join) {
+            if (
+                empty($options['method'])
+                || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])
+            ) {
+                //Let's tell our loaded that it's method is JOIN (forced)
+                $options['method'] = self::JOIN;
+            }
+        }
+
+        if (isset($loaders[$relation])) {
+            //Overwriting existed loader options
+            return $loaders[$relation] = $loaders[$relation]->withContext($this, $options);
+        }
+
+        try {
+            //Creating new loader.
+            $loader = $this->orm->getFactory()->loader($this->target, $relation);
+        } catch (FactoryException $e) {
+            throw new LoaderException(
+                "Unable to create loader: %s" . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
+
+        return $loaders[$relation] = $loader->withContext($this, $options);
+    }
+
+    /**
      * @param SelectQuery $query
      * @return SelectQuery
      */
@@ -285,10 +296,6 @@ abstract class AbstractLoader implements LoaderInterface
 
         foreach ($this->join as $loader) {
             $query = $loader->configureQuery(clone $query);
-        }
-
-        if (!empty($this->scope)) {
-            $this->scope->apply($query, $this);
         }
 
         return $query;

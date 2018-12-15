@@ -32,12 +32,7 @@ interface LoaderInterface
     public function getTarget(): string;
 
     /**
-     * Declare loader context, parent will declare TreeParser where loader can mount his data, in
-     * addition each loader will declare set of fields to be aggregated in a parent and used to
-     * properly load connected data (AbstractLoaders can also be loaded directly thought joining
-     * into SQL query).
-     *
-     * Attention, make sure that loader accepts given parent.
+     * Initiate loader with it's position and options in dependency tree.
      *
      * @param LoaderInterface $parent
      * @param array           $options

@@ -8,8 +8,8 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
@@ -17,6 +17,7 @@ use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
+use Spiral\Database\ForeignKeyInterface;
 
 abstract class CyclicReferencesTest extends BaseTest
 {
@@ -47,9 +48,22 @@ abstract class CyclicReferencesTest extends BaseTest
         ]);
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
-        $this->makeFK('favorites_map', 'user_id', 'user', 'id');
-        $this->makeFK('favorites_map', 'comment_id', 'comment', 'id');
-
+        $this->makeFK(
+            'favorites_map',
+            'user_id',
+            'user',
+            'id',
+            ForeignKeyInterface::NO_ACTION,
+            ForeignKeyInterface::NO_ACTION
+        );
+        $this->makeFK(
+            'favorites_map',
+            'comment_id',
+            'comment',
+            'id',
+            ForeignKeyInterface::NO_ACTION,
+            ForeignKeyInterface::NO_ACTION
+        );
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
@@ -104,7 +118,7 @@ abstract class CyclicReferencesTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
-                    'user'         => [
+                    'user'      => [
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [

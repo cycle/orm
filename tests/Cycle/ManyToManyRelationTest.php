@@ -8,6 +8,7 @@
 
 namespace Spiral\Cycle\Tests;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
@@ -339,6 +340,44 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $t = new Tag();
         $t->name = "my tag";
+
+        $u->tags->add($t);
+        $u2->tags->add($t);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($u2);
+        $tr->run();
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+
+        $this->assertSame("many@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+
+        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(4)->fetchOne();
+
+        $this->assertSame("many2@email.com", $u->email);
+        $this->assertCount(1, $u->tags);
+        $this->assertSame("my tag", $u->tags[0]->name);
+    }
+
+    public function testCreateWithManyToManyMultilinkDefaultCollection()
+    {
+        $u = new User();
+        $u->email = "many@email.com";
+        $u->balance = 900;
+
+        $u2 = new User();
+        $u2->email = "many2@email.com";
+        $u2->balance = 1900;
+
+        $t = new Tag();
+        $t->name = "my tag";
+
+        $u->tags = new ArrayCollection();
 
         $u->tags->add($t);
         $u2->tags->add($t);

@@ -247,12 +247,12 @@ abstract class AbstractLoader implements LoaderInterface
         $query = $this->applyScope(clone $query);
         foreach ($this->load as $loader) {
             if ($loader instanceof JoinableLoader && $loader->isJoined()) {
-                $query = $loader->configureQuery(clone $query);
+                $query = $loader->configureQuery($query);
             }
         }
 
         foreach ($this->join as $loader) {
-            $query = $loader->configureQuery(clone $query);
+            $query = $loader->configureQuery($query);
         }
 
         return $query;

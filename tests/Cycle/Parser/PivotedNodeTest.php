@@ -215,7 +215,7 @@ class PivotedNodeTest extends TestCase
         $data = [
             [1, 2, 1, 'email@gmail.com'],
             [2, 2, 2, 'other@gmail.com'],
-            [2, 3, 2],
+            [2],
         ];
 
         foreach ($data as $row) {

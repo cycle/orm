@@ -39,12 +39,4 @@ trait VisitorTrait
     {
         $this->visited[$branch] = true;
     }
-
-    /**
-     * Reset all visited branches.
-     */
-    public function resetVisited()
-    {
-        $this->visited = [];
-    }
 }

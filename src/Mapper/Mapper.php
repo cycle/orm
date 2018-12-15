@@ -20,54 +20,55 @@ use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
-use Zend\Hydrator\HydratorInterface;
-use Zend\Hydrator\Reflection;
+use Zend\Hydrator;
 
-class Mapper extends Source implements MapperInterface
+class Mapper extends Selector\Source implements MapperInterface
 {
     // system column to store entity type
     public const ENTITY_TYPE = '_type';
 
     /** @var null|RepositoryInterface */
-    private $repository;
+    protected $repository;
 
-    /** @var string */
-    private $role;
-
+    /** @var ORMInterface */
     protected $orm;
 
-    protected $schema;
+    /** @var string */
+    protected $role;
 
-    protected $primaryKey;
+    /** @var Hydrator\HydratorInterface */
+    protected $hydrator;
 
-    protected $children;
-
+    /** @var array */
     protected $columns;
 
-    /**
-     * @var HydratorInterface
-     */
-    private $hydrator;
+    /** @var string */
+    protected $primaryKey;
 
+    /** @var array */
+    protected $children = [];
+
+    /**
+     * @param ORMInterface $orm
+     * @param string       $role
+     */
     public function __construct(ORMInterface $orm, string $role)
     {
         $this->orm = $orm;
-        $this->schema = $orm->getSchema();
+        $this->role = $role;
+        $this->hydrator = new Hydrator\Reflection();
+
+        $schema = $orm->getSchema();
 
         parent::__construct(
             $orm->getFactory(),
-            $orm->getSchema()->define($role, Schema::DATABASE),
-            $orm->getSchema()->define($role, Schema::TABLE)
+            $schema->define($role, Schema::DATABASE),
+            $schema->define($role, Schema::TABLE)
         );
 
-        $this->role = $role;
-
-        // todo: make it better
-        $this->columns = $this->orm->getSchema()->define($role, Schema::COLUMNS);
-        $this->primaryKey = $this->orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $this->children = $this->orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
-
-        $this->hydrator = new Reflection();
+        $this->columns = $schema->define($role, Schema::COLUMNS);
+        $this->primaryKey = $schema->define($role, Schema::PRIMARY_KEY);
+        $this->children = $schema->define($role, Schema::CHILDREN) ?? [];
     }
 
     /**

@@ -6,11 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Spiral\Cycle\Selector;
 
 use Spiral\Cycle\FactoryInterface;
-use Spiral\Cycle\Selector\ScopeInterface;
-use Spiral\Cycle\Selector\SourceInterface;
 use Spiral\Database\DatabaseInterface;
 
 class Source implements SourceInterface

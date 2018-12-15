@@ -32,7 +32,7 @@ class QueryScope implements ScopeInterface
     /**
      * @inheritdoc
      */
-    public function apply(QueryMapper $query)
+    public function apply(QueryProxy $query)
     {
         $query->where($this->where);
         $query->orderBy($this->orderBy);

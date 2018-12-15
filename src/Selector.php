@@ -11,7 +11,7 @@ namespace Spiral\Cycle;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Parser\OutputNode;
 use Spiral\Cycle\Selector\LoaderInterface;
-use Spiral\Cycle\Selector\QueryMapper;
+use Spiral\Cycle\Selector\QueryProxy;
 use Spiral\Cycle\Selector\RootLoader;
 use Spiral\Cycle\Selector\ScopeInterface;
 use Spiral\Database\Query\SelectQuery;
@@ -129,7 +129,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function __call(string $name, array $arguments)
     {
-        $wrapper = new QueryMapper($this->getLoader()->getAlias());
+        $wrapper = new QueryProxy($this->getLoader()->getAlias());
 
         // aggregations
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {

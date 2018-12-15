@@ -16,7 +16,7 @@ interface ScopeInterface
     /**
      * Configure query and loader with needed conditions, queries or additional relations.
      *
-     * @param QueryMapper $query
+     * @param QueryProxy $query
      */
-    public function apply(QueryMapper $query);
+    public function apply(QueryProxy $query);
 }

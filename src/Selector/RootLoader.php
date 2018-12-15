@@ -149,7 +149,7 @@ class RootLoader extends AbstractLoader
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         if (!empty($this->scope)) {
-            $router = new QueryMapper($this->getAlias());
+            $router = new QueryProxy($this->getAlias());
             $this->scope->apply($router->withQuery($query));
         }
 

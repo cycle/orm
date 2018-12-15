@@ -15,16 +15,16 @@ use Spiral\Database\Query\SelectQuery;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method QueryMapper distinct()
- * @method QueryMapper where(...$args);
- * @method QueryMapper andWhere(...$args);
- * @method QueryMapper orWhere(...$args);
- * @method QueryMapper having(...$args);
- * @method QueryMapper andHaving(...$args);
- * @method QueryMapper orHaving(...$args);
- * @method QueryMapper orderBy($expression, $direction = 'ASC');
- * @method QueryMapper limit(int $limit)
- * @method QueryMapper offset(int $offset)
+ * @method QueryProxy distinct()
+ * @method QueryProxy where(...$args);
+ * @method QueryProxy andWhere(...$args);
+ * @method QueryProxy orWhere(...$args);
+ * @method QueryProxy having(...$args);
+ * @method QueryProxy andHaving(...$args);
+ * @method QueryProxy orHaving(...$args);
+ * @method QueryProxy orderBy($expression, $direction = 'ASC');
+ * @method QueryProxy limit(int $limit)
+ * @method QueryProxy offset(int $offset)
  *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
@@ -33,7 +33,7 @@ use Spiral\Database\Query\SelectQuery;
  *
  * @todo IMPROVE!!! FOR SCOPES AND OTHER STUFF!
  */
-class QueryMapper
+class QueryProxy
 {
     /** @var string */
     private $alias;
@@ -65,7 +65,7 @@ class QueryMapper
      *
      * @param SelectQuery $target
      * @param string      $forward Automatically forward "where" queries to another target.
-     * @return QueryMapper
+     * @return QueryProxy
      */
     public function withQuery(SelectQuery $target, string $forward = null): self
     {

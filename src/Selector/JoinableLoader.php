@@ -204,7 +204,7 @@ abstract class JoinableLoader extends AbstractLoader
         }
 
         if (!empty($this->scope)) {
-            $router = new QueryMapper($this->getAlias());
+            $router = new QueryProxy($this->getAlias());
             $this->scope->apply($router->withQuery($query, $this->isJoined() ? 'onWhere' : 'where'));
         }
 

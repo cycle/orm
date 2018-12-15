@@ -7,7 +7,7 @@
 
 namespace Spiral\Cycle\Selector\Traits;
 
-use Spiral\Cycle\Selector\QueryMapper;
+use Spiral\Cycle\Selector\QueryProxy;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -22,7 +22,7 @@ trait ConstrainTrait
     private function configureWindow(SelectQuery $query, array $orderBy)
     {
         if (!empty($orderBy)) {
-            (new QueryMapper($this->getAlias()))->withQuery($query)->orderBy($orderBy);
+            (new QueryProxy($this->getAlias()))->withQuery($query)->orderBy($orderBy);
         }
     }
 

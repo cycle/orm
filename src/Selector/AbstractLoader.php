@@ -17,7 +17,7 @@ use Spiral\Database\Query\SelectQuery;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
- * loaders can communicate with parent selector by providing it's own set of conditions, columns
+ * loaders can communicate with SelectQuery by providing it's own set of conditions, columns
  * joins and etc. In some cases loader may create additional selector to load data using information
  * fetched from previous query.
  *
@@ -27,9 +27,9 @@ use Spiral\Database\Query\SelectQuery;
  * Loaders can be used for both - loading and filtering of record data.
  *
  * Reference tree generation logic example:
- *  User has many Posts (relation "posts"), user primary is ID, post inner key pointing to user
- *  is USER_ID. Post loader must request User data loader to create references based on ID field
- *  values. Once Post data were parsed we can mount it under parent user using mount method:
+ *   User has many Posts (relation "posts"), user primary is ID, post inner key pointing to user
+ *   is USER_ID. Post loader must request User data loader to create references based on ID field
+ *   values. Once Post data were parsed we can mount it under parent user using mount method:
  *
  * @see Selector::load()
  * @see Selector::with()
@@ -73,6 +73,13 @@ abstract class AbstractLoader implements LoaderInterface
         $this->orm = $orm;
         $this->target = $target;
     }
+
+    /**
+     * Table alias of the loader.
+     *
+     * @return string
+     */
+    abstract public function getAlias(): string;
 
     /**
      * @return string
@@ -130,103 +137,6 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
-     * Pre-load data on inner relation or relation chain. Method automatically called by Selector,
-     * see load() method.
-     *
-     * Method support chain initiation via dot notation. Method will return already exists loader if
-     * such presented.
-     *
-     * @see Selector::load()
-     * @param string $relation Relation name, or chain of relations separated by.
-     * @param array  $options  Loader options (to be applied to last chain element only).
-     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
-     * @return LoaderInterface Must return loader for a requested relation.
-     *
-     * @throws LoaderException
-     */
-    final public function withRelation(string $relation, array $options, bool $join = false): LoaderInterface
-    {
-        $loader = clone $this;
-        $loader->loadRelation($relation, $options, $join);
-
-        return $loader;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public function createNode(): AbstractNode
-    {
-        $node = $this->initNode();
-
-        foreach ($this->load as $relation => $loader) {
-            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
-                $node->joinNode($relation, $loader->createNode());
-                continue;
-            }
-
-            $node->linkNode($relation, $loader->createNode());
-        }
-
-        return $node;
-    }
-
-    /**
-     * @param AbstractNode $node
-     */
-    public function loadData(AbstractNode $node)
-    {
-        // loading data thought child loaders
-        foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->getNode($relation));
-        }
-    }
-
-    /**
-     * Ensure state of every nested loader.
-     */
-    public function __clone()
-    {
-        foreach ($this->load as $name => $loader) {
-            $this->load[$name] = $loader->withContext($this);
-        }
-
-        foreach ($this->join as $name => $loader) {
-            $this->join[$name] = $loader->withContext($this);
-        }
-    }
-
-    /**
-     * Destruct loader.
-     */
-    final public function __destruct()
-    {
-        $this->load = [];
-        $this->join = [];
-    }
-
-    /**
-     * Table alias of the loader.
-     *
-     * @return string
-     */
-    abstract public function getAlias(): string;
-
-    /**
-     * List of columns associated with the loader.
-     *
-     * @return array
-     */
-    abstract protected function getColumns(): array;
-
-    /**
-     * Create input node for the loader.
-     *
-     * @return AbstractNode
-     */
-    abstract protected function initNode(): AbstractNode;
-
-    /**
      * Load the relation.
      *
      * @param string $relation Relation name, or chain of relations separated by.
@@ -236,7 +146,7 @@ abstract class AbstractLoader implements LoaderInterface
      *
      * @throws LoaderException
      */
-    final protected function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
+    final public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
     {
         //Check if relation contain dot, i.e. relation chain
         if ($this->isChain($relation)) {
@@ -281,6 +191,69 @@ abstract class AbstractLoader implements LoaderInterface
 
         return $loaders[$relation] = $loader->withContext($this, $options);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function createNode(): AbstractNode
+    {
+        $node = $this->initNode();
+
+        foreach ($this->load as $relation => $loader) {
+            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
+                $node->joinNode($relation, $loader->createNode());
+                continue;
+            }
+
+            $node->linkNode($relation, $loader->createNode());
+        }
+
+        return $node;
+    }
+
+    /**
+     * @param AbstractNode $node
+     */
+    public function loadData(AbstractNode $node)
+    {
+        // loading data thought child loaders
+        foreach ($this->load as $relation => $loader) {
+            $loader->loadData($node->getNode($relation));
+        }
+    }
+
+    /**
+     * Ensure state of every nested loader.
+     */
+    public function __clone()
+    {
+        $this->parent = null;
+
+        foreach ($this->load as $name => $loader) {
+            $this->load[$name] = $loader->withContext($this);
+        }
+
+        foreach ($this->join as $name => $loader) {
+            $this->join[$name] = $loader->withContext($this);
+        }
+    }
+
+    /**
+     * Destruct loader.
+     */
+    final public function __destruct()
+    {
+        $this->parent = null;
+        $this->load = [];
+        $this->join = [];
+    }
+
+    /**
+     * Create input node for the loader.
+     *
+     * @return AbstractNode
+     */
+    abstract protected function initNode(): AbstractNode;
 
     /**
      * @param SelectQuery $query

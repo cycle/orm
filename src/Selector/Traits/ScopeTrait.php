@@ -25,11 +25,10 @@ trait ScopeTrait
      * @param ScopeInterface $scope
      * @return AbstractLoader
      */
-    public function withScope(ScopeInterface $scope = null): self
+    public function setScope(ScopeInterface $scope = null): self
     {
-        $loader = clone $this;
-        $loader->scope = $scope;
+        $this->scope = $scope;
 
-        return $loader;
+        return $this;
     }
 }

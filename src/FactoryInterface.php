@@ -15,9 +15,9 @@ use Spiral\Database\DatabaseInterface;
 
 interface FactoryInterface
 {
-    public function database(string $name = null): DatabaseInterface;
-
     public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
+
+    public function database(string $name = null): DatabaseInterface;
 
     public function mapper(string $role): MapperInterface;
 

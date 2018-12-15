@@ -60,33 +60,17 @@ class RootLoader extends AbstractLoader
 
     /**
      * Columns to be selected, please note, primary key will always be included, DO not include
-     * column aliases in here, aliases will be added automatically. Creates new loader tree copy.
+     * column aliases in here, aliases will be added automatically.
      *
      * @param array $columns
      * @return RootLoader
      */
-    public function withColumns(array $columns): self
+    public function setColumns(array $columns): self
     {
-        $loader = clone $this;
-
         // always include primary key
-        $loader->columns = array_merge([$loader->define(Schema::PRIMARY_KEY)], $columns);
+        $this->columns = array_merge([$this->define(Schema::PRIMARY_KEY)], $columns);
 
-        return $loader;
-    }
-
-    /**
-     * Associate new query with the loader.
-     *
-     * @param SelectQuery $query
-     * @return RootLoader
-     */
-    public function withQuery(SelectQuery $query): self
-    {
-        $loader = clone $this;
-        $loader->query = $query;
-
-        return $loader;
+        return $this;
     }
 
     /**
@@ -96,7 +80,7 @@ class RootLoader extends AbstractLoader
      */
     public function getQuery(): SelectQuery
     {
-        return clone $this->query;
+        return $this->query;
     }
 
     /**
@@ -106,7 +90,7 @@ class RootLoader extends AbstractLoader
      */
     public function buildQuery(): SelectQuery
     {
-        return $this->configureQuery($this->getQuery());
+        return $this->configureQuery(clone $this->query);
     }
 
     /**
@@ -130,7 +114,7 @@ class RootLoader extends AbstractLoader
     }
 
     /**
-     * Clone with initial query.
+     * Clone the underlying query.
      */
     public function __clone()
     {
@@ -148,11 +132,7 @@ class RootLoader extends AbstractLoader
             $this->scope->apply($router->withQuery($query));
         }
 
-        $query = parent::configureQuery(
-            $this->mountColumns($query, true, '', true)
-        );
-
-        return $query;
+        return parent::configureQuery($this->mountColumns($query, true, '', true));
     }
 
     /**

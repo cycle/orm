@@ -63,22 +63,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function scope(ScopeInterface $scope = null): self
     {
-        $this->loader = $this->loader->withScope($scope);
-
-        return $this;
-    }
-
-    /**
-     * Columns to be selected, please note, primary key will always be included, DO not include
-     * column aliases in here, aliases will be added automatically.
-     *
-     * @see buildQuery()
-     * @param array $columns
-     * @return self
-     */
-    public function columns(array $columns): self
-    {
-        $this->loader = $this->loader->withColumns($columns);
+        $this->loader->setScope($scope);
 
         return $this;
     }
@@ -131,8 +116,8 @@ class Selector implements \IteratorAggregate, \Countable
     {
         $proxy = new QueryProxy($this->getLoader()->getAlias());
 
-        // aggregations
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
+            // aggregations
             return $proxy->withQuery($this->loader->buildQuery())->__call($name, $arguments);
         }
 
@@ -140,7 +125,6 @@ class Selector implements \IteratorAggregate, \Countable
         $result = $proxy->withQuery($this->loader->getQuery())->__call($name, $arguments);
 
         if ($result instanceof SelectQuery) {
-            $this->loader = $this->loader->withQuery($result);
             return $this;
         }
 
@@ -206,7 +190,7 @@ class Selector implements \IteratorAggregate, \Countable
     public function load($relation, array $options = []): self
     {
         if (is_string($relation)) {
-            $this->loader = $this->loader->withRelation($relation, $options);
+            $this->loader->loadRelation($relation, $options);
 
             return $this;
         }
@@ -297,7 +281,7 @@ class Selector implements \IteratorAggregate, \Countable
     public function with($relation, array $options = []): self
     {
         if (is_string($relation)) {
-            $this->loader = $this->loader->withRelation($relation, $options, true);
+            $this->loader->loadRelation($relation, $options, true);
 
             return $this;
         }

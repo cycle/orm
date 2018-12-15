@@ -175,6 +175,34 @@ class PivotedNodeTest extends TestCase
     /**
      * @expectedException \Spiral\Cycle\Exception\ParserException
      */
+    public function testNestedInvalidCountPivot()
+    {
+        $node = new RootNode(['id', 'email'], 'id');
+        $node->joinNode('roles', new PivotedNode(
+            ['id', 'name'],
+            ['user_id', 'role_id', 'added'],
+            'id',
+            'user_id',
+            'role_id'
+        ));
+
+        $data = [
+            [1, 'email@gmail.com', 1, 1, 'yesterday', 1, 'admin'],
+            [2, 'other@gmail.com', 2, 1, 'today', 1, 'admin'],
+            [2, 'other@gmail.com', 2, 2, 'today', 2, 'moderator'],
+            [2, 'other@gmail.com', 2, 3, 'last-week', 3, 'super-admin'],
+            [3, 'third@gmail.com', null, null, null, null, null],
+            [3, 'third@gmail.com'],
+        ];
+
+        foreach ($data as $row) {
+            $node->parseRow(0, $row);
+        }
+    }
+
+    /**
+     * @expectedException \Spiral\Cycle\Exception\ParserException
+     */
     public function testNoParent()
     {
         $node = new PivotedNode(

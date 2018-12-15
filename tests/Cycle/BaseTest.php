@@ -300,7 +300,6 @@ abstract class BaseTest extends TestCase
             $rValue = $relations[$name];
 
             if ($rValue instanceof PivotedStorage || $rValue instanceof \Spiral\Cycle\Relation\Pivoted\PivotedPromise) {
-                // todo: implement PIVOT data verification
                 continue;
             }
 

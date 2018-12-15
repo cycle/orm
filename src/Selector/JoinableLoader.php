@@ -22,10 +22,6 @@ abstract class JoinableLoader extends AbstractLoader
 {
     use ColumnsTrait;
 
-    // require to properly calculate unique column aliases while minified
-    // todo: i need stable approach (?)
-    private static $countLevels = 0;
-
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
@@ -204,13 +200,14 @@ abstract class JoinableLoader extends AbstractLoader
             return $this->options['alias'];
         }
 
+        $alias = $parent->getAlias() . '_' . $this->relation;
+
         if ($this->isLoaded() && $this->isJoined()) {
-            // unique alias, we are able to do that for relations just loaded
-            return 'd' . decoct(++self::$countLevels);
+            // to avoid collisions
+            return 'l_' . $alias;
         }
 
-        // chained alias
-        return $parent->getAlias() . '_' . $this->relation;
+        return $alias;
     }
 
     /**

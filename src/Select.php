@@ -61,7 +61,7 @@ class Select implements \IteratorAggregate, \Countable
      * @param ConstrainInterface|null $scope
      * @return Select
      */
-    public function scope(ConstrainInterface $scope = null): self
+    public function constrain(ConstrainInterface $scope = null): self
     {
         $this->loader->setConstrain($scope);
 

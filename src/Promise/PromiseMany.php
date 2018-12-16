@@ -97,7 +97,7 @@ class PromiseMany implements PromiseInterface
         }
 
         $selector = new Select($this->orm, $this->target);
-        $this->resolved = $selector->scope($this->scope)->where($this->query + $this->where)->fetchAll();
+        $this->resolved = $selector->constrain($this->scope)->where($this->query + $this->where)->fetchAll();
 
         $this->orm = null;
 

@@ -8,8 +8,8 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
@@ -74,6 +74,7 @@ abstract class InverseRelationTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
+                            Relation::ORDER_BY  => ['@.id' => 'ASC']
                         ],
                     ]
                 ]
@@ -107,6 +108,7 @@ abstract class InverseRelationTest extends BaseTest
     {
         $selector = new Selector($this->orm, User::class);
         $selector->load('profile.user')->orderBy('user.id');
+
         $this->assertEquals([
             [
                 'id'      => 1,

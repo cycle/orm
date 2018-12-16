@@ -389,7 +389,7 @@ abstract class HasManyRelationTest extends BaseTest
         list($a, $b) = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
             'alias'  => 'comment'
-        ])->orderBy('user.id')->orderBy('comment.id')->fetchAll();
+        ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);

@@ -15,6 +15,7 @@ use Spiral\Cycle\Selector;
 use Spiral\Cycle\Tests\BaseTest;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\Post;
+use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
@@ -450,7 +451,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
         ]);
 
         // overwrites default one
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
+        list($a, $b) = (new Selector($this->orm, User::class))->orderBy('user.id')->load('comments', [
             'where' => ['@.level' => 1]
         ])->fetchAll();
 
@@ -469,7 +470,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
         ]);
 
         // overwrites default one
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
+        list($a, $b) = (new Selector($this->orm, User::class))->orderBy('user.id')->load('comments', [
             'where'  => ['@.level' => 1],
             'method' => Selector\JoinableLoader::INLOAD
         ])->fetchAll();
@@ -583,7 +584,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
         return $this->orm->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => Mapper::class,
+                Schema::MAPPER      => SortedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',

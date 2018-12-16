@@ -34,6 +34,9 @@ use Spiral\Database\Query\SelectQuery;
  */
 class QueryProxy
 {
+    /** @var ORMInterface */
+    private $orm;
+
     /** @var null|SelectQuery */
     private $query;
 
@@ -50,8 +53,27 @@ class QueryProxy
      */
     public function __construct(ORMInterface $orm, SelectQuery $query, AbstractLoader $loader)
     {
+        $this->orm = $orm;
         $this->query = $query;
         $this->loader = $loader;
+    }
+
+    /**
+     * Get currently associated query.
+     *
+     * @return SelectQuery|null
+     */
+    public function getQuery(): ?SelectQuery
+    {
+        return $this->query;
+    }
+
+    /**
+     * @return AbstractLoader
+     */
+    public function getLoader(): AbstractLoader
+    {
+        return $this->loader;
     }
 
     /**
@@ -65,16 +87,6 @@ class QueryProxy
         $this->forward = $forward;
 
         return $this;
-    }
-
-    /**
-     * Get currently associated query.
-     *
-     * @return SelectQuery|null
-     */
-    public function getQuery(): ?SelectQuery
-    {
-        return $this->query;
     }
 
     /**

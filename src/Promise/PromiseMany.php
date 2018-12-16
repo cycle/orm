@@ -25,7 +25,7 @@ class PromiseMany implements PromiseInterface
     private $target;
 
     /** @var array */
-    private $scope = [];
+    private $queryScope = [];
 
     /** @var array */
     private $whereScope = [];
@@ -52,7 +52,7 @@ class PromiseMany implements PromiseInterface
     ) {
         $this->orm = $orm;
         $this->target = $target;
-        $this->scope = $queryScope;
+        $this->queryScope = $queryScope;
         $this->whereScope = $whereScope;
         $this->orderBy = $orderBy;
     }
@@ -78,7 +78,7 @@ class PromiseMany implements PromiseInterface
      */
     public function __scope(): array
     {
-        return $this->scope;
+        return $this->queryScope;
     }
 
     /**
@@ -98,7 +98,7 @@ class PromiseMany implements PromiseInterface
         $selector = new Selector($this->orm, $this->target);
         $selector->scope($source->getScope(Selector\Source::DEFAULT_SCOPE));
 
-        $selector->where($this->scope + $this->whereScope)->orderBy($this->orderBy);
+        $selector->where($this->queryScope + $this->whereScope)->orderBy($this->orderBy);
 
         $this->resolved = $selector->fetchAll();
         $this->orm = null;

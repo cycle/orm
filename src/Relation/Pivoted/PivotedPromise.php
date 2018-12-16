@@ -76,7 +76,9 @@ class PivotedPromise implements PromiseInterface
      */
     public function __scope(): array
     {
-        return $this->innerKey;
+        return [
+            $this->relationSchema[Relation::INNER_KEY] => $this->innerKey
+        ];
     }
 
     /**

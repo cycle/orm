@@ -23,6 +23,7 @@ class Relation
     public const TARGET               = 11;
     public const SCHEMA               = 21;
     public const ORDER_BY             = 1111;
+    public const SCOPE                = 11111111;
     public const CASCADE              = 234214;
     public const MORPH_KEY            = 903; //Morph key name (internal)
     public const PIVOT_ENTITY         = 9880;

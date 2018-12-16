@@ -176,7 +176,7 @@ abstract class HasManyScopeTest extends BaseTest
         $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'scope' => new Selector\QueryConstrain(['@.level' => 4])
+            'constrain' => new Selector\QueryConstrain(['@.level' => 4])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -194,7 +194,7 @@ abstract class HasManyScopeTest extends BaseTest
 
         $res = $s->load('comments', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryConstrain(['@.level' => 4])
+            'constrain'  => new Selector\QueryConstrain(['@.level' => 4])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -211,7 +211,7 @@ abstract class HasManyScopeTest extends BaseTest
         $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'scope' => new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
+            'constrain' => new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -232,7 +232,7 @@ abstract class HasManyScopeTest extends BaseTest
 
         $res = $s->load('comments', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
+            'constrain'  => new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         list($b, $a) = $res;

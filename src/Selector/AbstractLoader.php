@@ -13,7 +13,7 @@ use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Selector\Traits\ChainTrait;
-use Spiral\Cycle\Selector\Traits\ScopeTrait;
+use Spiral\Cycle\Selector\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -37,7 +37,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait, ScopeTrait;
+    use ChainTrait, ConstrainTrait;
 
     // Loading methods for data loaders.
     public const INLOAD    = 1;
@@ -53,7 +53,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var array */
     protected $options = [
-        'scope' => SourceInterface::DEFAULT_CONSTRAIN,
+        'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
     ];
 
     /** @var LoaderInterface[] */

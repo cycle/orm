@@ -30,7 +30,7 @@ abstract class JoinableLoader extends AbstractLoader
      * @var array
      */
     protected $options = [
-        'scope'  => SourceInterface::DEFAULT_CONSTRAIN, // scope to be used for the relation
+        'constrain'  => SourceInterface::DEFAULT_CONSTRAIN, // scope to be used for the relation
         'method' => null,                           // load method, see AbstractLoader constants
         'minify' => true,                           // when true all loader columns will be minified (only for loading)
         'alias'  => null,                           // table alias
@@ -53,7 +53,7 @@ abstract class JoinableLoader extends AbstractLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $target);
-        $this->options['scope'] = $schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        $this->options['constrain'] = $schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_CONSTRAIN;
         $this->relation = $name;
         $this->schema = $schema;
     }
@@ -101,12 +101,12 @@ abstract class JoinableLoader extends AbstractLoader
 
         //Calculate table alias
         $loader->options['alias'] = $loader->calculateAlias($parent);
-        if (!empty($loader->options['scope'])) {
-            if ($loader->options['scope'] instanceof ConstrainInterface) {
-                $loader->scope = $loader->options['scope'];
+        if (!empty($loader->options['constrain'])) {
+            if ($loader->options['constrain'] instanceof ConstrainInterface) {
+                $loader->constrain = $loader->options['constrain'];
             } else {
                 // we have to automatically constrain the loader query
-                $loader->scope = $this->getSource()->getConstrain($loader->options['scope']);
+                $loader->constrain = $this->getSource()->getConstrain($loader->options['constrain']);
             }
         }
 
@@ -217,7 +217,7 @@ abstract class JoinableLoader extends AbstractLoader
         }
 
         // apply the global scope
-        if (!empty($this->options['using']) && !empty($this->scope)) {
+        if (!empty($this->options['using']) && !empty($this->constrain)) {
             throw new LoaderException("Combination of scope and `using` source is ambiguous");
         }
 
@@ -242,11 +242,11 @@ abstract class JoinableLoader extends AbstractLoader
      */
     protected function applyScope(SelectQuery $query): SelectQuery
     {
-        if (!empty($this->scope)) {
+        if (!empty($this->constrain)) {
             $proxy = new QueryProxy($this->orm, $query, $this);
             $proxy->setTarget($this->isJoined() ? 'onWhere' : 'where');
 
-            $this->scope->apply($proxy);
+            $this->constrain->apply($proxy);
         }
 
         return $query;

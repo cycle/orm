@@ -63,7 +63,7 @@ class Selector implements \IteratorAggregate, \Countable
      */
     public function scope(ConstrainInterface $scope = null): self
     {
-        $this->loader->setScope($scope);
+        $this->loader->setConstrain($scope);
 
         return $this;
     }

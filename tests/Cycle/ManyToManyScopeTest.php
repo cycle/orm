@@ -120,7 +120,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         list($a, $b) = $selector->load('tags', [
-            'scope' => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
+            'constrain' => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -148,7 +148,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         list($a, $b) = $selector->load('tags', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
+            'constrain'  => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -176,7 +176,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         list($a, $b) = $selector->load('tags', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
+            'constrain'  => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);

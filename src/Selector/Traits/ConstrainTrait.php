@@ -16,10 +16,10 @@ use Spiral\Database\Query\SelectQuery;
 /**
  * Provides the ability to assign the scope to the AbstractLoader.
  */
-trait ScopeTrait
+trait ConstrainTrait
 {
     /** @var null|ConstrainInterface */
-    protected $scope;
+    protected $constrain;
 
     /**
      * Associate scope with the selector.
@@ -27,9 +27,9 @@ trait ScopeTrait
      * @param ConstrainInterface $scope
      * @return AbstractLoader
      */
-    public function setScope(ConstrainInterface $scope = null): self
+    public function setConstrain(ConstrainInterface $scope = null): self
     {
-        $this->scope = $scope;
+        $this->constrain = $scope;
 
         return $this;
     }
@@ -45,8 +45,8 @@ trait ScopeTrait
      */
     protected function applyScope(SelectQuery $query): SelectQuery
     {
-        if (!empty($this->scope)) {
-            $this->scope->apply(new QueryProxy($this->orm, $query, $this));
+        if (!empty($this->constrain)) {
+            $this->constrain->apply(new QueryProxy($this->orm, $query, $this));
         }
 
         return $query;

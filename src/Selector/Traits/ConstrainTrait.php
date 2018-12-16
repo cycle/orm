@@ -43,7 +43,7 @@ trait ConstrainTrait
      * @param SelectQuery $query
      * @return SelectQuery
      */
-    protected function applyScope(SelectQuery $query): SelectQuery
+    protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if (!empty($this->constrain)) {
             $this->constrain->apply(new QueryProxy($this->orm, $query, $this));

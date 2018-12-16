@@ -22,7 +22,7 @@ class Relation
     public const TYPE               = 10;
     public const TARGET             = 11;
     public const SCHEMA             = 21;
-    public const SCOPE              = 11111111;
+    public const CONSTRAIN          = 11111111;
     public const CASCADE            = 234214;
     public const MORPH_KEY          = 903;
     public const PIVOT_ENTITY       = 9880;

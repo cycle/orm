@@ -85,7 +85,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testOrderedByScope()
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
+            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
         ]);
 
         $selector = new Selector($this->orm, User::class);

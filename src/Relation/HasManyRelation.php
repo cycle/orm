@@ -75,9 +75,9 @@ class HasManyRelation extends AbstractRelation
             [
                 $this->outerKey => $innerKey
             ],
-            $this->schema[Relation::WHERE_SCOPE] ?? [],
-            $this->schema[Relation::ORDER_BY] ?? []
+            $this->schema[Relation::WHERE] ?? []
         );
+        $p->setScope($this->getScope());
 
         return [new CollectionPromise($p), $p];
     }

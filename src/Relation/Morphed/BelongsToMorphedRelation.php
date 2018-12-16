@@ -44,13 +44,13 @@ class BelongsToMorphedRelation extends BelongsToRelation
         }
 
         $target = $this->fetchKey($parentNode, $this->morphKey);
-        $scope = [$this->outerKey => $innerKey];
+        $query = [$this->outerKey => $innerKey];
 
-        if (!empty($e = $this->orm->get($target, $scope, false))) {
+        if (!empty($e = $this->orm->get($target, $query, false))) {
             return [$e, $e];
         }
 
-        $p = new PromiseOne($this->orm, $target, $scope);
+        $p = new PromiseOne($this->orm, $target, $query);
 
         $m = $this->getSource($target);
         if ($m instanceof ProxyFactoryInterface) {

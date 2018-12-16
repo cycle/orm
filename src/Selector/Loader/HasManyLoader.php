@@ -15,14 +15,13 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Selector\SourceInterface;
-use Spiral\Cycle\Selector\Traits\ConstrainTrait;
 use Spiral\Cycle\Selector\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
 class HasManyLoader extends JoinableLoader
 {
-    use WhereTrait, ConstrainTrait;
+    use WhereTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -30,13 +29,12 @@ class HasManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'scope'   => SourceInterface::DEFAULT_SCOPE,
-        'method'  => self::POSTLOAD,
-        'minify'  => true,
-        'alias'   => null,
-        'using'   => null,
-        'where'   => null,
-        'orderBy' => [],
+        'scope'  => SourceInterface::DEFAULT_SCOPE,
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'alias'  => null,
+        'using'  => null,
+        'where'  => null,
     ];
 
     /**
@@ -45,8 +43,7 @@ class HasManyLoader extends JoinableLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
-        $this->options['where'] = $schema[Relation::WHERE_SCOPE] ?? [];
+        $this->options['where'] = $schema[Relation::WHERE] ?? [];
     }
 
     /**
@@ -74,14 +71,11 @@ class HasManyLoader extends JoinableLoader
             $query->where($localKey, 'IN', new Parameter($outerKeys));
         }
 
-        // order and where window configuration
-        $this->configureWindow($query, $this->options['orderBy']);
-
         //When relation is joined we will use ON statements, when not - normal WHERE
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
         //Where conditions specified in relation definition
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE_SCOPE));
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE));
 
         //User specified WHERE conditions
         $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);

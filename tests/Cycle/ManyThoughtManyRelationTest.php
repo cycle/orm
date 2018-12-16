@@ -85,7 +85,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'tags' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY_PIVOTED,
+                        Relation::TYPE   => Relation::MANY_THOUGHT_MANY,
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,

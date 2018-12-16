@@ -53,6 +53,7 @@ abstract class JoinableLoader extends AbstractLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $target);
+        $this->options['scope'] = $schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_SCOPE;
         $this->relation = $name;
         $this->schema = $schema;
     }

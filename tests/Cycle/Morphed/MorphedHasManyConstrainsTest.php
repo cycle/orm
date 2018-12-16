@@ -89,7 +89,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrdered()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'DESC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
@@ -110,7 +110,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'ASC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
@@ -131,7 +131,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedPosts()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'DESC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, Post::class))->load('comments')->fetchAll();
@@ -152,7 +152,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedPostsASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'ASC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, Post::class))->load('comments')->fetchAll();
@@ -173,7 +173,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'DESC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
@@ -196,7 +196,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedASCInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'ASC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
@@ -219,7 +219,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedPostsInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'DESC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, Post::class))->load('comments', [
@@ -242,7 +242,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedPostsASCInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'ASC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, Post::class))->load('comments', [
@@ -265,7 +265,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedPromisedASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'ASC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
@@ -286,8 +286,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
@@ -305,8 +305,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedAndWherePromised()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
@@ -324,7 +324,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testPostOrderedPromisedASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY => ['@.level' => 'ASC'],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, Post::class))->fetchAll();
@@ -345,8 +345,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testPostOrderedAndWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         list($a, $b) = (new Selector($this->orm, Post::class))->load('comments')->fetchAll();
@@ -364,8 +364,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testPostOrderedAndWherePromised()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         list($a, $b) = (new Selector($this->orm, Post::class))->fetchAll();
@@ -385,8 +385,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhereReversed()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'DESC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
@@ -404,8 +404,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhereReversedInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'DESC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
@@ -426,8 +426,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhereReversedPromised()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'DESC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
@@ -442,54 +442,11 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testChangedOrder()
-    {
-        $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
-        ]);
-
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
-            'orderBy' => ['@.level' => 'DESC']
-        ])->fetchAll();
-
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
-
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-    }
-
-    public function testChangedOrderInload()
-    {
-        $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
-        ]);
-
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
-            'orderBy' => ['@.level' => 'DESC'],
-            'method'  => Selector\JoinableLoader::INLOAD
-        ])->fetchAll();
-
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
-
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-    }
-
     public function testCustomWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         // overwrites default one
@@ -507,8 +464,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testCustomWhereInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::ORDER_BY    => ['@.level' => 'ASC'],
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 2]]
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
         // overwrites default one
@@ -527,7 +484,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testWithWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE_SCOPE => ['@.level' => 4]
+            Relation::WHERE => ['@.level' => 4]
         ]);
 
         // second user has been filtered out
@@ -540,7 +497,7 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testWithWhereAltered()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE_SCOPE => ['@.level' => 4]
+            Relation::WHERE => ['@.level' => 4]
         ]);
 
         // second user has been filtered out
@@ -584,8 +541,8 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
     public function testInloadWithOrderAndWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 3]],
-            Relation::ORDER_BY    => ['@.level' => 'DESC']
+            Relation::WHERE => ['@.level' => ['>=' => 3]],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
@@ -605,45 +562,19 @@ abstract class MorphedHasManyConstrainsTest extends BaseTest
         $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
     }
 
-    public function testInloadWithOrderAndWhereAltered()
-    {
-        $this->orm = $this->withCommentsSchema([
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 3]],
-            Relation::ORDER_BY    => ['@.level' => 'DESC']
-        ]);
-
-        // sort by users and then by comments and only include comments with level > 3
-        $res = (new Selector($this->orm, User::class))->load('comments', [
-            'method'  => Selector\JoinableLoader::INLOAD,
-            'orderBy' => ['@.level' => 'ASC']
-        ])->orderBy('user.id', 'DESC')->fetchAll();
-
-        $this->assertCount(2, $res);
-        $this->assertSame('hello@world.com', $res[1]->email);
-        $this->assertSame('another@world.com', $res[0]->email);
-
-        $this->assertCount(2, $res[1]->comments);
-        $this->assertCount(1, $res[0]->comments);
-
-        $this->assertSame('msg 4', $res[1]->comments[1]->message);
-        $this->assertSame('msg 3', $res[1]->comments[0]->message);
-        $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
-    }
-
     /**
      * @expectedException \Spiral\Database\Exception\StatementException
      */
     public function testInvalidOrderBy()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE_SCOPE => ['@.level' => ['>=' => 3]],
-            Relation::ORDER_BY    => ['@.level' => 'DESC']
+            Relation::WHERE => ['@.level' => ['>=' => 3]],
+            Relation::SCOPE => new Selector\QueryScope([], ['@.column' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
         (new Selector($this->orm, User::class))->load('comments', [
-            'method'  => Selector\JoinableLoader::INLOAD,
-            'orderBy' => ['@.column' => 'ASC']
+            'method' => Selector\JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
 

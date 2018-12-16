@@ -51,27 +51,27 @@ class RelationConfig extends InjectableConfig
                 self::LOADER   => Selector\Loader\BelongsToLoader::class,
                 self::RELATION => Relation\BelongsToRelation::class
             ],
-            Relation::REFERS_TO            => [
+            Relation::REFERS_TO         => [
                 self::LOADER   => Selector\Loader\BelongsToLoader::class,
                 self::RELATION => Relation\RefersToRelation::class
             ],
-            Relation::HAS_MANY             => [
+            Relation::HAS_MANY          => [
                 self::LOADER   => Selector\Loader\HasManyLoader::class,
                 self::RELATION => Relation\HasManyRelation::class
             ],
-            Relation::MANY_TO_MANY         => [
+            Relation::MANY_TO_MANY      => [
                 self::LOADER   => Selector\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyToManyRelation::class
             ],
-            Relation::MANY_TO_MANY_PIVOTED => [
+            Relation::MANY_THOUGHT_MANY => [
                 self::LOADER   => Selector\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyThoughtManyRelation::class
             ],
-            Relation::MORPHED_HAS_ONE      => [
+            Relation::MORPHED_HAS_ONE   => [
                 self::LOADER   => Selector\Loader\Morphed\MorphedHasOneLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasOneRelation::class
             ],
-            Relation::MORPHED_HAS_MANY     => [
+            Relation::MORPHED_HAS_MANY  => [
                 self::LOADER   => Selector\Loader\Morphed\MorphedHasManyLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasManyRelation::class
             ],

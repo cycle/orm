@@ -46,6 +46,7 @@ trait PivotedTrait
 
         // will take care of all the loading and scoping
         $p = new Pivoted\PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
+        $p->setScope($this->getScope());
 
         return [new Pivoted\PivotedCollectionPromisePromise($p), $p];
     }

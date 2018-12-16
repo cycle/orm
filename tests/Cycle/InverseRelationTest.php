@@ -9,11 +9,11 @@
 namespace Spiral\Cycle\Tests;
 
 use Spiral\Cycle\Heap\Heap;
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
 use Spiral\Cycle\Tests\Fixtures\Profile;
+use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -60,7 +60,7 @@ abstract class InverseRelationTest extends BaseTest
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => Mapper::class,
+                Schema::MAPPER      => SortedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -74,14 +74,13 @@ abstract class InverseRelationTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
-                            Relation::ORDER_BY  => ['@.id' => 'ASC']
                         ],
                     ]
                 ]
             ],
             Profile::class => [
                 Schema::ALIAS       => 'profile',
-                Schema::MAPPER      => Mapper::class,
+                Schema::MAPPER      => SortedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'profile',
                 Schema::PRIMARY_KEY => 'id',
@@ -92,8 +91,7 @@ abstract class InverseRelationTest extends BaseTest
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],

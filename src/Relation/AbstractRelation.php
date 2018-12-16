@@ -13,6 +13,7 @@ use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
+use Spiral\Cycle\Selector\ScopeInterface;
 use Spiral\Cycle\Selector\SourceInterface;
 
 abstract class AbstractRelation implements RelationInterface
@@ -108,6 +109,21 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return true;
+    }
+
+    /**
+     * Get the scope name associated with the relation.
+     *
+     * @return null|ScopeInterface
+     */
+    protected function getScope(): ?ScopeInterface
+    {
+        $scope = $this->schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_SCOPE;
+        if ($scope instanceof ScopeInterface) {
+            return $scope;
+        }
+
+        return $this->getSource()->getScope($scope);
     }
 
     /**

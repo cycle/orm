@@ -22,7 +22,7 @@ class PromiseOne implements PromiseInterface
     private $target;
 
     /** @var array */
-    private $scope;
+    private $where;
 
     /** @var mixed */
     private $resolved;
@@ -30,13 +30,13 @@ class PromiseOne implements PromiseInterface
     /**
      * @param ORMInterface $orm
      * @param string       $target
-     * @param array        $queryScope
+     * @param array        $query
      */
-    public function __construct(ORMInterface $orm, string $target, array $queryScope)
+    public function __construct(ORMInterface $orm, string $target, array $query)
     {
         $this->orm = $orm;
         $this->target = $target;
-        $this->scope = $queryScope;
+        $this->where = $query;
     }
 
     /**
@@ -60,7 +60,7 @@ class PromiseOne implements PromiseInterface
      */
     public function __scope(): array
     {
-        return $this->scope;
+        return $this->where;
     }
 
     /**
@@ -69,7 +69,7 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $this->resolved = $this->orm->get($this->target, $this->scope, true);
+            $this->resolved = $this->orm->get($this->target, $this->where, true);
             $this->orm = null;
         }
 

@@ -16,6 +16,7 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
 use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -98,14 +99,13 @@ abstract class ManyToManyRelationTest extends BaseTest
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
                             Relation::THOUGHT_OUTER_KEY => 'tag_id',
-                            Relation::ORDER_BY          => ['@.id' => 'ASC']
                         ],
                     ]
                 ]
             ],
             Tag::class  => [
                 Schema::ALIAS       => 'tag',
-                Schema::MAPPER      => Mapper::class,
+                Schema::MAPPER      => SortedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',

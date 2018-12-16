@@ -17,6 +17,7 @@ use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
 use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
+use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -76,15 +77,14 @@ abstract class HasManyPromiseTest extends BaseTest
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                            Relation::ORDER_BY  => ['@.id' => 'ASC']
+                            Relation::OUTER_KEY => 'user_id'
                         ],
                     ]
                 ]
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',
-                Schema::MAPPER      => Mapper::class,
+                Schema::MAPPER      => SortedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',

@@ -8,6 +8,7 @@
 
 namespace Spiral\Cycle\Selector\Loader;
 
+use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\SingularNode;
 use Spiral\Cycle\Relation;
@@ -28,13 +29,24 @@ class BelongsToLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'scope'  => SourceInterface::DEFAULT_SCOPE,
         'method' => self::POSTLOAD,
         'minify' => true,
         'alias'  => null,
         'using'  => null,
         'where'  => null,
     ];
+
+    /**
+     * @param ORMInterface $orm
+     * @param string       $name
+     * @param string       $target
+     * @param array        $schema
+     */
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    {
+        parent::__construct($orm, $name, $target, $schema);
+        $this->scope = $this->getSource()->getScope(SourceInterface::DEFAULT_SCOPE);
+    }
 
     /**
      * {@inheritdoc}

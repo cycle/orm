@@ -15,14 +15,13 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Selector\SourceInterface;
-use Spiral\Cycle\Selector\Traits\ConstrainTrait;
 use Spiral\Cycle\Selector\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
 class ManyToManyLoader extends JoinableLoader
 {
-    use WhereTrait, ConstrainTrait;
+    use WhereTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -38,7 +37,6 @@ class ManyToManyLoader extends JoinableLoader
         'using'      => null,
         'where'      => null,
         'wherePivot' => null,
-        'orderBy'    => [],
     ];
 
     /**
@@ -47,9 +45,8 @@ class ManyToManyLoader extends JoinableLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
-        $this->options['where'] = $schema[Relation::WHERE_SCOPE] ?? [];
-        $this->options['wherePivot'] = $schema[Relation::PIVOT_SCOPE] ?? [];
+        $this->options['where'] = $schema[Relation::WHERE] ?? [];
+        $this->options['wherePivot'] = $schema[Relation::PIVOT_WHERE] ?? [];
     }
 
     /**
@@ -82,9 +79,6 @@ class ManyToManyLoader extends JoinableLoader
             );
         }
 
-        // order and where window configuration
-        $this->configureWindow($query, $this->options['orderBy']);
-
         // when relation is joined we will use ON statements, when not - normal WHERE
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
@@ -93,7 +87,7 @@ class ManyToManyLoader extends JoinableLoader
             $query,
             $this->pivotAlias(),
             $whereTarget,
-            $this->define(Relation::PIVOT_SCOPE)
+            $this->define(Relation::PIVOT_WHERE)
         );
 
         // pivot conditions specified by user
@@ -111,7 +105,7 @@ class ManyToManyLoader extends JoinableLoader
         }
 
         // where conditions specified in relation definition
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE_SCOPE));
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE));
 
         // user specified WHERE conditions
         $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);

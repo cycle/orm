@@ -38,6 +38,9 @@ class PivotedPromise implements PromiseInterface
     /** @var mixed */
     private $innerKey;
 
+    /** @var Selector\ScopeInterface|null */
+    private $scope;
+
     /** @var null|PivotedStorage */
     private $resolved;
 
@@ -53,6 +56,14 @@ class PivotedPromise implements PromiseInterface
         $this->target = $target;
         $this->relationSchema = $relationSchema;
         $this->innerKey = $innerKey;
+    }
+
+    /**
+     * @param Selector\ScopeInterface $scope
+     */
+    public function setScope(?Selector\ScopeInterface $scope)
+    {
+        $this->scope = $scope;
     }
 
     /**
@@ -97,8 +108,7 @@ class PivotedPromise implements PromiseInterface
 
         // getting scoped query
         $root = new Selector\RootLoader($this->orm, $this->target);
-        $root->setScope($source->getScope(Selector\Source::DEFAULT_SCOPE));
-        $query = $root->buildQuery();
+        $query = $root->setScope($this->scope)->buildQuery();
 
         // responsible for all the scoping
         $loader = new ManyToManyLoader($this->orm, $this->target, $source->getTable(), $this->relationSchema);

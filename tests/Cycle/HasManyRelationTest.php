@@ -17,6 +17,7 @@ use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
 use Spiral\Cycle\Selector\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
+use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -77,14 +78,13 @@ abstract class HasManyRelationTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
-                            Relation::ORDER_BY  => ['@.id' => 'ASC']
                         ],
                     ]
                 ]
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',
-                Schema::MAPPER      => Mapper::class,
+                Schema::MAPPER      => SortedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
@@ -244,9 +244,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[1])->getData()['user_id']);
 
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments', [
-            'orderBy' => ['@.id' => 'ASC']
-        ]);
+        $selector->load('comments');
 
         $this->assertEquals([
             [
@@ -272,9 +270,7 @@ abstract class HasManyRelationTest extends BaseTest
     public function testRemoveChildren()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->orderBy('user.id')->load('comments', [
-            'orderBy' => ['@.id' => 'ASC']
-        ]);
+        $selector->orderBy('user.id')->load('comments');
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -286,9 +282,7 @@ abstract class HasManyRelationTest extends BaseTest
         $tr->run();
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
-        $selector->orderBy('user.id')->load('comments', [
-            'orderBy' => ['@.id' => 'ASC']
-        ]);
+        $selector->orderBy('user.id')->load('comments');
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -302,9 +296,7 @@ abstract class HasManyRelationTest extends BaseTest
     public function testAddAndRemoveChildren()
     {
         $selector = new Selector($this->orm, User::class);
-        $selector->load('comments', [
-            'orderBy' => ['@.id' => 'ASC']
-        ]);
+        $selector->load('comments');
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -329,9 +321,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
-        $selector->load('comments', [
-            'orderBy' => ['@.id' => 'ASC']
-        ]);
+        $selector->load('comments');
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();

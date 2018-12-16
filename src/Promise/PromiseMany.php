@@ -25,13 +25,13 @@ class PromiseMany implements PromiseInterface
     private $target;
 
     /** @var array */
-    private $queryScope = [];
+    private $query = [];
 
     /** @var array */
-    private $whereScope = [];
+    private $where = [];
 
-    /** @var array */
-    private $orderBy = [];
+    /** @var Selector\ScopeInterface|null */
+    private $scope;
 
     /** @var array */
     private $resolved = [];
@@ -39,22 +39,23 @@ class PromiseMany implements PromiseInterface
     /**
      * @param ORMInterface $orm
      * @param string       $target
-     * @param array        $queryScope
-     * @param array        $whereScope
-     * @param array        $orderBy
+     * @param array        $query
+     * @param array        $where
      */
-    public function __construct(
-        ORMInterface $orm,
-        string $target,
-        array $queryScope = [],
-        array $whereScope = [],
-        array $orderBy = []
-    ) {
+    public function __construct(ORMInterface $orm, string $target, array $query = [], array $where = [])
+    {
         $this->orm = $orm;
         $this->target = $target;
-        $this->queryScope = $queryScope;
-        $this->whereScope = $whereScope;
-        $this->orderBy = $orderBy;
+        $this->query = $query;
+        $this->where = $where;
+    }
+
+    /**
+     * @param Selector\ScopeInterface $scope
+     */
+    public function setScope(?Selector\ScopeInterface $scope)
+    {
+        $this->scope = $scope;
     }
 
     /**
@@ -78,7 +79,7 @@ class PromiseMany implements PromiseInterface
      */
     public function __scope(): array
     {
-        return $this->queryScope;
+        return $this->query;
     }
 
     /**
@@ -96,11 +97,8 @@ class PromiseMany implements PromiseInterface
         }
 
         $selector = new Selector($this->orm, $this->target);
-        $selector->scope($source->getScope(Selector\Source::DEFAULT_SCOPE));
+        $this->resolved = $selector->scope($this->scope)->where($this->query + $this->where)->fetchAll();
 
-        $selector->where($this->queryScope + $this->whereScope)->orderBy($this->orderBy);
-
-        $this->resolved = $selector->fetchAll();
         $this->orm = null;
 
         return $this->resolved;

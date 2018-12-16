@@ -13,6 +13,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
+use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\TagContext;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -85,7 +86,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'tags' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY_PIVOTED,
+                        Relation::TYPE   => Relation::MANY_THOUGHT_MANY,
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
@@ -97,14 +98,13 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
                             Relation::THOUGHT_OUTER_KEY => 'tag_id',
-                            Relation::ORDER_BY          => ['@.id' => 'ASC']
                         ],
                     ]
                 ]
             ],
             Tag::class        => [
                 Schema::ALIAS       => 'tag',
-                Schema::MAPPER      => Mapper::class,
+                Schema::MAPPER      => SortedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',

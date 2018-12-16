@@ -46,12 +46,12 @@ class MorphedHasOneRelation extends HasOneRelation
             return [null, null];
         }
 
-        $scope = [
+        $query = [
             $this->outerKey => $innerKey,
             $this->morphKey => $parentNode->getRole()
         ];
 
-        $p = new PromiseOne($this->orm, $this->target, $scope);
+        $p = new PromiseOne($this->orm, $this->target, $query);
 
         $m = $this->getSource();
         if ($m instanceof ProxyFactoryInterface) {

@@ -11,7 +11,7 @@ namespace Spiral\Cycle\Tests;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Admin;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -67,7 +67,7 @@ abstract class TableInheritanceTest extends BaseTest
 
     public function testFetchData()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         $this->assertEquals([
             [
@@ -97,7 +97,7 @@ abstract class TableInheritanceTest extends BaseTest
 
     public function testIterate()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         list($a, $b, $c) = $selector->orderBy('id')->fetchAll();
 
         $this->assertInstanceOf(User::class, $a);
@@ -125,13 +125,13 @@ abstract class TableInheritanceTest extends BaseTest
         $tr->persist($a);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $this->assertInstanceOf(User::class, $selector->wherePK(4)->fetchOne());
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $this->assertNotInstanceOf(Admin::class, $selector->wherePK(4)->fetchOne());
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $this->assertInstanceOf(Admin::class, $selector->wherePK(5)->fetchOne());
     }
 }

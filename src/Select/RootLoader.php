@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector;
+namespace Spiral\Cycle\Select;
 
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\RootNode;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector\Traits\ColumnsTrait;
+use Spiral\Cycle\Select\Traits\ColumnsTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**

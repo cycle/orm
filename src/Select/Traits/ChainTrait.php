@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Traits;
+namespace Spiral\Cycle\Select\Traits;
 
 use Spiral\Cycle\Exception\LoaderException;
-use Spiral\Cycle\Selector\AbstractLoader;
-use Spiral\Cycle\Selector\LoaderInterface;
+use Spiral\Cycle\Select\AbstractLoader;
+use Spiral\Cycle\Select\LoaderInterface;
 
 trait ChainTrait
 {

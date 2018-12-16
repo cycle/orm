@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Traits;
+namespace Spiral\Cycle\Select\Traits;
 
-use Spiral\Cycle\Selector\AbstractLoader;
-use Spiral\Cycle\Selector\QueryProxy;
-use Spiral\Cycle\Selector\ConstrainInterface;
+use Spiral\Cycle\Select\AbstractLoader;
+use Spiral\Cycle\Select\QueryProxy;
+use Spiral\Cycle\Select\ConstrainInterface;
 use Spiral\Database\Query\SelectQuery;
 
 /**

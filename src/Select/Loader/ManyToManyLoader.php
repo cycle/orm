@@ -6,16 +6,16 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Loader;
+namespace Spiral\Cycle\Select\Loader;
 
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\PivotedNode;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector\JoinableLoader;
-use Spiral\Cycle\Selector\SourceInterface;
-use Spiral\Cycle\Selector\Traits\WhereTrait;
+use Spiral\Cycle\Select\JoinableLoader;
+use Spiral\Cycle\Select\SourceInterface;
+use Spiral\Cycle\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 

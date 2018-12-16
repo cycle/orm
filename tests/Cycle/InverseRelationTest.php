@@ -11,7 +11,7 @@ namespace Spiral\Cycle\Tests;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -104,7 +104,7 @@ abstract class InverseRelationTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('profile.user')->orderBy('user.id');
 
         $this->assertEquals([
@@ -143,7 +143,7 @@ abstract class InverseRelationTest extends BaseTest
 
     public function testSelfReferenceEntity()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('profile.user')->orderBy('user.id');
 
         list($a, $b) = $selector->fetchAll();
@@ -174,7 +174,7 @@ abstract class InverseRelationTest extends BaseTest
         $this->assertEquals(3, $u->id);
         $this->assertEquals(4, $u->profile->id);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
 
         $this->assertSame($u, $u->profile->user);

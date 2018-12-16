@@ -12,7 +12,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Cyclic;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -68,7 +68,7 @@ abstract class HasOneCyclicTest extends BaseTest
 
     public function testFetchCyclic()
     {
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         $selector->load('cyclic')->orderBy('cyclic.id');
 
         $this->assertEquals([
@@ -103,7 +103,7 @@ abstract class HasOneCyclicTest extends BaseTest
 
     public function testFetchCyclicRelation()
     {
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         list($a, $b, $c) = $selector->load('cyclic')->orderBy('cyclic.id')->fetchAll();
 
         $this->assertSame($b, $a->cyclic);
@@ -113,7 +113,7 @@ abstract class HasOneCyclicTest extends BaseTest
 
     public function testUpdateCyclic()
     {
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
         $this->assertEquals('self-reference', $c->name);
 
@@ -123,7 +123,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $tr->persist($c);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), Cyclic::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
 
         $this->assertEquals('updated', $c->name);
@@ -132,7 +132,7 @@ abstract class HasOneCyclicTest extends BaseTest
 
     public function testCyclicWithoutLoad()
     {
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         $c = $selector->wherePK(3)->fetchOne();
         $this->assertEquals('self-reference', $c->name);
         $this->assertSame($c, $c->cyclic);
@@ -150,7 +150,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), Cyclic::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(4)->fetchOne();
         $this->assertEquals('new', $c->name);
         $this->assertSame($c, $c->cyclic);

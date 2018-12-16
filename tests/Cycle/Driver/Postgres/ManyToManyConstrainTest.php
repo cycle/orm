@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\Postgres; 
 
-class ManyToManyConstrainTest extends \Spiral\Cycle\Tests\ManyToManyConstrainTest
+class ManyToManyConstrainTest extends \Spiral\Cycle\Tests\ManyToManyConstrainTest 
 { 
     const DRIVER = "postgres"; 
 }

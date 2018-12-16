@@ -13,7 +13,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\BaseTest;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\Post;
@@ -149,7 +149,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
 
     public function testAccessEntity()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -166,7 +166,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
 
     public function testNoWrite()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -180,7 +180,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
 
     public function testDeleteComment()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -202,7 +202,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -216,7 +216,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -241,7 +241,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -259,8 +259,8 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
          * @var User $a
          * @var Post $b
          */
-        $a = (new Selector($this->orm, User::class))->wherePK(1)->fetchOne();
-        $b = (new Selector($this->orm, Post::class))->wherePK(1)->fetchOne();
+        $a = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $b = (new Select($this->orm, Post::class))->wherePK(1)->fetchOne();
 
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
@@ -281,8 +281,8 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $a = (new Selector($this->orm, User::class))->wherePK(1)->fetchOne();
-        $b = (new Selector($this->orm, Post::class))->wherePK(1)->fetchOne();
+        $a = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $b = (new Select($this->orm, Post::class))->wherePK(1)->fetchOne();
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(3, $b->comments);

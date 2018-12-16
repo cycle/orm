@@ -16,10 +16,10 @@ use Spiral\Cycle\Parser\PivotedRootNode;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
-use Spiral\Cycle\Selector\Loader\ManyToManyLoader;
-use Spiral\Cycle\Selector\SourceInterface;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\JoinableLoader;
+use Spiral\Cycle\Select\Loader\ManyToManyLoader;
+use Spiral\Cycle\Select\SourceInterface;
 
 /**
  * Promise use loader to configure query and it's scope.
@@ -38,7 +38,7 @@ class PivotedPromise implements PromiseInterface
     /** @var mixed */
     private $innerKey;
 
-    /** @var Selector\ConstrainInterface|null */
+    /** @var Select\ConstrainInterface|null */
     private $scope;
 
     /** @var null|PivotedStorage */
@@ -59,9 +59,9 @@ class PivotedPromise implements PromiseInterface
     }
 
     /**
-     * @param Selector\ConstrainInterface $scope
+     * @param Select\ConstrainInterface $scope
      */
-    public function setScope(?Selector\ConstrainInterface $scope)
+    public function setScope(?Select\ConstrainInterface $scope)
     {
         $this->scope = $scope;
     }
@@ -107,7 +107,7 @@ class PivotedPromise implements PromiseInterface
         }
 
         // getting scoped query
-        $root = new Selector\RootLoader($this->orm, $this->target);
+        $root = new Select\RootLoader($this->orm, $this->target);
         $query = $root->buildQuery();
 
         // responsible for all the scoping

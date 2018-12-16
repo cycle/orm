@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector;
+namespace Spiral\Cycle\Select;
 
 use Spiral\Cycle\Exception\FactoryException;
 use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
-use Spiral\Cycle\Selector\Traits\ChainTrait;
-use Spiral\Cycle\Selector\Traits\ConstrainTrait;
+use Spiral\Cycle\Select\Traits\ChainTrait;
+use Spiral\Cycle\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -32,8 +32,8 @@ use Spiral\Database\Query\SelectQuery;
  *   is USER_ID. Post loader must request User data loader to create references based on ID field
  *   values. Once Post data were parsed we can mount it under parent user using mount method:
  *
- * @see Selector::load()
- * @see Selector::with()
+ * @see Select::load()
+ * @see Select::with()
  */
 abstract class AbstractLoader implements LoaderInterface
 {

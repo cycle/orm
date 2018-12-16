@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector;
+namespace Spiral\Cycle\Select;
 
 /**
  * Provides the ability to scope query and load necessary relations into the loader.

@@ -10,8 +10,8 @@ namespace Spiral\Cycle\Promise;
 
 use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\SourceInterface;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\SourceInterface;
 
 /**
  * Promises the selection of the
@@ -30,7 +30,7 @@ class PromiseMany implements PromiseInterface
     /** @var array */
     private $where = [];
 
-    /** @var Selector\ConstrainInterface|null */
+    /** @var Select\ConstrainInterface|null */
     private $scope;
 
     /** @var array */
@@ -51,9 +51,9 @@ class PromiseMany implements PromiseInterface
     }
 
     /**
-     * @param Selector\ConstrainInterface $scope
+     * @param Select\ConstrainInterface $scope
      */
-    public function setScope(?Selector\ConstrainInterface $scope)
+    public function setScope(?Select\ConstrainInterface $scope)
     {
         $this->scope = $scope;
     }
@@ -96,7 +96,7 @@ class PromiseMany implements PromiseInterface
             throw new RelationException("ManyToMany relation can only work with SelectableInterface mappers");
         }
 
-        $selector = new Selector($this->orm, $this->target);
+        $selector = new Select($this->orm, $this->target);
         $this->resolved = $selector->scope($this->scope)->where($this->query + $this->where)->fetchAll();
 
         $this->orm = null;

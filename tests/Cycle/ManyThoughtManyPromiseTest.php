@@ -12,7 +12,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\TagContext;
@@ -127,7 +127,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
 
     public function testLoadRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('tags');
 
         $this->assertEquals([
@@ -181,7 +181,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
 
     public function testRelationContextAccess()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -218,7 +218,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
 
     public function testNoQueries()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -237,9 +237,9 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
 
     public function testUnlinkManyToManyAndReplaceSome()
     {
-        $tagSelector = new Selector($this->orm, Tag::class);
+        $tagSelector = new Select($this->orm, Tag::class);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -281,7 +281,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
 
         $this->assertNumWrites(0);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         /**
          * @var User $a
          * @var User $b

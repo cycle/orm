@@ -12,7 +12,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Cyclic;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -88,7 +88,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumWrites(3);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         list ($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
@@ -129,7 +129,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumWrites(4);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         list ($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
@@ -154,7 +154,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         $a = $selector->orderBy('id')->fetchOne();
 
         $this->captureReadQueries();

@@ -12,7 +12,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\TagContext;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -126,7 +126,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
 
     public function testLoadRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('tags');
 
         $this->assertEquals([
@@ -180,7 +180,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
 
     public function testRelationContextAccess()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -225,7 +225,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $tr->persist($u);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
@@ -251,7 +251,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $tr->persist($u);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
@@ -279,7 +279,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->captureWriteQueries();
@@ -308,7 +308,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
         $tr->persist($u);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
@@ -321,9 +321,9 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
 
     public function testUnlinkManyToManyAndReplaceSome()
     {
-        $tagSelector = new Selector($this->orm, Tag::class);
+        $tagSelector = new Select($this->orm, Tag::class);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -364,7 +364,7 @@ abstract class ManyThoughtManyRelationTest extends BaseTest
 
         $this->assertNumWrites(0);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         /**
          * @var User $a
          * @var User $b

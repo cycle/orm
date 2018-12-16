@@ -19,8 +19,8 @@ use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\Source;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\Source;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
@@ -85,7 +85,7 @@ abstract class DatabaseMapper extends Source implements MapperInterface
             return $this->repository;
         }
 
-        $selector = new Selector($this->orm, $this->role);
+        $selector = new Select($this->orm, $this->role);
         $selector->scope($this->getConstrain(self::DEFAULT_CONSTRAIN));
 
         return $this->repository = new Repository($selector);

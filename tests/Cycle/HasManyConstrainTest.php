@@ -11,8 +11,8 @@ namespace Spiral\Cycle\Tests;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -66,10 +66,10 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrdered()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
+        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -87,10 +87,10 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
+        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -108,10 +108,10 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedASCInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
+        list($a, $b) = (new Select($this->orm, User::class))->load('comments', [
             'method' => JoinableLoader::INLOAD
         ])->orderBy('user.id')->fetchAll();
 
@@ -131,10 +131,10 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedPromisedASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
+        list($a, $b) = (new Select($this->orm, User::class))->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -152,11 +152,11 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedAndWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE     => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
+        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -171,11 +171,11 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedAndWherePromised()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE     => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
+        list($a, $b) = (new Select($this->orm, User::class))->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -190,11 +190,11 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedAndWhereReversed()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::WHERE     => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
+        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -209,11 +209,11 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedAndWhereReversedInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::WHERE     => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
+        list($a, $b) = (new Select($this->orm, User::class))->load('comments', [
             'method' => JoinableLoader::INLOAD
         ])->fetchAll();
 
@@ -230,11 +230,11 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testOrderedAndWhereReversedPromised()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::WHERE     => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
+        list($a, $b) = (new Select($this->orm, User::class))->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -249,12 +249,12 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testCustomWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE     => ['@.level' => ['>=' => 2]]
         ]);
 
         // overwrites default one
-        list($a, $b) = (new Selector($this->orm, User::class))->orderBy('user.id')->load('comments', [
+        list($a, $b) = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
             'where' => ['@.level' => 1]
         ])->fetchAll();
 
@@ -268,12 +268,12 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testCustomWhereInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE     => ['@.level' => ['>=' => 2]]
         ]);
 
         // overwrites default one
-        list($a, $b) = (new Selector($this->orm, User::class))->orderBy('user.id')->load('comments', [
+        list($a, $b) = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
             'where'  => ['@.level' => 1],
             'method' => JoinableLoader::INLOAD
         ])->fetchAll();
@@ -292,7 +292,7 @@ abstract class HasManyConstrainTest extends BaseTest
         ]);
 
         // second user has been filtered out
-        $res = (new Selector($this->orm, User::class))->with('comments')->fetchAll();
+        $res = (new Select($this->orm, User::class))->with('comments')->fetchAll();
 
         $this->assertCount(1, $res);
         $this->assertSame('hello@world.com', $res[0]->email);
@@ -305,7 +305,7 @@ abstract class HasManyConstrainTest extends BaseTest
         ]);
 
         // second user has been filtered out
-        $res = (new Selector($this->orm, User::class))->with('comments', [
+        $res = (new Select($this->orm, User::class))->with('comments', [
             'where' => ['@.level' => 1]
         ])->orderBy('user.id')->fetchAll();
 
@@ -320,7 +320,7 @@ abstract class HasManyConstrainTest extends BaseTest
         ]);
 
         // second user has been filtered out
-        $res = (new Selector($this->orm, User::class))
+        $res = (new Select($this->orm, User::class))
             ->load('comments')
             ->limit(1)->orderBy('user.id')->fetchAll();
 
@@ -337,7 +337,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->orm = $this->withCommentsSchema([]);
 
         // do not allow limits with joined and loaded relations
-        (new Selector($this->orm, User::class))
+        (new Select($this->orm, User::class))
             ->load('comments', ['method' => JoinableLoader::INLOAD])
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
@@ -346,11 +346,11 @@ abstract class HasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE     => ['@.level' => ['>=' => 3]],
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
-        $res = (new Selector($this->orm, User::class))->load('comments', [
+        $res = (new Select($this->orm, User::class))->load('comments', [
             'method' => JoinableLoader::INLOAD
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
@@ -373,11 +373,11 @@ abstract class HasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE     => ['@.level' => ['>=' => 3]],
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.column' => 'DESC']),
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
-        (new Selector($this->orm, User::class))->load('comments', [
+        (new Select($this->orm, User::class))->load('comments', [
             'method' => JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }

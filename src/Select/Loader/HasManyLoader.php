@@ -6,49 +6,44 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Loader;
+namespace Spiral\Cycle\Select\Loader;
 
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
-use Spiral\Cycle\Parser\SingularNode;
+use Spiral\Cycle\Parser\ArrayNode;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector\JoinableLoader;
-use Spiral\Cycle\Selector\SourceInterface;
+use Spiral\Cycle\Select\JoinableLoader;
+use Spiral\Cycle\Select\SourceInterface;
+use Spiral\Cycle\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
-/**
- * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
- * Loader support MORPH_KEY.
- *
- * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
- * purposes).
- */
-class HasOneLoader extends JoinableLoader
+class HasManyLoader extends JoinableLoader
 {
+    use WhereTrait;
+
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
      * @var array
      */
     protected $options = [
-        'method' => self::INLOAD,
+        'constrain'  => SourceInterface::DEFAULT_CONSTRAIN,
+        'method' => self::POSTLOAD,
         'minify' => true,
         'alias'  => null,
         'using'  => null,
+        'where'  => null,
     ];
 
     /**
-     * @param ORMInterface $orm
-     * @param string       $name
-     * @param string       $target
-     * @param array        $schema
+     * {@inheritdoc}
      */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->constrain = $this->getSource()->getConstrain(SourceInterface::DEFAULT_CONSTRAIN);
+        $this->options['where'] = $schema[Relation::WHERE] ?? [];
     }
 
     /**
@@ -76,6 +71,15 @@ class HasOneLoader extends JoinableLoader
             $query->where($localKey, 'IN', new Parameter($outerKeys));
         }
 
+        //When relation is joined we will use ON statements, when not - normal WHERE
+        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
+
+        //Where conditions specified in relation definition
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE));
+
+        //User specified WHERE conditions
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+
         return parent::configureQuery($query);
     }
 
@@ -84,7 +88,7 @@ class HasOneLoader extends JoinableLoader
      */
     protected function initNode(): AbstractNode
     {
-        return new SingularNode(
+        return new ArrayNode(
             $this->getColumns(),
             $this->define(Schema::PRIMARY_KEY),
             $this->schema[Relation::OUTER_KEY],

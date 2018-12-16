@@ -12,7 +12,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -55,7 +55,7 @@ abstract class MapperTest extends BaseTest
 
     public function testFetchData()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         $this->assertEquals([
             [
@@ -73,7 +73,7 @@ abstract class MapperTest extends BaseTest
 
     public function testFetchAll()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $result = $selector->fetchAll();
 
         $this->assertInstanceOf(User::class, $result[0]);
@@ -89,7 +89,7 @@ abstract class MapperTest extends BaseTest
 
     public function testFetchOne()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
 
         $this->assertInstanceOf(User::class, $result);
@@ -100,7 +100,7 @@ abstract class MapperTest extends BaseTest
 
     public function testWhere()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
 
         $this->assertInstanceOf(User::class, $result);
@@ -111,17 +111,17 @@ abstract class MapperTest extends BaseTest
 
     public function testDelete()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
 
         $tr = new Transaction($this->orm);
         $tr->delete($result);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $this->assertNull($selector->where('id', 2)->fetchOne());
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $this->assertNull($selector->where('id', 2)->fetchOne());
 
         $this->assertFalse($this->orm->getHeap()->has($result));
@@ -129,7 +129,7 @@ abstract class MapperTest extends BaseTest
 
     public function testHeap()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
 
         $this->assertEquals(1, $result->id);
@@ -192,7 +192,7 @@ abstract class MapperTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);
     }

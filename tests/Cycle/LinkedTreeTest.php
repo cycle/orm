@@ -13,7 +13,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Nested;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -102,7 +102,7 @@ abstract class LinkedTreeTest extends BaseTest
 
     public function testFetchRelations()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->orderBy('user.id');
 
         $this->assertEquals([
@@ -157,7 +157,7 @@ abstract class LinkedTreeTest extends BaseTest
 
         $this->assertNumWrites(3);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 
         $this->assertEquals([
@@ -188,7 +188,7 @@ abstract class LinkedTreeTest extends BaseTest
         ], $selector->fetchData());
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 
         list($u1, $u2) = $selector->fetchAll();

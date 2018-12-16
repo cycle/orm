@@ -12,7 +12,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -104,7 +104,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->assertNumWrites(3);
 
-        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
@@ -141,7 +141,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(1);
 
-        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u3 = $s->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
 
         $this->assertNotNull($u3->lastComment);
@@ -172,7 +172,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->assertNumWrites(2);
 
-        $s = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
@@ -218,7 +218,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $s = new Selector($this->orm, User::class);
+        $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNull($u->lastComment);
@@ -230,7 +230,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->persist($u);
         $tr->run();
 
-        $s = new Selector($this->orm, User::class);
+        $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
@@ -256,7 +256,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertNumWrites(3);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $s = new Selector($this->orm, User::class);
+        $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
@@ -272,7 +272,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $s = new Selector($this->orm, User::class);
+        $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNull($u->lastComment);

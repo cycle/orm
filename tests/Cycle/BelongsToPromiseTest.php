@@ -13,7 +13,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -108,7 +108,7 @@ abstract class BelongsToPromiseTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
 
         $this->assertEquals([
@@ -132,7 +132,7 @@ abstract class BelongsToPromiseTest extends BaseTest
 
     public function testFetchPromises()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
         list($a, $b, $c) = $selector->fetchAll();
 
@@ -153,7 +153,7 @@ abstract class BelongsToPromiseTest extends BaseTest
 
     public function testFetchPromisesFromHeap()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
         list($a, $b, $c) = $selector->fetchAll();
 
@@ -162,7 +162,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertSame(null, $c->user);
 
         // warm up
-        (new Selector($this->orm, User::class))->fetchAll();
+        (new Select($this->orm, User::class))->fetchAll();
 
         $this->captureReadQueries();
         $this->assertInstanceOf(User::class, $a->user->__resolve());
@@ -179,7 +179,7 @@ abstract class BelongsToPromiseTest extends BaseTest
 
     public function testNoWriteOperations()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
 
         $this->captureWriteQueries();
@@ -191,7 +191,7 @@ abstract class BelongsToPromiseTest extends BaseTest
 
     public function testAssignPromiseAsRelation()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
         $this->assertInstanceOf(PromiseInterface::class, $p->user);
 
@@ -212,7 +212,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertNumWrites(1);
         $this->assertNumReads(0);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), Profile::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), Profile::class);
         $p = $selector->wherePK(4)->fetchOne();
 
         $this->assertInstanceOf(User::class, $p->user->__resolve());

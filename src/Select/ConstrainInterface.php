@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector;
+namespace Spiral\Cycle\Select;
 
 /**
  * Provides the ability to modify the selector and/or entity loader. Can be used to implement multi-table inheritance.

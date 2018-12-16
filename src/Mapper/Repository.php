@@ -8,22 +8,22 @@
 
 namespace Spiral\Cycle\Mapper;
 
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 
 /**
  * Repository provides ability to load entities and construct queries.
  */
 class Repository implements RepositoryInterface
 {
-    /** @var Selector */
+    /** @var Select */
     protected $selector;
 
     /**
      * Create repository linked to one specific selector.
      *
-     * @param Selector $selector
+     * @param Select $selector
      */
-    public function __construct(Selector $selector)
+    public function __construct(Select $selector)
     {
         $this->selector = $selector;
     }
@@ -54,9 +54,9 @@ class Repository implements RepositoryInterface
 
     /**
      * @param array $where
-     * @return Selector|iterable
+     * @return Select|iterable
      */
-    public function find(array $where = []): Selector
+    public function find(array $where = []): Select
     {
         return (clone $this->selector)->where($where);
     }

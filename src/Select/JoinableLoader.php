@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector;
+namespace Spiral\Cycle\Select;
 
 use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\Heap\Node;
@@ -14,7 +14,7 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector\Traits\ColumnsTrait;
+use Spiral\Cycle\Select\Traits\ColumnsTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**

@@ -13,7 +13,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Nested;
 use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -129,7 +129,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('profile');
 
         $this->assertEquals([
@@ -154,7 +154,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testFetchPromises()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -174,7 +174,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testOnePromiseLoaded()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -188,7 +188,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testOnePromiseRole()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -200,7 +200,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testOnePromiseScope()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -214,7 +214,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testFetchPromisesFromHeap()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -222,7 +222,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);
 
         // warm up
-        (new Selector($this->orm, Profile::class))->fetchAll();
+        (new Select($this->orm, Profile::class))->fetchAll();
 
         $this->captureReadQueries();
         $this->assertSame($a->profile->__resolve(), $a->profile->__resolve());
@@ -238,7 +238,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testNoWriteOperations()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureWriteQueries();
@@ -250,7 +250,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testRemoveAssignment()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $a->profile = null;
@@ -269,7 +269,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $this->assertNull($a->profile->__resolve());
@@ -278,7 +278,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testMoveToAnotherUser()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $b->profile = $a->profile;
@@ -299,7 +299,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
         $this->assertNull($a->profile);
@@ -308,7 +308,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
     public function testMoveToAnotherUserPartial()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $b->profile = $a->profile;
@@ -328,7 +328,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
         $this->assertNull($a->profile);

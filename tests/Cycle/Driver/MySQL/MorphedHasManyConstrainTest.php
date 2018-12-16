@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class MorphedHasManyConstrainTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyConstrainTest
+class MorphedHasManyConstrainTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyConstrainTest 
 { 
     const DRIVER = "mysql"; 
 }

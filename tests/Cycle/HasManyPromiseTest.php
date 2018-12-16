@@ -14,8 +14,8 @@ use Spiral\Cycle\Promise\Collection\CollectionPromise;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -97,7 +97,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
         $this->assertEquals([
@@ -134,7 +134,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testPromised()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
@@ -148,7 +148,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testHasManyPromiseLoaded()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
@@ -163,7 +163,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testHasManyPromiseRole()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
@@ -176,7 +176,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testHasManyPromiseScope()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
@@ -191,7 +191,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testPromisedEmpty()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
@@ -202,7 +202,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testNoChanges()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
@@ -217,7 +217,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testNoChangesWithNoChildren()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
@@ -232,7 +232,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testRemoveChildren()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -243,7 +243,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -256,7 +256,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testAddAndRemoveChildren()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -271,7 +271,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -285,7 +285,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testSliceAndSaveToAnotherParent()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -320,7 +320,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
         /**
          * @var User $a

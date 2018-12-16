@@ -14,8 +14,8 @@ use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -97,7 +97,7 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
         $this->assertEquals([
@@ -134,7 +134,7 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testFetchRelationInload()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])->orderBy('user.id');
 
         $this->assertEquals([
@@ -171,7 +171,7 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testAccessRelated()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -191,7 +191,7 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testNoWrite()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -243,7 +243,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->comments[1])->getStatus());
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[1])->getData()['user_id']);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments');
 
         $this->assertEquals([
@@ -269,7 +269,7 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testRemoveChildren()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id')->load('comments');
 
         /** @var User $e */
@@ -281,7 +281,7 @@ abstract class HasManyRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $selector->orderBy('user.id')->load('comments');
 
         /** @var User $e */
@@ -295,7 +295,7 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testAddAndRemoveChildren()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments');
 
         /** @var User $e */
@@ -320,7 +320,7 @@ abstract class HasManyRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $selector->load('comments');
 
         /** @var User $e */
@@ -335,7 +335,7 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testSliceAndSaveToAnotherParent()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -370,7 +370,7 @@ abstract class HasManyRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
         /**
          * @var User $a

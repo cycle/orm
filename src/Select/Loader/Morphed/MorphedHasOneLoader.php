@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Loader\Morphed;
+namespace Spiral\Cycle\Select\Loader\Morphed;
 
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector\Loader\HasOneLoader;
-use Spiral\Cycle\Selector\Traits\MorphedTrait;
-use Spiral\Cycle\Selector\Traits\WhereTrait;
+use Spiral\Cycle\Select\Loader\HasOneLoader;
+use Spiral\Cycle\Select\Traits\MorphedTrait;
+use Spiral\Cycle\Select\Traits\WhereTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**

@@ -12,7 +12,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -175,7 +175,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')
             ->load('comments.favoredBy')
@@ -229,7 +229,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')
             ->load('comments.favoredBy')
@@ -255,7 +255,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertContains($u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('lastComment.user')
             ->load('comments.user')
             ->load('comments.favoredBy')

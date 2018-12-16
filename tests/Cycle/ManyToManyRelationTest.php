@@ -14,8 +14,8 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -118,7 +118,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
     public function testLoadRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('tags');
 
         $this->assertEquals([
@@ -166,7 +166,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
     public function testLoadRelationInload()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('tags', ['method' => JoinableLoader::INLOAD]);
 
         $this->assertEquals([
@@ -213,7 +213,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
     public function testRelationAccess()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -246,7 +246,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->persist($u);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
@@ -276,7 +276,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->captureWriteQueries();
@@ -302,7 +302,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->persist($u);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
@@ -326,7 +326,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->persist($t);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
@@ -355,14 +355,14 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->persist($u2);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(4)->fetchOne();
 
         $this->assertSame("many2@email.com", $u->email);
@@ -393,14 +393,14 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->persist($u2);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);
         $this->assertCount(1, $u->tags);
         $this->assertSame("my tag", $u->tags[0]->name);
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(4)->fetchOne();
 
         $this->assertSame("many2@email.com", $u->email);
@@ -410,9 +410,9 @@ abstract class ManyToManyRelationTest extends BaseTest
 
     public function testUnlinkManyToManyAndReplaceSome()
     {
-        $tagSelector = new Selector($this->orm, Tag::class);
+        $tagSelector = new Select($this->orm, Tag::class);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
@@ -434,7 +434,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->persist($b);
         $tr->run();
 
-        $selector = new Selector($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         /**
          * @var User $a
          * @var User $b

@@ -13,7 +13,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\BaseTest;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\Post;
@@ -148,7 +148,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
         $this->assertEquals([
@@ -191,7 +191,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
     public function testFetchAnother()
     {
-        $selector = new Selector($this->orm, Post::class);
+        $selector = new Select($this->orm, Post::class);
         $selector->load('comments')->orderBy('post.id');
 
         $this->assertEquals([
@@ -254,7 +254,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
     public function testLoadOverlapping()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector
             ->load('posts.comments')
             ->load('comments')
@@ -355,7 +355,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
     public function testAccessEntity()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -372,7 +372,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
     public function testNoWrite()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -386,7 +386,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
     public function testDeleteComment()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -408,7 +408,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -422,7 +422,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -447,7 +447,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -465,8 +465,8 @@ abstract class MorphedHasManyRelationTest extends BaseTest
          * @var User $a
          * @var Post $b
          */
-        $a = (new Selector($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
-        $b = (new Selector($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
+        $a = (new Select($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
+        $b = (new Select($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
 
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
@@ -487,8 +487,8 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $a = (new Selector($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
-        $b = (new Selector($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
+        $a = (new Select($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
+        $b = (new Select($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(3, $b->comments);

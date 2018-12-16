@@ -11,7 +11,7 @@ namespace Spiral\Cycle\Tests;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -85,10 +85,10 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testOrderedByScope()
     {
         $this->orm = $this->withTagSchema([
-            Relation::CONSTRAIN => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
+            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC'])
         ]);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /**
          * @var User $a
@@ -113,14 +113,14 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([]);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /**
          * @var User $a
          * @var User $b
          */
         list($a, $b) = $selector->load('tags', [
-            'constrain' => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
+            'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -140,15 +140,15 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([]);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /**
          * @var User $a
          * @var User $b
          */
         list($a, $b) = $selector->load('tags', [
-            'method' => Selector\JoinableLoader::INLOAD,
-            'constrain'  => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
+            'method' => Select\JoinableLoader::INLOAD,
+            'constrain'  => new Select\QueryConstrain([], ['@.level' => 'ASC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -168,15 +168,15 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([]);
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /**
          * @var User $a
          * @var User $b
          */
         list($a, $b) = $selector->load('tags', [
-            'method' => Selector\JoinableLoader::INLOAD,
-            'constrain'  => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
+            'method' => Select\JoinableLoader::INLOAD,
+            'constrain'  => new Select\QueryConstrain([], ['@.level' => 'DESC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -222,7 +222,7 @@ abstract class ManyToManyScopeTest extends BaseTest
             ],
             Tag::class  => [
                 Schema::ALIAS       => 'tag',
-                Schema::MAPPER      => ManyToManyScopeMapper::class,
+                Schema::MAPPER      => ManyToManyConstrainedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
@@ -232,7 +232,7 @@ abstract class ManyToManyScopeTest extends BaseTest
             ]
         ]));
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /**
          * @var User $a
@@ -283,7 +283,7 @@ abstract class ManyToManyScopeTest extends BaseTest
             ],
             Tag::class  => [
                 Schema::ALIAS       => 'tag',
-                Schema::MAPPER      => ManyToManyScopeMapper::class,
+                Schema::MAPPER      => ManyToManyConstrainedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
@@ -293,7 +293,7 @@ abstract class ManyToManyScopeTest extends BaseTest
             ]
         ]));
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
 
         /**
          * @var User $a
@@ -363,10 +363,10 @@ abstract class ManyToManyScopeTest extends BaseTest
     }
 }
 
-class ManyToManyScopeMapper extends Mapper
+class ManyToManyConstrainedMapper extends Mapper
 {
-    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?Selector\ConstrainInterface
+    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?Select\ConstrainInterface
     {
-        return new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
+        return new Select\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
     }
 }

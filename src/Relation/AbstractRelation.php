@@ -13,8 +13,8 @@ use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
-use Spiral\Cycle\Selector\ConstrainInterface;
-use Spiral\Cycle\Selector\SourceInterface;
+use Spiral\Cycle\Select\ConstrainInterface;
+use Spiral\Cycle\Select\SourceInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {

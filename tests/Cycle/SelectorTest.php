@@ -11,8 +11,8 @@ namespace Spiral\Cycle\Tests;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -95,10 +95,10 @@ abstract class SelectorTest extends BaseTest
 
     public function testStableStatement()
     {
-        $s = new Selector($this->orm, User::class);
+        $s = new Select($this->orm, User::class);
         $s->load('comments', ['method' => JoinableLoader::INLOAD]);
 
-        $s2 = new Selector($this->orm, User::class);
+        $s2 = new Select($this->orm, User::class);
         $s2->load('comments', ['method' => JoinableLoader::INLOAD]);
 
         $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());

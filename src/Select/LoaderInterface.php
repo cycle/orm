@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector;
+namespace Spiral\Cycle\Select;
 
 use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\Parser\AbstractNode;

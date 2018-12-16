@@ -12,7 +12,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Cyclic;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -97,7 +97,7 @@ abstract class DeepCyclicTest extends BaseTest
         $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         list($c1, $c2, $c3, $c4, $c5) = $selector
             ->load('cyclic')
             ->load('other')
@@ -146,7 +146,7 @@ abstract class DeepCyclicTest extends BaseTest
         $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         list($c1, $c2, $c3, $c4, $c5) = $selector
             ->load('cyclic')
             ->load('other')
@@ -195,7 +195,7 @@ abstract class DeepCyclicTest extends BaseTest
         $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         list($c1, $c2, $c3, $c4, $c5) = $selector
             ->load('cyclic')
             ->load('other')
@@ -249,7 +249,7 @@ abstract class DeepCyclicTest extends BaseTest
         $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Cyclic::class);
+        $selector = new Select($this->orm, Cyclic::class);
         list($c1, $c2, $c3, $c4, $c5) = $selector
             ->load('cyclic')
             ->load('other')

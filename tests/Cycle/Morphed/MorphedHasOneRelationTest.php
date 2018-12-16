@@ -12,7 +12,7 @@ use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
+use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\BaseTest;
 use Spiral\Cycle\Tests\Fixtures\Image;
 use Spiral\Cycle\Tests\Fixtures\Post;
@@ -144,7 +144,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
 
         $this->assertEquals([
@@ -176,7 +176,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testFetchRelationAnother()
     {
-        $selector = new Selector($this->orm, Post::class);
+        $selector = new Select($this->orm, Post::class);
         $selector->load('image')->orderBy('post.id');
 
         $this->assertEquals([
@@ -228,7 +228,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testFetchOverlapping()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')
             ->load('posts.image')
             ->orderBy('user.id');
@@ -309,7 +309,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testAccessEntity()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -322,7 +322,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testNoWrite()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -336,7 +336,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testSetNull()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -357,7 +357,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -367,7 +367,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testExchangeParentsSameType()
     {
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -389,7 +389,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         list($a, $b) = $selector->fetchAll();
 
@@ -399,9 +399,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testReplaceExisted()
     {
-        $count = (new Selector($this->orm, Image::class))->count();
+        $count = (new Select($this->orm, Image::class))->count();
 
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image');
         $u = $selector->wherePK(1)->fetchOne();
 
@@ -422,12 +422,12 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, User::class);
+        $selector = new Select($this->orm, User::class);
         $selector->load('image');
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->assertSame('new.png', $u->image->url);
-        $this->assertSame($count, (new Selector($this->orm, Image::class))->count());
+        $this->assertSame($count, (new Select($this->orm, Image::class))->count());
     }
 
     public function testCreateWithRelated()
@@ -453,7 +453,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Post::class);
+        $selector = new Select($this->orm, Post::class);
         $selector->load('image');
         $p = $selector->wherePK(5)->fetchOne();
 
@@ -463,8 +463,8 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testMoveToAnotherParent()
     {
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
+        $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
+        $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
 
         $u->image = $p->image;
         $p->image = null;
@@ -478,8 +478,8 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
 
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
+        $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
+        $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
 
         $this->assertSame("post-image.png", $u->image->url);
         $this->assertSame(null, $p->image);
@@ -488,8 +488,8 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testChangeParents()
     {
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
+        $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
+        $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
 
         list($u->image, $p->image) = [$p->image, $u->image];
 
@@ -510,8 +510,8 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
 
-        $u = (new Selector($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
-        $p = (new Selector($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
+        $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
+        $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
 
         $this->assertSame("post-2-image.png", $u->image->url);
         $this->assertSame("user-image.png", $p->image->url);

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Traits;
+namespace Spiral\Cycle\Select\Traits;
 
-use Spiral\Cycle\Selector\QueryProxy;
+use Spiral\Cycle\Select\QueryProxy;
 use Spiral\Database\Query\SelectQuery;
 
 /**

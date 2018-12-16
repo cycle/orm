@@ -10,10 +10,10 @@ namespace Spiral\Cycle;
 
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Parser\OutputNode;
-use Spiral\Cycle\Selector\LoaderInterface;
-use Spiral\Cycle\Selector\QueryProxy;
-use Spiral\Cycle\Selector\RootLoader;
-use Spiral\Cycle\Selector\ConstrainInterface;
+use Spiral\Cycle\Select\LoaderInterface;
+use Spiral\Cycle\Select\QueryProxy;
+use Spiral\Cycle\Select\RootLoader;
+use Spiral\Cycle\Select\ConstrainInterface;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -37,7 +37,7 @@ use Spiral\Database\Query\SelectQuery;
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-class Selector implements \IteratorAggregate, \Countable
+class Select implements \IteratorAggregate, \Countable
 {
     /** @var ORMInterface */
     private $orm;
@@ -59,7 +59,7 @@ class Selector implements \IteratorAggregate, \Countable
      * Create new Selector with applied scope.
      *
      * @param ConstrainInterface|null $scope
-     * @return Selector
+     * @return Select
      */
     public function scope(ConstrainInterface $scope = null): self
     {

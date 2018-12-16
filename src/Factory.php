@@ -14,7 +14,7 @@ use Spiral\Cycle\Config\RelationConfig;
 use Spiral\Cycle\Exception\FactoryException;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Relation\RelationInterface;
-use Spiral\Cycle\Selector\LoaderInterface;
+use Spiral\Cycle\Select\LoaderInterface;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 

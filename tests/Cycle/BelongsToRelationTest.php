@@ -13,8 +13,8 @@ use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\JoinableLoader;
+use Spiral\Cycle\Select;
+use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Nested;
 use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -131,7 +131,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testFetchRelation()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->load('user')->orderBy('profile.id');
 
         $this->assertEquals([
@@ -170,7 +170,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testFetchRelationInload()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->load('user', ['method' => JoinableLoader::INLOAD])
             ->orderBy('profile.id');
 
@@ -210,7 +210,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testAccessEntities()
     {
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->load('user')->orderBy('profile.id');
         $result = $selector->fetchAll();
 
@@ -254,7 +254,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
 
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->load('user');
 
         $this->assertEquals([
@@ -286,7 +286,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $p = $selector->load('user')->wherePK(4)->fetchOne();
 
         $this->captureWriteQueries();
@@ -298,7 +298,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testSetExistedParent()
     {
-        $s = new Selector($this->orm, User::class);
+        $s = new Select($this->orm, User::class);
         $u = $s->wherePK(1)->fetchOne();
 
         $p = new Profile();
@@ -317,7 +317,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
 
-        $selector = new Selector($this->orm, Profile::class);
+        $selector = new Select($this->orm, Profile::class);
         $selector->load('user');
 
         $this->assertEquals([
@@ -336,10 +336,10 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testChangeParent()
     {
-        $s = new Selector($this->orm, Profile::class);
+        $s = new Select($this->orm, Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
 
-        $s = new Selector($this->orm, User::class);
+        $s = new Select($this->orm, User::class);
         $u = $s->wherePK(2)->fetchOne();
 
         $p->user = $u;
@@ -359,14 +359,14 @@ abstract class BelongsToRelationTest extends BaseTest
                     'balance' => 200.0,
                 ],
             ]
-        ], (new Selector($this->orm, Profile::class))->load('user')->wherePK(
+        ], (new Select($this->orm, Profile::class))->load('user')->wherePK(
             1
         )->fetchData());
     }
 
     public function testExchangeParents()
     {
-        $s = new Selector($this->orm, Profile::class);
+        $s = new Select($this->orm, Profile::class);
         list($a, $b) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
             ->load('user')->fetchAll();
 
@@ -386,7 +386,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $s = new Selector($this->orm->withHeap(new Heap()), Profile::class);
+        $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         list($a2, $b2) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
             ->load('user')->fetchAll();
 
@@ -399,7 +399,7 @@ abstract class BelongsToRelationTest extends BaseTest
      */
     public function testSetNullException()
     {
-        $s = new Selector($this->orm, Profile::class);
+        $s = new Select($this->orm, Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
 
@@ -477,7 +477,7 @@ abstract class BelongsToRelationTest extends BaseTest
             'image'   => 'string'
         ]);
 
-        $s = new Selector($this->orm, Profile::class);
+        $s = new Select($this->orm, Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
 
@@ -494,7 +494,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $s = new Selector($this->orm->withHeap(new Heap()), Profile::class);
+        $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
 
         $this->assertSame(null, $p->user);
@@ -522,7 +522,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $s = new Selector($this->orm->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s->wherePK(2)->load('profile.user')->fetchOne();
 
         $this->assertSame('profile', $n->profile->image);

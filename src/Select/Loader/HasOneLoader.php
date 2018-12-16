@@ -6,22 +6,26 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Loader;
+namespace Spiral\Cycle\Select\Loader;
 
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\SingularNode;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
-use Spiral\Cycle\Selector\JoinableLoader;
-use Spiral\Cycle\Selector\SourceInterface;
+use Spiral\Cycle\Select\JoinableLoader;
+use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
 /**
- * Load parent data. Similar to HasOne but use POSTLOAD as default method.
+ * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
+ * Loader support MORPH_KEY.
+ *
+ * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
+ * purposes).
  */
-class BelongsToLoader extends JoinableLoader
+class HasOneLoader extends JoinableLoader
 {
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -29,11 +33,10 @@ class BelongsToLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'method' => self::POSTLOAD,
+        'method' => self::INLOAD,
         'minify' => true,
         'alias'  => null,
         'using'  => null,
-        'where'  => null,
     ];
 
     /**

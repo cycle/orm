@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Selector\Traits;
+namespace Spiral\Cycle\Select\Traits;
 
 use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\Heap\Node;

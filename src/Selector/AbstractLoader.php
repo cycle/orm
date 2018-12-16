@@ -53,7 +53,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var array */
     protected $options = [
-        'scope' => SourceInterface::DEFAULT_SCOPE,
+        'scope' => SourceInterface::DEFAULT_CONSTRAIN,
     ];
 
     /** @var LoaderInterface[] */

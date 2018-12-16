@@ -9,9 +9,9 @@
 namespace Spiral\Cycle\Selector;
 
 /**
- * Provides the ability to modify the selector and entity loader. Can be used to implement multi-table inheritance.
+ * Provides the ability to modify the selector and/or entity loader. Can be used to implement multi-table inheritance.
  */
-interface ScopeInterface
+interface ConstrainInterface
 {
     /**
      * Configure query and loader pair using proxy strategy.

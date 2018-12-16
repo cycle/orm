@@ -53,7 +53,7 @@ class Source implements SourceInterface
     /**
      * @inheritdoc
      */
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface
+    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface
     {
         return null;
     }

@@ -32,7 +32,7 @@ use Spiral\Database\Query\SelectQuery;
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-class QueryProxy
+final class QueryProxy
 {
     /** @var ORMInterface */
     private $orm;

@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\SQLServer; 
 
-class HasManyConstrainsTest extends \Spiral\Cycle\Tests\HasManyConstrainsTest 
+class MorphedHasManyConstrainTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyConstrainTest
 { 
     const DRIVER = "sqlserver"; 
 }

@@ -10,14 +10,14 @@ namespace Spiral\Cycle\Tests\Fixtures;
 
 
 use Spiral\Cycle\Mapper\Mapper;
-use Spiral\Cycle\Selector\QueryScope;
-use Spiral\Cycle\Selector\ScopeInterface;
+use Spiral\Cycle\Selector\QueryConstrain;
+use Spiral\Cycle\Selector\ConstrainInterface;
 
 // Sort all records by default
 class SortedMapper extends Mapper
 {
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface
+    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface
     {
-        return new QueryScope([], ['@.id' => 'ASC']);
+        return new QueryConstrain([], ['@.id' => 'ASC']);
     }
 }

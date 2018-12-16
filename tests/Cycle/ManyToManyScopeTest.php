@@ -85,7 +85,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testOrderedByScope()
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC'])
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
         ]);
 
         $selector = new Selector($this->orm, User::class);
@@ -120,7 +120,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         list($a, $b) = $selector->load('tags', [
-            'scope' => new Selector\QueryScope([], ['@.level' => 'DESC'])
+            'scope' => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -148,7 +148,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         list($a, $b) = $selector->load('tags', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryScope([], ['@.level' => 'ASC'])
+            'scope'  => new Selector\QueryConstrain([], ['@.level' => 'ASC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -176,7 +176,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         list($a, $b) = $selector->load('tags', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryScope([], ['@.level' => 'DESC'])
+            'scope'  => new Selector\QueryConstrain([], ['@.level' => 'DESC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -365,8 +365,8 @@ abstract class ManyToManyScopeTest extends BaseTest
 
 class ManyToManyScopeMapper extends Mapper
 {
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?Selector\ScopeInterface
+    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?Selector\ConstrainInterface
     {
-        return new Selector\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
+        return new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
     }
 }

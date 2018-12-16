@@ -16,7 +16,7 @@ use Spiral\Database\DatabaseInterface;
 interface SourceInterface
 {
     // points to the scope which must be applied to all queries
-    public const DEFAULT_SCOPE = '@default';
+    public const DEFAULT_CONSTRAIN = '@default';
 
     /**
      * Get database associated with the entity.
@@ -33,10 +33,10 @@ interface SourceInterface
     public function getTable(): string;
 
     /**
-     * Return named Selector scope or return null.
+     * Return named query constrain or return null.
      *
      * @param string $name
-     * @return ScopeInterface|null
+     * @return ConstrainInterface|null
      */
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface;
+    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface;
 }

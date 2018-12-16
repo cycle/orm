@@ -38,7 +38,7 @@ class PivotedPromise implements PromiseInterface
     /** @var mixed */
     private $innerKey;
 
-    /** @var Selector\ScopeInterface|null */
+    /** @var Selector\ConstrainInterface|null */
     private $scope;
 
     /** @var null|PivotedStorage */
@@ -59,9 +59,9 @@ class PivotedPromise implements PromiseInterface
     }
 
     /**
-     * @param Selector\ScopeInterface $scope
+     * @param Selector\ConstrainInterface $scope
      */
-    public function setScope(?Selector\ScopeInterface $scope)
+    public function setScope(?Selector\ConstrainInterface $scope)
     {
         $this->scope = $scope;
     }

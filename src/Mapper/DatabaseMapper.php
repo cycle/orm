@@ -86,7 +86,7 @@ abstract class DatabaseMapper extends Source implements MapperInterface
         }
 
         $selector = new Selector($this->orm, $this->role);
-        $selector->scope($this->getScope(self::DEFAULT_SCOPE));
+        $selector->scope($this->getConstrain(self::DEFAULT_CONSTRAIN));
 
         return $this->repository = new Repository($selector);
     }

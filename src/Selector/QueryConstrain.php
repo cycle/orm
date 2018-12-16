@@ -11,7 +11,7 @@ namespace Spiral\Cycle\Selector;
 /**
  * Provides the ability to scope query and load necessary relations into the loader.
  */
-class QueryScope implements ScopeInterface
+final class QueryConstrain implements ConstrainInterface
 {
     /** @var array */
     private $where = [];

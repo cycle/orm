@@ -10,7 +10,7 @@ namespace Spiral\Cycle\Selector\Traits;
 
 use Spiral\Cycle\Selector\AbstractLoader;
 use Spiral\Cycle\Selector\QueryProxy;
-use Spiral\Cycle\Selector\ScopeInterface;
+use Spiral\Cycle\Selector\ConstrainInterface;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -18,16 +18,16 @@ use Spiral\Database\Query\SelectQuery;
  */
 trait ScopeTrait
 {
-    /** @var null|ScopeInterface */
+    /** @var null|ConstrainInterface */
     protected $scope;
 
     /**
      * Associate scope with the selector.
      *
-     * @param ScopeInterface $scope
+     * @param ConstrainInterface $scope
      * @return AbstractLoader
      */
-    public function setScope(ScopeInterface $scope = null): self
+    public function setScope(ConstrainInterface $scope = null): self
     {
         $this->scope = $scope;
 

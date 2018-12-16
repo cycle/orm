@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\SQLite; 
 
-class ManyToManyConstrainsTest extends \Spiral\Cycle\Tests\ManyToManyConstrainsTest 
+class MorphedHasManyConstrainTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyConstrainTest
 { 
     const DRIVER = "sqlite"; 
 }

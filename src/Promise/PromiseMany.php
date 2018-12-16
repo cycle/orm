@@ -30,7 +30,7 @@ class PromiseMany implements PromiseInterface
     /** @var array */
     private $where = [];
 
-    /** @var Selector\ScopeInterface|null */
+    /** @var Selector\ConstrainInterface|null */
     private $scope;
 
     /** @var array */
@@ -51,9 +51,9 @@ class PromiseMany implements PromiseInterface
     }
 
     /**
-     * @param Selector\ScopeInterface $scope
+     * @param Selector\ConstrainInterface $scope
      */
-    public function setScope(?Selector\ScopeInterface $scope)
+    public function setScope(?Selector\ConstrainInterface $scope)
     {
         $this->scope = $scope;
     }

@@ -48,7 +48,7 @@ class HasOneLoader extends JoinableLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->scope = $this->getSource()->getScope(SourceInterface::DEFAULT_SCOPE);
+        $this->scope = $this->getSource()->getConstrain(SourceInterface::DEFAULT_CONSTRAIN);
     }
 
     /**

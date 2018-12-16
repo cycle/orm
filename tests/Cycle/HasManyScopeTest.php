@@ -12,7 +12,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Selector;
-use Spiral\Cycle\Selector\ScopeInterface;
+use Spiral\Cycle\Selector\ConstrainInterface;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -106,7 +106,7 @@ abstract class HasManyScopeTest extends BaseTest
     public function testSelectUsersWithScope()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope(['@.balance' => 100]));
+        $s->scope(new Selector\QueryConstrain(['@.balance' => 100]));
 
         $res = $s->fetchAll();
 
@@ -117,7 +117,7 @@ abstract class HasManyScopeTest extends BaseTest
     public function testSelectUserScopeCanNotBeOverwritten()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope(['@.balance' => 100]));
+        $s->scope(new Selector\QueryConstrain(['@.balance' => 100]));
 
         $res = $s->where('user.balance', 200)->fetchAll();
 
@@ -127,7 +127,7 @@ abstract class HasManyScopeTest extends BaseTest
     public function testSelectUserScopeCanNotBeOverwritten2()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope(['@.balance' => 100]));
+        $s->scope(new Selector\QueryConstrain(['@.balance' => 100]));
 
         $res = $s->orWhere('user.balance', 200)->fetchAll();
 
@@ -137,7 +137,7 @@ abstract class HasManyScopeTest extends BaseTest
     public function testScopeWithOrderBy()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->fetchAll();
 
@@ -149,7 +149,7 @@ abstract class HasManyScopeTest extends BaseTest
     public function testRelated()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments')->fetchAll();
 
@@ -173,10 +173,10 @@ abstract class HasManyScopeTest extends BaseTest
     public function testRelatedScope()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'scope' => new Selector\QueryScope(['@.level' => 4])
+            'scope' => new Selector\QueryConstrain(['@.level' => 4])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -190,11 +190,11 @@ abstract class HasManyScopeTest extends BaseTest
     public function testRelatedScopeInload()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryScope(['@.level' => 4])
+            'scope'  => new Selector\QueryConstrain(['@.level' => 4])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -208,10 +208,10 @@ abstract class HasManyScopeTest extends BaseTest
     public function testRelatedScopeOrdered()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'scope' => new Selector\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
+            'scope' => new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -228,11 +228,11 @@ abstract class HasManyScopeTest extends BaseTest
     public function testRelatedScopeOrderedInload()
     {
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
             'method' => Selector\JoinableLoader::INLOAD,
-            'scope'  => new Selector\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
+            'scope'  => new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -282,7 +282,7 @@ abstract class HasManyScopeTest extends BaseTest
         ]));
 
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments')->fetchAll();
 
@@ -333,7 +333,7 @@ abstract class HasManyScopeTest extends BaseTest
         ]));
 
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
             'method' => Selector\JoinableLoader::INLOAD,
@@ -386,7 +386,7 @@ abstract class HasManyScopeTest extends BaseTest
         ]));
 
         $s = new Selector($this->orm, User::class);
-        $s->scope(new Selector\QueryScope([], ['@.balance' => 'DESC']));
+        $s->scope(new Selector\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->fetchAll();
 
@@ -404,8 +404,8 @@ abstract class HasManyScopeTest extends BaseTest
 
 class HasManyScopeTestMapper extends Mapper
 {
-    public function getScope(string $name = self::DEFAULT_SCOPE): ?ScopeInterface
+    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface
     {
-        return new Selector\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
+        return new Selector\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
     }
 }

@@ -13,7 +13,7 @@ use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
-use Spiral\Cycle\Selector\ScopeInterface;
+use Spiral\Cycle\Selector\ConstrainInterface;
 use Spiral\Cycle\Selector\SourceInterface;
 
 abstract class AbstractRelation implements RelationInterface
@@ -114,16 +114,16 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * Get the scope name associated with the relation.
      *
-     * @return null|ScopeInterface
+     * @return null|ConstrainInterface
      */
-    protected function getScope(): ?ScopeInterface
+    protected function getScope(): ?ConstrainInterface
     {
-        $scope = $this->schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_SCOPE;
-        if ($scope instanceof ScopeInterface) {
+        $scope = $this->schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        if ($scope instanceof ConstrainInterface) {
             return $scope;
         }
 
-        return $this->getSource()->getScope($scope);
+        return $this->getSource()->getConstrain($scope);
     }
 
     /**

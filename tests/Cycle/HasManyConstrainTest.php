@@ -18,7 +18,7 @@ use Spiral\Cycle\Tests\Fixtures\SortedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
-abstract class HasManyConstrainsTest extends BaseTest
+abstract class HasManyConstrainTest extends BaseTest
 {
     use TableTrait;
 
@@ -66,7 +66,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrdered()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
@@ -87,7 +87,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments')->fetchAll();
@@ -108,7 +108,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedASCInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->load('comments', [
@@ -131,7 +131,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedPromisedASC()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         list($a, $b) = (new Selector($this->orm, User::class))->fetchAll();
@@ -152,7 +152,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -171,7 +171,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedAndWherePromised()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -190,7 +190,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhereReversed()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -209,7 +209,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhereReversedInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -230,7 +230,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testOrderedAndWhereReversedPromised()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -249,7 +249,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testCustomWhere()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -268,7 +268,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     public function testCustomWhereInload()
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'ASC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::WHERE => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -346,7 +346,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE => ['@.level' => ['>=' => 3]],
-            Relation::SCOPE => new Selector\QueryScope([], ['@.level' => 'DESC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
@@ -373,7 +373,7 @@ abstract class HasManyConstrainsTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE => ['@.level' => ['>=' => 3]],
-            Relation::SCOPE => new Selector\QueryScope([], ['@.column' => 'DESC']),
+            Relation::SCOPE => new Selector\QueryConstrain([], ['@.column' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3

@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\MySQL; 
 
-class ManyToManyConstrainsTest extends \Spiral\Cycle\Tests\ManyToManyConstrainsTest 
+class HasManyConstrainTest extends \Spiral\Cycle\Tests\HasManyConstrainTest
 { 
     const DRIVER = "mysql"; 
 }

@@ -13,7 +13,7 @@ use Spiral\Cycle\Parser\OutputNode;
 use Spiral\Cycle\Selector\LoaderInterface;
 use Spiral\Cycle\Selector\QueryProxy;
 use Spiral\Cycle\Selector\RootLoader;
-use Spiral\Cycle\Selector\ScopeInterface;
+use Spiral\Cycle\Selector\ConstrainInterface;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -58,10 +58,10 @@ class Selector implements \IteratorAggregate, \Countable
     /**
      * Create new Selector with applied scope.
      *
-     * @param ScopeInterface|null $scope
+     * @param ConstrainInterface|null $scope
      * @return Selector
      */
-    public function scope(ScopeInterface $scope = null): self
+    public function scope(ConstrainInterface $scope = null): self
     {
         $this->loader->setScope($scope);
 

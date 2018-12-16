@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\Postgres; 
 
-class MorphedHasManyConstrainsTest extends \Spiral\Cycle\Tests\Morphed\MorphedHasManyConstrainsTest 
+class HasManyConstrainTest extends \Spiral\Cycle\Tests\HasManyConstrainTest
 { 
     const DRIVER = "postgres"; 
 }

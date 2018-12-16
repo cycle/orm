@@ -30,7 +30,7 @@ abstract class JoinableLoader extends AbstractLoader
      * @var array
      */
     protected $options = [
-        'scope'  => SourceInterface::DEFAULT_SCOPE, // scope to be used for the relation
+        'scope'  => SourceInterface::DEFAULT_CONSTRAIN, // scope to be used for the relation
         'method' => null,                           // load method, see AbstractLoader constants
         'minify' => true,                           // when true all loader columns will be minified (only for loading)
         'alias'  => null,                           // table alias
@@ -53,7 +53,7 @@ abstract class JoinableLoader extends AbstractLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $target);
-        $this->options['scope'] = $schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_SCOPE;
+        $this->options['scope'] = $schema[Relation::SCOPE] ?? SourceInterface::DEFAULT_CONSTRAIN;
         $this->relation = $name;
         $this->schema = $schema;
     }
@@ -102,11 +102,11 @@ abstract class JoinableLoader extends AbstractLoader
         //Calculate table alias
         $loader->options['alias'] = $loader->calculateAlias($parent);
         if (!empty($loader->options['scope'])) {
-            if ($loader->options['scope'] instanceof ScopeInterface) {
+            if ($loader->options['scope'] instanceof ConstrainInterface) {
                 $loader->scope = $loader->options['scope'];
             } else {
                 // we have to automatically constrain the loader query
-                $loader->scope = $this->getSource()->getScope($loader->options['scope']);
+                $loader->scope = $this->getSource()->getConstrain($loader->options['scope']);
             }
         }
 

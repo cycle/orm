@@ -108,13 +108,14 @@ class PivotedPromise implements PromiseInterface
 
         // getting scoped query
         $root = new Selector\RootLoader($this->orm, $this->target);
-        $query = $root->setScope($this->scope)->buildQuery();
+        $query = $root->buildQuery();
 
         // responsible for all the scoping
         $loader = new ManyToManyLoader($this->orm, $this->target, $source->getTable(), $this->relationSchema);
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
+            'scope'      => $this->scope,
             'alias'      => $source->getTable(),
             'pivotAlias' => $source->getTable() . '_pivot',
             'method'     => JoinableLoader::POSTLOAD

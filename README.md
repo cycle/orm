@@ -12,7 +12,7 @@ Features:
 - works with directed graphs, cyclic graphs using IDDFS
 - persistence using command chains
 - one pass parser for query results
-- designed to work in long-running applications, immutable
+- designed to work in long-running applications
 - supports MySQL, PostgresSQL, SQLServer, SQLite (full mock capability)
 - bare PHP classes, ActiveRecord-like classes, no classes at all 
 - query scopes, UUID, soft deletes, auto timestamps, events

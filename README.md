@@ -15,5 +15,5 @@ Features:
 - designed to work in long-running applications
 - supports MySQL, PostgresSQL, SQLServer, SQLite (full mock capability)
 - bare PHP classes, ActiveRecord-like classes, no classes at all 
-- query scopes, UUID, soft deletes, auto timestamps, events
+- global query constrains, UUID, soft deletes, auto timestamps, events
 - compatible with Doctrine Collections and Zend Hydrator

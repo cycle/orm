@@ -27,7 +27,7 @@ class PromiseOne implements PromiseInterface
     private $constrain;
 
     /** @var array */
-    private $where;
+    private $scope;
 
     /** @var mixed */
     private $resolved;
@@ -35,13 +35,13 @@ class PromiseOne implements PromiseInterface
     /**
      * @param ORMInterface $orm
      * @param string       $target
-     * @param array        $query
+     * @param array        $scope
      */
-    public function __construct(ORMInterface $orm, string $target, array $query)
+    public function __construct(ORMInterface $orm, string $target, array $scope)
     {
         $this->orm = $orm;
         $this->target = $target;
-        $this->where = $query;
+        $this->scope = $scope;
     }
 
     /**
@@ -73,7 +73,7 @@ class PromiseOne implements PromiseInterface
      */
     public function __scope(): array
     {
-        return $this->where;
+        return $this->scope;
     }
 
     /**
@@ -82,7 +82,7 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            foreach ($this->where as $k => $v) {
+            foreach ($this->scope as $k => $v) {
                 if (!empty($e = $this->orm->getHeap()->find($this->target, $k, $v))) {
                     break;
                 }
@@ -95,7 +95,7 @@ class PromiseOne implements PromiseInterface
 
             // Fetching from the database
             $select = new Select($this->orm, $this->target);
-            $this->resolved = $select->constrain($this->constrain)->fetchOne($this->where);
+            $this->resolved = $select->constrain($this->constrain)->fetchOne($this->scope);
 
             $this->orm = null;
         }

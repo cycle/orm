@@ -23,7 +23,7 @@ use Spiral\Cycle\Relation\HasOneRelation;
  */
 class MorphedHasOneRelation extends HasOneRelation
 {
-    /** @var mixed|null */
+    /** @var string */
     private $morphKey;
 
     /**
@@ -35,7 +35,7 @@ class MorphedHasOneRelation extends HasOneRelation
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->morphKey = $schema[Relation::MORPH_KEY] ?? null;
+        $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
     /**
@@ -53,6 +53,7 @@ class MorphedHasOneRelation extends HasOneRelation
         ];
 
         $p = new PromiseOne($this->orm, $this->target, $query);
+        $p->setConstrain($this->getConstrain());
 
         $m = $this->getSource();
         if ($m instanceof ProxyFactoryInterface) {

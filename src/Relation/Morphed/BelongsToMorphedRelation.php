@@ -17,6 +17,8 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseOne;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Relation\BelongsToRelation;
+use Spiral\Cycle\Select\ConstrainInterface;
+use Spiral\Cycle\Select\SourceInterface;
 
 class BelongsToMorphedRelation extends BelongsToRelation
 {
@@ -50,15 +52,15 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [null, null];
         }
 
-        $query = [$this->outerKey => $innerKey];
+        $scope = [$this->outerKey => $innerKey];
 
         // todo: REMOVE AND REFACTOR
-        if (!empty($e = $this->orm->get($target, $query, false))) {
+        if (!empty($e = $this->orm->get($target, $scope, false))) {
             return [$e, $e];
         }
 
-        $p = new PromiseOne($this->orm, $target, $query);
-        $p->setConstrain($this->getConstrain());
+        $p = new PromiseOne($this->orm, $target, $scope);
+        $p->setConstrain($this->getTargetConstrain($target));
 
         $m = $this->getSource($target);
         if ($m instanceof ProxyFactoryInterface) {
@@ -89,5 +91,21 @@ class BelongsToMorphedRelation extends BelongsToRelation
         }
 
         return $wrappedStore;
+    }
+
+    /**
+     * Get the scope name associated with the relation.
+     *
+     * @param string $target
+     * @return null|ConstrainInterface
+     */
+    protected function getTargetConstrain(string $target): ?ConstrainInterface
+    {
+        $scope = $this->schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        if ($scope instanceof ConstrainInterface) {
+            return $scope;
+        }
+
+        return $this->getSource($target)->getConstrain($scope);
     }
 }

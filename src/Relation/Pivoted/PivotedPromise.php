@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle\Relation\Pivoted;
 
@@ -115,7 +116,7 @@ class PivotedPromise implements PromiseInterface
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'constrain'      => $this->scope,
+            'constrain'  => $this->scope,
             'alias'      => $source->getTable(),
             'pivotAlias' => $source->getTable() . '_pivot',
             'method'     => JoinableLoader::POSTLOAD

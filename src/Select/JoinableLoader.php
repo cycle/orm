@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle\Select;
 
@@ -30,12 +31,18 @@ abstract class JoinableLoader extends AbstractLoader
      * @var array
      */
     protected $options = [
-        'constrain'  => SourceInterface::DEFAULT_CONSTRAIN, // scope to be used for the relation
-        'method' => null,                           // load method, see AbstractLoader constants
-        'minify' => true,                           // when true all loader columns will be minified (only for loading)
-        'alias'  => null,                           // table alias
-        'using'  => null,                           // alias used by another relation
-        'where'  => null,                           // where conditions (if any)
+        'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
+        // scope to be used for the relation
+        'method'    => null,
+        // load method, see AbstractLoader constants
+        'minify'    => true,
+        // when true all loader columns will be minified (only for loading)
+        'alias'     => null,
+        // table alias
+        'using'     => null,
+        // alias used by another relation
+        'where'     => null,
+        // where conditions (if any)
     ];
 
     /** @var string */
@@ -244,7 +251,7 @@ abstract class JoinableLoader extends AbstractLoader
     {
         if (!empty($this->constrain)) {
             $proxy = new QueryProxy($this->orm, $query, $this);
-            $proxy->setTarget($this->isJoined() ? 'onWhere' : 'where');
+            $proxy->setForward($this->isJoined() ? 'onWhere' : 'where');
 
             $this->constrain->apply($proxy);
         }

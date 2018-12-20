@@ -5,15 +5,16 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle;
 
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Parser\OutputNode;
+use Spiral\Cycle\Select\ConstrainInterface;
 use Spiral\Cycle\Select\LoaderInterface;
 use Spiral\Cycle\Select\QueryProxy;
 use Spiral\Cycle\Select\RootLoader;
-use Spiral\Cycle\Select\ConstrainInterface;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -69,6 +70,16 @@ class Select implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Get Query proxy.
+     *
+     * @return QueryProxy
+     */
+    public function getQueryProxy(): QueryProxy
+    {
+        return new QueryProxy($this->orm, $this->getLoader()->getQuery(), $this->loader);
+    }
+
+    /**
      * Compiled SQL query, changes in this query would not affect Selector state (but binded parameters will).
      *
      * @return SelectQuery
@@ -114,7 +125,6 @@ class Select implements \IteratorAggregate, \Countable
      */
     public function __call(string $name, array $arguments)
     {
-
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
             $proxy = new QueryProxy($this->orm, $this->loader->buildQuery(), $this->loader);
 
@@ -122,10 +132,7 @@ class Select implements \IteratorAggregate, \Countable
             return $proxy->__call($name, $arguments);
         }
 
-        // where condition or statement
-        $proxy = new QueryProxy($this->orm, $this->loader->getQuery(), $this->loader);
-
-        $result = $proxy->__call($name, $arguments);
+        $result = $this->getQueryProxy()->__call($name, $arguments);
         if ($result instanceof QueryProxy) {
             return $this;
         }
@@ -354,16 +361,6 @@ class Select implements \IteratorAggregate, \Countable
     }
 
     /**
-     * Return base loader associated with the selector.
-     *
-     * @return RootLoader
-     */
-    public function getLoader(): RootLoader
-    {
-        return $this->loader;
-    }
-
-    /**
      * Compiled SQL statement.
      *
      * @return string
@@ -390,5 +387,15 @@ class Select implements \IteratorAggregate, \Countable
     {
         $this->orm = null;
         $this->loader = null;
+    }
+
+    /**
+     * Return base loader associated with the selector.
+     *
+     * @return RootLoader
+     */
+    protected function getLoader(): RootLoader
+    {
+        return $this->loader;
     }
 }

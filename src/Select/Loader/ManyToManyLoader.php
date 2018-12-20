@@ -6,6 +6,8 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
+declare(strict_types=1);
+
 namespace Spiral\Cycle\Select\Loader;
 
 use Spiral\Cycle\ORMInterface;
@@ -29,7 +31,7 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'constrain'      => SourceInterface::DEFAULT_CONSTRAIN,
+        'constrain'  => SourceInterface::DEFAULT_CONSTRAIN,
         'method'     => self::POSTLOAD,
         'minify'     => true,
         'alias'      => null,
@@ -194,11 +196,10 @@ class ManyToManyLoader extends JoinableLoader
      *
      * @see pivotKey()
      *
-     * @param string $key
-     *
+     * @param int|string $key
      * @return null|string
      */
-    protected function pivotKey(string $key)
+    protected function pivotKey($key): ?string
     {
         if (!isset($this->schema[$key])) {
             return null;

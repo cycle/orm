@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Loader;
 
@@ -29,12 +30,12 @@ class HasManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'constrain'  => SourceInterface::DEFAULT_CONSTRAIN,
-        'method' => self::POSTLOAD,
-        'minify' => true,
-        'alias'  => null,
-        'using'  => null,
-        'where'  => null,
+        'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
+        'method'    => self::POSTLOAD,
+        'minify'    => true,
+        'alias'     => null,
+        'using'     => null,
+        'where'     => null,
     ];
 
     /**

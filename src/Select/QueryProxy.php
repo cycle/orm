@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle\Select;
 
@@ -79,10 +80,10 @@ final class QueryProxy
     /**
      * Set query method prefix for all "where" queries. Can route "where" to "onWhere".
      *
-     * @param string $forward
+     * @param string $forward "where", "onWhere"
      * @return QueryProxy
      */
-    public function setTarget(string $forward = null): self
+    public function setForward(string $forward = null): self
     {
         $this->forward = $forward;
 

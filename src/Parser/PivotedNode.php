@@ -5,6 +5,8 @@
  * @author Wolfy-J
  */
 
+declare(strict_types=1);
+
 namespace Spiral\Cycle\Parser;
 
 use Spiral\Cycle\Exception\ParserException;

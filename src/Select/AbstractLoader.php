@@ -6,6 +6,8 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
+declare(strict_types=1);
+
 namespace Spiral\Cycle\Select;
 
 use Spiral\Cycle\Exception\FactoryException;

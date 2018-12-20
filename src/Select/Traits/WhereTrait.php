@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Traits;
 
@@ -31,7 +32,7 @@ trait WhereTrait
         }
 
         $proxy = new QueryProxy($this->orm, $query, $this);
-        $proxy->setTarget($target)->where($where);
+        $proxy->setForward($target)->where($where);
 
         return $proxy->getQuery();
     }

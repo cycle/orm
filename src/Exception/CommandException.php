@@ -6,6 +6,8 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
+declare(strict_types=1);
+
 namespace Spiral\Cycle\Exception;
 
 class CommandException extends ORMException

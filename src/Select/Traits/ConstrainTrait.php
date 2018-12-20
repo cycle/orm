@@ -5,12 +5,13 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Traits;
 
 use Spiral\Cycle\Select\AbstractLoader;
-use Spiral\Cycle\Select\QueryProxy;
 use Spiral\Cycle\Select\ConstrainInterface;
+use Spiral\Cycle\Select\QueryProxy;
 use Spiral\Database\Query\SelectQuery;
 
 /**

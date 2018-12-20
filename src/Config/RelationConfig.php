@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Cycle\Config;
 
@@ -43,39 +44,39 @@ class RelationConfig extends InjectableConfig
     public static function getDefault()
     {
         return new static([
-            Relation::HAS_ONE              => [
+            Relation::HAS_ONE            => [
                 self::LOADER   => Select\Loader\HasOneLoader::class,
                 self::RELATION => Relation\HasOneRelation::class
             ],
-            Relation::BELONGS_TO           => [
+            Relation::BELONGS_TO         => [
                 self::LOADER   => Select\Loader\BelongsToLoader::class,
                 self::RELATION => Relation\BelongsToRelation::class
             ],
-            Relation::REFERS_TO         => [
+            Relation::REFERS_TO          => [
                 self::LOADER   => Select\Loader\BelongsToLoader::class,
                 self::RELATION => Relation\RefersToRelation::class
             ],
-            Relation::HAS_MANY          => [
+            Relation::HAS_MANY           => [
                 self::LOADER   => Select\Loader\HasManyLoader::class,
                 self::RELATION => Relation\HasManyRelation::class
             ],
-            Relation::MANY_TO_MANY      => [
+            Relation::MANY_TO_MANY       => [
                 self::LOADER   => Select\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyToManyRelation::class
             ],
-            Relation::MANY_THOUGHT_MANY => [
+            Relation::MANY_THOUGHT_MANY  => [
                 self::LOADER   => Select\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyThoughtManyRelation::class
             ],
-            Relation::MORPHED_HAS_ONE   => [
+            Relation::MORPHED_HAS_ONE    => [
                 self::LOADER   => Select\Loader\Morphed\MorphedHasOneLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasOneRelation::class
             ],
-            Relation::MORPHED_HAS_MANY  => [
+            Relation::MORPHED_HAS_MANY   => [
                 self::LOADER   => Select\Loader\Morphed\MorphedHasManyLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasManyRelation::class
             ],
-            Relation::BELONGS_TO_MORPHED   => [
+            Relation::BELONGS_TO_MORPHED => [
                 self::RELATION => Relation\Morphed\BelongsToMorphedRelation::class
             ]
         ]);

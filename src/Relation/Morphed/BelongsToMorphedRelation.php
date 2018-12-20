@@ -20,7 +20,7 @@ use Spiral\Cycle\Relation\BelongsToRelation;
 
 class BelongsToMorphedRelation extends BelongsToRelation
 {
-    /** @var mixed|null */
+    /** @var string */
     private $morphKey;
 
     /**
@@ -32,7 +32,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->morphKey = $schema[Relation::MORPH_KEY] ?? null;
+        $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
     /**
@@ -44,14 +44,21 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [null, null];
         }
 
+        /** @var string $target */
         $target = $this->fetchKey($parentNode, $this->morphKey);
+        if (empty($target)) {
+            return [null, null];
+        }
+
         $query = [$this->outerKey => $innerKey];
 
+        // todo: REMOVE AND REFACTOR
         if (!empty($e = $this->orm->get($target, $query, false))) {
             return [$e, $e];
         }
 
         $p = new PromiseOne($this->orm, $target, $query);
+        $p->setConstrain($this->getConstrain());
 
         $m = $this->getSource($target);
         if ($m instanceof ProxyFactoryInterface) {

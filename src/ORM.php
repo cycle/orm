@@ -56,6 +56,8 @@ class ORM implements ORMInterface
 
     /**
      * @inheritdoc
+     *
+     * @todo remove this one
      */
     public function get(string $role, array $scope, bool $load = false)
     {

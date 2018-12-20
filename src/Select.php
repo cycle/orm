@@ -59,12 +59,12 @@ class Select implements \IteratorAggregate, \Countable
     /**
      * Create new Selector with applied scope.
      *
-     * @param ConstrainInterface|null $scope
+     * @param ConstrainInterface|null $constrain
      * @return Select
      */
-    public function constrain(ConstrainInterface $scope = null): self
+    public function constrain(ConstrainInterface $constrain = null): self
     {
-        $this->loader->setConstrain($scope);
+        $this->loader->setConstrain($constrain);
 
         return $this;
     }
@@ -113,7 +113,7 @@ class Select implements \IteratorAggregate, \Countable
             $column = sprintf("DISTINCT(%s)", $this->getLoader()->getPK());
         }
 
-        return $this->__call('count', [$column]);
+        return (int)$this->__call('count', [$column]);
     }
 
     /**

@@ -25,12 +25,12 @@ trait ConstrainTrait
     /**
      * Associate scope with the selector.
      *
-     * @param ConstrainInterface $scope
+     * @param ConstrainInterface $constrain
      * @return AbstractLoader
      */
-    public function setConstrain(ConstrainInterface $scope = null): self
+    public function setConstrain(ConstrainInterface $constrain = null): self
     {
-        $this->constrain = $scope;
+        $this->constrain = $constrain;
 
         return $this;
     }

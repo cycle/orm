@@ -78,7 +78,7 @@ class HasManyRelation extends AbstractRelation
             ],
             $this->schema[Relation::WHERE] ?? []
         );
-        $p->setScope($this->getScope());
+        $p->setConstrain($this->getConstrain());
 
         return [new CollectionPromise($p), $p];
     }

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Promise;
 
 use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Select;
 
 /**
  * Promises one entity and resolves the result via ORM heap or entity repository.
@@ -21,6 +22,9 @@ class PromiseOne implements PromiseInterface
 
     /** @var string|null */
     private $target;
+
+    /** @var Select\ConstrainInterface|null */
+    private $constrain;
 
     /** @var array */
     private $where;
@@ -38,6 +42,14 @@ class PromiseOne implements PromiseInterface
         $this->orm = $orm;
         $this->target = $target;
         $this->where = $query;
+    }
+
+    /**
+     * @param Select\ConstrainInterface $constrain
+     */
+    public function setConstrain(?Select\ConstrainInterface $constrain)
+    {
+        $this->constrain = $constrain;
     }
 
     /**
@@ -70,7 +82,21 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $this->resolved = $this->orm->get($this->target, $this->where, true);
+            foreach ($this->where as $k => $v) {
+                if (!empty($e = $this->orm->getHeap()->find($this->target, $k, $v))) {
+                    break;
+                }
+            }
+
+            if (!empty($e)) {
+                $this->orm = null;
+                return $this->resolved = $e;
+            }
+
+            // Fetching from the database
+            $select = new Select($this->orm, $this->target);
+            $this->resolved = $select->constrain($this->constrain)->fetchOne($this->where);
+
             $this->orm = null;
         }
 

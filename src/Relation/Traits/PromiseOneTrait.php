@@ -28,11 +28,13 @@ trait PromiseOneTrait
             $this->outerKey => $innerKey
         ];
 
+        // todo: find in heap, remove get method (REFACTOR)
         if (!empty($e = $this->orm->get($this->target, $scope, false))) {
             return [$e, $e];
         }
 
         $p = new PromiseOne($this->orm, $this->target, $scope);
+        $p->setConstrain($this->getConstrain());
 
         $m = $this->getSource();
         if ($m instanceof ProxyFactoryInterface) {

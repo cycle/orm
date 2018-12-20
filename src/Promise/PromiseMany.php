@@ -32,7 +32,7 @@ class PromiseMany implements PromiseInterface
     private $where = [];
 
     /** @var Select\ConstrainInterface|null */
-    private $scope;
+    private $constrain;
 
     /** @var array */
     private $resolved = [];
@@ -52,11 +52,11 @@ class PromiseMany implements PromiseInterface
     }
 
     /**
-     * @param Select\ConstrainInterface $scope
+     * @param Select\ConstrainInterface $constrain
      */
-    public function setScope(?Select\ConstrainInterface $scope)
+    public function setConstrain(?Select\ConstrainInterface $constrain)
     {
-        $this->scope = $scope;
+        $this->constrain = $constrain;
     }
 
     /**
@@ -98,7 +98,7 @@ class PromiseMany implements PromiseInterface
         }
 
         $selector = new Select($this->orm, $this->target);
-        $this->resolved = $selector->constrain($this->scope)->where($this->query + $this->where)->fetchAll();
+        $this->resolved = $selector->constrain($this->constrain)->where($this->query + $this->where)->fetchAll();
 
         $this->orm = null;
 

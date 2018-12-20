@@ -34,7 +34,7 @@ interface RelationInterface
     public function isCascade(): bool;
 
     /**
-     * Init related entity value(s). Returns tupe [value, value to store as relation context].
+     * Init related entity value(s). Returns tuple [value, value to store as relation context].
      *
      * @param array $data
      * @return array

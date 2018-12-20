@@ -92,7 +92,7 @@ class ManyToManyLoader extends JoinableLoader
             $this->define(Relation::PIVOT_WHERE)
         );
 
-        // pivot conditions specified by user
+        // pivot conditions specified by user @todo: bug, table name is ignored
         $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);
 
         if ($this->isJoined()) {

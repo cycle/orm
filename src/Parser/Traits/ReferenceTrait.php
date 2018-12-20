@@ -112,7 +112,7 @@ trait ReferenceTrait
     }
 
     /**
-     * Register key name which must be aggregated for the futher selection.
+     * Register key name which must be aggregated for the further selection.
      *
      * @param string $key
      *

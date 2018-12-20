@@ -42,8 +42,8 @@ class ManyToManyRelation extends AbstractRelation
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->thoughtInnerKey = $this->schema[Relation::THOUGHT_INNER_KEY] ?? null;
-        $this->thoughtOuterKey = $this->schema[Relation::THOUGHT_OUTER_KEY] ?? null;
+        $this->thoughtInnerKey = $this->schema[Relation::THOUGHT_INNER_KEY];
+        $this->thoughtOuterKey = $this->schema[Relation::THOUGHT_OUTER_KEY];
     }
 
     /**
@@ -180,6 +180,6 @@ class ManyToManyRelation extends AbstractRelation
      */
     protected function pivotTable(): string
     {
-        return $this->schema[Relation::PIVOT_TABLE] ?? null;
+        return $this->schema[Relation::PIVOT_TABLE];
     }
 }

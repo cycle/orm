@@ -14,7 +14,7 @@ use Spiral\Cycle\Context\ProducerInterface;
 use Spiral\Cycle\Heap\Traits\RelationTrait;
 
 /**
- * Node (metadata) carries meta information about entitey state, changes forwards data to other points thought
+ * Node (metadata) carries meta information about entity state, changes forwards data to other points thought
  * inner states.
  */
 final class Node implements ProducerInterface, ConsumerInterface

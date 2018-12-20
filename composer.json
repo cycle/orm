@@ -4,6 +4,7 @@
   "description": "DataMapper ORM with ActiveRecord capabilities designed for long-running processes",
   "require": {
     "php": "^7.1",
+    "ext-pdo": "*",
     "spiral/core": "^1.1",
     "spiral/debug": "^1.3",
     "spiral/database": "^2.1",

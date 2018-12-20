@@ -20,7 +20,7 @@ use Spiral\Cycle\Relation\HasManyRelation;
 
 class MorphedHasManyRelation extends HasManyRelation
 {
-    /** @var mixed|null */
+    /** @var string */
     private $morphKey;
 
     /**
@@ -32,7 +32,7 @@ class MorphedHasManyRelation extends HasManyRelation
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->morphKey = $schema[Relation::MORPH_KEY] ?? null;
+        $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
     /**

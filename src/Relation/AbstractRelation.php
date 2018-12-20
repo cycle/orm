@@ -119,12 +119,12 @@ abstract class AbstractRelation implements RelationInterface
      */
     protected function getConstrain(): ?ConstrainInterface
     {
-        $scope = $this->schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
-        if ($scope instanceof ConstrainInterface) {
-            return $scope;
+        $constrain = $this->schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        if ($constrain instanceof ConstrainInterface) {
+            return $constrain;
         }
 
-        return $this->getSource()->getConstrain($scope);
+        return $this->getSource()->getConstrain($constrain);
     }
 
     /**

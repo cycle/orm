@@ -101,11 +101,11 @@ class BelongsToMorphedRelation extends BelongsToRelation
      */
     protected function getTargetConstrain(string $target): ?ConstrainInterface
     {
-        $scope = $this->schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
-        if ($scope instanceof ConstrainInterface) {
-            return $scope;
+        $constrain = $this->schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        if ($constrain instanceof ConstrainInterface) {
+            return $constrain;
         }
 
-        return $this->getSource($target)->getConstrain($scope);
+        return $this->getSource($target)->getConstrain($constrain);
     }
 }

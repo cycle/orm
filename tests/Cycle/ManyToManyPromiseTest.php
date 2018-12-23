@@ -14,7 +14,7 @@ use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Tests\Fixtures\SortedMapper;
+use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
@@ -103,13 +103,14 @@ abstract class ManyToManyPromiseTest extends BaseTest
             ],
             Tag::class  => [
                 Schema::ALIAS       => 'tag',
-                Schema::MAPPER      => SortedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ]
         ]));
     }

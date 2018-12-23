@@ -14,7 +14,7 @@ use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
-use Spiral\Cycle\Tests\Fixtures\SortedMapper;
+use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
@@ -387,7 +387,7 @@ abstract class HasManyConstrainTest extends BaseTest
         return $this->orm->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => SortedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -403,7 +403,8 @@ abstract class HasManyConstrainTest extends BaseTest
                                 Relation::OUTER_KEY => 'user_id',
                             ] + $relationSchema,
                     ]
-                ]
+                ],
+                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',

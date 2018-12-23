@@ -15,7 +15,7 @@ use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\BaseTest;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\Post;
-use Spiral\Cycle\Tests\Fixtures\SortedMapper;
+use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
@@ -584,7 +584,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         return $this->orm->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => SortedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -601,7 +601,8 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
                                 Relation::MORPH_KEY => 'parent_type',
                             ] + $relationSchema,
                     ]
-                ]
+                ],
+                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
             Post::class    => [
                 Schema::ALIAS       => 'post',

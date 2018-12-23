@@ -9,11 +9,12 @@
 namespace Spiral\Cycle\Tests;
 
 use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Profile;
-use Spiral\Cycle\Tests\Fixtures\SortedMapper;
+use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -60,7 +61,7 @@ abstract class InverseRelationTest extends BaseTest
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
                 Schema::ALIAS       => 'user',
-                Schema::MAPPER      => SortedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -76,11 +77,12 @@ abstract class InverseRelationTest extends BaseTest
                             Relation::OUTER_KEY => 'user_id',
                         ],
                     ]
-                ]
+                ],
+                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
             Profile::class => [
                 Schema::ALIAS       => 'profile',
-                Schema::MAPPER      => SortedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'profile',
                 Schema::PRIMARY_KEY => 'id',
@@ -96,8 +98,8 @@ abstract class InverseRelationTest extends BaseTest
                             Relation::OUTER_KEY => 'id',
                         ],
                     ],
-
-                ]
+                ],
+                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
         ]));
     }

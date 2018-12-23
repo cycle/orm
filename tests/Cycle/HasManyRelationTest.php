@@ -17,7 +17,7 @@ use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Comment;
-use Spiral\Cycle\Tests\Fixtures\SortedMapper;
+use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -84,13 +84,14 @@ abstract class HasManyRelationTest extends BaseTest
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',
-                Schema::MAPPER      => SortedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ]
         ]));
     }

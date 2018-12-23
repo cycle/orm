@@ -13,11 +13,12 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Select\ConstrainInterface;
+use Spiral\Cycle\Select\QueryBuilder;
 use Spiral\Cycle\Tests\Fixtures\Comment;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
-abstract class HasManyScopeTest extends BaseTest
+abstract class HasManySourceTest extends BaseTest
 {
     use TableTrait;
 
@@ -106,9 +107,7 @@ abstract class HasManyScopeTest extends BaseTest
     public function testSelectUsersWithScope()
     {
         $s = new Select($this->orm, User::class);
-        $s->constrain(new Select\QueryConstrain(['@.balance' => 100]));
-
-        $res = $s->fetchAll();
+        $res = $s->constrain(new Select\QueryConstrain(['@.balance' => 100]))->fetchAll();
 
         $this->assertCount(1, $res);
         $this->assertSame('hello@world.com', $res[0]->email);
@@ -193,8 +192,8 @@ abstract class HasManyScopeTest extends BaseTest
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD,
-            'constrain'  => new Select\QueryConstrain(['@.level' => 4])
+            'method'    => Select\JoinableLoader::INLOAD,
+            'constrain' => new Select\QueryConstrain(['@.level' => 4])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -231,8 +230,8 @@ abstract class HasManyScopeTest extends BaseTest
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD,
-            'constrain'  => new Select\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
+            'method'    => Select\JoinableLoader::INLOAD,
+            'constrain' => new Select\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         list($b, $a) = $res;
@@ -271,13 +270,15 @@ abstract class HasManyScopeTest extends BaseTest
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',
-                Schema::MAPPER      => HasManyScopeTestMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => LeveledHasManyConstrain::class
+                ]
             ]
         ]));
 
@@ -322,13 +323,15 @@ abstract class HasManyScopeTest extends BaseTest
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',
-                Schema::MAPPER      => HasManyScopeTestMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => LeveledHasManyConstrain::class
+                ]
             ]
         ]));
 
@@ -375,13 +378,70 @@ abstract class HasManyScopeTest extends BaseTest
             ],
             Comment::class => [
                 Schema::ALIAS       => 'comment',
-                Schema::MAPPER      => HasManyScopeTestMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => LeveledHasManyConstrain::class
+                ]
+            ]
+        ]));
+
+        $s = new Select($this->orm, User::class);
+        $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
+
+        $res = $s->fetchAll();
+
+        list($b, $a) = $res;
+
+        $this->assertCount(2, $a->comments);
+        $this->assertCount(1, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+    }
+
+    public function testScopeViaMapperRelationPromiseShort()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class    => [
+                Schema::ALIAS       => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'comments' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
+            ],
+            Comment::class => [
+                Schema::ALIAS       => 'comment',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => ShortLeveledHasManyConstrain::class
+                ]
             ]
         ]));
 
@@ -402,10 +462,18 @@ abstract class HasManyScopeTest extends BaseTest
     }
 }
 
-class HasManyScopeTestMapper extends Mapper
+class LeveledHasManyConstrain implements ConstrainInterface
 {
-    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface
+    public function apply(QueryBuilder $query)
     {
-        return new Select\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
+        $query->where('@.level', '>=', 3)->orderBy('@.level', 'DESC');
+    }
+}
+
+class ShortLeveledHasManyConstrain implements ConstrainInterface
+{
+    public function apply(QueryBuilder $query)
+    {
+        $query->where('level', '>=', 3)->orderBy('level', 'DESC');
     }
 }

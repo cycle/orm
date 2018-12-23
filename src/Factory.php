@@ -13,14 +13,16 @@ use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Cycle\Config\RelationConfig;
 use Spiral\Cycle\Exception\FactoryException;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Relation\RelationInterface;
 use Spiral\Cycle\Select\LoaderInterface;
-use Spiral\Cycle\Select\SourceProviderInterface;
-use Spiral\Database\DatabaseInterface;
+use Spiral\Cycle\Select\Source;
+use Spiral\Cycle\Select\SourceFactoryInterface;
+use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Database\DatabaseManager;
 
-class Factory implements FactoryInterface
+class Factory implements FactoryInterface, SourceFactoryInterface
 {
     /** @var RelationConfig */
     private $config;
@@ -37,6 +39,9 @@ class Factory implements FactoryInterface
     /** @var SchemaInterface */
     private $schema;
 
+    /** @var SourceInterface[] */
+    private $sources = [];
+
     /**
      * @param DatabaseManager  $dbal
      * @param RelationConfig   $config
@@ -52,19 +57,12 @@ class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function database(string $name = null): DatabaseInterface
-    {
-        return $this->dbal->database($name);
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface
     {
         $factory = clone $this;
         $factory->orm = $orm;
         $factory->schema = $schema;
+        $factory->sources = [];
 
         return $factory;
     }
@@ -74,7 +72,8 @@ class Factory implements FactoryInterface
      */
     public function mapper(string $role): MapperInterface
     {
-        return $this->factory->make($this->getSchema()->define($role, Schema::MAPPER), [
+        $class = $this->getSchema()->define($role, Schema::MAPPER) ?? Mapper::class;
+        return $this->factory->make($class, [
             'orm'    => $this->orm,
             'role'   => $role,
             'schema' => $this->getSchema()->define($role, Schema::SCHEMA)
@@ -110,6 +109,30 @@ class Factory implements FactoryInterface
             'target' => $schema[Relation::TARGET],
             'schema' => $schema[Relation::SCHEMA]
         ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function source(string $role): SourceInterface
+    {
+        if (isset($this->sources[$role])) {
+            return $this->sources[$role];
+        }
+
+        $constrains = [];
+        foreach ($this->schema->define($role, Schema::CONSTRAINS) ?? [] as $name => $constrain) {
+            $constrains[$name] = $this->factory->make($constrain);
+        }
+
+        $class = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
+        $source = $this->factory->make($class, [
+            'database'   => $this->dbal->database($this->schema->define($role, Schema::DATABASE)),
+            'table'      => $this->schema->define($role, Schema::TABLE),
+            'constrains' => $constrains
+        ]);
+
+        return $this->sources[$role] = $source;
     }
 
     /**

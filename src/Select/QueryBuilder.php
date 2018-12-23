@@ -100,55 +100,17 @@ final class QueryBuilder
     public function __call(string $func, array $args)
     {
         $args = array_values($args);
-        if (count($args) > 0 && $args[0] instanceof \Closure) {
+        if (count($args) === 1 && $args[0] instanceof \Closure) {
             // $query->where(function($q) { ...
             call_user_func($args[0], $this);
             return $this;
         }
 
         // prepare arguments
-        $result = call_user_func_array(
-            $this->targetFunc($func),
-            $this->proxy($func, $args)
-        );
+        $result = call_user_func_array($this->targetFunc($func), $this->resolve($func, $args));
 
         if ($result === $this->query) {
             return $this;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Helper function used to replace {@} alias with actual table name.
-     *
-     * @param mixed $where
-     * @return mixed
-     */
-    protected function proxy($func, $where)
-    {
-        // todo: this require a lot of tests
-
-        if (is_string($where)) {
-            if (strpos($where, '.') === false) {
-                // always mount alias
-                return sprintf("%s.%s", $this->loader->getAlias(), $where);
-            }
-
-            return str_replace('@', $this->loader->getAlias(), $where);
-        }
-
-        if (!is_array($where)) {
-            return $where;
-        }
-
-        $result = [];
-        foreach ($where as $column => $value) {
-            if (is_string($column) && !is_int($column)) {
-                $column = str_replace('@', $this->loader->getAlias(), $column);
-            }
-
-            $result[$column] = !is_array($value) ? $value : $this->proxy(null, $value);
         }
 
         return $result;
@@ -177,5 +139,56 @@ final class QueryBuilder
         }
 
         return [$this->query, $call];
+    }
+
+    /**
+     * Automatically modify all identifiers to mount table prefix. Provide ability to automatically resolve
+     * relations.
+     *
+     * @param array $where
+     * @return array
+     */
+    protected function resolve($func, array $where): array
+    {
+        // all of the SelectQuery functions has similar signature where
+        // first argument is identifier, we will use generalized proxy
+
+        // short array syntax
+        if (count($where) === 1 && array_key_exists(0, $where) && is_array($where[0])) {
+            $result = [];
+            foreach ($where[0] as $key => $value) {
+                if (is_string($key) && !is_int($key)) {
+                    $key = $this->identifier($key);
+                }
+
+                $result[$key] = !is_array($value) ? $value : $this->resolve(null, $value);
+            }
+
+            return [$result];
+        }
+
+        // normal syntax
+        if (array_key_exists(0, $where) && is_string($where[0])) {
+            $where[0] = $this->identifier($where[0]);
+        }
+
+        return $where;
+    }
+
+    /**
+     * Automatically resolve identifier.
+     *
+     * @param string $identifier
+     * @return string
+     */
+    protected function identifier(string $identifier): string
+    {
+        if (strpos($identifier, '.') === false) {
+            // parent element
+            return sprintf('%s.%s', $this->loader->getAlias(), $identifier);
+        }
+
+        // strict format
+        return str_replace('@', $this->loader->getAlias(), $identifier);
     }
 }

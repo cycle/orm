@@ -16,7 +16,6 @@ use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Select\ConstrainInterface;
 use Spiral\Cycle\Select\SourceInterface;
-use Spiral\Cycle\Select\SourceProviderInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
@@ -174,10 +173,6 @@ abstract class AbstractRelation implements RelationInterface
      */
     protected function getSource(string $role = null): SourceInterface
     {
-        if (!$this->orm instanceof SourceProviderInterface) {
-            throw new RelationException("ORM must provide access to database source");
-        }
-
-        return $this->orm->getSource($role ?? $this->target);
+        return $this->orm->getFactory()->source($role ?? $this->target);
     }
 }

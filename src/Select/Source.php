@@ -19,14 +19,19 @@ final class Source implements SourceInterface
     /** @var string */
     private $table;
 
+    /** @var ConstrainInterface[] */
+    private $constrains = [];
+
     /**
-     * @param DatabaseInterface $database
-     * @param string            $table
+     * @param DatabaseInterface    $database
+     * @param string               $table
+     * @param ConstrainInterface[] $constrains
      */
-    public function __construct(DatabaseInterface $database, string $table)
+    public function __construct(DatabaseInterface $database, string $table, array $constrains)
     {
         $this->database = $database;
         $this->table = $table;
+        $this->constrains = $constrains;
     }
 
     /**
@@ -50,7 +55,6 @@ final class Source implements SourceInterface
      */
     public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface
     {
-        // todo: pass constrains
-        return null;
+        return $this->constrains[$name] ?? null;
     }
 }

@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Relation\Pivoted;
 
-use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Iterator;
 use Spiral\Cycle\ORMInterface;
@@ -101,10 +100,7 @@ class PivotedPromise implements PromiseInterface
             return $this->resolved;
         }
 
-        if (!$this->orm instanceof Select\SourceProviderInterface) {
-            throw new RelationException("ORM must provide access to database source");
-        }
-        $source = $this->orm->getSource($this->target);
+        $source = $this->orm->getFactory()->source($this->target);
 
         // getting scoped query
         $root = new Select\RootLoader($this->orm, $this->target);

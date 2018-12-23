@@ -92,11 +92,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function getSource(): SourceInterface
     {
-        if (!$this->orm instanceof SourceProviderInterface) {
-            throw new LoaderException("ORM must provide access to database source");
-        }
-
-        return $this->orm->getSource($this->target);
+        return $this->orm->getFactory()->source($this->target);
     }
 
     /**

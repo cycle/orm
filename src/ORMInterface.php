@@ -14,6 +14,7 @@ use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
+use Spiral\Cycle\Select\SourceFactoryInterface;
 
 /**
  * Provide the access to all ORM services.
@@ -44,7 +45,7 @@ interface ORMInterface
     /**
      * Get factory for relations, mappers and etc.
      *
-     * @return FactoryInterface
+     * @return FactoryInterface|SourceFactoryInterface
      */
     public function getFactory(): FactoryInterface;
 

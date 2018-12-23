@@ -27,6 +27,7 @@ interface SchemaInterface
     public const RELATIONS    = 10;
     public const EXTENDS      = 11;
     public const CHILDREN     = 12;
+    public const CONSTRAINS   = 13;
 
     public function defines(string $role): bool;
 

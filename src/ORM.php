@@ -18,14 +18,11 @@ use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Select\Source;
-use Spiral\Cycle\Select\SourceInterface;
-use Spiral\Cycle\Select\SourceProviderInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  */
-class ORM implements ORMInterface, SourceProviderInterface
+class ORM implements ORMInterface
 {
     // Memory section to store ORM schema.
     protected const MEMORY = 'orm.schema';
@@ -190,18 +187,6 @@ class ORM implements ORMInterface, SourceProviderInterface
         }
 
         return $this->mappers[$entity] = $this->factory->mapper($entity);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getSource(string $role): SourceInterface
-    {
-        // todo: constrains
-        return new Source(
-            $this->factory->database($this->schema->define($role, Schema::DATABASE)),
-            $this->schema->define($role, Schema::TABLE)
-        );
     }
 
     /**

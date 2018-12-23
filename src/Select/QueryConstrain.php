@@ -33,8 +33,8 @@ final class QueryConstrain implements ConstrainInterface
     /**
      * @inheritdoc
      */
-    public function apply(QueryBuilder $proxy)
+    public function apply(QueryBuilder $query)
     {
-        $proxy->where($this->where)->orderBy($this->orderBy);
+        $query->where($this->where)->orderBy($this->orderBy);
     }
 }

@@ -16,7 +16,6 @@ use Spiral\Cycle\Command\Database\Delete;
 use Spiral\Cycle\Command\Database\Insert;
 use Spiral\Cycle\Command\Database\Update;
 use Spiral\Cycle\Context\ConsumerInterface;
-use Spiral\Cycle\Exception\MapperException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
@@ -50,18 +49,17 @@ abstract class DatabaseMapper implements MapperInterface
     protected $children = [];
 
     /**
-     * @param ORMInterface $orm
-     * @param string       $role
+     * DatabaseMapper constructor.
+     *
+     * @param ORMInterface           $orm
+     * @param Select\SourceInterface $source
+     * @param string                 $role
      */
-    public function __construct(ORMInterface $orm, string $role)
+    public function __construct(ORMInterface $orm, Select\SourceInterface $source, string $role)
     {
-        if (!$orm instanceof Select\SourceProviderInterface) {
-            throw new MapperException("ORM must provide access to database source");
-        }
-
         $this->orm = $orm;
+        $this->source = $source;
         $this->role = $role;
-        $this->source = $orm->getSource($role);
 
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);

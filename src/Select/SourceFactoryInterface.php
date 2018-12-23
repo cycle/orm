@@ -8,7 +8,7 @@
 
 namespace Spiral\Cycle\Select;
 
-interface SourceProviderInterface
+interface SourceFactoryInterface
 {
     /**
      * Get database source associated with given entity role.
@@ -16,5 +16,5 @@ interface SourceProviderInterface
      * @param string $role
      * @return SourceInterface
      */
-    public function getSource(string $role): SourceInterface;
+    public function source(string $role): SourceInterface;
 }

@@ -30,7 +30,7 @@ class Mapper extends DatabaseMapper
      */
     public function __construct(ORMInterface $orm, string $role)
     {
-        parent::__construct($orm, $role);
+        parent::__construct($orm, $orm->getFactory()->source($role), $role);
 
         $this->hydrator = new Hydrator\Reflection();
     }

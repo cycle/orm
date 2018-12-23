@@ -47,7 +47,7 @@ abstract class AbstractLoader implements LoaderInterface
     public const JOIN      = 3;
     public const LEFT_JOIN = 4;
 
-    /** @var ORMInterface @internal */
+    /** @var ORMInterface|SourceFactoryInterface @internal */
     protected $orm;
 
     /** @var string */
@@ -92,7 +92,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function getSource(): SourceInterface
     {
-        return $this->orm->getFactory()->source($this->target);
+        return $this->orm->getSource($this->target);
     }
 
     /**

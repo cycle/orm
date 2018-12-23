@@ -45,7 +45,7 @@ interface ORMInterface
     /**
      * Get factory for relations, mappers and etc.
      *
-     * @return FactoryInterface|SourceFactoryInterface
+     * @return FactoryInterface
      */
     public function getFactory(): FactoryInterface;
 

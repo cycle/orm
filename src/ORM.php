@@ -18,16 +18,18 @@ use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Select\SourceFactoryInterface;
+use Spiral\Cycle\Select\SourceInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  */
-class ORM implements ORMInterface
+class ORM implements ORMInterface, SourceFactoryInterface
 {
     // Memory section to store ORM schema.
     protected const MEMORY = 'orm.schema';
 
-    /** @var FactoryInterface */
+    /** @var FactoryInterface|SourceFactoryInterface */
     private $factory;
 
     /** @var HeapInterface */
@@ -45,11 +47,18 @@ class ORM implements ORMInterface
     /** @var array */
     private $indexes = [];
 
+    /** @var SourceInterface[] */
+    private $sources = [];
+
     /**
      * @param FactoryInterface $factory
      */
     public function __construct(FactoryInterface $factory)
     {
+        if (!$factory instanceof SourceFactoryInterface) {
+            throw new ORMException("Source factory is missing");
+        }
+
         $this->factory = $factory;
         $this->heap = new Heap();
     }
@@ -192,6 +201,18 @@ class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
+    public function getSource(string $role): SourceInterface
+    {
+        if (isset($this->sources[$role])) {
+            return $this->sources[$role];
+        }
+
+        return $this->sources[$role] = $this->factory->getSource($role);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
     {
         if ($entity instanceof PromiseInterface) {
@@ -244,6 +265,7 @@ class ORM implements ORMInterface
         $this->mappers = [];
         $this->relmaps = [];
         $this->indexes = [];
+        $this->sources = [];
     }
 
     /**

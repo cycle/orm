@@ -100,7 +100,7 @@ class PivotedPromise implements PromiseInterface
             return $this->resolved;
         }
 
-        $source = $this->orm->getFactory()->source($this->target);
+        $source = $this->orm->getFactory()->getSource($this->target);
 
         // getting scoped query
         $root = new Select\RootLoader($this->orm, $this->target);

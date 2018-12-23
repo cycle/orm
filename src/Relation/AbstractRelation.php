@@ -15,13 +15,14 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Select\ConstrainInterface;
+use Spiral\Cycle\Select\SourceFactoryInterface;
 use Spiral\Cycle\Select\SourceInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
     use Traits\ContextTrait;
 
-    /** @var ORMInterface @internal */
+    /** @var ORMInterface|SourceFactoryInterface @internal */
     protected $orm;
 
     /** @var string */
@@ -173,6 +174,6 @@ abstract class AbstractRelation implements RelationInterface
      */
     protected function getSource(string $role = null): SourceInterface
     {
-        return $this->orm->getFactory()->source($role ?? $this->target);
+        return $this->orm->getSource($role ?? $this->target);
     }
 }

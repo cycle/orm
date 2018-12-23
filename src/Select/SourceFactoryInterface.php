@@ -16,5 +16,5 @@ interface SourceFactoryInterface
      * @param string $role
      * @return SourceInterface
      */
-    public function source(string $role): SourceInterface;
+    public function getSource(string $role): SourceInterface;
 }

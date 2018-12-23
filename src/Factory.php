@@ -39,9 +39,6 @@ class Factory implements FactoryInterface, SourceFactoryInterface
     /** @var SchemaInterface */
     private $schema;
 
-    /** @var SourceInterface[] */
-    private $sources = [];
-
     /**
      * @param DatabaseManager  $dbal
      * @param RelationConfig   $config
@@ -62,7 +59,6 @@ class Factory implements FactoryInterface, SourceFactoryInterface
         $factory = clone $this;
         $factory->orm = $orm;
         $factory->schema = $schema;
-        $factory->sources = [];
 
         return $factory;
     }
@@ -114,25 +110,19 @@ class Factory implements FactoryInterface, SourceFactoryInterface
     /**
      * @inheritdoc
      */
-    public function source(string $role): SourceInterface
+    public function getSource(string $role): SourceInterface
     {
-        if (isset($this->sources[$role])) {
-            return $this->sources[$role];
-        }
-
         $constrains = [];
         foreach ($this->schema->define($role, Schema::CONSTRAINS) ?? [] as $name => $constrain) {
             $constrains[$name] = $this->factory->make($constrain);
         }
 
         $class = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
-        $source = $this->factory->make($class, [
+        return $this->factory->make($class, [
             'database'   => $this->dbal->database($this->schema->define($role, Schema::DATABASE)),
             'table'      => $this->schema->define($role, Schema::TABLE),
             'constrains' => $constrains
         ]);
-
-        return $this->sources[$role] = $source;
     }
 
     /**

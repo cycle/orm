@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Traits;
 
-use Spiral\Cycle\Select\QueryProxy;
+use Spiral\Cycle\Select\QueryBuilder;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -31,8 +31,8 @@ trait WhereTrait
             return $query;
         }
 
-        $proxy = new QueryProxy($this->orm, $query, $this);
-        $proxy->setForward($target)->where($where);
+        $proxy = new QueryBuilder($this->orm, $query, $this);
+        $proxy->setForwarding($target)->where($where);
 
         return $proxy->getQuery();
     }

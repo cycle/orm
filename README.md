@@ -9,9 +9,7 @@ Features:
 - eager and lazy loading, auto joins, promises and proxies
 - runtime configuration with/without code-generation
 - single table inheritance
-- works with directed graphs and cyclic graphs using IDDFS
-- persistence using command chains
-- one pass parser for query results
+- works with directed graphs and cyclic graphs using IDDFS over command chains
 - designed to work in long-running applications
 - supports MySQL, PostgresSQL, SQLServer, SQLite (full mock capability)
 - bare PHP classes, ActiveRecord-like classes, no classes at all 

@@ -28,6 +28,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     public const SCHEDULED_INSERT = 3;
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
+    public const DELETED          = 6;
 
     /** @var int */
     private $status;

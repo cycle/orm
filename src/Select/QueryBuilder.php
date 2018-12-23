@@ -17,23 +17,23 @@ use Spiral\Database\Query\SelectQuery;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method QueryProxy distinct()
- * @method QueryProxy where(...$args);
- * @method QueryProxy andWhere(...$args);
- * @method QueryProxy orWhere(...$args);
- * @method QueryProxy having(...$args);
- * @method QueryProxy andHaving(...$args);
- * @method QueryProxy orHaving(...$args);
- * @method QueryProxy orderBy($expression, $direction = 'ASC');
- * @method QueryProxy limit(int $limit)
- * @method QueryProxy offset(int $offset)
+ * @method QueryBuilder distinct()
+ * @method QueryBuilder where(...$args);
+ * @method QueryBuilder andWhere(...$args);
+ * @method QueryBuilder orWhere(...$args);
+ * @method QueryBuilder having(...$args);
+ * @method QueryBuilder andHaving(...$args);
+ * @method QueryBuilder orHaving(...$args);
+ * @method QueryBuilder orderBy($expression, $direction = 'ASC');
+ * @method QueryBuilder limit(int $limit)
+ * @method QueryBuilder offset(int $offset)
  *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-final class QueryProxy
+final class QueryBuilder
 {
     /** @var ORMInterface */
     private $orm;
@@ -78,12 +78,12 @@ final class QueryProxy
     }
 
     /**
-     * Set query method prefix for all "where" queries. Can route "where" to "onWhere".
+     * Select query method prefix for all "where" queries. Can route "where" to "onWhere".
      *
      * @param string $forward "where", "onWhere"
-     * @return QueryProxy
+     * @return QueryBuilder
      */
-    public function setForward(string $forward = null): self
+    public function setForwarding(string $forward = null): self
     {
         $this->forward = $forward;
 
@@ -93,11 +93,11 @@ final class QueryProxy
     /**
      * Forward call to underlying target.
      *
-     * @param string $name
+     * @param string $func
      * @param array  $args
      * @return SelectQuery|mixed
      */
-    public function __call(string $name, array $args)
+    public function __call(string $func, array $args)
     {
         $args = array_values($args);
         if (count($args) > 0 && $args[0] instanceof \Closure) {
@@ -107,7 +107,11 @@ final class QueryProxy
         }
 
         // prepare arguments
-        $result = call_user_func_array($this->targetFunc($name), $this->proxy($args));
+        $result = call_user_func_array(
+            $this->targetFunc($func),
+            $this->proxy($func, $args)
+        );
+
         if ($result === $this->query) {
             return $this;
         }
@@ -121,7 +125,7 @@ final class QueryProxy
      * @param mixed $where
      * @return mixed
      */
-    protected function proxy($where)
+    protected function proxy($func, $where)
     {
         // todo: this require a lot of tests
 
@@ -144,7 +148,7 @@ final class QueryProxy
                 $column = str_replace('@', $this->loader->getAlias(), $column);
             }
 
-            $result[$column] = !is_array($value) ? $value : $this->proxy($value);
+            $result[$column] = !is_array($value) ? $value : $this->proxy(null, $value);
         }
 
         return $result;

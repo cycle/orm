@@ -17,7 +17,7 @@ interface ConstrainInterface
     /**
      * Configure query and loader pair using proxy strategy.
      *
-     * @param QueryProxy $proxy
+     * @param QueryBuilder $proxy
      */
-    public function apply(QueryProxy $proxy);
+    public function apply(QueryBuilder $proxy);
 }

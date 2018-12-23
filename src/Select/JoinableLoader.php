@@ -250,8 +250,8 @@ abstract class JoinableLoader extends AbstractLoader
     protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if (!empty($this->constrain)) {
-            $proxy = new QueryProxy($this->orm, $query, $this);
-            $proxy->setForward($this->isJoined() ? 'onWhere' : 'where');
+            $proxy = new QueryBuilder($this->orm, $query, $this);
+            $proxy->setForwarding($this->isJoined() ? 'onWhere' : 'where');
 
             $this->constrain->apply($proxy);
         }

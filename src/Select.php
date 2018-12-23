@@ -13,7 +13,7 @@ use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Parser\OutputNode;
 use Spiral\Cycle\Select\ConstrainInterface;
 use Spiral\Cycle\Select\LoaderInterface;
-use Spiral\Cycle\Select\QueryProxy;
+use Spiral\Cycle\Select\QueryBuilder;
 use Spiral\Cycle\Select\RootLoader;
 use Spiral\Database\Query\SelectQuery;
 
@@ -72,11 +72,11 @@ class Select implements \IteratorAggregate, \Countable
     /**
      * Get Query proxy.
      *
-     * @return QueryProxy
+     * @return QueryBuilder
      */
-    public function getQueryProxy(): QueryProxy
+    public function getQueryProxy(): QueryBuilder
     {
-        return new QueryProxy($this->orm, $this->getLoader()->getQuery(), $this->loader);
+        return new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
     }
 
     /**
@@ -126,14 +126,14 @@ class Select implements \IteratorAggregate, \Countable
     public function __call(string $name, array $arguments)
     {
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            $proxy = new QueryProxy($this->orm, $this->loader->buildQuery(), $this->loader);
+            $proxy = new QueryBuilder($this->orm, $this->loader->buildQuery(), $this->loader);
 
             // aggregations
             return $proxy->__call($name, $arguments);
         }
 
         $result = $this->getQueryProxy()->__call($name, $arguments);
-        if ($result instanceof QueryProxy) {
+        if ($result instanceof QueryBuilder) {
             return $this;
         }
 

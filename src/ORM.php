@@ -18,11 +18,12 @@ use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Select\SourceFactoryInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  */
-class ORM implements ORMInterface
+class ORM implements ORMInterface, SourceFactoryInterface
 {
     // Memory section to store ORM schema.
     protected const MEMORY = 'orm.schema';

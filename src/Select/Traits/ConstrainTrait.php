@@ -11,7 +11,7 @@ namespace Spiral\Cycle\Select\Traits;
 
 use Spiral\Cycle\Select\AbstractLoader;
 use Spiral\Cycle\Select\ConstrainInterface;
-use Spiral\Cycle\Select\QueryProxy;
+use Spiral\Cycle\Select\QueryBuilder;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -47,7 +47,7 @@ trait ConstrainTrait
     protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if (!empty($this->constrain)) {
-            $this->constrain->apply(new QueryProxy($this->orm, $query, $this));
+            $this->constrain->apply(new QueryBuilder($this->orm, $query, $this));
         }
 
         return $query;

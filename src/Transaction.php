@@ -130,7 +130,7 @@ final class Transaction implements TransactionInterface
 
             throw $e;
         } finally {
-            if (empty($e)) {
+            if (!isset($e)) {
                 // we are ready to commit all changes to our representation layer
                 $this->syncHeap();
             }

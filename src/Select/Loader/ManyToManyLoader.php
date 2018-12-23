@@ -52,6 +52,30 @@ class ManyToManyLoader extends JoinableLoader
     }
 
     /**
+     * Pivot table name.
+     *
+     * @return string
+     */
+    public function getPivotTable(): string
+    {
+        return $this->schema[Relation::PIVOT_TABLE];
+    }
+
+    /**
+     * Pivot table alias, depends on relation table alias.
+     *
+     * @return string
+     */
+    public function getPivotAlias(): string
+    {
+        if (!empty($this->options['pivotAlias'])) {
+            return $this->options['pivotAlias'];
+        }
+
+        return $this->getAlias() . '_pivot';
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
@@ -64,14 +88,14 @@ class ManyToManyLoader extends JoinableLoader
         if ($this->isJoined()) {
             $query->join(
                 $this->getJoinMethod(),
-                $this->pivotTable() . ' AS ' . $this->pivotAlias())
+                $this->getPivotTable() . ' AS ' . $this->getPivotAlias())
                 ->on(
                     $this->pivotKey(Relation::THOUGHT_INNER_KEY),
                     $this->parentKey(Relation::INNER_KEY)
                 );
         } else {
             $query->innerJoin(
-                $this->pivotTable() . ' AS ' . $this->pivotAlias()
+                $this->getPivotTable() . ' AS ' . $this->getPivotAlias()
             )->on(
                 $this->pivotKey(Relation::THOUGHT_OUTER_KEY),
                 $this->localKey(Relation::OUTER_KEY)
@@ -87,13 +111,13 @@ class ManyToManyLoader extends JoinableLoader
         // pivot conditions specified in relation schema
         $this->setWhere(
             $query,
-            $this->pivotAlias(),
+            $this->getPivotAlias(),
             $whereTarget,
             $this->define(Relation::PIVOT_WHERE)
         );
 
         // pivot conditions specified by user @todo: bug, table name is ignored
-        $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);
+        $this->setWhere($query, $this->getPivotAlias(), $whereTarget, $this->options['wherePivot']);
 
         if ($this->isJoined()) {
             // actual data is always INNER join
@@ -125,7 +149,7 @@ class ManyToManyLoader extends JoinableLoader
         bool $overwrite = false
     ): SelectQuery {
         //Pivot table source alias
-        $alias = $this->pivotAlias();
+        $alias = $this->getPivotAlias();
 
         $columns = $overwrite ? [] : $query->getColumns();
         foreach ($this->pivotColumns() as $name) {
@@ -160,30 +184,6 @@ class ManyToManyLoader extends JoinableLoader
     }
 
     /**
-     * Pivot table name.
-     *
-     * @return string
-     */
-    protected function pivotTable(): string
-    {
-        return $this->schema[Relation::PIVOT_TABLE];
-    }
-
-    /**
-     * Pivot table alias, depends on relation table alias.
-     *
-     * @return string
-     */
-    protected function pivotAlias(): string
-    {
-        if (!empty($this->options['pivotAlias'])) {
-            return $this->options['pivotAlias'];
-        }
-
-        return $this->getAlias() . '_pivot';
-    }
-
-    /**
      * @return array
      */
     protected function pivotColumns(): array
@@ -205,6 +205,6 @@ class ManyToManyLoader extends JoinableLoader
             return null;
         }
 
-        return $this->pivotAlias() . '.' . $this->schema[$key];
+        return $this->getPivotAlias() . '.' . $this->schema[$key];
     }
 }

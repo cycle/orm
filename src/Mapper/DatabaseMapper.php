@@ -16,18 +16,21 @@ use Spiral\Cycle\Command\Database\Delete;
 use Spiral\Cycle\Command\Database\Insert;
 use Spiral\Cycle\Command\Database\Update;
 use Spiral\Cycle\Context\ConsumerInterface;
+use Spiral\Cycle\Exception\MapperException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Select\Source;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
  */
-abstract class DatabaseMapper extends Source implements MapperInterface
+abstract class DatabaseMapper implements MapperInterface
 {
+    /** @var Select\SourceInterface */
+    protected $source;
+
     /** @var null|RepositoryInterface */
     protected $repository;
 
@@ -52,20 +55,17 @@ abstract class DatabaseMapper extends Source implements MapperInterface
      */
     public function __construct(ORMInterface $orm, string $role)
     {
+        if (!$orm instanceof Select\SourceProviderInterface) {
+            throw new MapperException("ORM must provide access to database source");
+        }
+
         $this->orm = $orm;
         $this->role = $role;
+        $this->source = $orm->getSource($role);
 
-        $schema = $orm->getSchema();
-
-        parent::__construct(
-            $orm->getFactory(),
-            $schema->define($role, Schema::DATABASE),
-            $schema->define($role, Schema::TABLE)
-        );
-
-        $this->columns = $schema->define($role, Schema::COLUMNS);
-        $this->primaryKey = $schema->define($role, Schema::PRIMARY_KEY);
-        $this->children = $schema->define($role, Schema::CHILDREN) ?? [];
+        $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
+        $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
     }
 
     /**
@@ -87,7 +87,7 @@ abstract class DatabaseMapper extends Source implements MapperInterface
         }
 
         $selector = new Select($this->orm, $this->role);
-        $selector->constrain($this->getConstrain(self::DEFAULT_CONSTRAIN));
+        $selector->constrain($this->source->getConstrain(Select\SourceInterface::DEFAULT_CONSTRAIN));
 
         return $this->repository = new Repository($selector);
     }
@@ -125,7 +125,7 @@ abstract class DatabaseMapper extends Source implements MapperInterface
      */
     public function queueDelete($entity, Node $node): CommandInterface
     {
-        $delete = new Delete($this->getDatabase(), $this->getTable());
+        $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
         $node->getState()->setStatus(Node::SCHEDULED_DELETE);
         $node->getState()->decClaim();
 
@@ -159,7 +159,7 @@ abstract class DatabaseMapper extends Source implements MapperInterface
         // todo: ID generation on client-side (!)
         unset($columns[$this->primaryKey]);
 
-        $insert = new Insert($this->getDatabase(), $this->getTable(), $columns);
+        $insert = new Insert($this->source->getDatabase(), $this->source->getTable(), $columns);
         $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
 
         return $insert;
@@ -180,7 +180,7 @@ abstract class DatabaseMapper extends Source implements MapperInterface
         $changes = array_diff($data, $state->getData());
         unset($changes[$this->primaryKey]);
 
-        $update = new Update($this->getDatabase(), $this->getTable(), $changes);
+        $update = new Update($this->source->getDatabase(), $this->source->getTable(), $changes);
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
 

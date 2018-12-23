@@ -1,0 +1,20 @@
+<?php
+/**
+ * Spiral Framework.
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
+namespace Spiral\Cycle\Select;
+
+interface SourceProviderInterface
+{
+    /**
+     * Get database source associated with given entity role.
+     *
+     * @param string $role
+     * @return SourceInterface
+     */
+    public function getSource(string $role): SourceInterface;
+}

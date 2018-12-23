@@ -20,7 +20,6 @@ use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Select\Loader\ManyToManyLoader;
-use Spiral\Cycle\Select\SourceInterface;
 
 /**
  * Promise use loader to configure query and it's scope.
@@ -102,10 +101,10 @@ class PivotedPromise implements PromiseInterface
             return $this->resolved;
         }
 
-        $source = $this->orm->getMapper($this->target);
-        if (!$source instanceof SourceInterface) {
-            throw new RelationException("ManyToMany relation can only work with SelectableInterface mappers");
+        if (!$this->orm instanceof Select\SourceProviderInterface) {
+            throw new RelationException("ORM must provide access to database source");
         }
+        $source = $this->orm->getSource($this->target);
 
         // getting scoped query
         $root = new Select\RootLoader($this->orm, $this->target);

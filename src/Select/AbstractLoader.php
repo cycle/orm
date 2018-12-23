@@ -92,12 +92,11 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function getSource(): SourceInterface
     {
-        $mapper = $this->orm->getMapper($this->target);
-        if (!$mapper instanceof SourceInterface) {
-            throw new LoaderException("Unable to use mapper " . get_class($mapper) . " as SQL source");
+        if (!$this->orm instanceof SourceProviderInterface) {
+            throw new LoaderException("ORM must provide access to database source");
         }
 
-        return $mapper;
+        return $this->orm->getSource($this->target);
     }
 
     /**

@@ -9,28 +9,22 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select;
 
-use Spiral\Cycle\FactoryInterface;
 use Spiral\Database\DatabaseInterface;
 
-class Source implements SourceInterface
+final class Source implements SourceInterface
 {
-    /** @var string */
+    /** @var DatabaseInterface */
     private $database;
 
     /** @var string */
     private $table;
 
-    /** @var FactoryInterface @internal */
-    private $factory;
-
     /**
-     * @param FactoryInterface $orm
-     * @param string           $database
-     * @param string           $table
+     * @param DatabaseInterface $database
+     * @param string            $table
      */
-    public function __construct(FactoryInterface $orm, string $database, string $table)
+    public function __construct(DatabaseInterface $database, string $table)
     {
-        $this->factory = $orm;
         $this->database = $database;
         $this->table = $table;
     }
@@ -40,7 +34,7 @@ class Source implements SourceInterface
      */
     public function getDatabase(): DatabaseInterface
     {
-        return $this->factory->database($this->database);
+        return $this->database;
     }
 
     /**
@@ -56,6 +50,7 @@ class Source implements SourceInterface
      */
     public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface
     {
+        // todo: pass constrains
         return null;
     }
 }

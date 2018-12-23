@@ -9,10 +9,8 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Promise;
 
-use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Select\SourceInterface;
 
 /**
  * Promises the selection of the
@@ -90,11 +88,6 @@ class PromiseMany implements PromiseInterface
     {
         if (is_null($this->orm)) {
             return $this->resolved;
-        }
-
-        $source = $this->orm->getMapper($this->target);
-        if (!$source instanceof SourceInterface) {
-            throw new RelationException("ManyToMany relation can only work with SelectableInterface mappers");
         }
 
         $selector = new Select($this->orm, $this->target);

@@ -64,6 +64,27 @@ class ORM implements ORMInterface, SourceFactoryInterface
     }
 
     /**
+     * @inheritdoc
+     *
+     * @todo remove this one
+     */
+    public function get(string $role, $id, bool $load = true)
+    {
+        $role = $this->resolveRole($role);
+        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+
+        if (!is_null($e = $this->heap->find($role, [$pk => $id]))) {
+            return $e;
+        }
+
+        if (!$load) {
+            return null;
+        }
+
+        return $this->getMapper($role)->getRepository()->findByPK($id);
+    }
+
+    /**
      * Automatically resolve role based on object name.
      *
      * @param string|object $entity

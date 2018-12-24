@@ -52,9 +52,7 @@ class Mapper extends DatabaseMapper
     {
         $class = $this->resolveClass($data);
 
-        // filter data
-
-        return [new $class, $data];
+        return [new $class, $this->filterData($data)];
     }
 
     /**

@@ -29,7 +29,7 @@ final class Runner implements RunnerInterface
      */
     public function run(CommandInterface $command)
     {
-        // found same link from multiple branches
+        // found the same link from multiple branches
         if ($command->isExecuted()) {
             $this->countExecuted++;
             return;

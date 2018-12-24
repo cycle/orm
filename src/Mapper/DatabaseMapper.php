@@ -22,6 +22,7 @@ use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
+use Spiral\Cycle\Typecast\Typecast;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
@@ -46,6 +47,9 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryKey;
 
+    /** @var Typecast|null */
+    protected $typecast;
+
     /**
      * DatabaseMapper constructor.
      *
@@ -64,6 +68,10 @@ abstract class DatabaseMapper implements MapperInterface
         $this->source = $orm->getSource($role);
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+
+        if (!is_null($rules = $orm->getSchema()->define($role, Schema::TYPECAST))) {
+            $this->typecast = new Typecast($rules);
+        }
     }
 
     /**
@@ -139,6 +147,19 @@ abstract class DatabaseMapper implements MapperInterface
     }
 
     /**
+     * @param array $data
+     * @return array
+     */
+    protected function filterData(array $data): array
+    {
+        if ($this->typecast !== null) {
+            return $this->typecast->cast($data);
+        }
+
+        return $data;
+    }
+
+    /**
      * Generate command or chain of commands needed to insert entity into the database.
      *
      * @param object $entity
@@ -153,7 +174,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_INSERT);
         $state->setData($columns);
 
-        $columns[$this->primaryKey] = $this->generateID();
+        $columns[$this->primaryKey] = $this->generatePrimaryKey();
         if (is_null($columns[$this->primaryKey])) {
             unset($columns[$this->primaryKey]);
         }
@@ -205,7 +226,7 @@ abstract class DatabaseMapper implements MapperInterface
      *
      * @return mixed|null
      */
-    protected function generateID()
+    protected function generatePrimaryKey()
     {
         return null;
     }

@@ -18,7 +18,7 @@ use Spiral\Cycle\Relation\DependencyInterface;
 use Spiral\Cycle\Relation\RelationInterface;
 
 /**
- * Manages the graph of relations and generates command branches.
+ * Manages the position of node in the relation graph and provide access to neighbours.
  */
 final class RelationMap
 {

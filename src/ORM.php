@@ -278,6 +278,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
             return new Nil();
         }
 
+        // currently we rely on db to delete all nested records (or soft deletes)
         return $this->getMapper($node->getRole())->queueDelete($entity, $node);
     }
 

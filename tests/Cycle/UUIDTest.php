@@ -51,6 +51,7 @@ abstract class UUIDTest extends BaseTest
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
 
+        // seed
         $this->u1 = Uuid::uuid4()->toString();
         $this->u2 = Uuid::uuid4()->toString();
         $this->c1 = Uuid::uuid4()->toString();

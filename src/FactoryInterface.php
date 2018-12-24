@@ -15,7 +15,7 @@ use Spiral\Cycle\Select\LoaderInterface;
 
 interface FactoryInterface
 {
-    public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
+    public function withSchema(ORMInterface $orm, SchemaInterface $schema): FactoryInterface;
 
     public function mapper(string $role): MapperInterface;
 

@@ -26,9 +26,6 @@ use Spiral\Cycle\Select\SourceInterface;
  */
 class ORM implements ORMInterface, SourceFactoryInterface
 {
-    // Memory section to store ORM schema.
-    protected const MEMORY = 'orm.schema';
-
     /** @var FactoryInterface|SourceFactoryInterface */
     private $factory;
 
@@ -51,15 +48,22 @@ class ORM implements ORMInterface, SourceFactoryInterface
     private $sources = [];
 
     /**
-     * @param FactoryInterface $factory
+     * @param FactoryInterface     $factory
+     * @param SchemaInterface|null $schema
      */
-    public function __construct(FactoryInterface $factory)
+    public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
     {
         if (!$factory instanceof SourceFactoryInterface) {
             throw new ORMException("Source factory is missing");
         }
 
         $this->factory = $factory;
+
+        if (!is_null($schema)) {
+            $this->schema = $schema;
+            $this->factory = $this->factory->withSchema($this, $schema);
+        }
+
         $this->heap = new Heap();
     }
 
@@ -144,7 +148,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
-        $orm->factory = $factory->withContext($orm, $orm->schema);
+        $orm->factory = $factory->withSchema($orm, $orm->schema);
 
         return $orm;
     }
@@ -164,7 +168,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
     {
         $orm = clone $this;
         $orm->schema = $schema;
-        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
+        $orm->factory = $orm->factory->withSchema($orm, $orm->schema);
 
         return $orm;
     }
@@ -174,9 +178,8 @@ class ORM implements ORMInterface, SourceFactoryInterface
      */
     public function getSchema(): SchemaInterface
     {
-        if (empty($this->schema)) {
-            $this->schema = $this->loadSchema();
-            $this->factory = $this->factory->withContext($this, $this->schema);
+        if (is_null($this->schema)) {
+            throw new ORMException("ORM is not configured, schema is missing");
         }
 
         return $this->schema;
@@ -189,7 +192,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
-        $orm->factory = $orm->factory->withContext($orm, $orm->schema);
+        $orm->factory = $orm->factory->withSchema($orm, $orm->schema);
 
         return $orm;
     }
@@ -324,13 +327,5 @@ class ORM implements ORMInterface, SourceFactoryInterface
         }
 
         return $this->relmaps[$role] = new RelationMap($this, $relations);
-    }
-
-
-    protected function loadSchema(): SchemaInterface
-    {
-        return new Schema([
-            // hahahaha
-        ]);
     }
 }

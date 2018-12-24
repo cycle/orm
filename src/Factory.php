@@ -54,7 +54,7 @@ class Factory implements FactoryInterface, SourceFactoryInterface
     /**
      * @inheritdoc
      */
-    public function withContext(ORMInterface $orm, SchemaInterface $schema): FactoryInterface
+    public function withSchema(ORMInterface $orm, SchemaInterface $schema): FactoryInterface
     {
         $factory = clone $this;
         $factory->orm = $orm;

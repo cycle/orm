@@ -31,6 +31,14 @@ interface ORMInterface
     public function get(string $role, array $scope, bool $load = false);
 
     /**
+     * Automatically resolve role based on object name.
+     *
+     * @param string|object $entity
+     * @return string
+     */
+    public function resolveRole($entity): string;
+
+    /**
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      *

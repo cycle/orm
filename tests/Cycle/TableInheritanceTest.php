@@ -8,8 +8,8 @@
 
 namespace Spiral\Cycle\Tests;
 
-use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Admin;
@@ -56,12 +56,7 @@ abstract class TableInheritanceTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ],
-            Admin::class => [
-                Schema::ALIAS     => 'admin',
-                Schema::EXTENDS   => User::class,
-                Schema::SCHEMA    => [],
-                Schema::RELATIONS => []
-            ]
+            Admin::class => [Schema::ALIAS => User::class,]
         ]));
     }
 

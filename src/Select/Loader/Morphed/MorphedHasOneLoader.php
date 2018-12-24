@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Select\Loader\Morphed;
 
 use Spiral\Cycle\Relation;
-use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\Loader\HasOneLoader;
 use Spiral\Cycle\Select\Traits\MorphedTrait;
 use Spiral\Cycle\Select\Traits\WhereTrait;
@@ -28,13 +27,11 @@ class MorphedHasOneLoader extends HasOneLoader
      */
     protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        $parentAlias = $this->orm->getSchema()->define($this->parent->getTarget(), Schema::ALIAS);
-
         return $this->setWhere(
             parent::configureQuery($query, $outerKeys),
             $this->getAlias(),
             $this->isJoined() ? 'onWhere' : 'where',
-            [$this->localKey(Relation::MORPH_KEY) => $parentAlias]
+            [$this->localKey(Relation::MORPH_KEY) => $this->parent->getTarget()]
         );
     }
 }

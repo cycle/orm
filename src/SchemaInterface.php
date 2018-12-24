@@ -15,6 +15,7 @@ interface SchemaInterface
 {
     public const ENTITY       = -1;
     public const ALIAS        = 0;
+    public const ROLE         = 0;
     public const MAPPER       = 1;
     public const SOURCE       = 2;
     public const DATABASE     = 3;
@@ -25,7 +26,6 @@ interface SchemaInterface
     public const COLUMN_TYPES = 8;
     public const SCHEMA       = 9;
     public const RELATIONS    = 10;
-    public const EXTENDS      = 11;
     public const CHILDREN     = 12;
     public const CONSTRAINS   = 13;
 
@@ -36,19 +36,19 @@ interface SchemaInterface
      *
      * Example: $schema->define(User::class, SchemaInterface::DATABASE);
      *
-     * @param string $class
+     * @param string $role
      * @param int    $property See ORM constants.
      * @return mixed
      *
      * @throws SchemaException
      */
-    public function define(string $class, int $property);
+    public function define(string $role, int $property);
 
     /**
      * @param string $alias
      * @return null|string
      */
-    public function getClass(string $alias): ?string;
+    public function resolveRole(string $alias): ?string;
 
     /**
      * Define options associated with specific entity relation.

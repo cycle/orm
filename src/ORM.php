@@ -77,11 +77,36 @@ class ORM implements ORMInterface, SourceFactoryInterface
         }
 
         if ($load) {
-            $role = $this->schema->getClass($role) ?? $role;
+            $role = $this->schema->resolveRole($role) ?? $role;
             return $this->getMapper($role)->getRepository()->findOne($scope);
         }
 
         return null;
+    }
+
+    /**
+     * Automatically resolve role based on object name.
+     *
+     * @param string|object $entity
+     * @return string
+     */
+    public function resolveRole($entity): string
+    {
+        if (is_object($entity)) {
+            $class = get_class($entity);
+            if (!$this->schema->defines($class)) {
+                $node = $this->getHeap()->get($entity);
+                if (is_null($node)) {
+                    throw new ORMException("Unable to resolve role of `$class`");
+                }
+
+                return $node->getRole();
+            }
+
+            $entity = $class;
+        }
+
+        return $this->schema->resolveRole($entity);
     }
 
     /**
@@ -184,18 +209,12 @@ class ORM implements ORMInterface, SourceFactoryInterface
      */
     public function getMapper($entity): MapperInterface
     {
-        if (is_string($entity)) {
-            // todo: do i need it?
-            $entity = $this->schema->getClass($entity) ?? $entity;
-        } else {
-            $entity = $this->findRole($entity);
+        $role = $this->resolveRole($entity);
+        if (isset($this->mappers[$role])) {
+            return $this->mappers[$role];
         }
 
-        if (isset($this->mappers[$entity])) {
-            return $this->mappers[$entity];
-        }
-
-        return $this->mappers[$entity] = $this->factory->mapper($entity);
+        return $this->mappers[$role] = $this->factory->mapper($role);
     }
 
     /**
@@ -287,29 +306,6 @@ class ORM implements ORMInterface, SourceFactoryInterface
     }
 
     /**
-     * Get the role of a given entity.
-     *
-     * @param object|string $entity
-     * @return string
-     */
-    protected function findRole($entity): string
-    {
-        $class = get_class($entity);
-
-        if ($this->schema->defines($class)) {
-            // check if class is being inherited
-            return $this->schema->define($class, Schema::EXTENDS) ?? $class;
-        }
-
-        // use role associated with the node (for roles without specific class)
-        if (!empty($node = $this->heap->get($entity))) {
-            return $node->getRole();
-        }
-
-        throw new ORMException("Undefined class {$class}");
-    }
-
-    /**
      * Get relation map associated with the given class.
      *
      * @param string $entity
@@ -317,21 +313,21 @@ class ORM implements ORMInterface, SourceFactoryInterface
      */
     protected function getRelmap($entity): RelationMap
     {
-        $entity = is_object($entity) ? get_class($entity) : $entity;
-
-        if (isset($this->relmaps[$entity])) {
-            return $this->relmaps[$entity];
+        $role = $this->resolveRole($entity);
+        if (isset($this->relmaps[$role])) {
+            return $this->relmaps[$role];
         }
 
         $relations = [];
 
-        $names = array_keys($this->schema->define($entity, Schema::RELATIONS));
+        $names = array_keys($this->schema->define($role, Schema::RELATIONS));
         foreach ($names as $relation) {
-            $relations[$relation] = $this->factory->relation($entity, $relation);
+            $relations[$relation] = $this->factory->relation($role, $relation);
         }
 
-        return $this->relmaps[$entity] = new RelationMap($this, $relations);
+        return $this->relmaps[$role] = new RelationMap($this, $relations);
     }
+
 
     protected function loadSchema(): SchemaInterface
     {

@@ -53,7 +53,7 @@ class Select implements \IteratorAggregate, \Countable
     public function __construct(ORMInterface $orm, string $role)
     {
         $this->orm = $orm;
-        $this->loader = new RootLoader($orm, $role);
+        $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
     }
 
     /**

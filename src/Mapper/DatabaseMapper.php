@@ -46,8 +46,6 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryKey;
 
-    /** @var array */
-    protected $children = [];
 
     /**
      * DatabaseMapper constructor.
@@ -64,10 +62,9 @@ abstract class DatabaseMapper implements MapperInterface
         $this->orm = $orm;
         $this->source = $orm->getSource($role);
         $this->role = $role;
-
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
+
     }
 
     /**
@@ -75,8 +72,7 @@ abstract class DatabaseMapper implements MapperInterface
      */
     public function getRole(): string
     {
-        // todo: return current role (!) CRITICAL TO MOVE FORWARD
-        return $this->orm->getSchema()->define($this->role, Schema::ALIAS);
+        return $this->role;
     }
 
     /**

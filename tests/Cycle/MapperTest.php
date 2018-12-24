@@ -79,6 +79,16 @@ abstract class MapperTest extends BaseTest
         $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
     }
 
+    public function testMakeByRole()
+    {
+        $this->assertInstanceOf(User::class, $this->orm->make('user'));
+    }
+
+    public function testMakeByClass()
+    {
+        $this->assertInstanceOf(User::class, $this->orm->make(User::class));
+    }
+
     public function testAssertRoleViaClass()
     {
         $selector = new Select($this->orm, User::class);
@@ -86,7 +96,6 @@ abstract class MapperTest extends BaseTest
 
         $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
     }
-
 
     public function testFetchAll()
     {

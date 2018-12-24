@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Mapper;
 
 use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Schema;
 use Zend\Hydrator;
 
 /**
@@ -21,6 +22,12 @@ class Mapper extends DatabaseMapper
     // system column to store entity type
     public const ENTITY_TYPE = '_type';
 
+    /** @var string */
+    protected $entity;
+
+    /** @var array */
+    protected $children = [];
+
     /** @var Hydrator\HydratorInterface */
     protected $hydrator;
 
@@ -31,6 +38,10 @@ class Mapper extends DatabaseMapper
     public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct($orm, $role);
+
+        $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
+        $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
+
         $this->hydrator = new Hydrator\Reflection();
     }
 
@@ -73,7 +84,7 @@ class Mapper extends DatabaseMapper
         $columns = array_intersect_key($this->extract($entity), array_flip($this->columns));
 
         $class = get_class($entity);
-        if ($class != $this->role) {
+        if ($class != $this->entity) {
             // inheritance
             foreach ($this->children as $alias => $childClass) {
                 if ($childClass == $class) {
@@ -94,7 +105,7 @@ class Mapper extends DatabaseMapper
      */
     protected function resolveClass(array $data): string
     {
-        $class = $this->role;
+        $class = $this->entity;
         if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
             $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
         }

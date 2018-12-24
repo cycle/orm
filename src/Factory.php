@@ -112,17 +112,19 @@ class Factory implements FactoryInterface, SourceFactoryInterface
      */
     public function getSource(string $role): SourceInterface
     {
-        $constrains = [];
+        $class = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
+
+        /** @var SourceInterface $source */
+        $source = $this->factory->make($class, [
+            'database' => $this->dbal->database($this->schema->define($role, Schema::DATABASE)),
+            'table'    => $this->schema->define($role, Schema::TABLE),
+        ]);
+
         foreach ($this->schema->define($role, Schema::CONSTRAINS) ?? [] as $name => $constrain) {
-            $constrains[$name] = $this->factory->make($constrain);
+            $source = $source->withConstrain($name, $this->factory->make($constrain));
         }
 
-        $class = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
-        return $this->factory->make($class, [
-            'database'   => $this->dbal->database($this->schema->define($role, Schema::DATABASE)),
-            'table'      => $this->schema->define($role, Schema::TABLE),
-            'constrains' => $constrains
-        ]);
+        return $source;
     }
 
     /**

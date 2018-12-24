@@ -23,15 +23,13 @@ final class Source implements SourceInterface
     private $constrains = [];
 
     /**
-     * @param DatabaseInterface    $database
-     * @param string               $table
-     * @param ConstrainInterface[] $constrains
+     * @param DatabaseInterface $database
+     * @param string            $table
      */
-    public function __construct(DatabaseInterface $database, string $table, array $constrains)
+    public function __construct(DatabaseInterface $database, string $table)
     {
         $this->database = $database;
         $this->table = $table;
-        $this->constrains = $constrains;
     }
 
     /**
@@ -48,6 +46,17 @@ final class Source implements SourceInterface
     public function getTable(): string
     {
         return $this->table;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withConstrain(string $name, ?ConstrainInterface $constrain): SourceInterface
+    {
+        $source = clone $this;
+        $source->constrains[$name] = $constrain;
+
+        return $source;
     }
 
     /**

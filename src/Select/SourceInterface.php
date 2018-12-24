@@ -34,6 +34,15 @@ interface SourceInterface
     public function getTable(): string;
 
     /**
+     * Create version of source with newly added/removed constrain.
+     *
+     * @param string                  $name
+     * @param ConstrainInterface|null $constrain
+     * @return SourceInterface
+     */
+    public function withConstrain(string $name, ?ConstrainInterface $constrain): SourceInterface;
+
+    /**
      * Return named query constrain or return null.
      *
      * @param string $name

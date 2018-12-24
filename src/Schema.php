@@ -87,43 +87,27 @@ final class Schema implements SchemaInterface
      */
     protected function normalize(array $schema): array
     {
-        $aliases = [];
-        foreach ($schema as $k => $item) {
-            if (!isset($item[self::ENTITY])) {
-                $item[self::ENTITY] = $k;
-            }
-
-            if (class_exists($item[self::ENTITY]) && isset($item[self::ROLE])) {
-                $aliases[$item[self::ENTITY]] = $item[self::ROLE];
-            }
-        }
+        $aliases = iterator_to_array($this->collectClasses($schema));
 
         $result = [];
         foreach ($schema as $k => $item) {
             if (isset($item[self::RELATIONS])) {
-                // convert all class pointers to role pointers
-                foreach ($item[self::RELATIONS] as &$rel) {
-                    $target = $rel[Relation::TARGET];
-
-                    if (isset($aliases[$target])) {
-                        $rel[Relation::TARGET] = $aliases[$target];
-                    }
-
-                    unset($rel);
-                }
+                $item[self::RELATIONS] = iterator_to_array($this->normalizeRelations(
+                    $item[self::RELATIONS],
+                    $aliases
+                ));
             }
 
+            // assume that key is class name
+            $item[self::ENTITY] = $item[self::ENTITY] ?? $k;
+
+            $role = $k;
+
+            // legacy format where role is defined as key
             if (isset($item[self::ROLE])) {
                 $role = $item[self::ROLE];
                 unset($item[self::ROLE]);
-            } else {
-                $role = $k;
             }
-
-            if (!isset($item[self::ENTITY]) && class_exists($k)) {
-                $item[self::ENTITY] = $k;
-            }
-
 
             $result[$role] = $item;
         }
@@ -134,5 +118,40 @@ final class Schema implements SchemaInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @param array $schema
+     * @return \Generator
+     */
+    private function collectClasses(array $schema): \Generator
+    {
+        foreach ($schema as $k => $item) {
+            if (!isset($item[self::ENTITY])) {
+                $item[self::ENTITY] = $k;
+            }
+
+            if (class_exists($item[self::ENTITY]) && isset($item[self::ROLE])) {
+                yield$item[self::ENTITY] => $item[self::ROLE];
+            }
+        }
+    }
+
+    /**
+     * @param array $relations
+     * @param array $aliases
+     * @return \Generator
+     */
+    private function normalizeRelations(array $relations, array $aliases): \Generator
+    {
+        foreach ($relations as $name => &$rl) {
+            $target = $rl[Relation::TARGET];
+
+            if (isset($aliases[$target])) {
+                $rl[Relation::TARGET] = $aliases[$target];
+            }
+
+            yield $name => $rl;
+        }
     }
 }

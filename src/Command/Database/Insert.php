@@ -29,7 +29,7 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface, Produce
     public const INSERT_ID = '@lastInsertID';
 
     /** @var array */
-    private $data;
+    protected $data;
 
     /** @var ConsumerInterface[] */
     protected $consumers = [];

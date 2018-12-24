@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Relation;
 
-use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
@@ -165,15 +165,24 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
-     * Get selectable mapper associated with a role.
+     * Get the source associated with the role.
      *
      * @param string|null $role
      * @return SourceInterface
-     *
-     * @throws RelationException
      */
     protected function getSource(string $role = null): SourceInterface
     {
         return $this->orm->getSource($role ?? $this->target);
+    }
+
+    /**
+     * Get the mapper associated with a role.
+     *
+     * @param string|null $role
+     * @return MapperInterface
+     */
+    protected function getMapper(string $role = null): MapperInterface
+    {
+        return $this->orm->getMapper($role ?? $this->target);
     }
 }

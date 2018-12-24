@@ -5,13 +5,13 @@
 
 Features:
 ---------
-- DataMapper, any data source, small
+- portable DataMapper, any data source
 - ORM with many-to-many, many-thought-many and polymorphism relations
 - query builder with automatic relation resolution
 - eager and lazy loading, proxies support
 - runtime configuration with/without code-generation
 - single table inheritance
-- works with directed graphs and cyclic graphs using IDDFS over command chains
+- works with directed graphs and cyclic graphs using IDDFS over linked command chains
 - designed to work in long-running applications
 - supports MySQL, PostgresSQL, SQLServer, SQLite (full mock capability)
 - bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/Cycle/Classless)

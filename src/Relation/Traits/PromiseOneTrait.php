@@ -32,7 +32,7 @@ trait PromiseOneTrait
         $p = new PromiseOne($this->orm, $this->target, $scope);
         $p->setConstrain($this->getConstrain());
 
-        $m = $this->getSource();
+        $m = $this->getMapper();
         if ($m instanceof ProxyFactoryInterface) {
             $p = $m->makeProxy($p);
         }

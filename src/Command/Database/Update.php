@@ -28,7 +28,7 @@ class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCa
     use ContextTrait, ScopeTrait, ErrorTrait;
 
     /** @var array */
-    private $data;
+    protected $data;
 
     /**
      * @param DatabaseInterface $db

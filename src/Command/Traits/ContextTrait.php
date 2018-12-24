@@ -14,10 +14,10 @@ namespace Spiral\Cycle\Command\Traits;
 trait ContextTrait
 {
     /** @var array */
-    private $context = [];
+    protected $context = [];
 
     /** @var array */
-    private $waitContext = [];
+    protected $waitContext = [];
 
     /**
      * Wait for the context value.

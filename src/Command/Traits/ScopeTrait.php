@@ -11,10 +11,10 @@ namespace Spiral\Cycle\Command\Traits;
 trait ScopeTrait
 {
     /** @var array */
-    private $scope = [];
+    protected $scope = [];
 
     /** @var array */
-    private $waitScope = [];
+    protected $waitScope = [];
 
     /**
      * Wait for the context value.

@@ -50,16 +50,13 @@ class TestContextCommand implements ContextCarrierInterface
 
     public function waitContext(string $key, bool $required = true)
     {
-        // TODO: Implement waitContext() method.
     }
 
     public function getContext(): array
     {
-        // TODO: Implement getContext() method.
     }
 
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
     {
-        // TODO: Implement register() method.
     }
 }

@@ -24,12 +24,8 @@ trait PromiseOneTrait
             return [null, null];
         }
 
-        $scope = [
-            $this->outerKey => $innerKey
-        ];
-
-        // todo: find in heap, remove get method (REFACTOR)
-        if (!empty($e = $this->orm->get($this->target, $scope, false))) {
+        $scope = [$this->outerKey => $innerKey];
+        if (!empty($e = $this->orm->getHeap()->find($this->target, $scope))) {
             return [$e, $e];
         }
 

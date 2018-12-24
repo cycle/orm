@@ -167,7 +167,7 @@ final class Transaction implements TransactionInterface
                 continue;
             }
 
-            // sync the current entity data with newly generated data @todo optimize
+            // sync the current entity data with newly generated data
             $this->orm->getMapper($node->getRole())->hydrate($e, $node->syncState());
         }
     }

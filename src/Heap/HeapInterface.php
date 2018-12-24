@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Heap;
 
+use Spiral\Cycle\Exception\HeapException;
+
 /**
  * Manages set of entities, their states and quick access though indexes.
  */
@@ -31,14 +33,16 @@ interface HeapInterface
     public function get($entity): ?Node;
 
     /**
-     * Find object by given path.
+     * Find object by key=>value scope. Attention, since all the keys are expected to be unique and indexed
+     * the search will be completed on first value match.
      *
      * @param string $role
-     * @param string $key
-     * @param mixed  $value
+     * @param array  $scope
      * @return null|object
+     *
+     * @throws HeapException
      */
-    public function find(string $role, string $key, $value);
+    public function find(string $role, array $scope);
 
     /**
      * Attach entity to the heap and create index path.

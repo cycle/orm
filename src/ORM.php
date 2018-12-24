@@ -64,27 +64,6 @@ class ORM implements ORMInterface, SourceFactoryInterface
     }
 
     /**
-     * @inheritdoc
-     *
-     * @todo remove this one
-     */
-    public function get(string $role, array $scope, bool $load = false)
-    {
-        foreach ($scope as $k => $v) {
-            if (!empty($e = $this->heap->find($role, $k, $v))) {
-                return $e;
-            }
-        }
-
-        if ($load) {
-            $role = $this->schema->resolveRole($role) ?? $role;
-            return $this->getMapper($role)->getRepository()->findOne($scope);
-        }
-
-        return null;
-    }
-
-    /**
      * Automatically resolve role based on object name.
      *
      * @param string|object $entity
@@ -121,7 +100,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
         $id = $data[$pk] ?? null;
 
         if ($node !== Node::NEW && !empty($id)) {
-            if (!empty($e = $this->heap->find($role, $pk, $id))) {
+            if (!empty($e = $this->heap->find($role, [$pk => $id]))) {
                 $node = $this->getHeap()->get($e);
 
                 // entity already been loaded, let's update it's relations with new context

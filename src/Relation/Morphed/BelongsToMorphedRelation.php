@@ -53,9 +53,7 @@ class BelongsToMorphedRelation extends BelongsToRelation
         }
 
         $scope = [$this->outerKey => $innerKey];
-
-        // todo: REMOVE AND REFACTOR
-        if (!empty($e = $this->orm->get($target, $scope, false))) {
+        if (!empty($e = $this->orm->getHeap()->find($target, $scope))) {
             return [$e, $e];
         }
 

@@ -21,16 +21,6 @@ use Spiral\Cycle\Mapper\MapperInterface;
 interface ORMInterface
 {
     /**
-     * Get entity from the Heap or automatically load it using it's mapper.
-     *
-     * @param string $role
-     * @param array  $scope
-     * @param bool   $load
-     * @return object|null
-     */
-    public function get(string $role, array $scope, bool $load = false);
-
-    /**
      * Automatically resolve role based on object name.
      *
      * @param string|object $entity

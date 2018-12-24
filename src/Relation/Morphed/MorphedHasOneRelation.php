@@ -47,12 +47,16 @@ class MorphedHasOneRelation extends HasOneRelation
             return [null, null];
         }
 
-        $query = [
+        $scope = [
             $this->outerKey => $innerKey,
             $this->morphKey => $parentNode->getRole()
         ];
 
-        $p = new PromiseOne($this->orm, $this->target, $query);
+        if (!empty($e = $this->orm->getHeap()->find($this->target, $scope))) {
+            return [$e, $e];
+        }
+
+        $p = new PromiseOne($this->orm, $this->target, $scope);
         $p->setConstrain($this->getConstrain());
 
         $m = $this->getSource();

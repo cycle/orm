@@ -32,6 +32,8 @@ use Spiral\Database\Query\SelectQuery;
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
+ *
+ * @todo make it smarter
  */
 final class QueryBuilder
 {

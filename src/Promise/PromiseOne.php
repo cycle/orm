@@ -82,13 +82,8 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            foreach ($this->scope as $k => $v) {
-                if (!empty($e = $this->orm->getHeap()->find($this->target, $k, $v))) {
-                    break;
-                }
-            }
-
-            if (!empty($e)) {
+            // entity has already been loaded in memory
+            if (!is_null($e = $this->orm->getHeap()->find($this->target, $this->scope))) {
                 $this->orm = null;
                 return $this->resolved = $e;
             }

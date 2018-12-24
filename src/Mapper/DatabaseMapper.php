@@ -203,7 +203,7 @@ abstract class DatabaseMapper implements MapperInterface
         $data = $this->fetchColumns($entity);
 
         // in a future mapper must support solid states
-        $changes = array_udiff_assoc($data, $state->getData(), [Typecast::class, 'compare']);
+        $changes = array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
         unset($changes[$this->primaryKey]);
 
         $update = new Update($this->source->getDatabase(), $this->source->getTable(), $changes);
@@ -239,4 +239,18 @@ abstract class DatabaseMapper implements MapperInterface
      * @return array
      */
     abstract protected function fetchColumns($entity): array;
+
+    /**
+     * @param mixed $a
+     * @param mixed $b
+     * @return int
+     */
+    protected static function compare($a, $b): int
+    {
+        if ($a == $b) {
+            return 0;
+        }
+
+        return ($a > $b) ? 1 : -1;
+    }
 }

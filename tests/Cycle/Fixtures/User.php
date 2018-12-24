@@ -53,6 +53,9 @@ class User implements ImagedInterface
     /** @var Post[]|Collection */
     public $posts;
 
+    /** @var \DateTimeInterface */
+    public $time_created;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();

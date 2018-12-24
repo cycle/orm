@@ -48,8 +48,8 @@ abstract class TypecastTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::TYPECAST    => [
-                    'id'      => 'intval',
-                    'balance' => 'floatval'
+                    'id'      => 'int',
+                    'balance' => 'float'
                 ],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []

@@ -23,6 +23,7 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Typecast\Typecast;
+use Spiral\Cycle\Typecast\TypecastInterface;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
@@ -47,16 +48,15 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryKey;
 
-    /** @var Typecast|null */
+    /** @var TypecastInterface|null */
     protected $typecast;
 
     /**
-     * DatabaseMapper constructor.
-     *
-     * @param ORMInterface $orm
-     * @param string       $role
+     * @param ORMInterface           $orm
+     * @param string                 $role
+     * @param TypecastInterface|null $typecast
      */
-    public function __construct(ORMInterface $orm, string $role)
+    public function __construct(ORMInterface $orm, string $role, TypecastInterface $typecast = null)
     {
         if (!$orm instanceof Select\SourceFactoryInterface) {
             throw new MapperException("Source factory is missing");
@@ -70,7 +70,8 @@ abstract class DatabaseMapper implements MapperInterface
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
 
         if (!is_null($rules = $orm->getSchema()->define($role, Schema::TYPECAST))) {
-            $this->typecast = new Typecast($rules);
+            $typecast = $typecast ?? new Typecast();
+            $this->typecast = $typecast->withRules($rules);
         }
     }
 
@@ -153,7 +154,7 @@ abstract class DatabaseMapper implements MapperInterface
     protected function filterData(array $data): array
     {
         if ($this->typecast !== null) {
-            return $this->typecast->cast($data);
+            return $this->typecast->cast($data, $this->source->getDatabase());
         }
 
         return $data;

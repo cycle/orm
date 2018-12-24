@@ -43,7 +43,7 @@ class MorphedHasOneRelation extends HasOneRelation
      */
     public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+        if (is_null($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [null, null];
         }
 
@@ -52,7 +52,7 @@ class MorphedHasOneRelation extends HasOneRelation
             $this->morphKey => $parentNode->getRole()
         ];
 
-        if (!empty($e = $this->orm->getHeap()->find($this->target, $scope))) {
+        if (!is_null($e = $this->orm->getHeap()->find($this->target, $scope))) {
             return [$e, $e];
         }
 

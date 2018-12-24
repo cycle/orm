@@ -42,18 +42,18 @@ class BelongsToMorphedRelation extends BelongsToRelation
      */
     public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+        if (is_null($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
             return [null, null];
         }
 
         /** @var string $target */
         $target = $this->fetchKey($parentNode, $this->morphKey);
-        if (empty($target)) {
+        if (is_null($target)) {
             return [null, null];
         }
 
         $scope = [$this->outerKey => $innerKey];
-        if (!empty($e = $this->orm->getHeap()->find($target, $scope))) {
+        if (!is_null($e = $this->orm->getHeap()->find($target, $scope))) {
             return [$e, $e];
         }
 

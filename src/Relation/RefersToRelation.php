@@ -42,7 +42,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         $relNode = $this->getNode($related);
 
         // related object exists, we can update key immediately
-        if (!empty($outerKey = $this->fetchKey($relNode, $this->outerKey))) {
+        if (!is_null($outerKey = $this->fetchKey($relNode, $this->outerKey))) {
             if ($outerKey != $this->fetchKey($parentNode, $this->innerKey)) {
                 $parentStore->register($this->innerKey, $outerKey, true);
             }

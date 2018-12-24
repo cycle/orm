@@ -21,6 +21,14 @@ use Spiral\Cycle\Mapper\MapperInterface;
 interface ORMInterface
 {
     /**
+     * Automatically resolve role based on object name.
+     *
+     * @param string|object $entity
+     * @return string
+     */
+    public function resolveRole($entity): string;
+
+    /**
      * Get entity by it's primary key from the heap of automatically load it.
      *
      * @param string $role
@@ -29,14 +37,6 @@ interface ORMInterface
      * @return object|null
      */
     public function get(string $role, $id, bool $load = true);
-
-    /**
-     * Automatically resolve role based on object name.
-     *
-     * @param string|object $entity
-     * @return string
-     */
-    public function resolveRole($entity): string;
 
     /**
      * Create new entity based on given role and input data. Method will attempt to re-use

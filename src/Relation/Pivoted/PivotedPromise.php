@@ -136,7 +136,7 @@ class PivotedPromise implements PromiseInterface
         $elements = [];
         $pivotData = new \SplObjectStorage();
         foreach (new Iterator($this->orm, $this->target, $node->getResult()) as $pivot => $entity) {
-            if (!empty($this->relationSchema[Relation::PIVOT_ENTITY])) {
+            if (isset($this->relationSchema[Relation::PIVOT_ENTITY])) {
                 $pivotData[$entity] = $this->orm->make(
                     $this->relationSchema[Relation::PIVOT_ENTITY],
                     $pivot,

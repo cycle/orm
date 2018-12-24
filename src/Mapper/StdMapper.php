@@ -10,9 +10,46 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Mapper;
 
 /**
- * Provide the ability to carry data over the StdClass objects.
+ * Provide the ability to carry data over the StdClass objects. Does not support single table inheritance.
  */
-abstract class StdMapper extends DatabaseMapper
+class StdMapper extends DatabaseMapper
 {
+    /**
+     * @inheritdoc
+     */
+    public function init(array $data): array
+    {
+        return [new \stdClass(), $data];
+    }
 
+    /**
+     * @inheritdoc
+     */
+    public function hydrate($entity, array $data)
+    {
+        foreach ($data as $k => $v) {
+            $entity->{$k} = $v;
+        }
+
+        return $entity;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function extract($entity): array
+    {
+        return (array)$entity;
+    }
+
+    /**
+     * Get entity columns.
+     *
+     * @param object $entity
+     * @return array
+     */
+    protected function fetchColumns($entity): array
+    {
+        return array_intersect_key($this->extract($entity), array_flip($this->columns));
+    }
 }

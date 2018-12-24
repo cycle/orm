@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\Postgres; 
 
-class HasManySourceTest extends \Spiral\Cycle\Tests\HasManySourceTest 
+class ClasslessMapperTest extends \Spiral\Cycle\Tests\Classless\ClasslessMapperTest 
 { 
     const DRIVER = "postgres"; 
 }

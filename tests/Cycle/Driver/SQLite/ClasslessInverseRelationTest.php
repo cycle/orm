@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\SQLite; 
 
-class HasManySourceTest extends \Spiral\Cycle\Tests\HasManySourceTest 
+class ClasslessInverseRelationTest extends \Spiral\Cycle\Tests\Classless\ClasslessInverseRelationTest
 { 
     const DRIVER = "sqlite"; 
 }

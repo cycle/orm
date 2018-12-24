@@ -14,7 +14,6 @@ use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Heap\HeapInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
-use Spiral\Cycle\Select\SourceFactoryInterface;
 
 /**
  * Provide the access to all ORM services.
@@ -40,7 +39,7 @@ interface ORMInterface
      * @param int    $node
      * @return object|null
      */
-    public function make(string $role, array $data, int $node = Node::NEW);
+    public function make(string $role, array $data = [], int $node = Node::NEW);
 
     /**
      * Get factory for relations, mappers and etc.

@@ -156,8 +156,7 @@ final class Node implements ProducerInterface, ConsumerInterface
             return [];
         }
 
-        $changes = array_diff($this->state->getData(), $this->data);
-
+        $changes = array_diff_assoc($this->state->getData(), $this->data);
         foreach ($this->state->getRelations() as $name => $relation) {
             $this->setRelation($name, $relation);
         }

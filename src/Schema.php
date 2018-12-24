@@ -46,6 +46,8 @@ final class Schema implements SchemaInterface
 
             if (isset($item[self::ALIAS])) {
                 $add[$item[self::ALIAS]] = $item;
+            } else {
+                $item[self::ALIAS] = $k;
             }
 
             unset($item);

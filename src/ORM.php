@@ -87,7 +87,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
     /**
      * @inheritdoc
      */
-    public function make(string $role, array $data, int $node = Node::NEW)
+    public function make(string $role, array $data = [], int $node = Node::NEW)
     {
         $m = $this->getMapper($role);
 
@@ -186,10 +186,9 @@ class ORM implements ORMInterface, SourceFactoryInterface
     {
         if (is_string($entity)) {
             $entity = $this->schema->getClass($entity) ?? $entity;
+        } else {
+            $entity = $this->getRole($entity);
         }
-
-        // todo: resolve role
-        $entity = $this->getRole($entity);
 
         if (isset($this->mappers[$entity])) {
             return $this->mappers[$entity];

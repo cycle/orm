@@ -158,17 +158,17 @@ final class Transaction implements TransactionInterface
     protected function syncHeap()
     {
         $heap = $this->orm->getHeap();
-        foreach ($heap as $entity) {
-            $node = $heap->get($entity);
+        foreach ($heap as $e) {
+            $node = $heap->get($e);
 
             // marked as being deleted and has no external claims (GC like approach)
             if ($node->getStatus() == Node::SCHEDULED_DELETE && !$node->getState()->hasClaims()) {
-                $heap->detach($entity);
+                $heap->detach($e);
                 continue;
             }
 
-            // sync the current entity data with newly generated data
-            $this->orm->getMapper($entity)->hydrate($entity, $node->syncState());
+            // sync the current entity data with newly generated data @todo optimize
+            $this->orm->getMapper($node->getRole())->hydrate($e, $node->syncState());
         }
     }
 
@@ -178,8 +178,8 @@ final class Transaction implements TransactionInterface
     protected function resetHeap()
     {
         $heap = $this->orm->getHeap();
-        foreach ($heap as $entity) {
-            $heap->get($entity)->resetState();
+        foreach ($heap as $e) {
+            $heap->get($e)->resetState();
         }
     }
 

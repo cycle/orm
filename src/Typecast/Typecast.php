@@ -96,4 +96,20 @@ final class Typecast implements TypecastInterface
 
         return new \DateTimeImmutable($value, $db->getDriver()->getTimezone());
     }
+
+    /**
+     * Perform strict value comparision.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return bool
+     */
+    public static function compare($a, $b)
+    {
+        if ($a == $b) {
+            return 0;
+        }
+
+        return ($a > $b) ? 1 : -1;
+    }
 }

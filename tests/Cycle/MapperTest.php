@@ -124,6 +124,20 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
+    public function testNoWrite()
+    {
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->fetchOne();
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($result);
+        $tr->run();
+        $this->assertNumWrites(0);
+    }
+
+
     public function testWhere()
     {
         $selector = new Select($this->orm, User::class);
@@ -218,6 +232,7 @@ abstract class MapperTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);

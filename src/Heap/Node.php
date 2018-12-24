@@ -12,6 +12,7 @@ namespace Spiral\Cycle\Heap;
 use Spiral\Cycle\Context\ConsumerInterface;
 use Spiral\Cycle\Context\ProducerInterface;
 use Spiral\Cycle\Heap\Traits\RelationTrait;
+use Spiral\Cycle\Typecast\Typecast;
 
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points thought
@@ -156,7 +157,7 @@ final class Node implements ProducerInterface, ConsumerInterface
             return [];
         }
 
-        $changes = array_diff_assoc($this->state->getData(), $this->data);
+        $changes = array_udiff_assoc($this->state->getData(), $this->data, [Typecast::class, 'compare']);
         foreach ($this->state->getRelations() as $name => $relation) {
             $this->setRelation($name, $relation);
         }

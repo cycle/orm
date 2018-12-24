@@ -9,11 +9,14 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Tests;
 
+use Spiral\Cycle\Heap\Heap;
+use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
+use Spiral\Cycle\Transaction;
 
 abstract class DatetimeTest extends BaseTest
 {
@@ -96,6 +99,75 @@ abstract class DatetimeTest extends BaseTest
         $this->assertSame('UTC', $result[1]->time_created->getTimezone()->getName());
 
         $this->assertSameTimestamp($this->b, $result[1]->time_created, 0);
+    }
+
+    public function testNoWrite()
+    {
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->fetchOne();
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($result);
+        $tr->run();
+        $this->assertNumWrites(0);
+    }
+
+    public function testStore()
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+        $e->time_created = new \DateTimeImmutable('tomorrow 10am');
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
+
+        $this->assertEquals(3, $e->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($e));
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->where('id', 3)->fetchOne();
+        $this->assertEquals(300, $result->balance);
+        $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
+    }
+
+    public function testUpdate()
+    {
+        $e = $this->orm->get('user', 1);
+        $e->time_created = new \DateTimeImmutable('tomorrow 10pm');
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->where('id', 1)->fetchOne();
+        $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
     }
 
     /**

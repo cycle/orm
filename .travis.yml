@@ -33,7 +33,7 @@ jobs:
     - stage: Test
       php: nightly
       env:
-        - "DB=postgres,mysql,sqlite COVERAGE=ALL"
+        - "DB=postgres,mysql,sqlite"
       before_install:
         - cd tests
         - docker-compose up -d

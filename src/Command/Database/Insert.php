@@ -39,7 +39,7 @@ class Insert extends DatabaseCommand implements ContextCarrierInterface, Produce
      * @param string            $table
      * @param array             $data
      */
-    public function __construct(DatabaseInterface $db, string $table, array $data = [])
+    public function __construct(DatabaseInterface $db, string $table, array $data = [], callable $generateID = null)
     {
         parent::__construct($db, $table);
         $this->data = $data;

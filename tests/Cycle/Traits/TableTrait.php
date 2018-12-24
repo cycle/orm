@@ -19,7 +19,7 @@ trait TableTrait
      * @param array  $columns
      * @param array  $fk
      */
-    public function makeTable(string $table, array $columns, array $fk = [])
+    public function makeTable(string $table, array $columns, array $fk = [], $pk = null)
     {
         $schema = $this->getDatabase()->table($table)->getSchema();
         $renderer = new Renderer();
@@ -27,6 +27,10 @@ trait TableTrait
 
         foreach ($fk as $column => $options) {
             $schema->foreignKey($column)->references($options['table'], $options['column']);
+        }
+
+        if (!empty($pk)) {
+            $schema->setPrimaryKeys([$pk]);
         }
 
         $schema->save();

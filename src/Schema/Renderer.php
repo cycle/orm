@@ -47,13 +47,24 @@ final class Renderer
      */
     public function renderColumns(AbstractTable $table, array $columns, array $defaults)
     {
+        $primaryKeys = [];
         foreach ($columns as $name => $definition) {
+            $type = $this->parse($table->getName(), $name, $definition);
+
+            if ($this->hasFlag($type, 'primary')) {
+                $primaryKeys[] = $name;
+            }
+
             $this->renderColumn(
                 $table->column($name),
-                $definition,
+                $type,
                 array_key_exists($name, $defaults),
                 $defaults[$name] ?? null
             );
+        }
+
+        if (count($primaryKeys)) {
+            $table->setPrimaryKeys($primaryKeys);
         }
     }
 
@@ -78,7 +89,7 @@ final class Renderer
      *
      * @see  AbstractColumn
      * @param AbstractColumn $column
-     * @param string         $definition
+     * @param array          $type
      * @param bool           $hasDefault Must be set to true if default value was set by user.
      * @param mixed          $default    Default value declared by record schema.
      *
@@ -86,7 +97,7 @@ final class Renderer
      */
     protected function renderColumn(
         AbstractColumn $column,
-        string $definition,
+        array $type,
         bool $hasDefault,
         $default = null
     ) {
@@ -99,33 +110,17 @@ final class Renderer
         //            return;
         //        }
 
-        $pattern = '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i';
-
-        if (!preg_match($pattern, $definition, $type)) {
-            throw new DeclarationException(
-                "Invalid column type definition in '{$column->getTable()}'.'{$column->getName()}'"
-            );
-        }
-
-        if (!empty($type['options'])) {
-            // exporting and trimming
-            $type['options'] = array_map('trim', explode(',', $type['options']));
-        }
-
         // ORM force EVERY column to NOT NULL state unless different is said
         $column->nullable(false);
 
-        if (!empty($type['nullable'])) {
+        if ($this->hasFlag($type, 'null') || $this->hasFlag($type, 'nullable')) {
             // indication that column is nullable
             $column->nullable(true);
         }
 
         try {
             // bypassing call to AbstractColumn->__call method (or specialized column method)
-            call_user_func_array(
-                [$column, $type['type']],
-                !empty($type['options']) ? $type['options'] : []
-            );
+            call_user_func_array([$column, $type['type']], $type['options']);
         } catch (\Throwable $e) {
             throw new DeclarationException(
                 "Invalid column type definition in '{$column->getTable()}'.'{$column->getName()}'",
@@ -140,8 +135,10 @@ final class Renderer
         }
 
         if (!$hasDefault && !$column->isNullable()) {
-            // we have to come up with some default value
-            $column->defaultValue($this->castDefault($column));
+            if (!$this->hasFlag($type, 'required') && !$this->hasFlag($type, 'primary')) {
+                // we have to come up with some default value
+                $column->defaultValue($this->castDefault($column));
+            }
 
             return;
         }
@@ -152,6 +149,49 @@ final class Renderer
         }
 
         $column->defaultValue($default);
+    }
+
+    /**
+     * @param string $table
+     * @param string $column
+     * @param string $definition
+     * @return array
+     */
+    protected function parse(string $table, string $column, string $definition): array
+    {
+        if (!preg_match(
+            '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<flags>.+))?/i',
+            $definition,
+            $type
+        )) {
+            throw new DeclarationException("Invalid column type definition in '{$table}'.'{$column}'");
+        }
+
+        if (empty($type['options'])) {
+            $type['options'] = [];
+        } else {
+            $type['options'] = array_map('trim', explode(',', $type['options'] ?? ''));
+        }
+
+        if (empty($type['flags'])) {
+            $type['flags'] = [];
+        } else {
+            $type['flags'] = array_map('trim', explode(',', $type['flags'] ?? ''));
+        }
+
+        unset($type[0], $type[1], $type[2], $type[3]);
+
+        return $type;
+    }
+
+    /**
+     * @param array  $type
+     * @param string $flag
+     * @return bool
+     */
+    protected function hasFlag(array $type, string $flag): bool
+    {
+        return in_array($flag, $type['flags'], true);
     }
 
     /**

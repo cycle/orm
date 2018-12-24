@@ -46,7 +46,6 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryKey;
 
-
     /**
      * DatabaseMapper constructor.
      *
@@ -60,11 +59,11 @@ abstract class DatabaseMapper implements MapperInterface
         }
 
         $this->orm = $orm;
-        $this->source = $orm->getSource($role);
         $this->role = $role;
+
+        $this->source = $orm->getSource($role);
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-
     }
 
     /**
@@ -154,11 +153,18 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_INSERT);
         $state->setData($columns);
 
-        // todo: ID generation on client-side (!)
-        unset($columns[$this->primaryKey]);
+        $columns[$this->primaryKey] = $this->generateID();
+        if (is_null($columns[$this->primaryKey])) {
+            unset($columns[$this->primaryKey]);
+        }
 
         $insert = new Insert($this->source->getDatabase(), $this->source->getTable(), $columns);
-        $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
+
+        if (!array_key_exists($this->primaryKey, $columns)) {
+            $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
+        } else {
+            $insert->forward($this->primaryKey, $state, $this->primaryKey);
+        }
 
         return $insert;
     }
@@ -192,6 +198,16 @@ abstract class DatabaseMapper implements MapperInterface
         );
 
         return $update;
+    }
+
+    /**
+     * Generate next sequential entity ID. Return null to use autoincrement value.
+     *
+     * @return mixed|null
+     */
+    protected function generateID()
+    {
+        return null;
     }
 
     /**

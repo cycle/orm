@@ -48,8 +48,8 @@ class ORM implements ORMInterface, SourceFactoryInterface
     private $sources = [];
 
     /**
-     * @param FactoryInterface     $factory
-     * @param SchemaInterface|null $schema
+     * @param FactoryInterface|SourceFactoryInterface $factory
+     * @param SchemaInterface|null                    $schema
      */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
     {
@@ -148,7 +148,11 @@ class ORM implements ORMInterface, SourceFactoryInterface
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
-        $orm->factory = $factory->withSchema($orm, $orm->schema);
+        $orm->factory = $factory;
+
+        if (!is_null($orm->schema)) {
+            $orm->factory = $factory->withSchema($orm, $orm->schema);
+        }
 
         return $orm;
     }

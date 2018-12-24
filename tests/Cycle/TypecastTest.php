@@ -27,15 +27,16 @@ abstract class TypecastTest extends BaseTest
 
         $this->makeTable('user', [
             'id'      => 'primary',
+            'active'  => 'bool',
             'email'   => 'string',
             'balance' => 'float'
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
+            ['email', 'active', 'balance'],
             [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
+                ['hello@world.com', true, 100],
+                ['another@world.com', false, 200],
             ]
         );
 
@@ -46,9 +47,10 @@ abstract class TypecastTest extends BaseTest
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::COLUMNS     => ['id', 'email', 'active', 'balance'],
                 Schema::TYPECAST    => [
                     'id'      => 'int',
+                    'active'  => 'bool',
                     'balance' => 'float'
                 ],
                 Schema::SCHEMA      => [],
@@ -66,11 +68,13 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(1, $result[0]->id);
         $this->assertSame('hello@world.com', $result[0]->email);
         $this->assertSame(100.0, $result[0]->balance);
+        $this->assertSame(true, $result[0]->active);
 
         $this->assertInstanceOf(User::class, $result[1]);
         $this->assertSame(2, $result[1]->id);
         $this->assertSame('another@world.com', $result[1]->email);
         $this->assertSame(200.0, $result[1]->balance);
+        $this->assertSame(false, $result[1]->active);
     }
 
     public function testAssertRole()
@@ -153,6 +157,7 @@ abstract class TypecastTest extends BaseTest
             [
                 'id'      => 1,
                 'email'   => 'hello@world.com',
+                'active'  => true,
                 'balance' => 100.0,
             ],
             $this->orm->getHeap()->get($result)->getData()
@@ -164,6 +169,7 @@ abstract class TypecastTest extends BaseTest
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
+        $e->active = true;
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -188,6 +194,7 @@ abstract class TypecastTest extends BaseTest
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
+        $e->active = true;
 
         $this->captureWriteQueries();
 
@@ -204,9 +211,11 @@ abstract class TypecastTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);
+        $this->assertSame(true, $result->active);
     }
 
     public function testRepositoryFindAll()

@@ -72,11 +72,11 @@ final class Typecast implements TypecastInterface
 
     /**
      * @param mixed $value
-     * @return float
+     * @return bool
      */
-    public static function bool($value): float
+    public static function bool($value): bool
     {
-        return floatval($value);
+        return boolval($value);
     }
 
     /**

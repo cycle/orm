@@ -56,6 +56,9 @@ class User implements ImagedInterface
     /** @var \DateTimeInterface */
     public $time_created;
 
+    /** @var bool */
+    public $active;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();

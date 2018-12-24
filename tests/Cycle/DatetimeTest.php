@@ -86,7 +86,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertInstanceOf(\DateTimeInterface::class, $result[0]->time_created);
         $this->assertSame('UTC', $result[0]->time_created->getTimezone()->getName());
 
-        $this->assertDiff($this->a, $result[0]->time_created, 0);
+        $this->assertSameTimestamp($this->a, $result[0]->time_created, 0);
 
         $this->assertInstanceOf(User::class, $result[1]);
         $this->assertSame(2, $result[1]->id);
@@ -95,7 +95,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertInstanceOf(\DateTimeInterface::class, $result[1]->time_created);
         $this->assertSame('UTC', $result[1]->time_created->getTimezone()->getName());
 
-        $this->assertDiff($this->b, $result[1]->time_created, 0);
+        $this->assertSameTimestamp($this->b, $result[1]->time_created, 0);
     }
 
     /**
@@ -103,7 +103,7 @@ abstract class DatetimeTest extends BaseTest
      * @param \DateTimeInterface $b
      * @param int                $max
      */
-    protected function assertDiff(\DateTimeInterface $a, \DateTimeInterface $b, int $max)
+    protected function assertSameTimestamp(\DateTimeInterface $a, \DateTimeInterface $b, int $max)
     {
         $diff = abs($a->getTimestamp() - $b->getTimestamp());
         $this->assertTrue($diff <= $max, 'Invalid time internal');

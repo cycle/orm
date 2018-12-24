@@ -117,7 +117,14 @@ class ManyToManyLoader extends JoinableLoader
         );
 
         // pivot conditions specified by user @todo: bug, table name is ignored
-        $this->setWhere($query, $this->getPivotAlias(), $whereTarget, $this->options['wherePivot']);
+        $this->setWhere(
+            $query,
+            $this->getPivotAlias(),
+            $whereTarget,
+            $this->options['wherePivot']
+        );
+
+        // todo: RELATED ENTITY MIGHT HAVE CONSTRAIN AS WELL
 
         if ($this->isJoined()) {
             // actual data is always INNER join

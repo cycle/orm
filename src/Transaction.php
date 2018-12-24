@@ -10,10 +10,10 @@ declare(strict_types=1);
 namespace Spiral\Cycle;
 
 use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\DatabaseCommand;
 use Spiral\Cycle\Exception\TransactionException;
 use Spiral\Cycle\Heap\Node;
-use Spiral\Database\Driver\DriverInterface;
+use Spiral\Cycle\Transaction\Runner;
+use Spiral\Cycle\Transaction\RunnerInterface;
 
 /**
  * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
@@ -36,11 +36,18 @@ final class Transaction implements TransactionInterface
     /** @var array */
     private $delete = [];
 
-    /** @param ORMInterface $orm */
-    public function __construct(ORMInterface $orm)
+    /** @var RunnerInterface */
+    private $runner;
+
+    /**
+     * @param ORMInterface         $orm
+     * @param RunnerInterface|null $runner
+     */
+    public function __construct(ORMInterface $orm, RunnerInterface $runner = null)
     {
         $this->orm = $orm;
         $this->known = new \SplObjectStorage();
+        $this->runner = $runner ?? new Runner();
     }
 
     /**
@@ -74,14 +81,12 @@ final class Transaction implements TransactionInterface
      */
     public function run()
     {
-        $executed = $drivers = [];
-
         try {
             $commands = $this->initCommands();
 
             while (!empty($commands)) {
                 $pending = [];
-                $countExecuted = count($executed);
+                $lastExecuted = count($this->runner);
 
                 foreach ($this->sort($commands) as $wait => $do) {
                     if ($wait != null) {
@@ -93,36 +98,17 @@ final class Transaction implements TransactionInterface
                         continue;
                     }
 
-                    // found same link from multiple branches
-                    if ($do->isExecuted()) {
-                        $countExecuted++;
-                        continue;
-                    }
-
-                    $this->beginTransaction($do, $drivers);
-                    $do->execute();
-
-                    $executed[] = $do;
+                    $this->runner->run($do);
                 }
 
-                if (count($executed) === $countExecuted && !empty($pending)) {
+                if (count($this->runner) === $lastExecuted && !empty($pending)) {
                     throw new TransactionException("Unable to complete: " . $this->listCommands($pending));
                 }
 
                 $commands = $pending;
             }
         } catch (\Throwable $e) {
-            // close all open and normalized database transactions
-            foreach (array_reverse($drivers) as $driver) {
-                /** @var DriverInterface $driver */
-                $driver->rollbackTransaction();
-            }
-
-            // close all of external types of transactions (revert changes)
-            foreach (array_reverse($executed) as $command) {
-                /** @var CommandInterface $command */
-                $command->rollBack();
-            }
+            $this->runner->rollback();
 
             // no calculations must be kept in node states, resetting
             // this will keep entity data as it was before transaction run
@@ -136,16 +122,7 @@ final class Transaction implements TransactionInterface
             }
         }
 
-        // commit all of the open and normalized database transactions
-        foreach (array_reverse($drivers) as $driver) {
-            /** @var DriverInterface $driver */
-            $driver->commitTransaction();
-        }
-
-        foreach ($executed as $command) {
-            // other type of transaction to close
-            $command->complete();
-        }
+        $this->runner->complete();
 
         // resetting the scope
         $this->persist = $this->delete = [];
@@ -202,22 +179,6 @@ final class Transaction implements TransactionInterface
         }
 
         return $commands;
-    }
-
-    /**
-     * @param CommandInterface $command
-     * @param array            $drivers
-     */
-    private function beginTransaction(CommandInterface $command, array &$drivers)
-    {
-        if ($command instanceof DatabaseCommand && !empty($command->getDatabase())) {
-            $driver = $command->getDatabase()->getDriver();
-
-            if (!empty($driver) && !in_array($driver, $drivers, true)) {
-                $driver->beginTransaction();
-                $drivers[] = $driver;
-            }
-        }
     }
 
     /**

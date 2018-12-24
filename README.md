@@ -5,7 +5,7 @@
 
 Features:
 ---------
-- DataMapper, any data source
+- DataMapper, any data source, small
 - ORM with many-to-many, many-thought-many and polymorphism relations
 - eager and lazy loading, auto joins, promises and proxies
 - runtime configuration with/without code-generation

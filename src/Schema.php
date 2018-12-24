@@ -12,7 +12,7 @@ namespace Spiral\Cycle;
 use Spiral\Cycle\Exception\SchemaException;
 
 /**
- * Provides access to compiled ORM schema.
+ * Static schema with automatic class name => role aliasing.
  */
 final class Schema implements SchemaInterface
 {

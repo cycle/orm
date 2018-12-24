@@ -185,9 +185,10 @@ class ORM implements ORMInterface, SourceFactoryInterface
     public function getMapper($entity): MapperInterface
     {
         if (is_string($entity)) {
+            // todo: do i need it?
             $entity = $this->schema->getClass($entity) ?? $entity;
         } else {
-            $entity = $this->getRole($entity);
+            $entity = $this->findRole($entity);
         }
 
         if (isset($this->mappers[$entity])) {
@@ -291,9 +292,9 @@ class ORM implements ORMInterface, SourceFactoryInterface
      * @param object|string $entity
      * @return string
      */
-    protected function getRole($entity): string
+    protected function findRole($entity): string
     {
-        $class = is_object($entity) ? get_class($entity) : $entity;
+        $class = get_class($entity);
 
         if ($this->schema->defines($class)) {
             // check if class is being inherited

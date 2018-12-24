@@ -19,7 +19,6 @@ $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
     'exclude'     => []
 ]));
 
-
 $databases = [
     'sqlite'    => [
         'namespace' => 'Spiral\Cycle\Tests\Driver\SQLite',

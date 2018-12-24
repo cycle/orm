@@ -7,7 +7,8 @@ Features:
 ---------
 - DataMapper, any data source, small
 - ORM with many-to-many, many-thought-many and polymorphism relations
-- eager and lazy loading, auto joins, promises and proxies
+- query builder with automatic relation resolution
+- eager and lazy loading, proxies support
 - runtime configuration with/without code-generation
 - single table inheritance
 - works with directed graphs and cyclic graphs using IDDFS over command chains

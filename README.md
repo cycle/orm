@@ -1,7 +1,7 @@
 # Cycle ORM
-[![Build Status](https://travis-ci.org/wolfy-j/treap.svg?branch=master)](https://travis-ci.org/wolfy-j/treap)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wolfy-j/treap/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wolfy-j/treap/?branch=master)
-[![Codecov](https://codecov.io/gh/wolfy-j/treap/graph/badge.svg)](https://codecov.io/gh/wolfy-j/treap)
+[![Build Status](https://travis-ci.org/wolfy-j/cycle.svg?branch=master)](https://travis-ci.org/wolfy-j/cycle)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wolfy-j/cycle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wolfy-j/cycle/?branch=master)
+[![Codecov](https://codecov.io/gh/wolfy-j/cycle/graph/badge.svg)](https://codecov.io/gh/wolfy-j/cycle)
 
 Features:
 ---------

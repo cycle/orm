@@ -152,8 +152,7 @@ final class QueryBuilder
      */
     protected function resolve($func, array $where): array
     {
-        // all of the SelectQuery functions has similar signature where
-        // first argument is identifier, we will use generalized proxy
+        // all of the SelectQuery functions has similar signature where first argument is identifier
 
         // short array syntax
         if (count($where) === 1 && array_key_exists(0, $where) && is_array($where[0])) {

@@ -20,7 +20,7 @@ use Spiral\Database\Query\SelectQuery;
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
  * and etc based on nested loaders.
  */
-class RootLoader extends AbstractLoader
+final class RootLoader extends AbstractLoader
 {
     use ColumnsTrait;
 

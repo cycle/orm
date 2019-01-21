@@ -12,7 +12,7 @@ namespace Spiral\Cycle\Typecast;
 use Spiral\Cycle\Exception\TypecastException;
 use Spiral\Database\DatabaseInterface;
 
-interface TypecastInterface
+interface TypecasterInterface
 {
     /**
      * Typecast key-values into internal representation according to database schema.
@@ -29,7 +29,7 @@ interface TypecastInterface
      * Create typecast version with new rule set (column => type) association.
      *
      * @param array $rules
-     * @return TypecastInterface
+     * @return TypecasterInterface
      */
-    public function withRules(array $rules): TypecastInterface;
+    public function withRules(array $rules): TypecasterInterface;
 }

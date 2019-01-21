@@ -22,8 +22,8 @@ use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Typecast\Typecast;
-use Spiral\Cycle\Typecast\TypecastInterface;
+use Spiral\Cycle\Typecast\Typecaster;
+use Spiral\Cycle\Typecast\TypecasterInterface;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
@@ -48,15 +48,15 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryKey;
 
-    /** @var TypecastInterface|null */
+    /** @var TypecasterInterface|null */
     protected $typecast;
 
     /**
-     * @param ORMInterface           $orm
-     * @param string                 $role
-     * @param TypecastInterface|null $typecast
+     * @param ORMInterface             $orm
+     * @param string                   $role
+     * @param TypecasterInterface|null $typecast
      */
-    public function __construct(ORMInterface $orm, string $role, TypecastInterface $typecast = null)
+    public function __construct(ORMInterface $orm, string $role, TypecasterInterface $typecast = null)
     {
         if (!$orm instanceof Select\SourceFactoryInterface) {
             throw new MapperException("Source factory is missing");
@@ -70,7 +70,7 @@ abstract class DatabaseMapper implements MapperInterface
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
 
         if (!is_null($rules = $orm->getSchema()->define($role, Schema::TYPECAST))) {
-            $typecast = $typecast ?? new Typecast();
+            $typecast = $typecast ?? new Typecaster();
             $this->typecast = $typecast->withRules($rules);
         }
     }
@@ -151,7 +151,7 @@ abstract class DatabaseMapper implements MapperInterface
      * @param array $data
      * @return array
      */
-    protected function filterData(array $data): array
+    protected function prepareData(array $data): array
     {
         if ($this->typecast !== null) {
             return $this->typecast->cast($data, $this->source->getDatabase());

@@ -12,7 +12,7 @@ namespace Spiral\Cycle\Typecast;
 use Spiral\Cycle\Exception\TypecastException;
 use Spiral\Database\DatabaseInterface;
 
-final class Typecast implements TypecastInterface
+final class Typecaster implements TypecasterInterface
 {
     /** @var array */
     private $rules;
@@ -44,7 +44,7 @@ final class Typecast implements TypecastInterface
     /**
      * @inheritdoc
      */
-    public function withRules(array $rules): TypecastInterface
+    public function withRules(array $rules): TypecasterInterface
     {
         $tc = clone $this;
         $tc->rules = $rules;

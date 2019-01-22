@@ -48,7 +48,7 @@ class StdMapper extends DatabaseMapper
      * @param object $entity
      * @return array
      */
-    protected function fetchColumns($entity): array
+    protected function fetchFields($entity): array
     {
         return array_intersect_key($this->extract($entity), array_flip($this->columns));
     }

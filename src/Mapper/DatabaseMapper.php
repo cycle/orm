@@ -181,7 +181,7 @@ abstract class DatabaseMapper implements MapperInterface
      */
     protected function queueCreate($entity, State $state): ContextCarrierInterface
     {
-        $columns = $this->fetchColumns($entity);
+        $columns = $this->fetchFields($entity);
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);
@@ -216,7 +216,7 @@ abstract class DatabaseMapper implements MapperInterface
      */
     protected function queueUpdate($entity, State $state): ContextCarrierInterface
     {
-        $data = $this->fetchColumns($entity);
+        $data = $this->fetchFields($entity);
 
         // in a future mapper must support solid states
         $changes = array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
@@ -256,7 +256,7 @@ abstract class DatabaseMapper implements MapperInterface
      * @param object $entity
      * @return array
      */
-    abstract protected function fetchColumns($entity): array;
+    abstract protected function fetchFields($entity): array;
 
     /**
      * Map internal field names to database specific column names.

@@ -12,7 +12,7 @@ ini_set('display_errors', true);
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 \Spiral\Cycle\Tests\BaseTest::$config = [
-    'debug'     => true,
+    'debug'     => false,
     'strict'    => true,
     'benchmark' => false,
     'sqlite'    => [

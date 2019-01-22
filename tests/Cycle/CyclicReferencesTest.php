@@ -26,7 +26,6 @@ abstract class CyclicReferencesTest extends BaseTest
     public function setUp()
     {
         parent::setUp();
-        $this->enableProfiling();
 
         $this->makeTable('user', [
             'id'         => 'primary',

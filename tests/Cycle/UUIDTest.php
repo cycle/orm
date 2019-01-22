@@ -1,13 +1,10 @@
 <?php
-/**
+declare(strict_types=1);/**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- */
-declare(strict_types=1);
-
-namespace Spiral\Cycle\Tests;
+ */namespace Spiral\Cycle\Tests;
 
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;

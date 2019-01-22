@@ -70,6 +70,16 @@ class Select implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Get Query proxy.
+     *
+     * @return QueryBuilder
+     */
+    public function getBuilder(): QueryBuilder
+    {
+        return new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
+    }
+
+    /**
      * Compiled SQL query, changes in this query would not affect Selector state (but binded parameters will).
      *
      * @return SelectQuery
@@ -387,15 +397,5 @@ class Select implements \IteratorAggregate, \Countable
     protected function getLoader(): RootLoader
     {
         return $this->loader;
-    }
-
-    /**
-     * Get Query proxy.
-     *
-     * @return QueryBuilder
-     */
-    protected function getBuilder(): QueryBuilder
-    {
-        return new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
     }
 }

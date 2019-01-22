@@ -95,8 +95,6 @@ abstract class SelectorTest extends BaseTest
 
     public function testStableStatement()
     {
-        $this->enableProfiling();
-
         $s = new Select($this->orm, User::class);
         $s->load('comments', ['method' => JoinableLoader::INLOAD]);
 

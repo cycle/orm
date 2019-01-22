@@ -24,9 +24,6 @@ final class RootLoader extends AbstractLoader
 {
     use ColumnsTrait;
 
-    /** @var null|array */
-    private $columns = null;
-
     /** @var SelectQuery */
     private $query;
 
@@ -56,21 +53,6 @@ final class RootLoader extends AbstractLoader
     public function getPK(): string
     {
         return $this->getAlias() . '.' . $this->define(Schema::PRIMARY_KEY);
-    }
-
-    /**
-     * Columns to be selected, please note, primary key will always be included, DO not include
-     * column aliases in here, aliases will be added automatically.
-     *
-     * @param array $columns
-     * @return RootLoader
-     */
-    public function setColumns(array $columns): self
-    {
-        // always include primary key
-        $this->columns = array_merge([$this->define(Schema::PRIMARY_KEY)], $columns);
-
-        return $this;
     }
 
     /**
@@ -145,7 +127,7 @@ final class RootLoader extends AbstractLoader
      */
     protected function getColumns(): array
     {
-        return $this->columns ?? $this->define(Schema::COLUMNS);
+        return $this->define(Schema::COLUMNS);
     }
 
     /**

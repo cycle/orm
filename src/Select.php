@@ -86,6 +86,7 @@ class Select implements \IteratorAggregate, \Countable
      */
     public function buildQuery(): SelectQuery
     {
+        // todo: mount columns?
         return $this->getLoader()->buildQuery();
     }
 

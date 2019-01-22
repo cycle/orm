@@ -100,7 +100,7 @@ abstract class BaseTest extends TestCase
     {
         $this->assertClearState($this->orm);
 
-        $this->disableProfiling();
+        //$this->disableProfiling();
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
         $this->dbal = null;

@@ -71,7 +71,7 @@ abstract class RepositoryTest extends BaseTest
         $r = $this->orm->getMapper(User::class)->getRepository();
         $r2 = clone $r;
 
-        $this->assertNotSame($r->find(), $r2->find());
+        $this->assertNotSame($r->select(), $r2->select());
     }
 
     public function testFindOne()

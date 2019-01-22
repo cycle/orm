@@ -103,4 +103,31 @@ abstract class SelectorTest extends BaseTest
 
         $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());
     }
+
+    public function testSelectCustomSQL()
+    {
+        $s = new Select($this->orm, User::class);
+        $s->with('comments', ['method' => JoinableLoader::INLOAD]);
+
+        $query = $s->buildQuery()->columns(
+            'user.id',
+            'SUM(user.balance) as balance',
+            'COUNT(user_comments.id) as count_comments'
+        )->groupBy('user.id')->orderBy('user.id');
+
+        $result = $query->fetchAll();
+
+        $this->assertEquals([
+            [
+                'id'             => 1,
+                'balance'        => 400.0,
+                'count_comments' => 4
+            ],
+            [
+                'id'             => 2,
+                'balance'        => 600.0,
+                'count_comments' => 3
+            ]
+        ], $result);
+    }
 }

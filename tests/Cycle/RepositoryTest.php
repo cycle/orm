@@ -69,6 +69,8 @@ abstract class RepositoryTest extends BaseTest
     public function testCloned()
     {
         $r = $this->orm->getMapper(User::class)->getRepository();
+
+        /** @var Repository $r2 */
         $r2 = clone $r;
 
         $this->assertNotSame($r->select(), $r2->select());

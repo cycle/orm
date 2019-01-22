@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Typecast;
+namespace Spiral\Cycle\Column;
 
 use Spiral\Cycle\Exception\TypecastException;
 use Spiral\Database\DatabaseInterface;

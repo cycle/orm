@@ -34,7 +34,7 @@ class Repository implements RepositoryInterface
      */
     public function findByPK($id)
     {
-        return $this->find()->wherePK($id)->fetchOne();
+        return $this->select()->wherePK($id)->fetchOne();
     }
 
     /**
@@ -42,7 +42,7 @@ class Repository implements RepositoryInterface
      */
     public function findOne(array $scope = [])
     {
-        return $this->find($scope)->fetchOne();
+        return $this->select()->where($scope)->fetchOne();
     }
 
     /**
@@ -50,16 +50,17 @@ class Repository implements RepositoryInterface
      */
     public function findAll(array $scope = [], array $orderBy = []): iterable
     {
-        return $this->find($scope)->orderBy($orderBy)->fetchAll();
+        return $this->select()->where($scope)->orderBy($orderBy)->fetchAll();
     }
 
     /**
-     * @param array $where
+     * Get selector associated with the repository.
+     *
      * @return Select|iterable
      */
-    public function find(array $where = []): Select
+    public function select(): Select
     {
-        return (clone $this->selector)->where($where);
+        return clone $this->selector;
     }
 
     /**

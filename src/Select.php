@@ -74,7 +74,7 @@ class Select implements \IteratorAggregate, \Countable
      *
      * @return QueryBuilder
      */
-    public function getQueryProxy(): QueryBuilder
+    public function getQueryBuilder(): QueryBuilder
     {
         return new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
     }
@@ -132,7 +132,7 @@ class Select implements \IteratorAggregate, \Countable
             return $proxy->__call($name, $arguments);
         }
 
-        $result = $this->getQueryProxy()->__call($name, $arguments);
+        $result = $this->getQueryBuilder()->__call($name, $arguments);
         if ($result instanceof QueryBuilder) {
             return $this;
         }

@@ -22,8 +22,8 @@ use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Typecast\Typecaster;
-use Spiral\Cycle\Typecast\TypecasterInterface;
+use Spiral\Cycle\Column\Typecaster;
+use Spiral\Cycle\Column\TypecasterInterface;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.

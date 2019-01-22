@@ -120,7 +120,7 @@ abstract class RepositoryTest extends BaseTest
         /** @var Repository $r */
         $r = $this->orm->getMapper(User::class)->getRepository();
 
-        $result = $r->find()->orderBy('id', 'DESC')->fetchAll();
+        $result = $r->select()->orderBy('id', 'DESC')->fetchAll();
 
         $this->assertInstanceOf(User::class, $result[1]);
         $this->assertEquals(1, $result[1]->id);
@@ -133,7 +133,7 @@ abstract class RepositoryTest extends BaseTest
         $this->assertEquals(200.0, $result[0]->balance);
 
         // immutable
-        $result = $r->find()->fetchAll();
+        $result = $r->select()->fetchAll();
 
         $this->assertInstanceOf(User::class, $result[0]);
         $this->assertEquals(1, $result[0]->id);

@@ -79,7 +79,7 @@ class Mapper extends DatabaseMapper
      */
     protected function fetchColumns($entity): array
     {
-        $columns = array_intersect_key($this->extract($entity), array_flip($this->columns));
+        $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
 
         $class = get_class($entity);
         if ($class != $this->entity) {

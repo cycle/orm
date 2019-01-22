@@ -35,7 +35,11 @@ trait ColumnsTrait
         $alias = $this->getAlias();
         $columns = $overwrite ? [] : $query->getColumns();
 
-        foreach ($this->getColumns() as $name) {
+        foreach ($this->getColumns() as $internal => $external) {
+            $name = $external;
+            if (!is_numeric($internal)) {
+                $name = $internal;
+            }
             $column = $name;
 
             if ($minify) {
@@ -43,10 +47,45 @@ trait ColumnsTrait
                 $column = 'c' . count($columns);
             }
 
-            $columns[] = "{$alias}.{$name} AS {$prefix}{$column}";
+            $columns[] = "{$alias}.{$external} AS {$prefix}{$column}";
         }
 
         return $query->columns($columns);
+    }
+
+    /**
+     * Return original column names.
+     *
+     * @return array
+     */
+    protected function columnNames(): array
+    {
+        $result = [];
+        foreach ($this->getColumns() as $internal => $external) {
+            if (!is_numeric($internal)) {
+                $result[] = $internal;
+            } else {
+                $result[] = $external;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Return column name associated with given field.
+     *
+     * @param string $field
+     * @return string
+     */
+    protected function columnName(string $field): string
+    {
+        $columns = $this->getColumns(false);
+        if (isset($columns[$field])) {
+            return $columns[$field];
+        }
+
+        return $field;
     }
 
     /**

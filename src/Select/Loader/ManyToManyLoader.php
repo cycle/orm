@@ -13,7 +13,6 @@ use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\PivotedNode;
 use Spiral\Cycle\Relation;
-use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Cycle\Select\Traits\WhereTrait;
@@ -181,7 +180,7 @@ class ManyToManyLoader extends JoinableLoader
     protected function initNode(): AbstractNode
     {
         return new PivotedNode(
-            $this->define(Schema::COLUMNS),
+            $this->columnNames(),
             $this->schema[Relation::PIVOT_COLUMNS],
             $this->schema[Relation::OUTER_KEY],
             $this->schema[Relation::THOUGHT_INNER_KEY],

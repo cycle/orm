@@ -86,7 +86,7 @@ class HasOneLoader extends JoinableLoader
     protected function initNode(): AbstractNode
     {
         return new SingularNode(
-            $this->getColumns(),
+            $this->columnNames(),
             $this->define(Schema::PRIMARY_KEY),
             $this->schema[Relation::OUTER_KEY],
             $this->schema[Relation::INNER_KEY]

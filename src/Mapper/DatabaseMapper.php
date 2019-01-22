@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Mapper;
 
+use Spiral\Cycle\Column\Typecaster;
+use Spiral\Cycle\Column\TypecasterInterface;
 use Spiral\Cycle\Command\Branch\Split;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
@@ -22,8 +24,6 @@ use Spiral\Cycle\Heap\State;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Column\Typecaster;
-use Spiral\Cycle\Column\TypecasterInterface;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
@@ -44,6 +44,9 @@ abstract class DatabaseMapper implements MapperInterface
 
     /** @var array */
     protected $columns;
+
+    /** @var array */
+    protected $fields;
 
     /** @var string */
     protected $primaryKey;
@@ -72,6 +75,15 @@ abstract class DatabaseMapper implements MapperInterface
         if (!is_null($rules = $orm->getSchema()->define($role, Schema::TYPECAST))) {
             $typecast = $typecast ?? new Typecaster();
             $this->typecast = $typecast->withRules($rules);
+        }
+
+        // Resolve field names
+        foreach ($this->columns as $name => $column) {
+            if (!is_numeric($name)) {
+                $this->fields[] = $name;
+            } else {
+                $this->fields[] = $column;
+            }
         }
     }
 
@@ -180,7 +192,11 @@ abstract class DatabaseMapper implements MapperInterface
             unset($columns[$this->primaryKey]);
         }
 
-        $insert = new Insert($this->source->getDatabase(), $this->source->getTable(), $columns);
+        $insert = new Insert(
+            $this->source->getDatabase(),
+            $this->source->getTable(),
+            $this->mapColumns($columns)
+        );
 
         if (!array_key_exists($this->primaryKey, $columns)) {
             $insert->forward(Insert::INSERT_ID, $state, $this->primaryKey);
@@ -205,6 +221,8 @@ abstract class DatabaseMapper implements MapperInterface
         // in a future mapper must support solid states
         $changes = array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
         unset($changes[$this->primaryKey]);
+
+        $changes = $this->mapColumns($changes);
 
         $update = new Update($this->source->getDatabase(), $this->source->getTable(), $changes);
         $state->setStatus(Node::SCHEDULED_UPDATE);
@@ -239,6 +257,26 @@ abstract class DatabaseMapper implements MapperInterface
      * @return array
      */
     abstract protected function fetchColumns($entity): array;
+
+    /**
+     * Map internal field names to database specific column names.
+     *
+     * @param array $columns
+     * @return array
+     */
+    protected function mapColumns(array $columns): array
+    {
+        $result = [];
+        foreach ($columns as $column => $value) {
+            if (array_key_exists($column, $this->columns)) {
+                $result[$this->columns[$column]] = $value;
+            } else {
+                $result[$column] = $value;
+            }
+        }
+
+        return $result;
+    }
 
     /**
      * @param mixed $a

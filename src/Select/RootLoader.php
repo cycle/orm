@@ -52,7 +52,7 @@ final class RootLoader extends AbstractLoader
      */
     public function getPK(): string
     {
-        return $this->getAlias() . '.' . $this->define(Schema::PRIMARY_KEY);
+        return $this->getAlias() . '.' . $this->columnName($this->define(Schema::PRIMARY_KEY));
     }
 
     /**
@@ -119,11 +119,13 @@ final class RootLoader extends AbstractLoader
      */
     protected function initNode(): AbstractNode
     {
-        return new RootNode($this->getColumns(), $this->define(Schema::PRIMARY_KEY));
+        return new RootNode($this->columnNames(), $this->define(Schema::PRIMARY_KEY));
     }
 
     /**
-     * @inheritdoc
+     * Relation columns.
+     *
+     * @return array
      */
     protected function getColumns(): array
     {

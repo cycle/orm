@@ -90,7 +90,7 @@ class HasManyLoader extends JoinableLoader
     protected function initNode(): AbstractNode
     {
         return new ArrayNode(
-            $this->getColumns(),
+            $this->columnNames(),
             $this->define(Schema::PRIMARY_KEY),
             $this->schema[Relation::OUTER_KEY],
             $this->schema[Relation::INNER_KEY]

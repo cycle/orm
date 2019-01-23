@@ -36,7 +36,7 @@ trait ContextTrait
         $carrier->waitContext($toKey, $this->isRequired());
 
         // forward key from state to the command (on change)
-        $to->forward($toKey, $carrier, $toKey);
+        $to->forward($toKey, $carrier, $this->columnName($to, $toKey));
 
         // link 2 keys and trigger cascade falling right now (if exists)
         $from->forward($fromKey, $to, $toKey, true);
@@ -56,8 +56,10 @@ trait ContextTrait
      */
     protected function forwardScope(Node $from, string $fromKey, CS $carrier, string $toKey): CS
     {
-        $carrier->waitScope($toKey);
-        $from->forward($fromKey, $carrier, $toKey, true, ConsumerInterface::SCOPE);
+        $column = $this->columnName($from, $toKey);
+
+        $carrier->waitScope($column);
+        $from->forward($fromKey, $carrier, $column, true, ConsumerInterface::SCOPE);
 
         return $carrier;
     }
@@ -77,6 +79,15 @@ trait ContextTrait
 
         return $state->getData()[$key] ?? null;
     }
+
+    /**
+     * Return column name in database.
+     *
+     * @param Node   $node
+     * @param string $field
+     * @return string
+     */
+    abstract protected function columnName(Node $node, string $field): string;
 
     /**
      * True is given relation is required for the object to be saved (i.e. NOT NULL).

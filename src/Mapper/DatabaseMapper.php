@@ -51,6 +51,9 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryKey;
 
+    /** @var string */
+    protected $primaryColumn;
+
     /** @var TypecasterInterface|null */
     protected $typecast;
 
@@ -71,6 +74,7 @@ abstract class DatabaseMapper implements MapperInterface
         $this->source = $orm->getSource($role);
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $this->primaryColumn = $this->columns[$this->primaryKey] ?? $this->primaryKey;
 
         if (!is_null($rules = $orm->getSchema()->define($role, Schema::TYPECAST))) {
             $typecast = $typecast ?? new Typecaster();
@@ -147,11 +151,11 @@ abstract class DatabaseMapper implements MapperInterface
         $node->getState()->setStatus(Node::SCHEDULED_DELETE);
         $node->getState()->decClaim();
 
-        $delete->waitScope($this->primaryKey);
+        $delete->waitScope($this->primaryColumn);
         $node->forward(
             $this->primaryKey,
             $delete,
-            $this->primaryKey,
+            $this->primaryColumn,
             true,
             ConsumerInterface::SCOPE
         );
@@ -232,7 +236,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->forward(
             $this->primaryKey,
             $update,
-            $this->primaryKey,
+            $this->primaryColumn,
             true,
             ConsumerInterface::SCOPE
         );

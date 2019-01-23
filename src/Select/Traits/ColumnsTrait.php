@@ -80,12 +80,7 @@ trait ColumnsTrait
      */
     protected function columnName(string $field): string
     {
-        $columns = $this->getColumns(false);
-        if (isset($columns[$field])) {
-            return $columns[$field];
-        }
-
-        return $field;
+        return $this->getColumns()[$field] ?? $field;
     }
 
     /**

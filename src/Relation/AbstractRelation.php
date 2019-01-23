@@ -14,6 +14,7 @@ use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\ConstrainInterface;
 use Spiral\Cycle\Select\SourceFactoryInterface;
 use Spiral\Cycle\Select\SourceInterface;
@@ -184,5 +185,15 @@ abstract class AbstractRelation implements RelationInterface
     protected function getMapper(string $role = null): MapperInterface
     {
         return $this->orm->getMapper($role ?? $this->target);
+    }
+
+    /**
+     * @param Node   $node
+     * @param string $field
+     * @return string
+     */
+    protected function columnName(Node $node, string $field): string
+    {
+        return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
     }
 }

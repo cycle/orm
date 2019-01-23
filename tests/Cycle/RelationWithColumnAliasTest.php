@@ -208,6 +208,107 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testFetchOneWhere()
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->load('comments', ['method' => JoinableLoader::INLOAD])
+            ->where('id', 1)
+            ->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'       => 1,
+                'email'    => 'hello@world.com',
+                'balance'  => 100.0,
+                'comments' => [
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'message' => 'msg 1',
+                    ],
+                    [
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'message' => 'msg 2',
+                    ],
+                    [
+                        'id'      => 3,
+                        'user_id' => 1,
+                        'message' => 'msg 3',
+                    ],
+                ],
+            ],
+        ], $selector->fetchData());
+    }
+
+    public function testFetchOneWhereTargeted()
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->load('comments', ['method' => JoinableLoader::INLOAD])
+            ->where('@.id', 1)
+            ->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'       => 1,
+                'email'    => 'hello@world.com',
+                'balance'  => 100.0,
+                'comments' => [
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'message' => 'msg 1',
+                    ],
+                    [
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'message' => 'msg 2',
+                    ],
+                    [
+                        'id'      => 3,
+                        'user_id' => 1,
+                        'message' => 'msg 3',
+                    ],
+                ],
+            ],
+        ], $selector->fetchData());
+    }
+
+    public function testFetchOneWhereAliased()
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->load('comments', ['method' => JoinableLoader::INLOAD])
+            ->where('user.id', 1)
+            ->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'       => 1,
+                'email'    => 'hello@world.com',
+                'balance'  => 100.0,
+                'comments' => [
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'message' => 'msg 1',
+                    ],
+                    [
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'message' => 'msg 2',
+                    ],
+                    [
+                        'id'      => 3,
+                        'user_id' => 1,
+                        'message' => 'msg 3',
+                    ],
+                ],
+            ],
+        ], $selector->fetchData());
+    }
+
+    // todo: find by comment (!)
+
     public function testAccessRelated()
     {
         $selector = new Select($this->orm, User::class);

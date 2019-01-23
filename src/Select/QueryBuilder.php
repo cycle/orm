@@ -191,12 +191,13 @@ final class QueryBuilder
 
         $chunks = explode('.', $identifier);
         // find loader
-        if (count($chunks) == 2 && $chunks[0] == $this->loader->getAlias()) {
+        if (count($chunks) == 2 && $chunks[0] == $this->loader->getAlias() || $chunks[0] == '@') {
+            $chunks[0] = $this->loader->getAlias();
             $chunks[1] = $this->loader->columnName($chunks[1]);
             return join(".", $chunks);
         }
 
-        // strict format
-        return str_replace('@', $this->loader->getAlias(), $this->loader->columnName($identifier));
+        // strict format (?)
+        return str_replace('@', $this->loader->getAlias(), $identifier);
     }
 }

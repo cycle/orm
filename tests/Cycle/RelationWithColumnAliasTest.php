@@ -332,10 +332,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
 
-        $all = $selector
-            ->with('comments')
-            ->load('comments')
-            ->where('comments.message', 'msg 3')->fetchAll();
+        $all = $selector->where('comments.message', 'msg 3')->fetchAll();
 
         $this->assertCount(1, $all);
         $this->assertEquals(1, $all[0]->id);

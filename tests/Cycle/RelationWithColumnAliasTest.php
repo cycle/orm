@@ -22,6 +22,7 @@ use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
+use Spiral\Database\Injection\Expression;
 
 abstract class RelationWithColumnAliasTest extends BaseTest
 {
@@ -278,8 +279,8 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
-        ->where('user.id', 1)
-        ->orderBy('user.id');
+            ->where('user.id', 1)
+            ->orderBy('user.id');
 
         $this->assertEquals([
             [
@@ -307,8 +308,6 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    // todo: find by comment (!), find by aliased comment (!!!!!)
-
     public function testAccessRelated()
     {
         $selector = new Select($this->orm, User::class);
@@ -327,6 +326,32 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertEquals('msg 1', $a->comments[0]->message);
         $this->assertEquals('msg 2', $a->comments[1]->message);
         $this->assertEquals('msg 3', $a->comments[2]->message);
+    }
+
+    public function testFilterByRelated()
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $all = $selector
+            ->with('comments')
+            ->load('comments')
+            ->where('comments.message', 'msg 3')->fetchAll();
+
+        $this->assertCount(1, $all);
+        $this->assertEquals(1, $all[0]->id);
+    }
+
+    public function testFilterByRelatedExpression()
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $all = $selector->where(
+            'comments.id',
+            new Expression($selector->getBuilder()->resolveColumn('user.id'))
+        )->fetchAll();
+
+        $this->assertCount(1, $all);
+        $this->assertEquals(1, $all[0]->id);
     }
 
     public function testNoWrite()

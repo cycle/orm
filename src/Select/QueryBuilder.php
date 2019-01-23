@@ -154,12 +154,14 @@ final class QueryBuilder
     {
         // all of the SelectQuery functions has similar signature where first argument is identifier
 
+        // todo: make it smarter
+
         // short array syntax
         if (count($args) === 1 && array_key_exists(0, $args) && is_array($args[0])) {
             $result = [];
             foreach ($args[0] as $key => $value) {
                 if (is_string($key) && !is_int($key)) {
-                    $key = $this->identifier($key);
+                    $key = $this->resolveColumn($key);
                 }
 
                 $result[$key] = !is_array($value) ? $value : $this->resolve(null, $value);
@@ -170,7 +172,7 @@ final class QueryBuilder
 
         // normal syntax
         if (array_key_exists(0, $args) && is_string($args[0])) {
-            $args[0] = $this->identifier($args[0]);
+            $args[0] = $this->resolveColumn($args[0]);
         }
 
         return $args;
@@ -179,22 +181,34 @@ final class QueryBuilder
     /**
      * Automatically resolve identifier.
      *
+     * todo: make this method public
+     *
      * @param string $identifier
      * @return string
      */
-    protected function identifier(string $identifier): string
+    public function resolveColumn(string $identifier): string
     {
         if (strpos($identifier, '.') === false) {
             // parent element
             return sprintf('%s.%s', $this->loader->getAlias(), $this->loader->columnName($identifier));
         }
 
+        // todo: automatic relation load?
+
         $chunks = explode('.', $identifier);
-        // find loader
+
+        // root loader
         if (count($chunks) == 2 && $chunks[0] == $this->loader->getAlias() || $chunks[0] == '@') {
             $chunks[0] = $this->loader->getAlias();
             $chunks[1] = $this->loader->columnName($chunks[1]);
             return join(".", $chunks);
+        }
+
+        if (count($chunks) >= 2 && strpos($identifier, '(') == false) {
+            $column = array_pop($chunks);
+            $loader = $this->loader->loadRelation(join('.', $chunks), [], true);
+
+            return sprintf('%s.%s', $loader->getAlias(), $loader->columnName($column));
         }
 
         // strict format (?)

@@ -10,7 +10,7 @@ Features:
 - query builder with automatic relation resolution
 - eager and lazy loading, proxies support
 - runtime configuration with/without code-generation
-- single table inheritance
+- column-to-field mapping, single table inheritance
 - works with directed graphs and cyclic graphs using IDDFS over linked command chains
 - designed to work in long-running applications
 - supports MySQL (MariaDB, Aurora), PostgresSQL, SQLServer, SQLite (full mock capability)

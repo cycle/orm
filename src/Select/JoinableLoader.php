@@ -108,6 +108,7 @@ abstract class JoinableLoader extends AbstractLoader
 
         //Calculate table alias
         $loader->options['alias'] = $loader->calculateAlias($parent);
+
         if (!empty($loader->options['constrain'])) {
             if ($loader->options['constrain'] instanceof ConstrainInterface) {
                 $loader->constrain = $loader->options['constrain'];
@@ -307,7 +308,7 @@ abstract class JoinableLoader extends AbstractLoader
             return null;
         }
 
-        return $this->getAlias() . '.' . $this->schema[$key];
+        return $this->getAlias() . '.' . $this->columnName($this->schema[$key]);
     }
 
     /**
@@ -318,7 +319,7 @@ abstract class JoinableLoader extends AbstractLoader
      */
     protected function parentKey($key): string
     {
-        return $this->parent->getAlias() . '.' . $this->schema[$key];
+        return $this->parent->getAlias() . '.' . $this->parent->columnName($this->schema[$key]);
     }
 
     /**

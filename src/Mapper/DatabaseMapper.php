@@ -226,9 +226,9 @@ abstract class DatabaseMapper implements MapperInterface
         $changes = array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
         unset($changes[$this->primaryKey]);
 
-        $changes = $this->mapColumns($changes);
+        $changedColumns = $this->mapColumns($changes);
 
-        $update = new Update($this->source->getDatabase(), $this->source->getTable(), $changes);
+        $update = new Update($this->source->getDatabase(), $this->source->getTable(), $changedColumns);
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
 

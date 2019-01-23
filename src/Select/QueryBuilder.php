@@ -147,17 +147,17 @@ final class QueryBuilder
      * Automatically modify all identifiers to mount table prefix. Provide ability to automatically resolve
      * relations.
      *
-     * @param array $where
+     * @param array $args
      * @return array
      */
-    protected function resolve($func, array $where): array
+    protected function resolve($func, array $args): array
     {
         // all of the SelectQuery functions has similar signature where first argument is identifier
 
         // short array syntax
-        if (count($where) === 1 && array_key_exists(0, $where) && is_array($where[0])) {
+        if (count($args) === 1 && array_key_exists(0, $args) && is_array($args[0])) {
             $result = [];
-            foreach ($where[0] as $key => $value) {
+            foreach ($args[0] as $key => $value) {
                 if (is_string($key) && !is_int($key)) {
                     $key = $this->identifier($key);
                 }
@@ -169,11 +169,11 @@ final class QueryBuilder
         }
 
         // normal syntax
-        if (array_key_exists(0, $where) && is_string($where[0])) {
-            $where[0] = $this->identifier($where[0]);
+        if (array_key_exists(0, $args) && is_string($args[0])) {
+            $args[0] = $this->identifier($args[0]);
         }
 
-        return $where;
+        return $args;
     }
 
     /**
@@ -186,10 +186,17 @@ final class QueryBuilder
     {
         if (strpos($identifier, '.') === false) {
             // parent element
-            return sprintf('%s.%s', $this->loader->getAlias(), $identifier);
+            return sprintf('%s.%s', $this->loader->getAlias(), $this->loader->columnName($identifier));
+        }
+
+        $chunks = explode('.', $identifier);
+        // find loader
+        if (count($chunks) == 2 && $chunks[0] == $this->loader->getAlias()) {
+            $chunks[1] = $this->loader->columnName($chunks[1]);
+            return join(".", $chunks);
         }
 
         // strict format
-        return str_replace('@', $this->loader->getAlias(), $identifier);
+        return str_replace('@', $this->loader->getAlias(), $this->loader->columnName($identifier));
     }
 }

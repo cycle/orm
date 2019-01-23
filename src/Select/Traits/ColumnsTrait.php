@@ -17,6 +17,17 @@ use Spiral\Database\Query\SelectQuery;
 trait ColumnsTrait
 {
     /**
+     * Return column name associated with given field.
+     *
+     * @param string $field
+     * @return string
+     */
+    public function columnName(string $field): string
+    {
+        return $this->getColumns()[$field] ?? $field;
+    }
+
+    /**
      * Set columns into SelectQuery.
      *
      * @param SelectQuery $query
@@ -70,17 +81,6 @@ trait ColumnsTrait
         }
 
         return $result;
-    }
-
-    /**
-     * Return column name associated with given field.
-     *
-     * @param string $field
-     * @return string
-     */
-    protected function columnName(string $field): string
-    {
-        return $this->getColumns()[$field] ?? $field;
     }
 
     /**

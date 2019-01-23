@@ -32,11 +32,13 @@ trait ContextTrait
      */
     protected function forwardContext(Node $from, string $fromKey, CC $carrier, Node $to, string $toKey): CC
     {
+        $toColumn = $this->columnName($to, $toKey);
+
         // do not execute until the key is given
-        $carrier->waitContext($toKey, $this->isRequired());
+        $carrier->waitContext($toColumn, $this->isRequired());
 
         // forward key from state to the command (on change)
-        $to->forward($toKey, $carrier, $this->columnName($to, $toKey));
+        $to->forward($toKey, $carrier, $toColumn);
 
         // link 2 keys and trigger cascade falling right now (if exists)
         $from->forward($fromKey, $to, $toKey, true);

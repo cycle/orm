@@ -33,6 +33,14 @@ interface LoaderInterface
     public function getTarget(): string;
 
     /**
+     * Get column name related to internal key.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function columnName(string $key): string;
+
+    /**
      * Initiate loader with it's position and options in dependency tree.
      *
      * @param LoaderInterface $parent

@@ -42,7 +42,7 @@ final class RootLoader extends AbstractLoader
      */
     public function getAlias(): string
     {
-        return $this->orm->getMapper($this->target)->getRole();
+        return $this->target;
     }
 
     /**

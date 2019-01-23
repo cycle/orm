@@ -100,7 +100,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     public function testFetchRelation()
     {
         $selector = new Select($this->orm, User::class);
-        $selector->load('comments')->orderBy('user.id_int');
+        $selector->load('comments')->orderBy('user.id');
 
         $this->assertEquals([
             [
@@ -278,8 +278,8 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
-            ->where('user.id', 1)
-            ->orderBy('user.id');
+        ->where('user.id', 1)
+        ->orderBy('user.id');
 
         $this->assertEquals([
             [
@@ -307,7 +307,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    // todo: find by comment (!)
+    // todo: find by comment (!), find by aliased comment (!!!!!)
 
     public function testAccessRelated()
     {

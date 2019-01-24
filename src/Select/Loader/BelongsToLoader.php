@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Loader;
 
-use Spiral\Cycle\Column\Typecaster;
+use Spiral\Cycle\Parser\Typecaster;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\SingularNode;

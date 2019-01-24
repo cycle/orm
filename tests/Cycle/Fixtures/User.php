@@ -59,6 +59,9 @@ class User implements ImagedInterface
     /** @var bool */
     public $active;
 
+    /** @var UUIDColumn */
+    public $uuid;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();

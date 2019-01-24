@@ -7,10 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Column;
+namespace Spiral\Cycle\Parser;
 
 use Spiral\Cycle\Exception\TypecastException;
-use Spiral\Cycle\Parser\TypecasterInterface;
 use Spiral\Database\DatabaseInterface;
 
 final class Typecaster implements TypecasterInterface
@@ -42,7 +41,7 @@ final class Typecaster implements TypecasterInterface
                     continue;
                 }
 
-                if (method_exists($this, $rule)) {
+                if (is_string($rule) && method_exists($this, $rule)) {
                     // default rules
                     $rule = [self::class, $rule];
                 }

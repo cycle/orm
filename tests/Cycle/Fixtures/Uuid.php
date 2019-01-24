@@ -59,7 +59,7 @@ class Uuid implements ValueInterface
      * @param DatabaseInterface $db
      * @return Uuid
      */
-    public static function read($value, DatabaseInterface $db): Uuid
+    public static function parse($value, DatabaseInterface $db): Uuid
     {
         if (is_resource($value)) {
             // postgres

@@ -44,7 +44,7 @@ abstract class UUIDColumnTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'uuid', 'email', 'balance'],
                 Schema::TYPECAST    => [
                     'id'      => 'int',
-                    'uuid'    => [Uuid::class, 'read'],
+                    'uuid'    => [Uuid::class, 'parse'],
                     'balance' => 'float'
                 ],
                 Schema::RELATIONS   => []
@@ -54,6 +54,7 @@ abstract class UUIDColumnTest extends BaseTest
 
     public function testCreate()
     {
+        $this->enableProfiling();
         $e = new User();
         $e->email = 'test@email.com';
         $e->uuid = Uuid::create();

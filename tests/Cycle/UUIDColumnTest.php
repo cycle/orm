@@ -95,9 +95,25 @@ abstract class UUIDColumnTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        $result = $selector->fetchData();
+        $this->assertEquals(1, $e->id);
 
-        $this->assertInstanceOf(UUIDColumn::class, $result[0]['uuid']);
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->fetchOne();
+
+        $this->assertInstanceOf(UUIDColumn::class, $result->uuid);
+        $this->assertEquals($e->uuid->__toString(), $result->uuid->__toString());
+
+        $result->uuid = UUIDColumn::create();
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($result);
+        $tr->run();
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $result2 = $selector->fetchOne();
+
+        $this->assertInstanceOf(UUIDColumn::class, $result2->uuid);
+        $this->assertEquals($result->uuid->__toString(), $result2->uuid->__toString());
     }
 }

@@ -138,6 +138,7 @@ class State implements ConsumerInterface, ProducerInterface
         int $stream = self::DATA
     ) {
         if (!$fresh) {
+            // custom, non value objects can be supported here
             $fresh = ($this->data[$key] ?? null) != $value;
         }
 

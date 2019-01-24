@@ -12,6 +12,7 @@ namespace Spiral\Cycle\Select;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\RootNode;
+use Spiral\Cycle\Parser\Typecaster;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\Traits\ColumnsTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -119,7 +120,14 @@ final class RootLoader extends AbstractLoader
      */
     protected function initNode(): AbstractNode
     {
-        return new RootNode($this->columnNames(), $this->define(Schema::PRIMARY_KEY));
+        $node = new RootNode($this->columnNames(), $this->define(Schema::PRIMARY_KEY));
+
+        $typecast = $this->define(Schema::TYPECAST);
+        if ($typecast !== null) {
+            $node->setTypecaster(new Typecaster($typecast, $this->getSource()->getDatabase()));
+        }
+
+        return $node;
     }
 
     /**

@@ -12,7 +12,9 @@ namespace Spiral\Cycle\Select\Loader;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\PivotedNode;
+use Spiral\Cycle\Parser\Typecaster;
 use Spiral\Cycle\Relation;
+use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Cycle\Select\Traits\WhereTrait;
@@ -179,13 +181,35 @@ class ManyToManyLoader extends JoinableLoader
      */
     protected function initNode(): AbstractNode
     {
-        return new PivotedNode(
+        $node = new PivotedNode(
             $this->columnNames(),
             $this->schema[Relation::PIVOT_COLUMNS],
             $this->schema[Relation::OUTER_KEY],
             $this->schema[Relation::THOUGHT_INNER_KEY],
             $this->schema[Relation::THOUGHT_OUTER_KEY]
         );
+
+        $typecast = $this->define(Schema::TYPECAST);
+        if ($typecast !== null) {
+            $node->setTypecaster(new Typecaster($typecast, $this->getSource()->getDatabase()));
+        }
+
+        if (isset($this->schema[Relation::PIVOT_ENTITY])) {
+            $typecast = $this->orm->getSchema()->define($this->schema[Relation::PIVOT_ENTITY], Schema::TYPECAST);
+            if ($typecast !== null) {
+                $node->setPivotTypecaster(new Typecaster(
+                    $typecast,
+                    $this->getSource()->getDatabase()
+                ));
+            }
+        } elseif (isset($this->schema[Relation::PIVOT_TYPECAST])) {
+            $node->setPivotTypecaster(new Typecaster(
+                $this->schema[Relation::PIVOT_TYPECAST],
+                $this->getSource()->getDatabase()
+            ));
+        }
+
+        return $node;
     }
 
     /**

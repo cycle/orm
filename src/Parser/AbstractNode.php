@@ -6,6 +6,7 @@ declare(strict_types=1);
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Cycle\Parser;
 
 use Spiral\Cycle\Exception\ParserException;
@@ -78,6 +79,9 @@ abstract class AbstractNode
      */
     protected $nodes = [];
 
+    /** @var TypecasterInterface|null */
+    protected $typecaster = null;
+
     /**
      * @param array       $columns  When columns are empty original line will be returned as result.
      * @param string|null $outerKey Defines column name in parent Node to be aggregated.
@@ -86,6 +90,14 @@ abstract class AbstractNode
     {
         $this->columns = $columns;
         $this->outerKey = $outerKey;
+    }
+
+    /**
+     * @param TypecasterInterface $typecaster
+     */
+    final public function setTypecaster(TypecasterInterface $typecaster)
+    {
+        $this->typecaster = $typecaster;
     }
 
     /**
@@ -239,10 +251,16 @@ abstract class AbstractNode
     {
         try {
             //Combine column names with sliced piece of row
-            return array_combine(
+            $result = array_combine(
                 $this->columns,
                 array_slice($line, $dataOffset, count($this->columns))
             );
+
+            if ($this->typecaster !== null) {
+                return $this->typecaster->cast($result);
+            }
+
+            return $result;
         } catch (\Exception $e) {
             throw new ParserException(
                 "Unable to parse incoming row: " . $e->getMessage(),

@@ -54,15 +54,11 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryColumn;
 
-    /** @var TypecasterInterface|null */
-    protected $typecast;
-
     /**
-     * @param ORMInterface             $orm
-     * @param string                   $role
-     * @param TypecasterInterface|null $typecast
+     * @param ORMInterface $orm
+     * @param string       $role
      */
-    public function __construct(ORMInterface $orm, string $role, TypecasterInterface $typecast = null)
+    public function __construct(ORMInterface $orm, string $role)
     {
         if (!$orm instanceof Select\SourceFactoryInterface) {
             throw new MapperException("Source factory is missing");
@@ -75,11 +71,6 @@ abstract class DatabaseMapper implements MapperInterface
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
         $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
         $this->primaryColumn = $this->columns[$this->primaryKey] ?? $this->primaryKey;
-
-        if (!is_null($rules = $orm->getSchema()->define($role, Schema::TYPECAST))) {
-            $typecast = $typecast ?? new Typecaster();
-            $this->typecast = $typecast->withRules($rules);
-        }
 
         // Resolve field names
         foreach ($this->columns as $name => $column) {
@@ -161,19 +152,6 @@ abstract class DatabaseMapper implements MapperInterface
         );
 
         return $delete;
-    }
-
-    /**
-     * @param array $data
-     * @return array
-     */
-    protected function prepareData(array $data): array
-    {
-        if ($this->typecast !== null) {
-            return $this->typecast->cast($data, $this->source->getDatabase());
-        }
-
-        return $data;
     }
 
     /**

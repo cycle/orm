@@ -12,6 +12,7 @@ namespace Spiral\Cycle\Select\Loader;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\ArrayNode;
+use Spiral\Cycle\Parser\Typecaster;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
@@ -89,11 +90,18 @@ class HasManyLoader extends JoinableLoader
      */
     protected function initNode(): AbstractNode
     {
-        return new ArrayNode(
+        $node = new ArrayNode(
             $this->columnNames(),
             $this->define(Schema::PRIMARY_KEY),
             $this->schema[Relation::OUTER_KEY],
             $this->schema[Relation::INNER_KEY]
         );
+
+        $typecast = $this->define(Schema::TYPECAST);
+        if ($typecast !== null) {
+            $node->setTypecaster(new Typecaster($typecast, $this->getSource()->getDatabase()));
+        }
+
+        return $node;
     }
 }

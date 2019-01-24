@@ -85,6 +85,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'tags' => [
@@ -95,6 +96,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                             Relation::PIVOT_TABLE       => 'tag_user_map',
                             Relation::PIVOT_DATABASE    => 'default',
                             Relation::PIVOT_COLUMNS     => ['user_id', 'tag_id'],
+                            Relation::PIVOT_TYPECAST    => ['user_id' => 'int', 'tag_id' => 'int'],
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -110,6 +112,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name'],
+                Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
@@ -123,7 +126,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('tags');
 
-        $this->assertEquals([
+        $this->assertSame([
             [
                 'id'      => 1,
                 'email'   => 'hello@world.com',

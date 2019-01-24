@@ -46,6 +46,9 @@ class Select implements \IteratorAggregate, \Countable
     /** @var LoaderInterface */
     private $loader;
 
+    /** @var QueryBuilder */
+    private $builder;
+
     /**
      * @param ORMInterface $orm
      * @param string       $role
@@ -54,6 +57,7 @@ class Select implements \IteratorAggregate, \Countable
     {
         $this->orm = $orm;
         $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
+        $this->builder = new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
     }
 
     /**
@@ -76,7 +80,7 @@ class Select implements \IteratorAggregate, \Countable
      */
     public function getBuilder(): QueryBuilder
     {
-        return new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
+        return $this->builder;
     }
 
     /**
@@ -86,7 +90,6 @@ class Select implements \IteratorAggregate, \Countable
      */
     public function buildQuery(): SelectQuery
     {
-        // todo: mount columns?
         return $this->getLoader()->buildQuery();
     }
 
@@ -379,6 +382,7 @@ class Select implements \IteratorAggregate, \Countable
     public function __clone()
     {
         $this->loader = clone $this->loader;
+        $this->builder = new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
     }
 
     /**
@@ -388,6 +392,7 @@ class Select implements \IteratorAggregate, \Countable
     {
         $this->orm = null;
         $this->loader = null;
+        $this->builder = null;
     }
 
     /**

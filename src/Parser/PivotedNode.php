@@ -28,6 +28,9 @@ class PivotedNode extends AbstractNode implements ArrayInterface
     /** @var string */
     private $outerPivotKey;
 
+    /** @var TypecasterInterface|null */
+    private $pivotTypecaster = null;
+
     /**
      * @param array  $columns
      * @param array  $pivotColumns
@@ -48,6 +51,14 @@ class PivotedNode extends AbstractNode implements ArrayInterface
         $this->pivotColumns = $pivotColumns;
         $this->innerPivotKey = $innerPivotKey;
         $this->outerPivotKey = $outerPivotKey;
+    }
+
+    /**
+     * @param TypecasterInterface $typecaster
+     */
+    final public function setPivotTypecaster(TypecasterInterface $typecaster)
+    {
+        $this->pivotTypecaster = $typecaster;
     }
 
     /**
@@ -95,10 +106,16 @@ class PivotedNode extends AbstractNode implements ArrayInterface
     {
         try {
             //Combine column names with sliced piece of row
-            return array_combine(
+            $result = array_combine(
                 $this->pivotColumns,
                 array_slice($line, $dataOffset, count($this->pivotColumns))
             );
+
+            if ($this->pivotTypecaster !== null) {
+                return $this->pivotTypecaster->cast($result);
+            }
+
+            return $result;
         } catch (\Exception $e) {
             throw new ParserException(
                 "Unable to parse incoming row: " . $e->getMessage(),

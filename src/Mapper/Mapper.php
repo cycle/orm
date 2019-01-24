@@ -52,7 +52,7 @@ class Mapper extends DatabaseMapper
     {
         $class = $this->resolveClass($data);
 
-        return [new $class, $this->prepareData($data)];
+        return [new $class, $data];
     }
 
     /**

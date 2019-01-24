@@ -83,6 +83,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'tags' => [
@@ -109,6 +110,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name'],
+                Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
@@ -120,6 +122,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                 Schema::TABLE       => 'tag_user_map',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ]
@@ -131,7 +134,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('tags');
 
-        $this->assertEquals([
+        $this->assertSame([
             [
                 'id'      => 1,
                 'email'   => 'hello@world.com',

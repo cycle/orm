@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Column;
+namespace Spiral\Cycle\Parser;
 
 use Spiral\Cycle\Exception\TypecastException;
 use Spiral\Database\DatabaseInterface;
@@ -17,10 +17,23 @@ final class Typecaster implements TypecasterInterface
     /** @var array */
     private $rules;
 
+    /** @var DatabaseInterface */
+    private $database;
+
+    /**
+     * @param array             $rules
+     * @param DatabaseInterface $database
+     */
+    public function __construct(array $rules, DatabaseInterface $database)
+    {
+        $this->rules = $rules;
+        $this->database = $database;
+    }
+
     /**
      * @inheritdoc
      */
-    public function cast(array $values, DatabaseInterface $db): array
+    public function cast(array $values): array
     {
         try {
             foreach ($this->rules as $key => $rule) {
@@ -29,27 +42,17 @@ final class Typecaster implements TypecasterInterface
                 }
 
                 if (method_exists($this, $rule)) {
+                    // default rules
                     $rule = [self::class, $rule];
                 }
 
-                $values[$key] = call_user_func($rule, $values[$key], $db);
+                $values[$key] = call_user_func($rule, $values[$key], $this->database);
             }
         } catch (\Throwable $e) {
             throw new TypecastException("Unable to typecast `$key`", $e->getCode(), $e);
         }
 
         return $values;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function withRules(array $rules): TypecasterInterface
-    {
-        $tc = clone $this;
-        $tc->rules = $rules;
-
-        return $tc;
     }
 
     /**
@@ -84,11 +87,11 @@ final class Typecaster implements TypecasterInterface
      *
      * @param string|int        $value
      * @param DatabaseInterface $db
-     * @return \DateTimeInterface
+     * @return null|\DateTimeInterface
      *
      * @throws \Exception
      */
-    public static function datetime($value, DatabaseInterface $db): \DateTimeInterface
+    public static function datetime($value, DatabaseInterface $db): ?\DateTimeInterface
     {
         if (!is_scalar($value)) {
             return null;

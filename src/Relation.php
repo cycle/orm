@@ -48,6 +48,7 @@ final class Relation
     public const PIVOT_TABLE       = 904;
     public const PIVOT_DATABASE    = 905;
     public const PIVOT_COLUMNS     = 9098;
+    public const PIVOT_TYPECAST    = 9099;
     public const PIVOT_WHERE       = 911;
 
     // Custom morph key

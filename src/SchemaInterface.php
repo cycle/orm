@@ -18,6 +18,7 @@ interface SchemaInterface
     public const ROLE         = 0;
     public const MAPPER       = 1;
     public const SOURCE       = 2;
+    public const REPOSITORY   = 99;
     public const DATABASE     = 3;
     public const TABLE        = 4;
     public const PRIMARY_KEY  = 5;

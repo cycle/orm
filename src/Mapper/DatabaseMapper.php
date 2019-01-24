@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Mapper;
 
-use Spiral\Cycle\Column\Typecaster;
 use Spiral\Cycle\Column\TypecasterInterface;
 use Spiral\Cycle\Command\Branch\Split;
 use Spiral\Cycle\Command\CommandInterface;
@@ -102,7 +101,9 @@ abstract class DatabaseMapper implements MapperInterface
         $selector = new Select($this->orm, $this->role);
         $selector->constrain($this->source->getConstrain(Select\SourceInterface::DEFAULT_CONSTRAIN));
 
-        return $this->repository = new Repository($selector);
+        $repositoryClass = $this->orm->getSchema()->define($this->role, Schema::REPOSITORY) ?? Repository::class;
+
+        return $this->repository = new $repositoryClass($selector);
     }
 
     /**

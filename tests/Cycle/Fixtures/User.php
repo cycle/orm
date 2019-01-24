@@ -59,7 +59,7 @@ class User implements ImagedInterface
     /** @var bool */
     public $active;
 
-    /** @var UUIDColumn */
+    /** @var Uuid */
     public $uuid;
 
     public function __construct()

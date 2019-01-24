@@ -15,7 +15,7 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\User;
-use Spiral\Cycle\Tests\Fixtures\UUIDColumn;
+use Spiral\Cycle\Tests\Fixtures\Uuid;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
 
@@ -29,7 +29,7 @@ abstract class UUIDColumnTest extends BaseTest
 
         $this->makeTable('user', [
             'id'      => 'primary',
-            'uuid'    => 'string',
+            'uuid'    => 'binary',
             'email'   => 'string',
             'balance' => 'float'
         ]);
@@ -44,10 +44,9 @@ abstract class UUIDColumnTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'uuid', 'email', 'balance'],
                 Schema::TYPECAST    => [
                     'id'      => 'int',
-                    'uuid'    => [UUIDColumn::class, 'unserialize'],
+                    'uuid'    => [Uuid::class, 'read'],
                     'balance' => 'float'
                 ],
-                Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ]
         ]));
@@ -57,7 +56,7 @@ abstract class UUIDColumnTest extends BaseTest
     {
         $e = new User();
         $e->email = 'test@email.com';
-        $e->uuid = UUIDColumn::create();
+        $e->uuid = Uuid::create();
         $e->balance = 300;
 
         $this->captureWriteQueries();
@@ -80,15 +79,36 @@ abstract class UUIDColumnTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $result = $selector->fetchOne();
 
-        $this->assertInstanceOf(UUIDColumn::class, $result->uuid);
-        $this->assertEquals($e->uuid->__toString(), $result->uuid->__toString());
+        $this->assertInstanceOf(Uuid::class, $result->uuid);
+        $this->assertEquals($e->uuid->toString(), $result->uuid->toString());
     }
 
     public function testFetchData()
     {
         $e = new User();
         $e->email = 'test@email.com';
-        $e->uuid = UUIDColumn::create();
+        $e->uuid = Uuid::create();
+        $e->balance = 300;
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+
+        $this->assertEquals(1, $e->id);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->fetchData();
+
+        $this->assertInstanceOf(Uuid::class, $result[0]['uuid']);
+        $this->assertEquals($e->uuid->toString(), $result[0]['uuid']->toString());
+    }
+
+    public function testUpdate()
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->uuid = Uuid::create();
         $e->balance = 300;
 
         $tr = new Transaction($this->orm);
@@ -101,10 +121,10 @@ abstract class UUIDColumnTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
 
-        $this->assertInstanceOf(UUIDColumn::class, $result->uuid);
-        $this->assertEquals($e->uuid->__toString(), $result->uuid->__toString());
+        $this->assertInstanceOf(Uuid::class, $result->uuid);
+        $this->assertEquals($e->uuid->toString(), $result->uuid->toString());
 
-        $result->uuid = UUIDColumn::create();
+        $result->uuid = Uuid::create();
 
         $tr = new Transaction($this->orm);
         $tr->persist($result);
@@ -113,7 +133,7 @@ abstract class UUIDColumnTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $result2 = $selector->fetchOne();
 
-        $this->assertInstanceOf(UUIDColumn::class, $result2->uuid);
-        $this->assertEquals($result->uuid->__toString(), $result2->uuid->__toString());
+        $this->assertInstanceOf(Uuid::class, $result2->uuid);
+        $this->assertEquals($result->uuid->toString(), $result2->uuid->toString());
     }
 }

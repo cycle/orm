@@ -18,11 +18,6 @@ class Uuid implements ValueInterface
     /** @var UuidBody */
     private $uuid;
 
-    public function toString()
-    {
-        return $this->uuid->toString();
-    }
-
     /**
      * @return string
      */
@@ -31,6 +26,26 @@ class Uuid implements ValueInterface
         return $this->uuid->getBytes();
     }
 
+    /**
+     * @return int
+     */
+    public function rawType(): int
+    {
+        return \PDO::PARAM_LOB;
+    }
+
+    /**
+     * @return string
+     */
+    public function toString()
+    {
+        return $this->uuid->toString();
+    }
+
+    /**
+     * @return Uuid
+     * @throws \Exception
+     */
     public static function create(): Uuid
     {
         $uuid = new static();
@@ -39,10 +54,20 @@ class Uuid implements ValueInterface
         return $uuid;
     }
 
-    public static function read(string $value, DatabaseInterface $db): Uuid
+    /**
+     * @param string            $value
+     * @param DatabaseInterface $db
+     * @return Uuid
+     */
+    public static function read($value, DatabaseInterface $db): Uuid
     {
+        if (is_resource($value)) {
+            // postgres
+            $value = fread($value, 16);
+        }
+
         $uuid = new static();
-        $uuid->uuid = UuidBody::fromBytes($value);
+        $uuid->uuid = UuidBody::fromBytes((string)$value);
 
         return $uuid;
     }

@@ -29,10 +29,10 @@ abstract class UUIDColumnTest extends BaseTest
 
         $this->makeTable('user', [
             'id'      => 'primary',
-            'uuid'    => 'binary',
+            'uuid'    => 'binary(16)',
             'email'   => 'string',
             'balance' => 'float'
-        ]);
+        ], [], null, ['uuid' => null]);
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [

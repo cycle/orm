@@ -88,7 +88,6 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
-
             ]
         ]));
     }

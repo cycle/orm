@@ -7,9 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Parser;
+namespace Spiral\Cycle\Column;
 
 use Spiral\Cycle\Exception\TypecastException;
+use Spiral\Cycle\Parser\TypecasterInterface;
 use Spiral\Database\DatabaseInterface;
 
 final class Typecaster implements TypecasterInterface

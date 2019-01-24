@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Loader;
 
+use Spiral\Cycle\Column\Typecaster;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\PivotedNode;
-use Spiral\Cycle\Parser\Typecaster;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;

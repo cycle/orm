@@ -8,6 +8,11 @@ services:
 php:
   - 7.1
   - 7.2
+  - 7.3
+
+matrix:
+  allow_failures:
+    - php: nightly
 
 env:
   - "DB=ALL COVERAGE=ALL"

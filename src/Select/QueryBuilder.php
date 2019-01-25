@@ -188,6 +188,7 @@ final class QueryBuilder
      */
     public function resolveColumn(string $identifier): string
     {
+
         if (strpos($identifier, '.') === false) {
             // parent element
             return sprintf('%s.%s', $this->loader->getAlias(), $this->loader->columnName($identifier));
@@ -197,15 +198,17 @@ final class QueryBuilder
 
         $chunks = explode('.', $identifier);
 
-        // root loader
-        if (count($chunks) == 2 && $chunks[0] == $this->loader->getTarget() || $chunks[0] == '@') {
-            return sprintf(
-                "%s.%s",
-                $this->loader->getAlias(),
-                $this->loader->columnName($chunks[1])
-            );
+        if (count($chunks) == 2) {
+            if (in_array($chunks[0], [$this->loader->getAlias(), $this->loader->getTarget(), '@'])) {
+                return sprintf(
+                    "%s.%s.",
+                    $this->loader->getAlias(),
+                    $this->loader->columnName($chunks[1])
+                );
+            }
         }
 
+        // todo must be improved
         if (count($chunks) >= 2 && strpos($identifier, '(') == false) {
             $column = array_pop($chunks);
             $loader = $this->loader->loadRelation(join('.', $chunks), [], true);

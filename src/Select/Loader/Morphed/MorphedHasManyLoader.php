@@ -11,7 +11,6 @@ namespace Spiral\Cycle\Select\Loader\Morphed;
 
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Select\Loader\HasManyLoader;
-use Spiral\Cycle\Select\Traits\MorphedTrait;
 use Spiral\Cycle\Select\Traits\WhereTrait;
 use Spiral\Database\Query\SelectQuery;
 
@@ -20,7 +19,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 class MorphedHasManyLoader extends HasManyLoader
 {
-    use WhereTrait, MorphedTrait;
+    use WhereTrait;
 
     /**
      * {@inheritdoc}

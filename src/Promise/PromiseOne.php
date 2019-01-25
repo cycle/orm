@@ -17,7 +17,7 @@ use Spiral\Cycle\Select;
  */
 class PromiseOne implements PromiseInterface
 {
-    /** @var ORMInterface|null */
+    /** @var ORMInterface|null @internal */
     private $orm;
 
     /** @var string|null */

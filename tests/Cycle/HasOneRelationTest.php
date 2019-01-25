@@ -20,6 +20,7 @@ use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
+use Spiral\Database\Injection\Parameter;
 
 abstract class HasOneRelationTest extends BaseTest
 {
@@ -514,5 +515,41 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
         $this->assertNumWrites(0);
+    }
+
+    public function testFindByRelatedID()
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $selector->where('profile.id', 1);
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(User::class, $result[0]);
+        $this->assertEquals(1, $result[0]->id);
+    }
+
+    public function testFindByRelatedIDArray()
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $selector->where('profile.id', new Parameter([1]));
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(User::class, $result[0]);
+        $this->assertEquals(1, $result[0]->id);
+    }
+
+    public function testFindByRelatedColumn()
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $selector->where('profile.image', '=', 'image.png');
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(User::class, $result[0]);
+        $this->assertEquals(1, $result[0]->id);
     }
 }

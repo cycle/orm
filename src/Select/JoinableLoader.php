@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Select;
 
 use Spiral\Cycle\Exception\LoaderException;
-use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Relation;
@@ -175,32 +174,6 @@ abstract class JoinableLoader extends AbstractLoader
     public function isLoaded(): bool
     {
         return $this->getMethod() !== self::JOIN && $this->getMethod() !== self::LEFT_JOIN;
-    }
-
-    /**
-     * Create condition to point relation to the given outerKey or entity node.
-     *
-     * @param mixed|Node $node
-     * @return array
-     */
-    protected function makeConstrain($node): array
-    {
-        $innerKey = $this->localKey($this->define(Relation::INNER_KEY));
-        $outerKey = $this->define(Relation::OUTER_KEY);
-
-        if (!$node instanceof Node) {
-            return [$innerKey => $node];
-        }
-
-        if ($node->getRole() != $this->target) {
-            throw new LoaderException("Unable to point {$this} to `{$node->getRole()}`");
-        }
-
-        if (!array_key_exists($outerKey, $node->getData())) {
-            throw new LoaderException("Unable to point {$this} to `{$node->getRole()}`, outerKey value not found");
-        }
-
-        return [$innerKey => $node->getData()[$outerKey]];
     }
 
     /**

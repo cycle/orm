@@ -54,7 +54,6 @@ abstract class UUIDColumnTest extends BaseTest
 
     public function testCreate()
     {
-        $this->enableProfiling();
         $e = new User();
         $e->email = 'test@email.com';
         $e->uuid = Uuid::create();

@@ -386,7 +386,7 @@ abstract class HasManyConstrainTest extends BaseTest
     {
         return $this->orm->withSchema(new Schema([
             User::class    => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -407,7 +407,7 @@ abstract class HasManyConstrainTest extends BaseTest
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
             Comment::class => [
-                Schema::ALIAS       => 'comment',
+                Schema::ROLE        => 'comment',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',

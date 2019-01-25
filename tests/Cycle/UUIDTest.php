@@ -74,7 +74,7 @@ abstract class UUIDTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => UUIDMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -94,7 +94,7 @@ abstract class UUIDTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ALIAS       => 'comment',
+                Schema::ROLE        => 'comment',
                 Schema::MAPPER      => UUIDMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',

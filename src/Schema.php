@@ -33,8 +33,8 @@ final class Schema implements SchemaInterface
      */
     public function resolveRole(string $entity): ?string
     {
-        while (isset($this->schema[$entity][self::ALIAS])) {
-            $entity = $this->schema[$entity][self::ALIAS];
+        while (isset($this->schema[$entity][self::ROLE])) {
+            $entity = $this->schema[$entity][self::ROLE];
         }
 
         return $entity;

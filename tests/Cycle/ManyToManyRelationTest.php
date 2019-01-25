@@ -79,7 +79,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -106,7 +106,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 ]
             ],
             Tag::class  => [
-                Schema::ALIAS       => 'tag',
+                Schema::ROLE        => 'tag',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',

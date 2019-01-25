@@ -77,7 +77,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class       => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -104,7 +104,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                 ]
             ],
             Tag::class        => [
-                Schema::ALIAS       => 'tag',
+                Schema::ROLE        => 'tag',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
@@ -116,7 +116,7 @@ abstract class ManyThoughtManyPromiseTest extends BaseTest
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
             TagContext::class => [
-                Schema::ALIAS       => 'tag_context',
+                Schema::ROLE        => 'tag_context',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag_user_map',

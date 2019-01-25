@@ -83,7 +83,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -113,7 +113,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
                 ]
             ],
             Post::class    => [
-                Schema::ALIAS       => 'post',
+                Schema::ROLE        => 'post',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'post',
@@ -134,7 +134,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ALIAS       => 'comment',
+                Schema::ROLE        => 'comment',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',

@@ -40,7 +40,7 @@ abstract class CustomRepositoryTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::REPOSITORY  => UserRepository::class,
                 Schema::DATABASE    => 'default',

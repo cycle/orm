@@ -60,7 +60,7 @@ abstract class InverseRelationTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -81,7 +81,7 @@ abstract class InverseRelationTest extends BaseTest
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
             Profile::class => [
-                Schema::ALIAS       => 'profile',
+                Schema::ROLE        => 'profile',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'profile',

@@ -74,7 +74,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -94,7 +94,7 @@ abstract class HasOnePromiseTest extends BaseTest
                 ]
             ],
             Profile::class => [
-                Schema::ALIAS        => 'profile',
+                Schema::ROLE         => 'profile',
                 Schema::MAPPER       => Mapper::class,
                 Schema::DATABASE     => 'default',
                 Schema::TABLE        => 'profile',
@@ -115,7 +115,7 @@ abstract class HasOnePromiseTest extends BaseTest
                 ]
             ],
             Nested::class  => [
-                Schema::ALIAS       => 'nested',
+                Schema::ROLE        => 'nested',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'nested',

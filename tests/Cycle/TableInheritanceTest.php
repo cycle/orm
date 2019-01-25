@@ -44,7 +44,7 @@ abstract class TableInheritanceTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class  => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::CHILDREN    => [
                     'admin' => Admin::class
                 ],
@@ -56,7 +56,7 @@ abstract class TableInheritanceTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ],
-            Admin::class => [Schema::ALIAS => User::class,]
+            Admin::class => [Schema::ROLE => User::class,]
         ]));
     }
 

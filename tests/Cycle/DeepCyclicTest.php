@@ -34,7 +34,7 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             Cyclic::class => [
-                Schema::ALIAS       => 'cyclic',
+                Schema::ROLE        => 'cyclic',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'cyclic',

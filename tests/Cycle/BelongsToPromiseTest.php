@@ -73,7 +73,7 @@ abstract class BelongsToPromiseTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -83,7 +83,7 @@ abstract class BelongsToPromiseTest extends BaseTest
                 Schema::RELATIONS   => []
             ],
             Profile::class => [
-                Schema::ALIAS       => 'profile',
+                Schema::ROLE        => 'profile',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'profile',

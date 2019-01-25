@@ -80,7 +80,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class  => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -110,7 +110,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
                 ]
             ],
             Post::class  => [
-                Schema::ALIAS       => 'post',
+                Schema::ROLE        => 'post',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'post',
@@ -131,7 +131,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
                 ]
             ],
             Image::class => [
-                Schema::ALIAS       => 'image',
+                Schema::ROLE        => 'image',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'image',

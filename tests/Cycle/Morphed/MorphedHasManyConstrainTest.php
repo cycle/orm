@@ -583,7 +583,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         return $this->orm->withSchema(new Schema([
             User::class    => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -605,7 +605,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
             ],
             Post::class    => [
-                Schema::ALIAS       => 'post',
+                Schema::ROLE        => 'post',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'post',
@@ -626,7 +626,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ALIAS       => 'comment',
+                Schema::ROLE        => 'comment',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',

@@ -37,7 +37,7 @@ abstract class ORMTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ALIAS       => 'user',
+                Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',

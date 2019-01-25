@@ -198,10 +198,12 @@ final class QueryBuilder
         $chunks = explode('.', $identifier);
 
         // root loader
-        if (count($chunks) == 2 && $chunks[0] == $this->loader->getAlias() || $chunks[0] == '@') {
-            $chunks[0] = $this->loader->getAlias();
-            $chunks[1] = $this->loader->columnName($chunks[1]);
-            return join(".", $chunks);
+        if (count($chunks) == 2 && $chunks[0] == $this->loader->getTarget() || $chunks[0] == '@') {
+            return sprintf(
+                "%s.%s",
+                $this->loader->getAlias(),
+                $this->loader->columnName($chunks[1])
+            );
         }
 
         if (count($chunks) >= 2 && strpos($identifier, '(') == false) {

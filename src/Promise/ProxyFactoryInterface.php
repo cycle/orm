@@ -7,10 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Spiral\Cycle\Promise;
 
 use Spiral\Cycle\Exception\MapperException;
-use Spiral\Cycle\Promise\PromiseInterface;
 
 /**
  * Provides mapper ability to initiate proxy version of it's entities.

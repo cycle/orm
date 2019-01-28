@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Relation\Traits;
 
 use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\ProxyFactoryInterface;
 use Spiral\Cycle\Promise\PromiseOne;
+use Spiral\Cycle\Promise\ProxyFactoryInterface;
 
 trait PromiseOneTrait
 {

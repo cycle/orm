@@ -13,9 +13,9 @@ use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface as CC;
 use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\ProxyFactoryInterface;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseOne;
+use Spiral\Cycle\Promise\ProxyFactoryInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Relation\HasOneRelation;
 

@@ -6,7 +6,7 @@
 Features:
 ---------
 - portable DataMapper, any data source
-- ORM with many-to-many, many-thought-many and polymorphism relations
+- ORM with many-to-many, many-thought-many and polymorphic relations
 - query builder with automatic relation resolution
 - eager and lazy loading, proxies support
 - runtime configuration with/without code-generation

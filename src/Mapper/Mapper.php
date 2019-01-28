@@ -42,6 +42,7 @@ class Mapper extends DatabaseMapper
         $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
 
+        // mappers can request custom hydrator using constructor dependency
         $this->hydrator = new Hydrator\Reflection();
     }
 

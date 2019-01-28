@@ -41,18 +41,28 @@ final class Typecaster implements TypecasterInterface
                     continue;
                 }
 
-                if (is_string($rule) && method_exists($this, $rule)) {
-                    // default rules
-                    $rule = [self::class, $rule];
-                }
-
-                $values[$key] = call_user_func($rule, $values[$key], $this->database);
+                $values[$key] = $this->invoke($rule, $values[$key]);
             }
         } catch (\Throwable $e) {
             throw new TypecastException("Unable to typecast `$key`", $e->getCode(), $e);
         }
 
         return $values;
+    }
+
+    /**
+     * @param callable $rule
+     * @param mixed    $value
+     * @return mixed
+     */
+    private function invoke($rule, $value)
+    {
+        if (is_string($rule) && method_exists($this, $rule)) {
+            // default rules
+            $rule = [self::class, $rule];
+        }
+
+        return call_user_func($rule, $value, $this->database);
     }
 
     /**

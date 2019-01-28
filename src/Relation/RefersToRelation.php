@@ -40,7 +40,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         }
 
         $relNode = $this->getNode($related);
-        $this->assertValid($related, $relNode);
+        $this->assertValid($relNode);
 
         // related object exists, we can update key immediately
         if (!is_null($outerKey = $this->fetchKey($relNode, $this->outerKey))) {

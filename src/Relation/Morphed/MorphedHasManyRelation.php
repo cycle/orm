@@ -11,6 +11,7 @@ namespace Spiral\Cycle\Relation\Morphed;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\Collection\CollectionPromise;
@@ -20,8 +21,6 @@ use Spiral\Cycle\Relation\HasManyRelation;
 
 class MorphedHasManyRelation extends HasManyRelation
 {
-    use Relation\Traits\MorphedTrait;
-
     /** @var string */
     private $morphKey;
 
@@ -78,5 +77,17 @@ class MorphedHasManyRelation extends HasManyRelation
         }
 
         return $relStore;
+    }
+
+    /**
+     * Assert that given entity is allowed for the relation.
+     *
+     * @param Node $relNode
+     *
+     * @throws RelationException
+     */
+    protected function assertValid(Node $relNode)
+    {
+        // no need to validate morphed relation yet
     }
 }

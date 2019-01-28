@@ -11,6 +11,7 @@ namespace Spiral\Cycle\Relation\Morphed;
 
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\ProxyFactoryInterface;
 use Spiral\Cycle\ORMInterface;
@@ -22,8 +23,6 @@ use Spiral\Cycle\Select\SourceInterface;
 
 class BelongsToMorphedRelation extends BelongsToRelation
 {
-    use Relation\Traits\MorphedTrait;
-
     /** @var string */
     private $morphKey;
 
@@ -107,5 +106,17 @@ class BelongsToMorphedRelation extends BelongsToRelation
         }
 
         return $this->getSource($target)->getConstrain($constrain);
+    }
+
+    /**
+     * Assert that given entity is allowed for the relation.
+     *
+     * @param Node $relNode
+     *
+     * @throws RelationException
+     */
+    protected function assertValid(Node $relNode)
+    {
+        // no need to validate morphed relation yet
     }
 }

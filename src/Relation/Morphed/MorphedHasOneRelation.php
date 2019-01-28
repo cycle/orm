@@ -11,6 +11,7 @@ namespace Spiral\Cycle\Relation\Morphed;
 
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface as CC;
+use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\ProxyFactoryInterface;
 use Spiral\Cycle\ORMInterface;
@@ -23,8 +24,6 @@ use Spiral\Cycle\Relation\HasOneRelation;
  */
 class MorphedHasOneRelation extends HasOneRelation
 {
-    use Relation\Traits\MorphedTrait;
-
     /** @var string */
     private $morphKey;
 
@@ -86,5 +85,17 @@ class MorphedHasOneRelation extends HasOneRelation
         }
 
         return $relStore;
+    }
+
+    /**
+     * Assert that given entity is allowed for the relation.
+     *
+     * @param Node $relNode
+     *
+     * @throws RelationException
+     */
+    protected function assertValid(Node $relNode)
+    {
+        // no need to validate morphed relation yet
     }
 }

@@ -45,7 +45,7 @@ class BelongsToRelation extends AbstractRelation implements DependencyInterface
 
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related);
-        $this->assertValid($related, $relNode);
+        $this->assertValid($relNode);
 
         $this->forwardContext($relNode, $this->outerKey, $parentStore, $parentNode, $this->innerKey);
 

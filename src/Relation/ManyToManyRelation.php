@@ -112,7 +112,7 @@ class ManyToManyRelation extends AbstractRelation
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);
-        $this->assertValid($related, $relNode);
+        $this->assertValid($relNode);
 
         if ($exists) {
             // no changes in relation between the objects

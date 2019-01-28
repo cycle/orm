@@ -113,7 +113,7 @@ class ManyThoughtManyRelation extends Relation\AbstractRelation
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);
-        $this->assertValid($related, $relNode);
+        $this->assertValid($relNode);
 
         if (!is_object($pivot)) {
             // first time initialization

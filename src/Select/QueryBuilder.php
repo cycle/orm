@@ -40,7 +40,7 @@ final class QueryBuilder
     /** @var ORMInterface */
     private $orm;
 
-    /** @var null|SelectQuery */
+    /** @var SelectQuery */
     private $query;
 
     /** @var AbstractLoader */

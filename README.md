@@ -18,3 +18,10 @@ Features:
 - bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/Cycle/Classless)
 - support global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - compatible with Doctrine Collections and Zend Hydrator
+
+In progress:
+---------
+- schema provider
+- proxy factory (tests)
+- schema lazy loader
+- schema generator

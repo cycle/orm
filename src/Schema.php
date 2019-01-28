@@ -13,6 +13,8 @@ use Spiral\Cycle\Exception\SchemaException;
 
 /**
  * Static schema with automatic class name => role aliasing.
+ *
+ * @todo improve abstraction
  */
 final class Schema implements SchemaInterface
 {
@@ -33,6 +35,7 @@ final class Schema implements SchemaInterface
      */
     public function resolveRole(string $entity): ?string
     {
+        // walk thought all children until parent entity found
         while (isset($this->schema[$entity][self::ROLE])) {
             $entity = $this->schema[$entity][self::ROLE];
         }
@@ -55,7 +58,7 @@ final class Schema implements SchemaInterface
     {
         $role = $this->resolveRole($role);
         if (!isset($this->schema[$role])) {
-            throw new SchemaException("Undefined schema `{$role}`, not found.");
+            throw new SchemaException("Undefined schema `{$role}`, not found");
         }
 
         if (!array_key_exists($property, $this->schema[$role])) {
@@ -73,7 +76,7 @@ final class Schema implements SchemaInterface
         $relations = $this->define($class, self::RELATIONS);
 
         if (!isset($relations[$relation])) {
-            throw new SchemaException("Undefined relation `{$class}`.`{$relation}`.");
+            throw new SchemaException("Undefined relation `{$class}`.`{$relation}`");
         }
 
         return $relations[$relation];

@@ -10,10 +10,11 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Tests\Fixtures;
 
 use Spiral\Cycle\Promise\PromiseInterface;
+use Spiral\Cycle\Promise\Traits\ProxyTrait;
 
 class UserProxy extends User implements PromiseInterface
 {
-    private $promise;
+    use ProxyTrait;
 
     public function __construct(PromiseInterface $promise)
     {
@@ -25,23 +26,8 @@ class UserProxy extends User implements PromiseInterface
         return $this->promise->__resolve()->id;
     }
 
-    public function __loaded(): bool
+    public function addComment(Comment $c)
     {
-        return $this->promise->__loaded();
-    }
-
-    public function __role(): string
-    {
-        return $this->promise->__role();
-    }
-
-    public function __scope(): array
-    {
-        return $this->promise->__scope();
-    }
-
-    public function __resolve()
-    {
-        return $this->promise->__resolve();
+        $this->__resolve()->addComment($c);
     }
 }

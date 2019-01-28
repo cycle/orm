@@ -129,6 +129,6 @@ abstract class BelongsToProxyTest extends BaseTest
         $this->assertInstanceOf(UserProxy::class, $b->user);
 
         $this->assertEquals(1, $a->user->getID());
-        $this->assertEquals(2, $a->user->getID());
+        $this->assertEquals(2, $b->user->getID());
     }
 }

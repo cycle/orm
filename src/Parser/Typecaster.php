@@ -103,10 +103,6 @@ final class Typecaster implements TypecasterInterface
      */
     public static function datetime($value, DatabaseInterface $db): ?\DateTimeInterface
     {
-        if (!is_scalar($value)) {
-            return null;
-        }
-
         return new \DateTimeImmutable($value, $db->getDriver()->getTimezone());
     }
 }

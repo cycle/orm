@@ -22,6 +22,5 @@ Features:
 In progress:
 ---------
 - schema provider
-- proxy factory (tests)
 - schema lazy loader
 - schema generator

@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Mapper;
 
-use Spiral\Cycle\Parser\TypecasterInterface;
 use Spiral\Cycle\Command\Branch\Split;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;

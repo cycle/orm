@@ -20,6 +20,8 @@ use Spiral\Cycle\Relation\HasManyRelation;
 
 class MorphedHasManyRelation extends HasManyRelation
 {
+    use Relation\Traits\MorphedTrait;
+
     /** @var string */
     private $morphKey;
 

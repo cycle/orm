@@ -49,14 +49,12 @@ class HasOneRelation extends AbstractRelation
             }
         }
 
+        $resStore = $this->orm->queueStore($related);
+        $relNode = $this->getNode($related, +1);
+        $this->assertValid($related, $relNode);
+
         // store command with mounted context paths
-        $relStore = $this->forwardContext(
-            $parentNode,
-            $this->innerKey,
-            $this->orm->queueStore($related),
-            $this->getNode($related, +1),
-            $this->outerKey
-        );
+        $relStore = $this->forwardContext($parentNode, $this->innerKey, $resStore, $relNode, $this->outerKey);
 
         if (is_null($original)) {
             return $relStore;

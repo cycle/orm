@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Relation;
 
+use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
 use Spiral\Cycle\ORMInterface;
@@ -97,7 +98,7 @@ abstract class AbstractRelation implements RelationInterface
     public function __toString()
     {
         // this is incorrect class
-        return sprintf("%s->%s", $this->target, $this->name);
+        return sprintf("%s(%s)->%s", $this->name, get_class($this), $this->target);
     }
 
     /**
@@ -195,5 +196,24 @@ abstract class AbstractRelation implements RelationInterface
     protected function columnName(Node $node, string $field): string
     {
         return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
+    }
+
+    /**
+     * Assert that given entity is allowed for the relation.
+     *
+     * @param object $related
+     * @param Node   $relNode
+     *
+     * @throws RelationException
+     */
+    protected function assertValid($related, Node $relNode)
+    {
+        if ($relNode->getRole() != $this->target) {
+            throw new RelationException(sprintf(
+                "Unable to link %s, given `%s`",
+                $this,
+                get_class($related)
+            ));
+        }
     }
 }

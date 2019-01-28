@@ -111,6 +111,8 @@ class ManyToManyRelation extends AbstractRelation
     protected function link(Node $parentNode, $related, $exists): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
+        $relNode = $this->getNode($related, +1);
+        $this->assertValid($related, $relNode);
 
         if ($exists) {
             // no changes in relation between the objects

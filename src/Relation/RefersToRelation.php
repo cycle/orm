@@ -40,6 +40,7 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         }
 
         $relNode = $this->getNode($related);
+        $this->assertValid($related, $relNode);
 
         // related object exists, we can update key immediately
         if (!is_null($outerKey = $this->fetchKey($relNode, $this->outerKey))) {
@@ -59,21 +60,10 @@ class RefersToRelation extends AbstractRelation implements DependencyInterface
         // fastest way to identify the entity
         $pk = $this->orm->getSchema()->define($parentNode->getRole(), Schema::PRIMARY_KEY);
 
-        $this->forwardContext(
-            $relNode,
-            $this->outerKey,
-            $update,
-            $parentNode,
-            $this->innerKey
-        );
+        $this->forwardContext($relNode, $this->outerKey, $update, $parentNode, $this->innerKey);
 
         // set where condition for update query
-        $this->forwardScope(
-            $parentNode,
-            $pk,
-            $update,
-            $pk
-        );
+        $this->forwardScope($parentNode, $pk, $update, $pk);
 
         return $update;
     }

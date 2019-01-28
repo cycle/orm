@@ -134,14 +134,9 @@ class HasManyRelation extends AbstractRelation
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);
+        $this->assertValid($related, $relNode);
 
-        $this->forwardContext(
-            $parentNode,
-            $this->innerKey,
-            $relStore,
-            $relNode,
-            $this->outerKey
-        );
+        $this->forwardContext($parentNode, $this->innerKey, $relStore, $relNode, $this->outerKey);
 
         return $relStore;
     }

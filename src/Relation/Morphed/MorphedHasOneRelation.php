@@ -23,6 +23,8 @@ use Spiral\Cycle\Relation\HasOneRelation;
  */
 class MorphedHasOneRelation extends HasOneRelation
 {
+    use Relation\Traits\MorphedTrait;
+
     /** @var string */
     private $morphKey;
 

@@ -22,6 +22,8 @@ use Spiral\Cycle\Select\SourceInterface;
 
 class BelongsToMorphedRelation extends BelongsToRelation
 {
+    use Relation\Traits\MorphedTrait;
+
     /** @var string */
     private $morphKey;
 

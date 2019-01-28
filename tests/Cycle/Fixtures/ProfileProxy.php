@@ -9,10 +9,11 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Tests\Fixtures;
 
+
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Promise\Traits\ProxyTrait;
 
-class UserProxy extends User implements PromiseInterface
+class ProfileProxy extends Profile implements PromiseInterface
 {
     use ProxyTrait;
 
@@ -26,8 +27,8 @@ class UserProxy extends User implements PromiseInterface
         return $this->__resolve()->id;
     }
 
-    public function addComment(Comment $c)
+    public function getImage()
     {
-        $this->__resolve()->addComment($c);
+        return $this->__resolve()->image;
     }
 }

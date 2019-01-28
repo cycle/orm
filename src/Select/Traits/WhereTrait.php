@@ -27,7 +27,7 @@ trait WhereTrait
     private function setWhere(SelectQuery $query, string $table, string $target, $where = null): SelectQuery
     {
         if (empty($where)) {
-            //No conditions, nothing to do
+            // no conditions, nothing to do
             return $query;
         }
 

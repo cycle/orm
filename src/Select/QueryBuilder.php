@@ -37,7 +37,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 final class QueryBuilder
 {
-    /** @var ORMInterface */
+    /** @var ORMInterface @internal */
     private $orm;
 
     /** @var SelectQuery */
@@ -93,6 +93,18 @@ final class QueryBuilder
     }
 
     /**
+     * @param SelectQuery $query
+     * @return QueryBuilder
+     */
+    public function withQuery(SelectQuery $query): self
+    {
+        $builder = clone $this;
+        $builder->query = $query;
+
+        return $builder;
+    }
+
+    /**
      * Forward call to underlying target.
      *
      * @param string $func
@@ -101,13 +113,6 @@ final class QueryBuilder
      */
     public function __call(string $func, array $args)
     {
-        $args = array_values($args);
-        if (count($args) === 1 && $args[0] instanceof \Closure) {
-            // $query->where(function($q) { ...
-            call_user_func($args[0], $this);
-            return $this;
-        }
-
         // prepare arguments
         $result = call_user_func_array($this->targetFunc($func), $this->resolve($func, $args));
 
@@ -152,30 +157,54 @@ final class QueryBuilder
      */
     protected function resolve($func, array $args): array
     {
-        // all of the SelectQuery functions has similar signature where first argument is identifier
 
-        // todo: make it smarter
 
         // short array syntax
         if (count($args) === 1 && array_key_exists(0, $args) && is_array($args[0])) {
-            $result = [];
-            foreach ($args[0] as $key => $value) {
-                if (is_string($key) && !is_int($key)) {
-                    $key = $this->resolveColumn($key);
+            return $this->walk_recursive($args, function (&$k, &$v) {
+                if (
+                    !is_numeric($k)
+                    // todo: improve
+                    && !in_array(strtoupper($k), ['@OR', '@AND', '<', '>', '<=', '>=', 'IN', 'BETWEEN', 'LIKE'])
+                ) {
+                    $k = $this->resolveColumn($k);
                 }
 
-                $result[$key] = !is_array($value) ? $value : $this->resolve(null, $value);
-            }
-
-            return [$result];
+                if ($v instanceof \Closure) {
+                    $v = function ($q) use ($v) {
+                        $v($this->withQuery($q));
+                    };
+                }
+            });
         }
 
-        // normal syntax
+        // short syntax (first argument is identifier)
         if (array_key_exists(0, $args) && is_string($args[0])) {
             $args[0] = $this->resolveColumn($args[0]);
         }
 
+        if (array_key_exists(0, $args) && $args[0] instanceof \Closure) {
+            $args[0] = function ($q) use ($args) {
+                $args[0]($this->withQuery($q));
+            };
+        }
+
         return $args;
+    }
+
+    private function walk_recursive(array $input, callable $function, $level = 0): array
+    {
+        $result = [];
+        foreach ($input as $k => $v) {
+            if (is_array($v)) {
+                $v = $this->walk_recursive($v, $function, $level + 1);
+            }
+
+            call_user_func_array($function, [&$k, &$v, $level]);
+            $result[$k] = $v;
+        }
+
+        return $result;
     }
 
     /**
@@ -188,7 +217,6 @@ final class QueryBuilder
      */
     public function resolveColumn(string $identifier): string
     {
-
         if (strpos($identifier, '.') === false) {
             // parent element
             return sprintf('%s.%s', $this->loader->getAlias(), $this->loader->columnName($identifier));

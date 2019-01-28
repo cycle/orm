@@ -37,7 +37,7 @@ final class Typecaster implements TypecasterInterface
     {
         try {
             foreach ($this->rules as $key => $rule) {
-                if (!array_key_exists($key, $values)) {
+                if (!array_key_exists($key, $values) || is_null($values[$key])) {
                     continue;
                 }
 

@@ -131,4 +131,54 @@ abstract class BelongsToProxyTest extends BaseTest
         $this->assertEquals(1, $a->user->getID());
         $this->assertEquals(2, $b->user->getID());
     }
+
+    public function testLoaded()
+    {
+        $selector = new Select($this->orm, Profile::class);
+        $selector->orderBy('profile.id');
+
+        /**
+         * @var Post $a
+         * @var Post $b
+         */
+        list($a, $b) = $selector->fetchAll();
+
+        $this->assertFalse($a->user->__loaded());
+        $this->assertEquals(1, $a->user->getID());
+        $this->assertTrue($a->user->__loaded());
+    }
+
+    public function testRole()
+    {
+        $selector = new Select($this->orm, Profile::class);
+        $selector->orderBy('profile.id');
+
+        /**
+         * @var Post $a
+         * @var Post $b
+         */
+        list($a, $b) = $selector->fetchAll();
+
+        $this->assertEquals('user', $a->user->__role());
+
+        $this->assertEquals([
+            'id' => 1
+        ], $a->user->__scope());
+    }
+
+    public function testScope()
+    {
+        $selector = new Select($this->orm, Profile::class);
+        $selector->orderBy('profile.id');
+
+        /**
+         * @var Post $a
+         * @var Post $b
+         */
+        list($a, $b) = $selector->fetchAll();
+
+        $this->assertEquals([
+            'id' => 1
+        ], $a->user->__scope());
+    }
 }

@@ -521,7 +521,19 @@ abstract class HasOneRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
 
-        $selector->where('profile.id', 1);
+        $selector->with('profile')->where('profile.id', 1);
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(User::class, $result[0]);
+        $this->assertEquals(1, $result[0]->id);
+    }
+
+    public function testFindByRelatedIDAliased()
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $selector->with('profile', ['alias' => 'profile_relation'])->where('profile.id', 1);
 
         $result = $selector->fetchAll();
         $this->assertCount(1, $result);
@@ -533,7 +545,7 @@ abstract class HasOneRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
 
-        $selector->where('profile.id', new Parameter([1]));
+        $selector->with('profile')->where('profile.id', new Parameter([1]));
 
         $result = $selector->fetchAll();
         $this->assertCount(1, $result);
@@ -545,7 +557,7 @@ abstract class HasOneRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
 
-        $selector->where('profile.image', '=', 'image.png');
+        $selector->with('profile')->where('profile.image', '=', 'image.png');
 
         $result = $selector->fetchAll();
         $this->assertCount(1, $result);

@@ -25,8 +25,8 @@ use Spiral\Cycle\SchemaInterface;
 use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Driver\AbstractDriver;
-use Spiral\Database\Driver\AbstractHandler;
+use Spiral\Database\Driver\Driver;
+use Spiral\Database\Driver\Handler;
 
 abstract class BaseTest extends TestCase
 {
@@ -41,7 +41,7 @@ abstract class BaseTest extends TestCase
 
     protected static $lastORM;
 
-    /** @var AbstractDriver */
+    /** @var Driver */
     protected $driver;
 
     /** @var DatabaseManager */
@@ -119,9 +119,9 @@ abstract class BaseTest extends TestCase
     }
 
     /**
-     * @return AbstractDriver
+     * @return Driver
      */
-    public function getDriver(): AbstractDriver
+    public function getDriver(): Driver
     {
         if (isset(static::$driverCache[static::DRIVER])) {
             return static::$driverCache[static::DRIVER];
@@ -216,7 +216,7 @@ abstract class BaseTest extends TestCase
                 $schema->dropForeignKey($foreign->getColumn());
             }
 
-            $schema->save(AbstractHandler::DROP_FOREIGN_KEYS);
+            $schema->save(Handler::DROP_FOREIGN_KEYS);
         }
 
         foreach ($database->getTables() as $table) {

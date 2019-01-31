@@ -9,13 +9,13 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select;
 
+use Spiral\Cycle\Exception\BuilderException;
 use Spiral\Cycle\ORMInterface;
+use Spiral\Database\Driver\Compiler;
 use Spiral\Database\Query\SelectQuery;
 
 /**
- * Query builder and entity selector. Mocks SelectQuery.
- *
- * Trait provides the ability to transparently configure underlying loader query.
+ * Mocks SelectQuery and automatically resolves identifiers for the loaded relations.
  *
  * @method QueryBuilder distinct()
  * @method QueryBuilder where(...$args);
@@ -32,8 +32,6 @@ use Spiral\Database\Query\SelectQuery;
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
- *
- * @todo make it smarter
  */
 final class QueryBuilder
 {
@@ -62,21 +60,23 @@ final class QueryBuilder
     }
 
     /**
-     * Get currently associated query.
+     * Get currently associated query. Immutable.
      *
      * @return SelectQuery|null
      */
     public function getQuery(): ?SelectQuery
     {
-        return $this->query;
+        return clone $this->query;
     }
 
     /**
+     * Access to underlying loader. Immutable.
+     *
      * @return AbstractLoader
      */
     public function getLoader(): AbstractLoader
     {
-        return $this->loader;
+        return clone $this->loader;
     }
 
     /**
@@ -85,11 +85,12 @@ final class QueryBuilder
      * @param string $forward "where", "onWhere"
      * @return QueryBuilder
      */
-    public function setForwarding(string $forward = null): self
+    public function withForward(string $forward = null): self
     {
-        $this->forward = $forward;
+        $builder = clone $this;
+        $builder->forward = $forward;
 
-        return $this;
+        return $builder;
     }
 
     /**
@@ -113,15 +114,62 @@ final class QueryBuilder
      */
     public function __call(string $func, array $args)
     {
-        // prepare arguments
-        $result = call_user_func_array($this->targetFunc($func), $this->resolve($func, $args));
-
+        $result = call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
         if ($result === $this->query) {
             return $this;
         }
 
         return $result;
     }
+
+    /**
+     * Resolve given object.field identifier into proper table alias and column name.
+     * Attention, calling this method would not affect loaded relations, you must call with/load directly!
+     *
+     * Use this method for complex relation queries in combination with Expression()
+     *
+     * @param string $identifier
+     * @return string
+     *
+     * @throws BuilderException
+     */
+    public function resolve(string $identifier): string
+    {
+        if (strpos($identifier, '.') === false) {
+            // parent element
+            return sprintf('%s.%s', $this->loader->getAlias(), $this->loader->columnName($identifier));
+        }
+
+        $chunks = explode('.', $identifier);
+
+        if (count($chunks) == 2) {
+            if (in_array($chunks[0], [$this->loader->getAlias(), $this->loader->getTarget(), '@'])) {
+                return sprintf(
+                    "%s.%s.",
+                    $this->loader->getAlias(),
+                    $this->loader->columnName($chunks[1])
+                );
+            }
+        }
+
+        // todo must be improved
+        if (count($chunks) >= 2 && strpos($identifier, '(') == false) {
+            $column = array_pop($chunks);
+
+            // todo: relation by ALIAS? (!)
+            $loader = $this->getLoader()->loadRelation(
+                join('.', $chunks),
+                [],
+                true
+            );
+
+            return sprintf('%s.%s', $loader->getAlias(), $loader->columnName($column));
+        }
+
+        // strict format (?)
+        return str_replace('@', $this->loader->getAlias(), $identifier);
+    }
+
 
     /**
      * Replace target where call with another compatible method (for example join or having).
@@ -155,36 +203,22 @@ final class QueryBuilder
      * @param array $args
      * @return array
      */
-    protected function resolve($func, array $args): array
+    protected function proxyArgs(array $args): array
     {
-
-
-        // short array syntax
-        if (count($args) === 1 && array_key_exists(0, $args) && is_array($args[0])) {
-            return $this->walk_recursive($args, function (&$k, &$v) {
-                if (
-                    !is_numeric($k)
-                    // todo: improve
-                    && !in_array(strtoupper($k), ['@OR', '@AND', '<', '>', '<=', '>=', 'IN', 'BETWEEN', 'LIKE'])
-                ) {
-                    $k = $this->resolveColumn($k);
-                }
-
-                if ($v instanceof \Closure) {
-                    $v = function ($q) use ($v) {
-                        $v($this->withQuery($q));
-                    };
-                }
-            });
+        if (!isset($args[0])) {
+            return $args;
         }
 
-        // short syntax (first argument is identifier)
-        if (array_key_exists(0, $args) && is_string($args[0])) {
-            $args[0] = $this->resolveColumn($args[0]);
+        if (is_string($args[0])) {
+            $args[0] = $this->resolve($args[0]);
         }
 
-        if (array_key_exists(0, $args) && $args[0] instanceof \Closure) {
-            $args[0] = function ($q) use ($args) {
+        if (is_array($args[0])) {
+            $args[0] = $this->walkRecursive($args[0], [$this, 'wrap']);
+        }
+
+        if ($args[0] instanceof \Closure) {
+            $args[0] = $args[0] = function ($q) use ($args) {
                 $args[0]($this->withQuery($q));
             };
         }
@@ -192,59 +226,51 @@ final class QueryBuilder
         return $args;
     }
 
-    private function walk_recursive(array $input, callable $function, $level = 0): array
+    /**
+     * Automatically resolve identifier value or wrap the expression.
+     *
+     * @param mixed $identifier
+     * @param mixed $value
+     */
+    private function wrap(&$identifier, &$value)
+    {
+        if (!is_numeric($identifier)) {
+            $identifier = $this->resolve($identifier);
+        }
+
+        if ($value instanceof \Closure) {
+            $value = function ($q) use ($value) {
+                $value($this->withQuery($q));
+            };
+        }
+    }
+
+    /**
+     * Walk thought method arguments using given function.
+     *
+     * @param array    $input
+     * @param callable $func
+     * @param bool     $complex
+     * @return array
+     */
+    private function walkRecursive(array $input, callable $func, bool $complex = false): array
     {
         $result = [];
         foreach ($input as $k => $v) {
             if (is_array($v)) {
-                $v = $this->walk_recursive($v, $function, $level + 1);
+                if (!is_numeric($k) && in_array(strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR])) {
+                    // complex expression like @OR and @AND
+                    $result[$k] = $this->walkRecursive($v, $func, true);
+                    continue;
+                } elseif ($complex) {
+                    $v = $this->walkRecursive($v, $func);
+                }
             }
 
-            call_user_func_array($function, [&$k, &$v, $level]);
+            call_user_func_array($func, [&$k, &$v]);
             $result[$k] = $v;
         }
 
         return $result;
-    }
-
-    /**
-     * Automatically resolve identifier.
-     *
-     * todo: make this method public
-     *
-     * @param string $identifier
-     * @return string
-     */
-    public function resolveColumn(string $identifier): string
-    {
-        if (strpos($identifier, '.') === false) {
-            // parent element
-            return sprintf('%s.%s', $this->loader->getAlias(), $this->loader->columnName($identifier));
-        }
-
-        // todo: automatic relation load?
-
-        $chunks = explode('.', $identifier);
-
-        if (count($chunks) == 2) {
-            if (in_array($chunks[0], [$this->loader->getAlias(), $this->loader->getTarget(), '@'])) {
-                return sprintf(
-                    "%s.%s.",
-                    $this->loader->getAlias(),
-                    $this->loader->columnName($chunks[1])
-                );
-            }
-        }
-
-        // todo must be improved
-        if (count($chunks) >= 2 && strpos($identifier, '(') == false) {
-            $column = array_pop($chunks);
-            $loader = $this->loader->loadRelation(join('.', $chunks), [], true);
-
-            return sprintf('%s.%s', $loader->getAlias(), $loader->columnName($column));
-        }
-
-        // strict format (?)
-        return str_replace('@', $this->loader->getAlias(), $identifier);
     }
 }

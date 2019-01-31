@@ -278,7 +278,8 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     public function testFetchOneWhereAliased()
     {
         $selector = new Select($this->orm, User::class);
-        $selector->load('comments', ['method' => JoinableLoader::INLOAD])
+        $selector
+            ->load('comments', ['method' => JoinableLoader::INLOAD])
             ->where('user.id', 1)
             ->orderBy('user.id');
 
@@ -332,7 +333,10 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
 
-        $all = $selector->where('comments.message', 'msg 3')->fetchAll();
+        $all = $selector
+            ->with('comments')
+            ->where('comments.message', 'msg 3')
+            ->fetchAll();
 
         $this->assertCount(1, $all);
         $this->assertEquals(1, $all[0]->id);
@@ -342,9 +346,11 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
 
-        $all = $selector->where(
+        $all = $selector
+            ->with('comments')
+            ->where(
             'comments.id',
-            new Expression($selector->getBuilder()->resolveColumn('user.id'))
+            new Expression($selector->getBuilder()->resolve('user.id'))
         )->fetchAll();
 
         $this->assertCount(1, $all);

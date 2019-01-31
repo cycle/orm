@@ -18,9 +18,9 @@ use Spiral\Database\Query\SelectQuery;
 trait WhereTrait
 {
     /**
-     * @param SelectQuery   $query
-     * @param string        $table  Table name to be automatically inserted into where conditions at place of {@}.
-     * @param string        $target Query target section (accepts: where, having, onWhere, on)
+     * @param SelectQuery    $query
+     * @param string         $table  Table name to be automatically inserted into where conditions at place of {@}.
+     * @param string         $target Query target section (accepts: where, having, onWhere, on)
      * @param array|\Closure $where  Where conditions in a form or short array form.
      * @return SelectQuery
      */
@@ -32,8 +32,8 @@ trait WhereTrait
         }
 
         $proxy = new QueryBuilder($this->orm, $query, $this);
-        $proxy->setForwarding($target)->where($where);
+        $proxy = $proxy->withForward($target);
 
-        return $proxy->getQuery();
+        return $proxy->where($where)->getQuery();
     }
 }

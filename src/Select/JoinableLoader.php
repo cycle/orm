@@ -225,9 +225,7 @@ abstract class JoinableLoader extends AbstractLoader
     {
         if (!empty($this->constrain)) {
             $proxy = new QueryBuilder($this->orm, $query, $this);
-            $proxy->setForwarding($this->isJoined() ? 'onWhere' : 'where');
-
-            $this->constrain->apply($proxy);
+            $this->constrain->apply($proxy->withForward($this->isJoined() ? 'onWhere' : 'where'));
         }
 
         return $query;

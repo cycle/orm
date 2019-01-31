@@ -11,6 +11,7 @@ namespace Spiral\Cycle\Select;
 
 use Spiral\Cycle\Exception\FactoryException;
 use Spiral\Cycle\Exception\LoaderException;
+use Spiral\Cycle\Exception\SchemaException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Select\Traits\ChainTrait;
@@ -54,6 +55,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var array */
     protected $options = [
+        //'alias'     => '',            @todo: make it seekable
         'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
     ];
 
@@ -160,7 +162,7 @@ abstract class AbstractLoader implements LoaderInterface
         try {
             //Creating new loader.
             $loader = $this->orm->getFactory()->loader($this->target, $relation);
-        } catch (FactoryException $e) {
+        } catch (SchemaException|FactoryException $e) {
             throw new LoaderException(
                 "Unable to create loader: %s" . $e->getMessage(),
                 $e->getCode(),

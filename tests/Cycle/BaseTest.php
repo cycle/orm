@@ -98,6 +98,7 @@ abstract class BaseTest extends TestCase
      */
     public function tearDown()
     {
+        gc_collect_cycles();
         $this->assertClearState($this->orm);
 
         $this->disableProfiling();

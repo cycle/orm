@@ -14,7 +14,6 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Tests\Fixtures\Nested;
 use Spiral\Cycle\Tests\Fixtures\Profile;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -171,7 +170,7 @@ abstract class BelongsToRelationTest extends BaseTest
     public function testFetchRelationInload()
     {
         $selector = new Select($this->orm, Profile::class);
-        $selector->load('user', ['method' => JoinableLoader::INLOAD])
+        $selector->load('user', ['method' => Select\JoinableLoader::INLOAD])
             ->orderBy('profile.id');
 
         $this->assertEquals([
@@ -527,5 +526,26 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->assertSame('profile', $n->profile->image);
         $this->assertSame('new@email.com', $n->profile->user->email);
+    }
+
+    public function testWhereNested()
+    {
+        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
+        $n = $s->with('profile.user')
+            ->where('profile.user.id', 1)
+            ->fetchOne();
+
+        $this->assertSame('nested-label', $n->label);
+    }
+
+    public function testWhereNestedWithAlias()
+    {
+        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
+        $n = $s
+            ->with('profile.user', ['alias' => 'u'])
+            ->where('u.id', 1)
+            ->fetchOne();
+
+        $this->assertSame('nested-label', $n->label);
     }
 }

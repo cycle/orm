@@ -40,7 +40,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 class Select implements \IteratorAggregate, \Countable
 {
-    /** @var ORMInterface */
+    /** @var ORMInterface @internal */
     private $orm;
 
     /** @var LoaderInterface */

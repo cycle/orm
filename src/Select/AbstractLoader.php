@@ -14,6 +14,7 @@ use Spiral\Cycle\Exception\LoaderException;
 use Spiral\Cycle\Exception\SchemaException;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
+use Spiral\Cycle\Select\Traits\AliasTrait;
 use Spiral\Cycle\Select\Traits\ChainTrait;
 use Spiral\Cycle\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -39,7 +40,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait, ConstrainTrait;
+    use ChainTrait, AliasTrait, ConstrainTrait;
 
     // Loading methods for data loaders.
     public const INLOAD    = 1;
@@ -129,6 +130,11 @@ abstract class AbstractLoader implements LoaderInterface
      */
     final public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
     {
+        $relation = $this->resolvePath($relation);
+        if (!empty($options['alias'])) {
+            $this->registerPath($options['alias'], $relation);
+        }
+        
         //Check if relation contain dot, i.e. relation chain
         if ($this->isChain($relation)) {
             return $this->loadChain($relation, $options, $join);
@@ -145,17 +151,14 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         if ($join) {
-            if (
-                empty($options['method'])
-                || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])
-            ) {
-                //Let's tell our loaded that it's method is JOIN (forced)
+            if (empty($options['method']) || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])) {
+                // let's tell our loaded that it's method is JOIN (forced)
                 $options['method'] = self::JOIN;
             }
         }
 
         if (isset($loaders[$relation])) {
-            //Overwriting existed loader options
+            // overwrite existing loader options
             return $loaders[$relation] = $loaders[$relation]->withContext($this, $options);
         }
 
@@ -164,7 +167,7 @@ abstract class AbstractLoader implements LoaderInterface
             $loader = $this->orm->getFactory()->loader($this->target, $relation);
         } catch (SchemaException|FactoryException $e) {
             throw new LoaderException(
-                "Unable to create loader: %s" . $e->getMessage(),
+                sprintf("Unable to create loader: %s", $e->getMessage()),
                 $e->getCode(),
                 $e
             );

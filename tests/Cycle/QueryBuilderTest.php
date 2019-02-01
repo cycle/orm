@@ -258,6 +258,20 @@ abstract class QueryBuilderTest extends BaseTest
         $this->assertSame(2, $b->id);
     }
 
+    public function testRelationAliased()
+    {
+        $select = new Select($this->orm, User::class);
+        list($a, $b) = $select
+            ->with('comments', ['alias' => 'c'])
+            ->where([
+                'c.message' => new Parameter(['msg 3', 'msg 1'])
+            ])
+            ->orderBy('id')->orderBy('c.id', 'DESC')->fetchAll();
+
+        $this->assertSame(1, $a->id);
+        $this->assertSame(2, $b->id);
+    }
+
     public function testRelationComplexArray()
     {
         $select = new Select($this->orm, User::class);

@@ -15,5 +15,4 @@ class SortByMsgConstrain implements ConstrainInterface
     {
         $query->orderBy('message', 'ASC');
     }
-
 }

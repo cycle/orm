@@ -266,7 +266,7 @@ abstract class QueryBuilderTest extends BaseTest
             ->where([
                 'c.message' => new Parameter(['msg 3', 'msg 1'])
             ])
-            ->orderBy('id')->orderBy('c.id', 'DESC')->fetchAll();
+            ->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
         $this->assertSame(2, $b->id);

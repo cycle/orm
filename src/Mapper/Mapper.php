@@ -75,17 +75,6 @@ class Mapper extends DatabaseMapper
         return $this->hydrator->extract($entity);
     }
 
-    protected function getHydrator($object): Hydrator\HydratorInterface
-    {
-        if (isset(self::$hydrators[get_class($object)])) {
-            return self::$hydrators[get_class($object)];
-        }
-
-        $class = (new Configuration(get_class($object)))->createFactory()->getHydratorClass();
-
-        return self::$hydrators[get_class($object)] = new $class;
-    }
-
     /**
      * Get entity columns.
      *

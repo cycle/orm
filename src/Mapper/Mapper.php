@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Mapper;
 
+use GeneratedHydrator\Configuration;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Zend\Hydrator;
@@ -30,6 +31,8 @@ class Mapper extends DatabaseMapper
 
     /** @var Hydrator\HydratorInterface */
     protected $hydrator;
+
+    private static $hydrators = [];
 
     /**
      * @param ORMInterface $orm
@@ -70,6 +73,17 @@ class Mapper extends DatabaseMapper
     public function extract($entity): array
     {
         return $this->hydrator->extract($entity);
+    }
+
+    protected function getHydrator($object): Hydrator\HydratorInterface
+    {
+        if (isset(self::$hydrators[get_class($object)])) {
+            return self::$hydrators[get_class($object)];
+        }
+
+        $class = (new Configuration(get_class($object)))->createFactory()->getHydratorClass();
+
+        return self::$hydrators[get_class($object)] = new $class;
     }
 
     /**

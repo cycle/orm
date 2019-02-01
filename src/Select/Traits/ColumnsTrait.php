@@ -22,7 +22,7 @@ trait ColumnsTrait
      * @param string $field
      * @return string
      */
-    public function columnName(string $field): string
+    public function fieldAlias(string $field): string
     {
         return $this->getColumns()[$field] ?? $field;
     }

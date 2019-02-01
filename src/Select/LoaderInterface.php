@@ -38,7 +38,7 @@ interface LoaderInterface
      * @param string $key
      * @return string
      */
-    public function columnName(string $key): string;
+    public function fieldAlias(string $key): string;
 
     /**
      * Initiate loader with it's position and options in dependency tree.

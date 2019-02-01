@@ -53,7 +53,7 @@ final class RootLoader extends AbstractLoader
      */
     public function getPK(): string
     {
-        return $this->getAlias() . '.' . $this->columnName($this->define(Schema::PRIMARY_KEY));
+        return $this->getAlias() . '.' . $this->fieldAlias($this->define(Schema::PRIMARY_KEY));
     }
 
     /**

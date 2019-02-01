@@ -137,39 +137,46 @@ final class QueryBuilder
     {
         if (strpos($identifier, '.') === false) {
             // parent element
-            return sprintf('%s.%s', $this->loader->getAlias(), $this->loader->columnName($identifier));
-        }
-
-        $chunks = explode('.', $identifier);
-
-        if (count($chunks) == 2) {
-            if (in_array($chunks[0], [$this->loader->getAlias(), $this->loader->getTarget(), '@'])) {
-                return sprintf(
-                    "%s.%s.",
-                    $this->loader->getAlias(),
-                    $this->loader->columnName($chunks[1])
-                );
-            }
-        }
-
-        // todo must be improved
-        if (count($chunks) >= 2 && strpos($identifier, '(') == false) {
-            $column = array_pop($chunks);
-
-            // todo: relation by ALIAS? (!)
-            $loader = $this->getLoader()->loadRelation(
-                join('.', $chunks),
-                [],
-                true
+            return sprintf(
+                '%s.%s',
+                $this->loader->getAlias(),
+                $this->loader->fieldAlias($identifier)
             );
-
-            return sprintf('%s.%s', $loader->getAlias(), $loader->columnName($column));
         }
 
-        // strict format (?)
-        return str_replace('@', $this->loader->getAlias(), $identifier);
+        $split = strrpos($identifier, '.');
+
+        $loader = $this->findLoader(substr($identifier, 0, $split));
+        if ($loader !== null) {
+            return sprintf(
+                "%s.%s.",
+                $loader->getAlias(),
+                $loader->fieldAlias(substr($identifier, $split + 1))
+            );
+        }
+
+        return $identifier;
     }
 
+    /**
+     * Find loader associated with given entity/relation alias.
+     *
+     * @param string $name
+     * @return AbstractLoader|null
+     */
+    protected function findLoader(string $name): ?LoaderInterface
+    {
+        if (strpos($name, '(')) {
+            // expressions are not allowed
+            return null;
+        }
+
+        if ($name == "" || $name == "@" || $name == $this->loader->getTarget() || $name == $this->loader->getAlias()) {
+            return $this->loader;
+        }
+
+        return $this->getLoader()->loadRelation($name, [], true);
+    }
 
     /**
      * Replace target where call with another compatible method (for example join or having).

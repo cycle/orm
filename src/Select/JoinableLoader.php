@@ -279,7 +279,7 @@ abstract class JoinableLoader extends AbstractLoader
             return null;
         }
 
-        return $this->getAlias() . '.' . $this->columnName($this->schema[$key]);
+        return $this->getAlias() . '.' . $this->fieldAlias($this->schema[$key]);
     }
 
     /**
@@ -290,7 +290,7 @@ abstract class JoinableLoader extends AbstractLoader
      */
     protected function parentKey($key): string
     {
-        return $this->parent->getAlias() . '.' . $this->parent->columnName($this->schema[$key]);
+        return $this->parent->getAlias() . '.' . $this->parent->fieldAlias($this->schema[$key]);
     }
 
     /**

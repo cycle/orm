@@ -542,7 +542,7 @@ abstract class BelongsToRelationTest extends BaseTest
     {
         $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s
-            ->with('profile.user', ['alias' => 'u'])
+            ->with('profile.user', ['as' => 'u'])
             ->where('u.id', 1)
             ->fetchOne();
 

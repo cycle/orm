@@ -248,7 +248,7 @@ class Select implements \IteratorAggregate, \Countable
      *
      * // Custom join alias for post comments relation
      * $user->with('posts.comments', [
-     *      'alias' => 'comments'
+     *      'as' => 'comments'
      * ])->where('comments.approved', true);
      *
      * // If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation
@@ -282,7 +282,7 @@ class Select implements \IteratorAggregate, \Countable
      *
      * // You will get only one query with INNER JOIN, to better understand this example let's use
      * // custom alias for comments in with() method.
-     * User::find()->with('comments', ['alias' => 'commentsR'])
+     * User::find()->with('comments', ['as' => 'commentsR'])
      *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *

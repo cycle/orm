@@ -34,7 +34,7 @@ class ManyToManyLoader extends JoinableLoader
         'constrain'  => SourceInterface::DEFAULT_CONSTRAIN,
         'method'     => self::POSTLOAD,
         'minify'     => true,
-        'alias'      => null,
+        'as'      => null,
         'pivotAlias' => null,
         'using'      => null,
         'where'      => null,

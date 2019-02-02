@@ -262,7 +262,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         list($a, $b) = $select
-            ->with('comments', ['alias' => 'c'])
+            ->with('comments', ['as' => 'c'])
             ->where([
                 'c.message' => new Parameter(['msg 3', 'msg 1'])
             ])
@@ -294,7 +294,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         list($a, $b) = $select
-            ->with('comments', ['alias' => 'cc'])
+            ->with('comments', ['as' => 'cc'])
             ->where([
                 'cc.id' => [
                     '>=' => 1,
@@ -371,7 +371,7 @@ abstract class QueryBuilderTest extends BaseTest
         $select = new Select($this->orm, User::class);
 
         list($a, $b) = $select
-            ->with('comments', ['alias' => 'comment_relation'])
+            ->with('comments', ['as' => 'comment_relation'])
             ->where([
                 '@or' => [
                     ['comments.message' => 'msg 1'],

@@ -56,7 +56,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var array */
     protected $options = [
-        //'alias'     => '',            @todo: make it seekable
+        //'as'     => '',
         'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
     ];
 
@@ -131,8 +131,8 @@ abstract class AbstractLoader implements LoaderInterface
     final public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
     {
         $relation = $this->resolvePath($relation);
-        if (!empty($options['alias'])) {
-            $this->registerPath($options['alias'], $relation);
+        if (!empty($options['as'])) {
+            $this->registerPath($options['as'], $relation);
         }
         
         //Check if relation contain dot, i.e. relation chain

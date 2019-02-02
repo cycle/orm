@@ -34,7 +34,7 @@ class HasManyLoader extends JoinableLoader
         'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
         'method'    => self::POSTLOAD,
         'minify'    => true,
-        'alias'     => null,
+        'as'     => null,
         'using'     => null,
         'where'     => null,
     ];

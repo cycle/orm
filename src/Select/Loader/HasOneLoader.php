@@ -37,7 +37,7 @@ class HasOneLoader extends JoinableLoader
     protected $options = [
         'method' => self::INLOAD,
         'minify' => true,
-        'alias'  => null,
+        'as'  => null,
         'using'  => null,
     ];
 

@@ -546,7 +546,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
          */
         list($a, $b) = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
-            'alias'  => 'comment'
+            'as'  => 'comment'
         ])->orderBy('user.id_int')->fetchAll();
 
         $this->assertCount(1, $a->comments);

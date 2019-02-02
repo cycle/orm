@@ -391,7 +391,7 @@ abstract class UUIDTest extends BaseTest
          */
         list($b, $a) = $selector->load('comments', [
             'method' => Select\JoinableLoader::INLOAD,
-            'alias'  => 'comment'
+            'as'  => 'comment'
         ])->orderBy('user.email')->fetchAll();
 
         $this->assertCount(1, $a->comments);

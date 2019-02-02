@@ -330,7 +330,7 @@ abstract class HasManyPromiseTest extends BaseTest
          */
         list($a, $b) = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
-            'alias'  => 'comment'
+            'as'  => 'comment'
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->comments);

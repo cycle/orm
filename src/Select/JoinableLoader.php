@@ -36,7 +36,7 @@ abstract class JoinableLoader extends AbstractLoader
         // load method, see AbstractLoader constants
         'minify'    => true,
         // when true all loader columns will be minified (only for loading)
-        'alias'     => null,
+        'as'     => null,
         // table alias
         'using'     => null,
         // alias used by another relation
@@ -76,8 +76,8 @@ abstract class JoinableLoader extends AbstractLoader
             return $this->options['using'];
         }
 
-        if (!empty($this->options['alias'])) {
-            return $this->options['alias'];
+        if (!empty($this->options['as'])) {
+            return $this->options['as'];
         }
 
         throw new LoaderException("Unable to resolve loader alias");
@@ -106,7 +106,7 @@ abstract class JoinableLoader extends AbstractLoader
         }
 
         //Calculate table alias
-        $loader->options['alias'] = $loader->calculateAlias($parent);
+        $loader->options['as'] = $loader->calculateAlias($parent);
 
         if (!empty($loader->options['constrain'])) {
             if ($loader->options['constrain'] instanceof ConstrainInterface) {
@@ -249,8 +249,8 @@ abstract class JoinableLoader extends AbstractLoader
      */
     protected function calculateAlias(AbstractLoader $parent): string
     {
-        if (!empty($this->options['alias'])) {
-            return $this->options['alias'];
+        if (!empty($this->options['as'])) {
+            return $this->options['as'];
         }
 
         $alias = $parent->getAlias() . '_' . $this->relation;

@@ -33,7 +33,7 @@ class BelongsToLoader extends JoinableLoader
     protected $options = [
         'method' => self::POSTLOAD,
         'minify' => true,
-        'alias'  => null,
+        'as'  => null,
         'using'  => null,
         'where'  => null,
     ];

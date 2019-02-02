@@ -14,7 +14,6 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 \Spiral\Cycle\Tests\BaseTest::$config = [
     'debug'     => false,
     'strict'    => true,
-    'validate'  => true,
     'benchmark' => false,
     'sqlite'    => [
         'driver' => \Spiral\Database\Driver\SQLite\SQLiteDriver::class,

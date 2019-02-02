@@ -98,9 +98,7 @@ abstract class BaseTest extends TestCase
      */
     public function tearDown()
     {
-        if (self::$config['validate']) {
-            $this->assertClearState($this->orm);
-        }
+        $this->assertClearState($this->orm);
 
         $this->disableProfiling();
         $this->dropDatabase($this->dbal->database('default'));

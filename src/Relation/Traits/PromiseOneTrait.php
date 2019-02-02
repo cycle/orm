@@ -28,12 +28,14 @@ trait PromiseOneTrait
             return [$e, $e];
         }
 
-        $p = new PromiseOne($this->orm, $this->target, [$this->outerKey => $innerKey]);
-        $p->setConstrain($this->getConstrain());
+        $scope = [$this->outerKey => $innerKey];
 
         $m = $this->getMapper();
         if ($m instanceof ProxyFactoryInterface) {
-            $p = $m->makeProxy($p);
+            $p = $m->makeProxy($scope);
+        } else {
+            $p = new PromiseOne($this->orm, $this->target, $scope);
+            $p->setConstrain($this->getConstrain());
         }
 
         return [$p, $p];

@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Tests\Fixtures;
 
-
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Promise\Traits\ProxyTrait;
 

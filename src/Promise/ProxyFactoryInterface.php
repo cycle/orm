@@ -19,10 +19,10 @@ interface ProxyFactoryInterface
     /**
      * Create entity proxy.
      *
-     * @param PromiseInterface $promise
+     * @param array $scope
      * @return PromiseInterface|null
      *
      * @throws MapperException
      */
-    public function makeProxy(PromiseInterface $promise): ?PromiseInterface;
+    public function makeProxy(array $scope): ?PromiseInterface;
 }

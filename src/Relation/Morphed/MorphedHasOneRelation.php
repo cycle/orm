@@ -48,15 +48,17 @@ class MorphedHasOneRelation extends HasOneRelation
             return [null, null];
         }
 
-        $p = new PromiseOne($this->orm, $this->target, [
+        $scope = [
             $this->outerKey => $innerKey,
             $this->morphKey => $parentNode->getRole()
-        ]);
-        $p->setConstrain($this->getConstrain());
+        ];
 
         $m = $this->getMapper();
         if ($m instanceof ProxyFactoryInterface) {
-            $p = $m->makeProxy($p);
+            $p = $m->makeProxy($scope);
+        } else {
+            $p = new PromiseOne($this->orm, $this->target, $scope);
+            $p->setConstrain($this->getConstrain());
         }
 
         return [$p, $p];

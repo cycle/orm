@@ -57,12 +57,14 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [$e, $e];
         }
 
-        $p = new PromiseOne($this->orm, $target, [$this->outerKey => $innerKey]);
-        $p->setConstrain($this->getTargetConstrain($target));
+        $scope = [$this->outerKey => $innerKey];
 
         $m = $this->getMapper($target);
         if ($m instanceof ProxyFactoryInterface) {
-            $p = $m->makeProxy($p);
+            $p = $m->makeProxy($scope);
+        } else {
+            $p = new PromiseOne($this->orm, $target, $scope);
+            $p->setConstrain($this->getTargetConstrain($target));
         }
 
         return [$p, $p];

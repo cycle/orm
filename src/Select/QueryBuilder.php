@@ -129,11 +129,12 @@ final class QueryBuilder
      * Use this method for complex relation queries in combination with Expression()
      *
      * @param string $identifier
+     * @param bool   $autoload If set to true (default) target relation will be automatically loaded.
      * @return string
      *
      * @throws BuilderException
      */
-    public function resolve(string $identifier): string
+    public function resolve(string $identifier, bool $autoload = true): string
     {
         if (strpos($identifier, '.') === false) {
             // parent element
@@ -146,7 +147,7 @@ final class QueryBuilder
 
         $split = strrpos($identifier, '.');
 
-        $loader = $this->findLoader(substr($identifier, 0, $split));
+        $loader = $this->findLoader(substr($identifier, 0, $split), $autoload);
         if ($loader !== null) {
             return sprintf(
                 "%s.%s.",
@@ -162,9 +163,10 @@ final class QueryBuilder
      * Find loader associated with given entity/relation alias.
      *
      * @param string $name
+     * @param bool   $autoload When set to true relation will be automatically loaded.
      * @return AbstractLoader|null
      */
-    protected function findLoader(string $name): ?LoaderInterface
+    protected function findLoader(string $name, bool $autoload = true): ?LoaderInterface
     {
         if (strpos($name, '(')) {
             // expressions are not allowed
@@ -175,8 +177,9 @@ final class QueryBuilder
             return $this->loader;
         }
 
-        // todo: do i like it?
-        return $this->getLoader()->loadRelation($name, [], true);
+        $loader = $autoload ? $this->loader : clone $this->loader;
+
+        return $loader->loadRelation($name, [], true);
     }
 
     /**

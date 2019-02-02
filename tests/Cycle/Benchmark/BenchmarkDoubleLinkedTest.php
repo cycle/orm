@@ -76,6 +76,22 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         ]));
     }
 
+    public function testClean()
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+        $tr = new Transaction($this->orm);
+
+        for ($i = 0; $i < 10000; $i++) {
+            // inverted
+            $c1 = new Cyclic();
+            $c1->name = "clean";
+
+            $tr->persist($c1, 1);
+        }
+
+        $tr->run();
+    }
+
     public function testMemoryUsage()
     {
         $this->orm = $this->orm->withHeap(new Heap());

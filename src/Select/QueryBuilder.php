@@ -175,6 +175,7 @@ final class QueryBuilder
             return $this->loader;
         }
 
+        // todo: do i like it?
         return $this->getLoader()->loadRelation($name, [], true);
     }
 

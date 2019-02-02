@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Mapper;
 
-use GeneratedHydrator\Configuration;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Schema;
 use Zend\Hydrator;
@@ -31,8 +30,6 @@ class Mapper extends DatabaseMapper
 
     /** @var Hydrator\HydratorInterface */
     protected $hydrator;
-
-    private static $hydrators = [];
 
     /**
      * @param ORMInterface $orm

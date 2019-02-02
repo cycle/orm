@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Loader;
 
-use Spiral\Cycle\Parser\Typecaster;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\PivotedNode;
+use Spiral\Cycle\Parser\Typecaster;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
@@ -34,7 +34,7 @@ class ManyToManyLoader extends JoinableLoader
         'constrain'  => SourceInterface::DEFAULT_CONSTRAIN,
         'method'     => self::POSTLOAD,
         'minify'     => true,
-        'as'      => null,
+        'as'         => null,
         'pivotAlias' => null,
         'using'      => null,
         'where'      => null,

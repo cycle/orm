@@ -134,7 +134,7 @@ abstract class AbstractLoader implements LoaderInterface
         if (!empty($options['as'])) {
             $this->registerPath($options['as'], $relation);
         }
-        
+
         //Check if relation contain dot, i.e. relation chain
         if ($this->isChain($relation)) {
             return $this->loadChain($relation, $options, $join);

@@ -36,7 +36,7 @@ abstract class JoinableLoader extends AbstractLoader
         // load method, see AbstractLoader constants
         'minify'    => true,
         // when true all loader columns will be minified (only for loading)
-        'as'     => null,
+        'as'        => null,
         // table alias
         'using'     => null,
         // alias used by another relation

@@ -28,7 +28,7 @@ trait VisitorTrait
      */
     public function visited(string $branch): bool
     {
-        return isset($this->visited[$branch]);
+        return array_key_exists($branch, $this->visited);
     }
 
     /**
@@ -38,6 +38,6 @@ trait VisitorTrait
      */
     public function markVisited(string $branch)
     {
-        $this->visited[$branch] = true;
+        $this->visited[$branch] = null;
     }
 }

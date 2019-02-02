@@ -53,12 +53,11 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [null, null];
         }
 
-        $scope = [$this->outerKey => $innerKey];
-        if (!is_null($e = $this->orm->getHeap()->find($target, $scope))) {
+        if (!is_null($e = $this->orm->getHeap()->find($target, $this->outerKey, $innerKey))) {
             return [$e, $e];
         }
 
-        $p = new PromiseOne($this->orm, $target, $scope);
+        $p = new PromiseOne($this->orm, $target, [$this->outerKey => $innerKey]);
         $p->setConstrain($this->getTargetConstrain($target));
 
         $m = $this->getMapper($target);

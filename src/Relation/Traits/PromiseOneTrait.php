@@ -24,12 +24,11 @@ trait PromiseOneTrait
             return [null, null];
         }
 
-        $scope = [$this->outerKey => $innerKey];
-        if (!empty($e = $this->orm->getHeap()->find($this->target, $scope))) {
+        if (!empty($e = $this->orm->getHeap()->find($this->target, $this->outerKey, $innerKey))) {
             return [$e, $e];
         }
 
-        $p = new PromiseOne($this->orm, $this->target, $scope);
+        $p = new PromiseOne($this->orm, $this->target, [$this->outerKey => $innerKey]);
         $p->setConstrain($this->getConstrain());
 
         $m = $this->getMapper();

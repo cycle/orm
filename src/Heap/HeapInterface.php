@@ -37,12 +37,13 @@ interface HeapInterface
      * the search will be completed on first value match.
      *
      * @param string $role
-     * @param array  $scope
+     * @param string $key
+     * @param mixed  $value
      * @return null|object
      *
      * @throws HeapException
      */
-    public function find(string $role, array $scope);
+    public function find(string $role, string $key, $value);
 
     /**
      * Attach entity to the heap and create index path.

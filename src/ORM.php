@@ -100,7 +100,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
         $role = $this->resolveRole($role);
         $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
 
-        if (!is_null($e = $this->heap->find($role, [$pk => $id]))) {
+        if (!is_null($e = $this->heap->find($role, $pk, $id))) {
             return $e;
         }
 
@@ -123,7 +123,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
         $id = $data[$pk] ?? null;
 
         if ($node !== Node::NEW && !empty($id)) {
-            if (!empty($e = $this->heap->find($role, [$pk => $id]))) {
+            if (!empty($e = $this->heap->find($role, $pk, $id))) {
                 $node = $this->getHeap()->get($e);
 
                 // entity already been loaded, let's update it's relations with new context

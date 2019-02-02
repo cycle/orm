@@ -56,16 +56,9 @@ class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function find(string $role, array $scope)
+    public function find(string $role, string $key, $value)
     {
-        foreach ($scope as $k => $v) {
-            $e = $this->paths[$role][$k][$v] ?? null;
-            if (!is_null($e)) {
-                return $e;
-            }
-        }
-
-        return null;
+        return $this->paths[$role][$key][$value] ?? null;
     }
 
     /**

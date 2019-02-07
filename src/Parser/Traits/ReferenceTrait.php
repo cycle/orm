@@ -100,7 +100,7 @@ trait ReferenceTrait
     final protected function mountArray(string $container, string $key, $criteria, array &$data)
     {
         if (!array_key_exists($criteria, $this->references[$key])) {
-            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`.");
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }
 
         foreach ($this->references[$key][$criteria] as &$subset) {
@@ -124,7 +124,7 @@ trait ReferenceTrait
     {
         if (!in_array($key, $this->columns)) {
             throw new ParserException(
-                "Unable to create reference, key `{$key}` does not exist."
+                "Unable to create reference, key `{$key}` does not exist"
             );
         }
 

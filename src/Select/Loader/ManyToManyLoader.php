@@ -36,7 +36,6 @@ class ManyToManyLoader extends JoinableLoader
         'method'    => self::POSTLOAD,
         'minify'    => true,
         'as'        => null,
-        'using'     => null,
         'where'     => null,
     ];
 
@@ -50,11 +49,10 @@ class ManyToManyLoader extends JoinableLoader
     {
         parent::__construct($orm, $name, $target, $schema);
 
+        // todo: extract pivot options
         unset($schema[Relation::CONSTRAIN]);
 
-        //todo: make this relation to be real?
 
-        // todo: extract pivot options
         $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THOUGHT_ENTITY], $schema);
     }
 
@@ -75,10 +73,17 @@ class ManyToManyLoader extends JoinableLoader
         return $loader;
     }
 
+    /**
+     * @param string $relation
+     * @param array  $options
+     * @param bool   $join
+     * @return LoaderInterface
+     */
     public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
     {
-        // todo crazy stuff is possible now (!)
-        if ($relation == 'pivot') {
+        if ($relation == '@') {
+            unset($options['method']);
+
             if (!empty($options)) {
                 $this->pivot = $this->pivot->withContext($this, $options);
             }
@@ -94,13 +99,6 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        // use pre-defined query
-        if (!empty($this->options['using'])) {
-            return parent::configureQuery($query, $outerKeys);
-        }
-
-        $query = $this->pivot->applyConstrain($query);
-
         // Manually join pivoted table
         if ($this->isJoined()) {
             $query->join(
@@ -118,6 +116,10 @@ class ManyToManyLoader extends JoinableLoader
                 $this->pivot->localKey(Relation::THOUGHT_OUTER_KEY)
             );
         } else {
+            // reset all the columns when query is isolated (we have to do it manually
+            // since underlying loader believes it's loaded)
+            $query->columns([]);
+
             $query->innerJoin(
                 $this->pivot->getJoinTable()
             )->on(
@@ -137,7 +139,7 @@ class ManyToManyLoader extends JoinableLoader
             $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
         );
 
-        return parent::configureQuery($query);
+        return parent::configureQuery($this->pivot->configureQuery($query));
     }
 
     /**
@@ -152,13 +154,7 @@ class ManyToManyLoader extends JoinableLoader
     }
 
     /**
-     * Load columns from both pivot and target entities.
-     *
-     * @param SelectQuery $query
-     * @param bool        $minify
-     * @param string      $prefix
-     * @param bool        $overwrite
-     * @return SelectQuery
+     * {@inheritdoc}
      */
     protected function mountColumns(
         SelectQuery $query,
@@ -166,8 +162,7 @@ class ManyToManyLoader extends JoinableLoader
         string $prefix = '',
         bool $overwrite = false
     ): SelectQuery {
-        $this->pivot->mountColumns($query, $minify, $prefix, $overwrite);
-
+        // columns are reset on earlier stage to allow pivot loader mount it's own aliases
         return parent::mountColumns($query, $minify, $prefix, false);
     }
 

@@ -41,14 +41,15 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
             'user_id' => ['table' => 'user', 'column' => 'id']
         ]);
 
-        $this->makeTable('favorites_map', [
+        $this->makeTable('favorites', [
+            'id'         => 'primary',
             'user_id'    => 'integer',
             'comment_id' => 'integer'
         ]);
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
         $this->makeFK(
-            'favorites_map',
+            'favorites',
             'user_id',
             'user',
             'id',
@@ -56,7 +57,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
             ForeignKeyInterface::NO_ACTION
         );
         $this->makeFK(
-            'favorites_map',
+            'favorites',
             'comment_id',
             'comment',
             'id',
@@ -64,7 +65,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
             ForeignKeyInterface::NO_ACTION
         );
         $this->orm = $this->withSchema(new Schema([
-            'user'    => [
+            'user'     => [
                 Schema::MAPPER      => StdMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
@@ -96,9 +97,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
                         Relation::TARGET => 'comment',
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
-                            Relation::PIVOT_TABLE       => 'favorites_map',
-                            Relation::PIVOT_DATABASE    => 'default',
-                            Relation::PIVOT_COLUMNS     => ['user_id', 'comment_id'],
+                            Relation::THOUGHT_ENTITY    => 'favorite',
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -107,7 +106,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
                     ],
                 ]
             ],
-            'comment' => [
+            'comment'  => [
                 Schema::MAPPER      => StdMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'comment',
@@ -129,9 +128,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
                         Relation::TARGET => 'user',
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
-                            Relation::PIVOT_TABLE       => 'favorites_map',
-                            Relation::PIVOT_DATABASE    => 'default',
-                            Relation::PIVOT_COLUMNS     => ['user_id', 'comment_id'],
+                            Relation::THOUGHT_ENTITY    => 'favorite',
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'comment_id',
@@ -139,6 +136,15 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
                         ],
                     ],
                 ]
+            ],
+            'favorite' => [
+                Schema::MAPPER      => StdMapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'favorites',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'comment_id'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
     }

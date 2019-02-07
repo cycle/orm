@@ -14,6 +14,7 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Comment;
+use Spiral\Cycle\Tests\Fixtures\Favorite;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -42,14 +43,15 @@ abstract class CyclicReferencesTest extends BaseTest
             'user_id' => ['table' => 'user', 'column' => 'id']
         ]);
 
-        $this->makeTable('favorites_map', [
+        $this->makeTable('favorites', [
+            'id'         => 'primary',
             'user_id'    => 'integer',
             'comment_id' => 'integer'
         ]);
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
         $this->makeFK(
-            'favorites_map',
+            'favorites',
             'user_id',
             'user',
             'id',
@@ -57,7 +59,7 @@ abstract class CyclicReferencesTest extends BaseTest
             ForeignKeyInterface::NO_ACTION
         );
         $this->makeFK(
-            'favorites_map',
+            'favorites',
             'comment_id',
             'comment',
             'id',
@@ -65,7 +67,7 @@ abstract class CyclicReferencesTest extends BaseTest
             ForeignKeyInterface::NO_ACTION
         );
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
+            User::class     => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -98,9 +100,7 @@ abstract class CyclicReferencesTest extends BaseTest
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
-                            Relation::PIVOT_TABLE       => 'favorites_map',
-                            Relation::PIVOT_DATABASE    => 'default',
-                            Relation::PIVOT_COLUMNS     => ['user_id', 'comment_id'],
+                            Relation::THOUGHT_ENTITY    => Favorite::class,
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -109,7 +109,7 @@ abstract class CyclicReferencesTest extends BaseTest
                     ],
                 ]
             ],
-            Comment::class => [
+            Comment::class  => [
                 Schema::ROLE        => 'comment',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -132,9 +132,7 @@ abstract class CyclicReferencesTest extends BaseTest
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
-                            Relation::PIVOT_TABLE       => 'favorites_map',
-                            Relation::PIVOT_DATABASE    => 'default',
-                            Relation::PIVOT_COLUMNS     => ['user_id', 'comment_id'],
+                            Relation::THOUGHT_ENTITY    => Favorite::class,
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'comment_id',
@@ -142,6 +140,16 @@ abstract class CyclicReferencesTest extends BaseTest
                         ],
                     ],
                 ]
+            ],
+            Favorite::class => [
+                Schema::ROLE        => 'favorite',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'favorites',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'comment_id'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
     }

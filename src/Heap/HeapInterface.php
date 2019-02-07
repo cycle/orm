@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Heap;
 
-use Spiral\Cycle\Exception\HeapException;
-
 /**
  * Manages set of entities, their states and quick access though indexes.
  */
@@ -40,8 +38,6 @@ interface HeapInterface
      * @param string $key
      * @param mixed  $value
      * @return null|object
-     *
-     * @throws HeapException
      */
     public function find(string $role, string $key, $value);
 

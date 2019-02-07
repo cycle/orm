@@ -59,7 +59,6 @@ class PivotedRootNode extends OutputNode
             ] + parent::fetchData($dataOffset + count($this->pivotColumns), $line);
     }
 
-
     /**
      * Fetch record columns from query row, must use data offset to slice required part of query.
      *

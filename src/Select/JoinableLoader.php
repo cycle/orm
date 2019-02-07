@@ -45,7 +45,7 @@ abstract class JoinableLoader extends AbstractLoader
     ];
 
     /** @var string */
-    protected $relation;
+    protected $name;
 
     /** @var array */
     protected $schema;
@@ -60,7 +60,7 @@ abstract class JoinableLoader extends AbstractLoader
     {
         parent::__construct($orm, $target);
         $this->options['constrain'] = $schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
-        $this->relation = $name;
+        $this->name = $name;
         $this->schema = $schema;
     }
 
@@ -253,7 +253,7 @@ abstract class JoinableLoader extends AbstractLoader
             return $this->options['as'];
         }
 
-        $alias = $parent->getAlias() . '_' . $this->relation;
+        $alias = $parent->getAlias() . '_' . $this->name;
 
         if ($this->isLoaded() && $this->isJoined()) {
             // to avoid collisions

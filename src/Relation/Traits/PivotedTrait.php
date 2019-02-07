@@ -49,6 +49,6 @@ trait PivotedTrait
         $p = new Pivoted\PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
         $p->setScope($this->getConstrain());
 
-        return [new Pivoted\PivotedCollectionPromisePromise($p), $p];
+        return [new Pivoted\PivotedCollectionPromise($p), $p];
     }
 }

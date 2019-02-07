@@ -94,8 +94,9 @@ abstract class AbstractNode
 
     /**
      * @param TypecasterInterface $typecaster
+     * @todo: immutable?
      */
-    final public function setTypecaster(TypecasterInterface $typecaster)
+    final public function setTypecast(TypecasterInterface $typecaster)
     {
         $this->typecaster = $typecaster;
     }

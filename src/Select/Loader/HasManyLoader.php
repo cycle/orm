@@ -12,7 +12,7 @@ namespace Spiral\Cycle\Select\Loader;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\ArrayNode;
-use Spiral\Cycle\Parser\Typecaster;
+use Spiral\Cycle\Parser\Typecast;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
@@ -73,14 +73,13 @@ class HasManyLoader extends JoinableLoader
             $query->where($localKey, 'IN', new Parameter($outerKeys));
         }
 
-        //When relation is joined we will use ON statements, when not - normal WHERE
-        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
-
-        //Where conditions specified in relation definition
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE));
-
         //User specified WHERE conditions
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+        $this->setWhere(
+            $query,
+            $this->getAlias(),
+            $this->isJoined() ? 'onWhere' : 'where',
+            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+        );
 
         return parent::configureQuery($query);
     }
@@ -99,7 +98,7 @@ class HasManyLoader extends JoinableLoader
 
         $typecast = $this->define(Schema::TYPECAST);
         if ($typecast !== null) {
-            $node->setTypecaster(new Typecaster($typecast, $this->getSource()->getDatabase()));
+            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
         }
 
         return $node;

@@ -9,23 +9,22 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Relation;
 
+use Doctrine\Common\Collections\Collection;
 use Spiral\Cycle\Command\Branch\Sequence;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Command\Database\Delete;
-use Spiral\Cycle\Command\Database\Insert;
-use Spiral\Cycle\Context\ConsumerInterface;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Iterator;
 use Spiral\Cycle\ORMInterface;
+use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Relation\Pivoted;
-use Spiral\Database\DatabaseInterface;
 
-class ManyToManyRelation extends AbstractRelation
+class ManyToManyRelation extends Relation\AbstractRelation
 {
-    use Relation\Traits\PivotedTrait;
+    /** @var string|null */
+    private $pivotEntity;
 
     /** @var string */
     protected $thoughtInnerKey;
@@ -35,15 +34,16 @@ class ManyToManyRelation extends AbstractRelation
 
     /**
      * @param ORMInterface $orm
-     * @param string       $target
      * @param string       $name
+     * @param string       $target
      * @param array        $schema
      */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->thoughtInnerKey = $this->schema[Relation::THOUGHT_INNER_KEY];
-        $this->thoughtOuterKey = $this->schema[Relation::THOUGHT_OUTER_KEY];
+        $this->pivotEntity = $this->schema[Relation::THOUGHT_ENTITY] ?? null;
+        $this->thoughtInnerKey = $this->schema[Relation::THOUGHT_INNER_KEY] ?? null;
+        $this->thoughtOuterKey = $this->schema[Relation::THOUGHT_OUTER_KEY] ?? null;
     }
 
     /**
@@ -54,8 +54,9 @@ class ManyToManyRelation extends AbstractRelation
         $elements = [];
         $pivotData = new \SplObjectStorage();
 
-        foreach (new Iterator($this->orm, $this->target, $data) as $pivot => $entity) {
-            $pivotData[$entity] = $pivot;
+        $iterator = new Iterator($this->orm, $this->target, $data);
+        foreach ($iterator as $pivot => $entity) {
+            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
             $elements[] = $entity;
         }
 
@@ -63,6 +64,42 @@ class ManyToManyRelation extends AbstractRelation
             new Pivoted\PivotedCollection($elements, $pivotData),
             new Pivoted\PivotedStorage($elements, $pivotData)
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function extract($data)
+    {
+        if ($data instanceof CollectionPromiseInterface && !$data->isInitialized()) {
+            return $data->getPromise();
+        }
+
+        if ($data instanceof Pivoted\PivotedCollectionInterface) {
+            return new Pivoted\PivotedStorage($data->toArray(), $data->getPivotContext());
+        }
+
+        if ($data instanceof Collection) {
+            return new Pivoted\PivotedStorage($data->toArray());
+        }
+
+        return new Pivoted\PivotedStorage();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function initPromise(Node $parentNode): array
+    {
+        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+            return [new Pivoted\PivotedCollection(), null];
+        }
+
+        // will take care of all the loading and scoping
+        $p = new Pivoted\PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
+        $p->setConstrain($this->getConstrain());
+
+        return [new Pivoted\PivotedCollectionPromise($p), $p];
     }
 
     /**
@@ -87,13 +124,13 @@ class ManyToManyRelation extends AbstractRelation
 
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
-            $sequence->addCommand($this->link($parentNode, $item, $original->has($item)));
+            $sequence->addCommand($this->link($parentNode, $item, $related->get($item), $related));
         }
 
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
-                $sequence->addCommand($this->unlink($parentNode, $item));
+                $sequence->addCommand($this->orm->queueDelete($original->get($item)));
             }
         }
 
@@ -103,85 +140,50 @@ class ManyToManyRelation extends AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node   $parentNode
-     * @param object $related
-     * @param bool   $exists
+     * @param Node                   $parentNode
+     * @param object                 $related
+     * @param object                 $pivot
+     * @param Pivoted\PivotedStorage $storage
      * @return CommandInterface
      */
-    protected function link(Node $parentNode, $related, $exists): CommandInterface
+    protected function link(Node $parentNode, $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);
         $this->assertValid($relNode);
 
-        if ($exists) {
-            // no changes in relation between the objects
-            return $relStore;
+        if (!is_object($pivot)) {
+            // first time initialization
+            $pivot = $this->orm->make($this->pivotEntity, $pivot ?? []);
         }
 
-        $sync = new Insert($this->pivotDatabase(), $this->pivotTable());
+        // defer the insert until pivot keys are resolved
+        $pivotStore = $this->orm->queueStore($pivot);
+        $pivotNode = $this->getNode($pivot);
 
-        $sync->waitContext($this->thoughtInnerKey, true);
-        $sync->waitContext($this->thoughtOuterKey, true);
+        $this->forwardContext(
+            $parentNode,
+            $this->innerKey,
+            $pivotStore,
+            $pivotNode,
+            $this->thoughtInnerKey
+        );
 
-        $parentNode->forward($this->innerKey, $sync, $this->thoughtInnerKey, true);
-        $this->getNode($related)->forward($this->outerKey, $sync, $this->thoughtOuterKey, true);
+        $this->forwardContext(
+            $relNode,
+            $this->outerKey,
+            $pivotStore,
+            $pivotNode,
+            $this->thoughtOuterKey
+        );
 
         $sequence = new Sequence();
         $sequence->addCommand($relStore);
-        $sequence->addCommand($sync);
+        $sequence->addCommand($pivotStore);
+
+        // update the link
+        $storage->set($related, $pivot);
 
         return $sequence;
-    }
-
-    /**
-     * Remove the connection between two objects.
-     *
-     * @param Node   $parentNode
-     * @param object $related
-     * @return CommandInterface
-     */
-    protected function unlink(Node $parentNode, $related): CommandInterface
-    {
-        $relNode = $this->getNode($related);
-
-        $delete = new Delete($this->pivotDatabase(), $this->pivotTable());
-        $delete->waitScope($this->thoughtOuterKey);
-        $delete->waitScope($this->thoughtInnerKey);
-
-        $parentNode->forward(
-            $this->innerKey
-            , $delete,
-            $this->thoughtInnerKey,
-            true,
-            ConsumerInterface::SCOPE
-        );
-
-        $relNode->forward(
-            $this->outerKey,
-            $delete,
-            $this->thoughtOuterKey,
-            true,
-            ConsumerInterface::SCOPE
-        );
-
-        return $delete;
-    }
-
-    /**
-     * @return DatabaseInterface
-     */
-    protected function pivotDatabase(): DatabaseInterface
-    {
-        // always expect entities to be located in a same database
-        return $this->getSource()->getDatabase();
-    }
-
-    /**
-     * @return string
-     */
-    protected function pivotTable(): string
-    {
-        return $this->schema[Relation::PIVOT_TABLE];
     }
 }

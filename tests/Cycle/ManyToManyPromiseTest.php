@@ -10,12 +10,12 @@ namespace Spiral\Cycle\Tests;
 
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
-use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\Tag;
+use Spiral\Cycle\Tests\Fixtures\TagContext;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 use Spiral\Cycle\Transaction;
@@ -67,22 +67,23 @@ abstract class ManyToManyPromiseTest extends BaseTest
         );
 
         $this->getDatabase()->table('tag_user_map')->insertMultiple(
-            ['user_id', 'tag_id'],
+            ['user_id', 'tag_id', 'as'],
             [
-                [1, 1],
-                [1, 2],
-                [2, 3],
+                [1, 1, 'primary'],
+                [1, 2, 'secondary'],
+                [2, 3, 'primary'],
             ]
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
+            User::class       => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'tags' => [
@@ -90,9 +91,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
-                            Relation::PIVOT_TABLE       => 'tag_user_map',
-                            Relation::PIVOT_DATABASE    => 'default',
-                            Relation::PIVOT_COLUMNS     => ['user_id', 'tag_id'],
+                            Relation::THOUGHT_ENTITY    => TagContext::class,
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -101,16 +100,28 @@ abstract class ManyToManyPromiseTest extends BaseTest
                     ]
                 ]
             ],
-            Tag::class  => [
+            Tag::class        => [
                 Schema::ROLE        => 'tag',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name'],
+                Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
                 Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
     }
@@ -120,27 +131,31 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('tags');
 
-        $this->assertEquals([
+        $this->assertSame([
             [
                 'id'      => 1,
                 'email'   => 'hello@world.com',
                 'balance' => 100.0,
                 'tags'    => [
                     [
-                        '@pivot' => [
-                            'user_id' => 1,
-                            'tag_id'  => 1,
-                        ],
-                        'id'     => 1,
-                        'name'   => 'tag a',
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'tag_id'  => 1,
+                        'as'      => 'primary',
+                        '@'       => [
+                            'id'   => 1,
+                            'name' => 'tag a',
+                        ]
                     ],
                     [
-                        '@pivot' => [
-                            'user_id' => 1,
-                            'tag_id'  => 2,
-                        ],
-                        'id'     => 2,
-                        'name'   => 'tag b',
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'tag_id'  => 2,
+                        'as'      => 'secondary',
+                        '@'       => [
+                            'id'   => 2,
+                            'name' => 'tag b',
+                        ]
                     ],
                 ],
             ],
@@ -151,53 +166,67 @@ abstract class ManyToManyPromiseTest extends BaseTest
                 'balance' => 200.0,
                 'tags'    => [
                     [
-                        '@pivot' => [
-                            'user_id' => 2,
-                            'tag_id'  => 3,
-                        ],
-                        'id'     => 3,
-                        'name'   => 'tag c',
+                        'id'      => 3,
+                        'user_id' => 2,
+                        'tag_id'  => 3,
+                        'as'      => 'primary',
+                        '@'       => [
+                            'id'   => 3,
+                            'name' => 'tag c',
+                        ]
                     ],
                 ],
             ],
         ], $selector->fetchData());
     }
 
-    public function testLoadPromise()
+    public function testRelationContextAccess()
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
-
-        $this->assertInstanceOf(CollectionPromiseInterface::class, $a->tags);
-        $this->assertInstanceOf(CollectionPromiseInterface::class, $b->tags);
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
         $this->assertNumReads(2);
-    }
-
-    public function testConsistent()
-    {
-        $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
 
-        $this->assertEquals('tag a', $a->tags[0]->name);
-        $this->assertEquals('tag b', $a->tags[1]->name);
-        $this->assertEquals('tag c', $b->tags[0]->name);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
 
-        $this->assertNumReads(2);
+        $this->assertTrue($a->tags->hasPivot($a->tags[0]));
+        $this->assertTrue($a->tags->hasPivot($a->tags[1]));
+        $this->assertTrue($b->tags->hasPivot($b->tags[0]));
+
+        $this->assertFalse($b->tags->hasPivot($a->tags[0]));
+        $this->assertFalse($b->tags->hasPivot($a->tags[1]));
+        $this->assertFalse($a->tags->hasPivot($b->tags[0]));
+
+        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[0]));
+        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[1]));
+        $this->assertInstanceOf(TagContext::class, $b->tags->getPivot($b->tags[0]));
+
+        $this->assertEquals('primary', $a->tags->getPivot($a->tags[0])->as);
+        $this->assertEquals('secondary', $a->tags->getPivot($a->tags[1])->as);
+        $this->assertEquals('primary', $b->tags->getPivot($b->tags[0])->as);
+        $this->assertNumReads(0);
     }
 
-    public function testNoWrites()
+    public function testNoQueries()
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->fetchAll();
 
         $this->captureReadQueries();
-        $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
         $tr->persist($a);
@@ -205,7 +234,6 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $tr->run();
 
         $this->assertNumReads(0);
-        $this->assertNumWrites(0);
     }
 
     public function testUnlinkManyToManyAndReplaceSome()
@@ -217,22 +245,42 @@ abstract class ManyToManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('id')->fetchAll();
+        list($a, $b) = $selector->fetchAll();
 
         $a->tags->remove(0);
+
         $a->tags->add($tagSelector->wherePK(3)->fetchOne());
+        $a->tags->getPivot($a->tags[1])->as = "new";
 
         // remove all
         $b->tags->clear();
+
         $t = new Tag();
         $t->name = "new tag";
 
+        $pc = new TagContext();
+        $pc->as = 'super';
+
         $b->tags->add($t);
+        $b->tags->setPivot($t, $pc);
+
+        $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
         $tr->persist($a);
         $tr->persist($b);
         $tr->run();
+
+        $this->assertNumWrites(6);
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         /**
@@ -242,7 +290,9 @@ abstract class ManyToManyPromiseTest extends BaseTest
         list($a, $b) = $selector->load('tags')->fetchAll();
 
         $this->assertSame("tag b", $a->tags[0]->name);
-        $this->assertSame("tag c", $a->tags[1]->name);
+        $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);
+
         $this->assertSame("new tag", $b->tags[0]->name);
+        $this->assertSame('super', $b->tags->getPivot($b->tags[0])->as);
     }
 }

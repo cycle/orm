@@ -12,11 +12,14 @@ use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
+use Spiral\Cycle\Tests\Fixtures\SortByLevelConstrain;
+use Spiral\Cycle\Tests\Fixtures\SortByLevelDESCConstrain;
 use Spiral\Cycle\Tests\Fixtures\Tag;
+use Spiral\Cycle\Tests\Fixtures\TagContext;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
-abstract class ManyToManyScopeTest extends BaseTest
+abstract class ManyToManyConstrainedTest extends BaseTest
 {
     use TableTrait;
 
@@ -147,8 +150,8 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         list($a, $b) = $selector->load('tags', [
-            'method' => Select\JoinableLoader::INLOAD,
-            'constrain'  => new Select\QueryConstrain([], ['@.level' => 'ASC'])
+            'method'    => Select\JoinableLoader::INLOAD,
+            'constrain' => new Select\QueryConstrain([], ['@.level' => 'ASC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -175,8 +178,8 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         list($a, $b) = $selector->load('tags', [
-            'method' => Select\JoinableLoader::INLOAD,
-            'constrain'  => new Select\QueryConstrain([], ['@.level' => 'DESC'])
+            'method'    => Select\JoinableLoader::INLOAD,
+            'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -192,10 +195,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame("tag f", $b->tags[0]->name);
     }
 
-    public function testScopeViaMapper()
+    public function testGlobalConstrain()
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
+            User::class       => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -209,9 +212,7 @@ abstract class ManyToManyScopeTest extends BaseTest
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
-                            Relation::PIVOT_TABLE       => 'tag_user_map',
-                            Relation::PIVOT_DATABASE    => 'default',
-                            Relation::PIVOT_COLUMNS     => ['user_id', 'tag_id'],
+                            Relation::THOUGHT_ENTITY    => TagContext::class,
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -220,15 +221,29 @@ abstract class ManyToManyScopeTest extends BaseTest
                     ]
                 ]
             ],
-            Tag::class  => [
+            Tag::class        => [
                 Schema::ROLE        => 'tag',
-                Schema::MAPPER      => ManyToManyConstrainedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelConstrain::class
+                ]
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
 
@@ -241,22 +256,24 @@ abstract class ManyToManyScopeTest extends BaseTest
         list($a, $b) = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(2, $a->tags);
+        $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(0);
 
-        $this->assertSame("tag e", $a->tags[0]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
+        $this->assertSame("tag a", $a->tags[0]->name);
+        $this->assertSame("tag b", $a->tags[1]->name);
+        $this->assertSame("tag d", $a->tags[2]->name);
+        $this->assertSame("tag e", $a->tags[3]->name);
 
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame("tag c", $b->tags[0]->name);
         $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag c", $b->tags[2]->name);
+        $this->assertSame("tag f", $b->tags[2]->name);
     }
 
-    public function testScopeViaMapperPromised()
+    public function testGlobalConstrainDESC()
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
+            User::class       => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -270,9 +287,7 @@ abstract class ManyToManyScopeTest extends BaseTest
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
-                            Relation::PIVOT_TABLE       => 'tag_user_map',
-                            Relation::PIVOT_DATABASE    => 'default',
-                            Relation::PIVOT_COLUMNS     => ['user_id', 'tag_id'],
+                            Relation::THOUGHT_ENTITY    => TagContext::class,
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -281,15 +296,181 @@ abstract class ManyToManyScopeTest extends BaseTest
                     ]
                 ]
             ],
-            Tag::class  => [
+            Tag::class        => [
                 Schema::ROLE        => 'tag',
-                Schema::MAPPER      => ManyToManyConstrainedMapper::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelDESCConstrain::class
+                ]
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ]));
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags')->orderBy('user.id')->fetchAll();
+
+        $this->captureReadQueries();
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+        $this->assertNumReads(0);
+
+        $this->assertSame("tag a", $a->tags[3]->name);
+        $this->assertSame("tag b", $a->tags[2]->name);
+        $this->assertSame("tag d", $a->tags[1]->name);
+        $this->assertSame("tag e", $a->tags[0]->name);
+
+        $this->assertSame("tag c", $b->tags[2]->name);
+        $this->assertSame("tag d", $b->tags[1]->name);
+        $this->assertSame("tag f", $b->tags[0]->name);
+    }
+
+    public function testGlobalConstrainDESCButASC()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class       => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'tags' => [
+                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TARGET => Tag::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE           => true,
+                            Relation::THOUGHT_ENTITY    => TagContext::class,
+                            Relation::INNER_KEY         => 'id',
+                            Relation::OUTER_KEY         => 'id',
+                            Relation::THOUGHT_INNER_KEY => 'user_id',
+                            Relation::THOUGHT_OUTER_KEY => 'tag_id',
+                        ],
+                    ]
+                ]
+            ],
+            Tag::class        => [
+                Schema::ROLE        => 'tag',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'name', 'level'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelDESCConstrain::class
+                ]
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ]));
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags', [
+            'constrain' => new SortByLevelConstrain()
+        ])->orderBy('user.id')->fetchAll();
+
+        $this->captureReadQueries();
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+        $this->assertNumReads(0);
+
+        $this->assertSame("tag a", $a->tags[0]->name);
+        $this->assertSame("tag b", $a->tags[1]->name);
+        $this->assertSame("tag d", $a->tags[2]->name);
+        $this->assertSame("tag e", $a->tags[3]->name);
+
+        $this->assertSame("tag c", $b->tags[0]->name);
+        $this->assertSame("tag d", $b->tags[1]->name);
+        $this->assertSame("tag f", $b->tags[2]->name);
+    }
+
+    public function testGlobalConstrainPromised()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class       => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'tags' => [
+                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TARGET => Tag::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE           => true,
+                            Relation::THOUGHT_ENTITY    => TagContext::class,
+                            Relation::INNER_KEY         => 'id',
+                            Relation::OUTER_KEY         => 'id',
+                            Relation::THOUGHT_INNER_KEY => 'user_id',
+                            Relation::THOUGHT_OUTER_KEY => 'tag_id',
+                        ],
+                    ]
+                ]
+            ],
+            Tag::class        => [
+                Schema::ROLE        => 'tag',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'name', 'level'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelConstrain::class
+                ]
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
 
@@ -301,30 +482,100 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         list($a, $b) = $selector->orderBy('user.id')->fetchAll();
 
-        $this->assertFalse($a->tags->getPromise()->__loaded());
-        $this->assertSame('tag', $a->tags->getPromise()->__role());
-        $this->assertEquals(['id' => 1], $a->tags->getPromise()->__scope());
-
         $this->captureReadQueries();
-        $this->assertCount(2, $a->tags);
+        $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(2);
 
-        $this->assertTrue($a->tags->getPromise()->__loaded());
+        $this->assertSame("tag a", $a->tags[0]->name);
+        $this->assertSame("tag b", $a->tags[1]->name);
+        $this->assertSame("tag d", $a->tags[2]->name);
+        $this->assertSame("tag e", $a->tags[3]->name);
 
-        $this->assertSame("tag e", $a->tags[0]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame("tag c", $b->tags[0]->name);
         $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag c", $b->tags[2]->name);
+        $this->assertSame("tag f", $b->tags[2]->name);
     }
 
+    public function testGlobalConstrainDESCPromised()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class       => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'tags' => [
+                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TARGET => Tag::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE           => true,
+                            Relation::THOUGHT_ENTITY    => TagContext::class,
+                            Relation::INNER_KEY         => 'id',
+                            Relation::OUTER_KEY         => 'id',
+                            Relation::THOUGHT_INNER_KEY => 'user_id',
+                            Relation::THOUGHT_OUTER_KEY => 'tag_id',
+                        ],
+                    ]
+                ]
+            ],
+            Tag::class        => [
+                Schema::ROLE        => 'tag',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'name', 'level'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelDESCConstrain::class
+                ]
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ]));
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+
+        $this->captureReadQueries();
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+        $this->assertNumReads(2);
+
+        $this->assertSame("tag a", $a->tags[3]->name);
+        $this->assertSame("tag b", $a->tags[2]->name);
+        $this->assertSame("tag d", $a->tags[1]->name);
+        $this->assertSame("tag e", $a->tags[0]->name);
+
+        $this->assertSame("tag c", $b->tags[2]->name);
+        $this->assertSame("tag d", $b->tags[1]->name);
+        $this->assertSame("tag f", $b->tags[0]->name);
+    }
 
     protected function withTagSchema(array $relationSchema)
     {
         return $this->withSchema(new Schema([
-            User::class => [
+            User::class       => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -338,9 +589,7 @@ abstract class ManyToManyScopeTest extends BaseTest
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
                                 Relation::CASCADE           => true,
-                                Relation::PIVOT_TABLE       => 'tag_user_map',
-                                Relation::PIVOT_DATABASE    => 'default',
-                                Relation::PIVOT_COLUMNS     => ['user_id', 'tag_id'],
+                                Relation::THOUGHT_ENTITY    => TagContext::class,
                                 Relation::INNER_KEY         => 'id',
                                 Relation::OUTER_KEY         => 'id',
                                 Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -349,7 +598,7 @@ abstract class ManyToManyScopeTest extends BaseTest
                     ]
                 ]
             ],
-            Tag::class  => [
+            Tag::class        => [
                 Schema::ROLE        => 'tag',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -358,15 +607,18 @@ abstract class ManyToManyScopeTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
-    }
-}
-
-class ManyToManyConstrainedMapper extends Mapper
-{
-    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?Select\ConstrainInterface
-    {
-        return new Select\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']);
     }
 }

@@ -16,7 +16,9 @@ use Spiral\Cycle\Promise\PromiseInterface;
 /**
  * Collection at top of pivoted (entity + context entity) promise.
  */
-class PivotedCollectionPromisePromise extends AbstractLazyCollection implements CollectionPromiseInterface, PivotedCollectionInterface
+class PivotedCollectionPromise extends AbstractLazyCollection implements
+    CollectionPromiseInterface,
+    PivotedCollectionInterface
 {
     /** @var PivotedPromise */
     protected $promise;

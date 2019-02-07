@@ -14,7 +14,7 @@ use Spiral\Cycle\Exception\TypecastException;
 /**
  * Typecaster provides ability to cast column values into their internal representation.
  */
-interface TypecasterInterface
+interface TypecastInterface
 {
     /**
      * Typecast key-values into internal representation.

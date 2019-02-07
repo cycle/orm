@@ -47,13 +47,6 @@ abstract class AbstractNode
     protected $columns = [];
 
     /**
-     * Column types.
-     *
-     * @var array
-     */
-    protected $types = [];
-
-    /**
      * Declared column which must be aggregated in a parent node. i.e. Parent Key
      *
      * @var null|string
@@ -63,24 +56,25 @@ abstract class AbstractNode
     /**
      * Node location in a tree. Set when node is registered.
      *
-     * @invisible
+     * @internal
      * @var string
      */
     protected $container;
 
     /**
-     * @invisible
+     * @internal
      * @var AbstractNode
      */
     protected $parent;
 
     /**
-     * @var AbstractNode[]
+     * @internal
+     * @var TypecastInterface|null
      */
-    protected $nodes = [];
+    protected $typecast = null;
 
-    /** @var TypecasterInterface|null */
-    protected $typecaster = null;
+    /** @var AbstractNode[] */
+    protected $nodes = [];
 
     /**
      * @param array       $columns  When columns are empty original line will be returned as result.
@@ -93,11 +87,11 @@ abstract class AbstractNode
     }
 
     /**
-     * @param TypecasterInterface $typecaster
+     * @param TypecastInterface $typecaster
      */
-    final public function setTypecaster(TypecasterInterface $typecaster)
+    final public function setTypecast(TypecastInterface $typecaster)
     {
-        $this->typecaster = $typecaster;
+        $this->typecast = $typecaster;
     }
 
     /**
@@ -256,8 +250,8 @@ abstract class AbstractNode
                 array_slice($line, $dataOffset, count($this->columns))
             );
 
-            if ($this->typecaster !== null) {
-                return $this->typecaster->cast($result);
+            if ($this->typecast !== null) {
+                return $this->typecast->cast($result);
             }
 
             return $result;

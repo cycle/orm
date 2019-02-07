@@ -15,10 +15,10 @@ namespace Spiral\Cycle\Parser\Traits;
  */
 trait DuplicateTrait
 {
-    /** @var string */
+    /** @var string @internal */
     protected $duplicateCriteria = '';
 
-    /** @var array */
+    /** @var array @internal */
     protected $duplicates = [];
 
     /**

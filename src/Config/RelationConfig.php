@@ -64,10 +64,6 @@ class RelationConfig extends InjectableConfig
                 self::LOADER   => Select\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyToManyRelation::class
             ],
-            Relation::MANY_THOUGHT_MANY  => [
-                self::LOADER   => Select\Loader\ManyToManyLoader::class,
-                self::RELATION => Relation\ManyThoughtManyRelation::class
-            ],
             Relation::MORPHED_HAS_ONE    => [
                 self::LOADER   => Select\Loader\Morphed\MorphedHasOneLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasOneRelation::class

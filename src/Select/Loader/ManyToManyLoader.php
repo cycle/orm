@@ -11,11 +11,12 @@ namespace Spiral\Cycle\Select\Loader;
 
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
-use Spiral\Cycle\Parser\PivotedNode;
-use Spiral\Cycle\Parser\Typecaster;
+use Spiral\Cycle\Parser\SingularNode;
+use Spiral\Cycle\Parser\Typecast;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
+use Spiral\Cycle\Select\LoaderInterface;
 use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Cycle\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
@@ -31,15 +32,16 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'constrain'  => SourceInterface::DEFAULT_CONSTRAIN,
-        'method'     => self::POSTLOAD,
-        'minify'     => true,
-        'as'         => null,
-        'pivotAlias' => null,
-        'using'      => null,
-        'where'      => null,
-        'wherePivot' => null,
+        'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
+        'method'    => self::POSTLOAD,
+        'minify'    => true,
+        'as'        => null,
+        'using'     => null,
+        'where'     => null,
     ];
+
+    /** @var PivotLoader */
+    protected $pivot;
 
     /**
      * {@inheritdoc}
@@ -47,32 +49,28 @@ class ManyToManyLoader extends JoinableLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->options['where'] = $schema[Relation::WHERE] ?? [];
-        $this->options['wherePivot'] = $schema[Relation::PIVOT_WHERE] ?? [];
+
+        unset($schema[Relation::CONSTRAIN]);
+
+        // todo: extract pivot options
+        $this->pivot = new PivotLoader($orm, $schema[Relation::THOUGHT_ENTITY], $schema);
     }
 
     /**
-     * Pivot table name.
-     *
-     * @return string
+     * @param LoaderInterface $parent
+     * @param array           $options
+     * @return LoaderInterface
      */
-    public function getPivotTable(): string
+    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
-        return $this->schema[Relation::PIVOT_TABLE];
-    }
+        /** @var ManyToManyLoader $loader */
+        $loader = parent::withContext($parent, $options);
+        $loader->pivot = $loader->pivot->withContext(
+            $loader,
+            ['method' => $options['method'] ?? self::JOIN]
+        );
 
-    /**
-     * Pivot table alias, depends on relation table alias.
-     *
-     * @return string
-     */
-    public function getPivotAlias(): string
-    {
-        if (!empty($this->options['pivotAlias'])) {
-            return $this->options['pivotAlias'];
-        }
-
-        return $this->getAlias() . '_pivot';
+        return $loader;
     }
 
     /**
@@ -80,74 +78,84 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
+        // use pre-defined query
         if (!empty($this->options['using'])) {
-            //Use pre-defined query
             return parent::configureQuery($query, $outerKeys);
         }
 
+        $query = $this->pivot->applyConstrain($query);
+
+        // Manually join pivoted table
         if ($this->isJoined()) {
             $query->join(
                 $this->getJoinMethod(),
-                $this->getPivotTable() . ' AS ' . $this->getPivotAlias())
-                ->on(
-                    $this->pivotKey(Relation::THOUGHT_INNER_KEY),
-                    $this->parentKey(Relation::INNER_KEY)
-                );
+                $this->pivot->getTable() . ' AS ' . $this->pivot->getAlias()
+            )->on(
+                $this->pivot->localKey(Relation::THOUGHT_INNER_KEY),
+                $this->parentKey(Relation::INNER_KEY)
+            );
+
+            $query->join(
+                'INNER',
+                $this->getJoinTable()
+            )->on(
+                $this->localKey(Relation::OUTER_KEY),
+                $this->pivot->localKey(Relation::THOUGHT_OUTER_KEY)
+            );
         } else {
             $query->innerJoin(
-                $this->getPivotTable() . ' AS ' . $this->getPivotAlias()
+                $this->pivot->getTable() . ' AS ' . $this->pivot->getAlias()
             )->on(
-                $this->pivotKey(Relation::THOUGHT_OUTER_KEY),
+                $this->pivot->localKey(Relation::THOUGHT_OUTER_KEY),
                 $this->localKey(Relation::OUTER_KEY)
             )->where(
-                $this->pivotKey(Relation::THOUGHT_INNER_KEY),
+                $this->pivot->localKey(Relation::THOUGHT_INNER_KEY),
                 new Parameter($outerKeys)
             );
         }
 
-        // when relation is joined we will use ON statements, when not - normal WHERE
-        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
-
-        // pivot conditions specified in relation schema
-        $this->setWhere(
-            $query,
-            $this->getPivotAlias(),
-            $whereTarget,
-            $this->define(Relation::PIVOT_WHERE)
-        );
-
-        // pivot conditions specified by user @todo: bug, table name is ignored
-        $this->setWhere(
-            $query,
-            $this->getPivotAlias(),
-            $whereTarget,
-            $this->options['wherePivot']
-        );
-
-        // todo: RELATED ENTITY MIGHT HAVE CONSTRAIN AS WELL
-
-        if ($this->isJoined()) {
-            // actual data is always INNER join
-            $query->join(
-                $this->getJoinMethod(),
-                $this->getJoinTable()
-            )->on(
-                $this->localKey(Relation::OUTER_KEY),
-                $this->pivotKey(Relation::THOUGHT_OUTER_KEY)
-            );
-        }
-
-        // where conditions specified in relation definition
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE));
-
         // user specified WHERE conditions
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+        $this->setWhere(
+            $query,
+            $this->getAlias(),
+            $this->isJoined() ? 'onWhere' : 'where',
+            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+        );
 
         return parent::configureQuery($query);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     */
+    public function initNode(): AbstractNode
+    {
+        $target = new SingularNode(
+            $this->columnNames(),
+            $this->define(Schema::PRIMARY_KEY),
+            $this->schema[Relation::OUTER_KEY],
+            $this->schema[Relation::THOUGHT_OUTER_KEY]
+        );
+
+        $typecast = $this->define(Schema::TYPECAST);
+        if ($typecast !== null) {
+            $target->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
+        }
+
+        $node = $this->pivot->initNode();
+        $node->joinNode('@', $target);
+
+        return $node;
+    }
+
+    /**
+     * Load columns from both pivot and target entities.
+     *
+     * @param SelectQuery $query
+     * @param bool        $minify
+     * @param string      $prefix
+     * @param bool        $overwrite
+     * @return SelectQuery
      */
     protected function mountColumns(
         SelectQuery $query,
@@ -155,85 +163,8 @@ class ManyToManyLoader extends JoinableLoader
         string $prefix = '',
         bool $overwrite = false
     ): SelectQuery {
-        //Pivot table source alias
-        $alias = $this->getPivotAlias();
-
-        $columns = $overwrite ? [] : $query->getColumns();
-        foreach ($this->pivotColumns() as $name) {
-            $column = $name;
-
-            if ($minify) {
-                //Let's use column number instead of full name
-                $column = 'p_c' . count($columns);
-            }
-
-            $columns[] = "{$alias}.{$name} AS {$prefix}{$column}";
-        }
-
-        //Updating column set
-        $query->columns($columns);
+        $this->pivot->mountColumns($query, $minify, $prefix, $overwrite);
 
         return parent::mountColumns($query, $minify, $prefix, false);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function initNode(): AbstractNode
-    {
-        $node = new PivotedNode(
-            $this->columnNames(),
-            $this->schema[Relation::PIVOT_COLUMNS],
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::THOUGHT_INNER_KEY],
-            $this->schema[Relation::THOUGHT_OUTER_KEY]
-        );
-
-        $typecast = $this->define(Schema::TYPECAST);
-        if ($typecast !== null) {
-            $node->setTypecaster(new Typecaster($typecast, $this->getSource()->getDatabase()));
-        }
-
-        if (isset($this->schema[Relation::PIVOT_ENTITY])) {
-            $typecast = $this->orm->getSchema()->define($this->schema[Relation::PIVOT_ENTITY], Schema::TYPECAST);
-            if ($typecast !== null) {
-                $node->setPivotTypecaster(new Typecaster(
-                    $typecast,
-                    $this->getSource()->getDatabase()
-                ));
-            }
-        } elseif (isset($this->schema[Relation::PIVOT_TYPECAST])) {
-            $node->setPivotTypecaster(new Typecaster(
-                $this->schema[Relation::PIVOT_TYPECAST],
-                $this->getSource()->getDatabase()
-            ));
-        }
-
-        return $node;
-    }
-
-    /**
-     * @return array
-     */
-    protected function pivotColumns(): array
-    {
-        return $this->schema[Relation::PIVOT_COLUMNS];
-    }
-
-    /**
-     * Key related to pivot table. Must include pivot table alias.
-     *
-     * @see pivotKey()
-     *
-     * @param int|string $key
-     * @return null|string
-     */
-    protected function pivotKey($key): ?string
-    {
-        if (!isset($this->schema[$key])) {
-            return null;
-        }
-
-        return $this->getPivotAlias() . '.' . $this->schema[$key];
     }
 }

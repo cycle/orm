@@ -8,7 +8,7 @@
  
 namespace Spiral\Cycle\Tests\Driver\SQLServer; 
 
-class ManyThoughtManyPromiseTest extends \Spiral\Cycle\Tests\ManyThoughtManyPromiseTest 
+class ManyToManyConstrainedTest extends \Spiral\Cycle\Tests\ManyToManyConstrainedTest 
 { 
     const DRIVER = "sqlserver"; 
 }

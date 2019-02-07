@@ -12,7 +12,7 @@ namespace Spiral\Cycle\Select;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\RootNode;
-use Spiral\Cycle\Parser\Typecaster;
+use Spiral\Cycle\Parser\Typecast;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\Traits\ColumnsTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -35,7 +35,9 @@ final class RootLoader extends AbstractLoader
     public function __construct(ORMInterface $orm, string $target)
     {
         parent::__construct($orm, $target);
-        $this->query = $this->getSource()->getDatabase()->select()->from($this->getSourceTable());
+        $this->query = $this->getSource()->getDatabase()->select()->from(
+            sprintf("%s AS %s", $this->getSource()->getTable(), $this->getAlias())
+        );
     }
 
     /**
@@ -124,7 +126,7 @@ final class RootLoader extends AbstractLoader
 
         $typecast = $this->define(Schema::TYPECAST);
         if ($typecast !== null) {
-            $node->setTypecaster(new Typecaster($typecast, $this->getSource()->getDatabase()));
+            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
         }
 
         return $node;
@@ -138,13 +140,5 @@ final class RootLoader extends AbstractLoader
     protected function getColumns(): array
     {
         return $this->define(Schema::COLUMNS);
-    }
-
-    /**
-     * @return string
-     */
-    protected function getSourceTable(): string
-    {
-        return sprintf("%s AS %s", $this->getSource()->getTable(), $this->getAlias());
     }
 }

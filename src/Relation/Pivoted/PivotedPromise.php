@@ -9,13 +9,13 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Relation\Pivoted;
 
+use Spiral\Cycle\Exception\ORMException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Iterator;
 use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Parser\PivotedRootNode;
+use Spiral\Cycle\Parser\RootNode;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Relation;
-use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Select\Loader\ManyToManyLoader;
@@ -38,7 +38,7 @@ class PivotedPromise implements PromiseInterface
     private $innerKey;
 
     /** @var Select\ConstrainInterface|null */
-    private $scope;
+    private $constrain;
 
     /** @var null|PivotedStorage */
     private $resolved;
@@ -58,11 +58,11 @@ class PivotedPromise implements PromiseInterface
     }
 
     /**
-     * @param Select\ConstrainInterface $scope
+     * @param Select\ConstrainInterface $constrain
      */
-    public function setScope(?Select\ConstrainInterface $scope)
+    public function setConstrain(?Select\ConstrainInterface $constrain)
     {
-        $this->scope = $scope;
+        $this->constrain = $constrain;
     }
 
     /**
@@ -100,32 +100,36 @@ class PivotedPromise implements PromiseInterface
             return $this->resolved;
         }
 
-        $source = $this->orm->getFactory()->getSource($this->target);
+        if (!$this->orm instanceof Select\SourceFactoryInterface) {
+            throw new ORMException("PivotedPromise require ORM to implement SourceFactoryInterface");
+        }
+
+        $table = $this->orm->getSource($this->target)->getTable();
 
         // getting scoped query
         $root = new Select\RootLoader($this->orm, $this->target);
         $query = $root->buildQuery();
 
         // responsible for all the scoping
-        $loader = new ManyToManyLoader($this->orm, $this->target, $source->getTable(), $this->relationSchema);
+        $loader = new ManyToManyLoader($this->orm, $table, $this->target, $this->relationSchema);
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'constrain'  => $this->scope,
-            'as'         => $source->getTable(),
-            'pivotAlias' => $source->getTable() . '_pivot',
-            'method'     => JoinableLoader::POSTLOAD
+            'constrain' => $this->constrain,
+            'as'        => $table,
+            'method'    => JoinableLoader::POSTLOAD
         ]);
 
         $query = $loader->configureQuery($query, [$this->innerKey]);
 
-        $node = new PivotedRootNode(
-            $this->orm->getSchema()->define($this->target, Schema::COLUMNS),
-            $this->relationSchema[Relation::PIVOT_COLUMNS],
-            $this->relationSchema[Relation::OUTER_KEY],
-            $this->relationSchema[Relation::THOUGHT_INNER_KEY],
-            $this->relationSchema[Relation::THOUGHT_OUTER_KEY]
-        );
+        // we are going to add pivot node into virtual root node to aggregate the results
+        $root = new RootNode([$this->relationSchema[Relation::INNER_KEY]], $this->relationSchema[Relation::INNER_KEY]);
+
+        $node = $loader->initNode();
+        $root->linkNode('output', $node);
+
+        // emulate presence of parent entity
+        $root->parseRow(0, [$this->innerKey]);
 
         $iterator = $query->getIterator();
         foreach ($iterator as $row) {
@@ -135,16 +139,12 @@ class PivotedPromise implements PromiseInterface
 
         $elements = [];
         $pivotData = new \SplObjectStorage();
-        foreach (new Iterator($this->orm, $this->target, $node->getResult()) as $pivot => $entity) {
-            if (isset($this->relationSchema[Relation::PIVOT_ENTITY])) {
-                $pivotData[$entity] = $this->orm->make(
-                    $this->relationSchema[Relation::PIVOT_ENTITY],
-                    $pivot,
-                    Node::MANAGED
-                );
-            } else {
-                $pivotData[$entity] = $pivot;
-            }
+        foreach (new Iterator($this->orm, $this->target, $root->getResult()[0]['output']) as $pivot => $entity) {
+            $pivotData[$entity] = $this->orm->make(
+                $this->relationSchema[Relation::THOUGHT_ENTITY],
+                $pivot,
+                Node::MANAGED
+            );
 
             $elements[] = $entity;
         }

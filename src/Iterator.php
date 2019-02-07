@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Spiral\Cycle;
 
 use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Parser\PivotedNode;
 
 /**
  * Iterates over given data-set and instantiates objects.
@@ -47,10 +46,11 @@ final class Iterator implements \IteratorAggregate
     public function getIterator(): \Generator
     {
         foreach ($this->source as $index => $data) {
-            if (isset($data[PivotedNode::PIVOT_DATA])) {
-                // when pivot data is provided we are going to use it as array key.
-                $index = $data[PivotedNode::PIVOT_DATA];
-                unset($data[PivotedNode::PIVOT_DATA]);
+            // though-like relations
+            if (isset($data['@'])) {
+                $index = $data;
+                unset($index['@']);
+                $data = $data['@'];
             }
 
             yield $index => $this->orm->make($this->class, $data, Node::MANAGED);

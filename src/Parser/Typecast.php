@@ -12,7 +12,7 @@ namespace Spiral\Cycle\Parser;
 use Spiral\Cycle\Exception\TypecastException;
 use Spiral\Database\DatabaseInterface;
 
-final class Typecaster implements TypecasterInterface
+final class Typecast implements TypecastInterface
 {
     /** @var array */
     private $rules;

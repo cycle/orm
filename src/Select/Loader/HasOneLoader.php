@@ -12,7 +12,7 @@ namespace Spiral\Cycle\Select\Loader;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\SingularNode;
-use Spiral\Cycle\Parser\Typecaster;
+use Spiral\Cycle\Parser\Typecast;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
@@ -95,7 +95,7 @@ class HasOneLoader extends JoinableLoader
 
         $typecast = $this->define(Schema::TYPECAST);
         if ($typecast !== null) {
-            $node->setTypecaster(new Typecaster($typecast, $this->getSource()->getDatabase()));
+            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
         }
 
         return $node;

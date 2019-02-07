@@ -20,12 +20,11 @@ final class Relation
     public const SCHEMA = 21;
 
     // Relation types (default)
-    public const HAS_ONE           = 1;
-    public const HAS_MANY          = 3;
-    public const BELONGS_TO        = 2;
-    public const REFERS_TO         = 4;
-    public const MANY_TO_MANY      = 5;
-    public const MANY_THOUGHT_MANY = 52;
+    public const HAS_ONE      = 1;
+    public const HAS_MANY     = 3;
+    public const BELONGS_TO   = 2;
+    public const REFERS_TO    = 4;
+    public const MANY_TO_MANY = 52;
 
     // Morphed relations
     public const BELONGS_TO_MORPHED = 99999;
@@ -44,11 +43,7 @@ final class Relation
     // Many-To-Many relation(s) options
     public const THOUGHT_INNER_KEY = 908;
     public const THOUGHT_OUTER_KEY = 909;
-    public const PIVOT_ENTITY      = 9880;
-    public const PIVOT_TABLE       = 904;
-    public const PIVOT_DATABASE    = 905;
-    public const PIVOT_COLUMNS     = 9098;
-    public const PIVOT_TYPECAST    = 9099;
+    public const THOUGHT_ENTITY    = 988888;
     public const PIVOT_WHERE       = 911;
 
     // Custom morph key

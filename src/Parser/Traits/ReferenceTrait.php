@@ -20,6 +20,7 @@ trait ReferenceTrait
      * Tree parts associated with reference keys and key values:
      * $this->collectedReferences[id][ID_VALUE] = [ITEM1, ITEM2, ...].
      *
+     * @internal
      * @var array
      */
     protected $references = [];
@@ -27,6 +28,7 @@ trait ReferenceTrait
     /**
      * Set of keys to be aggregated by Parser while parsing results.
      *
+     * @internal
      * @var array
      */
     protected $trackReferences = [];

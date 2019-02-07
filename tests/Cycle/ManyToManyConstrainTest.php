@@ -13,6 +13,7 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Tag;
+use Spiral\Cycle\Tests\Fixtures\TagContext;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
 
@@ -108,6 +109,8 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame("tag d", $b->tags[1]->name);
         $this->assertSame("tag f", $b->tags[2]->name);
     }
+
+    // todo: test ordered by pivoted
 
     public function testOrderedDESC()
     {
@@ -452,13 +455,12 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        list($a) = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD,
             'where'  => ['@.level' => 1]
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->tags);
-        $this->assertCount(0, $b->tags);
 
         $this->assertSame("tag a", $a->tags[0]->name);
     }
@@ -522,9 +524,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
 
         // second user has been filtered out
         $res = $selector
-            ->load('tags', [
-                'method' => Select\JoinableLoader::INLOAD
-            ])
+            ->load('tags', ['method' => Select\JoinableLoader::INLOAD])
             ->limit(1)
             ->orderBy('user.id')->fetchAll();
     }
@@ -546,7 +546,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     protected function withTagSchema(array $relationSchema)
     {
         return $this->withSchema(new Schema([
-            User::class => [
+            User::class       => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -556,13 +556,11 @@ abstract class ManyToManyConstrainTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'tags' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY_R,
+                        Relation::TYPE   => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
                                 Relation::CASCADE           => true,
-                                Relation::PIVOT_TABLE       => 'tag_user_map',
-                                Relation::PIVOT_DATABASE    => 'default',
-                                Relation::PIVOT_COLUMNS     => ['user_id', 'tag_id'],
+                                Relation::THOUGHT_ENTITY    => TagContext::class,
                                 Relation::INNER_KEY         => 'id',
                                 Relation::OUTER_KEY         => 'id',
                                 Relation::THOUGHT_INNER_KEY => 'user_id',
@@ -571,13 +569,24 @@ abstract class ManyToManyConstrainTest extends BaseTest
                     ]
                 ]
             ],
-            Tag::class  => [
+            Tag::class        => [
                 Schema::ROLE        => 'tag',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'tag',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name', 'level'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ]

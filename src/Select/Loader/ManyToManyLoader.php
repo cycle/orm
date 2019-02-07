@@ -50,6 +50,8 @@ class ManyToManyLoader extends JoinableLoader
     {
         parent::__construct($orm, $name, $target, $schema);
 
+        unset($schema[Relation::CONSTRAIN]);
+
         // todo: extract pivot options
         $this->pivot = new PivotLoader($orm, $schema[Relation::THOUGHT_ENTITY], $schema);
     }
@@ -94,7 +96,7 @@ class ManyToManyLoader extends JoinableLoader
             );
 
             $query->join(
-                $this->getJoinMethod(),
+                'INNER',
                 $this->getJoinTable()
             )->on(
                 $this->localKey(Relation::OUTER_KEY),
@@ -112,16 +114,38 @@ class ManyToManyLoader extends JoinableLoader
             );
         }
 
-        // when relation is joined we will use ON statements, when not - normal WHERE
-        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
-
-        // where conditions specified in relation definition
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->define(Relation::WHERE));
-
         // user specified WHERE conditions
-        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+        $this->setWhere(
+            $query,
+            $this->getAlias(),
+            $this->isJoined() ? 'onWhere' : 'where',
+            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+        );
 
         return parent::configureQuery($query);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function initNode(): AbstractNode
+    {
+        $target = new SingularNode(
+            $this->columnNames(),
+            $this->define(Schema::PRIMARY_KEY),
+            $this->schema[Relation::OUTER_KEY],
+            $this->schema[Relation::THOUGHT_OUTER_KEY]
+        );
+
+        $typecast = $this->define(Schema::TYPECAST);
+        if ($typecast !== null) {
+            $target->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
+        }
+
+        $node = $this->pivot->initNode();
+        $node->joinNode('@', $target);
+
+        return $node;
     }
 
     /**
@@ -142,28 +166,5 @@ class ManyToManyLoader extends JoinableLoader
         $this->pivot->mountColumns($query, $minify, $prefix, $overwrite);
 
         return parent::mountColumns($query, $minify, $prefix, false);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function initNode(): AbstractNode
-    {
-        $target = new SingularNode(
-            $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::THOUGHT_OUTER_KEY]
-        );
-
-        $typecast = $this->define(Schema::TYPECAST);
-        if ($typecast !== null) {
-            $target->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
-        }
-
-        $node = $this->pivot->initNode();
-        $node->joinNode('@', $target);
-
-        return $node;
     }
 }

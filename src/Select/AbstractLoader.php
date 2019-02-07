@@ -128,7 +128,7 @@ abstract class AbstractLoader implements LoaderInterface
      *
      * @throws LoaderException
      */
-    final public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
+    public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
     {
         $relation = $this->resolvePath($relation);
         if (!empty($options['as'])) {

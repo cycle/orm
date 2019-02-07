@@ -52,6 +52,8 @@ class ManyToManyLoader extends JoinableLoader
 
         unset($schema[Relation::CONSTRAIN]);
 
+        //todo: make this relation to be real?
+
         // todo: extract pivot options
         $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THOUGHT_ENTITY], $schema);
     }
@@ -71,6 +73,20 @@ class ManyToManyLoader extends JoinableLoader
         );
 
         return $loader;
+    }
+
+    public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
+    {
+        // todo crazy stuff is possible now (!)
+        if ($relation == 'pivot') {
+            if (!empty($options)) {
+                $this->pivot = $this->pivot->withContext($this, $options);
+            }
+
+            return $this->pivot;
+        }
+
+        return parent::loadRelation($relation, $options, $join);
     }
 
     /**

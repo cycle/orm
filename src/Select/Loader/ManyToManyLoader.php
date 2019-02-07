@@ -53,7 +53,7 @@ class ManyToManyLoader extends JoinableLoader
         unset($schema[Relation::CONSTRAIN]);
 
         // todo: extract pivot options
-        $this->pivot = new PivotLoader($orm, $schema[Relation::THOUGHT_ENTITY], $schema);
+        $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THOUGHT_ENTITY], $schema);
     }
 
     /**
@@ -88,15 +88,14 @@ class ManyToManyLoader extends JoinableLoader
         // Manually join pivoted table
         if ($this->isJoined()) {
             $query->join(
-                $this->getJoinMethod(),
-                $this->pivot->getTable() . ' AS ' . $this->pivot->getAlias()
+                $this->pivot->getJoinMethod(),
+                $this->pivot->getJoinTable()
             )->on(
                 $this->pivot->localKey(Relation::THOUGHT_INNER_KEY),
                 $this->parentKey(Relation::INNER_KEY)
             );
 
-            $query->join(
-                'INNER',
+            $query->innerJoin(
                 $this->getJoinTable()
             )->on(
                 $this->localKey(Relation::OUTER_KEY),
@@ -104,7 +103,7 @@ class ManyToManyLoader extends JoinableLoader
             );
         } else {
             $query->innerJoin(
-                $this->pivot->getTable() . ' AS ' . $this->pivot->getAlias()
+                $this->pivot->getJoinTable()
             )->on(
                 $this->pivot->localKey(Relation::THOUGHT_OUTER_KEY),
                 $this->localKey(Relation::OUTER_KEY)
@@ -130,7 +129,7 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function createNode(): AbstractNode
     {
-        $node = $this->pivot->initNode();
+        $node = $this->pivot->createNode();
         $node->joinNode('@', parent::createNode());
 
         return $node;

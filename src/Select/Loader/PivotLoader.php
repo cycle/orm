@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Loader;
 
-use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\ArrayNode;
 use Spiral\Cycle\Parser\Typecast;
@@ -18,13 +17,11 @@ use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Select\SourceInterface;
 
+/**
+ * Loads given entity table without any specific condition.
+ */
 class PivotLoader extends JoinableLoader
 {
-    // All pivoted relations has constant name.
-    public const NAME = 'pivot';
-
-    // todo: POSITION? @pivot
-
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
@@ -35,20 +32,7 @@ class PivotLoader extends JoinableLoader
         'method'    => self::JOIN,
         'minify'    => true,
         'as'        => null,
-        'where'     => null,
     ];
-
-    /**
-     * @param ORMInterface $orm
-     * @param string       $target
-     * @param array        $schema
-     */
-    public function __construct(ORMInterface $orm, string $target, array $schema)
-    {
-        parent::__construct($orm, self::NAME, $target, $schema);
-
-        // todo: map schema
-    }
 
     /**
      * @return string

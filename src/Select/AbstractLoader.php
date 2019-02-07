@@ -179,7 +179,7 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    final public function createNode(): AbstractNode
+    public function createNode(): AbstractNode
     {
         $node = $this->initNode();
 

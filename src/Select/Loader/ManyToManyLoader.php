@@ -128,22 +128,10 @@ class ManyToManyLoader extends JoinableLoader
     /**
      * {@inheritdoc}
      */
-    public function initNode(): AbstractNode
+    public function createNode(): AbstractNode
     {
-        $target = new SingularNode(
-            $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::THOUGHT_OUTER_KEY]
-        );
-
-        $typecast = $this->define(Schema::TYPECAST);
-        if ($typecast !== null) {
-            $target->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
-        }
-
         $node = $this->pivot->initNode();
-        $node->joinNode('@', $target);
+        $node->joinNode('@', parent::createNode());
 
         return $node;
     }
@@ -166,5 +154,25 @@ class ManyToManyLoader extends JoinableLoader
         $this->pivot->mountColumns($query, $minify, $prefix, $overwrite);
 
         return parent::mountColumns($query, $minify, $prefix, false);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function initNode(): AbstractNode
+    {
+        $node = new SingularNode(
+            $this->columnNames(),
+            $this->define(Schema::PRIMARY_KEY),
+            $this->schema[Relation::OUTER_KEY],
+            $this->schema[Relation::THOUGHT_OUTER_KEY]
+        );
+
+        $typecast = $this->define(Schema::TYPECAST);
+        if ($typecast !== null) {
+            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
+        }
+
+        return $node;
     }
 }

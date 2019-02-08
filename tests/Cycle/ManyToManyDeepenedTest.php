@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Tests;
 
+use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
@@ -19,6 +20,7 @@ use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\TagContext;
 use Spiral\Cycle\Tests\Fixtures\User;
 use Spiral\Cycle\Tests\Traits\TableTrait;
+use Spiral\Cycle\Transaction;
 
 /**
  * This tests provides ability to create deep linked trees using pivoted entity. We did not plan to have such functionality
@@ -334,6 +336,42 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         $this->assertEquals('first.jpg', $a->tags->getPivot($a->tags[0])->image->url);
         $this->assertNull($a->tags->getPivot($a->tags[1])->image);
         $this->assertEquals('second.png', $b->tags->getPivot($b->tags[0])->image->url);
+    }
+
+    public function testUpdateLoadedBranch()
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->load('tags.@.image')->orderBy('id', 'ASC');
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags')->fetchAll();
+
+        $this->assertCount(2, $a->tags);
+        $this->assertCount(1, $b->tags);
+
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
+
+        $b->tags->getPivot($b->tags[0])->image->url = 'new.gif';
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector->load('tags.@.image')->orderBy('id', 'ASC');
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        list($a, $b) = $selector->load('tags')->fetchAll();
+        $this->assertSame('new.gif', $b->tags->getPivot($b->tags[0])->image->url);
     }
 
     public function testFilterByPivotedBranch()

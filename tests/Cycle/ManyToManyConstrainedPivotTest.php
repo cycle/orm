@@ -211,8 +211,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
         ]);
 
         $selector = new Select($this->orm, User::class);
-        $selector->load('tags')
-            ->orderBy('id');
+        $selector->load('tags')->orderBy('id');
 
         $this->assertSame([
             [
@@ -321,7 +320,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
     {
         $this->orm = $this->withPivotSchema([], [
             Relation::THOUGHT_CONSTRAIN => new Select\QueryConstrain(
-                ['@.level' => ['>=' => 2]],
+                ['@.level' => ['>' => 3]],
                 ['@.level' => 'DESC']
             ),
         ]);
@@ -350,65 +349,8 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
                             'level' => 5,
                         ],
                     ],
-                    [
-                        'id'      => 4,
-                        'user_id' => 1,
-                        'tag_id'  => 4,
-                        'as'      => null,
-                        'level'   => 3,
-                        '@'       => [
-                            'id'    => 4,
-                            'name'  => 'tag d',
-                            'level' => 4,
-                        ],
-                    ],
-                    [
-                        'id'      => 2,
-                        'user_id' => 1,
-                        'tag_id'  => 2,
-                        'as'      => null,
-                        'level'   => 2,
-                        '@'       => [
-                            'id'    => 2,
-                            'name'  => 'tag b',
-                            'level' => 2,
-                        ],
-                    ],
                 ],
             ],
-            1 =>
-                [
-                    'id'      => 2,
-                    'email'   => 'another@world.com',
-                    'balance' => 200.0,
-                    'tags'    => [
-                        [
-                            'id'      => 7,
-                            'user_id' => 2,
-                            'tag_id'  => 6,
-                            'as'      => null,
-                            'level'   => 3,
-                            '@'       => [
-                                'id'    => 6,
-                                'name'  => 'tag f',
-                                'level' => 6,
-                            ],
-                        ],
-                        [
-                            'id'      => 6,
-                            'user_id' => 2,
-                            'tag_id'  => 4,
-                            'as'      => null,
-                            'level'   => 2,
-                            '@'       => [
-                                'id'    => 4,
-                                'name'  => 'tag d',
-                                'level' => 4,
-                            ],
-                        ],
-
-                    ],
-                ],
         ], $selector->fetchData());
     }
 

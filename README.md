@@ -21,5 +21,5 @@ Features:
 
 In progress:
 ---------
-- schema provider and generator
+- schema locator and generator, diff based migrations
 - documentation

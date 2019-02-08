@@ -3,7 +3,7 @@
   "type": "library",
   "description": "DataMapper and ORM for long-running processes",
   "require": {
-    "php": "^7.1",
+    "php": "^7.1|^8.0",
     "ext-pdo": "*",
     "spiral/core": "^1.1",
     "spiral/database": "^2.1",

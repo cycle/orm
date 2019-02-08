@@ -21,6 +21,5 @@ Features:
 
 In progress:
 ---------
-- schema provider
-- schema lazy loader
-- schema generator
+- schema provider and generator
+- documentation

@@ -22,4 +22,5 @@ Features:
 In progress:
 ---------
 - schema locator and generator, diff based migrations
+- easy pagination
 - documentation

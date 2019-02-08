@@ -199,7 +199,9 @@ abstract class JoinableLoader extends AbstractLoader
 
         // apply the global scope
         if (!empty($this->options['using']) && !empty($this->constrain)) {
-            throw new LoaderException("Combination of scope and `using` source is ambiguous");
+            throw new LoaderException(
+                "Combination of constrain and `using` source is ambiguous in `{$this->name}`"
+            );
         }
 
         return parent::configureQuery($query);

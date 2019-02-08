@@ -78,4 +78,4 @@ class %s extends \%s
 }
 
 // helper to validate the selection results
-// file_put_contents('out.php', '<?php ' . var_export($selector->fetchData(), 1));
+// file_put_contents('out.php', '<?php ' . var_export($selector->fetchData(), true));

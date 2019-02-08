@@ -14,6 +14,7 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
 use Spiral\Cycle\Tests\Fixtures\Image;
+use Spiral\Cycle\Tests\Fixtures\SortByIDConstrain;
 use Spiral\Cycle\Tests\Fixtures\Tag;
 use Spiral\Cycle\Tests\Fixtures\TagContext;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -126,7 +127,10 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name'],
                 Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAINS  => [
+                    Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class
+                ]
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -156,6 +160,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 Schema::TABLE       => 'images',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'url', 'parent_id'],
+                Schema::TYPECAST    => ['id' => 'int', 'parent_id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ]
@@ -179,9 +184,9 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'tag_id'  => 1,
                         'as'      => 'primary',
                         'image'   => [
-                            'id'        => '1',
+                            'id'        => 1,
                             'url'       => 'first.jpg',
-                            'parent_id' => '1',
+                            'parent_id' => 1,
                         ],
                         '@'       => [
                             'id'   => 1,
@@ -212,9 +217,9 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'tag_id'  => 3,
                         'as'      => 'primary',
                         'image'   => [
-                            'id'        => '2',
+                            'id'        => 2,
                             'url'       => 'second.png',
-                            'parent_id' => '3',
+                            'parent_id' => 3,
                         ],
                         '@'       => [
                             'id'   => 3,
@@ -231,7 +236,8 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector
             ->load('tags', ['method' => Select\JoinableLoader::INLOAD])
-            ->load('tags.@.image')->orderBy('id', 'ASC');
+            ->load('tags.@.image')
+            ->orderBy('id', 'ASC');
 
         $this->assertSame([
             [
@@ -245,9 +251,9 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'tag_id'  => 1,
                         'as'      => 'primary',
                         'image'   => [
-                            'id'        => '1',
+                            'id'        => 1,
                             'url'       => 'first.jpg',
-                            'parent_id' => '1',
+                            'parent_id' => 1,
                         ],
                         '@'       => [
                             'id'   => 1,
@@ -278,9 +284,9 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'tag_id'  => 3,
                         'as'      => 'primary',
                         'image'   => [
-                            'id'        => '2',
+                            'id'        => 2,
                             'url'       => 'second.png',
-                            'parent_id' => '3',
+                            'parent_id' => 3,
                         ],
                         '@'       => [
                             'id'   => 3,
@@ -350,9 +356,9 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'tag_id'  => 3,
                         'as'      => 'primary',
                         'image'   => [
-                            'id'        => '2',
+                            'id'        => 2,
                             'url'       => 'second.png',
-                            'parent_id' => '3',
+                            'parent_id' => 3,
                         ],
                         '@'       => [
                             'id'   => 3,
@@ -362,47 +368,5 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 ],
             ],
         ], $selector->fetchData());
-    }
-
-    public function testFilterByPivotedBranchUsing()
-    {
-        $selector = new Select($this->orm, User::class);
-
-        $selector
-            ->with('tags', ['as' => 'tags'])
-            ->with('tags.@', ['as' => 'u_tags_pivot'])
-            ->with('tags.@.image', ['as' => 'tag_context_image'])
-            ->where('tags.@.image.url', 'second.png')
-            ->load('tags', ['using' => 'tags'])
-            ->load('tags.@', ['using' => 'u_tags_pivot'])
-            ->load('tags.@.image', ['using' => 'tag_context_image'])
-            ->orderBy('id', 'ASC');
-
-        $this->captureReadQueries();
-        $this->assertSame([
-            [
-                'id'      => 2,
-                'email'   => 'another@world.com',
-                'balance' => 200.0,
-                'tags'    => [
-                    [
-                        'id'      => 3,
-                        'user_id' => 2,
-                        'tag_id'  => 3,
-                        'as'      => 'primary',
-                        'image'   => [
-                            'id'        => '2',
-                            'url'       => 'second.png',
-                            'parent_id' => '3',
-                        ],
-                        '@'       => [
-                            'id'   => 3,
-                            'name' => 'tag c',
-                        ],
-                    ],
-                ],
-            ],
-        ], $selector->fetchData());
-        $this->assertNumReads(1);
     }
 }

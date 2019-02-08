@@ -180,8 +180,10 @@ abstract class ManyToManyRelationTest extends BaseTest
     public function testLoadRelationInload()
     {
         $selector = new Select($this->orm, User::class);
-        $selector->load('tags', ['method' => Select\JoinableLoader::INLOAD])
-            ->orderBy(['id' => 'ASC', 'tags.id' => 'ASC']);
+        $selector->load('tags', [
+            'method'    => Select\JoinableLoader::INLOAD,
+            'constrain' => new Select\QueryConstrain([], ['id' => 'ASC'])
+        ])->orderBy(['id' => 'ASC']);
 
         $this->assertSame([
             [

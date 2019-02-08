@@ -254,7 +254,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
         }
 
         $cmd = $m->queueStore($entity, $node);
-        if (!$mode == TransactionInterface::MODE_CASCADE) {
+        if ($mode != TransactionInterface::MODE_CASCADE) {
             return $cmd;
         }
 
@@ -274,7 +274,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
     {
         $node = $this->heap->get($entity);
         if ($entity instanceof PromiseInterface || is_null($node)) {
-            // nothing to do
+            // nothing to do, what about promises?
             return new Nil();
         }
 

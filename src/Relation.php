@@ -44,7 +44,8 @@ final class Relation
     public const THOUGHT_INNER_KEY = 908;
     public const THOUGHT_OUTER_KEY = 909;
     public const THOUGHT_ENTITY    = 988888;
-    public const PIVOT_WHERE       = 911;
+    public const THOUGHT_CONSTRAIN = 911;
+    public const THOUGHT_WHERE     = 912;
 
     // Custom morph key
     public const MORPH_KEY = 903;

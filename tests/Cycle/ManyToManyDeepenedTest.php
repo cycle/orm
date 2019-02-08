@@ -334,12 +334,9 @@ abstract class ManyToManyDeepenedTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector
-            ->with('tags.@.image')
             ->load('tags.@.image')
             ->where('tags.@.image.url', 'second.png')
             ->orderBy('id', 'ASC');
-
-        $this->assertEquals(1, $selector->count());
 
         $this->assertSame([
             [
@@ -365,5 +362,47 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 ],
             ],
         ], $selector->fetchData());
+    }
+
+    public function testFilterByPivotedBranchUsing()
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $selector
+            ->with('tags', ['as' => 'tags'])
+            ->with('tags.@', ['as' => 'u_tags_pivot'])
+            ->with('tags.@.image', ['as' => 'tag_context_image'])
+            ->where('tags.@.image.url', 'second.png')
+            ->load('tags', ['using' => 'tags'])
+            ->load('tags.@', ['using' => 'u_tags_pivot'])
+            ->load('tags.@.image', ['using' => 'tag_context_image'])
+            ->orderBy('id', 'ASC');
+
+        $this->captureReadQueries();
+        $this->assertSame([
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'tags'    => [
+                    [
+                        'id'      => 3,
+                        'user_id' => 2,
+                        'tag_id'  => 3,
+                        'as'      => 'primary',
+                        'image'   => [
+                            'id'        => '2',
+                            'url'       => 'second.png',
+                            'parent_id' => '3',
+                        ],
+                        '@'       => [
+                            'id'   => 3,
+                            'name' => 'tag c',
+                        ],
+                    ],
+                ],
+            ],
+        ], $selector->fetchData());
+        $this->assertNumReads(1);
     }
 }

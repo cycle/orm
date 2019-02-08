@@ -36,6 +36,7 @@ class ManyToManyLoader extends JoinableLoader
         'method'    => self::POSTLOAD,
         'minify'    => true,
         'as'        => null,
+        'using'     => null,
         'where'     => null,
     ];
 
@@ -49,9 +50,7 @@ class ManyToManyLoader extends JoinableLoader
     {
         parent::__construct($orm, $name, $target, $schema);
 
-        // todo: extract pivot options
         unset($schema[Relation::CONSTRAIN]);
-
 
         $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THOUGHT_ENTITY], $schema);
     }
@@ -67,7 +66,7 @@ class ManyToManyLoader extends JoinableLoader
         $loader = parent::withContext($parent, $options);
         $loader->pivot = $loader->pivot->withContext(
             $loader,
-            ['method' => $options['method'] ?? self::JOIN]
+            ['method' => $options['method'] ?? self::JOIN] + ($options['pivot'] ?? [])
         );
 
         return $loader;
@@ -99,10 +98,15 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
+        if (!empty($this->options['using'])) {
+            // use pre-defined query
+            return parent::configureQuery($this->pivot->configureQuery($query), $outerKeys);
+        }
+
         // Manually join pivoted table
         if ($this->isJoined()) {
             $query->join(
-                $this->pivot->getJoinMethod(),
+                $this->getJoinMethod(),
                 $this->pivot->getJoinTable()
             )->on(
                 $this->pivot->localKey(Relation::THOUGHT_INNER_KEY),

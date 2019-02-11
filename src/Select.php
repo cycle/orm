@@ -16,6 +16,7 @@ use Spiral\Cycle\Select\LoaderInterface;
 use Spiral\Cycle\Select\QueryBuilder;
 use Spiral\Cycle\Select\RootLoader;
 use Spiral\Database\Query\SelectQuery;
+use Spiral\Pagination\PaginableInterface;
 
 /**
  * Query builder and entity selector. Mocks SelectQuery. Attention, Selector does not mount RootLoader scope by default.
@@ -30,15 +31,13 @@ use Spiral\Database\Query\SelectQuery;
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
  * @method $this orderBy($expression, $direction = 'ASC');
- * @method $this limit(int $limit)
- * @method $this offset(int $offset)
  *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-class Select implements \IteratorAggregate, \Countable
+class Select implements \IteratorAggregate, \Countable, PaginableInterface
 {
     /** @var ORMInterface @internal */
     private $orm;
@@ -118,6 +117,27 @@ class Select implements \IteratorAggregate, \Countable
         }
 
         return (int)$this->__call('count', [$column]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function limit(int $limit): self
+    {
+        $this->loader->getQuery()->distinct();
+        $this->loader->getQuery()->limit($limit);
+
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offset(int $offset): self
+    {
+        $this->loader->getQuery()->offset($offset);
+
+        return $this;
     }
 
     /**

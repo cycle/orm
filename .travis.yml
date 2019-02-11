@@ -9,10 +9,6 @@ php:
   - 7.1
   - 7.2
 
-matrix:
-  allow_failures:
-    - php: nightly
-
 env:
   - "DB=ALL COVERAGE=ALL"
 
@@ -36,20 +32,6 @@ jobs:
     # PHP 7.3 builds does not support SQLServer yet
     - stage: Test
       php: 7.3
-      env:
-        - "DB=postgres,mysql,sqlite"
-      before_install:
-        - cd tests
-        - docker-compose up -d
-        - cd ..
-      script:
-        - vendor/bin/phpunit tests/Cycle/Driver/SQLite
-        - vendor/bin/phpunit tests/Cycle/Driver/MySQL
-        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
-
-    # PHP Nightly builds does not support SQLServer yet
-    - stage: Test
-      php: nightly
       env:
         - "DB=postgres,mysql,sqlite"
       before_install:

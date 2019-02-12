@@ -58,7 +58,6 @@ abstract class SoftDeletesTest extends BaseTest
 
     public function testCreate()
     {
-        $this->enableProfiling();
         $u = new User();
         $u->email = 'test@email.com';
         $u->balance = 199;
@@ -73,7 +72,6 @@ abstract class SoftDeletesTest extends BaseTest
 
     public function testDelete()
     {
-        $this->enableProfiling();
         $u = new User();
         $u->email = 'test@email.com';
         $u->balance = 199;

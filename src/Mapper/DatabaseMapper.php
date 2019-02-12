@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Mapper;
 
-use Spiral\Cycle\Command\Branch\Split;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Command\Database\Delete;
@@ -108,60 +107,7 @@ abstract class DatabaseMapper implements MapperInterface
     /**
      * @inheritdoc
      */
-    public function queueStore($entity, Node $node): ContextCarrierInterface
-    {
-        if ($node->getStatus() == Node::NEW) {
-            $cmd = $this->queueCreate($entity, $node->getState());
-            $node->getState()->setCommand($cmd);
-
-            return $cmd;
-        }
-
-        $lastCommand = $node->getState()->getCommand();
-        if (empty($lastCommand)) {
-            return $this->queueUpdate($entity, $node->getState());
-        }
-
-        if ($lastCommand instanceof Split || $lastCommand instanceof Update) {
-            return $lastCommand;
-        }
-
-        // in cases where we have to update new entity we can merge two commands into one
-        $split = new Split($lastCommand, $this->queueUpdate($entity, $node->getState()));
-        $node->getState()->setCommand($split);
-
-        return $split;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function queueDelete($entity, Node $node): CommandInterface
-    {
-        $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
-        $node->getState()->setStatus(Node::SCHEDULED_DELETE);
-        $node->getState()->decClaim();
-
-        $delete->waitScope($this->primaryColumn);
-        $node->forward(
-            $this->primaryKey,
-            $delete,
-            $this->primaryColumn,
-            true,
-            ConsumerInterface::SCOPE
-        );
-
-        return $delete;
-    }
-
-    /**
-     * Generate command or chain of commands needed to insert entity into the database.
-     *
-     * @param object $entity
-     * @param State  $state
-     * @return ContextCarrierInterface
-     */
-    protected function queueCreate($entity, State $state): ContextCarrierInterface
+    public function queueCreate($entity, State $state): ContextCarrierInterface
     {
         $columns = $this->fetchFields($entity);
 
@@ -169,7 +115,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_INSERT);
         $state->setData($columns);
 
-        $columns[$this->primaryKey] = $this->generatePrimaryKey();
+        $columns[$this->primaryKey] = $this->nextPrimaryKey();
         if (is_null($columns[$this->primaryKey])) {
             unset($columns[$this->primaryKey]);
         }
@@ -190,13 +136,9 @@ abstract class DatabaseMapper implements MapperInterface
     }
 
     /**
-     * Generate command or chain of commands needed to update entity in the database.
-     *
-     * @param object $entity
-     * @param State  $state
-     * @return ContextCarrierInterface
+     * @inheritdoc
      */
-    protected function queueUpdate($entity, State $state): ContextCarrierInterface
+    public function queueUpdate($entity, State $state): ContextCarrierInterface
     {
         $data = $this->fetchFields($entity);
 
@@ -223,11 +165,32 @@ abstract class DatabaseMapper implements MapperInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function queueDelete($entity, State $state): CommandInterface
+    {
+        $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
+        $state->setStatus(Node::SCHEDULED_DELETE);
+        $state->decClaim();
+
+        $delete->waitScope($this->primaryColumn);
+        $state->forward(
+            $this->primaryKey,
+            $delete,
+            $this->primaryColumn,
+            true,
+            ConsumerInterface::SCOPE
+        );
+
+        return $delete;
+    }
+
+    /**
      * Generate next sequential entity ID. Return null to use autoincrement value.
      *
      * @return mixed|null
      */
-    protected function generatePrimaryKey()
+    protected function nextPrimaryKey()
     {
         return null;
     }

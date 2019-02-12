@@ -59,6 +59,12 @@ abstract class ORMTest extends BaseTest
         $this->assertNumReads(0);
     }
 
+    public function testORMClone()
+    {
+        $orm = $this->orm->withFactory($this->orm->getFactory());
+        $this->assertNotSame($orm, $this->orm);
+    }
+
     public function testORMGetByRole()
     {
         $this->assertNull($this->orm->get('user', 1, false));

@@ -12,7 +12,7 @@ namespace Spiral\Cycle\Mapper;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Exception\MapperException;
-use Spiral\Cycle\Heap\Node;
+use Spiral\Cycle\Heap\State;
 
 /**
  * Provides basic capabilities for CRUD operations with given entity class (role).
@@ -65,21 +65,32 @@ interface MapperInterface
      * Initiate chain of commands require to store object and it's data into persistent storage.
      *
      * @param object $entity
-     * @param Node   $node
+     * @param State  $state
      * @return ContextCarrierInterface
      *
      * @throws MapperException
      */
-    public function queueStore($entity, Node $node): ContextCarrierInterface;
+    public function queueCreate($entity, State $state): ContextCarrierInterface;
+
+    /**
+     * Initiate chain of commands required to update object in the persistent storage.
+     *
+     * @param object $entity
+     * @param State  $state
+     * @return ContextCarrierInterface
+     *
+     * @throws MapperException
+     */
+    public function queueUpdate($entity, State $state): ContextCarrierInterface;
 
     /**
      * Initiate sequence of of commands required to delete object from the persistent storage.
      *
      * @param object $entity
-     * @param Node   $node
+     * @param State  $state
      * @return CommandInterface
      *
      * @throws MapperException
      */
-    public function queueDelete($entity, Node $node): CommandInterface;
+    public function queueDelete($entity, State $state): CommandInterface;
 }

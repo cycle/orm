@@ -14,7 +14,7 @@ use Spiral\Cycle\Command\CommandInterface;
 /**
  * Execute branch only if condition is met.
  */
-class Condition implements CommandInterface, \IteratorAggregate
+final class Condition implements CommandInterface, \IteratorAggregate
 {
     /** @var CommandInterface */
     private $command;

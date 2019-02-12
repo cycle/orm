@@ -18,7 +18,7 @@ class UUIDMapper extends Mapper
     /**
      * Generate entity primary key value.
      */
-    public function generatePrimaryKey()
+    public function nextPrimaryKey()
     {
         try {
             return Uuid::uuid4()->toString();

@@ -18,7 +18,7 @@ use Spiral\Cycle\Command\ContextCarrierInterface;
  *
  * Handlers are attached to the head command since we can guarantee that head would always be executed.
  */
-class Split implements ContextCarrierInterface, \IteratorAggregate
+final class Split implements ContextCarrierInterface, \IteratorAggregate
 {
     /** @var ContextCarrierInterface */
     private $head;

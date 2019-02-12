@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Command\Database;
 
-use Spiral\Cycle\Command\ContextCarrierInterface;
 use Spiral\Cycle\Command\DatabaseCommand;
+use Spiral\Cycle\Command\InitCarrierInterface;
 use Spiral\Cycle\Command\Traits\ContextTrait;
 use Spiral\Cycle\Command\Traits\ErrorTrait;
 use Spiral\Cycle\Context\ConsumerInterface;
@@ -21,7 +21,7 @@ use Spiral\Database\DatabaseInterface;
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class Insert extends DatabaseCommand implements ContextCarrierInterface, ProducerInterface
+class Insert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
 {
     use ContextTrait, ErrorTrait;
 

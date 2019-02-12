@@ -10,8 +10,10 @@ declare(strict_types=1);
 namespace Spiral\Cycle;
 
 use Spiral\Cycle\Command\Branch\Nil;
+use Spiral\Cycle\Command\Branch\Split;
 use Spiral\Cycle\Command\CommandInterface;
 use Spiral\Cycle\Command\ContextCarrierInterface;
+use Spiral\Cycle\Command\InitCarrierInterface;
 use Spiral\Cycle\Exception\ORMException;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Heap\HeapInterface;
@@ -244,16 +246,16 @@ class ORM implements ORMInterface, SourceFactoryInterface
             return new Nil();
         }
 
-        $m = $this->getMapper($entity);
+        $mapper = $this->getMapper($entity);
 
         $node = $this->heap->get($entity);
         if (is_null($node)) {
             // automatic entity registration
-            $node = new Node(Node::NEW, [], $m->getRole());
+            $node = new Node(Node::NEW, [], $mapper->getRole());
             $this->heap->attach($entity, $node);
         }
 
-        $cmd = $m->queueStore($entity, $node);
+        $cmd = $this->store($mapper, $entity, $node);
         if ($mode != TransactionInterface::MODE_CASCADE) {
             return $cmd;
         }
@@ -263,7 +265,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
             $cmd,
             $entity,
             $node,
-            $m->extract($entity)
+            $mapper->extract($entity)
         );
     }
 
@@ -279,7 +281,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
         }
 
         // currently we rely on db to delete all nested records (or soft deletes)
-        return $this->getMapper($node->getRole())->queueDelete($entity, $node);
+        return $this->getMapper($node->getRole())->queueDelete($entity, $node->getState());
     }
 
     /**
@@ -332,5 +334,37 @@ class ORM implements ORMInterface, SourceFactoryInterface
         }
 
         return $this->relmaps[$role] = new RelationMap($this, $relations);
+    }
+
+    /**
+     * @param MapperInterface $mapper
+     * @param object          $entity
+     * @param Node            $node
+     * @return ContextCarrierInterface
+     */
+    protected function store(MapperInterface $mapper, $entity, Node $node): ContextCarrierInterface
+    {
+        if ($node->getStatus() == Node::NEW) {
+            $cmd = $mapper->queueCreate($entity, $node->getState());
+            $node->getState()->setCommand($cmd);
+
+            return $cmd;
+        }
+
+        $lastCommand = $node->getState()->getCommand();
+        if (empty($lastCommand)) {
+            return $mapper->queueUpdate($entity, $node->getState());
+        }
+
+        // Command can aggregate multiple operations on soft basis.
+        if (!$lastCommand instanceof InitCarrierInterface) {
+            return $lastCommand;
+        }
+
+        // in cases where we have to update new entity we can merge two commands into one
+        $split = new Split($lastCommand, $mapper->queueUpdate($entity, $node->getState()));
+        $node->getState()->setCommand($split);
+
+        return $split;
     }
 }

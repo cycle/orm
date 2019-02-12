@@ -230,9 +230,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelConstrain::class
-                ]
+                Schema::CONSTRAIN   => SortByLevelConstrain::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -305,9 +303,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelDESCConstrain::class
-                ]
+                Schema::CONSTRAIN   => SortByLevelDESCConstrain::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -380,9 +376,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelDESCConstrain::class
-                ]
+                Schema::CONSTRAIN   => SortByLevelDESCConstrain::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -457,9 +451,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelConstrain::class
-                ]
+                Schema::CONSTRAIN   => SortByLevelConstrain::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -532,9 +524,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => SortByLevelDESCConstrain::class
-                ]
+                Schema::CONSTRAIN   => SortByLevelDESCConstrain::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',

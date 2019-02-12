@@ -78,7 +78,7 @@ abstract class InverseRelationTest extends BaseTest
                         ],
                     ]
                 ],
-                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
+                Schema::CONSTRAIN   => SortByIDConstrain::class
             ],
             Profile::class => [
                 Schema::ROLE        => 'profile',
@@ -99,7 +99,7 @@ abstract class InverseRelationTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
+                Schema::CONSTRAIN   => SortByIDConstrain::class
             ],
         ]));
     }

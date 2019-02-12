@@ -1,10 +1,13 @@
 <?php
-declare(strict_types=1);/**
+declare(strict_types=1);
+/**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- */namespace Spiral\Cycle\Tests;
+ */
+
+namespace Spiral\Cycle\Tests;
 
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
@@ -102,7 +105,7 @@ abstract class UUIDTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByMsgConstrain::class]
+                Schema::CONSTRAIN   => SortByMsgConstrain::class
             ]
         ]));
     }
@@ -391,7 +394,7 @@ abstract class UUIDTest extends BaseTest
          */
         list($b, $a) = $selector->load('comments', [
             'method' => Select\JoinableLoader::INLOAD,
-            'as'  => 'comment'
+            'as'     => 'comment'
         ])->orderBy('user.email')->fetchAll();
 
         $this->assertCount(1, $a->comments);

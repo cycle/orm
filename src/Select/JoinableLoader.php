@@ -30,17 +30,24 @@ abstract class JoinableLoader extends AbstractLoader
      * @var array
      */
     protected $options = [
-        'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
+        // true or instance to enable, false or null to disable
+        'constrain' => true,
+
         // scope to be used for the relation
         'method'    => null,
+
         // load method, see AbstractLoader constants
         'minify'    => true,
+
         // when true all loader columns will be minified (only for loading)
         'as'        => null,
+
         // table alias
         'using'     => null,
+
         // alias used by another relation
         'where'     => null,
+
         // where conditions (if any)
     ];
 
@@ -59,7 +66,7 @@ abstract class JoinableLoader extends AbstractLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $target);
-        $this->options['constrain'] = $schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        $this->options['constrain'] = $schema[Relation::CONSTRAIN] ?? true;
         $this->name = $name;
         $this->schema = $schema;
     }
@@ -112,8 +119,7 @@ abstract class JoinableLoader extends AbstractLoader
             if ($loader->options['constrain'] instanceof ConstrainInterface) {
                 $loader->constrain = $loader->options['constrain'];
             } else {
-                // we have to automatically constrain the loader query
-                $loader->constrain = $this->getSource()->getConstrain($loader->options['constrain']);
+                $loader->constrain = $this->getSource()->getConstrain();
             }
         }
 

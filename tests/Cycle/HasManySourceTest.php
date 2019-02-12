@@ -276,9 +276,7 @@ abstract class HasManySourceTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => LeveledHasManyConstrain::class
-                ]
+                Schema::CONSTRAIN   => LeveledHasManyConstrain::class
             ]
         ]));
 
@@ -329,9 +327,7 @@ abstract class HasManySourceTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => LeveledHasManyConstrain::class
-                ]
+                Schema::CONSTRAIN   => LeveledHasManyConstrain::class
             ]
         ]));
 
@@ -385,9 +381,7 @@ abstract class HasManySourceTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => LeveledHasManyConstrain::class
-                ]
+                Schema::CONSTRAIN   => LeveledHasManyConstrain::class
             ]
         ]));
 
@@ -439,9 +433,7 @@ abstract class HasManySourceTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => ShortLeveledHasManyConstrain::class
-                ]
+                Schema::CONSTRAIN   => ShortLeveledHasManyConstrain::class
             ]
         ]));
 

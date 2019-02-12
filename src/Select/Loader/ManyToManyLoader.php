@@ -17,7 +17,6 @@ use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
 use Spiral\Cycle\Select\LoaderInterface;
-use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Cycle\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
@@ -32,7 +31,7 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
+        'constrain' => true,
         'method'    => self::POSTLOAD,
         'minify'    => true,
         'as'        => null,

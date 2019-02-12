@@ -19,8 +19,8 @@ final class Source implements SourceInterface
     /** @var string */
     private $table;
 
-    /** @var ConstrainInterface[] */
-    private $constrains = [];
+    /** @var ConstrainInterface|null */
+    private $constrain = null;
 
     /**
      * @param DatabaseInterface $database
@@ -51,10 +51,10 @@ final class Source implements SourceInterface
     /**
      * @inheritdoc
      */
-    public function withConstrain(string $name, ?ConstrainInterface $constrain): SourceInterface
+    public function withConstrain(?ConstrainInterface $constrain): SourceInterface
     {
         $source = clone $this;
-        $source->constrains[$name] = $constrain;
+        $source->constrain = $constrain;
 
         return $source;
     }
@@ -62,8 +62,8 @@ final class Source implements SourceInterface
     /**
      * @inheritdoc
      */
-    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface
+    public function getConstrain(): ?ConstrainInterface
     {
-        return $this->constrains[$name] ?? null;
+        return $this->constrain;
     }
 }

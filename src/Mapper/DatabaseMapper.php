@@ -97,7 +97,7 @@ abstract class DatabaseMapper implements MapperInterface
         }
 
         $selector = new Select($this->orm, $this->role);
-        $selector->constrain($this->source->getConstrain(Select\SourceInterface::DEFAULT_CONSTRAIN));
+        $selector->constrain($this->source->getConstrain());
 
         $repositoryClass = $this->orm->getSchema()->define($this->role, Schema::REPOSITORY) ?? Repository::class;
 

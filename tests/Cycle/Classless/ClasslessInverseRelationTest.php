@@ -65,7 +65,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::RELATIONS => [
                     'profile' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => 'profile',
@@ -76,7 +76,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
                         ],
                     ]
                 ],
-                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
+                Schema::CONSTRAIN =>  SortByIDConstrain::class
             ],
             'profile' => [
                 Schema::MAPPER      => StdMapper::class,
@@ -96,7 +96,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
+                Schema::CONSTRAIN   => SortByIDConstrain::class
             ],
         ]));
     }

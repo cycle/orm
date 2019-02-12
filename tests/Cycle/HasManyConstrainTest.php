@@ -393,7 +393,7 @@ abstract class HasManyConstrainTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::RELATIONS => [
                     'comments' => [
                         Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
@@ -404,7 +404,7 @@ abstract class HasManyConstrainTest extends BaseTest
                             ] + $relationSchema,
                     ]
                 ],
-                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
+                Schema::CONSTRAIN =>  SortByIDConstrain::class
             ],
             Comment::class => [
                 Schema::ROLE        => 'comment',

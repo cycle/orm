@@ -91,7 +91,7 @@ abstract class HasManyPromiseTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class]
+                Schema::CONSTRAIN   =>  SortByIDConstrain::class
 
             ]
         ]));

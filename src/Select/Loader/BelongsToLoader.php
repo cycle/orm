@@ -9,14 +9,12 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Select\Loader;
 
-use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Parser\AbstractNode;
 use Spiral\Cycle\Parser\SingularNode;
 use Spiral\Cycle\Parser\Typecast;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
-use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
@@ -31,24 +29,13 @@ class BelongsToLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'method' => self::POSTLOAD,
-        'minify' => true,
-        'as'     => null,
-        'using'  => null,
-        'where'  => null,
+        'constrain' => true,
+        'method'    => self::POSTLOAD,
+        'minify'    => true,
+        'as'        => null,
+        'using'     => null,
+        'where'     => null,
     ];
-
-    /**
-     * @param ORMInterface $orm
-     * @param string       $name
-     * @param string       $target
-     * @param array        $schema
-     */
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
-    {
-        parent::__construct($orm, $name, $target, $schema);
-        $this->constrain = $this->getSource()->getConstrain(SourceInterface::DEFAULT_CONSTRAIN);
-    }
 
     /**
      * {@inheritdoc}

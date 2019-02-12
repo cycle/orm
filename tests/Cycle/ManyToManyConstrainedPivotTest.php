@@ -205,9 +205,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
     public function testLoadRelationOrderByPivotColumn()
     {
         $this->orm = $this->withPivotSchema([
-            Schema::CONSTRAINS => [
-                Select\Source::DEFAULT_CONSTRAIN => SortByLevelDESCConstrain::class,
-            ]
+            Schema::CONSTRAIN => SortByLevelDESCConstrain::class,
         ]);
 
         $selector = new Select($this->orm, User::class);

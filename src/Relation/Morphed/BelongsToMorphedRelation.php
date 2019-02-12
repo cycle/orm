@@ -19,7 +19,6 @@ use Spiral\Cycle\Promise\ProxyFactoryInterface;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Relation\BelongsToRelation;
 use Spiral\Cycle\Select\ConstrainInterface;
-use Spiral\Cycle\Select\SourceInterface;
 
 class BelongsToMorphedRelation extends BelongsToRelation
 {
@@ -101,12 +100,16 @@ class BelongsToMorphedRelation extends BelongsToRelation
      */
     protected function getTargetConstrain(string $target): ?ConstrainInterface
     {
-        $constrain = $this->schema[Relation::CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        $constrain = $this->schema[Relation::CONSTRAIN] ?? true;
         if ($constrain instanceof ConstrainInterface) {
             return $constrain;
         }
 
-        return $this->getSource($target)->getConstrain($constrain);
+        if ($constrain === null) {
+            return null;
+        }
+
+        return $this->getSource($target)->getConstrain();
     }
 
     /**

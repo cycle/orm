@@ -130,9 +130,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    Select\Source::DEFAULT_CONSTRAIN => SortByIDConstrain::class
-                ]
+                Schema::CONSTRAIN   => SortByIDConstrain::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',

@@ -120,8 +120,9 @@ class Factory implements FactoryInterface, SourceFactoryInterface
             'table'    => $this->schema->define($role, Schema::TABLE),
         ]);
 
-        foreach ($this->schema->define($role, Schema::CONSTRAINS) ?? [] as $name => $constrain) {
-            $source = $source->withConstrain($name, $this->factory->make($constrain));
+        $constrain = $this->schema->define($role, Schema::CONSTRAIN);
+        if ($constrain !== null) {
+            $source = $source->withConstrain($this->factory->make($constrain));
         }
 
         return $source;

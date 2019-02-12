@@ -16,9 +16,6 @@ use Spiral\Database\DatabaseInterface;
  */
 interface SourceInterface
 {
-    // points to the scope which must be applied to all queries
-    public const DEFAULT_CONSTRAIN = '@default';
-
     /**
      * Get database associated with the entity.
      *
@@ -34,19 +31,17 @@ interface SourceInterface
     public function getTable(): string;
 
     /**
-     * Create version of source with newly added/removed constrain.
+     * Associate query constrain (or remove association).
      *
-     * @param string                  $name
      * @param ConstrainInterface|null $constrain
      * @return SourceInterface
      */
-    public function withConstrain(string $name, ?ConstrainInterface $constrain): SourceInterface;
+    public function withConstrain(?ConstrainInterface $constrain): SourceInterface;
 
     /**
-     * Return named query constrain or return null.
+     * Return associated query constrain.
      *
-     * @param string $name
      * @return ConstrainInterface|null
      */
-    public function getConstrain(string $name = self::DEFAULT_CONSTRAIN): ?ConstrainInterface;
+    public function getConstrain(): ?ConstrainInterface;
 }

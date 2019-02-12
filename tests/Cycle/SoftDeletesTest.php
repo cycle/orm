@@ -12,7 +12,6 @@ namespace Spiral\Cycle\Tests;
 use Spiral\Cycle\Heap\Heap;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Cycle\Tests\Fixtures\NotDeletedConstrain;
 use Spiral\Cycle\Tests\Fixtures\SoftDeletedMapper;
 use Spiral\Cycle\Tests\Fixtures\User;
@@ -49,10 +48,7 @@ abstract class SoftDeletesTest extends BaseTest
                 ],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAINS  => [
-                    // todo: WHY DO I NEED IT?
-                    SourceInterface::DEFAULT_CONSTRAIN => NotDeletedConstrain::class
-                ]
+                Schema::CONSTRAIN   => NotDeletedConstrain::class
             ]
         ]));
     }

@@ -16,7 +16,6 @@ use Spiral\Cycle\Parser\Typecast;
 use Spiral\Cycle\Relation;
 use Spiral\Cycle\Schema;
 use Spiral\Cycle\Select\JoinableLoader;
-use Spiral\Cycle\Select\SourceInterface;
 use Spiral\Cycle\Select\Traits\WhereTrait;
 use Spiral\Database\Query\SelectQuery;
 
@@ -33,7 +32,7 @@ class PivotLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'constrain' => SourceInterface::DEFAULT_CONSTRAIN,
+        'constrain' => true,
         'method'    => self::JOIN,
         'minify'    => true,
         'as'        => null,
@@ -46,7 +45,7 @@ class PivotLoader extends JoinableLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->options['constrain'] = $schema[Relation::THOUGHT_CONSTRAIN] ?? SourceInterface::DEFAULT_CONSTRAIN;
+        $this->options['constrain'] = $schema[Relation::THOUGHT_CONSTRAIN] ?? true;
     }
 
     /**

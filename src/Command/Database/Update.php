@@ -94,11 +94,10 @@ class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCa
     /**
      * {@inheritdoc}
      */
-    protected function isEmpty(): bool
+    public function isEmpty(): bool
     {
         return (empty($this->data) && empty($this->context)) || empty($this->scope);
     }
-
 
     /**
      * @inheritdoc

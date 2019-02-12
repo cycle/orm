@@ -53,27 +53,31 @@ final class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    public function persist($entity, int $mode = self::MODE_CASCADE)
+    public function persist($entity, int $mode = self::MODE_CASCADE): self
     {
         if ($this->known->offsetExists($entity)) {
-            return;
+            return $this;
         }
-        $this->known->offsetSet($entity, true);
 
+        $this->known->offsetSet($entity, true);
         $this->persist[] = [$entity, $mode];
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete($entity, int $mode = self::MODE_CASCADE)
+    public function delete($entity, int $mode = self::MODE_CASCADE): self
     {
         if ($this->known->offsetExists($entity)) {
-            return;
+            return $this;
         }
-        $this->known->offsetSet($entity, true);
 
+        $this->known->offsetSet($entity, true);
         $this->delete[] = [$entity, $mode];
+
+        return $this;
     }
 
     /**

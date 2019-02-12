@@ -33,16 +33,18 @@ final class CommandGenerator
             return new Nil();
         }
 
+        $state = $node->getState();
+
         if ($node->getStatus() == Node::NEW) {
-            $cmd = $mapper->queueCreate($entity, $node->getState());
-            $node->getState()->setCommand($cmd);
+            $cmd = $mapper->queueCreate($entity, $state);
+            $state->setCommand($cmd);
 
             return $cmd;
         }
 
-        $lastCommand = $node->getState()->getCommand();
+        $lastCommand = $state->getCommand();
         if (empty($lastCommand)) {
-            return $mapper->queueUpdate($entity, $node->getState());
+            return $mapper->queueUpdate($entity, $state);
         }
 
         // Command can aggregate multiple operations on soft basis.
@@ -51,8 +53,8 @@ final class CommandGenerator
         }
 
         // in cases where we have to update new entity we can merge two commands into one
-        $split = new Split($lastCommand, $mapper->queueUpdate($entity, $node->getState()));
-        $node->getState()->setCommand($split);
+        $split = new Split($lastCommand, $mapper->queueUpdate($entity, $state));
+        $state->setCommand($split);
 
         return $split;
 

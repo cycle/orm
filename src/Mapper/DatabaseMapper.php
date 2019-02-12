@@ -107,7 +107,7 @@ abstract class DatabaseMapper implements MapperInterface
     /**
      * @inheritdoc
      */
-    public function queueCreate($entity, State $state): ContextCarrierInterface
+    public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface
     {
         $columns = $this->fetchFields($entity);
 
@@ -138,7 +138,7 @@ abstract class DatabaseMapper implements MapperInterface
     /**
      * @inheritdoc
      */
-    public function queueUpdate($entity, State $state): ContextCarrierInterface
+    public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface
     {
         $data = $this->fetchFields($entity);
 
@@ -167,7 +167,7 @@ abstract class DatabaseMapper implements MapperInterface
     /**
      * @inheritdoc
      */
-    public function queueDelete($entity, State $state): CommandInterface
+    public function queueDelete($entity, Node $node, State $state): CommandInterface
     {
         $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
         $state->setStatus(Node::SCHEDULED_DELETE);

@@ -18,7 +18,7 @@ use Spiral\Cycle\Mapper\Mapper;
 
 class SoftDeletedMapper extends Mapper
 {
-    public function queueDelete($entity, State $state): CommandInterface
+    public function queueDelete($entity, Node $node, State $state): CommandInterface
     {
         $state->setStatus(Node::SCHEDULED_DELETE);
         $state->decClaim();

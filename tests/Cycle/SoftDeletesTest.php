@@ -50,6 +50,7 @@ abstract class SoftDeletesTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
                 Schema::CONSTRAINS  => [
+                    // todo: WHY DO I NEED IT?
                     SourceInterface::DEFAULT_CONSTRAIN => NotDeletedConstrain::class
                 ]
             ]

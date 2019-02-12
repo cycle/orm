@@ -36,7 +36,7 @@ final class CommandGenerator
         $state = $node->getState();
 
         if ($node->getStatus() == Node::NEW) {
-            $cmd = $mapper->queueCreate($entity, $state);
+            $cmd = $mapper->queueCreate($entity, $node, $state);
             $state->setCommand($cmd);
 
             return $cmd;
@@ -44,7 +44,7 @@ final class CommandGenerator
 
         $tail = $state->getCommand();
         if ($tail === null) {
-            return $mapper->queueUpdate($entity, $state);
+            return $mapper->queueUpdate($entity, $node, $state);
         }
 
         // Command can aggregate multiple operations on soft basis.
@@ -53,7 +53,7 @@ final class CommandGenerator
         }
 
         // in cases where we have to update new entity we can merge two commands into one
-        $split = new Split($tail, $mapper->queueUpdate($entity, $state));
+        $split = new Split($tail, $mapper->queueUpdate($entity, $node, $state));
         $state->setCommand($split);
 
         return $split;
@@ -65,6 +65,6 @@ final class CommandGenerator
     public function generateDelete(MapperInterface $mapper, $entity, Node $node): CommandInterface
     {
         // currently we rely on db to delete all nested records (or soft deletes)
-        return $mapper->queueDelete($entity, $node->getState());
+        return $mapper->queueDelete($entity, $node, $node->getState());
     }
 }

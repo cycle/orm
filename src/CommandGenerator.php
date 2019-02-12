@@ -42,22 +42,21 @@ final class CommandGenerator
             return $cmd;
         }
 
-        $lastCommand = $state->getCommand();
-        if (empty($lastCommand)) {
+        $tail = $state->getCommand();
+        if ($tail === null) {
             return $mapper->queueUpdate($entity, $state);
         }
 
         // Command can aggregate multiple operations on soft basis.
-        if (!$lastCommand instanceof InitCarrierInterface) {
-            return $lastCommand;
+        if (!$tail instanceof InitCarrierInterface) {
+            return $tail;
         }
 
         // in cases where we have to update new entity we can merge two commands into one
-        $split = new Split($lastCommand, $mapper->queueUpdate($entity, $state));
+        $split = new Split($tail, $mapper->queueUpdate($entity, $state));
         $state->setCommand($split);
 
         return $split;
-
     }
 
     /**

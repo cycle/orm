@@ -69,6 +69,11 @@ class User implements ImagedInterface
         $this->favorites = new PivotedCollection();
     }
 
+    public function getID()
+    {
+        return $this->id;
+    }
+
     public function addComment(Comment $c)
     {
         $this->lastComment = $c;

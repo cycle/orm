@@ -12,16 +12,12 @@ namespace Spiral\Cycle\Tests\Fixtures;
 
 use Spiral\Cycle\Mapper\Mapper;
 use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Promise\PromiseOne;
 use Spiral\Cycle\Promise\ProxyFactoryInterface;
 
 class UserMapperWithProxy extends Mapper implements ProxyFactoryInterface
 {
     public function makeProxy(array $scope): ?PromiseInterface
     {
-        $p = new PromiseOne($this->orm, $this->role, $scope);
-        $p->setConstrain($this->orm->getSource($this->role)->getConstrain());
-
-        return new UserProxy($p);
+        return new UserProxy($this->orm, $this->role, $scope, $this->orm->getSource($this->role)->getConstrain());
     }
 }

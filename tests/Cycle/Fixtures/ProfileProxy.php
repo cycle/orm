@@ -9,16 +9,76 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Tests\Fixtures;
 
+use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Promise\Traits\ProxyTrait;
+use Spiral\Cycle\Select;
 
 class ProfileProxy extends Profile implements PromiseInterface
 {
-    use ProxyTrait;
+    /** @var ORMInterface|null @internal */
+    private $__orm;
 
-    public function __construct(PromiseInterface $promise)
+    /** @var string|null */
+    private $__target;
+
+    /** @var Select\ConstrainInterface|null */
+    private $__constrain;
+
+    /** @var array */
+    private $__scope;
+
+    /**
+     * @param ORMInterface $orm
+     * @param string       $target
+     * @param array        $scope
+     */
+    public function __construct(ORMInterface $orm, string $target, array $scope, ?Select\ConstrainInterface $constrain)
     {
-        $this->promise = $promise;
+        $this->__orm = $orm;
+        $this->__target = $target;
+        $this->__scope = $scope;
+        $this->__constrain = $constrain;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __loaded(): bool
+    {
+        return empty($this->__orm);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __role(): string
+    {
+        return $this->__target;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __scope(): array
+    {
+        return $this->__scope;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __resolve()
+    {
+        if (!is_null($this->__orm)) {
+            $select = new Select($this->__orm, $this->__target);
+            $data = $select->constrain($this->__constrain)->where($this->__scope)->fetchData();
+
+            $this->__orm->getMapper($this->__target)->hydrate($this, $data[0]);
+
+            $this->__orm = null;
+        }
+
+        return $this;
     }
 
     public function getID()

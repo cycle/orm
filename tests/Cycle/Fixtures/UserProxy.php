@@ -37,8 +37,6 @@ class UserProxy extends User implements PromiseInterface
         $this->__orm = $orm;
         $this->__target = $target;
         $this->__scope = $scope;
-
-        parent::__construct();
     }
 
     /**

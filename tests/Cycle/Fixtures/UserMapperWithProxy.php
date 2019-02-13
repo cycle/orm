@@ -18,6 +18,6 @@ class UserMapperWithProxy extends Mapper implements ProxyFactoryInterface
 {
     public function makeProxy(array $scope): ?PromiseInterface
     {
-        return new UserProxy($this->orm, $this->role, $scope, $this->orm->getSource($this->role)->getConstrain());
+        return new UserProxy($this->orm, $this->role, $scope);
     }
 }

@@ -18,4 +18,14 @@ class Profile
 
     /** @var User */
     public $user;
+
+    public function getID()
+    {
+        return $this->id;
+    }
+
+    public function getImage()
+    {
+        return $this->image;
+    }
 }

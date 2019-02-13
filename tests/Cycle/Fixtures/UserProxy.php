@@ -12,7 +12,6 @@ namespace Spiral\Cycle\Tests\Fixtures;
 use Spiral\Cycle\ORMInterface;
 use Spiral\Cycle\Promise\PromiseInterface;
 use Spiral\Cycle\Select;
-use Spiral\Cycle\Select\ConstrainInterface;
 
 class UserProxy extends User implements PromiseInterface
 {
@@ -22,23 +21,22 @@ class UserProxy extends User implements PromiseInterface
     /** @var string|null */
     private $__target;
 
-    /** @var ConstrainInterface|null */
-    private $__constrain;
-
     /** @var array */
     private $__scope;
+
+    /** @var User */
+    private $__resolved;
 
     /**
      * @param ORMInterface $orm
      * @param string       $target
      * @param array        $scope
      */
-    public function __construct(ORMInterface $orm, string $target, array $scope, ?ConstrainInterface $constrain)
+    public function __construct(ORMInterface $orm, string $target, array $scope)
     {
         $this->__orm = $orm;
         $this->__target = $target;
         $this->__scope = $scope;
-        $this->__constrain = $constrain;
 
         parent::__construct();
     }
@@ -73,28 +71,34 @@ class UserProxy extends User implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->__orm)) {
-            $select = new Select($this->__orm, $this->__target);
-            $data = $select->constrain($this->__constrain)->where($this->__scope)->fetchData();
+            $key = key($this->__scope);
+            $value = $this->__scope[$key];
 
-            $this->__orm->getMapper($this->__target)->hydrate($this, $data[0]);
+            // entity has already been loaded in memory
+            if (!is_null($e = $this->__orm->getHeap()->find($this->__target, $key, $value))) {
+                $this->__orm = null;
+                return $this->__resolved = $e;
+            }
+
+            // Fetching from the database
+            $select = new Select($this->__orm, $this->__target);
+            $this->__resolved = $select->constrain(
+                $this->__orm->getSource($this->__target)->getConstrain()
+            )->fetchOne($this->__scope);
 
             $this->__orm = null;
         }
 
-        return $this;
+        return $this->__resolved;
     }
 
     public function getID()
     {
-        $this->__resolve();
-
-        return parent::getID();
+        return $this->__resolve()->getID();
     }
 
     public function addComment(Comment $c)
     {
-        $this->__resolve();
-
-        return parent::addComment($c);
+        return $this->__resolve()->addComment($c);
     }
 }

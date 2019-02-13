@@ -17,6 +17,6 @@ class ProfileMapperWithProxy extends Mapper implements ProxyFactoryInterface
 {
     public function makeProxy(array $scope): ?PromiseInterface
     {
-        return new ProfileProxy($this->orm, $this->role, $scope, $this->orm->getSource($this->role)->getConstrain());
+        return new ProfileProxy($this->orm, $this->role, $scope);
     }
 }

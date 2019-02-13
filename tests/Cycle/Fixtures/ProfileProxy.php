@@ -21,9 +21,6 @@ class ProfileProxy extends Profile implements PromiseInterface
     /** @var string|null */
     private $__target;
 
-    /** @var Select\ConstrainInterface|null */
-    private $__constrain;
-
     /** @var array */
     private $__scope;
 
@@ -32,12 +29,11 @@ class ProfileProxy extends Profile implements PromiseInterface
      * @param string       $target
      * @param array        $scope
      */
-    public function __construct(ORMInterface $orm, string $target, array $scope, ?Select\ConstrainInterface $constrain)
+    public function __construct(ORMInterface $orm, string $target, array $scope)
     {
         $this->__orm = $orm;
         $this->__target = $target;
         $this->__scope = $scope;
-        $this->__constrain = $constrain;
     }
 
     /**
@@ -71,7 +67,9 @@ class ProfileProxy extends Profile implements PromiseInterface
     {
         if (!is_null($this->__orm)) {
             $select = new Select($this->__orm, $this->__target);
-            $data = $select->constrain($this->__constrain)->where($this->__scope)->fetchData();
+            $data = $select->constrain(
+                $this->__orm->getSource($this->__target)->getConstrain()
+            )->where($this->__scope)->fetchData();
 
             $this->__orm->getMapper($this->__target)->hydrate($this, $data[0]);
 
@@ -83,11 +81,15 @@ class ProfileProxy extends Profile implements PromiseInterface
 
     public function getID()
     {
-        return $this->__resolve()->id;
+        $this->__resolve();
+
+        return parent::getID();
     }
 
     public function getImage()
     {
-        return $this->__resolve()->image;
+        $this->__resolve();
+
+        return parent::getImage();
     }
 }

@@ -14,7 +14,7 @@ class NullLocator implements LocatorInterface
     /**
      * @inheritdoc
      */
-    public function getDeclarations(): array
+    public function getEntities(): array
     {
         return [];
     }

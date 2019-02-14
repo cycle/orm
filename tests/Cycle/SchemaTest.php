@@ -19,7 +19,8 @@ class SchemaTest extends TestCase
     {
         $schema = new Schema([
             User::class => [
-                1 => 'value'
+                1            => 'value',
+                Schema::ROLE => 'user'
             ]
         ]);
 
@@ -44,7 +45,8 @@ class SchemaTest extends TestCase
     {
         $schema = new Schema([
             User::class => [
-                1 => 'value'
+                1            => 'value',
+                Schema::ROLE => 'user'
             ]
         ]);
 

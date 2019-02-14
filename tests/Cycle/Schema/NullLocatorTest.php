@@ -16,7 +16,6 @@ class NullLocatorTest extends TestCase
     public function testLocator()
     {
         $locator = new NullLocator();
-
-        $this->assertSame([], $locator->getDeclarations());
+        $this->assertSame([], $locator->getEntities());
     }
 }

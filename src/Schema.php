@@ -42,6 +42,14 @@ final class Schema implements SchemaInterface
     /**
      * @inheritdoc
      */
+    public function getRelations(string $role): array
+    {
+        return array_keys($this->define($role, self::RELATIONS));
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function defines(string $role): bool
     {
         return array_key_exists($role, $this->schema) || array_key_exists($role, $this->aliases);
@@ -62,14 +70,6 @@ final class Schema implements SchemaInterface
         }
 
         return $this->schema[$role][$property];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getRelations(string $role): array
-    {
-        return array_keys($this->define($role, self::RELATIONS));
     }
 
     /**

@@ -40,6 +40,14 @@ interface SchemaInterface
     public function getRoles(): array;
 
     /**
+     * Get name of relations associated with given entity role.
+     *
+     * @param string $role
+     * @return array
+     */
+    public function getRelations(string $role): array;
+
+    /**
      * Check is given role has definition within the schema.
      *
      * @param string $role
@@ -59,14 +67,6 @@ interface SchemaInterface
      * @throws SchemaException
      */
     public function define(string $role, int $property);
-
-    /**
-     * Get name of relations associated with given entity role.
-     *
-     * @param string $role
-     * @return array
-     */
-    public function getRelations(string $role): array;
 
     /**
      * Define options associated with specific entity relation.

@@ -1,13 +1,17 @@
 <?php
+declare(strict_types=1);
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-declare(strict_types=1);
 
 namespace Spiral\Cycle\Schema;
+
+use Spiral\Cycle\Select\SourceInterface;
+use Spiral\Database\DatabaseManager;
+use Spiral\Database\Schema\AbstractTable;
 
 interface EntityInterface
 {
@@ -17,27 +21,37 @@ interface EntityInterface
     public function getRole(): string;
 
     /**
-     * @return string
+     * @param DatabaseManager $manager
+     * @return SourceInterface
      */
-    public function getMapper(): string;
+    public function getSource(DatabaseManager $manager): SourceInterface;
 
     /**
-     * @return string
+     * Render associate table schema.
+     *
+     * @param AbstractTable $table
      */
-    public function getSource(): string;
+    public function render(AbstractTable $table);
 
     /**
-     * @return string
+     * Associate entity with specific table schema. Entity must fetch all known
+     * and used columns at this step.
+     *
+     * @param AbstractTable $table
      */
-    public function getRepository(): string;
+    public function associate(AbstractTable $table);
 
     /**
-     * @return string
+     * Return list of all relations associated with given entity.
+     *
+     * @return RelationInterface[]
      */
-    public function getTable(): string;
+    public function getRelations(): array;
 
     /**
-     * @return string|null
+     * Pack entity schema into internal format.
+     *
+     * @return array
      */
-    public function getDatabase(): ?string;
+    public function packSchema(): array;
 }

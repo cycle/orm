@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Relation;
 
+use Spiral\Cycle\Exception\ORMException;
 use Spiral\Cycle\Exception\RelationException;
 use Spiral\Cycle\Heap\Node;
 use Spiral\Cycle\Mapper\MapperInterface;
@@ -50,6 +51,10 @@ abstract class AbstractRelation implements RelationInterface
      */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
+        if (!$orm instanceof SourceFactoryInterface) {
+            throw new ORMException("Relations expect to work with SourceInterface instance of ORM");
+        }
+
         $this->orm = $orm;
         $this->name = $name;
         $this->target = $target;

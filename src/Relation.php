@@ -15,38 +15,39 @@ namespace Spiral\Cycle;
 final class Relation
 {
     // General options
-    public const TYPE   = 10;
-    public const TARGET = 11;
-    public const SCHEMA = 21;
+    public const TYPE   = 0;
+    public const TARGET = 1;
+    public const SCHEMA = 2;
 
     // Relation types (default)
-    public const HAS_ONE      = 1;
-    public const HAS_MANY     = 3;
-    public const BELONGS_TO   = 2;
-    public const REFERS_TO    = 4;
-    public const MANY_TO_MANY = 52;
+    public const HAS_ONE      = 10;
+    public const HAS_MANY     = 11;
+    public const BELONGS_TO   = 12;
+    public const REFERS_TO    = 13;
+    public const MANY_TO_MANY = 14;
 
     // Morphed relations
-    public const BELONGS_TO_MORPHED = 99999;
-    public const MORPHED_HAS_ONE    = 1000034;
-    public const MORPHED_HAS_MANY   = 1000035;
-
-    public const CASCADE   = 234214;
-    public const NULLABLE  = 40000;
-    public const OUTER_KEY = 2;
-    public const INNER_KEY = 3;
-
-    // Selections
-    public const CONSTRAIN = 11111111;
-    public const WHERE     = 910;
-
-    // Many-To-Many relation(s) options
-    public const THOUGHT_INNER_KEY = 908;
-    public const THOUGHT_OUTER_KEY = 909;
-    public const THOUGHT_ENTITY    = 988888;
-    public const THOUGHT_CONSTRAIN = 911;
-    public const THOUGHT_WHERE     = 912;
+    public const BELONGS_TO_MORPHED = 20;
+    public const MORPHED_HAS_ONE    = 21;
+    public const MORPHED_HAS_MANY   = 23;
 
     // Custom morph key
-    public const MORPH_KEY = 903;
+    public const MORPH_KEY = 29;
+
+    // Common relation options
+    public const CASCADE   = 30;
+    public const NULLABLE  = 31;
+    public const OUTER_KEY = 32;
+    public const INNER_KEY = 33;
+
+    // Selections
+    public const CONSTRAIN = 40;
+    public const WHERE     = 41;
+
+    // Many-To-Many relation(s) options
+    public const THOUGHT_INNER_KEY = 50;
+    public const THOUGHT_OUTER_KEY = 51;
+    public const THOUGHT_ENTITY    = 52;
+    public const THOUGHT_CONSTRAIN = 53;
+    public const THOUGHT_WHERE     = 54;
 }

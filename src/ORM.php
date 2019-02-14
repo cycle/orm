@@ -93,7 +93,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
             $entity = $class;
         }
 
-        return $this->schema->resolveRole($entity);
+        return $this->schema->resolveAlias($entity);
     }
 
     /**

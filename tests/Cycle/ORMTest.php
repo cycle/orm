@@ -57,6 +57,8 @@ abstract class ORMTest extends BaseTest
         $this->captureReadQueries();
         $this->assertInstanceOf(User::class, $this->orm->get(User::class, 1));
         $this->assertNumReads(0);
+
+        $this->assertCount(1, $this->orm->getSchema()->getRoles());
     }
 
     public function testORMClone()

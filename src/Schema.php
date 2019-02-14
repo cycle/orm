@@ -13,11 +13,12 @@ use Spiral\Cycle\Exception\SchemaException;
 
 /**
  * Static schema with automatic class name => role aliasing.
- *
- * @todo improve abstraction
  */
 final class Schema implements SchemaInterface
 {
+    /** @var array */
+    private $aliases;
+
     /** @var array */
     private $schema = [];
 
@@ -27,20 +28,15 @@ final class Schema implements SchemaInterface
     public function __construct(array $schema)
     {
         // split into two?
-        $this->schema = $this->normalize($schema);
+        list($this->schema, $this->aliases) = $this->normalize($schema);
     }
 
     /**
      * @inheritdoc
      */
-    public function resolveRole(string $entity): ?string
+    public function getRoles(): array
     {
-        // walk thought all children until parent entity found
-        while (isset($this->schema[$entity][self::ROLE])) {
-            $entity = $this->schema[$entity][self::ROLE];
-        }
-
-        return $entity;
+        return array_keys($this->schema);
     }
 
     /**
@@ -48,7 +44,7 @@ final class Schema implements SchemaInterface
      */
     public function defines(string $role): bool
     {
-        return array_key_exists($role, $this->schema);
+        return array_key_exists($role, $this->schema) || array_key_exists($role, $this->aliases);
     }
 
     /**
@@ -56,7 +52,7 @@ final class Schema implements SchemaInterface
      */
     public function define(string $role, int $property)
     {
-        $role = $this->resolveRole($role);
+        $role = $this->resolveAlias($role);
         if (!isset($this->schema[$role])) {
             throw new SchemaException("Undefined schema `{$role}`, not found");
         }
@@ -66,6 +62,19 @@ final class Schema implements SchemaInterface
         }
 
         return $this->schema[$role][$property];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function resolveAlias(string $entity): ?string
+    {
+        // walk thought all children until parent entity found
+        while (isset($this->aliases[$entity])) {
+            $entity = $this->aliases[$entity];
+        }
+
+        return $entity;
     }
 
     /**
@@ -86,14 +95,35 @@ final class Schema implements SchemaInterface
      * Automatically replace class names with their aliases.
      *
      * @param array $schema
-     * @return array
+     * @return array Pair of [schema, aliases]
      */
     protected function normalize(array $schema): array
     {
-        $aliases = iterator_to_array($this->collectClasses($schema));
+        $result = $aliases = [];
 
-        $result = [];
-        foreach ($schema as $k => $item) {
+        foreach ($schema as $key => $item) {
+            $role = $key;
+            if (!isset($item[self::ENTITY])) {
+                // legacy type of declaration (class => schema)
+                $item[self::ENTITY] = $key;
+            }
+
+            if (class_exists($key)) {
+                if (!isset($item[self::ROLE])) {
+                    throw new SchemaException("Unable to create schema record without given role for `{$key}`");
+                }
+
+                // class => role type of definition
+                $aliases[$key] = $item[self::ROLE];
+                $role = $item[self::ROLE];
+            }
+
+            unset($item[self::ROLE]);
+            $result[$role] = $item;
+        }
+
+        // normalizing relation associations
+        foreach ($result as &$item) {
             if (isset($item[self::RELATIONS])) {
                 $item[self::RELATIONS] = iterator_to_array($this->normalizeRelations(
                     $item[self::RELATIONS],
@@ -101,43 +131,10 @@ final class Schema implements SchemaInterface
                 ));
             }
 
-            // assume that key is class name
-            $item[self::ENTITY] = $item[self::ENTITY] ?? $k;
-
-            $role = $k;
-
-            // legacy format where role is defined as key
-            if (isset($item[self::ROLE])) {
-                $role = $item[self::ROLE];
-                unset($item[self::ROLE]);
-            }
-
-            $result[$role] = $item;
+            unset($item);
         }
 
-        // return aliases to their location
-        foreach ($aliases as $name => $role) {
-            $result[$name] = [self::ROLE => $role];
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array $schema
-     * @return \Generator
-     */
-    private function collectClasses(array $schema): \Generator
-    {
-        foreach ($schema as $k => $item) {
-            if (!isset($item[self::ENTITY])) {
-                $item[self::ENTITY] = $k;
-            }
-
-            if (class_exists($item[self::ENTITY]) && isset($item[self::ROLE])) {
-                yield$item[self::ENTITY] => $item[self::ROLE];
-            }
-        }
+        return [$result, $aliases];
     }
 
     /**
@@ -147,14 +144,15 @@ final class Schema implements SchemaInterface
      */
     private function normalizeRelations(array $relations, array $aliases): \Generator
     {
-        foreach ($relations as $name => &$rl) {
-            $target = $rl[Relation::TARGET];
-
-            if (isset($aliases[$target])) {
-                $rl[Relation::TARGET] = $aliases[$target];
+        foreach ($relations as $name => &$rel) {
+            $target = $rel[Relation::TARGET];
+            while (isset($aliases[$target])) {
+                $target = $aliases[$target];
             }
 
-            yield $name => $rl;
+            $rel[Relation::TARGET] = $target;
+
+            yield $name => $rel;
         }
     }
 }

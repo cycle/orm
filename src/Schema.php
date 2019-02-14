@@ -67,6 +67,28 @@ final class Schema implements SchemaInterface
     /**
      * @inheritdoc
      */
+    public function getRelations(string $role): array
+    {
+        return array_keys($this->define($role, self::RELATIONS));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function defineRelation(string $role, string $relation): array
+    {
+        $relations = $this->define($role, self::RELATIONS);
+
+        if (!isset($relations[$relation])) {
+            throw new SchemaException("Undefined relation `{$role}`.`{$relation}`");
+        }
+
+        return $relations[$relation];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function resolveAlias(string $entity): ?string
     {
         // walk thought all children until parent entity found
@@ -77,19 +99,6 @@ final class Schema implements SchemaInterface
         return $entity;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function defineRelation(string $class, string $relation): array
-    {
-        $relations = $this->define($class, self::RELATIONS);
-
-        if (!isset($relations[$relation])) {
-            throw new SchemaException("Undefined relation `{$class}`.`{$relation}`");
-        }
-
-        return $relations[$relation];
-    }
 
     /**
      * Automatically replace class names with their aliases.

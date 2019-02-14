@@ -128,6 +128,11 @@ abstract class HasOneRelationTest extends BaseTest
         ]));
     }
 
+    public function testHasInSchema()
+    {
+        $this->assertSame(['profile'], $this->orm->getSchema()->getRelations('user'));
+    }
+
     public function testFetchRelation()
     {
         $selector = new Select($this->orm, User::class);

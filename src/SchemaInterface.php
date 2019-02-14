@@ -61,21 +61,29 @@ interface SchemaInterface
     public function define(string $role, int $property);
 
     /**
-     * Resolve the role name using entity class name.
+     * Get name of relations associated with given entity role.
      *
-     * @param string $alias
-     * @return null|string
+     * @param string $role
+     * @return array
      */
-    public function resolveAlias(string $alias): ?string;
+    public function getRelations(string $role): array;
 
     /**
      * Define options associated with specific entity relation.
      *
-     * @param string $class
+     * @param string $role
      * @param string $relation
      * @return array
      *
      * @throws SchemaException
      */
-    public function defineRelation(string $class, string $relation): array;
+    public function defineRelation(string $role, string $relation): array;
+
+    /**
+     * Resolve the role name using entity class name.
+     *
+     * @param string $role
+     * @return null|string
+     */
+    public function resolveAlias(string $role): ?string;
 }

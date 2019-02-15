@@ -32,15 +32,15 @@ class AnnotatedEntity
         $this->class = $class;
         $this->role = $role;
 
-        $parser = new Parser();
-        $parser->register([
-            'entity' => new Entity(),
-            'table'  => new Table(),
-            'index'  => new Index(),
-            'column' => new Column()
-        ]);
+//        $parser = new Parser();
+//        $parser->register([
+//            'entity' => new Entity(),
+//            'table'  => new Table(),
+//            'index'  => new Index(),
+//            'column' => new Column()
+//        ]);
 
-        dump($parser->parse((new \ReflectionClass($class))->getDocComment()));
+        //dump($parser->parse((new \ReflectionClass($class))->getDocComment()));
     }
 
     /**

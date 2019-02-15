@@ -10,11 +10,16 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Tests\Fixtures;
 
 /**
- * @entity
+ * @entity (
+ *     role =   "annotated",
+ *     mapper = Spiral\Cycle\Tests\Fixtures\ProfileMapperWithProxy,
+ * )
  * @table (
  *     name     = "annotated",
  *     database = "default",
- *     indexes  = {@index(columns={"email"}, unique = true)}
+ *     indexes  = {
+ *          @index(columns={"email"}, unique = true)
+ *     }
  * )
  */
 class Annotated

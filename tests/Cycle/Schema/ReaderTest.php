@@ -12,8 +12,8 @@ namespace Spiral\Cycle\Tests\Schema;
 use PHPUnit\Framework\TestCase;
 use Spiral\Annotations\Parser;
 use Spiral\Annotations\Reader;
-use Spiral\Cycle\Schema\Annotated\Node\Column;
-use Spiral\Cycle\Schema\Annotated\Node\Entity;
+use Spiral\Cycle\Schema\Annotated\Annotation\Column;
+use Spiral\Cycle\Schema\Annotated\Annotation\Entity;
 use Spiral\Cycle\Tests\Fixtures\Annotated;
 
 class ReaderTest extends TestCase

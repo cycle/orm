@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Schema\Annotated\Node;
+namespace Spiral\Cycle\Schema\Annotated\Annotation;
 
 use Spiral\Annotations\AbstractAnnotation;
 use Spiral\Annotations\Parser;

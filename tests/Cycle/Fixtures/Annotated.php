@@ -10,17 +10,10 @@ declare(strict_types=1);
 namespace Spiral\Cycle\Tests\Fixtures;
 
 /**
- * @entity (
- *     role =   "annotated",
- *     mapper = Spiral\Cycle\Tests\Fixtures\ProfileMapperWithProxy,
- * )
- * @table (
- *     name     = "annotated",
- *     database = "default",
- *     indexes  = {
- *          @index(columns={"email"}, unique = true)
- *     }
- * )
+ * @entity (role="annotated")
+ * @table (database="default",table="annotated", indexes={
+ *   @index(columns={"email"}, unique = true)
+ * })
  */
 class Annotated
 {
@@ -32,7 +25,7 @@ class Annotated
 
     /**
      * @column (type="string(32)", name="email_str")
-     * @var int
+     * @var string
      */
     protected $email;
 

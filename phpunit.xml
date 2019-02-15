@@ -11,7 +11,7 @@
          stopOnFailure="false"
          stopOnError="false">
     <testsuites>
-        <testsuite name="Treap: Reference based object heap mapper">
+        <testsuite name="Cycle: DataMapper and ORM">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>

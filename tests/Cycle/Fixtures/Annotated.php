@@ -14,9 +14,7 @@ namespace Spiral\Cycle\Tests\Fixtures;
  * @table (
  *     name     = "annotated",
  *     database = "default",
- *     indexes  = {
- *          @index(columns={"email"}, unique = true),
- *     }
+ *     indexes  = {@index(columns={"email"}, unique = true)}
  * )
  */
 class Annotated
@@ -34,7 +32,7 @@ class Annotated
     protected $email;
 
     /**
-     * @hasOne(target="user", nullable=true)
+     * @hasOne (target="user", nullable=true, cascade=true)
      * @var User
      */
     protected $user;

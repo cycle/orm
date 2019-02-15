@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Schema\Annotated;
 
+use Spiral\Cycle\Schema\Annotated\Node\Column;
+use Spiral\Cycle\Schema\Annotated\Node\Entity;
+use Spiral\Cycle\Schema\Annotated\Node\Index;
+use Spiral\Cycle\Schema\Annotated\Node\Table;
+
 class AnnotatedEntity
 {
     /** @var string */
@@ -20,11 +25,22 @@ class AnnotatedEntity
     /**
      * @param string      $class
      * @param string|null $role
+     * @throws \ReflectionException
      */
     public function __construct(string $class, string $role = null)
     {
         $this->class = $class;
         $this->role = $role;
+
+        $parser = new Parser();
+        $parser->register([
+            'entity' => new Entity(),
+            'table'  => new Table(),
+            'index'  => new Index(),
+            'column' => new Column()
+        ]);
+
+        dump($parser->parse((new \ReflectionClass($class))->getDocComment()));
     }
 
     /**

@@ -11,9 +11,7 @@ namespace Spiral\Cycle\Tests\Fixtures;
 
 /**
  * @entity (role="annotated")
- * @table (database="default",table="annotated", indexes={
- *   @index(columns={"email"}, unique = true)
- * })
+ * @table (database="default", table="annotated", indexes={@index (columns={"email"}, unique=true)})
  */
 class Annotated
 {

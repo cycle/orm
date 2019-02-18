@@ -9,13 +9,7 @@ declare(strict_types=1);
 
 namespace Spiral\Cycle\Schema;
 
-class NullLocator implements LocatorInterface
+interface MapperInterface
 {
-    /**
-     * @inheritdoc
-     */
-    public function getEntities(): array
-    {
-        return [];
-    }
+
 }

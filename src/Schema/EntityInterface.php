@@ -20,13 +20,16 @@ interface EntityInterface
     public function getRole(): string;
 
     /**
+     * Get associated mapper schema. Mappers can perform some schema changes on related
+     * entities based on their internal rules.
+     *
+     * @return MapperInterface
+     */
+    public function getMapper(): MapperInterface;
+
+    /**
      * @param DatabaseManager $manager
      * @return SourceInterface
      */
     public function getSource(DatabaseManager $manager): SourceInterface;
-
-    /**
-     * @return array
-     */
-    public function getFields(): array;
 }

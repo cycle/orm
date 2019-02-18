@@ -8,8 +8,8 @@
 
 namespace Spiral\Cycle\Tests;
 
+use Spiral\Cycle\Tests\Util\TableRenderer as Renderer;
 use Spiral\Database\Schema\AbstractTable;
-use Spiral\Cycle\Schema\Renderer;
 
 abstract class TableRendererTest extends BaseTest
 {

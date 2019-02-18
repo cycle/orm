@@ -1,4 +1,5 @@
 # Cycle ORM
+[![Latest Stable Version](https://poser.pugx.org/spiral/cycle/version)](https://packagist.org/packages/spiral/cycle)
 [![Build Status](https://travis-ci.org/spiral/cycle.svg?branch=master)](https://travis-ci.org/spiral/cycle)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral/cycle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spiral/cycle/?branch=master)
 [![Codecov](https://codecov.io/gh/spiral/cycle/graph/badge.svg)](https://codecov.io/gh/spiral/cycle)
@@ -18,8 +19,3 @@ Features:
 - bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/Cycle/Classless)
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - compatible with Doctrine Collections and Zend Hydrator
-
-In progress:
----------
-- schema locator and generator, diff based migrations
-- documentation

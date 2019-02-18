@@ -7,9 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Schema\Definition;
+namespace Spiral\Cycle\Exception\Annotation;
 
-class Relation
+
+class AnnotationException extends \RuntimeException
 {
 
 }

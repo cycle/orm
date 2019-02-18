@@ -8,7 +8,7 @@
 
 namespace Spiral\Cycle\Tests\Traits;
 
-use Spiral\Cycle\Schema\Renderer;
+use Spiral\Cycle\Tests\Util\TableRenderer;
 use Spiral\Database\Database;
 use Spiral\Database\ForeignKeyInterface;
 
@@ -22,7 +22,7 @@ trait TableTrait
     public function makeTable(string $table, array $columns, array $fk = [], $pk = null, $defaults = [])
     {
         $schema = $this->getDatabase()->table($table)->getSchema();
-        $renderer = new Renderer();
+        $renderer = new TableRenderer();
         $renderer->renderColumns($schema, $columns, $defaults);
 
         foreach ($fk as $column => $options) {

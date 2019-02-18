@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Schema;
+namespace Spiral\Cycle\Tests\Util;
 
 use Spiral\Cycle\Exception\Schema\DeclarationException;
 use Spiral\Database\Schema\AbstractColumn;
@@ -20,7 +20,7 @@ use Spiral\Database\Schema\AbstractTable;
  * Attention, this class will try to guess default value if column is NOT NULL and no default
  * value provided by user.
  */
-final class Renderer
+final class TableRenderer
 {
     /**
      * Render columns in table based on string definition.
@@ -95,21 +95,8 @@ final class Renderer
      *
      * @throws DeclarationException
      */
-    protected function renderColumn(
-        AbstractColumn $column,
-        array $type,
-        bool $hasDefault,
-        $default = null
-    ) {
-        // @todo implement it
-        //        if (
-        //            class_exists($definition) && is_a($definition, ColumnInterface::class, true)
-        //        ) {
-        //            // dedicating column definition to our column class
-        //            call_user_func([$definition, 'describeColumn'], $column);
-        //            return;
-        //        }
-
+    protected function renderColumn(AbstractColumn $column, array $type, bool $hasDefault, $default = null)
+    {
         // ORM force EVERY column to NOT NULL state unless different is said
         $column->nullable(false);
 

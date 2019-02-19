@@ -7,12 +7,12 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation;
+namespace Cycle\ORM\Relation;
 
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Exception\RelationException;
-use Spiral\Cycle\Heap\Node;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Exception\RelationException;
+use Cycle\ORM\Heap\Node;
 
 /**
  * Manages single branch type between parent entity and other objects.

@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Parser;
+namespace Cycle\ORM\Parser;
 
 /**
  * Indicates that node represent array sub-set. This interface would only change the default

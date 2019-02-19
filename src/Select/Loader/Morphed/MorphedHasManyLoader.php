@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select\Loader\Morphed;
+namespace Cycle\ORM\Select\Loader\Morphed;
 
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Select\Loader\HasManyLoader;
-use Spiral\Cycle\Select\Traits\WhereTrait;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Select\Loader\HasManyLoader;
+use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**

@@ -7,16 +7,16 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Command\Branch\Nil;
-use Spiral\Cycle\Command\Branch\Split;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Command\InitCarrierInterface;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\MapperInterface;
-use Spiral\Cycle\Promise\PromiseInterface;
+use Cycle\ORM\Command\Branch\Nil;
+use Cycle\ORM\Command\Branch\Split;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Command\InitCarrierInterface;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Mapper\MapperInterface;
+use Cycle\ORM\Promise\PromiseInterface;
 
 /**
  * Responsible for proper command chain generation.

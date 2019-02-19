@@ -6,9 +6,9 @@
  */
 declare(strict_types=1);
 
-namespace Spiral\Cycle\Command;
+namespace Cycle\ORM\Command;
 
-use Spiral\Cycle\Context\ConsumerInterface;
+use Cycle\ORM\Context\ConsumerInterface;
 
 /**
  * Command provide the ability to accept and carry the context to the persistence layer.

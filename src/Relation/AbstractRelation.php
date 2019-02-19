@@ -7,19 +7,19 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation;
+namespace Cycle\ORM\Relation;
 
-use Spiral\Cycle\Exception\ORMException;
-use Spiral\Cycle\Exception\RelationException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\MapperInterface;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Schema;
-use Spiral\Cycle\Select\ConstrainInterface;
-use Spiral\Cycle\Select\SourceFactoryInterface;
-use Spiral\Cycle\Select\SourceInterface;
+use Cycle\ORM\Exception\ORMException;
+use Cycle\ORM\Exception\RelationException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Mapper\MapperInterface;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Schema;
+use Cycle\ORM\Select\ConstrainInterface;
+use Cycle\ORM\Select\SourceFactoryInterface;
+use Cycle\ORM\Select\SourceInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {

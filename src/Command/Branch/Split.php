@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command\Branch;
+namespace Cycle\ORM\Command\Branch;
 
-use Spiral\Cycle\Command\ContextCarrierInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
 
 /**
  * Splits input context command into 2 destinations: original create command (usually insert) and delayed update command.

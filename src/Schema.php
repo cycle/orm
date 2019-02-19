@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Exception\SchemaException;
+use Cycle\ORM\Exception\SchemaException;
 
 /**
  * Static schema with automatic class name => role aliasing.

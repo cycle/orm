@@ -6,9 +6,9 @@
  */
 declare(strict_types=1);
 
-namespace Spiral\Cycle\Parser;
+namespace Cycle\ORM\Parser;
 
-use Spiral\Cycle\Exception\ParserException;
+use Cycle\ORM\Exception\ParserException;
 
 /**
  * Node with ability to push it's data into referenced tree location.

@@ -16,6 +16,6 @@ Features:
 - works with directed graphs and cyclic graphs using IDDFS over linked command chains
 - designed to work in long-running applications
 - supports MySQL (MariaDB, Aurora), PostgresSQL, SQLServer, SQLite (full mock capability)
-- bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/Cycle/Classless)
+- bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/ORM/Classless)
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - compatible with Doctrine Collections and Zend Hydrator

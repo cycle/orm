@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command;
+namespace Cycle\ORM\Command;
 
 /**
  * Represent one or multiple operations in transaction.

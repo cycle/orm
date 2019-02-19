@@ -7,15 +7,15 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command\Database;
+namespace Cycle\ORM\Command\Database;
 
-use Spiral\Cycle\Command\DatabaseCommand;
-use Spiral\Cycle\Command\InitCarrierInterface;
-use Spiral\Cycle\Command\Traits\ContextTrait;
-use Spiral\Cycle\Command\Traits\ErrorTrait;
-use Spiral\Cycle\Context\ConsumerInterface;
-use Spiral\Cycle\Context\ProducerInterface;
-use Spiral\Cycle\Exception\CommandException;
+use Cycle\ORM\Command\DatabaseCommand;
+use Cycle\ORM\Command\InitCarrierInterface;
+use Cycle\ORM\Command\Traits\ContextTrait;
+use Cycle\ORM\Command\Traits\ErrorTrait;
+use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Context\ProducerInterface;
+use Cycle\ORM\Exception\CommandException;
 use Spiral\Database\DatabaseInterface;
 
 /**

@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation\Pivoted;
+namespace Cycle\ORM\Relation\Pivoted;
 
 use Doctrine\Common\Collections\Collection;
 

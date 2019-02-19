@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Parser;
+namespace Cycle\ORM\Parser;
 
-use Spiral\Cycle\Exception\TypecastException;
+use Cycle\ORM\Exception\TypecastException;
 use Spiral\Database\DatabaseInterface;
 
 final class Typecast implements TypecastInterface

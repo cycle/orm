@@ -7,19 +7,19 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation;
+namespace Cycle\ORM\Relation;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\Cycle\Command\Branch\Sequence;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Iterator;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Relation\Pivoted;
+use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Iterator;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\Pivoted;
 
 class ManyToManyRelation extends Relation\AbstractRelation
 {

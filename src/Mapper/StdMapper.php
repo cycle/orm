@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Cycle\ORM\Mapper;
 
 /**
  * Provide the ability to carry data over the StdClass objects. Does not support single table inheritance.

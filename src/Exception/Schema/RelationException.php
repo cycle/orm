@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Exception\Schema;
+namespace Cycle\ORM\Exception\Schema;
 
-use Spiral\Cycle\Exception\SchemaException;
+use Cycle\ORM\Exception\SchemaException;
 
 class RelationException extends SchemaException
 {

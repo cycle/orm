@@ -7,7 +7,7 @@
  */
 declare(strict_types=1);
 
-namespace Spiral\Cycle\Exception;
+namespace Cycle\ORM\Exception;
 
 class BuilderException extends ORMException
 {

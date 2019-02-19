@@ -7,13 +7,13 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Config;
+namespace Cycle\ORM\Config;
 
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
-use Spiral\Cycle\Exception\ConfigException;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Select;
+use Cycle\ORM\Exception\ConfigException;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Select;
 
 class RelationConfig extends InjectableConfig
 {

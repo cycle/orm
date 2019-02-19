@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command\Traits;
+namespace Cycle\ORM\Command\Traits;
 
 // describes why command has been locked up
 trait ErrorTrait

@@ -7,14 +7,14 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select;
+namespace Cycle\ORM\Select;
 
-use Spiral\Cycle\Exception\LoaderException;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Parser\AbstractNode;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Schema;
-use Spiral\Cycle\Select\Traits\ColumnsTrait;
+use Cycle\ORM\Exception\LoaderException;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Schema;
+use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**

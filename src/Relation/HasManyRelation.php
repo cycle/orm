@@ -7,19 +7,19 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation;
+namespace Cycle\ORM\Relation;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Spiral\Cycle\Command\Branch\Condition;
-use Spiral\Cycle\Command\Branch\Sequence;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Promise\Collection\CollectionPromise;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Promise\PromiseMany;
-use Spiral\Cycle\Relation;
+use Cycle\ORM\Command\Branch\Condition;
+use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\Collection\CollectionPromise;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\PromiseMany;
+use Cycle\ORM\Relation;
 
 /**
  * Provides the ability to own the collection of entities.

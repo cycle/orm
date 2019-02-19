@@ -7,15 +7,15 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Command\Branch\ContextSequence;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Relation\DependencyInterface;
-use Spiral\Cycle\Relation\RelationInterface;
+use Cycle\ORM\Command\Branch\ContextSequence;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Relation\DependencyInterface;
+use Cycle\ORM\Relation\RelationInterface;
 
 /**
  * Manages the position of node in the relation graph and provide access to neighbours.

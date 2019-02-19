@@ -21,29 +21,29 @@ $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
 
 $databases = [
     'sqlite'    => [
-        'namespace' => 'Spiral\Cycle\Tests\Driver\SQLite',
-        'directory' => __DIR__ . '/Cycle/Driver/SQLite/'
+        'namespace' => 'Cycle\ORM\Tests\Driver\SQLite',
+        'directory' => __DIR__ . '/ORM/Driver/SQLite/'
     ],
     'mysql'     => [
-        'namespace' => 'Spiral\Cycle\Tests\Driver\MySQL',
-        'directory' => __DIR__ . '/Cycle/Driver/MySQL/'
+        'namespace' => 'Cycle\ORM\Tests\Driver\MySQL',
+        'directory' => __DIR__ . '/ORM/Driver/MySQL/'
     ],
     'postgres'  => [
-        'namespace' => 'Spiral\Cycle\Tests\Driver\Postgres',
-        'directory' => __DIR__ . '/Cycle/Driver/Postgres/'
+        'namespace' => 'Cycle\ORM\Tests\Driver\Postgres',
+        'directory' => __DIR__ . '/ORM/Driver/Postgres/'
     ],
     'sqlserver' => [
-        'namespace' => 'Spiral\Cycle\Tests\Driver\SQLServer',
-        'directory' => __DIR__ . '/Cycle/Driver/SQLServer/'
+        'namespace' => 'Cycle\ORM\Tests\Driver\SQLServer',
+        'directory' => __DIR__ . '/ORM/Driver/SQLServer/'
     ]
 ];
 
 echo "Generating test classes for all database types...\n";
 
-$classes = $tokenizer->classLocator()->getClasses(\Spiral\Cycle\Tests\BaseTest::class);
+$classes = $tokenizer->classLocator()->getClasses(\Cycle\ORM\Tests\BaseTest::class);
 
 foreach ($classes as $class) {
-    if (!$class->isAbstract() || $class->getName() == \Spiral\Cycle\Tests\BaseTest::class) {
+    if (!$class->isAbstract() || $class->getName() == \Cycle\ORM\Tests\BaseTest::class) {
         continue;
     }
 

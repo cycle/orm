@@ -7,10 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Transaction;
+namespace Cycle\ORM\Transaction;
 
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\DatabaseCommand;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\DatabaseCommand;
 use Spiral\Database\Driver\DriverInterface;
 
 final class Runner implements RunnerInterface

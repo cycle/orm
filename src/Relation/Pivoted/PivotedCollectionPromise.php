@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation\Pivoted;
+namespace Cycle\ORM\Relation\Pivoted;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
-use Spiral\Cycle\Promise\Collection\CollectionPromiseInterface;
-use Spiral\Cycle\Promise\PromiseInterface;
+use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
+use Cycle\ORM\Promise\PromiseInterface;
 
 /**
  * Collection at top of pivoted (entity + context entity) promise.

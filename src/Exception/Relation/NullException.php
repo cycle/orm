@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Exception\Relation;
+namespace Cycle\ORM\Exception\Relation;
 
-use Spiral\Cycle\Exception\RelationException;
+use Cycle\ORM\Exception\RelationException;
 
 class NullException extends RelationException
 {

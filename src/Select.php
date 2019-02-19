@@ -7,14 +7,14 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Parser\OutputNode;
-use Spiral\Cycle\Select\ConstrainInterface;
-use Spiral\Cycle\Select\LoaderInterface;
-use Spiral\Cycle\Select\QueryBuilder;
-use Spiral\Cycle\Select\RootLoader;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Parser\OutputNode;
+use Cycle\ORM\Select\ConstrainInterface;
+use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Select\QueryBuilder;
+use Cycle\ORM\Select\RootLoader;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Pagination\PaginableInterface;
 

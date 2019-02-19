@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select\Traits;
+namespace Cycle\ORM\Select\Traits;
 
-use Spiral\Cycle\Exception\LoaderException;
-use Spiral\Cycle\Select\AbstractLoader;
-use Spiral\Cycle\Select\LoaderInterface;
+use Cycle\ORM\Exception\LoaderException;
+use Cycle\ORM\Select\AbstractLoader;
+use Cycle\ORM\Select\LoaderInterface;
 
 trait ChainTrait
 {

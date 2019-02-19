@@ -6,9 +6,9 @@
  */
 declare(strict_types=1);
 
-namespace Spiral\Cycle\Command\Branch;
+namespace Cycle\ORM\Command\Branch;
 
-use Spiral\Cycle\Command\ContextCarrierInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
 
 /**
  * Doing noting.

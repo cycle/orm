@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Heap;
+namespace Cycle\ORM\Heap;
 
 /**
  * Manages set of entities, their states and quick access though indexes.

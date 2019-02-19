@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Exception;
+namespace Cycle\ORM\Exception;
 
 class ParserException extends ORMException
 {

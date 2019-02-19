@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Cycle\ORM\Mapper;
 
 /**
  * Defines ability to locate entities based on scope parameters.

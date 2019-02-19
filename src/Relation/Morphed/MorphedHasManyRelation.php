@@ -7,17 +7,17 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation\Morphed;
+namespace Cycle\ORM\Relation\Morphed;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Exception\RelationException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Promise\Collection\CollectionPromise;
-use Spiral\Cycle\Promise\PromiseMany;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Relation\HasManyRelation;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Exception\RelationException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\Collection\CollectionPromise;
+use Cycle\ORM\Promise\PromiseMany;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\HasManyRelation;
 
 class MorphedHasManyRelation extends HasManyRelation
 {

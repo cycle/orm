@@ -7,20 +7,20 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Cycle\ORM\Mapper;
 
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Command\Database\Delete;
-use Spiral\Cycle\Command\Database\Insert;
-use Spiral\Cycle\Command\Database\Update;
-use Spiral\Cycle\Context\ConsumerInterface;
-use Spiral\Cycle\Exception\MapperException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Heap\State;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Schema;
-use Spiral\Cycle\Select;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Command\Database\Delete;
+use Cycle\ORM\Command\Database\Insert;
+use Cycle\ORM\Command\Database\Update;
+use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Exception\MapperException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Schema;
+use Cycle\ORM\Select;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.

@@ -7,14 +7,14 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Heap;
+namespace Cycle\ORM\Heap;
 
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Context\ConsumerInterface;
-use Spiral\Cycle\Context\ProducerInterface;
-use Spiral\Cycle\Heap\Traits\ClaimTrait;
-use Spiral\Cycle\Heap\Traits\RelationTrait;
-use Spiral\Cycle\Heap\Traits\VisitorTrait;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Context\ProducerInterface;
+use Cycle\ORM\Heap\Traits\ClaimTrait;
+use Cycle\ORM\Heap\Traits\RelationTrait;
+use Cycle\ORM\Heap\Traits\VisitorTrait;
 
 /**
  * Current node state.

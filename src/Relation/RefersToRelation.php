@@ -7,15 +7,15 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation;
+namespace Cycle\ORM\Relation;
 
-use Spiral\Cycle\Command\Branch\Nil;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Command\Database\Update;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Relation\Traits\PromiseOneTrait;
-use Spiral\Cycle\Schema;
+use Cycle\ORM\Command\Branch\Nil;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Command\Database\Update;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Relation\Traits\PromiseOneTrait;
+use Cycle\ORM\Schema;
 
 /**
  * Variation of belongs-to relation which provides the ability to be self. Relation can be used

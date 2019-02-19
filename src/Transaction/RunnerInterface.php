@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Transaction;
+namespace Cycle\ORM\Transaction;
 
-use Spiral\Cycle\Command\CommandInterface;
+use Cycle\ORM\Command\CommandInterface;
 
 interface RunnerInterface extends \Countable
 {

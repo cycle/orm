@@ -7,12 +7,12 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation\Traits;
+namespace Cycle\ORM\Relation\Traits;
 
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Command\ScopeCarrierInterface as CS;
-use Spiral\Cycle\Context\ConsumerInterface;
-use Spiral\Cycle\Heap\Node;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Command\ScopeCarrierInterface as CS;
+use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Heap\Node;
 
 /**
  * Provides the ability to set the promises for command context and scopes linked

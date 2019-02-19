@@ -7,13 +7,13 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command\Database;
+namespace Cycle\ORM\Command\Database;
 
-use Spiral\Cycle\Command\DatabaseCommand;
-use Spiral\Cycle\Command\ScopeCarrierInterface;
-use Spiral\Cycle\Command\Traits\ErrorTrait;
-use Spiral\Cycle\Command\Traits\ScopeTrait;
-use Spiral\Cycle\Exception\CommandException;
+use Cycle\ORM\Command\DatabaseCommand;
+use Cycle\ORM\Command\ScopeCarrierInterface;
+use Cycle\ORM\Command\Traits\ErrorTrait;
+use Cycle\ORM\Command\Traits\ScopeTrait;
+use Cycle\ORM\Exception\CommandException;
 use Spiral\Database\DatabaseInterface;
 
 class Delete extends DatabaseCommand implements ScopeCarrierInterface

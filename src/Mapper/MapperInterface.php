@@ -7,13 +7,13 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Cycle\ORM\Mapper;
 
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Exception\MapperException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Heap\State;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Exception\MapperException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 
 /**
  * Provides basic capabilities for CRUD operations with given entity class (role).

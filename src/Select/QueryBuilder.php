@@ -7,10 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select;
+namespace Cycle\ORM\Select;
 
-use Spiral\Cycle\Exception\BuilderException;
-use Spiral\Cycle\ORMInterface;
+use Cycle\ORM\Exception\BuilderException;
+use Cycle\ORM\ORMInterface;
 use Spiral\Database\Driver\Compiler;
 use Spiral\Database\Query\SelectQuery;
 

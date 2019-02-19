@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Parser\Traits;
+namespace Cycle\ORM\Parser\Traits;
 
 /**
  * Trait provides ability for Node to ensure that given data is unique in selection. Primary key

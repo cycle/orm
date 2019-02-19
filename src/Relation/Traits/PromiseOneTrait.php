@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation\Traits;
+namespace Cycle\ORM\Relation\Traits;
 
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Promise\PromiseOne;
-use Spiral\Cycle\Promise\ProxyFactoryInterface;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\PromiseOne;
+use Cycle\ORM\Promise\ProxyFactoryInterface;
 
 trait PromiseOneTrait
 {

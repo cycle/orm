@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select;
+namespace Cycle\ORM\Select;
 
 /**
  * Provides the ability to scope query and load necessary relations into the loader.

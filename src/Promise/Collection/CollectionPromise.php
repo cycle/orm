@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Promise\Collection;
+namespace Cycle\ORM\Promise\Collection;
 
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Doctrine\Common\Collections\ArrayCollection;
-use Spiral\Cycle\Promise\PromiseInterface;
+use Cycle\ORM\Promise\PromiseInterface;
 
 /**
  * LazyLoading collection build at top of data promise.

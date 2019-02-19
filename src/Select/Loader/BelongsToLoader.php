@@ -7,14 +7,14 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select\Loader;
+namespace Cycle\ORM\Select\Loader;
 
-use Spiral\Cycle\Parser\AbstractNode;
-use Spiral\Cycle\Parser\SingularNode;
-use Spiral\Cycle\Parser\Typecast;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Schema;
-use Spiral\Cycle\Select\JoinableLoader;
+use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Parser\SingularNode;
+use Cycle\ORM\Parser\Typecast;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Schema;
+use Cycle\ORM\Select\JoinableLoader;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 

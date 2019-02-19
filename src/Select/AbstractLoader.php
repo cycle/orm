@@ -7,16 +7,16 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select;
+namespace Cycle\ORM\Select;
 
-use Spiral\Cycle\Exception\FactoryException;
-use Spiral\Cycle\Exception\LoaderException;
-use Spiral\Cycle\Exception\SchemaException;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Parser\AbstractNode;
-use Spiral\Cycle\Select\Traits\AliasTrait;
-use Spiral\Cycle\Select\Traits\ChainTrait;
-use Spiral\Cycle\Select\Traits\ConstrainTrait;
+use Cycle\ORM\Exception\FactoryException;
+use Cycle\ORM\Exception\LoaderException;
+use Cycle\ORM\Exception\SchemaException;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Select\Traits\AliasTrait;
+use Cycle\ORM\Select\Traits\ChainTrait;
+use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**

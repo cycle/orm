@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Heap;
+namespace Cycle\ORM\Heap;
 
-use Spiral\Cycle\Context\ConsumerInterface;
-use Spiral\Cycle\Context\ProducerInterface;
-use Spiral\Cycle\Heap\Traits\RelationTrait;
+use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Context\ProducerInterface;
+use Cycle\ORM\Heap\Traits\RelationTrait;
 
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points thought

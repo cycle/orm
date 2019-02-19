@@ -20,12 +20,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Spiral\\Cycle\\": "src/"
+      "Cycle\\ORM\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Spiral\\Cycle\\Tests\\": "tests/Cycle/"
+      "Cycle\\ORM\\Tests\\": "tests/ORM/"
     }
   }
 }

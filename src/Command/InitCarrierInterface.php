@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Spiral\Cycle\Command;
+namespace Cycle\ORM\Command;
 
-use Spiral\Cycle\Command\Branch\Split;
+use Cycle\ORM\Command\Branch\Split;
 
 /**
  * Represents commands required to init object presence in persistence storage.

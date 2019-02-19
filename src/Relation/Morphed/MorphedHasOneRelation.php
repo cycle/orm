@@ -7,17 +7,17 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation\Morphed;
+namespace Cycle\ORM\Relation\Morphed;
 
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Exception\RelationException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Promise\PromiseOne;
-use Spiral\Cycle\Promise\ProxyFactoryInterface;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Relation\HasOneRelation;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Exception\RelationException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\PromiseOne;
+use Cycle\ORM\Promise\ProxyFactoryInterface;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\HasOneRelation;
 
 /**
  * Inverted version of belongs to morphed.

@@ -7,19 +7,19 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Spiral\Cycle\Config\RelationConfig;
-use Spiral\Cycle\Exception\FactoryException;
-use Spiral\Cycle\Mapper\Mapper;
-use Spiral\Cycle\Mapper\MapperInterface;
-use Spiral\Cycle\Relation\RelationInterface;
-use Spiral\Cycle\Select\LoaderInterface;
-use Spiral\Cycle\Select\Source;
-use Spiral\Cycle\Select\SourceFactoryInterface;
-use Spiral\Cycle\Select\SourceInterface;
+use Cycle\ORM\Config\RelationConfig;
+use Cycle\ORM\Exception\FactoryException;
+use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Mapper\MapperInterface;
+use Cycle\ORM\Relation\RelationInterface;
+use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Select\Source;
+use Cycle\ORM\Select\SourceFactoryInterface;
+use Cycle\ORM\Select\SourceInterface;
 use Spiral\Database\DatabaseManager;
 
 class Factory implements FactoryInterface, SourceFactoryInterface

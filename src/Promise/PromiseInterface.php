@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Promise;
+namespace Cycle\ORM\Promise;
 
 /**
  * Promises some related data.

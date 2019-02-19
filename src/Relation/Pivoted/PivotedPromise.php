@@ -7,18 +7,18 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation\Pivoted;
+namespace Cycle\ORM\Relation\Pivoted;
 
-use Spiral\Cycle\Exception\ORMException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Iterator;
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Parser\RootNode;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Relation;
-use Spiral\Cycle\Select;
-use Spiral\Cycle\Select\JoinableLoader;
-use Spiral\Cycle\Select\Loader\ManyToManyLoader;
+use Cycle\ORM\Exception\ORMException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Iterator;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Parser\RootNode;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Select;
+use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\Loader\ManyToManyLoader;
 
 /**
  * Promise use loader to configure query and it's scope.

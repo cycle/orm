@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Parser\Traits;
+namespace Cycle\ORM\Parser\Traits;
 
-use Spiral\Cycle\Exception\ParserException;
+use Cycle\ORM\Exception\ParserException;
 
 /**
  * Mounts given data piece into reference based data tree.

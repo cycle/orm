@@ -7,10 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command\Branch;
+namespace Cycle\ORM\Command\Branch;
 
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Exception\CommandException;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Exception\CommandException;
 
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.

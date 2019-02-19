@@ -7,10 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Cycle\ORM\Mapper;
 
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Schema;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Schema;
 use Zend\Hydrator;
 
 /**

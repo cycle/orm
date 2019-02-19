@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Heap\Traits;
+namespace Cycle\ORM\Heap\Traits;
 
 /**
  * Provides the ability to remember visited paths in dependency tree.

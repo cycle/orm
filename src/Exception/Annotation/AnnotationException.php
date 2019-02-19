@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Exception\Annotation;
+namespace Cycle\ORM\Exception\Annotation;
 
 
 class AnnotationException extends \RuntimeException

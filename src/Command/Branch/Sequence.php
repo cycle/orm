@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command\Branch;
+namespace Cycle\ORM\Command\Branch;
 
-use Spiral\Cycle\Command\CommandInterface;
+use Cycle\ORM\Command\CommandInterface;
 
 /**
  * Wraps multiple commands into one sequence.

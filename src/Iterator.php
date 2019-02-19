@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Heap\Node;
+use Cycle\ORM\Heap\Node;
 
 /**
  * Iterates over given data-set and instantiates objects.

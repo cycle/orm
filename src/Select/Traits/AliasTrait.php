@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select\Traits;
+namespace Cycle\ORM\Select\Traits;
 
 trait AliasTrait
 {

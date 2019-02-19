@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Heap;
+namespace Cycle\ORM\Heap;
 
 class Heap implements HeapInterface, \IteratorAggregate
 {

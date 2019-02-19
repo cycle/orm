@@ -7,13 +7,13 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Exception\TransactionException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Transaction\Runner;
-use Spiral\Cycle\Transaction\RunnerInterface;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Exception\TransactionException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Transaction\Runner;
+use Cycle\ORM\Transaction\RunnerInterface;
 
 /**
  * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction

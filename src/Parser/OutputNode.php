@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Parser;
+namespace Cycle\ORM\Parser;
 
 /**
  * Provides ability to fetch node context.

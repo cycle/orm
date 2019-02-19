@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Parser;
+namespace Cycle\ORM\Parser;
 
-use Spiral\Cycle\Exception\ParserException;
-use Spiral\Cycle\Parser\Traits\DuplicateTrait;
-use Spiral\Cycle\Parser\Traits\ReferenceTrait;
+use Cycle\ORM\Exception\ParserException;
+use Cycle\ORM\Parser\Traits\DuplicateTrait;
+use Cycle\ORM\Parser\Traits\ReferenceTrait;
 
 /**
  * Represents data node in a tree with ability to parse line of results, split it into sub

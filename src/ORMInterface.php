@@ -7,13 +7,13 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Heap\HeapInterface;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\MapperInterface;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Heap\HeapInterface;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Mapper\MapperInterface;
 
 /**
  * Provide the access to all ORM services.

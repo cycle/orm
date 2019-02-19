@@ -7,11 +7,11 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Mapper\MapperInterface;
-use Spiral\Cycle\Relation\RelationInterface;
-use Spiral\Cycle\Select\LoaderInterface;
+use Cycle\ORM\Mapper\MapperInterface;
+use Cycle\ORM\Relation\RelationInterface;
+use Cycle\ORM\Select\LoaderInterface;
 
 interface FactoryInterface
 {

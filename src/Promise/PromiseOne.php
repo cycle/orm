@@ -7,10 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Promise;
+namespace Cycle\ORM\Promise;
 
-use Spiral\Cycle\ORMInterface;
-use Spiral\Cycle\Select;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Select;
 
 /**
  * Promises one entity and resolves the result via ORM heap or entity repository.

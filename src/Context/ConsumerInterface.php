@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Context;
+namespace Cycle\ORM\Context;
 
 /**
  * Provides the ability to accept the forwarded key value.

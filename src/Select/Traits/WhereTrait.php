@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select\Traits;
+namespace Cycle\ORM\Select\Traits;
 
-use Spiral\Cycle\Select\QueryBuilder;
+use Cycle\ORM\Select\QueryBuilder;
 use Spiral\Database\Query\SelectQuery;
 
 /**

@@ -7,14 +7,14 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation;
+namespace Cycle\ORM\Relation;
 
-use Spiral\Cycle\Command\Branch\Nil;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Exception\Relation\NullException;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Relation\Traits\PromiseOneTrait;
+use Cycle\ORM\Command\Branch\Nil;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Exception\Relation\NullException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 
 /**
  * Provides ability to link to the parent object. Will claim branch up to the parent object and it's relations. To disable

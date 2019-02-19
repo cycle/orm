@@ -7,16 +7,16 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Relation;
+namespace Cycle\ORM\Relation;
 
-use Spiral\Cycle\Command\Branch\Condition;
-use Spiral\Cycle\Command\Branch\ContextSequence;
-use Spiral\Cycle\Command\Branch\Nil;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface as CC;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Relation\Traits\PromiseOneTrait;
+use Cycle\ORM\Command\Branch\Condition;
+use Cycle\ORM\Command\Branch\ContextSequence;
+use Cycle\ORM\Command\Branch\Nil;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 
 /**
  * Provides the ability to own and forward context values to child entity.

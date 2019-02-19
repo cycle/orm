@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Command;
+namespace Cycle\ORM\Command;
 
-use Spiral\Cycle\Context\ConsumerInterface;
+use Cycle\ORM\Context\ConsumerInterface;
 
 /**
  * Command indicates the ability to accept the forwarded scope values.

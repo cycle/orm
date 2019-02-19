@@ -7,9 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Mapper;
+namespace Cycle\ORM\Mapper;
 
-use Spiral\Cycle\Select;
+use Cycle\ORM\Select;
 
 /**
  * Repository provides ability to load entities and construct queries.

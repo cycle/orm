@@ -7,19 +7,19 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle;
+namespace Cycle\ORM;
 
-use Spiral\Cycle\Command\Branch\Nil;
-use Spiral\Cycle\Command\CommandInterface;
-use Spiral\Cycle\Command\ContextCarrierInterface;
-use Spiral\Cycle\Exception\ORMException;
-use Spiral\Cycle\Heap\Heap;
-use Spiral\Cycle\Heap\HeapInterface;
-use Spiral\Cycle\Heap\Node;
-use Spiral\Cycle\Mapper\MapperInterface;
-use Spiral\Cycle\Promise\PromiseInterface;
-use Spiral\Cycle\Select\SourceFactoryInterface;
-use Spiral\Cycle\Select\SourceInterface;
+use Cycle\ORM\Command\Branch\Nil;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Exception\ORMException;
+use Cycle\ORM\Heap\Heap;
+use Cycle\ORM\Heap\HeapInterface;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Mapper\MapperInterface;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Select\SourceFactoryInterface;
+use Cycle\ORM\Select\SourceInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.

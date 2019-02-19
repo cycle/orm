@@ -7,10 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Promise\Collection;
+namespace Cycle\ORM\Promise\Collection;
 
 use Doctrine\Common\Collections\Collection;
-use Spiral\Cycle\Promise\PromiseInterface;
+use Cycle\ORM\Promise\PromiseInterface;
 
 /**
  * Indicates that collection has been build at top of promise.

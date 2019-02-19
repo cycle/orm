@@ -7,10 +7,10 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cycle\Select;
+namespace Cycle\ORM\Select;
 
-use Spiral\Cycle\Exception\LoaderException;
-use Spiral\Cycle\Parser\AbstractNode;
+use Cycle\ORM\Exception\LoaderException;
+use Cycle\ORM\Parser\AbstractNode;
 
 /**
  * Loaders provide the ability to create data tree based on set of nested queries or parse resulted

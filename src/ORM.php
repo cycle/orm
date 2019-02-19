@@ -130,8 +130,9 @@ class ORM implements ORMInterface, SourceFactoryInterface
         $id = $data[$pk] ?? null;
 
         if ($node !== Node::NEW && !empty($id)) {
-            if (!empty($e = $this->heap->find($role, $pk, $id))) {
-                $node = $this->getHeap()->get($e);
+            $e = $this->heap->find($role, $pk, $id);
+            if ($e !== null) {
+                $node = $this->heap->get($e);
 
                 // entity already been loaded, let's update it's relations with new context
                 return $m->hydrate($e, $this->getRelmap($role)->init($node, $data));

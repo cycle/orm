@@ -1,5 +1,5 @@
 {
-  "name": "spiral/cycle",
+  "name": "cycle/orm",
   "type": "library",
   "description": "DataMapper and ORM for long-running processes",
   "require": {

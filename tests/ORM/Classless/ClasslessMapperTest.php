@@ -208,7 +208,7 @@ abstract class ClasslessMapperTest extends BaseTest
 
     public function testRepositoryFindAll()
     {
-        $r = $this->orm->getMapper('user')->getRepository();
+        $r = $this->orm->getRepository('user');
         $result = $r->findAll();
 
         $this->assertEquals(1, $result[0]->id);
@@ -222,7 +222,7 @@ abstract class ClasslessMapperTest extends BaseTest
 
     public function testRepositoryFindOne()
     {
-        $r = $this->orm->getMapper('user')->getRepository();
+        $r = $this->orm->getRepository('user');
         $result = $r->findOne();
 
         $this->assertEquals(1, $result->id);
@@ -232,7 +232,7 @@ abstract class ClasslessMapperTest extends BaseTest
 
     public function testRepositoryFindOneWithWhere()
     {
-        $r = $this->orm->getMapper('user')->getRepository();
+        $r = $this->orm->getRepository('user');
         $result = $r->findOne(['id' => 2]);
 
         $this->assertEquals(2, $result->id);

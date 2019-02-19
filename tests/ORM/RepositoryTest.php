@@ -9,8 +9,8 @@
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Mapper\Repository;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -52,7 +52,7 @@ abstract class RepositoryTest extends BaseTest
 
     public function testFindAll()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findAll();
 
         $this->assertInstanceOf(User::class, $result[0]);
@@ -68,7 +68,7 @@ abstract class RepositoryTest extends BaseTest
 
     public function testCloned()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
 
         /** @var Repository $r2 */
         $r2 = clone $r;
@@ -78,7 +78,7 @@ abstract class RepositoryTest extends BaseTest
 
     public function testFindOne()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findOne();
 
         $this->assertInstanceOf(User::class, $result);
@@ -89,7 +89,7 @@ abstract class RepositoryTest extends BaseTest
 
     public function testFindOneWithWhere()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 2]);
 
         $this->assertInstanceOf(User::class, $result);
@@ -100,7 +100,7 @@ abstract class RepositoryTest extends BaseTest
 
     public function testFindNull()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 3]);
 
         $this->assertNull($result);
@@ -108,7 +108,7 @@ abstract class RepositoryTest extends BaseTest
 
     public function testFindByPK()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findByPK(2);
 
         $this->assertInstanceOf(User::class, $result);
@@ -120,7 +120,7 @@ abstract class RepositoryTest extends BaseTest
     public function testFindImmutable()
     {
         /** @var Repository $r */
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
 
         $result = $r->select()->orderBy('id', 'DESC')->fetchAll();
 

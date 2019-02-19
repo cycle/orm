@@ -18,6 +18,7 @@ use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -29,9 +30,6 @@ abstract class DatabaseMapper implements MapperInterface
 {
     /** @var Select\SourceInterface */
     protected $source;
-
-    /** @var null|RepositoryInterface */
-    protected $repository;
 
     /** @var ORMInterface */
     protected $orm;
@@ -85,23 +83,6 @@ abstract class DatabaseMapper implements MapperInterface
     public function getRole(): string
     {
         return $this->role;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getRepository(): RepositoryInterface
-    {
-        if (!empty($this->repository)) {
-            return $this->repository;
-        }
-
-        $selector = new Select($this->orm, $this->role);
-        $selector->constrain($this->source->getConstrain());
-
-        $repositoryClass = $this->orm->getSchema()->define($this->role, Schema::REPOSITORY) ?? Repository::class;
-
-        return $this->repository = new $repositoryClass($selector);
     }
 
     /**

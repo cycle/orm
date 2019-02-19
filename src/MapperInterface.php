@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Cycle\ORM\Mapper;
+namespace Cycle\ORM;
 
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
@@ -26,13 +26,6 @@ interface MapperInterface
      * @return string
      */
     public function getRole(): string;
-
-    /**
-     * Get repository associated with a given mapper.
-     *
-     * @return RepositoryInterface
-     */
-    public function getRepository(): RepositoryInterface;
 
     /**
      * Init empty entity object an return pre-filtered data (hydration will happen on a later stage). Must

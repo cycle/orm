@@ -16,8 +16,8 @@ use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Mapper\MapperInterface;
 use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\SourceFactoryInterface;
 use Cycle\ORM\Select\SourceInterface;
 
@@ -40,6 +40,9 @@ class ORM implements ORMInterface, SourceFactoryInterface
 
     /** @var MapperInterface[] */
     private $mappers = [];
+
+    /** @var RepositoryInterface[] */
+    private $repositories = [];
 
     /** @var RelationMap[] */
     private $relmaps = [];
@@ -112,7 +115,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
             return null;
         }
 
-        return $this->getMapper($role)->getRepository()->findByPK($id);
+        return $this->getRepository($role)->findByPK($id);
     }
 
     /**
@@ -224,6 +227,24 @@ class ORM implements ORMInterface, SourceFactoryInterface
         }
 
         return $this->mappers[$role] = $this->factory->mapper($role);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getRepository($entity): RepositoryInterface
+    {
+        $role = $this->resolveRole($entity);
+        if (isset($this->repositories[$role])) {
+            return $this->repositories[$role];
+        }
+
+        $selector = new Select($this, $role);
+        $selector->constrain($this->getSource($role)->getConstrain());
+
+        $repositoryClass = $this->getSchema()->define($role, Schema::REPOSITORY) ?? Repository::class;
+
+        return $this->repositories[$role] = new $repositoryClass($selector);
     }
 
     /**

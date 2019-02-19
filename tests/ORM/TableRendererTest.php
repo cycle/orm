@@ -193,7 +193,7 @@ abstract class TableRendererTest extends BaseTest
     }
 
     /**
-     * @expectedException \Cycle\ORM\Exception\Schema\DeclarationException
+     * @expectedException \Cycle\ORM\Exception\SchemaException
      */
     public function testRenderBadDeclaration()
     {
@@ -210,7 +210,7 @@ abstract class TableRendererTest extends BaseTest
     }
 
     /**
-     * @expectedException \Cycle\ORM\Exception\Schema\DeclarationException
+     * @expectedException \Cycle\ORM\Exception\SchemaException
      */
     public function testRenderBadDeclaration2()
     {
@@ -227,7 +227,7 @@ abstract class TableRendererTest extends BaseTest
     }
 
     /**
-     * @expectedException \Cycle\ORM\Exception\Schema\DeclarationException
+     * @expectedException \Cycle\ORM\Exception\SchemaException
      */
     public function testRenderBadDeclaration3()
     {

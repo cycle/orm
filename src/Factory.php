@@ -9,17 +9,16 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Spiral\Core\Container;
-use Spiral\Core\FactoryInterface as CoreFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Mapper\MapperInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceFactoryInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Spiral\Core\Container;
+use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Database\DatabaseManager;
 
 class Factory implements FactoryInterface, SourceFactoryInterface
@@ -79,9 +78,9 @@ class Factory implements FactoryInterface, SourceFactoryInterface
     /**
      * @inheritdoc
      */
-    public function loader(string $class, string $relation): LoaderInterface
+    public function loader(string $role, string $relation): LoaderInterface
     {
-        $schema = $this->getSchema()->defineRelation($class, $relation);
+        $schema = $this->getSchema()->defineRelation($role, $relation);
 
         return $this->config->getLoader($schema[Relation::TYPE])->resolve($this->factory, [
             'orm'    => $this->orm,
@@ -94,9 +93,9 @@ class Factory implements FactoryInterface, SourceFactoryInterface
     /**
      * @inheritdoc
      */
-    public function relation(string $class, string $relation): RelationInterface
+    public function relation(string $role, string $relation): RelationInterface
     {
-        $schema = $this->getSchema()->defineRelation($class, $relation);
+        $schema = $this->getSchema()->defineRelation($role, $relation);
         $type = $schema[Relation::TYPE];
 
         return $this->config->getRelation($type)->resolve($this->factory, [

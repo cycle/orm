@@ -220,7 +220,7 @@ abstract class TypecastTest extends BaseTest
 
     public function testRepositoryFindAll()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findAll();
 
         $this->assertInstanceOf(User::class, $result[0]);
@@ -236,7 +236,7 @@ abstract class TypecastTest extends BaseTest
 
     public function testRepositoryFindOne()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findOne();
 
         $this->assertInstanceOf(User::class, $result);
@@ -247,7 +247,7 @@ abstract class TypecastTest extends BaseTest
 
     public function testRepositoryFindOneWithWhere()
     {
-        $r = $this->orm->getMapper(User::class)->getRepository();
+        $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 2]);
 
         $this->assertInstanceOf(User::class, $result);

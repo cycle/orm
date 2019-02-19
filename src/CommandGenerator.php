@@ -15,7 +15,6 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\InitCarrierInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Mapper\MapperInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 
 /**

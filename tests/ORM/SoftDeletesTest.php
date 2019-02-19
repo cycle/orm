@@ -83,8 +83,10 @@ abstract class SoftDeletesTest extends BaseTest
 
         // must be deleted
         $orm = $this->orm->withHeap(new Heap());
-        $s = $orm->getMapper(User::class)->getRepository();
+        $s = $orm->getRepository(User::class);
         $this->assertNull($s->findOne());
+
+        $this->assertSame($s, $orm->getRepository(User::class));
 
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);

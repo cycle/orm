@@ -7,8 +7,9 @@ declare(strict_types=1);
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Cycle\ORM\Mapper;
+namespace Cycle\ORM\Select;
 
+use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\Select;
 
 /**

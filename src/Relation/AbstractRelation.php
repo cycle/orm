@@ -12,7 +12,7 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Mapper\MapperInterface;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation;

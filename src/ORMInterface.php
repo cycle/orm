@@ -13,7 +13,6 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Mapper\MapperInterface;
 
 /**
  * Provide the access to all ORM services.
@@ -77,6 +76,14 @@ interface ORMInterface
      * @return MapperInterface
      */
     public function getMapper($entity): MapperInterface;
+
+    /**
+     * Get repository associated with given entity.
+     *
+     * @param string|object $entity
+     * @return RepositoryInterface
+     */
+    public function getRepository($entity): RepositoryInterface;
 
     /**
      * Generate chain of commands required to store given entity and it's relations.

@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Util;
 
-use Cycle\ORM\Exception\Schema\DeclarationException;
+use Cycle\ORM\Exception\SchemaException;
 use Spiral\Database\Schema\AbstractColumn;
 use Spiral\Database\Schema\AbstractTable;
 
@@ -43,7 +43,7 @@ final class TableRenderer
      * @param array         $columns
      * @param array         $defaults
      *
-     * @throws DeclarationException
+     * @throws SchemaException
      */
     public function renderColumns(AbstractTable $table, array $columns, array $defaults)
     {
@@ -93,7 +93,7 @@ final class TableRenderer
      * @param bool           $hasDefault Must be set to true if default value was set by user.
      * @param mixed          $default    Default value declared by record schema.
      *
-     * @throws DeclarationException
+     * @throws SchemaException
      */
     protected function renderColumn(AbstractColumn $column, array $type, bool $hasDefault, $default = null)
     {
@@ -109,7 +109,7 @@ final class TableRenderer
             // bypassing call to AbstractColumn->__call method (or specialized column method)
             call_user_func_array([$column, $type['type']], $type['options']);
         } catch (\Throwable $e) {
-            throw new DeclarationException(
+            throw new SchemaException(
                 "Invalid column type definition in '{$column->getTable()}'.'{$column->getName()}'",
                 $e->getCode(),
                 $e
@@ -151,7 +151,7 @@ final class TableRenderer
             $definition,
             $type
         )) {
-            throw new DeclarationException("Invalid column type definition in '{$table}'.'{$column}'");
+            throw new SchemaException("Invalid column type definition in '{$table}'.'{$column}'");
         }
 
         if (empty($type['options'])) {

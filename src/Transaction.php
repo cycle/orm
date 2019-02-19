@@ -94,11 +94,10 @@ final class Transaction implements TransactionInterface
 
                 foreach ($this->sort($commands) as $wait => $do) {
                     if ($wait != null) {
-                        if (in_array($wait, $pending, true)) {
-                            continue;
+                        if (!in_array($wait, $pending, true)) {
+                            $pending[] = $wait;
                         }
-
-                        $pending[] = $wait;
+                        
                         continue;
                     }
 

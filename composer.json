@@ -1,6 +1,7 @@
 {
   "name": "cycle/orm",
   "type": "library",
+  "license": "MIT",
   "description": "DataMapper and ORM for long-running processes",
   "require": {
     "php": "^7.1|^8.0",

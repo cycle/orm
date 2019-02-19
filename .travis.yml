@@ -76,7 +76,7 @@ jobs:
       before_install:
         - psql -c 'create database spiral;' -U postgres
       script:
-        - vendor/bin/phpunit tests/Cycle/Driver/Postgres
+        - vendor/bin/phpunit tests/ORM/Driver/Postgres
 
     - stage: Test
       php: 7.2

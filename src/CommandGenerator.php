@@ -27,11 +27,6 @@ final class CommandGenerator
      */
     public function generateStore(MapperInterface $mapper, $entity, Node $node): ContextCarrierInterface
     {
-        if ($entity instanceof PromiseInterface) {
-            // we do not expect to store promises
-            return new Nil();
-        }
-
         $state = $node->getState();
 
         if ($node->getStatus() == Node::NEW) {

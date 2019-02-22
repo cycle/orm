@@ -200,7 +200,7 @@ final class TableRenderer
             return $column->getEnumValues()[0];
         }
 
-        switch ($column->phpType()) {
+        switch ($column->getType()) {
             case 'int':
                 return 0;
             case 'float':

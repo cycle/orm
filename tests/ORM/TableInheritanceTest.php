@@ -56,7 +56,7 @@ abstract class TableInheritanceTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ],
-            Admin::class => [Schema::ROLE => User::class,]
+            Admin::class => [Schema::ROLE => User::class]
         ]));
     }
 

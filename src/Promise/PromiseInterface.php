@@ -12,7 +12,7 @@ namespace Cycle\ORM\Promise;
 /**
  * Promises some related data.
  */
-interface PromiseInterface
+interface PromiseInterface extends ReferenceInterface
 {
     /**
      * Return true if promise has been already resolved.
@@ -20,22 +20,6 @@ interface PromiseInterface
      * @return bool
      */
     public function __loaded(): bool;
-
-    /**
-     * Entity role associated with the promise.
-     *
-     * @return string
-     */
-    public function __role(): string;
-
-    /**
-     * Return association data used to resolve the promise.
-     * In most of cases simply contain outer key name and it's
-     * value.
-     *
-     * @return array
-     */
-    public function __scope(): array;
 
     /**
      * Resolve promise and return related data.

@@ -34,7 +34,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($table->hasColumn('name'));
         $column = $table->column('name');
 
-        $this->assertSame('string', $column->phpType());
+        $this->assertSame('string', $column->getType());
         $this->assertSame('default', $column->getDefaultValue());
         $this->assertFalse($column->isNullable());
     }
@@ -59,7 +59,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($table->hasColumn('name'));
         $column = $table->column('name');
 
-        $this->assertSame('string', $column->phpType());
+        $this->assertSame('string', $column->getType());
         $this->assertSame(null, $column->getDefaultValue());
         $this->assertTrue($column->isNullable());
     }
@@ -83,7 +83,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($table->hasColumn('name'));
         $column = $table->column('name');
 
-        $this->assertSame('string', $column->phpType());
+        $this->assertSame('string', $column->getType());
         $this->assertTrue($column->isNullable());
     }
 
@@ -106,7 +106,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($table->hasColumn('name'));
         $column = $table->column('name');
 
-        $this->assertSame('string', $column->phpType());
+        $this->assertSame('string', $column->getType());
         $this->assertTrue($column->isNullable());
     }
 
@@ -129,7 +129,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($table->hasColumn('name'));
         $column = $table->column('name');
 
-        $this->assertSame('string', $column->phpType());
+        $this->assertSame('string', $column->getType());
         $this->assertSame(['active', 'disabled'], $column->getEnumValues());
         $this->assertSame('active', $column->getDefaultValue());
 
@@ -157,7 +157,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($table->hasColumn('name'));
         $column = $table->column('name');
 
-        $this->assertSame('string', $column->phpType());
+        $this->assertSame('string', $column->getType());
         $this->assertSame(['active', 'disabled'], $column->getEnumValues());
         $this->assertSame(null, $column->getDefaultValue());
 
@@ -185,7 +185,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($table->hasColumn('name'));
         $column = $table->column('name');
 
-        $this->assertSame('string', $column->phpType());
+        $this->assertSame('string', $column->getType());
         $this->assertSame(['active', 'disabled'], $column->getEnumValues());
         $this->assertSame('disabled', $column->getDefaultValue());
 

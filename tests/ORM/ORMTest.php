@@ -51,8 +51,8 @@ abstract class ORMTest extends BaseTest
 
     public function testORMGet()
     {
-        $this->assertNull($this->orm->get(User::class, 1, false));
-        $this->assertInstanceOf(User::class, $this->orm->get(User::class, 1, true));
+        $this->assertNull($this->orm->get(User::class, 'id', 1, false));
+        $this->assertInstanceOf(User::class, $this->orm->get(User::class, 'id', 1, true));
 
         $this->captureReadQueries();
         $this->assertInstanceOf(User::class, $this->orm->get(User::class, 'id', 1));
@@ -69,8 +69,8 @@ abstract class ORMTest extends BaseTest
 
     public function testORMGetByRole()
     {
-        $this->assertNull($this->orm->get('user', 1, false));
-        $this->assertInstanceOf(User::class, $this->orm->get('user', 1, true));
+        $this->assertNull($this->orm->get('user', 'id', 1, false));
+        $this->assertInstanceOf(User::class, $this->orm->get('user', 'id', 1, true));
 
         $this->captureReadQueries();
         $this->assertInstanceOf(User::class, $this->orm->get('user', 'id', 1));

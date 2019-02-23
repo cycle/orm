@@ -6,7 +6,6 @@
 
 Features:
 ---------
-- portable DataMapper, any data source
 - ORM with many-to-many, many-thought-many and polymorphic relations
 - bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/ORM/Classless)
 - query builder with automatic relation resolution

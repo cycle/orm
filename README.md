@@ -11,7 +11,7 @@ Features:
 - query builder with automatic relation resolution
 - eager and lazy loading, proxies support
 - runtime configuration with/without code-generation
-- column-to-field mapping, value objects support
+- column-to-field mapping, value objects support, referrences support
 - single table inheritance
 - works with directed graphs and cyclic graphs using IDDFS over linked command chains
 - designed to work in long-running applications

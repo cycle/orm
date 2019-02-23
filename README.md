@@ -9,9 +9,9 @@ Features:
 - ORM with many-to-many, many-thought-many and polymorphic relations
 - bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/ORM/Classless)
 - query builder with automatic relation resolution
-- eager and lazy loading, proxies support
+- eager and lazy loading, proxies support, references support
 - runtime configuration with/without code-generation
-- column-to-field mapping, value objects support, references support
+- column-to-field mapping, value objects support
 - single table inheritance
 - works with directed graphs and cyclic graphs using IDDFS over linked command chains
 - designed to work in long-running applications

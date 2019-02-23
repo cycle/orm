@@ -283,9 +283,9 @@ class ORM implements ORMInterface
      *
      * Returns references by default.
      */
-    public function promise(string $role, array $scope): ?ReferenceInterface
+    public function promise(string $role, array $scope)
     {
-        $e = $this->heap->find($role, key($scope), key($scope));
+        $e = $this->heap->find($role, key($scope), current($scope));
         if ($e !== null) {
             return $e;
         }

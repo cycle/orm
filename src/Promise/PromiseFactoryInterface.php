@@ -17,11 +17,13 @@ use Cycle\ORM\Exception\PromiseException;
 interface PromiseFactoryInterface
 {
     /**
+     * Method can return target entity if such already presented in heap memory.
+     *
      * @param string $role
      * @param array  $scope
-     * @return ReferenceInterface|null
+     * @return ReferenceInterface|mixed|null
      *
      * @throws PromiseException
      */
-    public function promise(string $role, array $scope): ?ReferenceInterface;
+    public function promise(string $role, array $scope);
 }

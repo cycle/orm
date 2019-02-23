@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class ClasslessCyclicReferencesTest extends \Cycle\ORM\Tests\Classless\ClasslessCyclicReferencesTest
+class ClasslessCyclicReferencesTest extends \Cycle\ORM\Tests\Classless\ClasslessCyclicReferencesTest 
 { 
     const DRIVER = "mysql"; 
 }

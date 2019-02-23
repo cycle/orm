@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest
+class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest 
 { 
     const DRIVER = "sqlserver"; 
 }

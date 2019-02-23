@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest
+class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest 
 { 
     const DRIVER = "postgres"; 
 }

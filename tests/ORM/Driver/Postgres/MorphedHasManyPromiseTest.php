@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest
+class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest 
 { 
     const DRIVER = "postgres"; 
 }

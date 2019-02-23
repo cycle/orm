@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest
+class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest 
 { 
     const DRIVER = "sqlserver"; 
 }

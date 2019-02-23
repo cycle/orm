@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class InverseRelationTest extends \Cycle\ORM\Tests\InverseRelationTest
+class InverseRelationTest extends \Cycle\ORM\Tests\InverseRelationTest 
 { 
     const DRIVER = "postgres"; 
 }

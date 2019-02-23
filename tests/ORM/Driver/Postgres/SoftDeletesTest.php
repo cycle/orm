@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest
+class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest 
 { 
     const DRIVER = "postgres"; 
 }

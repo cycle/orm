@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class TableRendererTest extends \Cycle\ORM\Tests\TableRendererTest
+class TableRendererTest extends \Cycle\ORM\Tests\TableRendererTest 
 { 
     const DRIVER = "sqlite"; 
 }

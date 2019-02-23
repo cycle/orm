@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest
+class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest 
 { 
     const DRIVER = "sqlserver"; 
 }

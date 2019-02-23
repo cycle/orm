@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class ORMTest extends \Cycle\ORM\Tests\ORMTest
+class ORMTest extends \Cycle\ORM\Tests\ORMTest 
 { 
     const DRIVER = "mysql"; 
 }

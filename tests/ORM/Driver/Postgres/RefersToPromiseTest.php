@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class RefersToPromiseTest extends \Cycle\ORM\Tests\RefersToPromiseTest
+class RefersToPromiseTest extends \Cycle\ORM\Tests\RefersToPromiseTest 
 { 
     const DRIVER = "postgres"; 
 }

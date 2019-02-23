@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class HasManyPromiseTest extends \Cycle\ORM\Tests\HasManyPromiseTest
+class HasManyPromiseTest extends \Cycle\ORM\Tests\HasManyPromiseTest 
 { 
     const DRIVER = "mysql"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class HasOneProxyTest extends \Cycle\ORM\Tests\HasOneProxyTest
+class HasOneProxyTest extends \Cycle\ORM\Tests\HasOneProxyTest 
 { 
     const DRIVER = "sqlserver"; 
 }

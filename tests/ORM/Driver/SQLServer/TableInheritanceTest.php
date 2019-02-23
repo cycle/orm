@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class TableInheritanceTest extends \Cycle\ORM\Tests\TableInheritanceTest
+class TableInheritanceTest extends \Cycle\ORM\Tests\TableInheritanceTest 
 { 
     const DRIVER = "sqlserver"; 
 }

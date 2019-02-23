@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class HasOneRelationTest extends \Cycle\ORM\Tests\HasOneRelationTest
+class HasOneRelationTest extends \Cycle\ORM\Tests\HasOneRelationTest 
 { 
     const DRIVER = "sqlserver"; 
 }

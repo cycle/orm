@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class DeepCyclicTest extends \Cycle\ORM\Tests\DeepCyclicTest
+class DeepCyclicTest extends \Cycle\ORM\Tests\DeepCyclicTest 
 { 
     const DRIVER = "sqlite"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class BelongsToRelationTest extends \Cycle\ORM\Tests\BelongsToRelationTest
+class BelongsToRelationTest extends \Cycle\ORM\Tests\BelongsToRelationTest 
 { 
     const DRIVER = "postgres"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class ClasslessHasOneCyclicTest extends \Cycle\ORM\Tests\Classless\ClasslessHasOneCyclicTest
+class ClasslessHasOneCyclicTest extends \Cycle\ORM\Tests\Classless\ClasslessHasOneCyclicTest 
 { 
     const DRIVER = "sqlite"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class TypecastTest extends \Cycle\ORM\Tests\TypecastTest
+class TypecastTest extends \Cycle\ORM\Tests\TypecastTest 
 { 
     const DRIVER = "sqlserver"; 
 }

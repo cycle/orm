@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest
+class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest 
 { 
     const DRIVER = "mysql"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest
+class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest 
 { 
     const DRIVER = "sqlserver"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class ColumnAliasesTest extends \Cycle\ORM\Tests\ColumnAliasesTest
+class ColumnAliasesTest extends \Cycle\ORM\Tests\ColumnAliasesTest 
 { 
     const DRIVER = "sqlserver"; 
 }

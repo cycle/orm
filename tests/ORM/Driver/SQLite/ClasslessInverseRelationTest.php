@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest
+class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest 
 { 
     const DRIVER = "sqlite"; 
 }

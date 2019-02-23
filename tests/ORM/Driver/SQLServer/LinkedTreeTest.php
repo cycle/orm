@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class LinkedTreeTest extends \Cycle\ORM\Tests\LinkedTreeTest
+class LinkedTreeTest extends \Cycle\ORM\Tests\LinkedTreeTest 
 { 
     const DRIVER = "sqlserver"; 
 }

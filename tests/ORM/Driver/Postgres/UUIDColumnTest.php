@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class UUIDColumnTest extends \Cycle\ORM\Tests\UUIDColumnTest
+class UUIDColumnTest extends \Cycle\ORM\Tests\UUIDColumnTest 
 { 
     const DRIVER = "postgres"; 
 }

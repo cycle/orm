@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class MorphedHasManyRelationTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyRelationTest
+class MorphedHasManyRelationTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyRelationTest 
 { 
     const DRIVER = "mysql"; 
 }

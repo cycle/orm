@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class PaginateTest extends \Cycle\ORM\Tests\PaginateTest
+class PaginateTest extends \Cycle\ORM\Tests\PaginateTest 
 { 
     const DRIVER = "mysql"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest
+class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest 
 { 
     const DRIVER = "mysql"; 
 }

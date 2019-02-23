@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest
+class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest 
 { 
     const DRIVER = "mysql"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest
+class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest 
 { 
     const DRIVER = "sqlserver"; 
 }

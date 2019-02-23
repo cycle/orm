@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class ManyToManyConstrainedTest extends \Cycle\ORM\Tests\ManyToManyConstrainedTest
+class ManyToManyConstrainedTest extends \Cycle\ORM\Tests\ManyToManyConstrainedTest 
 { 
     const DRIVER = "postgres"; 
 }

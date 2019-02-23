@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class RefersToRelationTest extends \Cycle\ORM\Tests\RefersToRelationTest
+class RefersToRelationTest extends \Cycle\ORM\Tests\RefersToRelationTest 
 { 
     const DRIVER = "sqlite"; 
 }

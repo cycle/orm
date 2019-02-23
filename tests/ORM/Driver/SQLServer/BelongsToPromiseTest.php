@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class BelongsToPromiseTest extends \Cycle\ORM\Tests\BelongsToPromiseTest
+class BelongsToPromiseTest extends \Cycle\ORM\Tests\BelongsToPromiseTest 
 { 
     const DRIVER = "sqlserver"; 
 }

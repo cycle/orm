@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class HasOneCyclicTest extends \Cycle\ORM\Tests\HasOneCyclicTest
+class HasOneCyclicTest extends \Cycle\ORM\Tests\HasOneCyclicTest 
 { 
     const DRIVER = "postgres"; 
 }

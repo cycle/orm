@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class ManyToManyPromiseTest extends \Cycle\ORM\Tests\ManyToManyPromiseTest
+class ManyToManyPromiseTest extends \Cycle\ORM\Tests\ManyToManyPromiseTest 
 { 
     const DRIVER = "sqlite"; 
 }

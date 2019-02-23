@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class DatetimeTest extends \Cycle\ORM\Tests\DatetimeTest
+class DatetimeTest extends \Cycle\ORM\Tests\DatetimeTest 
 { 
     const DRIVER = "sqlite"; 
 }

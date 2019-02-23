@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class MapperTest extends \Cycle\ORM\Tests\MapperTest
+class MapperTest extends \Cycle\ORM\Tests\MapperTest 
 { 
     const DRIVER = "postgres"; 
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class ColumnAliasesTest extends \Cycle\ORM\Tests\ColumnAliasesTest
+class ColumnAliasesTest extends \Cycle\ORM\Tests\ColumnAliasesTest 
 { 
     const DRIVER = "postgres"; 
 }

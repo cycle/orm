@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class ManyToManyConstrainedPivotTest extends \Cycle\ORM\Tests\ManyToManyConstrainedPivotTest
+class ManyToManyConstrainedPivotTest extends \Cycle\ORM\Tests\ManyToManyConstrainedPivotTest 
 { 
     const DRIVER = "mysql"; 
 }

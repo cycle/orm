@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class ORMTest extends \Cycle\ORM\Tests\ORMTest
+class ORMTest extends \Cycle\ORM\Tests\ORMTest 
 { 
     const DRIVER = "sqlserver"; 
 }

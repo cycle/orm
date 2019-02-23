@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class MapperTest extends \Cycle\ORM\Tests\MapperTest
+class MapperTest extends \Cycle\ORM\Tests\MapperTest 
 { 
     const DRIVER = "sqlserver"; 
 }

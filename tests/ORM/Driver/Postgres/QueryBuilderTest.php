@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest
+class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest 
 { 
     const DRIVER = "postgres"; 
 }

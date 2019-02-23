@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
  
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest
+class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest 
 { 
     const DRIVER = "sqlite"; 
 }

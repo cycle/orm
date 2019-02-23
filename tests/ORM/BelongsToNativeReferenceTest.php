@@ -11,18 +11,19 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\ProxyFactoryInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
-use Cycle\ORM\Tests\Fixtures\ReferenceFactory;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Fixtures\UserID;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
-abstract class BelongsToReferenceTest extends BaseTest
+abstract class BelongsToNativeReferenceTest extends BaseTest
 {
     use TableTrait;
 
@@ -106,7 +107,13 @@ abstract class BelongsToReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new ReferenceFactory());
+        ]))->withProxyFactory(new class implements ProxyFactoryInterface
+        {
+            public function proxy(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
+            {
+                return new Reference($role, $scope);
+            }
+        });
     }
 
     public function testFetchRelation()
@@ -150,7 +157,7 @@ abstract class BelongsToReferenceTest extends BaseTest
         $p = $selector->wherePK(1)->fetchOne();
 
         $this->assertInstanceOf(ReferenceInterface::class, $p->user);
-        $this->assertInstanceOf(UserID::class, $p->user);
+        $this->assertInstanceOf(Reference::class, $p->user);
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -162,7 +169,7 @@ abstract class BelongsToReferenceTest extends BaseTest
     public function testCreateWithoutObject()
     {
         $p = new Profile();
-        $p->user = new UserID(1);
+        $p->user = new Reference('user', ['id' => 1]);
         $p->image = 'test.png';
 
         $this->captureReadQueries();

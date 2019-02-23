@@ -7,7 +7,7 @@
 Features:
 ---------
 - ORM with many-to-many, many-thought-many and polymorphic relations
-- bare PHP classes, ActiveRecord-like classes, [no classes at all](tests/ORM/Classless)
+- bare PHP objects, ActiveRecord-like objects, [same object type for all entities](tests/ORM/Classless)
 - query builder with automatic relation resolution
 - eager and lazy loading, proxies support, references support
 - runtime configuration with/without code-generation

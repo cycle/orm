@@ -16,7 +16,6 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\BelongsToRelation;
-use Cycle\ORM\Select\ConstrainInterface;
 
 class BelongsToMorphedRelation extends BelongsToRelation
 {
@@ -76,26 +75,6 @@ class BelongsToMorphedRelation extends BelongsToRelation
         }
 
         return $wrappedStore;
-    }
-
-    /**
-     * Get the scope name associated with the relation.
-     *
-     * @param string $target
-     * @return null|ConstrainInterface
-     */
-    protected function getTargetConstrain(string $target): ?ConstrainInterface
-    {
-        $constrain = $this->schema[Relation::CONSTRAIN] ?? true;
-        if ($constrain instanceof ConstrainInterface) {
-            return $constrain;
-        }
-
-        if ($constrain === null) {
-            return null;
-        }
-
-        return $this->getSource($target)->getConstrain();
     }
 
     /**

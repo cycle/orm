@@ -9,13 +9,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\Branch\Split;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\InitCarrierInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
 
 /**
  * Responsible for proper command chain generation.
@@ -36,18 +34,18 @@ final class CommandGenerator
             return $cmd;
         }
 
-        $tail = $state->getCommand();
-        if ($tail === null) {
+        $head = $state->getCommand();
+        if ($head === null) {
             return $mapper->queueUpdate($entity, $node, $state);
         }
 
-        // Command can aggregate multiple operations on soft basis.
-        if (!$tail instanceof InitCarrierInterface) {
-            return $tail;
+        // we can not use current command as [head, tail] update tuple
+        if (!$head instanceof InitCarrierInterface) {
+            return $head;
         }
 
         // in cases where we have to update new entity we can merge two commands into one
-        $split = new Split($tail, $mapper->queueUpdate($entity, $node, $state));
+        $split = new Split($head, $mapper->queueUpdate($entity, $node, $state));
         $state->setCommand($split);
 
         return $split;

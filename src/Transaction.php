@@ -97,7 +97,7 @@ final class Transaction implements TransactionInterface
                         if (!in_array($wait, $pending, true)) {
                             $pending[] = $wait;
                         }
-                        
+
                         continue;
                     }
 

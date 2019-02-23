@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Morphed;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
@@ -18,6 +17,7 @@ use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseMany;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasManyRelation;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class MorphedHasManyRelation extends HasManyRelation
 {

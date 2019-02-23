@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Promise\Collection;
 
+use Cycle\ORM\Promise\PromiseInterface;
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Doctrine\Common\Collections\ArrayCollection;
-use Cycle\ORM\Promise\PromiseInterface;
 
 /**
  * LazyLoading collection build at top of data promise.

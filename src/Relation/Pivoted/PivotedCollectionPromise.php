@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Pivoted;
 
-use Doctrine\Common\Collections\AbstractLazyCollection;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
 use Cycle\ORM\Promise\PromiseInterface;
+use Doctrine\Common\Collections\AbstractLazyCollection;
 
 /**
  * Collection at top of pivoted (entity + context entity) promise.

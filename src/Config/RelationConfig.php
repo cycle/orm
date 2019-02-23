@@ -9,11 +9,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Config;
 
-use Spiral\Core\Container\Autowire;
-use Spiral\Core\InjectableConfig;
 use Cycle\ORM\Exception\ConfigException;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
+use Spiral\Core\Container\Autowire;
+use Spiral\Core\InjectableConfig;
 
 class RelationConfig extends InjectableConfig
 {

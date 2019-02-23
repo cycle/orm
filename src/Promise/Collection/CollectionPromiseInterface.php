@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Promise\Collection;
 
-use Doctrine\Common\Collections\Collection;
 use Cycle\ORM\Promise\PromiseInterface;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * Indicates that collection has been build at top of promise.

@@ -151,6 +151,7 @@ abstract class BelongsToReferenceTest extends BaseTest
 
         $this->assertInstanceOf(ReferenceInterface::class, $p->user);
         $this->assertInstanceOf(UserID::class, $p->user);
+        $this->assertEquals(new UserID(1), $p->user);
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);

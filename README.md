@@ -13,7 +13,7 @@ Features:
 - runtime configuration with/without code-generation
 - column-to-field mapping, value objects support
 - single table inheritance
-- works with directed graphs and cyclic graphs using IDDFS over linked command chains
+- works with directed graphs and cyclic graphs using IDDFS over command chains
 - designed to work in long-running applications
 - supports MySQL (MariaDB, Aurora), PostgresSQL, SQLServer, SQLite (full mock capability)
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps

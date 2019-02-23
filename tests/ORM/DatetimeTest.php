@@ -1,10 +1,13 @@
 <?php
-declare(strict_types=1);/**
+declare(strict_types=1);
+/**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- */namespace Cycle\ORM\Tests;
+ */
+
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
@@ -145,7 +148,7 @@ abstract class DatetimeTest extends BaseTest
 
     public function testUpdate()
     {
-        $e = $this->orm->get('user', 1);
+        $e = $this->orm->get('user', 'id', 1);
         $e->time_created = new \DateTimeImmutable('tomorrow 10pm');
 
         $this->captureWriteQueries();

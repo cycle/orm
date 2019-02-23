@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-interface SourceFactoryInterface
+interface SourceProviderInterface
 {
     /**
      * Get database source associated with given entity role.
@@ -18,4 +18,6 @@ interface SourceFactoryInterface
      * @return SourceInterface
      */
     public function getSource(string $role): SourceInterface;
+
+    // todo: database?
 }

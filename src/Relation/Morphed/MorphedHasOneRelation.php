@@ -14,8 +14,6 @@ use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ProxyFactoryInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasOneRelation;
 
@@ -53,15 +51,10 @@ class MorphedHasOneRelation extends HasOneRelation
             $this->morphKey => $parentNode->getRole()
         ];
 
-        $m = $this->getMapper();
-        if ($m instanceof ProxyFactoryInterface) {
-            $p = $m->makeProxy($scope);
-        } else {
-            $p = new PromiseOne($this->orm, $this->target, $scope);
-            $p->setConstrain($this->getConstrain());
-        }
 
-        return [$p, $p];
+        $r = $this->orm->promise($this->target, $scope);
+
+        return [$r, $r];
     }
 
     /**

@@ -16,26 +16,31 @@ use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\Reference;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\Repository;
-use Cycle\ORM\Select\SourceFactoryInterface;
+use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  */
-class ORM implements ORMInterface, SourceFactoryInterface
+class ORM implements ORMInterface
 {
     /** @var CommandGenerator */
     private $generator;
 
-    /** @var FactoryInterface|SourceFactoryInterface */
+    /** @var FactoryInterface|SourceProviderInterface */
     private $factory;
+
+    /** @var ProxyFactoryInterface|null */
+    private $proxyFactory;
 
     /** @var HeapInterface */
     private $heap;
 
-    /** @var SchemaInterface */
+    /** @var SchemaInterface|null */
     private $schema;
 
     /** @var MapperInterface[] */
@@ -54,22 +59,14 @@ class ORM implements ORMInterface, SourceFactoryInterface
     private $sources = [];
 
     /**
-     * @param FactoryInterface|SourceFactoryInterface $factory
-     * @param SchemaInterface|null                    $schema
+     * @param FactoryInterface|SourceProviderInterface $factory
+     * @param SchemaInterface|null                     $schema
      */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
     {
-        if (!$factory instanceof SourceFactoryInterface) {
-            throw new ORMException("Source factory is missing");
-        }
-
         $this->generator = new CommandGenerator();
         $this->factory = $factory;
-
-        if (!is_null($schema)) {
-            $this->schema = $schema;
-            $this->factory = $this->factory->withSchema($this, $schema);
-        }
+        $this->schema = $schema;
 
         $this->heap = new Heap();
     }
@@ -102,12 +99,10 @@ class ORM implements ORMInterface, SourceFactoryInterface
     /**
      * @inheritdoc
      */
-    public function get(string $role, $id, bool $load = true)
+    public function get(string $role, string $key, $value, bool $load = true)
     {
         $role = $this->resolveRole($role);
-        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-
-        if (!is_null($e = $this->heap->find($role, $pk, $id))) {
+        if (!is_null($e = $this->heap->find($role, $key, $value))) {
             return $e;
         }
 
@@ -115,7 +110,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
             return null;
         }
 
-        return $this->getRepository($role)->findByPK($id);
+        return $this->getRepository($role)->findByPK($value);
     }
 
     /**
@@ -158,10 +153,6 @@ class ORM implements ORMInterface, SourceFactoryInterface
         $orm = clone $this;
         $orm->factory = $factory;
 
-        if (!is_null($orm->schema)) {
-            $orm->factory = $factory->withSchema($orm, $orm->schema);
-        }
-
         return $orm;
     }
 
@@ -180,7 +171,6 @@ class ORM implements ORMInterface, SourceFactoryInterface
     {
         $orm = clone $this;
         $orm->schema = $schema;
-        $orm->factory = $orm->factory->withSchema($orm, $orm->schema);
 
         return $orm;
     }
@@ -204,7 +194,6 @@ class ORM implements ORMInterface, SourceFactoryInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
-        $orm->factory = $orm->factory->withSchema($orm, $orm->schema);
 
         return $orm;
     }
@@ -227,7 +216,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
             return $this->mappers[$role];
         }
 
-        return $this->mappers[$role] = $this->factory->mapper($role);
+        return $this->mappers[$role] = $this->factory->mapper($this, $this->schema, $role);
     }
 
     /**
@@ -257,7 +246,55 @@ class ORM implements ORMInterface, SourceFactoryInterface
             return $this->sources[$role];
         }
 
-        return $this->sources[$role] = $this->factory->getSource($role);
+        $source = $this->schema->define($role, Schema::SOURCE);
+        if ($source !== null) {
+            return $this->factory->get($source);
+        }
+
+        $source = new Source(
+            $this->factory->database($this->schema->define($role, Schema::DATABASE)),
+            $this->schema->define($role, Schema::TABLE)
+        );
+
+        $constrain = $this->schema->define($role, Schema::CONSTRAIN);
+        if ($constrain !== null) {
+            $source = $source->withConstrain($this->factory->get($constrain));
+        }
+
+        return $this->sources[$role] = $source;
+    }
+
+    /**
+     * Overlay existing promise factory.
+     *
+     * @param ProxyFactoryInterface $proxyFactory
+     * @return ORM
+     */
+    public function withProxyFactory(ProxyFactoryInterface $proxyFactory): self
+    {
+        $orm = clone $this;
+        $orm->proxyFactory = $proxyFactory;
+
+        return $orm;
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * Returns references by default.
+     */
+    public function promise(string $role, array $scope): ?ReferenceInterface
+    {
+        $e = $this->heap->find($role, key($scope), key($scope));
+        if ($e !== null) {
+            return $e;
+        }
+
+        if ($this->proxyFactory !== null) {
+            return $this->proxyFactory->proxy($this, $role, $scope);
+        }
+
+        return new Reference($role, $scope);
     }
 
     /**
@@ -265,7 +302,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
      */
     public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
     {
-        if ($entity instanceof PromiseInterface) {
+        if ($entity instanceof ReferenceInterface) {
             // we do not expect to store promises
             return new Nil();
         }
@@ -299,7 +336,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
     public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
     {
         $node = $this->heap->get($entity);
-        if ($entity instanceof PromiseInterface || is_null($node)) {
+        if ($entity instanceof ReferenceInterface || is_null($node)) {
             // nothing to do, what about promises?
             return new Nil();
         }
@@ -317,6 +354,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
         $this->relmaps = [];
         $this->indexes = [];
         $this->sources = [];
+        $this->repositories = [];
     }
 
     /**
@@ -354,7 +392,7 @@ class ORM implements ORMInterface, SourceFactoryInterface
 
         $names = array_keys($this->schema->define($role, Schema::RELATIONS));
         foreach ($names as $relation) {
-            $relations[$relation] = $this->factory->relation($role, $relation);
+            $relations[$relation] = $this->factory->relation($this, $this->schema, $role, $relation);
         }
 
         return $this->relmaps[$role] = new RelationMap($this, $relations);

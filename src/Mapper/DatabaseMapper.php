@@ -55,7 +55,7 @@ abstract class DatabaseMapper implements MapperInterface
      */
     public function __construct(ORMInterface $orm, string $role)
     {
-        if (!$orm instanceof Select\SourceFactoryInterface) {
+        if (!$orm instanceof Select\SourceProviderInterface) {
             throw new MapperException("Source factory is missing");
         }
 

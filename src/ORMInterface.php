@@ -13,11 +13,13 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\PromiseFactoryInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * Provide the access to all ORM services.
  */
-interface ORMInterface
+interface ORMInterface extends SourceProviderInterface, PromiseFactoryInterface
 {
     /**
      * Automatically resolve role based on object name.
@@ -28,14 +30,15 @@ interface ORMInterface
     public function resolveRole($entity): string;
 
     /**
-     * Get entity by it's primary key from the heap of automatically load it.
+     * Get/load entity by unique key/value pair.
      *
      * @param string $role
-     * @param mixed  $id
+     * @param string $key
+     * @param mixed  $value
      * @param bool   $load
      * @return object|null
      */
-    public function get(string $role, $id, bool $load = true);
+    public function get(string $role, string $key, $value, bool $load = true);
 
     /**
      * Create new entity based on given role and input data. Method will attempt to re-use

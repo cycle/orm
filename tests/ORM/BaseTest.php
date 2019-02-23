@@ -8,6 +8,7 @@
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Promise\PromiseFactory;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -91,6 +92,9 @@ abstract class BaseTest extends TestCase
             $this->dbal,
             RelationConfig::getDefault()
         ));
+
+        // use promises by default
+        $this->orm = $this->orm->withProxyFactory(new PromiseFactory());
     }
 
     /**

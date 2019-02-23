@@ -15,6 +15,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\Profile;
+use Cycle\ORM\Tests\Fixtures\ProxyFactory;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserMapperWithProxy;
 use Cycle\ORM\Tests\Fixtures\UserProxy;
@@ -61,7 +62,7 @@ abstract class BelongsToProxyTest extends BaseTest
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
                 Schema::ROLE        => 'user',
-                Schema::MAPPER      => UserMapperWithProxy::class,
+                Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
@@ -89,7 +90,7 @@ abstract class BelongsToProxyTest extends BaseTest
                     ]
                 ]
             ]
-        ]));
+        ]))->withProxyFactory(new ProxyFactory());
     }
 
     public function testFetchRelation()

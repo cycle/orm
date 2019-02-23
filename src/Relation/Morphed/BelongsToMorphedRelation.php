@@ -14,8 +14,6 @@ use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ProxyFactoryInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\BelongsToRelation;
 use Cycle\ORM\Select\ConstrainInterface;
@@ -52,21 +50,9 @@ class BelongsToMorphedRelation extends BelongsToRelation
             return [null, null];
         }
 
-        if (!is_null($e = $this->orm->getHeap()->find($target, $this->outerKey, $innerKey))) {
-            return [$e, $e];
-        }
+        $r = $this->orm->promise($target, [$this->outerKey => $innerKey]);
 
-        $scope = [$this->outerKey => $innerKey];
-
-        $m = $this->getMapper($target);
-        if ($m instanceof ProxyFactoryInterface) {
-            $p = $m->makeProxy($scope);
-        } else {
-            $p = new PromiseOne($this->orm, $target, $scope);
-            $p->setConstrain($this->getTargetConstrain($target));
-        }
-
-        return [$p, $p];
+        return [$r, $r];
     }
 
     /**

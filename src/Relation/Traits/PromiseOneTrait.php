@@ -10,8 +10,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ProxyFactoryInterface;
 
 trait PromiseOneTrait
 {
@@ -24,20 +22,8 @@ trait PromiseOneTrait
             return [null, null];
         }
 
-        if (!empty($e = $this->orm->getHeap()->find($this->target, $this->outerKey, $innerKey))) {
-            return [$e, $e];
-        }
+        $r = $this->orm->promise($this->target, [$this->outerKey => $innerKey]);
 
-        $scope = [$this->outerKey => $innerKey];
-
-        $m = $this->getMapper();
-        if ($m instanceof ProxyFactoryInterface) {
-            $p = $m->makeProxy($scope);
-        } else {
-            $p = new PromiseOne($this->orm, $this->target, $scope);
-            $p->setConstrain($this->getConstrain());
-        }
-
-        return [$p, $p];
+        return [$r, $r];
     }
 }

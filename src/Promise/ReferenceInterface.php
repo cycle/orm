@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Promise;
 
+/**
+ * Reference points to a remote entity.
+ */
 interface ReferenceInterface
 {
     /**
@@ -19,9 +22,8 @@ interface ReferenceInterface
     public function __role(): string;
 
     /**
-     * Return association data used to resolve the promise.
-     * In most of cases simply contain outer key name and it's
-     * value.
+     * Data to unique identify the entity. In most of cases simply contain outer key name (primary key) and
+     * it's value.
      *
      * @return array
      */

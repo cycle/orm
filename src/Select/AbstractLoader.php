@@ -48,7 +48,7 @@ abstract class AbstractLoader implements LoaderInterface
     public const JOIN      = 3;
     public const LEFT_JOIN = 4;
 
-    /** @var ORMInterface|SourceFactoryInterface @internal */
+    /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;
 
     /** @var string */
@@ -163,7 +163,12 @@ abstract class AbstractLoader implements LoaderInterface
 
         try {
             //Creating new loader.
-            $loader = $this->orm->getFactory()->loader($this->target, $relation);
+            $loader = $this->orm->getFactory()->loader(
+                $this->orm,
+                $this->orm->getSchema(),
+                $this->target,
+                $relation
+            );
         } catch (SchemaException|FactoryException $e) {
             throw new LoaderException(
                 sprintf("Unable to create loader: %s", $e->getMessage()),

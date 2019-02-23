@@ -100,7 +100,7 @@ class PivotedPromise implements PromiseInterface
             return $this->resolved;
         }
 
-        if (!$this->orm instanceof Select\SourceFactoryInterface) {
+        if (!$this->orm instanceof Select\SourceProviderInterface) {
             throw new ORMException("PivotedPromise require ORM to implement SourceFactoryInterface");
         }
 

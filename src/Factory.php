@@ -10,18 +10,16 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Config\RelationConfig;
-use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
-use Cycle\ORM\Select\Source;
-use Cycle\ORM\Select\SourceFactoryInterface;
-use Cycle\ORM\Select\SourceInterface;
+use Psr\Container\ContainerInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
+use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 
-class Factory implements FactoryInterface, SourceFactoryInterface
+class Factory implements FactoryInterface
 {
     /** @var RelationConfig */
     private $config;
@@ -29,61 +27,76 @@ class Factory implements FactoryInterface, SourceFactoryInterface
     /** @var CoreFactory */
     private $factory;
 
+    /** @var ContainerInterface */
+    private $container;
+
     /** @var DatabaseManager */
     private $dbal;
 
-    /** @var ORMInterface */
-    private $orm;
-
-    /** @var SchemaInterface */
-    private $schema;
-
     /**
-     * @param DatabaseManager  $dbal
-     * @param RelationConfig   $config
-     * @param CoreFactory|null $factory
+     * @param DatabaseManager         $dbal
+     * @param RelationConfig          $config
+     * @param CoreFactory|null        $factory
+     * @param ContainerInterface|null $container
      */
-    public function __construct(DatabaseManager $dbal, RelationConfig $config, CoreFactory $factory = null)
-    {
+    public function __construct(
+        DatabaseManager $dbal,
+        RelationConfig $config,
+        CoreFactory $factory = null,
+        ContainerInterface $container = null
+    ) {
         $this->dbal = $dbal;
         $this->config = $config;
         $this->factory = $factory ?? new Container();
+        $this->container = $container ?? new Container();
     }
 
     /**
      * @inheritdoc
      */
-    public function withSchema(ORMInterface $orm, SchemaInterface $schema): FactoryInterface
+    public function has($id)
     {
-        $factory = clone $this;
-        $factory->orm = $orm;
-        $factory->schema = $schema;
-
-        return $factory;
+        return $this->container->has($id);
     }
 
     /**
      * @inheritdoc
      */
-    public function mapper(string $role): MapperInterface
+    public function get($id)
     {
-        $class = $this->getSchema()->define($role, Schema::MAPPER) ?? Mapper::class;
+        return $this->container->get($id);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function mapper(
+        ORMInterface $orm,
+        SchemaInterface $schema,
+        string $role
+    ): MapperInterface {
+        $class = $schema->define($role, Schema::MAPPER) ?? Mapper::class;
+
         return $this->factory->make($class, [
-            'orm'    => $this->orm,
+            'orm'    => $orm,
             'role'   => $role,
-            'schema' => $this->getSchema()->define($role, Schema::SCHEMA)
+            'schema' => $schema->define($role, Schema::SCHEMA)
         ]);
     }
 
     /**
      * @inheritdoc
      */
-    public function loader(string $role, string $relation): LoaderInterface
-    {
-        $schema = $this->getSchema()->defineRelation($role, $relation);
+    public function loader(
+        ORMInterface $orm,
+        SchemaInterface $schema,
+        string $role,
+        string $relation
+    ): LoaderInterface {
+        $schema = $schema->defineRelation($role, $relation);
 
         return $this->config->getLoader($schema[Relation::TYPE])->resolve($this->factory, [
-            'orm'    => $this->orm,
+            'orm'    => $orm,
             'name'   => $relation,
             'target' => $schema[Relation::TARGET],
             'schema' => $schema[Relation::SCHEMA]
@@ -93,51 +106,28 @@ class Factory implements FactoryInterface, SourceFactoryInterface
     /**
      * @inheritdoc
      */
-    public function relation(string $role, string $relation): RelationInterface
-    {
-        $schema = $this->getSchema()->defineRelation($role, $relation);
-        $type = $schema[Relation::TYPE];
+    public function relation(
+        ORMInterface $orm,
+        SchemaInterface $schema,
+        string $role,
+        string $relation
+    ): RelationInterface {
+        $relSchema = $schema->defineRelation($role, $relation);
+        $type = $relSchema[Relation::TYPE];
 
         return $this->config->getRelation($type)->resolve($this->factory, [
-            'orm'    => $this->orm,
+            'orm'    => $orm,
             'name'   => $relation,
-            'target' => $schema[Relation::TARGET],
-            'schema' => $schema[Relation::SCHEMA]
+            'target' => $relSchema[Relation::TARGET],
+            'schema' => $relSchema[Relation::SCHEMA]
         ]);
     }
 
     /**
      * @inheritdoc
      */
-    public function getSource(string $role): SourceInterface
+    public function database(string $database): DatabaseInterface
     {
-        $class = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
-
-        /** @var SourceInterface $source */
-        $source = $this->factory->make($class, [
-            'database' => $this->dbal->database($this->schema->define($role, Schema::DATABASE)),
-            'table'    => $this->schema->define($role, Schema::TABLE),
-        ]);
-
-        $constrain = $this->schema->define($role, Schema::CONSTRAIN);
-        if ($constrain !== null) {
-            $source = $source->withConstrain($this->factory->make($constrain));
-        }
-
-        return $source;
-    }
-
-    /**
-     * @return SchemaInterface
-     *
-     * @throws FactoryException
-     */
-    protected function getSchema(): SchemaInterface
-    {
-        if (empty($this->schema)) {
-            throw new FactoryException("Factory does not have associated schema");
-        }
-
-        return $this->schema;
+        return $this->dbal->database($database);
     }
 }

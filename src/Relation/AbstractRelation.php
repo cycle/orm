@@ -9,23 +9,23 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\ConstrainInterface;
-use Cycle\ORM\Select\SourceFactoryInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
     use Traits\ContextTrait;
 
-    /** @var ORMInterface|SourceFactoryInterface @internal */
+    /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;
 
     /** @var string */
@@ -51,10 +51,6 @@ abstract class AbstractRelation implements RelationInterface
      */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        if (!$orm instanceof SourceFactoryInterface) {
-            throw new ORMException("Relations expect to work with SourceInterface instance of ORM");
-        }
-
         $this->orm = $orm;
         $this->name = $name;
         $this->target = $target;
@@ -153,7 +149,7 @@ abstract class AbstractRelation implements RelationInterface
             return null;
         }
 
-        if ($entity instanceof PromiseInterface) {
+        if ($entity instanceof ReferenceInterface) {
             return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
         }
 
@@ -219,5 +215,21 @@ abstract class AbstractRelation implements RelationInterface
         if ($relNode->getRole() != $this->target) {
             throw new RelationException(sprintf("Unable to link %s, given `%s`", $this, $relNode->getRole()));
         }
+    }
+
+    /**
+     * Resolve the reference to the object.
+     *
+     * @param ReferenceInterface $reference
+     * @return mixed|null
+     */
+    protected function resolve(ReferenceInterface $reference)
+    {
+        if ($reference instanceof PromiseInterface) {
+            return $reference->__resolve();
+        }
+
+        $scope = $reference->__scope();
+        return $this->orm->get($reference->__role(), key($scope), current($scope), true);
     }
 }

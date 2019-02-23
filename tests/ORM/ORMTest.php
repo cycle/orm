@@ -55,7 +55,7 @@ abstract class ORMTest extends BaseTest
         $this->assertInstanceOf(User::class, $this->orm->get(User::class, 1, true));
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $this->orm->get(User::class, 1));
+        $this->assertInstanceOf(User::class, $this->orm->get(User::class, 'id', 1));
         $this->assertNumReads(0);
 
         $this->assertCount(1, $this->orm->getSchema()->getRoles());
@@ -73,7 +73,7 @@ abstract class ORMTest extends BaseTest
         $this->assertInstanceOf(User::class, $this->orm->get('user', 1, true));
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $this->orm->get('user', 1));
+        $this->assertInstanceOf(User::class, $this->orm->get('user', 'id', 1));
         $this->assertNumReads(0);
     }
 }

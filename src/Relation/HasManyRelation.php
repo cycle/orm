@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Cycle\ORM\Command\Branch\Condition;
 use Cycle\ORM\Command\Branch\Sequence;
 use Cycle\ORM\Command\CommandInterface;
@@ -19,7 +17,10 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\PromiseMany;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * Provides the ability to own the collection of entities.
@@ -88,12 +89,12 @@ class HasManyRelation extends AbstractRelation
      */
     public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
     {
-        if ($related instanceof PromiseInterface) {
-            $related = $related->__resolve();
+        if ($related instanceof ReferenceInterface) {
+            $related = $this->resolve($related);
         }
 
-        if ($original instanceof PromiseInterface) {
-            $original = $original->__resolve();
+        if ($original instanceof ReferenceInterface) {
+            $original = $this->resolve($original);
         }
 
         $sequence = new Sequence();

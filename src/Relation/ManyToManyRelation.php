@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Doctrine\Common\Collections\Collection;
 use Cycle\ORM\Command\Branch\Sequence;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
@@ -17,9 +16,10 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Pivoted;
+use Doctrine\Common\Collections\Collection;
 
 class ManyToManyRelation extends Relation\AbstractRelation
 {
@@ -112,12 +112,12 @@ class ManyToManyRelation extends Relation\AbstractRelation
     {
         $original = $original ?? new Pivoted\PivotedStorage();
 
-        if ($related instanceof PromiseInterface) {
-            $related = $related->__resolve();
+        if ($related instanceof ReferenceInterface) {
+            $related = $this->resolve($related);
         }
 
-        if ($original instanceof PromiseInterface) {
-            $original = $original->__resolve();
+        if ($original instanceof ReferenceInterface) {
+            $original = $this->resolve($original);
         }
 
         $sequence = new Sequence();

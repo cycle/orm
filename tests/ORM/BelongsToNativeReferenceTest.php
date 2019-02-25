@@ -107,7 +107,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new class implements PromiseFactoryInterface
+        ]))->withPromiseFactory(new class implements PromiseFactoryInterface
         {
             public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
             {

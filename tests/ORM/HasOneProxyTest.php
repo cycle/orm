@@ -126,7 +126,7 @@ abstract class HasOneProxyTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ]
-        ]))->withProxyFactory(new PromiseFactory());
+        ]))->withPromiseFactory(new PromiseFactory());
     }
 
     public function testFetchRelation()

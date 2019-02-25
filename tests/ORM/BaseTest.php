@@ -94,7 +94,7 @@ abstract class BaseTest extends TestCase
         ));
 
         // use promises by default
-        $this->orm = $this->orm->withProxyFactory(new PromiseFactory());
+        $this->orm = $this->orm->withPromiseFactory(new PromiseFactory());
     }
 
     /**

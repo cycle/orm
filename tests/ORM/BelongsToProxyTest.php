@@ -90,7 +90,7 @@ abstract class BelongsToProxyTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new PromiseFactory());
+        ]))->withPromiseFactory(new PromiseFactory());
     }
 
     public function testFetchRelation()

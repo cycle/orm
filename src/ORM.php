@@ -35,7 +35,7 @@ class ORM implements ORMInterface
     private $factory;
 
     /** @var PromiseFactoryInterface|null */
-    private $proxyFactory;
+    private $promiseFactory;
 
     /** @var HeapInterface */
     private $heap;
@@ -267,13 +267,13 @@ class ORM implements ORMInterface
     /**
      * Overlay existing promise factory.
      *
-     * @param PromiseFactoryInterface $proxyFactory
+     * @param PromiseFactoryInterface $promiseFactory
      * @return ORM
      */
-    public function withProxyFactory(PromiseFactoryInterface $proxyFactory): self
+    public function withPromiseFactory(PromiseFactoryInterface $promiseFactory): self
     {
         $orm = clone $this;
-        $orm->proxyFactory = $proxyFactory;
+        $orm->promiseFactory = $promiseFactory;
 
         return $orm;
     }
@@ -290,8 +290,8 @@ class ORM implements ORMInterface
             return $e;
         }
 
-        if ($this->proxyFactory !== null) {
-            return $this->proxyFactory->promise($this, $role, $scope);
+        if ($this->promiseFactory !== null) {
+            return $this->promiseFactory->promise($this, $role, $scope);
         }
 
         return new Reference($role, $scope);

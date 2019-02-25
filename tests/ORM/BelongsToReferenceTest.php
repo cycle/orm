@@ -106,7 +106,7 @@ abstract class BelongsToReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new ReferenceFactory());
+        ]))->withPromiseFactory(new ReferenceFactory());
     }
 
     public function testFetchRelation()

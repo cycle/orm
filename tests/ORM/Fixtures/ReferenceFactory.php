@@ -12,11 +12,11 @@ namespace Cycle\ORM\Tests\Fixtures;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseOne;
 use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\ProxyFactoryInterface;
+use Cycle\ORM\PromiseFactoryInterface;
 
-class ReferenceFactory implements ProxyFactoryInterface
+class ReferenceFactory implements PromiseFactoryInterface
 {
-    public function proxy(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
+    public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
     {
         switch ($role) {
             case 'user':

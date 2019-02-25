@@ -13,13 +13,13 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseFactoryInterface;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * Provide the access to all ORM services.
  */
-interface ORMInterface extends SourceProviderInterface, PromiseFactoryInterface
+interface ORMInterface extends SourceProviderInterface
 {
     /**
      * Automatically resolve role based on object name.
@@ -50,6 +50,15 @@ interface ORMInterface extends SourceProviderInterface, PromiseFactoryInterface
      * @return object|null
      */
     public function make(string $role, array $data = [], int $node = Node::NEW);
+
+    /**
+     * Promise object reference, proxy or object from memory heap.
+     *
+     * @param string $role
+     * @param array  $scope
+     * @return ReferenceInterface|mixed|null
+     */
+    public function promise(string $role, array $scope);
 
     /**
      * Get factory for relations, mappers and etc.

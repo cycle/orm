@@ -15,7 +15,7 @@ use Cycle\ORM\Promise\ReferenceInterface;
  * To create proxies, references, custom promises and etc. This class is similar to PromiseFactoryInterface
  * but it use ORM as scope so it can be nested to ORM as provider.
  */
-interface ProxyFactoryInterface
+interface PromiseFactoryInterface
 {
     /**
      * @param ORMInterface $orm
@@ -23,5 +23,5 @@ interface ProxyFactoryInterface
      * @param array        $scope
      * @return ReferenceInterface|null
      */
-    public function proxy(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface;
+    public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface;
 }

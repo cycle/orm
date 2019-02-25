@@ -14,7 +14,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\ProxyFactoryInterface;
+use Cycle\ORM\PromiseFactoryInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -107,9 +107,9 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new class implements ProxyFactoryInterface
+        ]))->withProxyFactory(new class implements PromiseFactoryInterface
         {
-            public function proxy(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
+            public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
             {
                 return new Reference($role, $scope);
             }

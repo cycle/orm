@@ -21,7 +21,6 @@ use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
-use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -31,7 +30,7 @@ class ORM implements ORMInterface
     /** @var CommandGenerator */
     private $generator;
 
-    /** @var FactoryInterface|SourceProviderInterface */
+    /** @var FactoryInterface */
     private $factory;
 
     /** @var PromiseFactoryInterface|null */
@@ -59,8 +58,8 @@ class ORM implements ORMInterface
     private $sources = [];
 
     /**
-     * @param FactoryInterface|SourceProviderInterface $factory
-     * @param SchemaInterface|null                     $schema
+     * @param FactoryInterface     $factory
+     * @param SchemaInterface|null $schema
      */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
     {

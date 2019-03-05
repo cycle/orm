@@ -45,7 +45,7 @@ class PivotLoader extends JoinableLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->options['constrain'] = $schema[Relation::THOUGHT_CONSTRAIN] ?? true;
+        $this->options['constrain'] = $schema[Relation::THOUGH_CONSTRAIN] ?? true;
     }
 
     /**
@@ -66,7 +66,7 @@ class PivotLoader extends JoinableLoader
             $query,
             $this->getAlias(),
             $this->isJoined() ? 'onWhere' : 'where',
-            $this->options['where'] ?? $this->schema[Relation::THOUGHT_WHERE] ?? []
+            $this->options['where'] ?? $this->schema[Relation::THOUGH_WHERE] ?? []
         );
 
         return parent::configureQuery($query, $outerKeys);
@@ -80,7 +80,7 @@ class PivotLoader extends JoinableLoader
         $node = new ArrayNode(
             $this->columnNames(),
             $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::THOUGHT_INNER_KEY],
+            $this->schema[Relation::THOUGH_INNER_KEY],
             $this->schema[Relation::INNER_KEY]
         );
 

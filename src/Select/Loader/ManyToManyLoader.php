@@ -51,7 +51,7 @@ class ManyToManyLoader extends JoinableLoader
 
         unset($schema[Relation::CONSTRAIN]);
 
-        $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THOUGHT_ENTITY], $schema);
+        $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THOUGH_ENTITY], $schema);
     }
 
     /**
@@ -108,7 +108,7 @@ class ManyToManyLoader extends JoinableLoader
                 $this->getJoinMethod(),
                 $this->pivot->getJoinTable()
             )->on(
-                $this->pivot->localKey(Relation::THOUGHT_INNER_KEY),
+                $this->pivot->localKey(Relation::THOUGH_INNER_KEY),
                 $this->parentKey(Relation::INNER_KEY)
             );
 
@@ -116,7 +116,7 @@ class ManyToManyLoader extends JoinableLoader
                 $this->getJoinTable()
             )->on(
                 $this->localKey(Relation::OUTER_KEY),
-                $this->pivot->localKey(Relation::THOUGHT_OUTER_KEY)
+                $this->pivot->localKey(Relation::THOUGH_OUTER_KEY)
             );
         } else {
             // reset all the columns when query is isolated (we have to do it manually
@@ -126,10 +126,10 @@ class ManyToManyLoader extends JoinableLoader
             $query->innerJoin(
                 $this->pivot->getJoinTable()
             )->on(
-                $this->pivot->localKey(Relation::THOUGHT_OUTER_KEY),
+                $this->pivot->localKey(Relation::THOUGH_OUTER_KEY),
                 $this->localKey(Relation::OUTER_KEY)
             )->where(
-                $this->pivot->localKey(Relation::THOUGHT_INNER_KEY),
+                $this->pivot->localKey(Relation::THOUGH_INNER_KEY),
                 new Parameter($outerKeys)
             );
         }
@@ -178,7 +178,7 @@ class ManyToManyLoader extends JoinableLoader
             $this->columnNames(),
             $this->define(Schema::PRIMARY_KEY),
             $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::THOUGHT_OUTER_KEY]
+            $this->schema[Relation::THOUGH_OUTER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

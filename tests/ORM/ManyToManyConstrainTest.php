@@ -110,8 +110,6 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame("tag f", $b->tags[2]->name);
     }
 
-    // todo: test ordered by pivoted
-
     public function testOrderedDESC()
     {
         $this->orm = $this->withTagSchema([

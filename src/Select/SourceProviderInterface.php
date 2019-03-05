@@ -18,6 +18,4 @@ interface SourceProviderInterface
      * @return SourceInterface
      */
     public function getSource(string $role): SourceInterface;
-
-    // todo: database?
 }

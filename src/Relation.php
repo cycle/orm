@@ -49,4 +49,5 @@ final class Relation
     public const THOUGHT_OUTER_KEY = 51;
     public const THOUGHT_ENTITY    = 52;
     public const THOUGHT_CONSTRAIN = 53;
+    public const THOUGHT_WHERE     = 54;
 }

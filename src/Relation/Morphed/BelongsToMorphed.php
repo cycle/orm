@@ -15,12 +15,9 @@ use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\HasOneRelation;
+use Cycle\ORM\Relation\BelongsTo;
 
-/**
- * Inverted version of belongs to morphed.
- */
-class MorphedHasOneRelation extends HasOneRelation
+class BelongsToMorphed extends BelongsTo
 {
     /** @var string */
     private $morphKey;
@@ -46,13 +43,13 @@ class MorphedHasOneRelation extends HasOneRelation
             return [null, null];
         }
 
-        $scope = [
-            $this->outerKey => $innerKey,
-            $this->morphKey => $parentNode->getRole()
-        ];
+        /** @var string $target */
+        $target = $this->fetchKey($parentNode, $this->morphKey);
+        if (is_null($target)) {
+            return [null, null];
+        }
 
-
-        $r = $this->orm->promise($this->target, $scope);
+        $r = $this->orm->promise($target, [$this->outerKey => $innerKey]);
 
         return [$r, $r];
     }
@@ -62,18 +59,22 @@ class MorphedHasOneRelation extends HasOneRelation
      */
     public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
     {
-        $relStore = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
+        $wrappedStore = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
 
-        if ($relStore instanceof CC && !is_null($related)) {
-            $relNode = $this->getNode($related);
-
-            if ($this->fetchKey($relNode, $this->morphKey) != $parentNode->getRole()) {
-                $relStore->register($this->morphKey, $parentNode->getRole(), true);
-                $relNode->register($this->morphKey, $parentNode->getRole(), true);
+        if (is_null($related)) {
+            if ($this->fetchKey($parentNode, $this->morphKey) !== null) {
+                $parentStore->register($this->morphKey, null, true);
+                $parentNode->register($this->morphKey, null, true);
+            }
+        } else {
+            $relState = $this->getNode($related);
+            if ($this->fetchKey($parentNode, $this->morphKey) != $relState->getRole()) {
+                $parentStore->register($this->morphKey, $relState->getRole(), true);
+                $parentNode->register($this->morphKey, $relState->getRole(), true);
             }
         }
 
-        return $relStore;
+        return $wrappedStore;
     }
 
     /**

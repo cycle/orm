@@ -19,7 +19,7 @@ use Cycle\ORM\Relation\Traits\PromiseOneTrait;
  * Provides ability to link to the parent object. Will claim branch up to the parent object and it's relations. To disable
  * branch walk-though use RefersTo relation.
  */
-class BelongsToRelation extends AbstractRelation implements DependencyInterface
+class BelongsTo extends AbstractRelation implements DependencyInterface
 {
     use PromiseOneTrait;
 

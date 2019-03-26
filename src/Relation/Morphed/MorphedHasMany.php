@@ -15,10 +15,10 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseMany;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\HasManyRelation;
+use Cycle\ORM\Relation\HasMany;
 use Doctrine\Common\Collections\ArrayCollection;
 
-class MorphedHasManyRelation extends HasManyRelation
+class MorphedHasMany extends HasMany
 {
     /** @var string */
     private $morphKey;

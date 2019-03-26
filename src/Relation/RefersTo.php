@@ -20,7 +20,7 @@ use Cycle\ORM\Schema;
  * Variation of belongs-to relation which provides the ability to be self. Relation can be used
  * to create cyclic references. Relation does not trigger store operation of referenced object!
  */
-class RefersToRelation extends AbstractRelation implements DependencyInterface
+class RefersTo extends AbstractRelation implements DependencyInterface
 {
     use PromiseOneTrait;
 

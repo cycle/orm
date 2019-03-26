@@ -24,7 +24,7 @@ use Doctrine\Common\Collections\Collection;
 /**
  * Provides the ability to own the collection of entities.
  */
-class HasManyRelation extends AbstractRelation
+class HasMany extends AbstractRelation
 {
     /**
      * Init relation state and entity collection.

@@ -20,7 +20,7 @@ use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 /**
  * Provides the ability to own and forward context values to child entity.
  */
-class HasOneRelation extends AbstractRelation
+class HasOne extends AbstractRelation
 {
     use PromiseOneTrait;
 

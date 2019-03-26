@@ -20,7 +20,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Pivoted;
 use Doctrine\Common\Collections\Collection;
 
-class ManyToManyRelation extends Relation\AbstractRelation
+class ManyToMany extends Relation\AbstractRelation
 {
     /** @var string|null */
     private $pivotEntity;

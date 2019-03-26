@@ -50,7 +50,6 @@ class MorphedHasOne extends HasOne
             $this->morphKey => $parentNode->getRole()
         ];
 
-
         $r = $this->orm->promise($this->target, $scope);
 
         return [$r, $r];

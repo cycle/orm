@@ -36,9 +36,6 @@ class PivotedPromise implements PromiseInterface
     /** @var mixed */
     private $innerKey;
 
-    /** @var Select\ConstrainInterface|null */
-    private $constrain;
-
     /** @var null|PivotedStorage */
     private $resolved;
 
@@ -54,14 +51,6 @@ class PivotedPromise implements PromiseInterface
         $this->target = $target;
         $this->relationSchema = $relationSchema;
         $this->innerKey = $innerKey;
-    }
-
-    /**
-     * @param Select\ConstrainInterface $constrain
-     */
-    public function setConstrain(?Select\ConstrainInterface $constrain)
-    {
-        $this->constrain = $constrain;
     }
 
     /**
@@ -114,7 +103,7 @@ class PivotedPromise implements PromiseInterface
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'constrain' => $this->constrain,
+            'constrain' => $this->orm->getSource($this->target)->getConstrain(),
             'as'        => $table,
             'method'    => JoinableLoader::POSTLOAD
         ]);

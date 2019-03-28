@@ -69,10 +69,15 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $key = key($this->scope);
-            $value = $this->scope[$key];
+            if (count($this->scope) !== 1) {
+                $this->resolved = $this->orm->getRepository($this->target)->findOne($this->scope);
+            } else {
+                $key = key($this->scope);
+                $value = $this->scope[$key];
 
-            $this->resolved = $this->orm->get($this->target, $key, $value, true);
+                $this->resolved = $this->orm->get($this->target, $key, $value, true);
+            }
+
             $this->orm = null;
         }
 

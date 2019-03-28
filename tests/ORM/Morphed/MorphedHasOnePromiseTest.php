@@ -8,8 +8,8 @@
 
 namespace Cycle\ORM\Tests\Morphed;
 
-use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Heap\Heap;
+use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;

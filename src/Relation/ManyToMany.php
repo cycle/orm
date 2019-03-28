@@ -96,7 +96,6 @@ class ManyToMany extends Relation\AbstractRelation
 
         // will take care of all the loading and scoping
         $p = new Pivoted\PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
-        $p->setConstrain($this->getConstrain());
 
         return [new Pivoted\PivotedCollectionPromise($p), $p];
     }

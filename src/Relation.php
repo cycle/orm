@@ -40,13 +40,11 @@ final class Relation
     public const INNER_KEY = 33;
 
     // Selections
-    public const CONSTRAIN = 40;
-    public const WHERE     = 41;
+    public const WHERE = 41;
 
     // Many-To-Many relation(s) options
     public const THOUGH_INNER_KEY = 50;
     public const THOUGH_OUTER_KEY = 51;
     public const THOUGH_ENTITY    = 52;
-    public const THOUGH_CONSTRAIN = 53;
     public const THOUGH_WHERE     = 54;
 }

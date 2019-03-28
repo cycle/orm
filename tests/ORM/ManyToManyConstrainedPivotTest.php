@@ -94,8 +94,8 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
 
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')
-            ->orderBy('id')
-            ->orderBy('tags.id');
+                 ->orderBy('id')
+                 ->orderBy('tags.id');
 
         $this->assertSame([
             [
@@ -316,8 +316,8 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
 
     public function testLoaderRelationWithConstrain()
     {
-        $this->orm = $this->withPivotSchema([], [
-            Relation::THOUGH_CONSTRAIN => new Select\QueryConstrain(
+        $this->orm = $this->withPivotSchema([
+            Schema::CONSTRAIN => new Select\QueryConstrain(
                 ['@.level' => ['>' => 3]],
                 ['@.level' => 'DESC']
             ),

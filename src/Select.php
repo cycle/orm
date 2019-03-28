@@ -59,7 +59,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     }
 
     /**
-     * Create new Selector with applied scope.
+     * Create new Selector with applied scope. By default no constrain used.
      *
      * @param ConstrainInterface|null $constrain
      * @return Select

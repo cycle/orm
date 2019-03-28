@@ -14,15 +14,18 @@ use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
+use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
  * and etc based on nested loaders.
+ *
+ * Root load does not load constrain from ORM by default.
  */
 final class RootLoader extends AbstractLoader
 {
-    use ColumnsTrait;
+    use ColumnsTrait, ConstrainTrait;
 
     /** @var SelectQuery */
     private $query;

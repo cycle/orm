@@ -16,7 +16,6 @@ use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 
@@ -113,25 +112,6 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return true;
-    }
-
-    /**
-     * Get the scope name associated with the relation.
-     *
-     * @return null|ConstrainInterface
-     */
-    protected function getConstrain(): ?ConstrainInterface
-    {
-        $constrain = $this->schema[Relation::CONSTRAIN] ?? true;
-        if ($constrain instanceof ConstrainInterface) {
-            return $constrain;
-        }
-
-        if ($constrain == null) {
-            return null;
-        }
-
-        return $this->getSource()->getConstrain();
     }
 
     /**

@@ -88,7 +88,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
     public function testOrderedByScope()
     {
         $this->orm = $this->withTagSchema([
-            Relation::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC'])
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC'])
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -562,7 +562,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertSame("tag f", $b->tags[0]->name);
     }
 
-    protected function withTagSchema(array $relationSchema)
+    protected function withTagSchema(array $tagSchema)
     {
         return $this->withSchema(new Schema([
             User::class       => [
@@ -578,26 +578,26 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                         Relation::TYPE   => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
-                                Relation::CASCADE          => true,
-                                Relation::THOUGH_ENTITY    => TagContext::class,
-                                Relation::INNER_KEY        => 'id',
-                                Relation::OUTER_KEY        => 'id',
-                                Relation::THOUGH_INNER_KEY => 'user_id',
-                                Relation::THOUGH_OUTER_KEY => 'tag_id',
-                            ] + $relationSchema,
+                            Relation::CASCADE          => true,
+                            Relation::THOUGH_ENTITY    => TagContext::class,
+                            Relation::INNER_KEY        => 'id',
+                            Relation::OUTER_KEY        => 'id',
+                            Relation::THOUGH_INNER_KEY => 'user_id',
+                            Relation::THOUGH_OUTER_KEY => 'tag_id',
+                        ],
                     ]
                 ]
             ],
             Tag::class        => [
-                Schema::ROLE        => 'tag',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name', 'level'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-            ],
+                    Schema::ROLE        => 'tag',
+                    Schema::MAPPER      => Mapper::class,
+                    Schema::DATABASE    => 'default',
+                    Schema::TABLE       => 'tag',
+                    Schema::PRIMARY_KEY => 'id',
+                    Schema::COLUMNS     => ['id', 'name', 'level'],
+                    Schema::SCHEMA      => [],
+                    Schema::RELATIONS   => [],
+                ] + $tagSchema,
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
                 Schema::MAPPER      => Mapper::class,

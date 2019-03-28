@@ -47,9 +47,6 @@ class ManyToManyLoader extends JoinableLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-
-        unset($schema[Relation::CONSTRAIN]);
-
         $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THOUGH_ENTITY], $schema);
     }
 

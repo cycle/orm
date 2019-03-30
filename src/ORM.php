@@ -245,7 +245,7 @@ class ORM implements ORMInterface
         }
 
         $source = $this->schema->define($role, Schema::SOURCE);
-        if ($source !== null) {
+        if ($source !== null && $source !== Source::class) {
             return $this->factory->get($source);
         }
 

@@ -121,9 +121,11 @@ final class Schema implements SchemaInterface
                     throw new SchemaException("Unable to create schema record without given role for `{$key}`");
                 }
 
-                // class => role type of definition
-                $aliases[$key] = $item[self::ROLE];
                 $role = $item[self::ROLE];
+            }
+
+            if (class_exists($item[self::ENTITY])) {
+                $aliases[$item[self::ENTITY]] = $key;
             }
 
             unset($item[self::ROLE]);
@@ -143,6 +145,19 @@ final class Schema implements SchemaInterface
         }
 
         return [$result, $aliases];
+    }
+
+    /**
+     * @param array $an_array
+     * @return Schema
+     */
+    public static function __set_state($an_array): Schema
+    {
+        $schema = new self([]);
+        $schema->schema = $an_array['schema'];
+        $schema->aliases = $an_array['aliases'];
+
+        return $schema;
     }
 
     /**

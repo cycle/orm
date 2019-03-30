@@ -125,7 +125,7 @@ final class Schema implements SchemaInterface
             }
 
             if (class_exists($item[self::ENTITY])) {
-                $aliases[$item[self::ENTITY]] = $key;
+                $aliases[$item[self::ENTITY]] = $role;
             }
 
             unset($item[self::ROLE]);

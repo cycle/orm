@@ -24,7 +24,7 @@ use Cycle\ORM\Select\Loader\ManyToManyLoader;
  */
 class PivotedPromise implements PromiseInterface
 {
-    /** @var ORMInterface */
+    /** @var ORMInterface @internal */
     private $orm;
 
     /** @var string */

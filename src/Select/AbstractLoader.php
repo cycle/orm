@@ -15,7 +15,6 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
-use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -39,7 +38,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait, AliasTrait, ConstrainTrait;
+    use ChainTrait, AliasTrait;
 
     // Loading methods for data loaders.
     public const INLOAD    = 1;
@@ -120,8 +119,8 @@ abstract class AbstractLoader implements LoaderInterface
      * Load the relation.
      *
      * @param string $relation Relation name, or chain of relations separated by.
-     * @param array  $options  Loader options (to be applied to last chain element only).
-     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
+     * @param array  $options Loader options (to be applied to last chain element only).
+     * @param bool   $join When set to true loaders will be forced into JOIN mode.
      * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
@@ -261,6 +260,12 @@ abstract class AbstractLoader implements LoaderInterface
 
         return $query;
     }
+
+    /**
+     * @param SelectQuery $query
+     * @return SelectQuery
+     */
+    abstract protected function applyConstrain(SelectQuery $query): SelectQuery;
 
     /**
      * Define schema option associated with the entity.

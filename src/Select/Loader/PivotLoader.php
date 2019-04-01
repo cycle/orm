@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ArrayNode;
 use Cycle\ORM\Parser\Typecast;
@@ -38,15 +37,6 @@ class PivotLoader extends JoinableLoader
         'as'        => null,
         'using'     => null
     ];
-
-    /**
-     * @inheritdoc
-     */
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
-    {
-        parent::__construct($orm, $name, $target, $schema);
-        $this->options['constrain'] = $schema[Relation::THOUGH_CONSTRAIN] ?? true;
-    }
 
     /**
      * @return string

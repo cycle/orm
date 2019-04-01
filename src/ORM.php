@@ -108,7 +108,7 @@ class ORM implements ORMInterface
             return null;
         }
 
-        return $this->getRepository($role)->findByPK($value);
+        return $this->getRepository($role)->findOne([$key => $value]);
     }
 
     /**
@@ -245,7 +245,7 @@ class ORM implements ORMInterface
         }
 
         $source = $this->schema->define($role, Schema::SOURCE);
-        if ($source !== null) {
+        if ($source !== null && $source !== Source::class) {
             return $this->factory->get($source);
         }
 
@@ -256,7 +256,9 @@ class ORM implements ORMInterface
 
         $constrain = $this->schema->define($role, Schema::CONSTRAIN);
         if ($constrain !== null) {
-            $source = $source->withConstrain($this->factory->get($constrain));
+            $source = $source->withConstrain(
+                is_object($constrain) ? $constrain : $this->factory->get($constrain)
+            );
         }
 
         return $this->sources[$role] = $source;

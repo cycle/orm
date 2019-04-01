@@ -53,7 +53,6 @@ class MorphedHasMany extends HasMany
             ],
             $this->schema[Relation::WHERE] ?? []
         );
-        $p->setConstrain($this->getConstrain());
 
         return [new CollectionPromise($p), $p];
     }

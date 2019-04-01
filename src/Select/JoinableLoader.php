@@ -11,9 +11,9 @@ namespace Cycle\ORM\Select;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
-use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
+use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 
 /**
@@ -21,7 +21,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class JoinableLoader extends AbstractLoader
 {
-    use ColumnsTrait;
+    use ColumnsTrait, ConstrainTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -65,7 +65,7 @@ abstract class JoinableLoader extends AbstractLoader
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $target);
-        $this->options['constrain'] = $schema[Relation::CONSTRAIN] ?? true;
+
         $this->name = $name;
         $this->schema = $schema;
     }
@@ -114,12 +114,14 @@ abstract class JoinableLoader extends AbstractLoader
         //Calculate table alias
         $loader->options['as'] = $loader->calculateAlias($parent);
 
-        if (!empty($loader->options['constrain'])) {
+        if (array_key_exists('constrain', $options)) {
             if ($loader->options['constrain'] instanceof ConstrainInterface) {
-                $loader->constrain = $loader->options['constrain'];
-            } else {
-                $loader->constrain = $this->getSource()->getConstrain();
+                $loader->setConstrain($loader->options['constrain']);
+            } elseif (is_string($loader->options['constrain'])) {
+                $loader->setConstrain($this->orm->getFactory()->get($loader->options['constrain']));
             }
+        } else {
+            $loader->setConstrain($this->getSource()->getConstrain());
         }
 
         return $loader;
@@ -202,14 +204,25 @@ abstract class JoinableLoader extends AbstractLoader
             $this->mountColumns($query, $this->options['minify'], '', true);
         }
 
-        // apply the global scope
-        if (!empty($this->options['using']) && !empty($this->constrain)) {
-            throw new LoaderException(
-                "Combination of constrain and `using` source is ambiguous in `{$this->name}`"
-            );
+        return parent::configureQuery($query);
+    }
+
+    /**
+     * @param SelectQuery $query
+     * @return SelectQuery
+     */
+    protected function applyConstrain(SelectQuery $query): SelectQuery
+    {
+        if ($this->constrain !== null) {
+            $builder = new QueryBuilder($this->orm, $query, $this);
+            if ($this->isJoined()) {
+                $builder = $builder->withForward('onWhere');
+            }
+
+            $this->constrain->apply($builder);
         }
 
-        return parent::configureQuery($query);
+        return $query;
     }
 
     /**
@@ -220,22 +233,6 @@ abstract class JoinableLoader extends AbstractLoader
     protected function getMethod(): int
     {
         return $this->options['method'];
-    }
-
-    /**
-     * Apply scope with specific where target.
-     *
-     * @param SelectQuery $query
-     * @return SelectQuery
-     */
-    protected function applyConstrain(SelectQuery $query): SelectQuery
-    {
-        if (!empty($this->constrain)) {
-            $proxy = new QueryBuilder($this->orm, $query, $this);
-            $this->constrain->apply($proxy->withForward($this->isJoined() ? 'onWhere' : 'where'));
-        }
-
-        return $query;
     }
 
     /**

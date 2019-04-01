@@ -9,7 +9,6 @@
 namespace Cycle\ORM\Promise;
 
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Select;
 
 /**
  * Promises one entity and resolves the result via ORM heap or entity repository.
@@ -21,9 +20,6 @@ class PromiseOne implements PromiseInterface
 
     /** @var string|null */
     private $target;
-
-    /** @var Select\ConstrainInterface|null */
-    private $constrain;
 
     /** @var array */
     private $scope;
@@ -41,14 +37,6 @@ class PromiseOne implements PromiseInterface
         $this->orm = $orm;
         $this->target = $target;
         $this->scope = $scope;
-    }
-
-    /**
-     * @param Select\ConstrainInterface $constrain
-     */
-    public function setConstrain(?Select\ConstrainInterface $constrain)
-    {
-        $this->constrain = $constrain;
     }
 
     /**
@@ -81,18 +69,14 @@ class PromiseOne implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->orm)) {
-            $key = key($this->scope);
-            $value = $this->scope[$key];
+            if (count($this->scope) !== 1) {
+                $this->resolved = $this->orm->getRepository($this->target)->findOne($this->scope);
+            } else {
+                $key = key($this->scope);
+                $value = $this->scope[$key];
 
-            // entity has already been loaded in memory
-            if (!is_null($e = $this->orm->getHeap()->find($this->target, $key, $value))) {
-                $this->orm = null;
-                return $this->resolved = $e;
+                $this->resolved = $this->orm->get($this->target, $key, $value, true);
             }
-
-            // Fetching from the database
-            $select = new Select($this->orm, $this->target);
-            $this->resolved = $select->constrain($this->constrain)->fetchOne($this->scope);
 
             $this->orm = null;
         }

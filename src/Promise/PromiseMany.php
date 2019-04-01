@@ -9,7 +9,6 @@
 namespace Cycle\ORM\Promise;
 
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Select;
 
 /**
  * Promises the selection of the
@@ -28,9 +27,6 @@ class PromiseMany implements PromiseInterface
     /** @var array */
     private $where = [];
 
-    /** @var Select\ConstrainInterface|null */
-    private $constrain;
-
     /** @var array */
     private $resolved = [];
 
@@ -46,14 +42,6 @@ class PromiseMany implements PromiseInterface
         $this->target = $target;
         $this->query = $query;
         $this->where = $where;
-    }
-
-    /**
-     * @param Select\ConstrainInterface $constrain
-     */
-    public function setConstrain(?Select\ConstrainInterface $constrain)
-    {
-        $this->constrain = $constrain;
     }
 
     /**
@@ -89,9 +77,9 @@ class PromiseMany implements PromiseInterface
             return $this->resolved;
         }
 
-        $selector = new Select($this->orm, $this->target);
-        $this->resolved = $selector->constrain($this->constrain)->where($this->query + $this->where)->fetchAll();
-
+        foreach ($this->orm->getRepository($this->target)->findAll($this->query + $this->where) as $item) {
+            $this->resolved[] = $item;
+        }
         $this->orm = null;
 
         return $this->resolved;

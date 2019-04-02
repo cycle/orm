@@ -8,7 +8,7 @@
 
 namespace Cycle\ORM\Promise;
 
-class Reference implements ReferenceInterface
+final class Reference implements ReferenceInterface
 {
     /** @var string */
     private $role;

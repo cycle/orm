@@ -24,7 +24,7 @@ use Cycle\ORM\Select\SourceInterface;
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  */
-class ORM implements ORMInterface
+final class ORM implements ORMInterface
 {
     /** @var CommandGenerator */
     private $generator;

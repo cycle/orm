@@ -13,7 +13,7 @@ use Cycle\ORM\ORMInterface;
 /**
  * Promises the selection of the
  */
-class PromiseMany implements PromiseInterface
+final class PromiseMany implements PromiseInterface
 {
     /** @var ORMInterface @internal */
     private $orm;

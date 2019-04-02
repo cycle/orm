@@ -8,7 +8,7 @@
 
 namespace Cycle\ORM\Heap;
 
-class Heap implements HeapInterface, \IteratorAggregate
+final class Heap implements HeapInterface, \IteratorAggregate
 {
     /** @var \SplObjectStorage */
     private $storage;

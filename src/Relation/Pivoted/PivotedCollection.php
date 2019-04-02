@@ -14,7 +14,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
  * filtered.
  */
-class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
+final class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
     /** @var \SplObjectStorage */
     protected $pivotContext;

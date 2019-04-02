@@ -13,7 +13,7 @@ use Cycle\ORM\Command\CommandInterface;
 /**
  * Wraps multiple commands into one sequence.
  */
-class Sequence implements CommandInterface, \IteratorAggregate, \Countable
+final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 {
     /** @var CommandInterface[] */
     protected $commands = [];

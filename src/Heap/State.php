@@ -18,7 +18,7 @@ use Cycle\ORM\Heap\Traits\VisitorTrait;
 /**
  * Current node state.
  */
-class State implements ConsumerInterface, ProducerInterface
+final class State implements ConsumerInterface, ProducerInterface
 {
     use RelationTrait, ClaimTrait, VisitorTrait;
 

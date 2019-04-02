@@ -20,7 +20,7 @@ use Spiral\Database\DatabaseInterface;
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-class Insert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
+final class Insert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
 {
     use ContextTrait, ErrorTrait;
 

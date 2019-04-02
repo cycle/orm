@@ -36,7 +36,7 @@ use Spiral\Pagination\PaginableInterface;
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-class Select implements \IteratorAggregate, \Countable, PaginableInterface
+final class Select implements \IteratorAggregate, \Countable, PaginableInterface
 {
     /** @var ORMInterface @internal */
     private $orm;

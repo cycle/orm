@@ -22,7 +22,7 @@ use Spiral\Database\DatabaseInterface;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
+final class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
 {
     use ContextTrait, ScopeTrait, ErrorTrait;
 

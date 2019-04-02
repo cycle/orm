@@ -14,14 +14,21 @@ use Cycle\ORM\Select;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
 
-class RelationConfig extends InjectableConfig
+final class RelationConfig extends InjectableConfig
 {
     public const LOADER   = 'loader';
     public const RELATION = 'relation';
     public const SCHEMA   = 'schema';
 
+    /**
+     * @var array
+     */
     protected $config = [];
 
+    /**
+     * @param int|string $type
+     * @return Autowire
+     */
     public function getLoader($type): Autowire
     {
         if (!isset($this->config[$type][self::LOADER])) {
@@ -31,6 +38,10 @@ class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::LOADER]);
     }
 
+    /**
+     * @param int|string $type
+     * @return Autowire
+     */
     public function getRelation($type): Autowire
     {
         if (!isset($this->config[$type][self::RELATION])) {
@@ -40,6 +51,9 @@ class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::RELATION]);
     }
 
+    /**
+     * @return RelationConfig
+     */
     public static function getDefault()
     {
         return new static([

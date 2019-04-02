@@ -15,7 +15,7 @@ use Doctrine\Common\Collections\AbstractLazyCollection;
 /**
  * Collection at top of pivoted (entity + context entity) promise.
  */
-class PivotedCollectionPromise extends AbstractLazyCollection implements
+final class PivotedCollectionPromise extends AbstractLazyCollection implements
     CollectionPromiseInterface,
     PivotedCollectionInterface
 {

@@ -15,7 +15,7 @@ use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
 use Spiral\Database\DatabaseInterface;
 
-class Delete extends DatabaseCommand implements ScopeCarrierInterface
+final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
     use ScopeTrait, ErrorTrait;
 

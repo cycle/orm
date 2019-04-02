@@ -13,7 +13,7 @@ use Cycle\ORM\ORMInterface;
 /**
  * Promises one entity and resolves the result via ORM heap or entity repository.
  */
-class PromiseOne implements PromiseInterface
+final class PromiseOne implements PromiseInterface
 {
     /** @var ORMInterface|null @internal */
     private $orm;

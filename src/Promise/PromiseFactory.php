@@ -14,7 +14,7 @@ use Cycle\ORM\PromiseFactoryInterface;
 /**
  * Returns PromiseOne for all entities.
  */
-class PromiseFactory implements PromiseFactoryInterface
+final class PromiseFactory implements PromiseFactoryInterface
 {
     /**
      * @param ORMInterface $orm

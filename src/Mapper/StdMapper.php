@@ -38,7 +38,7 @@ class StdMapper extends DatabaseMapper
      */
     public function extract($entity): array
     {
-        return (array)$entity;
+        return get_object_vars($entity);
     }
 
     /**

@@ -22,7 +22,7 @@ use Cycle\ORM\Select\Loader\ManyToManyLoader;
 /**
  * Promise use loader to configure query and it's scope.
  */
-class PivotedPromise implements PromiseInterface
+final class PivotedPromise implements PromiseInterface
 {
     /** @var ORMInterface @internal */
     private $orm;

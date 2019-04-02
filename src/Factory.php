@@ -18,7 +18,7 @@ use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 
-class Factory implements FactoryInterface
+final class Factory implements FactoryInterface
 {
     /** @var RelationConfig */
     private $config;

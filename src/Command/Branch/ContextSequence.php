@@ -10,8 +10,8 @@ namespace Cycle\ORM\Command\Branch;
 
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Exception\CommandException;
-use Cycle\ORM\Heap\State;
 
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.
@@ -70,7 +70,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
         string $key,
         $value,
         bool $fresh = false,
-        int $stream = State::DATA
+        int $stream = ConsumerInterface::DATA
     ) {
         $this->getPrimary()->register($key, $value, $fresh, $stream);
     }

@@ -16,7 +16,7 @@ use Cycle\ORM\Heap\State;
 /**
  * Wraps the sequence with commands and provides an ability to mock access to the primary command.
  */
-final class ContextSequence implements CommandInterface, \IteratorAggregate, \Countable
+final class ContextSequence implements ContextCarrierInterface, \IteratorAggregate, \Countable
 {
     /** @var ContextCarrierInterface */
     protected $primary;

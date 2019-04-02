@@ -4,6 +4,8 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/cycle/orm/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/cycle/orm/?branch=master)
 [![Codecov](https://codecov.io/gh/cycle/orm/graph/badge.svg)](https://codecov.io/gh/cycle/orm)
 
+Cycle is PHP DataMapper and ORM engine designed to work in long-running PHP applications (workers).
+
 Features:
 ---------
 - ORM with many-to-many, many-thought-many and polymorphic relations

@@ -40,12 +40,12 @@ final class Factory implements FactoryInterface
      */
     public function __construct(
         DatabaseManager $dbal,
-        RelationConfig $config,
+        RelationConfig $config = null,
         CoreFactory $factory = null,
         ContainerInterface $container = null
     ) {
         $this->dbal = $dbal;
-        $this->config = $config;
+        $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
         $this->container = $container ?? new Container();
     }

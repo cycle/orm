@@ -6,6 +6,10 @@
 
 Cycle is PHP DataMapper and ORM engine designed to work in long-running PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)).
 
+<p align="center">
+	<a href="https://github.com/cycle/docs"><b>Documentation (in-progress)</b></a>
+</p>
+
 Features:
 ---------
 - ORM with many-to-many, many-thought-many and polymorphic relations

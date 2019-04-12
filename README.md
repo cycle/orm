@@ -4,7 +4,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/cycle/orm/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/cycle/orm/?branch=master)
 [![Codecov](https://codecov.io/gh/cycle/orm/graph/badge.svg)](https://codecov.io/gh/cycle/orm)
 
-Cycle is PHP DataMapper and ORM engine designed to work in long-running PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides hard separation between the entity objects and their persistent representation which allows you to use any type of data carrying models or define database schema on a fly without code generation.
+Cycle is PHP DataMapper and ORM engine designed to work in long-running PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides the hard separation between the entity objects and their persistent representation which allows you to use any type of data carrying models or define database schema on a fly without code generation.
 
 <p align="center">
 	<a href="https://github.com/cycle/docs"><b>Documentation (in-progress)</b></a>

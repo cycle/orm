@@ -40,6 +40,8 @@ class SequenceCommandTest extends TestCase
         }
 
         $this->assertSame(2, $count);
+        $this->assertSame(2, count($command));
+        $this->assertCount(2, $command->getCommands());
 
         //Nothing
         $command->execute();
@@ -50,6 +52,7 @@ class SequenceCommandTest extends TestCase
     public function testNeverExecuted()
     {
         $command = new Sequence();
+        $this->assertTrue($command->isReady());
         $this->assertFalse($command->isExecuted());
     }
 

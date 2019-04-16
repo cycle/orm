@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\DatabaseManager;
+use Spiral\Database\DatabaseProviderInterface;
 
 final class Factory implements FactoryInterface
 {
@@ -29,17 +29,17 @@ final class Factory implements FactoryInterface
     /** @var ContainerInterface */
     private $container;
 
-    /** @var DatabaseManager */
+    /** @var DatabaseProviderInterface */
     private $dbal;
 
     /**
-     * @param DatabaseManager         $dbal
-     * @param RelationConfig          $config
-     * @param CoreFactory|null        $factory
-     * @param ContainerInterface|null $container
+     * @param DatabaseProviderInterface $dbal
+     * @param RelationConfig            $config
+     * @param CoreFactory|null          $factory
+     * @param ContainerInterface|null   $container
      */
     public function __construct(
-        DatabaseManager $dbal,
+        DatabaseProviderInterface $dbal,
         RelationConfig $config = null,
         CoreFactory $factory = null,
         ContainerInterface $container = null
@@ -125,7 +125,7 @@ final class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function database(string $database): DatabaseInterface
+    public function database(string $database = null): DatabaseInterface
     {
         return $this->dbal->database($database);
     }

@@ -8,21 +8,21 @@
 
 namespace Cycle\ORM\Tests;
 
-use Cycle\ORM\Promise\PromiseFactory;
-use Doctrine\Common\Collections\Collection;
-use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LoggerTrait;
-use Psr\Log\LogLevel;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
+use Cycle\ORM\Promise\PromiseFactory;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\SchemaInterface;
+use Doctrine\Common\Collections\Collection;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
+use Psr\Log\LogLevel;
 use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
@@ -108,6 +108,10 @@ abstract class BaseTest extends TestCase
         $this->dropDatabase($this->dbal->database('default'));
         $this->orm = null;
         $this->dbal = null;
+
+        if (function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
+        }
     }
 
     /**

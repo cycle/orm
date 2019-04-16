@@ -12,11 +12,12 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Psr\Container\ContainerInterface;
 use Spiral\Database\DatabaseInterface;
+use Spiral\Database\DatabaseProviderInterface;
 
 /**
  * Must provide access to generic DI.
  */
-interface FactoryInterface extends ContainerInterface
+interface FactoryInterface extends DatabaseProviderInterface, ContainerInterface
 {
     /**
      * Create mapper associated with given role.
@@ -70,5 +71,5 @@ interface FactoryInterface extends ContainerInterface
      * @param string $database
      * @return DatabaseInterface
      */
-    public function database(string $database): DatabaseInterface;
+    public function database(string $database = null): DatabaseInterface;
 }

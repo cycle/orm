@@ -17,7 +17,6 @@ before_install:
   - cd tests
   - docker-compose up -d
   - cd ..
-  - sudo apt update
   - bash ./tests/install-sqlsrv.sh
 
 install:

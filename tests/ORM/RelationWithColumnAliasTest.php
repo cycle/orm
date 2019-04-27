@@ -1,15 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use Doctrine\Common\Collections\Collection;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -22,6 +22,7 @@ use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Doctrine\Common\Collections\Collection;
 use Spiral\Database\Injection\Expression;
 
 abstract class RelationWithColumnAliasTest extends BaseTest
@@ -213,8 +214,8 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
-            ->where('id', 1)
-            ->orderBy('user.id');
+                 ->where('id', 1)
+                 ->orderBy('user.id');
 
         $this->assertEquals([
             [
@@ -246,8 +247,8 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
-            ->where('@.id', 1)
-            ->orderBy('user.id');
+                 ->where('@.id', 1)
+                 ->orderBy('user.id');
 
         $this->assertEquals([
             [

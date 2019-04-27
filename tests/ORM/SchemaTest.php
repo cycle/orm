@@ -1,17 +1,18 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
+use PHPUnit\Framework\TestCase;
 
 class SchemaTest extends TestCase
 {

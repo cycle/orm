@@ -1,10 +1,11 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Classless;
 
@@ -65,7 +66,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS => [
+                Schema::RELATIONS   => [
                     'profile' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => 'profile',
@@ -76,7 +77,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
                         ],
                     ]
                 ],
-                Schema::CONSTRAIN =>  SortByIDConstrain::class
+                Schema::CONSTRAIN   => SortByIDConstrain::class
             ],
             'profile' => [
                 Schema::MAPPER      => StdMapper::class,

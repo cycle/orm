@@ -1,10 +1,11 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Morphed;
 
@@ -230,8 +231,8 @@ abstract class MorphedHasOneRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('image')
-            ->load('posts.image')
-            ->orderBy('user.id');
+                 ->load('posts.image')
+                 ->orderBy('user.id');
 
 
         $this->assertEquals([

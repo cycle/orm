@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\Postgres; 
+declare(strict_types=1);
 
-class MorphedHasOnePromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasOnePromiseTest 
-{ 
-    const DRIVER = "postgres"; 
+namespace Cycle\ORM\Tests\Driver\Postgres;
+
+class MorphedHasOnePromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasOnePromiseTest
+{
+    const DRIVER = "postgres";
 }

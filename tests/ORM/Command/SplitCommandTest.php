@@ -1,16 +1,17 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Command;
 
-use PHPUnit\Framework\TestCase;
 use Cycle\ORM\Command\Branch\Split;
 use Cycle\ORM\Command\ContextCarrierInterface;
+use PHPUnit\Framework\TestCase;
 
 class SplitCommandTest extends TestCase
 {

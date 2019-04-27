@@ -1,10 +1,11 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Classless;
 
@@ -181,9 +182,9 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
         $selector->load('lastComment.user')
-            ->load('comments.user')
-            ->load('comments.favoredBy')
-            ->load('favorites');
+                 ->load('comments.user')
+                 ->load('comments.favoredBy')
+                 ->load('favorites');
 
         $u1 = $selector->wherePK(1)->fetchOne();
 
@@ -236,9 +237,9 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
         $selector->load('lastComment.user')
-            ->load('comments.user')
-            ->load('comments.favoredBy')
-            ->load('favorites');
+                 ->load('comments.user')
+                 ->load('comments.favoredBy')
+                 ->load('favorites');
 
         $u1 = $selector->wherePK($u->id)->fetchOne();
 
@@ -262,9 +263,9 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
         $selector->load('lastComment.user')
-            ->load('comments.user')
-            ->load('comments.favoredBy')
-            ->load('favorites');
+                 ->load('comments.user')
+                 ->load('comments.favoredBy')
+                 ->load('favorites');
 
         $u1 = $selector->wherePK(2)->fetchOne();
 

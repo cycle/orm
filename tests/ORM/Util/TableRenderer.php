@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Util;
 
@@ -86,13 +88,13 @@ final class TableRenderer
      *
      * Attention, column state will be affected!
      *
-     * @see  AbstractColumn
      * @param AbstractColumn $column
      * @param array          $type
      * @param bool           $hasDefault Must be set to true if default value was set by user.
-     * @param mixed          $default    Default value declared by record schema.
+     * @param mixed          $default Default value declared by record schema.
      *
      * @throws SchemaException
+     * @see  AbstractColumn
      */
     protected function renderColumn(AbstractColumn $column, array $type, bool $hasDefault, $default = null)
     {

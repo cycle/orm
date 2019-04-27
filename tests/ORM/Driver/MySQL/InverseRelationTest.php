@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+declare(strict_types=1);
 
-class InverseRelationTest extends \Cycle\ORM\Tests\InverseRelationTest 
-{ 
-    const DRIVER = "mysql"; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
+
+class InverseRelationTest extends \Cycle\ORM\Tests\InverseRelationTest
+{
+    const DRIVER = "mysql";
 }

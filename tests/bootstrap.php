@@ -1,7 +1,8 @@
 <?php
 /**
- * Spiral Framework, SpiralScout LLC.
+ * Cycle DataMapper ORM
  *
+ * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
 

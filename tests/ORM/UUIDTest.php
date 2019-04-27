@@ -1,15 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use Doctrine\Common\Collections\Collection;
-use Ramsey\Uuid\Uuid;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation;
@@ -21,6 +21,8 @@ use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UUIDMapper;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Doctrine\Common\Collections\Collection;
+use Ramsey\Uuid\Uuid;
 
 abstract class UUIDTest extends BaseTest
 {

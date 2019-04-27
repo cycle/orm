@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\SQLite; 
+declare(strict_types=1);
 
-class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest 
-{ 
-    const DRIVER = "sqlite"; 
+namespace Cycle\ORM\Tests\Driver\SQLite;
+
+class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest
+{
+    const DRIVER = "sqlite";
 }

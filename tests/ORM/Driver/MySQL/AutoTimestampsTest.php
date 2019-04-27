@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+declare(strict_types=1);
 
-class AutoTimestampsTest extends \Cycle\ORM\Tests\AutoTimestampsTest 
-{ 
-    const DRIVER = "mysql"; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
+
+class AutoTimestampsTest extends \Cycle\ORM\Tests\AutoTimestampsTest
+{
+    const DRIVER = "mysql";
 }

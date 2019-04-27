@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+declare(strict_types=1);
 
-class HasOnePromiseTest extends \Cycle\ORM\Tests\HasOnePromiseTest 
-{ 
-    const DRIVER = "mysql"; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
+
+class HasOnePromiseTest extends \Cycle\ORM\Tests\HasOnePromiseTest
+{
+    const DRIVER = "mysql";
 }

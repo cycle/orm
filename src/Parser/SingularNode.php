@@ -13,7 +13,7 @@ use Cycle\ORM\Exception\ParserException;
 /**
  * Node with ability to push it's data into referenced tree location.
  */
-class SingularNode extends AbstractNode
+final class SingularNode extends AbstractNode
 {
     /** @var string */
     protected $innerKey;

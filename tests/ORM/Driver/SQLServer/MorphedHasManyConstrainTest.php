@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+declare(strict_types=1);
 
-class MorphedHasManyConstrainTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyConstrainTest 
-{ 
-    const DRIVER = "sqlserver"; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
+
+class MorphedHasManyConstrainTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyConstrainTest
+{
+    const DRIVER = "sqlserver";
 }

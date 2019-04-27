@@ -1,16 +1,17 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Command;
 
-use PHPUnit\Framework\TestCase;
 use Cycle\ORM\Command\Branch\Condition;
 use Cycle\ORM\Command\CommandInterface;
+use PHPUnit\Framework\TestCase;
 
 class ConditionCommandTest extends TestCase
 {

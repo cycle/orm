@@ -1,15 +1,16 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Cycle\ORM\Heap\Node;
+use PHPUnit\Framework\TestCase;
 
 class StateTest extends TestCase
 {

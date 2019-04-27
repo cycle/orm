@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\SQLite; 
+declare(strict_types=1);
 
-class LinkedTreeTest extends \Cycle\ORM\Tests\LinkedTreeTest 
-{ 
-    const DRIVER = "sqlite"; 
+namespace Cycle\ORM\Tests\Driver\SQLite;
+
+class LinkedTreeTest extends \Cycle\ORM\Tests\LinkedTreeTest
+{
+    const DRIVER = "sqlite";
 }

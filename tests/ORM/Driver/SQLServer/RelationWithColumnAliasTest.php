@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+declare(strict_types=1);
 
-class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest 
-{ 
-    const DRIVER = "sqlserver"; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
+
+class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest
+{
+    const DRIVER = "sqlserver";
 }

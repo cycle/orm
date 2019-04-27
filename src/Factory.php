@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM;
 
@@ -53,17 +54,9 @@ final class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function has($id)
+    public function make(string $alias, array $parameters = [])
     {
-        return $this->container->has($id);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function get($id)
-    {
-        return $this->container->get($id);
+        return $this->factory->make($alias, $parameters);
     }
 
     /**

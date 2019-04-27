@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM;
 
@@ -70,7 +71,7 @@ final class ORM implements ORMInterface
     }
 
     /**
-     * Automatically resolve role based on object name.
+     * Automatically resolve role based on object name or instance.
      *
      * @param string|object $entity
      * @return string
@@ -78,14 +79,14 @@ final class ORM implements ORMInterface
     public function resolveRole($entity): string
     {
         if (is_object($entity)) {
+            $node = $this->getHeap()->get($entity);
+            if (!is_null($node)) {
+                return $node->getRole();
+            }
+
             $class = get_class($entity);
             if (!$this->schema->defines($class)) {
-                $node = $this->getHeap()->get($entity);
-                if (is_null($node)) {
-                    throw new ORMException("Unable to resolve role of `$class`");
-                }
-
-                return $node->getRole();
+                throw new ORMException("Unable to resolve role of `$class`");
             }
 
             $entity = $class;
@@ -227,12 +228,15 @@ final class ORM implements ORMInterface
             return $this->repositories[$role];
         }
 
-        $selector = new Select($this, $role);
-        $selector->constrain($this->getSource($role)->getConstrain());
+        $repository = $this->getSchema()->define($role, Schema::REPOSITORY) ?? Repository::class;
+        $params = ['orm' => $this, 'role' => $role];
 
-        $repositoryClass = $this->getSchema()->define($role, Schema::REPOSITORY) ?? Repository::class;
+        if ($this->getSchema()->define($role, Schema::TABLE) !== null) {
+            $params['select'] = new Select($this, $role);
+            $params['select']->constrain($this->getSource($role)->getConstrain());
+        }
 
-        return $this->repositories[$role] = new $repositoryClass($selector);
+        return $this->repositories[$role] = $this->factory->make($repository, $params);
     }
 
     /**
@@ -244,9 +248,10 @@ final class ORM implements ORMInterface
             return $this->sources[$role];
         }
 
-        $source = $this->schema->define($role, Schema::SOURCE);
-        if ($source !== null && $source !== Source::class) {
-            return $this->factory->get($source);
+        $source = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
+        if ($source !== Source::class) {
+            // custom implementation
+            return $this->factory->make($source, ['orm' => $this, 'role' => $role]);
         }
 
         $source = new Source(
@@ -257,7 +262,7 @@ final class ORM implements ORMInterface
         $constrain = $this->schema->define($role, Schema::CONSTRAIN);
         if ($constrain !== null) {
             $source = $source->withConstrain(
-                is_object($constrain) ? $constrain : $this->factory->get($constrain)
+                is_object($constrain) ? $constrain : $this->factory->make($constrain)
             );
         }
 

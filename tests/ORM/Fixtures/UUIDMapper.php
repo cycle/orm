@@ -1,16 +1,18 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-use Ramsey\Uuid\Uuid;
 use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Mapper\Mapper;
+use Ramsey\Uuid\Uuid;
 
 class UUIDMapper extends Mapper
 {

@@ -1,23 +1,23 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM;
 
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
-use Psr\Container\ContainerInterface;
-use Spiral\Database\DatabaseInterface;
+use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Database\DatabaseProviderInterface;
 
 /**
  * Must provide access to generic DI.
  */
-interface FactoryInterface extends DatabaseProviderInterface, ContainerInterface
+interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
     /**
      * Create mapper associated with given role.
@@ -64,12 +64,4 @@ interface FactoryInterface extends DatabaseProviderInterface, ContainerInterface
         string $role,
         string $relation
     ): RelationInterface;
-
-    /**
-     * Get database by it's name.
-     *
-     * @param string $database
-     * @return DatabaseInterface
-     */
-    public function database(string $database = null): DatabaseInterface;
 }

@@ -1,17 +1,18 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Command;
 
+use Cycle\ORM\Command\Database\Insert;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
-use Cycle\ORM\Command\Database\Insert;
 
 class InsertCommandTest extends TestCase
 {

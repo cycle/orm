@@ -1,17 +1,18 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;

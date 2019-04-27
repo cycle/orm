@@ -1,17 +1,18 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
 /**
  * Provide the ability to carry data over the StdClass objects. Does not support single table inheritance.
  */
-class StdMapper extends DatabaseMapper
+final class StdMapper extends DatabaseMapper
 {
     /**
      * @inheritdoc

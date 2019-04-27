@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\Postgres; 
+declare(strict_types=1);
 
-class CyclicReferencesTest extends \Cycle\ORM\Tests\CyclicReferencesTest 
-{ 
-    const DRIVER = "postgres"; 
+namespace Cycle\ORM\Tests\Driver\Postgres;
+
+class CyclicReferencesTest extends \Cycle\ORM\Tests\CyclicReferencesTest
+{
+    const DRIVER = "postgres";
 }

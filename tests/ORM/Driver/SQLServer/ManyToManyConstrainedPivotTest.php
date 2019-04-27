@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+declare(strict_types=1);
 
-class ManyToManyConstrainedPivotTest extends \Cycle\ORM\Tests\ManyToManyConstrainedPivotTest 
-{ 
-    const DRIVER = "sqlserver"; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
+
+class ManyToManyConstrainedPivotTest extends \Cycle\ORM\Tests\ManyToManyConstrainedPivotTest
+{
+    const DRIVER = "sqlserver";
 }

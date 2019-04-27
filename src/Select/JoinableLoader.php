@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
@@ -118,7 +119,7 @@ abstract class JoinableLoader extends AbstractLoader
             if ($loader->options['constrain'] instanceof ConstrainInterface) {
                 $loader->setConstrain($loader->options['constrain']);
             } elseif (is_string($loader->options['constrain'])) {
-                $loader->setConstrain($this->orm->getFactory()->get($loader->options['constrain']));
+                $loader->setConstrain($this->orm->getFactory()->make($loader->options['constrain']));
             }
         } else {
             $loader->setConstrain($this->getSource()->getConstrain());

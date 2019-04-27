@@ -1,17 +1,18 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Parser;
 
-use PHPUnit\Framework\TestCase;
 use Cycle\ORM\Parser\ArrayNode;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\SingularNode;
+use PHPUnit\Framework\TestCase;
 
 class NodeTest extends TestCase
 {

@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
@@ -17,16 +18,16 @@ use Cycle\ORM\Select;
 class Repository implements RepositoryInterface
 {
     /** @var Select */
-    protected $selector;
+    protected $select;
 
     /**
      * Create repository linked to one specific selector.
      *
-     * @param Select $selector
+     * @param Select $select
      */
-    public function __construct(Select $selector)
+    public function __construct(Select $select)
     {
-        $this->selector = $selector;
+        $this->select = $select;
     }
 
     /**
@@ -60,7 +61,7 @@ class Repository implements RepositoryInterface
      */
     public function select(): Select
     {
-        return clone $this->selector;
+        return clone $this->select;
     }
 
     /**
@@ -68,6 +69,6 @@ class Repository implements RepositoryInterface
      */
     public function __clone()
     {
-        $this->selector = clone $this->selector;
+        $this->select = clone $this->select;
     }
 }

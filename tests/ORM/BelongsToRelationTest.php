@@ -1,10 +1,11 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
@@ -171,7 +172,7 @@ abstract class BelongsToRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user', ['method' => Select\JoinableLoader::INLOAD])
-            ->orderBy('profile.id');
+                 ->orderBy('profile.id');
 
         $this->assertEquals([
             [
@@ -367,7 +368,7 @@ abstract class BelongsToRelationTest extends BaseTest
     {
         $s = new Select($this->orm, Profile::class);
         list($a, $b) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-            ->load('user')->fetchAll();
+                         ->load('user')->fetchAll();
 
         list($a->user, $b->user) = [$b->user, $a->user];
 
@@ -387,7 +388,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         list($a2, $b2) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-            ->load('user')->fetchAll();
+                           ->load('user')->fetchAll();
 
         $this->assertSame($a->user->id, $a2->user->id);
         $this->assertSame($b->user->id, $b2->user->id);
@@ -532,8 +533,8 @@ abstract class BelongsToRelationTest extends BaseTest
     {
         $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s->with('profile.user')
-            ->where('profile.user.id', 1)
-            ->fetchOne();
+               ->where('profile.user.id', 1)
+               ->fetchOne();
 
         $this->assertSame('nested-label', $n->label);
     }

@@ -1,14 +1,14 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use Doctrine\Common\Collections\Collection;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -21,6 +21,7 @@ use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Doctrine\Common\Collections\Collection;
 
 abstract class HasManyRelationTest extends BaseTest
 {
@@ -91,7 +92,7 @@ abstract class HasManyRelationTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   =>  SortByIDConstrain::class
+                Schema::CONSTRAIN   => SortByIDConstrain::class
             ]
         ]));
     }
@@ -379,7 +380,7 @@ abstract class HasManyRelationTest extends BaseTest
          */
         list($a, $b) = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
-            'as'  => 'comment'
+            'as'     => 'comment'
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->comments);

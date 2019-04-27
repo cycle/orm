@@ -13,7 +13,7 @@ use Cycle\ORM\Exception\ParserException;
 /**
  * Parses multiple sub children and mount them under parent node.
  */
-class ArrayNode extends AbstractNode implements ArrayInterface
+final class ArrayNode extends AbstractNode implements ArrayInterface
 {
     /** @var string */
     protected $innerKey;

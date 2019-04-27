@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM;
 
@@ -51,6 +52,8 @@ final class Iterator implements \IteratorAggregate
                 unset($index['@']);
                 $data = $data['@'];
             }
+
+            // add pipeline filter support?
 
             yield $index => $this->orm->make($this->class, $data, Node::MANAGED);
         }

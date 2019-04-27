@@ -1,14 +1,15 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
- 
-namespace Cycle\ORM\Tests\Driver\Postgres; 
+declare(strict_types=1);
 
-class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest 
-{ 
-    const DRIVER = "postgres"; 
+namespace Cycle\ORM\Tests\Driver\Postgres;
+
+class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest
+{
+    const DRIVER = "postgres";
 }

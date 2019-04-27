@@ -1,10 +1,11 @@
 <?php
 /**
- * Spiral Framework.
+ * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Classless;
 
@@ -87,7 +88,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   =>SortByIDConstrain::class
+                Schema::CONSTRAIN   => SortByIDConstrain::class
             ]
         ]));
     }
@@ -312,7 +313,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         list($a, $b) = $selector->load('comments', [
             'method' => Select\JoinableLoader::INLOAD,
-            'as'  => 'comment'
+            'as'     => 'comment'
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->comments);

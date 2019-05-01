@@ -124,6 +124,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function limit(int $limit): self
     {
+        $this->loader->getQuery()->distinct();
         $this->loader->getQuery()->limit($limit);
 
         return $this;

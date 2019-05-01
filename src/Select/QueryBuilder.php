@@ -136,6 +136,10 @@ final class QueryBuilder
      */
     public function resolve(string $identifier, bool $autoload = true): string
     {
+        if ($identifier === '*') {
+            return '*';
+        }
+
         if (strpos($identifier, '.') === false) {
             // parent element
             return sprintf(

@@ -124,7 +124,6 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function limit(int $limit): self
     {
-        $this->loader->getQuery()->distinct();
         $this->loader->getQuery()->limit($limit);
 
         return $this;
@@ -215,10 +214,10 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      * Attention, consider disabling entity map if you want to use recursive loading (i.e
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
-     * @see with()
      * @param string|array $relation
      * @param array        $options
      * @return $this|self
+     * @see with()
      */
     public function load($relation, array $options = []): self
     {
@@ -306,10 +305,10 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *
-     * @see load()
      * @param string|array $relation
      * @param array        $options
      * @return $this|self
+     * @see load()
      */
     public function with($relation, array $options = []): self
     {

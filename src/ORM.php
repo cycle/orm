@@ -92,7 +92,7 @@ final class ORM implements ORMInterface
             $entity = $class;
         }
 
-        if ($this->schema === null) {
+        if (is_null($this->schema)) {
             throw new ORMException('ORM Schema should be defined');
         }
 

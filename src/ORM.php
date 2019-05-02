@@ -92,6 +92,10 @@ final class ORM implements ORMInterface
             $entity = $class;
         }
 
+        if ($this->schema === null) {
+            throw new ORMException('ORM Schema should be defined');
+        }
+
         return $this->schema->resolveAlias($entity);
     }
 

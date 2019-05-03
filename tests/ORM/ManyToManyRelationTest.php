@@ -125,6 +125,12 @@ abstract class ManyToManyRelationTest extends BaseTest
         ]));
     }
 
+    public function testInitRelation()
+    {
+        $u = $this->orm->make(User::class);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $u->tags);
+    }
+
     public function testLoadRelation()
     {
         $selector = new Select($this->orm, User::class);

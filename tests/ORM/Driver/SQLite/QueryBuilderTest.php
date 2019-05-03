@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest
-{
-    const DRIVER = "sqlite";
+class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest 
+{ 
+    const DRIVER = "sqlite"; 
 }

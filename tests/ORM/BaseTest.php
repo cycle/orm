@@ -17,6 +17,7 @@ use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseFactory;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
+use Cycle\ORM\Relation\Pivoted\PivotedCollectionPromise;
 use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\SchemaInterface;
 use Doctrine\Common\Collections\Collection;
@@ -312,7 +313,7 @@ abstract class BaseTest extends TestCase
                 continue;
             }
 
-            if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionInterface) {
+            if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionPromise) {
                 if (!$eValue->isInitialized()) {
                     $eValue = $eValue->getPromise();
                 } else {
@@ -325,6 +326,9 @@ abstract class BaseTest extends TestCase
 
             if ($eValue instanceof Collection) {
                 $eValue = $eValue->toArray();
+                if ($rValue === null) {
+                    $rValue = [];
+                }
             }
 
             $this->assertEquals(

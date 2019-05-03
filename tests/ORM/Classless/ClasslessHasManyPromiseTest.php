@@ -20,6 +20,7 @@ use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Doctrine\Common\Collections\ArrayCollection;
 
 abstract class ClasslessHasManyPromiseTest extends BaseTest
 {
@@ -92,6 +93,12 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
             ]
         ]));
     }
+
+//    public function testInitRelation()
+//    {
+//        $u = $this->orm->make('user');
+//        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
+//    }
 
     public function testFetchRelation()
     {

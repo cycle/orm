@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class AutoTimestampsTest extends \Cycle\ORM\Tests\AutoTimestampsTest
-{
-    const DRIVER = "sqlite";
+class AutoTimestampsTest extends \Cycle\ORM\Tests\AutoTimestampsTest 
+{ 
+    const DRIVER = "sqlite"; 
 }

@@ -11,6 +11,7 @@ namespace Cycle\ORM\Mapper;
 
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
+use Doctrine\Instantiator;
 use Zend\Hydrator;
 
 /**
@@ -31,6 +32,9 @@ class Mapper extends DatabaseMapper
     /** @var Hydrator\HydratorInterface */
     protected $hydrator;
 
+    /** @var Instantiator\InstantiatorInterface */
+    protected $instantiator;
+
     /**
      * @param ORMInterface $orm
      * @param string       $role
@@ -44,6 +48,7 @@ class Mapper extends DatabaseMapper
 
         // mappers can request custom hydrator using constructor dependency
         $this->hydrator = new Hydrator\Reflection();
+        $this->instantiator = new Instantiator\Instantiator();
     }
 
     /**
@@ -53,7 +58,7 @@ class Mapper extends DatabaseMapper
     {
         $class = $this->resolveClass($data);
 
-        return [new $class, $data];
+        return [$this->instantiator->instantiate($class), $data];
     }
 
     /**

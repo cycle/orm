@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class HasOneProxyTest extends \Cycle\ORM\Tests\HasOneProxyTest
-{
-    const DRIVER = "sqlserver";
+class HasOneProxyTest extends \Cycle\ORM\Tests\HasOneProxyTest 
+{ 
+    const DRIVER = "sqlserver"; 
 }

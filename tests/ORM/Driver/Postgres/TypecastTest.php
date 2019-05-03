@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class TypecastTest extends \Cycle\ORM\Tests\TypecastTest
-{
-    const DRIVER = "postgres";
+class TypecastTest extends \Cycle\ORM\Tests\TypecastTest 
+{ 
+    const DRIVER = "postgres"; 
 }

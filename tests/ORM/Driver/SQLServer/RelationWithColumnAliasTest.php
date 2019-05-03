@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest
-{
-    const DRIVER = "sqlserver";
+class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest 
+{ 
+    const DRIVER = "sqlserver"; 
 }

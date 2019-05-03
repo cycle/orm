@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest
-{
-    const DRIVER = "postgres";
+class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest 
+{ 
+    const DRIVER = "postgres"; 
 }

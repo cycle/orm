@@ -21,6 +21,7 @@ use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 abstract class HasManyRelationTest extends BaseTest
@@ -95,6 +96,12 @@ abstract class HasManyRelationTest extends BaseTest
                 Schema::CONSTRAIN   => SortByIDConstrain::class
             ]
         ]));
+    }
+
+    public function testInitRelation()
+    {
+        $u = $this->orm->make(User::class);
+        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
     }
 
     public function testFetchRelation()

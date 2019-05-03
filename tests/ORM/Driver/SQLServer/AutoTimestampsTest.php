@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class AutoTimestampsTest extends \Cycle\ORM\Tests\AutoTimestampsTest
-{
-    const DRIVER = "sqlserver";
+class AutoTimestampsTest extends \Cycle\ORM\Tests\AutoTimestampsTest 
+{ 
+    const DRIVER = "sqlserver"; 
 }

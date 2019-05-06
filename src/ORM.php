@@ -330,6 +330,10 @@ final class ORM implements ORMInterface
             return $cmd;
         }
 
+        if ($this->schema->define($node->getRole(), Schema::RELATIONS) === []) {
+            return $cmd;
+        }
+
         // generate set of commands required to store entity relations
         return $this->getRelmap($node->getRole())->queueRelations(
             $cmd,

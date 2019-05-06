@@ -93,12 +93,7 @@ final class RelationMap
      */
     public function queueRelations(CC $parentStore, $parentEntity, Node $parentNode, array $parentData): CC
     {
-        if ($this->dependencies === [] && $this->relations === []) {
-            return $parentStore;
-        }
-
         $state = $parentNode->getState();
-
         $sequence = new ContextSequence();
 
         // queue all "left" graph branches

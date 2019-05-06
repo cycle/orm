@@ -39,7 +39,7 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->makeTable('profile', [
             'id'      => 'primary',
-            'user_id' => 'integer',
+            'user_id' => 'integer,nullable',
             'image'   => 'string'
         ]);
 
@@ -317,6 +317,77 @@ abstract class HasOneRelationTest extends BaseTest
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
         $this->assertSame(null, $e->profile);
+    }
+
+    public function testDeleteNullableChild()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'profile' => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::NULLABLE  => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
+            ],
+            Profile::class => [
+                Schema::ROLE        => 'profile',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'image'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'nested' => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Nested::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'profile_id',
+                        ],
+                    ]
+                ]
+            ],
+            Nested::class  => [
+                Schema::ROLE        => 'nested',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'nested',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'profile_id', 'label'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ]));
+
+        $selector = new Select($this->orm, User::class);
+        $e = $selector->wherePK(1)->load('profile')->fetchOne();
+        $e->profile = null;
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $e = $selector->wherePK(1)->load('profile')->fetchOne();
+
+        $this->assertSame(null, $e->profile);
+        $this->assertSame(1, (new Select($this->orm, Profile::class))->count());
     }
 
     public function testAssignNewChild()

@@ -151,6 +151,16 @@ class HasMany extends AbstractRelation
     {
         $relNode = $this->getNode($related);
 
+        if (!$this->isRequired()) {
+            $store = $this->orm->queueStore($related);
+            $store->register($this->outerKey, null, true);
+            $relNode->getState()->decClaim();
+
+            return new Condition($store, function () use ($relNode) {
+                return !$relNode->getState()->hasClaims();
+            });
+        }
+
         return new Condition($this->orm->queueDelete($related), function () use ($relNode) {
             return !$relNode->getState()->hasClaims();
         });

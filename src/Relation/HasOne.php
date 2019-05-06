@@ -77,6 +77,16 @@ class HasOne extends AbstractRelation
     {
         $relNode = $this->getNode($original);
 
+        if (!$this->isRequired()) {
+            $store = $this->orm->queueStore($original);
+            $store->register($this->outerKey, null, true);
+            $relNode->getState()->decClaim();
+
+            return new Condition($store, function () use ($relNode) {
+                return !$relNode->getState()->hasClaims();
+            });
+        }
+
         // only delete original child when no other objects claim it
         return new Condition($this->orm->queueDelete($original), function () use ($relNode) {
             return !$relNode->getState()->hasClaims();

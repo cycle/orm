@@ -40,7 +40,7 @@ abstract class HasManyRelationTest extends BaseTest
 
         $this->makeTable('comment', [
             'id'      => 'primary',
-            'user_id' => 'integer',
+            'user_id' => 'integer,null',
             'message' => 'string'
         ]);
 
@@ -300,6 +300,70 @@ abstract class HasManyRelationTest extends BaseTest
 
         $this->assertSame('msg 1', $e->comments[0]->message);
         $this->assertSame('msg 3', $e->comments[1]->message);
+    }
+
+
+    public function testRemoveChildrenNullable()
+    {
+        $this->orm = $this->withSchema(new Schema([
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'comments' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::NULLABLE  => true,
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
+            ],
+            Comment::class => [
+                Schema::ROLE        => 'comment',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAIN   => SortByIDConstrain::class
+            ]
+        ]));
+
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('user.id')->load('comments');
+
+        /** @var User $e */
+        $e = $selector->wherePK(1)->fetchOne();
+
+        $e->comments->remove(1);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector->orderBy('user.id')->load('comments');
+
+        /** @var User $e */
+        $e = $selector->wherePK(1)->fetchOne();
+
+        $this->assertCount(2, $e->comments);
+
+        $this->assertSame('msg 1', $e->comments[0]->message);
+        $this->assertSame('msg 3', $e->comments[1]->message);
+
+        $this->assertSame(3, (new Select($this->orm, Comment::class))->count());
     }
 
     public function testAddAndRemoveChildren()

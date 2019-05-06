@@ -79,21 +79,17 @@ final class ORM implements ORMInterface
     public function resolveRole($entity): string
     {
         if (is_object($entity)) {
-            $class = get_class($entity);
-            if ($this->schema->defines($class)) {
-                return $this->schema->resolveAlias($class);
+            $node = $this->getHeap()->get($entity);
+            if (!is_null($node)) {
+                return $node->getRole();
             }
 
-            $node = $this->getHeap()->get($entity);
-            if (is_null($node)) {
+            $class = get_class($entity);
+            if (!$this->schema->defines($class)) {
                 throw new ORMException("Unable to resolve role of `$class`");
             }
 
-            return $node->getRole();
-        }
-
-        if (is_null($this->schema)) {
-            throw new ORMException('ORM Schema should be defined');
+            $entity = $class;
         }
 
         return $this->schema->resolveAlias($entity);

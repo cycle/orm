@@ -31,6 +31,12 @@ final class RootLoader extends AbstractLoader
     /** @var SelectQuery */
     private $query;
 
+    /** @var array */
+    protected $options = [
+        'load'      => true,
+        'constrain' => true,
+    ];
+
     /**
      * @param ORMInterface $orm
      * @param string       $target

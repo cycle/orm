@@ -31,6 +31,7 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
+        'load'      => false,
         'constrain' => true,
         'method'    => self::POSTLOAD,
         'minify'    => true,
@@ -52,6 +53,15 @@ class ManyToManyLoader extends JoinableLoader
     }
 
     /**
+     * Make sure that pivot loader is always carried with parent relation.
+     */
+    public function __clone()
+    {
+        parent::__clone();
+        $this->pivot = clone $this->pivot;
+    }
+
+    /**
      * @param LoaderInterface $parent
      * @param array           $options
      * @return LoaderInterface
@@ -62,7 +72,10 @@ class ManyToManyLoader extends JoinableLoader
         $loader = parent::withContext($parent, $options);
         $loader->pivot = $loader->pivot->withContext(
             $loader,
-            ['method' => $options['method'] ?? self::JOIN] + ($options['pivot'] ?? [])
+            [
+                'load'   => $loader->isLoaded(),
+                'method' => $options['method'] ?? self::JOIN,
+            ] + ($options['pivot'] ?? [])
         );
 
         return $loader;
@@ -72,10 +85,15 @@ class ManyToManyLoader extends JoinableLoader
      * @param string $relation
      * @param array  $options
      * @param bool   $join
+     * @param bool   $load
      * @return LoaderInterface
      */
-    public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
-    {
+    public function loadRelation(
+        string $relation,
+        array $options,
+        bool $join = false,
+        bool $load = false
+    ): LoaderInterface {
         if ($relation == '@') {
             unset($options['method']);
 
@@ -86,7 +104,7 @@ class ManyToManyLoader extends JoinableLoader
             return $this->pivot;
         }
 
-        return parent::loadRelation($relation, $options, $join);
+        return parent::loadRelation($relation, $options, $join, $load);
     }
 
     /**

@@ -159,6 +159,14 @@ abstract class HasOneRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testWithNoColumns()
+    {
+        $selector = new Select($this->orm, User::class);
+        $data = $selector->with('profile')->buildQuery()->fetchAll();
+
+        $this->assertSame(3, count($data[0]));
+    }
+
     public function testFetchRelationPostload()
     {
         $selector = new Select($this->orm, User::class);

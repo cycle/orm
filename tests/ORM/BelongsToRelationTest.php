@@ -168,6 +168,14 @@ abstract class BelongsToRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testWithNoColumns()
+    {
+        $selector = new Select($this->orm, Profile::class);
+        $data = $selector->with('user')->buildQuery()->fetchAll();
+
+        $this->assertSame(3, count($data[0]));
+    }
+
     public function testFetchRelationInload()
     {
         $selector = new Select($this->orm, Profile::class);

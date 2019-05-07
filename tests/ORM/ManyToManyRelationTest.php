@@ -184,6 +184,14 @@ abstract class ManyToManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testWithNoColumns()
+    {
+        $selector = new Select($this->orm, User::class);
+        $data = $selector->with('tags')->buildQuery()->fetchAll();
+
+        $this->assertSame(3, count($data[0]));
+    }
+
     public function testLoadRelationInload()
     {
         $selector = new Select($this->orm, User::class);
@@ -372,6 +380,9 @@ abstract class ManyToManyRelationTest extends BaseTest
         $tr->run();
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector->load('tags')->wherePK(3);
+
+        $selector->fetchOne();
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame("many@email.com", $u->email);

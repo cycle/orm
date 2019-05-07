@@ -31,6 +31,7 @@ class PivotLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
+        'load'      => false,
         'constrain' => true,
         'method'    => self::JOIN,
         'minify'    => true,

@@ -37,12 +37,12 @@ trait ChainTrait
      *
      * @throws LoaderException When one of the elements can not be chained.
      */
-    protected function loadChain(string $chain, array $options, bool $join): LoaderInterface
+    protected function loadChain(string $chain, array $options, bool $join, bool $load): LoaderInterface
     {
         $position = strpos($chain, '.');
 
         // chain of relations provided (relation.nestedRelation)
-        $child = $this->loadRelation(substr($chain, 0, $position), [], $join);
+        $child = $this->loadRelation(substr($chain, 0, $position), [], $join, $load);
 
         if (!$child instanceof AbstractLoader) {
             throw new LoaderException(
@@ -51,11 +51,16 @@ trait ChainTrait
         }
 
         // load nested relation thought chain (chainOptions prior to user options)
-        return $child->loadRelation(substr($chain, $position + 1), $options, $join);
+        return $child->loadRelation(substr($chain, $position + 1), $options, $join, $load);
     }
 
     /**
      * @inheritdoc
      */
-    abstract public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface;
+    abstract public function loadRelation(
+        string $relation,
+        array $options,
+        bool $join = false,
+        bool $load = false
+    ): LoaderInterface;
 }

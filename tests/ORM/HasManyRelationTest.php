@@ -178,6 +178,13 @@ abstract class HasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testWithNoColumns()
+    {
+        $selector = new Select($this->orm, User::class);
+        $data = $selector->with('comments')->buildQuery()->fetchAll();
+        $this->assertSame(3, count($data[0]));
+    }
+
     public function testAccessRelated()
     {
         $selector = new Select($this->orm, User::class);
@@ -301,7 +308,6 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSame('msg 1', $e->comments[0]->message);
         $this->assertSame('msg 3', $e->comments[1]->message);
     }
-
 
     public function testRemoveChildrenNullable()
     {

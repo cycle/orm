@@ -223,7 +223,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function load($relation, array $options = []): self
     {
         if (is_string($relation)) {
-            $this->loader->loadRelation($relation, $options);
+            $this->loader->loadRelation($relation, $options, false, true);
 
             return $this;
         }
@@ -314,7 +314,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function with($relation, array $options = []): self
     {
         if (is_string($relation)) {
-            $this->loader->loadRelation($relation, $options, true);
+            $this->loader->loadRelation($relation, $options, true, false);
 
             return $this;
         }

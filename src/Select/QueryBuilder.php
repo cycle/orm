@@ -41,7 +41,7 @@ final class QueryBuilder
     /** @var SelectQuery */
     private $query;
 
-    /** @var AbstractLoader */
+    /** @var AbstractLoader @internal */
     private $loader;
 
     /** @var string|null */

@@ -29,6 +29,7 @@ class BelongsToLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
+        'load'      => false,
         'constrain' => true,
         'method'    => self::POSTLOAD,
         'minify'    => true,

@@ -33,6 +33,7 @@ class HasOneLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
+        'load'      => false,
         'constrain' => true,
         'method'    => self::INLOAD,
         'minify'    => true,

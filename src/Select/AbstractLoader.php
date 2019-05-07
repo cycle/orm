@@ -55,6 +55,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var array */
     protected $options = [
+        'load'      => false,
         'constrain' => true,
     ];
 
@@ -122,12 +123,17 @@ abstract class AbstractLoader implements LoaderInterface
      * @param string $relation Relation name, or chain of relations separated by.
      * @param array  $options Loader options (to be applied to last chain element only).
      * @param bool   $join When set to true loaders will be forced into JOIN mode.
+     * @param bool   $load Load relation data.
      * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
      */
-    public function loadRelation(string $relation, array $options, bool $join = false): LoaderInterface
-    {
+    public function loadRelation(
+        string $relation,
+        array $options,
+        bool $join = false,
+        bool $load = false
+    ): LoaderInterface {
         $relation = $this->resolvePath($relation);
         if (!empty($options['as'])) {
             $this->registerPath($options['as'], $relation);
@@ -135,17 +141,21 @@ abstract class AbstractLoader implements LoaderInterface
 
         //Check if relation contain dot, i.e. relation chain
         if ($this->isChain($relation)) {
-            return $this->loadChain($relation, $options, $join);
+            return $this->loadChain($relation, $options, $join, $load);
         }
 
         /*
          * Joined loaders must be isolated from normal loaders due they would not load any data
          * and will only modify SelectQuery.
          */
-        if (!$join) {
+        if (!$join || $load) {
             $loaders = &$this->load;
         } else {
             $loaders = &$this->join;
+        }
+
+        if ($load) {
+            $options['load'] = true;
         }
 
         if ($join) {

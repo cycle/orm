@@ -30,6 +30,9 @@ abstract class JoinableLoader extends AbstractLoader
      * @var array
      */
     protected $options = [
+        // load relation data
+        'load'      => false,
+
         // true or instance to enable, false or null to disable
         'constrain' => true,
 
@@ -181,7 +184,7 @@ abstract class JoinableLoader extends AbstractLoader
      */
     public function isLoaded(): bool
     {
-        return $this->getMethod() !== self::JOIN && $this->getMethod() !== self::LEFT_JOIN;
+        return $this->options['load'] || in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD]);
     }
 
     /**
@@ -193,16 +196,18 @@ abstract class JoinableLoader extends AbstractLoader
      */
     protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        if ($this->isJoined()) {
-            if ($this->isLoaded() && $query->getLimit() != 0) {
-                throw new LoaderException("Unable to load data using join with limit on parent query");
-            }
+        if ($this->isLoaded()) {
+            if ($this->isJoined()) {
+                if ($query->getLimit() != 0) {
+                    throw new LoaderException("Unable to load data using join with limit on parent query");
+                }
 
-            // mounting the columns to parent query
-            $this->mountColumns($query, $this->options['minify']);
-        } else {
-            // this is initial set of columns (remove all existed)
-            $this->mountColumns($query, $this->options['minify'], '', true);
+                // mounting the columns to parent query
+                $this->mountColumns($query, $this->options['minify']);
+            } else {
+                // this is initial set of columns (remove all existed)
+                $this->mountColumns($query, $this->options['minify'], '', true);
+            }
         }
 
         return parent::configureQuery($query);

@@ -420,7 +420,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *
      * @return RootLoader
      */
-    protected function getLoader(): RootLoader
+    private function getLoader(): RootLoader
     {
         return $this->loader;
     }

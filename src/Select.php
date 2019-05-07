@@ -42,7 +42,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     /** @var ORMInterface @internal */
     private $orm;
 
-    /** @var LoaderInterface */
+    /** @var RootLoader */
     private $loader;
 
     /** @var QueryBuilder */

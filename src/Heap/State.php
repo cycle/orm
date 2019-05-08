@@ -97,8 +97,8 @@ final class State implements ConsumerInterface, ProducerInterface
     /**
      * Set the reference to the object creation command (non executed).
      *
-     * @param ContextCarrierInterface|null $cmd
      * @internal
+     * @param ContextCarrierInterface|null $cmd
      */
     public function setCommand(ContextCarrierInterface $cmd = null)
     {
@@ -106,8 +106,8 @@ final class State implements ConsumerInterface, ProducerInterface
     }
 
     /**
-     * @return null|ContextCarrierInterface
      * @internal
+     * @return null|ContextCarrierInterface
      */
     public function getCommand(): ?ContextCarrierInterface
     {
@@ -117,6 +117,7 @@ final class State implements ConsumerInterface, ProducerInterface
     /**
      * Storage to store temporary cross entity links.
      *
+     * @internal
      * @param string $type
      * @return \SplObjectStorage
      */

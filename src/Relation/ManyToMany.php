@@ -199,14 +199,14 @@ class ManyToMany extends Relation\AbstractRelation
     protected function initPivot(Node $parentNode, $related, $pivot)
     {
         $relNode = $this->getNode($related);
-        if ($parentNode->getState()->getStorage()->contains($relNode)) {
-            return $parentNode->getState()->getStorage()->offsetGet($relNode);
+        if ($parentNode->getState()->getStorage($this->pivotEntity)->contains($relNode)) {
+            return $parentNode->getState()->getStorage($this->pivotEntity)->offsetGet($relNode);
         }
 
         $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
 
-        $parentNode->getState()->getStorage()->offsetSet($relNode, $entity);
-        $relNode->getState()->getStorage()->offsetSet($parentNode, $entity);
+        $parentNode->getState()->getStorage($this->pivotEntity)->offsetSet($relNode, $entity);
+        $relNode->getState()->getStorage($this->pivotEntity)->offsetSet($parentNode, $entity);
 
         return $entity;
     }

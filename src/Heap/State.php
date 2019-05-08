@@ -35,8 +35,8 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var ContextCarrierInterface[] */
     private $consumers;
 
-    /** @var \SplObjectStorage */
-    private $linkStorage;
+    /** @var \SplObjectStorage[] */
+    private $storage = [];
 
     /**
      * @param int   $state
@@ -115,15 +115,18 @@ final class State implements ConsumerInterface, ProducerInterface
     }
 
     /**
+     * Storage to store temporary cross entity links.
+     *
+     * @param string $type
      * @return \SplObjectStorage
      */
-    public function getStorage(): \SplObjectStorage
+    public function getStorage(string $type): \SplObjectStorage
     {
-        if ($this->linkStorage === null) {
-            $this->linkStorage = new \SplObjectStorage();
+        if (!isset($this->storage[$type])) {
+            $this->storage[$type] = new \SplObjectStorage();
         }
 
-        return $this->linkStorage;
+        return $this->storage[$type];
     }
 
     /**

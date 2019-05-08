@@ -48,7 +48,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         ]);
 
         $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
-        $this->makeFK('tag_user_map', 'user_id', 'tag', 'id');
+        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
 
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],

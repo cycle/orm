@@ -1,11 +1,12 @@
 <?php
 /**
- * Cycle DataMapper ORM
+ * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
+
 
 namespace Cycle\ORM\Tests;
 
@@ -14,14 +15,13 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
-abstract class ManyToManyPromiseTest extends BaseTest
+abstract class CyclicManyToManyTest extends BaseTest
 {
     use TableTrait;
 
@@ -49,6 +49,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
         $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
         $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
+        $this->makeIndex('tag_user_map', ['user_id', 'tag_id'], true);
 
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
@@ -110,8 +111,20 @@ abstract class ManyToManyPromiseTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name'],
                 Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
+                Schema::RELATIONS   => [
+                    'users' => [
+                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TARGET => User::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE          => true,
+                            Relation::THOUGH_ENTITY    => TagContext::class,
+                            Relation::INNER_KEY        => 'id',
+                            Relation::OUTER_KEY        => 'id',
+                            Relation::THOUGH_INNER_KEY => 'tag_id',
+                            Relation::THOUGH_OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -130,7 +143,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
     public function testLoadRelation()
     {
         $selector = new Select($this->orm, User::class);
-        $selector->load('tags');
+        $selector->load('tags')->orderBy('id', 'ASC');
 
         $this->assertSame([
             [
@@ -146,7 +159,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
                         '@'       => [
                             'id'   => 1,
                             'name' => 'tag a',
-                        ]
+                        ],
                     ],
                     [
                         'id'      => 2,
@@ -156,11 +169,10 @@ abstract class ManyToManyPromiseTest extends BaseTest
                         '@'       => [
                             'id'   => 2,
                             'name' => 'tag b',
-                        ]
+                        ],
                     ],
                 ],
             ],
-
             [
                 'id'      => 2,
                 'email'   => 'another@world.com',
@@ -181,119 +193,67 @@ abstract class ManyToManyPromiseTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testRelationContextAccess()
+    public function testCreateFromUser()
     {
-        $selector = new Select($this->orm, User::class);
-        /**
-         * @var User $a
-         * @var User $b
-         */
-        list($a, $b) = $selector->fetchAll();
+        $u = new User();
+        $u->email = "hello@world.com";
+        $u->balance = 1;
 
-        $this->captureReadQueries();
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(1, $b->tags);
-        $this->assertNumReads(2);
+        $tag = new Tag();
+        $tag->name = "hello";
 
-        $this->captureReadQueries();
+        $u->tags->add($tag);
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
 
-        $this->assertTrue($a->tags->hasPivot($a->tags[0]));
-        $this->assertTrue($a->tags->hasPivot($a->tags[1]));
-        $this->assertTrue($b->tags->hasPivot($b->tags[0]));
+        $u2 = $this->orm->withHeap(new Heap())->get(User::class, 'id', $u->id);
 
-        $this->assertFalse($b->tags->hasPivot($a->tags[0]));
-        $this->assertFalse($b->tags->hasPivot($a->tags[1]));
-        $this->assertFalse($a->tags->hasPivot($b->tags[0]));
-
-        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[0]));
-        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[1]));
-        $this->assertInstanceOf(TagContext::class, $b->tags->getPivot($b->tags[0]));
-
-        $this->assertEquals('primary', $a->tags->getPivot($a->tags[0])->as);
-        $this->assertEquals('secondary', $a->tags->getPivot($a->tags[1])->as);
-        $this->assertEquals('primary', $b->tags->getPivot($b->tags[0])->as);
-        $this->assertNumReads(0);
+        $this->assertSame($tag->id, $u2->tags->get(0)->id);
+        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
     }
 
-    public function testNoQueries()
+    public function testCreateFromTag()
     {
-        $selector = new Select($this->orm, User::class);
-        /**
-         * @var User $a
-         * @var User $b
-         */
-        list($a, $b) = $selector->fetchAll();
+        $u = new User();
+        $u->email = "hello@world.com";
+        $u->balance = 1;
 
-        $this->captureReadQueries();
+        $tag = new Tag();
+        $tag->name = "hello";
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
+        $tag->users->add($u);
 
-        $this->assertNumReads(0);
+        $t = new Transaction($this->orm);
+        $t->persist($tag);
+        $t->run();
+
+        $u2 = $this->orm->withHeap(new Heap())->get(User::class, 'id', $u->id);
+
+        $this->assertSame($tag->id, $u2->tags->get(0)->id);
+        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
     }
 
-    public function testUnlinkManyToManyAndReplaceSome()
+    public function testCreateCyclic()
     {
-        $tagSelector = new Select($this->orm, Tag::class);
+        $u = new User();
+        $u->email = "hello@world.com";
+        $u->balance = 1;
 
-        $selector = new Select($this->orm, User::class);
-        /**
-         * @var User $a
-         * @var User $b
-         */
-        list($a, $b) = $selector->fetchAll();
+        $tag = new Tag();
+        $tag->name = "hello";
 
-        $a->tags->remove(0);
+        $tag->users->add($u);
+        $u->tags->add($tag);
 
-        $a->tags->add($tagSelector->wherePK(3)->fetchOne());
-        $a->tags->getPivot($a->tags[1])->as = "new";
+        $t = new Transaction($this->orm);
+        $t->persist($tag);
+        $t->run();
 
-        // remove all
-        $b->tags->clear();
+        $u2 = $this->orm->withHeap(new Heap())->get(User::class, 'id', $u->id);
 
-        $t = new Tag();
-        $t->name = "new tag";
-
-        $pc = new TagContext();
-        $pc->as = 'super';
-
-        $b->tags->add($t);
-        $b->tags->setPivot($t, $pc);
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
-        $this->assertNumWrites(6);
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
-        $this->assertNumWrites(0);
-
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        /**
-         * @var User $a
-         * @var User $b
-         */
-        list($a, $b) = $selector->load('tags')->fetchAll();
-
-        $this->assertSame("tag b", $a->tags[0]->name);
-        $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);
-
-        $this->assertSame("new tag", $b->tags[0]->name);
-        $this->assertSame('super', $b->tags->getPivot($b->tags[0])->as);
+        $this->assertSame($tag->id, $u2->tags->get(0)->id);
+        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
     }
 }

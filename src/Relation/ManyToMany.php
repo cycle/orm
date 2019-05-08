@@ -129,6 +129,7 @@ class ManyToMany extends Relation\AbstractRelation
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
+                // todo: THIS IS MAGIC
                 $sequence->addCommand($this->orm->queueDelete($original->get($item)));
             }
         }
@@ -153,7 +154,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         if (!is_object($pivot)) {
             // first time initialization
-            $pivot = $this->orm->make($this->pivotEntity, $pivot ?? []);
+            $pivot = $this->initPivot($parentNode, $related, $pivot);
         }
 
         // defer the insert until pivot keys are resolved
@@ -184,5 +185,26 @@ class ManyToMany extends Relation\AbstractRelation
         $storage->set($related, $pivot);
 
         return $sequence;
+    }
+
+    /**
+     * @param Node   $parentNode
+     * @param object $related
+     * @param mixed  $pivot
+     * @return mixed|object|null
+     */
+    protected function initPivot(Node $parentNode, $related, $pivot)
+    {
+        $relNode = $this->getNode($related);
+        if ($parentNode->getState()->getStorage()->contains($relNode)) {
+            return $parentNode->getState()->getStorage()->offsetGet($relNode);
+        }
+
+        $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
+
+        $parentNode->getState()->getStorage()->offsetSet($relNode, $entity);
+        $relNode->getState()->getStorage()->offsetSet($parentNode, $entity);
+
+        return $entity;
     }
 }

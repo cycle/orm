@@ -35,6 +35,9 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var ContextCarrierInterface[] */
     private $consumers;
 
+    /** @var \SplObjectStorage */
+    private $linkStorage;
+
     /**
      * @param int   $state
      * @param array $data
@@ -94,8 +97,8 @@ final class State implements ConsumerInterface, ProducerInterface
     /**
      * Set the reference to the object creation command (non executed).
      *
-     * @internal
      * @param ContextCarrierInterface|null $cmd
+     * @internal
      */
     public function setCommand(ContextCarrierInterface $cmd = null)
     {
@@ -103,12 +106,24 @@ final class State implements ConsumerInterface, ProducerInterface
     }
 
     /**
-     * @internal
      * @return null|ContextCarrierInterface
+     * @internal
      */
     public function getCommand(): ?ContextCarrierInterface
     {
         return $this->command;
+    }
+
+    /**
+     * @return \SplObjectStorage
+     */
+    public function getStorage(): \SplObjectStorage
+    {
+        if ($this->linkStorage === null) {
+            $this->linkStorage = new \SplObjectStorage();
+        }
+
+        return $this->linkStorage;
     }
 
     /**

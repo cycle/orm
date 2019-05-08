@@ -59,6 +59,22 @@ trait TableTrait
     }
 
     /**
+     * @param string $table
+     * @param array  $columns
+     * @param bool   $unique
+     */
+    public function makeIndex(
+        string $table,
+        array $columns,
+        bool $unique
+    ) {
+        $schema = $this->getDatabase()->table($table)->getSchema();
+        $schema->index($columns)->unique($unique);
+        $schema->save();
+    }
+
+
+    /**
      * @return Database
      */
     abstract protected function getDatabase(): Database;

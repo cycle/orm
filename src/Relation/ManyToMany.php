@@ -188,6 +188,9 @@ class ManyToMany extends Relation\AbstractRelation
     }
 
     /**
+     * Since many to many relation can overlap from two directions we have to properly resolve the pivot entity upon
+     * it's generation. This is achieved using temporary mapping associated with each of the entity states.
+     *
      * @param Node   $parentNode
      * @param object $related
      * @param mixed  $pivot

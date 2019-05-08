@@ -12,7 +12,6 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Parser\OutputNode;
 use Cycle\ORM\Select\ConstrainInterface;
-use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use Spiral\Database\Query\SelectQuery;

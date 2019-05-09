@@ -136,6 +136,7 @@ abstract class AbstractRelation implements RelationInterface
         $node = $this->orm->getHeap()->get($entity);
 
         if (is_null($node)) {
+            // possibly rely on relation target role, it will allow context switch
             $node = new Node(Node::NEW, [], $this->orm->getMapper($entity)->getRole());
             $this->orm->getHeap()->attach($entity, $node);
         }

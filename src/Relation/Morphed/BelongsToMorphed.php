@@ -67,10 +67,10 @@ class BelongsToMorphed extends BelongsTo
                 $node->register($this->morphKey, null, true);
             }
         } else {
-            $relState = $this->getNode($related);
-            if ($this->fetchKey($node, $this->morphKey) != $relState->getRole()) {
-                $store->register($this->morphKey, $relState->getRole(), true);
-                $node->register($this->morphKey, $relState->getRole(), true);
+            $rNode = $this->getNode($related);
+            if ($this->fetchKey($node, $this->morphKey) != $rNode->getRole()) {
+                $store->register($this->morphKey, $rNode->getRole(), true);
+                $node->register($this->morphKey, $rNode->getRole(), true);
             }
         }
 

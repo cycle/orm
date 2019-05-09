@@ -16,10 +16,10 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseFactory;
 use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionPromise;
 use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -254,6 +254,13 @@ abstract class BaseTest extends TestCase
         if (!is_null($this->logger)) {
             $this->logger->hide();
         }
+    }
+
+    protected function save($e)
+    {
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
     }
 
     protected function assertSQL($expected, $given)

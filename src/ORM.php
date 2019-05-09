@@ -326,13 +326,12 @@ final class ORM implements ORMInterface
             return $cmd;
         }
 
-        $rMap = $this->getRelationMap($node->getRole());
-        if ($rMap === null) {
+        if ($this->schema->define($node->getRole(), Schema::RELATIONS) === []) {
             return $cmd;
         }
 
         // generate set of commands required to store entity relations
-        return $rMap->queueRelations(
+        return $this->getRelationMap($node->getRole())->queueRelations(
             $cmd,
             $entity,
             $node,
@@ -389,17 +388,13 @@ final class ORM implements ORMInterface
      * Get relation map associated with the given class.
      *
      * @param string $entity
-     * @return RelationMap|null
+     * @return RelationMap
      */
-    protected function getRelationMap($entity): ?RelationMap
+    protected function getRelationMap($entity): RelationMap
     {
         $role = $this->resolveRole($entity);
-        if (array_key_exists($role, $this->relmaps)) {
+        if (isset($this->relmaps[$role])) {
             return $this->relmaps[$role];
-        }
-
-        if ($this->schema->define($role, Schema::RELATIONS) === []) {
-            return $this->relmaps[$role] = null;
         }
 
         $relations = [];

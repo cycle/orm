@@ -56,24 +56,24 @@ interface RelationInterface
     /**
      * Returns tuple of [promise to insert into entity, promise to store as relation context].
      *
-     * @param Node $parentNode
+     * @param Node $node
      * @return array
      *
      * @throws RelationException
      */
-    public function initPromise(Node $parentNode): array;
+    public function initPromise(Node $node): array;
 
     /**
      * Create branch of operations required to store the relation.
      *
-     * @param CC     $parentStore
-     * @param object $parentEntity
-     * @param Node   $parentNode
+     * @param CC     $store
+     * @param object $entity
+     * @param Node   $node
      * @param object $related
      * @param object $original
      * @return CommandInterface
      *
      * @throws RelationException
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface;
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface;
 }

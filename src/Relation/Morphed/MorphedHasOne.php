@@ -40,15 +40,15 @@ class MorphedHasOne extends HasOne
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $parentNode): array
+    public function initPromise(Node $node): array
     {
-        if (is_null($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+        if (is_null($innerKey = $this->fetchKey($node, $this->innerKey))) {
             return [null, null];
         }
 
         $scope = [
             $this->outerKey => $innerKey,
-            $this->morphKey => $parentNode->getRole()
+            $this->morphKey => $node->getRole()
         ];
 
         $r = $this->orm->promise($this->target, $scope);
@@ -59,30 +59,30 @@ class MorphedHasOne extends HasOne
     /**
      * @inheritdoc
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
-        $relStore = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
+        $rStore = parent::queue($store, $entity, $node, $related, $original);
 
-        if ($relStore instanceof CC && !is_null($related)) {
-            $relNode = $this->getNode($related);
+        if ($rStore instanceof CC && !is_null($related)) {
+            $rNode = $this->getNode($related);
 
-            if ($this->fetchKey($relNode, $this->morphKey) != $parentNode->getRole()) {
-                $relStore->register($this->morphKey, $parentNode->getRole(), true);
-                $relNode->register($this->morphKey, $parentNode->getRole(), true);
+            if ($this->fetchKey($rNode, $this->morphKey) != $node->getRole()) {
+                $rStore->register($this->morphKey, $node->getRole(), true);
+                $rNode->register($this->morphKey, $node->getRole(), true);
             }
         }
 
-        return $relStore;
+        return $rStore;
     }
 
     /**
      * Assert that given entity is allowed for the relation.
      *
-     * @param Node $relNode
+     * @param Node $related
      *
      * @throws RelationException
      */
-    protected function assertValid(Node $relNode)
+    protected function assertValid(Node $related)
     {
         // no need to validate morphed relation yet
     }

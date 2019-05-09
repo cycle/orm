@@ -27,28 +27,34 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         if (is_null($related)) {
-            if ($this->isRequired()) {
+            if ($this->isNullable()) {
                 throw new NullException("Relation {$this} can not be null");
             }
 
             if (!is_null($original)) {
                 // reset the key
-                $parentStore->register($this->innerKey, null, true);
+                $store->register($this->innerKey, null, true);
             }
 
             // nothing to do
             return new Nil();
         }
 
-        $relStore = $this->orm->queueStore($related);
-        $relNode = $this->getNode($related);
-        $this->assertValid($relNode);
+        $rStore = $this->orm->queueStore($related);
+        $rNode = $this->getNode($related);
+        $this->assertValid($rNode);
 
-        $this->forwardContext($relNode, $this->outerKey, $parentStore, $parentNode, $this->innerKey);
+        $this->forwardContext(
+            $rNode,
+            $this->outerKey,
+            $store,
+            $node,
+            $this->innerKey
+        );
 
-        return $relStore;
+        return $rStore;
     }
 }

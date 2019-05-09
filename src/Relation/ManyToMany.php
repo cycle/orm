@@ -89,14 +89,19 @@ class ManyToMany extends Relation\AbstractRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $parentNode): array
+    public function initPromise(Node $node): array
     {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($node, $this->innerKey))) {
             return [new Pivoted\PivotedCollection(), null];
         }
 
         // will take care of all the loading and scoping
-        $p = new Pivoted\PivotedPromise($this->orm, $this->target, $this->schema, $innerKey);
+        $p = new Pivoted\PivotedPromise(
+            $this->orm,
+            $this->target,
+            $this->schema,
+            $innerKey
+        );
 
         return [new Pivoted\PivotedCollectionPromise($p), $p];
     }
@@ -107,7 +112,7 @@ class ManyToMany extends Relation\AbstractRelation
      * @param Pivoted\PivotedStorage $related
      * @param Pivoted\PivotedStorage $original
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         $original = $original ?? new Pivoted\PivotedStorage();
 
@@ -123,13 +128,13 @@ class ManyToMany extends Relation\AbstractRelation
 
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
-            $sequence->addCommand($this->link($parentNode, $item, $related->get($item), $related));
+            $sequence->addCommand($this->link($node, $item, $related->get($item), $related));
         }
 
         // un-link old elements
         foreach ($original->getElements() as $item) {
             if (!$related->has($item)) {
-                // todo: THIS IS MAGIC
+                // todo: add support for nullable pivot entities
                 $sequence->addCommand($this->orm->queueDelete($original->get($item)));
             }
         }
@@ -140,46 +145,46 @@ class ManyToMany extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node                   $parentNode
+     * @param Node                   $node
      * @param object                 $related
      * @param object                 $pivot
      * @param Pivoted\PivotedStorage $storage
      * @return CommandInterface
      */
-    protected function link(Node $parentNode, $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
+    protected function link(Node $node, $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
     {
-        $relStore = $this->orm->queueStore($related);
-        $relNode = $this->getNode($related, +1);
-        $this->assertValid($relNode);
+        $rStore = $this->orm->queueStore($related);
+        $rNode = $this->getNode($related, +1);
+        $this->assertValid($rNode);
 
         if (!is_object($pivot)) {
             // first time initialization
-            $pivot = $this->initPivot($parentNode, $related, $pivot);
+            $pivot = $this->initPivot($node, $related, $pivot);
         }
 
         // defer the insert until pivot keys are resolved
-        $pivotStore = $this->orm->queueStore($pivot);
-        $pivotNode = $this->getNode($pivot);
+        $pStore = $this->orm->queueStore($pivot);
+        $pNode = $this->getNode($pivot);
 
         $this->forwardContext(
-            $parentNode,
+            $node,
             $this->innerKey,
-            $pivotStore,
-            $pivotNode,
+            $pStore,
+            $pNode,
             $this->thoughtInnerKey
         );
 
         $this->forwardContext(
-            $relNode,
+            $rNode,
             $this->outerKey,
-            $pivotStore,
-            $pivotNode,
+            $pStore,
+            $pNode,
             $this->thoughtOuterKey
         );
 
         $sequence = new Sequence();
-        $sequence->addCommand($relStore);
-        $sequence->addCommand($pivotStore);
+        $sequence->addCommand($rStore);
+        $sequence->addCommand($pStore);
 
         // update the link
         $storage->set($related, $pivot);
@@ -191,22 +196,22 @@ class ManyToMany extends Relation\AbstractRelation
      * Since many to many relation can overlap from two directions we have to properly resolve the pivot entity upon
      * it's generation. This is achieved using temporary mapping associated with each of the entity states.
      *
-     * @param Node   $parentNode
+     * @param Node   $node
      * @param object $related
      * @param mixed  $pivot
      * @return mixed|object|null
      */
-    protected function initPivot(Node $parentNode, $related, $pivot)
+    protected function initPivot(Node $node, $related, $pivot)
     {
         $relNode = $this->getNode($related);
-        if ($parentNode->getState()->getStorage($this->pivotEntity)->contains($relNode)) {
-            return $parentNode->getState()->getStorage($this->pivotEntity)->offsetGet($relNode);
+        if ($node->getState()->getStorage($this->pivotEntity)->contains($relNode)) {
+            return $node->getState()->getStorage($this->pivotEntity)->offsetGet($relNode);
         }
 
         $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
 
-        $parentNode->getState()->getStorage($this->pivotEntity)->offsetSet($relNode, $entity);
-        $relNode->getState()->getStorage($this->pivotEntity)->offsetSet($parentNode, $entity);
+        $node->getState()->getStorage($this->pivotEntity)->offsetSet($relNode, $entity);
+        $relNode->getState()->getStorage($this->pivotEntity)->offsetSet($node, $entity);
 
         return $entity;
     }

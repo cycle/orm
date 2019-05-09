@@ -106,7 +106,7 @@ abstract class AbstractRelation implements RelationInterface
      *
      * @return bool
      */
-    protected function isRequired(): bool
+    protected function isNullable(): bool
     {
         if (array_key_exists(Relation::NULLABLE, $this->schema)) {
             return !$this->schema[Relation::NULLABLE];
@@ -186,14 +186,14 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * Assert that given entity is allowed for the relation.
      *
-     * @param Node $relNode
+     * @param Node $related
      *
      * @throws RelationException
      */
-    protected function assertValid(Node $relNode)
+    protected function assertValid(Node $related)
     {
-        if ($relNode->getRole() != $this->target) {
-            throw new RelationException(sprintf("Unable to link %s, given `%s`", $this, $relNode->getRole()));
+        if ($related->getRole() != $this->target) {
+            throw new RelationException(sprintf("Unable to link %s, given `%s`", $this, $related->getRole()));
         }
     }
 

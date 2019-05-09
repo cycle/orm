@@ -28,24 +28,24 @@ class RefersTo extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         // refers-to relation is always nullable (as opposite to belongs-to)
         if (is_null($related)) {
             if (!is_null($original)) {
-                $parentStore->register($this->innerKey, null, true);
+                $store->register($this->innerKey, null, true);
             }
 
             return new Nil();
         }
 
-        $relNode = $this->getNode($related);
-        $this->assertValid($relNode);
+        $rNode = $this->getNode($related);
+        $this->assertValid($rNode);
 
         // related object exists, we can update key immediately
-        if (!is_null($outerKey = $this->fetchKey($relNode, $this->outerKey))) {
-            if ($outerKey != $this->fetchKey($parentNode, $this->innerKey)) {
-                $parentStore->register($this->innerKey, $outerKey, true);
+        if (!is_null($outerKey = $this->fetchKey($rNode, $this->outerKey))) {
+            if ($outerKey != $this->fetchKey($node, $this->innerKey)) {
+                $store->register($this->innerKey, $outerKey, true);
             }
 
             return new Nil();
@@ -53,17 +53,28 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 
         // update parent entity once related instance is able to provide us context key
         $update = new Update(
-            $this->getSource($parentNode->getRole())->getDatabase(),
-            $this->getSource($parentNode->getRole())->getTable()
+            $this->getSource($node->getRole())->getDatabase(),
+            $this->getSource($node->getRole())->getTable()
         );
 
         // fastest way to identify the entity
-        $pk = $this->orm->getSchema()->define($parentNode->getRole(), Schema::PRIMARY_KEY);
+        $pk = $this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
 
-        $this->forwardContext($relNode, $this->outerKey, $update, $parentNode, $this->innerKey);
+        $this->forwardContext(
+            $rNode,
+            $this->outerKey,
+            $update,
+            $node,
+            $this->innerKey
+        );
 
         // set where condition for update query
-        $this->forwardScope($parentNode, $pk, $update, $pk);
+        $this->forwardScope(
+            $node,
+            $pk,
+            $update,
+            $pk
+        );
 
         return $update;
     }

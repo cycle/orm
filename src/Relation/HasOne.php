@@ -28,7 +28,7 @@ class HasOne extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         if ($original instanceof ReferenceInterface) {
             $original = $this->resolve($original);
@@ -49,20 +49,26 @@ class HasOne extends AbstractRelation
             }
         }
 
-        $resStore = $this->orm->queueStore($related);
-        $relNode = $this->getNode($related, +1);
-        $this->assertValid($relNode);
+        $rStore = $this->orm->queueStore($related);
+        $rNode = $this->getNode($related, +1);
+        $this->assertValid($rNode);
 
         // store command with mounted context paths
-        $relStore = $this->forwardContext($parentNode, $this->innerKey, $resStore, $relNode, $this->outerKey);
+        $rStore = $this->forwardContext(
+            $node,
+            $this->innerKey,
+            $rStore,
+            $rNode,
+            $this->outerKey
+        );
 
         if (is_null($original)) {
-            return $relStore;
+            return $rStore;
         }
 
         $sequence = new ContextSequence();
         $sequence->addCommand($this->deleteOriginal($original));
-        $sequence->addPrimary($relStore);
+        $sequence->addPrimary($rStore);
 
         return $sequence;
     }
@@ -75,21 +81,21 @@ class HasOne extends AbstractRelation
      */
     protected function deleteOriginal($original): CommandInterface
     {
-        $relNode = $this->getNode($original);
+        $rNode = $this->getNode($original);
 
-        if (!$this->isRequired()) {
+        if (!$this->isNullable()) {
             $store = $this->orm->queueStore($original);
             $store->register($this->outerKey, null, true);
-            $relNode->getState()->decClaim();
+            $rNode->getState()->decClaim();
 
-            return new Condition($store, function () use ($relNode) {
-                return !$relNode->getState()->hasClaims();
+            return new Condition($store, function () use ($rNode) {
+                return !$rNode->getState()->hasClaims();
             });
         }
 
         // only delete original child when no other objects claim it
-        return new Condition($this->orm->queueDelete($original), function () use ($relNode) {
-            return !$relNode->getState()->hasClaims();
+        return new Condition($this->orm->queueDelete($original), function () use ($rNode) {
+            return !$rNode->getState()->hasClaims();
         });
     }
 }

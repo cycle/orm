@@ -65,9 +65,9 @@ class HasMany extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $parentNode): array
+    public function initPromise(Node $node): array
     {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($node, $this->innerKey))) {
             return [new ArrayCollection(), null];
         }
 
@@ -86,7 +86,7 @@ class HasMany extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
@@ -99,7 +99,7 @@ class HasMany extends AbstractRelation
         $sequence = new Sequence();
 
         foreach ($related as $item) {
-            $sequence->addCommand($this->queueStore($parentNode, $item));
+            $sequence->addCommand($this->queueStore($node, $item));
         }
 
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
@@ -126,17 +126,23 @@ class HasMany extends AbstractRelation
     /**
      * Persist related object.
      *
-     * @param Node   $parentNode
+     * @param Node   $node
      * @param object $related
      * @return CC
      */
-    protected function queueStore(Node $parentNode, $related): CC
+    protected function queueStore(Node $node, $related): CC
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);
         $this->assertValid($relNode);
 
-        $this->forwardContext($parentNode, $this->innerKey, $relStore, $relNode, $this->outerKey);
+        $this->forwardContext(
+            $node,
+            $this->innerKey,
+            $relStore,
+            $relNode,
+            $this->outerKey
+        );
 
         return $relStore;
     }
@@ -149,20 +155,20 @@ class HasMany extends AbstractRelation
      */
     protected function queueDelete($related): CommandInterface
     {
-        $relNode = $this->getNode($related);
+        $rNode = $this->getNode($related);
 
-        if (!$this->isRequired()) {
+        if (!$this->isNullable()) {
             $store = $this->orm->queueStore($related);
             $store->register($this->outerKey, null, true);
-            $relNode->getState()->decClaim();
+            $rNode->getState()->decClaim();
 
-            return new Condition($store, function () use ($relNode) {
-                return !$relNode->getState()->hasClaims();
+            return new Condition($store, function () use ($rNode) {
+                return !$rNode->getState()->hasClaims();
             });
         }
 
-        return new Condition($this->orm->queueDelete($related), function () use ($relNode) {
-            return !$relNode->getState()->hasClaims();
+        return new Condition($this->orm->queueDelete($related), function () use ($rNode) {
+            return !$rNode->getState()->hasClaims();
         });
     }
 }

@@ -37,14 +37,14 @@ class BelongsToMorphed extends BelongsTo
     /**
      * @inheritdoc
      */
-    public function initPromise(Node $parentNode): array
+    public function initPromise(Node $node): array
     {
-        if (is_null($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
+        if (is_null($innerKey = $this->fetchKey($node, $this->innerKey))) {
             return [null, null];
         }
 
         /** @var string $target */
-        $target = $this->fetchKey($parentNode, $this->morphKey);
+        $target = $this->fetchKey($node, $this->morphKey);
         if (is_null($target)) {
             return [null, null];
         }
@@ -57,20 +57,20 @@ class BelongsToMorphed extends BelongsTo
     /**
      * @inheritdoc
      */
-    public function queue(CC $parentStore, $parentEntity, Node $parentNode, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
-        $wrappedStore = parent::queue($parentStore, $parentEntity, $parentNode, $related, $original);
+        $wrappedStore = parent::queue($store, $entity, $node, $related, $original);
 
         if (is_null($related)) {
-            if ($this->fetchKey($parentNode, $this->morphKey) !== null) {
-                $parentStore->register($this->morphKey, null, true);
-                $parentNode->register($this->morphKey, null, true);
+            if ($this->fetchKey($node, $this->morphKey) !== null) {
+                $store->register($this->morphKey, null, true);
+                $node->register($this->morphKey, null, true);
             }
         } else {
             $relState = $this->getNode($related);
-            if ($this->fetchKey($parentNode, $this->morphKey) != $relState->getRole()) {
-                $parentStore->register($this->morphKey, $relState->getRole(), true);
-                $parentNode->register($this->morphKey, $relState->getRole(), true);
+            if ($this->fetchKey($node, $this->morphKey) != $relState->getRole()) {
+                $store->register($this->morphKey, $relState->getRole(), true);
+                $node->register($this->morphKey, $relState->getRole(), true);
             }
         }
 
@@ -80,11 +80,11 @@ class BelongsToMorphed extends BelongsTo
     /**
      * Assert that given entity is allowed for the relation.
      *
-     * @param Node $relNode
+     * @param Node $related
      *
      * @throws RelationException
      */
-    protected function assertValid(Node $relNode)
+    protected function assertValid(Node $related)
     {
         // no need to validate morphed relation yet
     }

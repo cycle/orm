@@ -129,7 +129,7 @@ final class ORM implements ORMInterface
                 $node = $this->heap->get($e);
 
                 // entity already been loaded, let's update it's relations with new context
-                return $m->hydrate($e, $this->getRelmap($role)->init($node, $data));
+                return $m->hydrate($e, $this->getRelationMap($role)->init($node, $data));
             }
         }
 
@@ -141,7 +141,7 @@ final class ORM implements ORMInterface
         $this->heap->attach($e, $node, $this->getIndexes($m->getRole()));
 
         // hydrate entity with it's data, relations and proxies
-        return $m->hydrate($e, $this->getRelmap($role)->init($node, $prepared));
+        return $m->hydrate($e, $this->getRelationMap($role)->init($node, $prepared));
     }
 
     /**
@@ -326,12 +326,13 @@ final class ORM implements ORMInterface
             return $cmd;
         }
 
-        if ($this->schema->define($node->getRole(), Schema::RELATIONS) === []) {
+        $rMap = $this->getRelationMap($node->getRole());
+        if ($rMap === null) {
             return $cmd;
         }
 
         // generate set of commands required to store entity relations
-        return $this->getRelmap($node->getRole())->queueRelations(
+        return $rMap->queueRelations(
             $cmd,
             $entity,
             $node,
@@ -388,13 +389,17 @@ final class ORM implements ORMInterface
      * Get relation map associated with the given class.
      *
      * @param string $entity
-     * @return RelationMap
+     * @return RelationMap|null
      */
-    protected function getRelmap($entity): RelationMap
+    protected function getRelationMap($entity): ?RelationMap
     {
         $role = $this->resolveRole($entity);
-        if (isset($this->relmaps[$role])) {
+        if (array_key_exists($role, $this->relmaps)) {
             return $this->relmaps[$role];
+        }
+
+        if ($this->schema->define($role, Schema::RELATIONS) === []) {
+            return $this->relmaps[$role] = null;
         }
 
         $relations = [];

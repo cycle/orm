@@ -88,12 +88,12 @@ final class Transaction implements TransactionInterface
         try {
             $commands = $this->initCommands();
 
-            while (!empty($commands)) {
+            while ($commands !== []) {
                 $pending = [];
                 $lastExecuted = count($this->runner);
 
                 foreach ($this->sort($commands) as $wait => $do) {
-                    if ($wait != null) {
+                    if ($wait !== null) {
                         if (!in_array($wait, $pending, true)) {
                             $pending[] = $wait;
                         }

@@ -99,23 +99,27 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      */
     public function execute()
     {
-        $update = true;
         $data = $this->getData();
         $insertID = $this->db->insert($this->table)->values($data)->run();
 
         foreach ($this->consumers as $key => $consumers) {
+            $fresh = true;
+            if ($key === self::INSERT_ID) {
+                $value = $insertID;
+            } else {
+                $value = $data[$key] ?? null;
+            }
+
             foreach ($consumers as $id => $consumer) {
                 /** @var ConsumerInterface $cn */
                 $cn = $consumer[0];
 
-                if ($key == self::INSERT_ID) {
-                    $value = $insertID;
-                } else {
-                    $value = $data[$key] ?? null;
-                }
+                $cn->register($consumer[1], $value, $fresh, $consumer[2]);
 
-                $cn->register($consumer[1], $value, $update, $consumer[2]);
-                $update = false;
+                if ($key !== self::INSERT_ID) {
+                    // primary key is always delivered as fresh
+                    $fresh = false;
+                }
             }
         }
 

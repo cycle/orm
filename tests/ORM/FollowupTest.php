@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Schema;
-use Cycle\ORM\Tests\Fixtures\SnapshotMapper;
+use Cycle\ORM\Tests\Fixtures\UserSnapshotMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -41,7 +41,7 @@ abstract class FollowupTest extends BaseTest
         $this->orm = $this->withSchema(new Schema([
             User::class => [
                 Schema::ROLE        => 'user',
-                Schema::MAPPER      => SnapshotMapper::class,
+                Schema::MAPPER      => UserSnapshotMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',

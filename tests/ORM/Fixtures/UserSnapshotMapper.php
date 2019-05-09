@@ -16,7 +16,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;
 
-class SnapshotMapper extends Mapper
+class UserSnapshotMapper extends Mapper
 {
     public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface
     {

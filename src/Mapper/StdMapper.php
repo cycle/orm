@@ -50,6 +50,9 @@ final class StdMapper extends DatabaseMapper
      */
     protected function fetchFields($entity): array
     {
-        return array_intersect_key($this->extract($entity), array_flip($this->columns));
+        return array_intersect_key(
+            $this->extract($entity),
+            array_flip($this->columns)
+        );
     }
 }

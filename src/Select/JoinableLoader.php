@@ -16,6 +16,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
+use Spiral\Database\StatementInterface;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
@@ -151,9 +152,8 @@ abstract class JoinableLoader extends AbstractLoader
 
         //Ensure all nested relations
         $statement = $this->configureQuery($this->initQuery(), $references)->run();
-        $statement->setFetchMode(\PDO::FETCH_NUM);
 
-        foreach ($statement as $row) {
+        foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {
             $node->parseRow(0, $row);
         }
 

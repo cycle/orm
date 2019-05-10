@@ -17,6 +17,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
+use Spiral\Database\StatementInterface;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
@@ -93,9 +94,8 @@ final class RootLoader extends AbstractLoader
     public function loadData(AbstractNode $node)
     {
         $statement = $this->buildQuery()->run();
-        $statement->setFetchMode(\PDO::FETCH_NUM);
 
-        foreach ($statement as $row) {
+        foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {
             $node->parseRow(0, $row);
         }
 

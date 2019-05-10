@@ -125,6 +125,25 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
+    public function testFetchSame()
+    {
+        $u = new User();
+        $u->email = "test";
+        $u->balance = 100;
+
+        (new Transaction($this->orm))->persist($u)->run();
+
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->orderBy('id', 'DESC')->fetchOne();
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals($u->id, $result->id);
+        $this->assertEquals($u->email, $result->email);
+        $this->assertEquals($u->balance, $result->balance);
+
+        $this->assertSame($u, $result);
+    }
+
     public function testNoWrite()
     {
         $selector = new Select($this->orm, User::class);
@@ -137,7 +156,6 @@ abstract class MapperTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
     }
-
 
     public function testWhere()
     {

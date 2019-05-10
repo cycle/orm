@@ -202,7 +202,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
-        $selector = new Select($this->orm, 'user');
+        $selector = new Select($this->orm->withHeap(new Heap()), 'user');
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);
     }

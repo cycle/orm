@@ -300,7 +300,7 @@ abstract class BaseTest extends TestCase
     {
         foreach ($entity as $name => $eValue) {
             if (array_key_exists($name, $stateData)) {
-                $this->assertSame(
+                $this->assertEquals(
                     $eValue,
                     $stateData[$name],
                     "Entity and State are not in sync `{$eName}`.`{$name}`"

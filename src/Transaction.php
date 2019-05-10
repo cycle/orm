@@ -39,6 +39,9 @@ final class Transaction implements TransactionInterface
     /** @var RunnerInterface */
     private $runner;
 
+    /** @var array */
+    private $indexes = [];
+
     /**
      * @param ORMInterface         $orm
      * @param RunnerInterface|null $runner
@@ -149,6 +152,9 @@ final class Transaction implements TransactionInterface
 
             // sync the current entity data with newly generated data
             $this->orm->getMapper($node->getRole())->hydrate($e, $node->syncState());
+
+            // reindex the entity
+            $heap->attach($e, $node, $this->getIndexes($node->getRole()));
         }
     }
 
@@ -228,5 +234,23 @@ final class Transaction implements TransactionInterface
         }
 
         return join(', ', $errors);
+    }
+
+    /**
+     * Indexable node fields.
+     *
+     * @param string $role
+     * @return array
+     */
+    private function getIndexes(string $role): array
+    {
+        if (isset($this->indexes[$role])) {
+            return $this->indexes[$role];
+        }
+
+        $pk = $this->orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $keys = $this->orm->getSchema()->define($role, Schema::FIND_BY_KEYS) ?? [];
+
+        return $this->indexes[$role] = array_merge([$pk], $keys);
     }
 }

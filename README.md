@@ -25,7 +25,7 @@ Features:
 - dirty state, sync exceptions do not break entity map state
 - supports MySQL, MariaDB, PostgresSQL, SQLServer, SQLite
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
-- supports custom persiters, disposable UoW, custom column types
+- supports custom persiters, disposable UoW, custom column types, FKs to non primary columns
 - compatible with Doctrine Collections and Zend Hydrator
 
 Extensions:

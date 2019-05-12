@@ -12,7 +12,7 @@ Cycle is PHP DataMapper and ORM engine designed to work in long-running PHP appl
 
 Features:
 ---------
-- ORM with many-to-many, many-thought-many and polymorphic relations
+- ORM with has-one, has-many, many-thought-many and polymorphic relations
 - bare PHP objects, ActiveRecord-like objects, [same object type for all entities](tests/ORM/Classless)
 - same entity type for multiple repositories
 - query builder with automatic relation resolution

@@ -81,7 +81,8 @@ final class PromiseMany implements PromiseInterface
         if ($this->query === []) {
             // nothing to proxy to
             $this->orm = null;
-            return null;
+
+            return [];
         }
 
         foreach ($this->orm->getRepository($this->target)->findAll($this->query + $this->where) as $item) {

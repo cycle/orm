@@ -129,6 +129,10 @@ abstract class JoinableLoader extends AbstractLoader
             $loader->setConstrain($this->getSource()->getConstrain());
         }
 
+        foreach ($loader->getEagerRelations() as $relation) {
+            $loader->loadRelation($relation, [], false, true);
+        }
+
         return $loader;
     }
 

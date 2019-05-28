@@ -35,12 +35,12 @@ class HasMany extends AbstractRelation
      */
     public function init(array $data): array
     {
-        $result = [];
+        $elements = [];
         foreach ($data as $item) {
-            $result[] = $this->orm->make($this->target, $item, Node::MANAGED);
+            $elements[] = $this->orm->make($this->target, $item, Node::MANAGED);
         }
 
-        return [new ArrayCollection($result), $result];
+        return [new ArrayCollection($elements), $elements];
     }
 
     /**

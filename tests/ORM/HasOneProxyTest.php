@@ -87,6 +87,7 @@ abstract class HasOneProxyTest extends BaseTest
                     'profile' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Profile::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',

@@ -41,7 +41,7 @@ class MorphedHasMany extends HasMany
      */
     public function initPromise(Node $node): array
     {
-        if (empty($innerKey = $this->fetchKey($node, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($node, $this->innerKey)) || !$this->isPromised()) {
             return [new ArrayCollection(), null];
         }
 

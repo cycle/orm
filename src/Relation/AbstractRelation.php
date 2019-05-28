@@ -213,4 +213,14 @@ abstract class AbstractRelation implements RelationInterface
         $scope = $reference->__scope();
         return $this->orm->get($reference->__role(), key($scope), current($scope), true);
     }
+
+    /**
+     * Indicates that relation allows promise.
+     *
+     * @return bool
+     */
+    protected function isPromised(): bool
+    {
+        return ($this->schema[Relation::LOAD] ?? null) === Relation::LOAD_PROMISE;
+    }
 }

@@ -6,7 +6,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
@@ -18,7 +17,6 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\PromiseFactory;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Fixtures\UserMapperWithProxy;
 use Cycle\ORM\Tests\Fixtures\UserProxy;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -83,6 +81,7 @@ abstract class BelongsToProxyTest extends BaseTest
                     'user' => [
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',

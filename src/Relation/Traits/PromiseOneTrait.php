@@ -22,6 +22,11 @@ trait PromiseOneTrait
             return [null, null];
         }
 
+        $e = $this->orm->getHeap()->find($this->target, $this->outerKey, $innerKey);
+        if ($e !== null || !$this->isPromised()) {
+            return [$e, $e];
+        }
+
         $r = $this->orm->promise($this->target, [$this->outerKey => $innerKey]);
 
         return [$r, $r];

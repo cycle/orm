@@ -45,7 +45,7 @@ class BelongsToMorphed extends BelongsTo
 
         /** @var string $target */
         $target = $this->fetchKey($node, $this->morphKey);
-        if (is_null($target)) {
+        if (is_null($target) || !$this->isPromised()) {
             return [null, null];
         }
 

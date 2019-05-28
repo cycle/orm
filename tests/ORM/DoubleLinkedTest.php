@@ -46,6 +46,7 @@ abstract class DoubleLinkedTest extends BaseTest
                     'cyclic' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Cyclic::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::NULLABLE  => true,
@@ -56,6 +57,7 @@ abstract class DoubleLinkedTest extends BaseTest
                     'other'  => [
                         Relation::TYPE   => Relation::REFERS_TO,
                         Relation::TARGET => Cyclic::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::NULLABLE  => true,

@@ -42,7 +42,7 @@ class MorphedHasOne extends HasOne
      */
     public function initPromise(Node $node): array
     {
-        if (is_null($innerKey = $this->fetchKey($node, $this->innerKey))) {
+        if (is_null($innerKey = $this->fetchKey($node, $this->innerKey)) || !$this->isPromised()) {
             return [null, null];
         }
 

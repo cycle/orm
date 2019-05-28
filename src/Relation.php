@@ -51,6 +51,6 @@ final class Relation
     public const THOUGH_WHERE     = 54;
 
     // Relation pre-fetch mode
-    public const LOAD_LAZY  = 10;
-    public const LOAD_EAGER = 11;
+    public const LOAD_PROMISE = 10;
+    public const LOAD_EAGER   = 11;
 }

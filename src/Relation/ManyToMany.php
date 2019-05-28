@@ -91,7 +91,7 @@ class ManyToMany extends Relation\AbstractRelation
      */
     public function initPromise(Node $node): array
     {
-        if (empty($innerKey = $this->fetchKey($node, $this->innerKey))) {
+        if (empty($innerKey = $this->fetchKey($node, $this->innerKey)) || !$this->isPromised()) {
             return [new Pivoted\PivotedCollection(), null];
         }
 

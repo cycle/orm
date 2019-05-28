@@ -94,6 +94,7 @@ abstract class RefersToPromiseTest extends BaseTest
                     'user' => [
                         Relation::TYPE   => Relation::REFERS_TO,
                         Relation::TARGET => User::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',

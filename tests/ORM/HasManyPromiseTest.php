@@ -75,6 +75,7 @@ abstract class HasManyPromiseTest extends BaseTest
                     'comments' => [
                         Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',

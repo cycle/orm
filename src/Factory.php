@@ -111,7 +111,7 @@ final class Factory implements FactoryInterface
             'orm'    => $orm,
             'name'   => $relation,
             'target' => $relSchema[Relation::TARGET],
-            'schema' => $relSchema[Relation::SCHEMA]
+            'schema' => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
         ]);
     }
 

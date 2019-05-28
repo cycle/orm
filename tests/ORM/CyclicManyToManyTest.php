@@ -91,6 +91,7 @@ abstract class CyclicManyToManyTest extends BaseTest
                     'tags' => [
                         Relation::TYPE   => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE          => true,
                             Relation::THOUGH_ENTITY    => TagContext::class,
@@ -115,6 +116,7 @@ abstract class CyclicManyToManyTest extends BaseTest
                     'users' => [
                         Relation::TYPE   => Relation::MANY_TO_MANY,
                         Relation::TARGET => User::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE          => true,
                             Relation::THOUGH_ENTITY    => TagContext::class,

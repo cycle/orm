@@ -367,6 +367,16 @@ final class ORM implements ORMInterface
     }
 
     /**
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return [
+            'schema' => $this->schema
+        ];
+    }
+
+    /**
      * Get list of keys entity must be indexed in a Heap by.
      *
      * @param string $role

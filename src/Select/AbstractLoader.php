@@ -299,7 +299,7 @@ abstract class AbstractLoader implements LoaderInterface
     protected function getEagerRelations(): \Generator
     {
         foreach ($this->orm->getSchema()->define($this->target, Schema::RELATIONS) as $relation => $schema) {
-            if (($schema[Relation::FETCH] ?? null) == Relation::FETCH_EAGER) {
+            if (($schema[Relation::LOAD] ?? null) == Relation::LOAD_EAGER) {
                 yield $relation;
             }
         }

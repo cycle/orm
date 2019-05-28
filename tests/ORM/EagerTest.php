@@ -83,7 +83,7 @@ abstract class EagerTest extends BaseTest
                     'profile' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Profile::class,
-                        Relation::FETCH  => Relation::FETCH_EAGER,
+                        Relation::LOAD   => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
@@ -104,7 +104,7 @@ abstract class EagerTest extends BaseTest
                     'nested' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Nested::class,
-                        Relation::FETCH  => Relation::FETCH_EAGER,
+                        Relation::LOAD   => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',

@@ -18,6 +18,7 @@ final class Relation
     public const TYPE   = 0;
     public const TARGET = 1;
     public const SCHEMA = 2;
+    public const FETCH  = 3;
 
     // Relation types (default)
     public const HAS_ONE      = 10;
@@ -48,4 +49,8 @@ final class Relation
     public const THOUGH_OUTER_KEY = 51;
     public const THOUGH_ENTITY    = 52;
     public const THOUGH_WHERE     = 54;
+
+    // Relation pre-fetch mode
+    public const FETCH_LAZY  = 10;
+    public const FETCH_EAGER = 11;
 }

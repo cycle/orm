@@ -210,7 +210,7 @@ abstract class AbstractNode
     final public function getNode(string $container): AbstractNode
     {
         if (!isset($this->nodes[$container])) {
-            throw new ParserException("Undefined node {$container}.");
+            throw new ParserException("Undefined node `{$container}`.");
         }
 
         return $this->nodes[$container];

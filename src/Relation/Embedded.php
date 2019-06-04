@@ -12,11 +12,15 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\Relation\Embedded\PartialPromise;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceProviderInterface;
 
@@ -25,6 +29,8 @@ use Cycle\ORM\Select\SourceProviderInterface;
  */
 final class Embedded implements RelationInterface
 {
+    use  Relation\Traits\NodeTrait;
+
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;
 
@@ -33,6 +39,9 @@ final class Embedded implements RelationInterface
 
     /** @var string */
     protected $target;
+
+    /** @var array */
+    protected $schema;
 
     /** @var MapperInterface */
     protected $mapper;
@@ -47,12 +56,14 @@ final class Embedded implements RelationInterface
      * @param ORMInterface $orm
      * @param string       $name
      * @param string       $target
+     * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $name, string $target)
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         $this->orm = $orm;
         $this->name = $name;
         $this->target = $target;
+        $this->schema = $schema;
         $this->mapper = $this->orm->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
@@ -61,7 +72,7 @@ final class Embedded implements RelationInterface
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
     public function getName(): string
     {
@@ -73,45 +84,54 @@ final class Embedded implements RelationInterface
      */
     public function isCascade(): bool
     {
+        // always cascade
         return true;
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
-    public function init(array $data): array
+    public function init(Node $node, array $data): array
     {
-        list($e, $data) = $this->mapper->init($data);
-        $this->mapper->hydrate($e, $data);
+        // ensure proper object reference
+        $data[$this->primaryKey] = $node->getData()[$this->primaryKey];
 
-        return [$e, $data];
+        $item = $this->orm->make($this->target, $data, Node::MANAGED);
+
+        return [$item, $item];
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
-    public function extract($value)
+    public function initPromise(Node $parentNode): array
     {
-        return $value;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function initPromise(Node $node): array
-    {
-        $primaryKey = $node->getData()[$this->primaryKey] ?? null;
-        if (empty($primaryKey)) {
-            // unable to initiate promise
+        if (empty($primaryKey = $this->fetchKey($parentNode, $this->primaryKey))) {
             return [null, null];
         }
 
-        $p = new PartialPromise($this->orm, $this->target, [$this->primaryKey => $primaryKey]);
-        if ($this->orm->getProxyFactory() !== null) {
-            $p = $this->orm->getProxyFactory()->proxy($this->orm, $p);
+        /** @var ORMInterface $orm */
+        $orm = $this->orm;
+
+        $e = $orm->getHeap()->find($this->target, $this->primaryKey, $primaryKey);
+        if ($e !== null) {
+            return [$e, $e];
         }
 
-        return [$p, $p];
+        $r = new Reference($this->target, [$this->primaryKey => $primaryKey]);
+        if ($orm->getProxyFactory() !== null) {
+            $r = $orm->getProxyFactory()->proxy($this->orm, $r);
+        }
+
+        return [$r, new Nil()];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function extract($data)
+    {
+        return $data;
     }
 
     /**
@@ -119,50 +139,42 @@ final class Embedded implements RelationInterface
      */
     public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
-        if ($related instanceof ReferenceInterface && $original instanceof ReferenceInterface) {
-            // todo: need additional logic here
-            if ($related === $original) {
-                // nothing to do
-                return new Nil();
-            }
+        if ($related instanceof ReferenceInterface) {
+            $related = $this->resolve($related);
         }
 
-        // todo: promised
+        if ($related === null) {
+            throw new NullException("Embedded relation `{$this->name}` can't be null");
+        }
 
-        //if ($original instanceof ReferenceInterface) {
-        //                    $original = $this->resolve($original);
-        //      }
+        $state = $this->getNode($related)->getState();
 
-        $changes = $this->getChanges($related, $original);
+        // calculate embedded node changes
+        $changes = $this->getChanges($related, $state);
+
+        // register node changes
+        $state->setData($changes);
 
         // store embedded entity changes via parent command
         foreach ($this->mapColumns($changes) as $key => $value) {
             $store->register($key, $value, true);
         }
 
+        // ensure related state
+
         return new Nil();
     }
 
     /**
-     * @param $related
-     * @param $original
+     * @param mixed $related
+     * @param State $state
      * @return array
      */
-    protected function getChanges($related, $original): array
+    protected function getChanges($related, State $state): array
     {
-        // entity has been reset, nullify all the fields
-        if ($related === null) {
-            // todo: check if relation can be nullable?
-            return array_fill_keys($this->columns, null);
-        }
-
         $data = $this->mapper->extract($related);
-        if ($original === null) {
-            // nothing were set
-            return $data;
-        }
 
-        return array_udiff_assoc($data, $original, [static::class, 'compare']);
+        return array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
     }
 
     /**
@@ -197,5 +209,37 @@ final class Embedded implements RelationInterface
         }
 
         return ($a > $b) ? 1 : -1;
+    }
+
+    /**
+     * Resolve the reference to the object.
+     *
+     * @param ReferenceInterface $reference
+     * @return mixed|null
+     */
+    protected function resolve(ReferenceInterface $reference)
+    {
+        if ($reference instanceof PromiseInterface) {
+            return $reference->__resolve();
+        }
+
+        $scope = $reference->__scope();
+        return $this->orm->get($reference->__role(), key($scope), current($scope), true);
+    }
+
+    /**
+     * Fetch key from the state.
+     *
+     * @param Node   $state
+     * @param string $key
+     * @return mixed|null
+     */
+    protected function fetchKey(?Node $state, string $key)
+    {
+        if (is_null($state)) {
+            return null;
+        }
+
+        return $state->getData()[$key] ?? null;
     }
 }

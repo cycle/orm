@@ -22,7 +22,7 @@ use Cycle\ORM\Select\SourceProviderInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    use Traits\ContextTrait;
+    use Traits\ContextTrait, Relation\Traits\NodeTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;
@@ -77,7 +77,7 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * @inheritdoc
      */
-    public function init(array $data): array
+    public function init(Node $node, array $data): array
     {
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
 
@@ -113,43 +113,6 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return true;
-    }
-
-    /**
-     * Get Node for the given entity. Null if entity does not exists. Automatically
-     * register entity claims.
-     *
-     * @param object $entity
-     * @param int    $claim
-     * @return Node|null
-     */
-    protected function getNode($entity, int $claim = 0): ?Node
-    {
-        if (is_null($entity)) {
-            return null;
-        }
-
-        if ($entity instanceof ReferenceInterface) {
-            return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
-        }
-
-        $node = $this->orm->getHeap()->get($entity);
-
-        if (is_null($node)) {
-            // possibly rely on relation target role, it will allow context switch
-            $node = new Node(Node::NEW, [], $this->orm->getMapper($entity)->getRole());
-            $this->orm->getHeap()->attach($entity, $node);
-        }
-
-        if ($claim === 1) {
-            $node->getState()->addClaim();
-        }
-
-        if ($claim === -1) {
-            $node->getState()->decClaim();
-        }
-
-        return $node;
     }
 
     /**
@@ -212,15 +175,5 @@ abstract class AbstractRelation implements RelationInterface
 
         $scope = $reference->__scope();
         return $this->orm->get($reference->__role(), key($scope), current($scope), true);
-    }
-
-    /**
-     * Indicates that relation allows promise.
-     *
-     * @return bool
-     */
-    protected function isPromised(): bool
-    {
-        return ($this->schema[Relation::LOAD] ?? null) === Relation::LOAD_PROMISE;
     }
 }

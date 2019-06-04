@@ -38,6 +38,9 @@ final class EmbeddedLoader implements JoinableInterface
     /** @var array */
     private $options = ['load' => false, 'minify' => true];
 
+    /** @var array */
+    private $columns = [];
+
     /**
      * @param ORMInterface $orm
      * @param string       $target
@@ -46,6 +49,14 @@ final class EmbeddedLoader implements JoinableInterface
     {
         $this->orm = $orm;
         $this->target = $target;
+
+        // never duplicate primary key in data selection
+        $primaryKey = $this->define(Schema::PRIMARY_KEY);
+        foreach ($this->define(Schema::COLUMNS) as $internal => $external) {
+            if ($internal !== $primaryKey && $external !== $primaryKey) {
+                $this->columns[$internal] = $external;
+            }
+        }
     }
 
     /**
@@ -157,7 +168,7 @@ final class EmbeddedLoader implements JoinableInterface
      */
     protected function getColumns(): array
     {
-        return $this->define(Schema::COLUMNS);
+        return $this->columns;
     }
 
     /**

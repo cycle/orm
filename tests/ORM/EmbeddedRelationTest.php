@@ -58,9 +58,7 @@ abstract class EmbeddedRelationTest extends BaseTest
                         Relation::TYPE   => Relation::EMBEDDED,
                         Relation::TARGET => 'user_credentials',
                         Relation::LOAD   => Relation::LOAD_PROMISE,
-                        Relation::SCHEMA => [
-                            //Relation::CASCADE => true,
-                        ],
+                        Relation::SCHEMA => [],
                     ],
                 ]
             ],
@@ -71,6 +69,7 @@ abstract class EmbeddedRelationTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => [
+                    'id'       => 'id',
                     'username' => 'creds_username',
                     'password' => 'creds_password',
                 ],
@@ -189,6 +188,12 @@ abstract class EmbeddedRelationTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(0);
+
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
@@ -216,5 +221,48 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
         $this->assertSame('user1', $u->credentials->__resolve()->username);
+    }
+
+    public function testChangePromise()
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
+        $u->credentials->__resolve()->username = 'user3';
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+
+        $this->assertEquals($u->id, $u2->id);
+        $this->assertSame('user3', $u2->credentials->username);
+    }
+
+    /**
+     * @expectedException \Cycle\ORM\Exception\Relation\NullException
+     */
+    public function testNullify()
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
+        $u->credentials = null;
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+
+        $this->assertEquals($u->id, $u2->id);
+        $this->assertSame('user3', $u2->credentials->username);
     }
 }

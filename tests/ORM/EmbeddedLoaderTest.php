@@ -75,9 +75,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
                         Relation::TYPE   => Relation::EMBEDDED,
                         Relation::TARGET => UserCredentials::class,
                         Relation::LOAD   => null,
-                        Relation::SCHEMA => [
-                            //Relation::CASCADE => true,
-                        ],
+                        Relation::SCHEMA => [],
                     ],
                     'comments'    => [
                         Relation::TYPE   => Relation::HAS_MANY,
@@ -97,6 +95,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => [
+                    'id'         => 'id',
                     'username'   => 'creds_username',
                     'password'   => 'creds_password',
                     'num_logins' => 'creds_num_logins'
@@ -193,6 +192,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => [
+                    'id'         => 'id',
                     'username'   => 'creds_username',
                     'password'   => 'creds_password',
                     'num_logins' => 'creds_num_logins'
@@ -260,6 +260,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => [
+                    'id'         => 'int',
                     'username'   => 'creds_username',
                     'password'   => 'creds_password',
                     'num_logins' => 'creds_num_logins'

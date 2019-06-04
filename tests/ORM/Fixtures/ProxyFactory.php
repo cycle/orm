@@ -24,9 +24,9 @@ class ProxyFactory implements ProxyFactoryInterface
 
         switch ($role) {
             case 'user':
-                return new UserProxy($orm, 'user', $scope);
+                return new UserPromise($orm, 'user', $scope);
             case 'profile':
-                return new ProfileProxy($orm, 'profile', $scope);
+                return new ProfilePromise($orm, 'profile', $scope);
         }
 
         return new PromiseOne($orm, $role, $scope);

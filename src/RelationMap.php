@@ -75,7 +75,7 @@ final class RelationMap
             }
 
             // init relation for the entity and for state and the same time
-            list($data[$name], $orig) = $relation->init($item);
+            list($data[$name], $orig) = $relation->init($node, $item);
             $node->setRelation($name, $orig);
         }
 

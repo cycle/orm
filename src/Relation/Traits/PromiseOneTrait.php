@@ -28,7 +28,7 @@ trait PromiseOneTrait
         $orm = $this->orm;
 
         $e = $orm->getHeap()->find($this->target, $this->outerKey, $innerKey);
-        if ($e !== null || !$this->isPromised()) {
+        if ($e !== null) {
             return [$e, $e];
         }
 
@@ -39,4 +39,13 @@ trait PromiseOneTrait
 
         return [$r, $r];
     }
+
+    /**
+     * Fetch key from the state.
+     *
+     * @param Node   $node
+     * @param string $key
+     * @return mixed|null
+     */
+    abstract protected function fetchKey(?Node $node, string $key);
 }

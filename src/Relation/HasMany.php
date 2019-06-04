@@ -30,10 +30,11 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      *
+     * @param Node  $node
      * @param array $data
      * @return array
      */
-    public function init(array $data): array
+    public function init(Node $node, array $data): array
     {
         $elements = [];
         foreach ($data as $item) {

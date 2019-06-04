@@ -17,7 +17,7 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\ProxyFactory;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Fixtures\UserProxy;
+use Cycle\ORM\Tests\Fixtures\UserPromise;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class BelongsToProxyTest extends BaseTest
@@ -126,8 +126,8 @@ abstract class BelongsToProxyTest extends BaseTest
         $this->assertInstanceOf(User::class, $a->user);
         $this->assertInstanceOf(User::class, $b->user);
 
-        $this->assertInstanceOf(UserProxy::class, $a->user);
-        $this->assertInstanceOf(UserProxy::class, $b->user);
+        $this->assertInstanceOf(UserPromise::class, $a->user);
+        $this->assertInstanceOf(UserPromise::class, $b->user);
 
         $this->assertEquals(1, $a->user->getID());
         $this->assertEquals(2, $b->user->getID());

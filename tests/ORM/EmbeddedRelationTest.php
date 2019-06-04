@@ -218,7 +218,10 @@ abstract class EmbeddedRelationTest extends BaseTest
     public function testUpdateEmbeddedDirectly()
     {
         $selector = new Select($this->orm, User::class);
-        $u = $selector->orderBy('id', 'ASC')->load('credentials')->fetchOne();
+        $u = $selector
+            ->orderBy('id', 'ASC')
+            ->load('credentials')
+            ->fetchOne();
 
         $this->captureWriteQueries();
         $t = new Transaction($this->orm);

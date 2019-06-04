@@ -22,7 +22,7 @@ use Spiral\Database\Query\SelectQuery;
 /**
  * Loads object sub-section (column subset).
  */
-class EmbeddedLoader implements JoinableInterface
+final class EmbeddedLoader implements JoinableInterface
 {
     use ColumnsTrait;
 
@@ -36,7 +36,7 @@ class EmbeddedLoader implements JoinableInterface
     private $parent;
 
     /** @var array */
-    private $options = ['load' => false];
+    private $options = ['load' => false, 'minify' => true];
 
     /**
      * @param ORMInterface $orm
@@ -101,7 +101,7 @@ class EmbeddedLoader implements JoinableInterface
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded()) {
-            $this->mountColumns($query);
+            $this->mountColumns($query, $this->options['minify'] ?? true);
         }
 
         return $query;

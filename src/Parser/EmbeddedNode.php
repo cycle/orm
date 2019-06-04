@@ -11,6 +11,9 @@ namespace Cycle\ORM\Parser;
 
 use Cycle\ORM\Exception\ParserException;
 
+/**
+ * @internal
+ */
 final class EmbeddedNode extends AbstractNode
 {
     /**

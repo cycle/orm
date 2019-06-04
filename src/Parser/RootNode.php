@@ -11,6 +11,8 @@ namespace Cycle\ORM\Parser;
 
 /**
  * Node without specified parent.
+ *
+ * @internal
  */
 final class RootNode extends OutputNode
 {

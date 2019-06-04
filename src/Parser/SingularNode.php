@@ -12,6 +12,8 @@ use Cycle\ORM\Exception\ParserException;
 
 /**
  * Node with ability to push it's data into referenced tree location.
+ *
+ * @internal
  */
 final class SingularNode extends AbstractNode
 {

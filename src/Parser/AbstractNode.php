@@ -20,6 +20,8 @@ use Cycle\ORM\Parser\Traits\ReferenceTrait;
  * Nodes can be used as to parse one big and flat query, or when multiple queries provide their
  * data into one dataset, in both cases flow is identical from standpoint of Nodes (but offsets are
  * different).
+ *
+ * @internal
  */
 abstract class AbstractNode
 {
@@ -273,7 +275,7 @@ abstract class AbstractNode
     {
         //Let's force placeholders for every sub loaded
         foreach ($this->nodes as $name => $node) {
-            $data[$name] = $node instanceof ArrayInterface ? [] : null;
+            $data[$name] = $node instanceof ArrayNode ? [] : null;
         }
     }
 }

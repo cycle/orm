@@ -72,7 +72,7 @@ final class EmbeddedLoader implements JoinableInterface
     {
         $loader = clone $this;
         $loader->parent = $parent;
-        $loader->options = $options;
+        $loader->options = $options + $this->options;
 
         return $loader;
     }
@@ -134,6 +134,22 @@ final class EmbeddedLoader implements JoinableInterface
     public function loadData(AbstractNode $node)
     {
         // embedded entities does not support inner loaders... for now!
+    }
+
+    /**
+     * Ensure state of every nested loader.
+     */
+    public function __clone()
+    {
+        $this->parent = null;
+    }
+
+    /**
+     * Destruct loader.
+     */
+    final public function __destruct()
+    {
+        $this->parent = null;
     }
 
     /**

@@ -19,7 +19,7 @@ use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
-abstract class EmbeddedTest extends BaseTest
+abstract class EmbeddedLoaderTest extends BaseTest
 {
     use TableTrait;
 

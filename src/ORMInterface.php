@@ -68,6 +68,13 @@ interface ORMInterface extends SourceProviderInterface
     public function getFactory(): FactoryInterface;
 
     /**
+     * Return associated proxy factory if any.
+     *
+     * @return ProxyFactoryInterface|null
+     */
+    public function getProxyFactory(): ?ProxyFactoryInterface;
+
+    /**
      * Get ORM relation and entity schema provider.
      *
      * @return SchemaInterface

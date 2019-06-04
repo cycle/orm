@@ -132,8 +132,6 @@ abstract class EmbeddedRelationTest extends BaseTest
 
     public function testCreateUserWithEmbedded()
     {
-        $this->enableProfiling();
-
         $u = new User();
         $u->email = "new@email.com";
         $u->balance = 900;
@@ -198,6 +196,25 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertEquals(800, $u2->balance);
         $this->assertSame('altered', $u2->credentials->username);
         $this->assertSame('newpass', $u2->credentials->password);
+    }
 
+    public function testInitRelationReferenceNothing()
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(0);
+    }
+
+    public function testResolvePromise()
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
+        $this->assertSame('user1', $u->credentials->__resolve()->username);
     }
 }

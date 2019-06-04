@@ -15,6 +15,8 @@ use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Relation\Embedded\PartialPromise;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceProviderInterface;
 
@@ -35,6 +37,9 @@ final class Embedded implements RelationInterface
     /** @var MapperInterface */
     protected $mapper;
 
+    /** @var string */
+    protected $primaryKey;
+
     /** @var array */
     protected $columns = [];
 
@@ -51,6 +56,7 @@ final class Embedded implements RelationInterface
         $this->mapper = $this->orm->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
+        $this->primaryKey = $this->orm->getSchema()->define($target, Schema::PRIMARY_KEY);
         $this->columns = $this->orm->getSchema()->define($target, Schema::COLUMNS);
     }
 
@@ -94,9 +100,19 @@ final class Embedded implements RelationInterface
      */
     public function initPromise(Node $node): array
     {
-        // todo: implement it
+        $primaryKey = $node->getData()[$this->primaryKey] ?? null;
+        if (empty($primaryKey)) {
+            // unable to initiate promise
+            return [null, null];
+        }
 
-        return [null, null];
+        $p = new PartialPromise($this->orm, $this->target, [$this->primaryKey => $primaryKey]);
+        if ($this->orm->getProxyFactory() !== null) {
+            // create proxy
+            $p = $this->orm->getProxyFactory()->proxyPromise($this->orm, $this->target, $p);
+        }
+
+        return [$p, $p];
     }
 
     /**
@@ -104,18 +120,24 @@ final class Embedded implements RelationInterface
      */
     public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
+        if ($related instanceof ReferenceInterface && $original instanceof ReferenceInterface) {
+            // todo: need additional logic here
+            if ($related === $original) {
+                // nothing to do
+                return new Nil();
+            }
+        }
+
         // todo: promised
 
         //if ($original instanceof ReferenceInterface) {
-        //            $original = $this->resolve($original);
+        //                    $original = $this->resolve($original);
         //      }
 
-        //if ($related === $original) {
+        $changes = $this->getChanges($related, $original);
 
-        //}
-
-        // todo: test update
-        foreach ($this->getChanges($related, $original) as $key => $value) {
+        // store embedded entity changes via parent command
+        foreach ($this->mapColumns($changes) as $key => $value) {
             $store->register($key, $value, true);
         }
 
@@ -129,13 +151,19 @@ final class Embedded implements RelationInterface
      */
     protected function getChanges($related, $original): array
     {
-        $data = $this->mapper->extract($related);
-        if ($original === null) {
-            return $this->mapColumns($data);
+        // entity has been reset, nullify all the fields
+        if ($related === null) {
+            // todo: check if relation can be nullable?
+            return array_fill_keys($this->columns, null);
         }
 
-        $changes = array_udiff_assoc($data, $original, [static::class, 'compare']);
-        return $this->mapColumns($changes);
+        $data = $this->mapper->extract($related);
+        if ($original === null) {
+            // nothing were set
+            return $data;
+        }
+
+        return array_udiff_assoc($data, $original, [static::class, 'compare']);
     }
 
     /**

@@ -10,12 +10,12 @@ declare(strict_types=1);
 namespace Cycle\ORM\Promise;
 
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\PromiseFactoryInterface;
+use Cycle\ORM\ProxyFactoryInterface;
 
 /**
  * Returns PromiseOne for all entities.
  */
-final class PromiseFactory implements PromiseFactoryInterface
+final class ProxyFactory implements ProxyFactoryInterface
 {
     /**
      * @param ORMInterface $orm
@@ -26,5 +26,17 @@ final class PromiseFactory implements PromiseFactoryInterface
     public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
     {
         return new PromiseOne($orm, $role, $scope);
+    }
+
+    /**
+     * @param ORMInterface     $orm
+     * @param string           $role
+     * @param PromiseInterface $promise
+     * @return PromiseInterface
+     */
+    public function proxyPromise(ORMInterface $orm, string $role, PromiseInterface $promise): PromiseInterface
+    {
+        // doing nothing by default
+        return $promise;
     }
 }

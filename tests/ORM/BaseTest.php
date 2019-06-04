@@ -15,7 +15,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
-use Cycle\ORM\Promise\PromiseFactory;
+use Cycle\ORM\Promise\ProxyFactory;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionPromise;
@@ -98,7 +98,7 @@ abstract class BaseTest extends TestCase
         ));
 
         // use promises by default
-        $this->orm = $this->orm->withPromiseFactory(new PromiseFactory());
+        $this->orm = $this->orm->withProxyFactory(new ProxyFactory());
     }
 
     /**

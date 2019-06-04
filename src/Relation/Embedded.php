@@ -18,7 +18,6 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -118,11 +117,7 @@ final class Embedded implements RelationInterface
             return [$e, $e];
         }
 
-        $r = new Reference($this->target, [$this->primaryKey => $primaryKey]);
-        if ($orm->getProxyFactory() !== null) {
-            $r = $orm->getProxyFactory()->proxy($this->orm, $r);
-        }
-
+        $r = $this->orm->promise($this->target, [$this->primaryKey => $primaryKey]);
         return [$r, new Nil()];
     }
 

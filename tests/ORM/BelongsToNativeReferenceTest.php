@@ -11,10 +11,8 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\ProxyFactoryInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -108,7 +106,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(null);
+        ]))->withPromiseFactory(null);
     }
 
     public function testFetchRelation()

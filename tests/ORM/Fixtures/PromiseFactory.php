@@ -12,23 +12,19 @@ namespace Cycle\ORM\Tests\Fixtures;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\ProxyFactoryInterface;
+use Cycle\ORM\PromiseFactoryInterface;
 
-class ProxyFactory implements ProxyFactoryInterface
+class PromiseFactory implements PromiseFactoryInterface
 {
-    public function proxy(ORMInterface $orm, ReferenceInterface $reference): PromiseInterface
+    public function promise(ORMInterface $orm, string $target, array $scope): PromiseInterface
     {
-        $role = $reference->__role();
-        $scope = $reference->__scope();
-
-        switch ($role) {
+        switch ($target) {
             case 'user':
                 return new UserPromise($orm, 'user', $scope);
             case 'profile':
                 return new ProfilePromise($orm, 'profile', $scope);
         }
 
-        return new PromiseOne($orm, $role, $scope);
+        return new PromiseOne($orm, $target, $scope);
     }
 }

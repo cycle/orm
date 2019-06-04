@@ -15,7 +15,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\Profile;
-use Cycle\ORM\Tests\Fixtures\ProxyFactory;
+use Cycle\ORM\Tests\Fixtures\PromiseFactory;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserPromise;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -90,7 +90,7 @@ abstract class BelongsToProxyTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new ProxyFactory());
+        ]))->withPromiseFactory(new PromiseFactory());
     }
 
     public function testFetchRelation()

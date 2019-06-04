@@ -16,7 +16,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
-use Cycle\ORM\Tests\Fixtures\ReferenceFactory;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserID;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -107,7 +106,7 @@ abstract class BelongsToReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(null);
+        ]))->withPromiseFactory(null);
     }
 
     public function testFetchRelation()

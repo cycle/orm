@@ -18,7 +18,7 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\ProfileMapperWithProxy;
 use Cycle\ORM\Tests\Fixtures\ProfilePromise;
-use Cycle\ORM\Tests\Fixtures\ProxyFactory;
+use Cycle\ORM\Tests\Fixtures\PromiseFactory;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -127,7 +127,7 @@ abstract class HasOneProxyTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ]
-        ]))->withProxyFactory(new ProxyFactory());
+        ]))->withPromiseFactory(new PromiseFactory());
     }
 
     public function testFetchRelation()

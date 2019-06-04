@@ -20,6 +20,9 @@ final class Relation
     public const SCHEMA = 2;
     public const LOAD   = 3;
 
+    // Composite relation type without usage of external table.
+    public const EMBEDDED = 1;
+
     // Relation types (default)
     public const HAS_ONE      = 10;
     public const HAS_MANY     = 11;

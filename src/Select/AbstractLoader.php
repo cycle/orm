@@ -199,7 +199,7 @@ abstract class AbstractLoader implements LoaderInterface
         $node = $this->initNode();
 
         foreach ($this->load as $relation => $loader) {
-            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
+            if ($loader instanceof JoinableInterface && $loader->isJoined()) {
                 $node->joinNode($relation, $loader->createNode());
                 continue;
             }
@@ -262,7 +262,7 @@ abstract class AbstractLoader implements LoaderInterface
     {
         $query = $this->applyConstrain(clone $query);
         foreach ($this->load as $loader) {
-            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
+            if ($loader instanceof JoinableInterface && $loader->isJoined()) {
                 $query = $loader->configureQuery($query);
             }
         }

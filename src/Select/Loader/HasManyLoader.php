@@ -51,7 +51,7 @@ class HasManyLoader extends JoinableLoader
     /**
      * {@inheritdoc}
      */
-    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if (!empty($this->options['using'])) {
             // use pre-defined query

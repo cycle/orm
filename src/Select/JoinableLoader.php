@@ -21,7 +21,7 @@ use Spiral\Database\StatementInterface;
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
  */
-abstract class JoinableLoader extends AbstractLoader
+abstract class JoinableLoader extends AbstractLoader implements JoinableInterface
 {
     use ColumnsTrait, ConstrainTrait;
 
@@ -200,7 +200,7 @@ abstract class JoinableLoader extends AbstractLoader
      * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
      * @return SelectQuery
      */
-    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded()) {
             if ($this->isJoined()) {

@@ -27,6 +27,9 @@ abstract class AbstractNode
 {
     use DuplicateTrait, ReferenceTrait;
 
+    // Indicates tha data must be placed at the last registered reference
+    protected const LAST_REFERENCE = ['~'];
+
     // Typecasting types
     public const STRING  = 1;
     public const INTEGER = 2;
@@ -89,11 +92,11 @@ abstract class AbstractNode
     }
 
     /**
-     * @param TypecastInterface $typecaster
+     * @param TypecastInterface $typecast
      */
-    final public function setTypecast(TypecastInterface $typecaster)
+    final public function setTypecast(TypecastInterface $typecast)
     {
-        $this->typecast = $typecaster;
+        $this->typecast = $typecast;
     }
 
     /**
@@ -113,7 +116,7 @@ abstract class AbstractNode
             $this->ensurePlaceholders($data);
             $this->push($data);
 
-        } elseif (!empty($this->parent)) {
+        } elseif ($this->parent !== null) {
             // register duplicate rows in each parent row
             $this->push($data);
         }
@@ -155,7 +158,7 @@ abstract class AbstractNode
      */
     public function getReferences(): array
     {
-        if (empty($this->parent)) {
+        if ($this->parent === null) {
             throw new ParserException("Unable to aggregate reference values, parent is missing");
         }
 

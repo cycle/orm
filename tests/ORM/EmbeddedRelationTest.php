@@ -269,6 +269,15 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user3', $u2->credentials->username);
     }
 
+
+    public function testSelectEmbeddable()
+    {
+        $selector = new Select($this->orm, UserCredentials::class);
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
+        $this->assertSame('user1', $u->username);
+    }
+
     public function testChangeWhole()
     {
         $selector = new Select($this->orm, User::class);

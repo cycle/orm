@@ -12,7 +12,6 @@ namespace Cycle\ORM\Tests;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\ProxyFactoryInterface;
@@ -109,18 +108,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new class implements ProxyFactoryInterface
-        {
-            public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
-            {
-                return new Reference($role, $scope);
-            }
-
-            public function proxyPromise(ORMInterface $orm, string $role, PromiseInterface $promise): PromiseInterface
-            {
-                return $promise;
-            }
-        });
+        ]))->withProxyFactory(null);
     }
 
     public function testFetchRelation()

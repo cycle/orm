@@ -14,6 +14,7 @@ use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasOne;
 
@@ -51,7 +52,10 @@ class MorphedHasOne extends HasOne
             $this->morphKey => $node->getRole()
         ];
 
-        $r = $this->orm->promise($this->target, $scope);
+        $r = new Reference($this->target, $scope);
+        if ($this->orm->getProxyFactory() !== null) {
+            $r = $this->orm->getProxyFactory()->proxy($this->orm, $r);
+        }
 
         return [$r, $r];
     }

@@ -14,6 +14,7 @@ use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\BelongsTo;
 
@@ -49,7 +50,15 @@ class BelongsToMorphed extends BelongsTo
             return [null, null];
         }
 
-        $r = $this->orm->promise($target, [$this->outerKey => $innerKey]);
+        $e = $this->orm->getHeap()->find($target, $this->outerKey, $innerKey);
+        if ($e !== null) {
+            return [$e, $e];
+        }
+
+        $r = new Reference($target, [$this->outerKey => $innerKey]);
+        if ($this->orm->getProxyFactory() !== null) {
+            $r = $this->orm->getProxyFactory()->proxy($this->orm, $r);
+        }
 
         return [$r, $r];
     }

@@ -17,8 +17,11 @@ use Cycle\ORM\ProxyFactoryInterface;
 
 class ProxyFactory implements ProxyFactoryInterface
 {
-    public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
+    public function proxy(ORMInterface $orm, ReferenceInterface $reference): PromiseInterface
     {
+        $role = $reference->__role();
+        $scope = $reference->__scope();
+
         switch ($role) {
             case 'user':
                 return new UserProxy($orm, 'user', $scope);
@@ -27,10 +30,5 @@ class ProxyFactory implements ProxyFactoryInterface
         }
 
         return new PromiseOne($orm, $role, $scope);
-    }
-
-    public function proxyPromise(ORMInterface $orm, string $role, PromiseInterface $promise): PromiseInterface
-    {
-        return $promise;
     }
 }

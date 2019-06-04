@@ -19,20 +19,12 @@ use Cycle\ORM\Promise\ReferenceInterface;
 interface ProxyFactoryInterface
 {
     /**
-     * @param ORMInterface $orm
-     * @param string       $role
-     * @param array        $scope
-     * @return ReferenceInterface|null
-     */
-    public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface;
-
-    /**
-     * Create proxy using underlying promise.
+     * Create proxy using object reference. Implementation must not resolve reference if it's provided in a form
+     * of PromiseInterface!
      *
-     * @param ORMInterface     $orm
-     * @param string           $role
-     * @param PromiseInterface $promise
+     * @param ORMInterface       $orm
+     * @param ReferenceInterface $reference
      * @return PromiseInterface
      */
-    public function proxyPromise(ORMInterface $orm, string $role, PromiseInterface $promise): PromiseInterface;
+    public function proxy(ORMInterface $orm, ReferenceInterface $reference): PromiseInterface;
 }

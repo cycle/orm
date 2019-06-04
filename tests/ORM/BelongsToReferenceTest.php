@@ -107,7 +107,7 @@ abstract class BelongsToReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withProxyFactory(new ReferenceFactory());
+        ]))->withProxyFactory(null);
     }
 
     public function testFetchRelation()
@@ -151,8 +151,7 @@ abstract class BelongsToReferenceTest extends BaseTest
         $p = $selector->wherePK(1)->fetchOne();
 
         $this->assertInstanceOf(ReferenceInterface::class, $p->user);
-        $this->assertInstanceOf(UserID::class, $p->user);
-        $this->assertEquals(new UserID(1), $p->user);
+        $this->assertEquals((new UserID(1))->__scope(), $p->user->__scope());
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);

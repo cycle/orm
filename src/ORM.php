@@ -16,7 +16,6 @@ use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
@@ -272,13 +271,13 @@ final class ORM implements ORMInterface
     /**
      * Overlay existing promise factory.
      *
-     * @param ProxyFactoryInterface $promiseFactory
+     * @param ProxyFactoryInterface $proxyFactory
      * @return ORM
      */
-    public function withProxyFactory(ProxyFactoryInterface $promiseFactory): self
+    public function withProxyFactory(ProxyFactoryInterface $proxyFactory = null): self
     {
         $orm = clone $this;
-        $orm->proxyFactory = $promiseFactory;
+        $orm->proxyFactory = $proxyFactory;
 
         return $orm;
     }
@@ -289,25 +288,6 @@ final class ORM implements ORMInterface
     public function getProxyFactory(): ?ProxyFactoryInterface
     {
         return $this->proxyFactory;
-    }
-
-    /**
-     * @inheritdoc
-     *
-     * Returns references by default.
-     */
-    public function promise(string $role, array $scope)
-    {
-        $e = $this->heap->find($role, key($scope), current($scope));
-        if ($e !== null) {
-            return $e;
-        }
-
-        if ($this->proxyFactory !== null) {
-            return $this->proxyFactory->promise($this, $role, $scope);
-        }
-
-        return new Reference($role, $scope);
     }
 
     /**

@@ -108,8 +108,7 @@ final class Embedded implements RelationInterface
 
         $p = new PartialPromise($this->orm, $this->target, [$this->primaryKey => $primaryKey]);
         if ($this->orm->getProxyFactory() !== null) {
-            // create proxy
-            $p = $this->orm->getProxyFactory()->proxyPromise($this->orm, $this->target, $p);
+            $p = $this->orm->getProxyFactory()->proxy($this->orm, $p);
         }
 
         return [$p, $p];

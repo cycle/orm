@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\Reference;
 
 trait PromiseOneTrait
 {
@@ -22,12 +24,18 @@ trait PromiseOneTrait
             return [null, null];
         }
 
-        $e = $this->orm->getHeap()->find($this->target, $this->outerKey, $innerKey);
+        /** @var ORMInterface $orm */
+        $orm = $this->orm;
+
+        $e = $orm->getHeap()->find($this->target, $this->outerKey, $innerKey);
         if ($e !== null || !$this->isPromised()) {
             return [$e, $e];
         }
 
-        $r = $this->orm->promise($this->target, [$this->outerKey => $innerKey]);
+        $r = new Reference($this->target, [$this->outerKey => $innerKey]);
+        if ($orm->getProxyFactory() !== null) {
+            $r = $orm->getProxyFactory()->proxy($this->orm, $r);
+        }
 
         return [$r, $r];
     }

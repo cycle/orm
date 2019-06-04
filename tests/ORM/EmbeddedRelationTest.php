@@ -215,6 +215,32 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    public function testUpdateEmbeddedDirectly()
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->orderBy('id', 'ASC')->load('credentials')->fetchOne();
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u->credentials);
+        $t->run();
+        $this->assertNumWrites(0);
+
+        $u->credentials->username = 'altered';
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u->credentials);
+        $t->run();
+        $this->assertNumWrites(1);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+
+        $this->assertEquals($u->id, $u2->id);
+        $this->assertSame('altered', $u2->credentials->username);
+    }
+
     public function testResolvePromise()
     {
         $selector = new Select($this->orm, User::class);
@@ -241,6 +267,29 @@ abstract class EmbeddedRelationTest extends BaseTest
 
         $this->assertEquals($u->id, $u2->id);
         $this->assertSame('user3', $u2->credentials->username);
+    }
+
+    public function testChangeWhole()
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
+        $u->credentials = new UserCredentials();
+        $u->credentials->username = 'abc';
+        $u->credentials->password = 'new-pass';
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+
+        $this->assertEquals($u->id, $u2->id);
+        $this->assertSame('abc', $u2->credentials->username);
+        $this->assertSame('new-pass', $u2->credentials->password);
     }
 
     /**

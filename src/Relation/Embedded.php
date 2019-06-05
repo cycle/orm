@@ -155,7 +155,10 @@ final class Embedded implements RelationInterface
             $store->register($key, $value, true);
         }
 
-        // ensure related state
+        // currently embeddings does not support chain relations, however it is possible by
+        // exposing relationMap inside this method. in theory it is possible to use
+        // parent entity command to carry context for nested relations, however, custom context
+        // propagation chain must be defined (embedded node => parent command)
 
         return new Nil();
     }

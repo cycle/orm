@@ -318,6 +318,38 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user2', $u4->credentials->username);
     }
 
+    public function testMoveClonedEmbedding()
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
+
+        $selector = new Select($this->orm, User::class);
+        $u2 = $selector->load('credentials')->orderBy('id', 'ASC')->wherePK(2)->fetchOne();
+
+        $u->credentials = clone $u2->credentials;
+
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+
+        $this->assertEquals($u->id, $u3->id);
+        $this->assertSame('user2', $u3->credentials->username);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u4 = $selector->load('credentials')->wherePK($u2->id)->fetchOne();
+
+        // unchanged
+        $this->assertEquals($u2->id, $u4->id);
+        $this->assertSame('user2', $u4->credentials->username);
+    }
+
     public function testSelectEmbeddable()
     {
         $selector = new Select($this->orm, UserCredentials::class);

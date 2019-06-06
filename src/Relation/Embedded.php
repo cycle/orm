@@ -118,7 +118,7 @@ final class Embedded implements RelationInterface
         }
 
         $r = $this->orm->promise($this->target, [$this->primaryKey => $primaryKey]);
-        return [$r, new Nil()];
+        return [$r, [$this->primaryKey => $primaryKey]];
     }
 
     /**
@@ -135,7 +135,16 @@ final class Embedded implements RelationInterface
     public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
+            if ($related->__scope() === $original) {
+                // do not update non resolved and non changed promises
+                if (!$related instanceof PromiseInterface || !$related->__loaded()) {
+                    return new Nil();
+                }
+                $related = $this->resolve($related);
+            } else {
+                // do not affect parent embeddings
+                $related = clone $this->resolve($related);
+            }
         }
 
         if ($related === null) {

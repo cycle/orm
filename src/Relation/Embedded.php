@@ -136,8 +136,8 @@ final class Embedded implements RelationInterface
     {
         if ($related instanceof ReferenceInterface) {
             if ($related->__scope() === $original) {
-                // do not update non resolved and non changed promises
-                if (!$related instanceof PromiseInterface || !$related->__loaded()) {
+                if (!($related instanceof PromiseInterface && $related->__loaded())) {
+                    // do not update non resolved and non changed promises
                     return new Nil();
                 }
                 $related = $this->resolve($related);

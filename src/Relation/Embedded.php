@@ -140,6 +140,7 @@ final class Embedded implements RelationInterface
                     // do not update non resolved and non changed promises
                     return new Nil();
                 }
+
                 $related = $this->resolve($related);
             } else {
                 // do not affect parent embeddings

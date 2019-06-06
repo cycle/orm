@@ -169,6 +169,7 @@ final class Embedded implements RelationInterface
         // exposing relationMap inside this method. in theory it is possible to use
         // parent entity command to carry context for nested relations, however, custom context
         // propagation chain must be defined (embedded node => parent command)
+        // in short, we need to get access to getRelationMap from orm to support it.
 
         return new Nil();
     }

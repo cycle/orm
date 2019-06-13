@@ -254,7 +254,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
                 ]
             ],
             UserCredentials::class => [
-                Schema::ROLE        => 'user_credentials',
+                Schema::ROLE        => 'user:credentials',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',

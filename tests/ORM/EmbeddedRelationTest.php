@@ -56,14 +56,14 @@ abstract class EmbeddedRelationTest extends BaseTest
                 Schema::RELATIONS   => [
                     'credentials' => [
                         Relation::TYPE   => Relation::EMBEDDED,
-                        Relation::TARGET => 'user_credentials',
+                        Relation::TARGET => 'user:credentials',
                         Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [],
                     ],
                 ]
             ],
             UserCredentials::class => [
-                Schema::ROLE        => 'user_credentials',
+                Schema::ROLE        => 'user:credentials',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'user',

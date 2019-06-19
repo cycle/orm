@@ -74,6 +74,7 @@ abstract class BidirectionTest extends BaseTest
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
+                            Relation::NULLABLE  => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -187,6 +188,30 @@ abstract class BidirectionTest extends BaseTest
         $t->persist($u);
         $t->persist($u->comments[0]);
         $t->run();
+
+        $select = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u = $select->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertCount(1, $u->comments);
+    }
+
+    public function testDoubleRemoval()
+    {
+        $select = new Select($this->orm, User::class);
+        $u = $select->load('comments')->wherePK(1)->fetchOne();
+
+        $this->assertCount(2, $u->comments);
+
+        $c = $u->comments[0];
+        $c->user = null;
+        $u->comments->removeElement($c);
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->persist($c);
+        $t->run();
+        $this->assertNumWrites(1);
 
         $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();

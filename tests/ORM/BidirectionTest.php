@@ -114,7 +114,7 @@ abstract class BidirectionTest extends BaseTest
             [
                 'id'       => 1,
                 'email'    => 'hello@world.com',
-                'balance'  => '100.0',
+                'balance'  => 100.0,
                 'comments' => [
                     [
                         'id'      => 1,
@@ -131,7 +131,7 @@ abstract class BidirectionTest extends BaseTest
             [
                 'id'       => 2,
                 'email'    => 'another@world.com',
-                'balance'  => '200.0',
+                'balance'  => 200.0,
                 'comments' => [],
             ],
         ], $selector->fetchData());

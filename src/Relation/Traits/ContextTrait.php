@@ -35,7 +35,7 @@ trait ContextTrait
         $toColumn = $this->columnName($to, $toKey);
 
         // do not execute until the key is given
-        $carrier->waitContext($toColumn, $this->isNullable());
+        $carrier->waitContext($toColumn, $this->isNotNullable());
 
         // forward key from state to the command (on change)
         $to->forward($toKey, $carrier, $toColumn);
@@ -96,5 +96,5 @@ trait ContextTrait
      *
      * @return bool
      */
-    abstract public function isNullable(): bool;
+    abstract public function isNotNullable(): bool;
 }

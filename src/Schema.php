@@ -28,7 +28,7 @@ final class Schema implements SchemaInterface
     public function __construct(array $schema)
     {
         // split into two?
-        list($this->schema, $this->aliases) = $this->normalize($schema);
+        [$this->schema, $this->aliases] = $this->normalize($schema);
     }
 
     /**

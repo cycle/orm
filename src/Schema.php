@@ -118,12 +118,10 @@ final class Schema implements SchemaInterface
             }
 
             if (class_exists($key)) {
-                if (!isset($item[self::ROLE])) {
-                    throw new SchemaException("Unable to create schema record without given role for `{$key}`");
+                $role = $item[self::ROLE] ?? $key;
+                if ($role !== $key) {
+                    $aliases[$key] = $role;
                 }
-
-                $role = $item[self::ROLE];
-                $aliases[$key] = $role;
             }
 
             if (class_exists($item[self::ENTITY])) {

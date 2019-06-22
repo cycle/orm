@@ -85,14 +85,14 @@ final class ORM implements ORMInterface
             }
 
             $class = get_class($entity);
-            if (!$this->schema->defines($class)) {
+            if (!$this->getSchema()->defines($class)) {
                 throw new ORMException("Unable to resolve role of `$class`");
             }
 
             $entity = $class;
         }
 
-        return $this->schema->resolveAlias($entity);
+        return $this->getSchema()->resolveAlias($entity);
     }
 
     /**
@@ -180,7 +180,7 @@ final class ORM implements ORMInterface
     public function getSchema(): SchemaInterface
     {
         if (is_null($this->schema)) {
-            throw new ORMException("ORM is not configured, schema is missing");
+            throw new ORMException('ORM is not configured, schema is missing');
         }
 
         return $this->schema;
@@ -215,7 +215,7 @@ final class ORM implements ORMInterface
             return $this->mappers[$role];
         }
 
-        return $this->mappers[$role] = $this->factory->mapper($this, $this->schema, $role);
+        return $this->mappers[$role] = $this->factory->mapper($this, $this->getSchema(), $role);
     }
 
     /**
@@ -248,18 +248,18 @@ final class ORM implements ORMInterface
             return $this->sources[$role];
         }
 
-        $source = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
+        $source = $this->getSchema()->define($role, Schema::SOURCE) ?? Source::class;
         if ($source !== Source::class) {
             // custom implementation
             return $this->factory->make($source, ['orm' => $this, 'role' => $role]);
         }
 
         $source = new Source(
-            $this->factory->database($this->schema->define($role, Schema::DATABASE)),
-            $this->schema->define($role, Schema::TABLE)
+            $this->factory->database($this->getSchema()->define($role, Schema::DATABASE)),
+            $this->getSchema()->define($role, Schema::TABLE)
         );
 
-        $constrain = $this->schema->define($role, Schema::CONSTRAIN);
+        $constrain = $this->getSchema()->define($role, Schema::CONSTRAIN);
         if ($constrain !== null) {
             $source = $source->withConstrain(
                 is_object($constrain) ? $constrain : $this->factory->make($constrain)
@@ -324,11 +324,11 @@ final class ORM implements ORMInterface
         }
 
         $cmd = $this->generator->generateStore($mapper, $entity, $node);
-        if ($mode != TransactionInterface::MODE_CASCADE) {
+        if ($mode !== TransactionInterface::MODE_CASCADE) {
             return $cmd;
         }
 
-        if ($this->schema->define($node->getRole(), Schema::RELATIONS) === []) {
+        if ($this->getSchema()->define($node->getRole(), Schema::RELATIONS) === []) {
             return $cmd;
         }
 
@@ -390,8 +390,10 @@ final class ORM implements ORMInterface
             return $this->indexes[$role];
         }
 
-        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-        $keys = $this->schema->define($role, Schema::FIND_BY_KEYS) ?? [];
+        $schema = $this->getSchema();
+
+        $pk = $schema->define($role, Schema::PRIMARY_KEY);
+        $keys = $schema->define($role, Schema::FIND_BY_KEYS) ?? [];
 
         return $this->indexes[$role] = array_merge([$pk], $keys);
     }
@@ -411,9 +413,9 @@ final class ORM implements ORMInterface
 
         $relations = [];
 
-        $names = array_keys($this->schema->define($role, Schema::RELATIONS));
+        $names = array_keys($this->getSchema()->define($role, Schema::RELATIONS));
         foreach ($names as $relation) {
-            $relations[$relation] = $this->factory->relation($this, $this->schema, $role, $relation);
+            $relations[$relation] = $this->factory->relation($this, $this->getSchema(), $role, $relation);
         }
 
         return $this->relmaps[$role] = new RelationMap($this, $relations);

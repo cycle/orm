@@ -58,8 +58,13 @@ trait ReferenceTrait
      */
     final protected function mount(string $container, string $key, $criteria, array &$data)
     {
+        if ($criteria === self::LAST_REFERENCE) {
+            end($this->references[$key]);
+            $criteria = key($this->references[$key]);
+        }
+
         if (!array_key_exists($criteria, $this->references[$key])) {
-            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`.");
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }
 
         foreach ($this->references[$key][$criteria] as &$subset) {
@@ -141,8 +146,8 @@ trait ReferenceTrait
      *
      * $this->references[id][ID_VALUE] = ITEM.
      *
-     * @see deduplicate()
      * @param array $data
+     * @see deduplicate()
      */
     final protected function collectReferences(array &$data)
     {

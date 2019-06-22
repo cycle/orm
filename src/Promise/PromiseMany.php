@@ -50,7 +50,7 @@ final class PromiseMany implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->orm);
+        return $this->orm === null;
     }
 
     /**
@@ -76,6 +76,13 @@ final class PromiseMany implements PromiseInterface
     {
         if (is_null($this->orm)) {
             return $this->resolved;
+        }
+
+        if ($this->query === []) {
+            // nothing to proxy to
+            $this->orm = null;
+
+            return [];
         }
 
         foreach ($this->orm->getRepository($this->target)->findAll($this->query + $this->where) as $item) {

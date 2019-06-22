@@ -19,12 +19,13 @@ final class PromiseFactory implements PromiseFactoryInterface
 {
     /**
      * @param ORMInterface $orm
-     * @param string       $role
+     * @param string       $target
      * @param array        $scope
-     * @return ReferenceInterface|null
+     * @return PromiseInterface
      */
-    public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
+    public function promise(ORMInterface $orm, string $target, array $scope): PromiseInterface
     {
-        return new PromiseOne($orm, $role, $scope);
+        // doing nothing by default
+        return new PromiseOne($orm, $target, $scope);
     }
 }

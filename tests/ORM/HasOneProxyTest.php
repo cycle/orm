@@ -17,7 +17,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\ProfileMapperWithProxy;
-use Cycle\ORM\Tests\Fixtures\ProfileProxy;
+use Cycle\ORM\Tests\Fixtures\ProfilePromise;
 use Cycle\ORM\Tests\Fixtures\PromiseFactory;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -87,6 +87,7 @@ abstract class HasOneProxyTest extends BaseTest
                     'profile' => [
                         Relation::TYPE   => Relation::HAS_ONE,
                         Relation::TARGET => Profile::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
@@ -167,8 +168,8 @@ abstract class HasOneProxyTest extends BaseTest
         $this->assertInstanceOf(Profile::class, $a->profile);
         $this->assertInstanceOf(Profile::class, $b->profile);
 
-        $this->assertInstanceOf(ProfileProxy::class, $a->profile);
-        $this->assertInstanceOf(ProfileProxy::class, $b->profile);
+        $this->assertInstanceOf(ProfilePromise::class, $a->profile);
+        $this->assertInstanceOf(ProfilePromise::class, $b->profile);
 
         $this->assertEquals('image.png', $a->profile->getImage());
     }

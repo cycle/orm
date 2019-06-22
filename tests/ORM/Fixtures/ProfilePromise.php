@@ -6,7 +6,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
@@ -14,7 +13,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Select;
 
-class UserProxy extends User implements PromiseInterface
+class ProfilePromise extends Profile implements PromiseInterface
 {
     /** @var ORMInterface|null @internal */
     private $__orm;
@@ -24,9 +23,6 @@ class UserProxy extends User implements PromiseInterface
 
     /** @var array */
     private $__scope;
-
-    /** @var User */
-    private $__resolved;
 
     /**
      * @param ORMInterface $orm
@@ -70,34 +66,30 @@ class UserProxy extends User implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->__orm)) {
-            $key = key($this->__scope);
-            $value = $this->__scope[$key];
-
-            // entity has already been loaded in memory
-            if (!is_null($e = $this->__orm->getHeap()->find($this->__target, $key, $value))) {
-                $this->__orm = null;
-                return $this->__resolved = $e;
-            }
-
-            // Fetching from the database
             $select = new Select($this->__orm, $this->__target);
-            $this->__resolved = $select->constrain(
+            $data = $select->constrain(
                 $this->__orm->getSource($this->__target)->getConstrain()
-            )->fetchOne($this->__scope);
+            )->where($this->__scope)->fetchData();
+
+            $this->__orm->getMapper($this->__target)->hydrate($this, $data[0]);
 
             $this->__orm = null;
         }
 
-        return $this->__resolved;
+        return $this;
     }
 
     public function getID()
     {
-        return $this->__resolve()->getID();
+        $this->__resolve();
+
+        return parent::getID();
     }
 
-    public function addComment(Comment $c)
+    public function getImage()
     {
-        return $this->__resolve()->addComment($c);
+        $this->__resolve();
+
+        return parent::getImage();
     }
 }

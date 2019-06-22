@@ -16,7 +16,7 @@ namespace Cycle\ORM\Parser\Traits;
 trait DuplicateTrait
 {
     /** @var string @internal */
-    protected $duplicateCriteria = '';
+    protected $duplicateCriteria = null;
 
     /** @var array @internal */
     protected $duplicates = [];
@@ -40,6 +40,10 @@ trait DuplicateTrait
      */
     final protected function deduplicate(array &$data): bool
     {
+        if ($this->duplicateCriteria === null) {
+            return true;
+        }
+
         $criteria = $this->duplicateCriteria($data);
 
         if (isset($this->duplicates[$criteria])) {

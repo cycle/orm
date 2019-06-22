@@ -28,7 +28,10 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     use ContextTrait, ScopeTrait, ErrorTrait;
 
     /** @var array */
-    protected $data;
+    protected $data = [];
+
+    /** @var array */
+    protected $appendix = [];
 
     /**
      * @param DatabaseInterface $db
@@ -72,7 +75,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      */
     public function getData(): array
     {
-        return array_merge($this->data, $this->context);
+        return array_merge($this->data, $this->context, $this->appendix);
     }
 
     /**
@@ -124,5 +127,19 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
             // update commands
             $this->setContext($key, $value);
         }
+    }
+
+    /**
+     * Register optional value to store in database. Having this value would not cause command to be executed
+     * if data or context is empty.
+     *
+     * Example: $update->registerAppendix("updated_at", new DateTime());
+     *
+     * @param string $key
+     * @param mixed  $value
+     */
+    public function registerAppendix(string $key, $value)
+    {
+        $this->appendix[$key] = $value;
     }
 }

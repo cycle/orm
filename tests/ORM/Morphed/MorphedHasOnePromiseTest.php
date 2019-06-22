@@ -92,6 +92,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
                     'image' => [
                         Relation::TYPE   => Relation::MORPHED_HAS_ONE,
                         Relation::TARGET => Image::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
@@ -102,6 +103,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
                     'posts' => [
                         Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Post::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
@@ -122,6 +124,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
                     'image' => [
                         Relation::TYPE   => Relation::MORPHED_HAS_ONE,
                         Relation::TARGET => Image::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',

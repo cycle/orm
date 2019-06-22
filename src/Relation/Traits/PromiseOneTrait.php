@@ -26,4 +26,13 @@ trait PromiseOneTrait
 
         return [$r, $r];
     }
+
+    /**
+     * Fetch key from the state.
+     *
+     * @param Node   $node
+     * @param string $key
+     * @return mixed|null
+     */
+    abstract protected function fetchKey(?Node $node, string $key);
 }

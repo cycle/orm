@@ -11,6 +11,8 @@ namespace Cycle\ORM\Parser;
 
 /**
  * Provides ability to fetch node context.
+ *
+ * @internal
  */
 abstract class OutputNode extends AbstractNode
 {

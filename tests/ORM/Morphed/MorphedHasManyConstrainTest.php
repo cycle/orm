@@ -606,6 +606,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
                     'comments' => [
                         Relation::TYPE   => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                                 Relation::CASCADE   => true,
                                 Relation::INNER_KEY => 'id',
@@ -628,6 +629,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
                     'comments' => [
                         Relation::TYPE   => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                                 Relation::CASCADE   => true,
                                 Relation::INNER_KEY => 'id',

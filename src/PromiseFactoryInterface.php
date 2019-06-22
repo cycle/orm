@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Promise\PromiseInterface;
 
 /**
  * To create proxies, references, custom promises and etc. This class is similar to PromiseFactoryInterface
@@ -18,10 +18,13 @@ use Cycle\ORM\Promise\ReferenceInterface;
 interface PromiseFactoryInterface
 {
     /**
+     * Create proxy using object reference. Implementation must not resolve reference if it's provided in a form
+     * of PromiseInterface!
+     *
      * @param ORMInterface $orm
      * @param string       $role
      * @param array        $scope
-     * @return ReferenceInterface|null
+     * @return PromiseInterface
      */
-    public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface;
+    public function promise(ORMInterface $orm, string $role, array $scope): PromiseInterface;
 }

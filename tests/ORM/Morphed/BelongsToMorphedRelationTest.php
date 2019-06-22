@@ -145,6 +145,8 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
                     'parent' => [
                         Relation::TYPE   => Relation::BELONGS_TO_MORPHED,
                         Relation::TARGET => ImagedInterface::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
+
                         Relation::SCHEMA => [
                             Relation::NULLABLE  => true,
                             Relation::CASCADE   => true,

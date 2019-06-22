@@ -13,9 +13,11 @@ use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseFactory;
 use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionPromise;
 use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\SchemaInterface;
@@ -283,7 +285,8 @@ abstract class BaseTest extends TestCase
             $this->assertNotNull($state);
 
             $this->assertEntitySynced(
-                $r->getShortName(),
+                $orm,
+                $state->getRole(),
                 $orm->getMapper($entity)->extract($entity),
                 $state->getData(),
                 $rel->getValue($state)
@@ -296,8 +299,13 @@ abstract class BaseTest extends TestCase
         }
     }
 
-    protected function assertEntitySynced(string $eName, array $entity, array $stateData, array $relations)
-    {
+    protected function assertEntitySynced(
+        ORMInterface $orm,
+        string $eName,
+        array $entity,
+        array $stateData,
+        array $relations
+    ) {
         foreach ($entity as $name => $eValue) {
             if (array_key_exists($name, $stateData)) {
                 $this->assertEquals(
@@ -311,6 +319,12 @@ abstract class BaseTest extends TestCase
 
             if (!array_key_exists($name, $relations)) {
                 // something else
+                continue;
+            }
+
+            $relation = $this->orm->getSchema()->defineRelation($eName, $name);
+            if ($relation[Relation::TYPE] === Relation::EMBEDDED) {
+                // do not run integrity check for embedded nodes, they do not have their own node
                 continue;
             }
 

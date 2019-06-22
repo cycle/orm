@@ -6,26 +6,25 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\PromiseFactoryInterface;
 
 class PromiseFactory implements PromiseFactoryInterface
 {
-    public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
+    public function promise(ORMInterface $orm, string $target, array $scope): PromiseInterface
     {
-        switch ($role) {
+        switch ($target) {
             case 'user':
-                return new UserProxy($orm, 'user', $scope);
+                return new UserPromise($orm, 'user', $scope);
             case 'profile':
-                return new ProfileProxy($orm, 'profile', $scope);
+                return new ProfilePromise($orm, 'profile', $scope);
         }
 
-        return new PromiseOne($orm, $role, $scope);
+        return new PromiseOne($orm, $target, $scope);
     }
 }

@@ -6,7 +6,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
@@ -17,7 +16,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
-use Cycle\ORM\Tests\Fixtures\ReferenceFactory;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserID;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -98,6 +96,7 @@ abstract class BelongsToReferenceTest extends BaseTest
                     'user' => [
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',
@@ -107,7 +106,7 @@ abstract class BelongsToReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withPromiseFactory(new ReferenceFactory());
+        ]))->withPromiseFactory(null);
     }
 
     public function testFetchRelation()
@@ -151,8 +150,7 @@ abstract class BelongsToReferenceTest extends BaseTest
         $p = $selector->wherePK(1)->fetchOne();
 
         $this->assertInstanceOf(ReferenceInterface::class, $p->user);
-        $this->assertInstanceOf(UserID::class, $p->user);
-        $this->assertEquals(new UserID(1), $p->user);
+        $this->assertEquals((new UserID(1))->__scope(), $p->user->__scope());
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);

@@ -14,6 +14,8 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Relation;
+use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -121,9 +123,9 @@ abstract class AbstractLoader implements LoaderInterface
      * Load the relation.
      *
      * @param string $relation Relation name, or chain of relations separated by.
-     * @param array  $options Loader options (to be applied to last chain element only).
-     * @param bool   $join When set to true loaders will be forced into JOIN mode.
-     * @param bool   $load Load relation data.
+     * @param array  $options  Loader options (to be applied to last chain element only).
+     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
+     * @param bool   $load     Load relation data.
      * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
@@ -197,7 +199,7 @@ abstract class AbstractLoader implements LoaderInterface
         $node = $this->initNode();
 
         foreach ($this->load as $relation => $loader) {
-            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
+            if ($loader instanceof JoinableInterface && $loader->isJoined()) {
                 $node->joinNode($relation, $loader->createNode());
                 continue;
             }
@@ -260,7 +262,7 @@ abstract class AbstractLoader implements LoaderInterface
     {
         $query = $this->applyConstrain(clone $query);
         foreach ($this->load as $loader) {
-            if ($loader instanceof JoinableLoader && $loader->isJoined()) {
+            if ($loader instanceof JoinableInterface && $loader->isJoined()) {
                 $query = $loader->configureQuery($query);
             }
         }
@@ -287,5 +289,19 @@ abstract class AbstractLoader implements LoaderInterface
     protected function define(int $property)
     {
         return $this->orm->getSchema()->define($this->target, $property);
+    }
+
+    /**
+     * Returns list of relations to be automatically joined with parent object.
+     *
+     * @return \Generator
+     */
+    protected function getEagerRelations(): \Generator
+    {
+        foreach ($this->orm->getSchema()->define($this->target, Schema::RELATIONS) as $relation => $schema) {
+            if (($schema[Relation::LOAD] ?? null) == Relation::LOAD_EAGER) {
+                yield $relation;
+            }
+        }
     }
 }

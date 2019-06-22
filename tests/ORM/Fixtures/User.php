@@ -63,11 +63,17 @@ class User implements ImagedInterface
     /** @var Uuid */
     public $uuid;
 
+    /**
+     * @var UserCredentials
+     */
+    public $credentials;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->tags = new PivotedCollection();
         $this->favorites = new PivotedCollection();
+        $this->credentials = new UserCredentials();
     }
 
     public function getID()

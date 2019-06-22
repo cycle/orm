@@ -34,14 +34,16 @@ interface RelationInterface
     public function isCascade(): bool;
 
     /**
-     * Init related entity value(s). Returns tuple [value, value to store as relation context].
+     * Init related entity value(s). Returns tuple [value, value to store as relation context]. If data null
+     * relation must initiate empty relation state (when lazy loading is off).
      *
-     * @param array $data
+     * @param Node       $node Parent node.
+     * @param array|null $data
      * @return array
      *
      * @throws RelationException
      */
-    public function init(array $data): array;
+    public function init(Node $node, array $data): array;
 
     /**
      * Extract the related values from the entity field value.

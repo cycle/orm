@@ -20,10 +20,15 @@ use Cycle\ORM\Parser\Traits\ReferenceTrait;
  * Nodes can be used as to parse one big and flat query, or when multiple queries provide their
  * data into one dataset, in both cases flow is identical from standpoint of Nodes (but offsets are
  * different).
+ *
+ * @internal
  */
 abstract class AbstractNode
 {
     use DuplicateTrait, ReferenceTrait;
+
+    // Indicates tha data must be placed at the last registered reference
+    protected const LAST_REFERENCE = ['~'];
 
     // Typecasting types
     public const STRING  = 1;
@@ -87,11 +92,11 @@ abstract class AbstractNode
     }
 
     /**
-     * @param TypecastInterface $typecaster
+     * @param TypecastInterface $typecast
      */
-    final public function setTypecast(TypecastInterface $typecaster)
+    final public function setTypecast(TypecastInterface $typecast)
     {
-        $this->typecast = $typecaster;
+        $this->typecast = $typecast;
     }
 
     /**
@@ -111,7 +116,7 @@ abstract class AbstractNode
             $this->ensurePlaceholders($data);
             $this->push($data);
 
-        } elseif (!empty($this->parent)) {
+        } elseif ($this->parent !== null) {
             // register duplicate rows in each parent row
             $this->push($data);
         }
@@ -153,7 +158,7 @@ abstract class AbstractNode
      */
     public function getReferences(): array
     {
-        if (empty($this->parent)) {
+        if ($this->parent === null) {
             throw new ParserException("Unable to aggregate reference values, parent is missing");
         }
 
@@ -210,7 +215,7 @@ abstract class AbstractNode
     final public function getNode(string $container): AbstractNode
     {
         if (!isset($this->nodes[$container])) {
-            throw new ParserException("Undefined node {$container}.");
+            throw new ParserException("Undefined node `{$container}`.");
         }
 
         return $this->nodes[$container];
@@ -273,7 +278,7 @@ abstract class AbstractNode
     {
         //Let's force placeholders for every sub loaded
         foreach ($this->nodes as $name => $node) {
-            $data[$name] = $node instanceof ArrayInterface ? [] : null;
+            $data[$name] = $node instanceof ArrayNode ? [] : null;
         }
     }
 }

@@ -30,7 +30,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
     public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         if (is_null($related)) {
-            if ($this->isNullable()) {
+            if ($this->isNotNullable()) {
                 throw new NullException("Relation {$this} can not be null");
             }
 

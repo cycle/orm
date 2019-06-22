@@ -52,7 +52,6 @@ class MorphedHasOne extends HasOne
         ];
 
         $r = $this->orm->promise($this->target, $scope);
-
         return [$r, $r];
     }
 

@@ -49,9 +49,14 @@ class BelongsToMorphed extends BelongsTo
             return [null, null];
         }
 
-        $r = $this->orm->promise($target, [$this->outerKey => $innerKey]);
+        $e = $this->orm->getHeap()->find($target, $this->outerKey, $innerKey);
+        if ($e !== null) {
+            return [$e, $e];
+        }
 
-        return [$r, $r];
+        $e = $this->orm->promise($target, [$this->outerKey => $innerKey]);
+
+        return [$e, $e];
     }
 
     /**

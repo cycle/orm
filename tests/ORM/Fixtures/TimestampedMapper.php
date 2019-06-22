@@ -6,7 +6,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
@@ -35,11 +34,7 @@ class TimestampedMapper extends Mapper
     {
         /** @var Update $cmd */
         $cmd = parent::queueUpdate($entity, $node, $state);
-
-        if (!$cmd->isEmpty()) {
-            $state->register('updated_at', new \DateTimeImmutable(), true);
-            $cmd->register('updated_at', new \DateTimeImmutable(), true);
-        }
+        $cmd->registerAppendix('updated_at', new \DateTimeImmutable());
 
         return $cmd;
     }

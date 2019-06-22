@@ -6,16 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\PromiseFactoryInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -99,6 +96,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
                     'user' => [
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',
@@ -108,13 +106,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
                     ]
                 ]
             ]
-        ]))->withPromiseFactory(new class implements PromiseFactoryInterface
-        {
-            public function promise(ORMInterface $orm, string $role, array $scope): ?ReferenceInterface
-            {
-                return new Reference($role, $scope);
-            }
-        });
+        ]))->withPromiseFactory(null);
     }
 
     public function testFetchRelation()

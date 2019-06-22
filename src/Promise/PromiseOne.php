@@ -45,7 +45,7 @@ final class PromiseOne implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->orm);
+        return $this->orm === null;
     }
 
     /**
@@ -69,18 +69,23 @@ final class PromiseOne implements PromiseInterface
      */
     public function __resolve()
     {
-        if (!is_null($this->orm)) {
-            if (count($this->scope) !== 1) {
-                $this->resolved = $this->orm->getRepository($this->target)->findOne($this->scope);
-            } else {
-                $key = key($this->scope);
-                $value = $this->scope[$key];
-
-                $this->resolved = $this->orm->get($this->target, $key, $value, true);
-            }
-
-            $this->orm = null;
+        if (is_null($this->orm)) {
+            return $this->resolved;
         }
+
+        if (count($this->scope) !== 1) {
+            $this->resolved = $this->orm->getRepository($this->target)->findOne($this->scope);
+        } elseif ($this->scope === []) {
+            // nothing to proxy to
+            $this->orm = null;
+        } else {
+            $key = key($this->scope);
+            $value = $this->scope[$key];
+
+            $this->resolved = $this->orm->get($this->target, $key, $value, true);
+        }
+
+        $this->orm = null;
 
         return $this->resolved;
     }

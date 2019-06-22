@@ -30,17 +30,18 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      *
+     * @param Node  $node
      * @param array $data
      * @return array
      */
-    public function init(array $data): array
+    public function init(Node $node, array $data): array
     {
-        $result = [];
+        $elements = [];
         foreach ($data as $item) {
-            $result[] = $this->orm->make($this->target, $item, Node::MANAGED);
+            $elements[] = $this->orm->make($this->target, $item, Node::MANAGED);
         }
 
-        return [new ArrayCollection($result), $result];
+        return [new ArrayCollection($elements), $elements];
     }
 
     /**
@@ -157,7 +158,7 @@ class HasMany extends AbstractRelation
     {
         $rNode = $this->getNode($related);
 
-        if (!$this->isNullable()) {
+        if (!$this->isNotNullable()) {
             $store = $this->orm->queueStore($related);
             $store->register($this->outerKey, null, true);
             $rNode->getState()->decClaim();

@@ -24,7 +24,7 @@ class MorphedHasManyLoader extends HasManyLoader
     /**
      * {@inheritdoc}
      */
-    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         return $this->setWhere(
             parent::configureQuery($query, $outerKeys),

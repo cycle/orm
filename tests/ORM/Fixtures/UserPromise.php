@@ -14,7 +14,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Select;
 
-class ProfileProxy extends Profile implements PromiseInterface
+class UserPromise extends User implements PromiseInterface
 {
     /** @var ORMInterface|null @internal */
     private $__orm;
@@ -24,6 +24,9 @@ class ProfileProxy extends Profile implements PromiseInterface
 
     /** @var array */
     private $__scope;
+
+    /** @var User */
+    private $__resolved;
 
     /**
      * @param ORMInterface $orm
@@ -67,30 +70,34 @@ class ProfileProxy extends Profile implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->__orm)) {
-            $select = new Select($this->__orm, $this->__target);
-            $data = $select->constrain(
-                $this->__orm->getSource($this->__target)->getConstrain()
-            )->where($this->__scope)->fetchData();
+            $key = key($this->__scope);
+            $value = $this->__scope[$key];
 
-            $this->__orm->getMapper($this->__target)->hydrate($this, $data[0]);
+            // entity has already been loaded in memory
+            if (!is_null($e = $this->__orm->getHeap()->find($this->__target, $key, $value))) {
+                $this->__orm = null;
+                return $this->__resolved = $e;
+            }
+
+            // Fetching from the database
+            $select = new Select($this->__orm, $this->__target);
+            $this->__resolved = $select->constrain(
+                $this->__orm->getSource($this->__target)->getConstrain()
+            )->fetchOne($this->__scope);
 
             $this->__orm = null;
         }
 
-        return $this;
+        return $this->__resolved;
     }
 
     public function getID()
     {
-        $this->__resolve();
-
-        return parent::getID();
+        return $this->__resolve()->getID();
     }
 
-    public function getImage()
+    public function addComment(Comment $c)
     {
-        $this->__resolve();
-
-        return parent::getImage();
+        return $this->__resolve()->addComment($c);
     }
 }

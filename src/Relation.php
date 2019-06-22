@@ -18,6 +18,10 @@ final class Relation
     public const TYPE   = 0;
     public const TARGET = 1;
     public const SCHEMA = 2;
+    public const LOAD   = 3;
+
+    // Composite relation type without usage of external table.
+    public const EMBEDDED = 1;
 
     // Relation types (default)
     public const HAS_ONE      = 10;
@@ -48,4 +52,8 @@ final class Relation
     public const THOUGH_OUTER_KEY = 51;
     public const THOUGH_ENTITY    = 52;
     public const THOUGH_WHERE     = 54;
+
+    // Relation pre-fetch mode
+    public const LOAD_PROMISE = 10;
+    public const LOAD_EAGER   = 11;
 }

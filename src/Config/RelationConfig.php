@@ -58,6 +58,10 @@ final class RelationConfig extends InjectableConfig
     public static function getDefault()
     {
         return new static([
+            Relation::EMBEDDED           => [
+                self::LOADER   => Select\Loader\EmbeddedLoader::class,
+                self::RELATION => Relation\Embedded::class,
+            ],
             Relation::HAS_ONE            => [
                 self::LOADER   => Select\Loader\HasOneLoader::class,
                 self::RELATION => Relation\HasOne::class

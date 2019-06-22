@@ -275,7 +275,7 @@ final class ORM implements ORMInterface
      * @param PromiseFactoryInterface $promiseFactory
      * @return ORM
      */
-    public function withPromiseFactory(PromiseFactoryInterface $promiseFactory): self
+    public function withPromiseFactory(PromiseFactoryInterface $promiseFactory = null): self
     {
         $orm = clone $this;
         $orm->promiseFactory = $promiseFactory;
@@ -290,9 +290,11 @@ final class ORM implements ORMInterface
      */
     public function promise(string $role, array $scope)
     {
-        $e = $this->heap->find($role, key($scope), current($scope));
-        if ($e !== null) {
-            return $e;
+        if (count($scope) === 1) {
+            $e = $this->heap->find($role, key($scope), current($scope));
+            if ($e !== null) {
+                return $e;
+            }
         }
 
         if ($this->promiseFactory !== null) {
@@ -364,6 +366,16 @@ final class ORM implements ORMInterface
         $this->indexes = [];
         $this->sources = [];
         $this->repositories = [];
+    }
+
+    /**
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return [
+            'schema' => $this->schema
+        ];
     }
 
     /**

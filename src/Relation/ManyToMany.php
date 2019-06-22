@@ -49,7 +49,7 @@ class ManyToMany extends Relation\AbstractRelation
     /**
      * @inheritdoc
      */
-    public function init(array $data): array
+    public function init(Node $node, array $data): array
     {
         $elements = [];
         $pivotData = new \SplObjectStorage();

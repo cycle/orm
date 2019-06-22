@@ -48,6 +48,10 @@ final class RootLoader extends AbstractLoader
         $this->query = $this->getSource()->getDatabase()->select()->from(
             sprintf("%s AS %s", $this->getSource()->getTable(), $this->getAlias())
         );
+
+        foreach ($this->getEagerRelations() as $relation) {
+            $this->loadRelation($relation, [], false, true);
+        }
     }
 
     /**
@@ -148,6 +152,7 @@ final class RootLoader extends AbstractLoader
      */
     protected function getColumns(): array
     {
+
         return $this->define(Schema::COLUMNS);
     }
 }

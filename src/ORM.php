@@ -63,11 +63,11 @@ final class ORM implements ORMInterface
      */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
     {
-        $this->generator = new CommandGenerator();
         $this->factory = $factory;
         $this->schema = $schema ?? new Schema([]);
 
         $this->heap = new Heap();
+        $this->generator = new CommandGenerator();
     }
 
     /**
@@ -134,7 +134,7 @@ final class ORM implements ORMInterface
         }
 
         // init entity class and prepared (typecasted) data
-        list($e, $prepared) = $m->init($data);
+        [$e, $prepared] = $m->init($data);
 
         $node = new Node($node, $prepared, $m->getRole());
 
@@ -179,10 +179,6 @@ final class ORM implements ORMInterface
      */
     public function getSchema(): SchemaInterface
     {
-        if (is_null($this->schema)) {
-            throw new ORMException('ORM is not configured, schema is missing');
-        }
-
         return $this->schema;
     }
 

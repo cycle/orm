@@ -28,7 +28,7 @@ final class Schema implements SchemaInterface
     public function __construct(array $schema)
     {
         // split into two?
-        list($this->schema, $this->aliases) = $this->normalize($schema);
+        [$this->schema, $this->aliases] = $this->normalize($schema);
     }
 
     /**
@@ -60,7 +60,8 @@ final class Schema implements SchemaInterface
      */
     public function define(string $role, int $property)
     {
-        $role = $this->resolveAlias($role);
+        $role = $this->resolveAlias($role) ?? $role;
+
         if (!isset($this->schema[$role])) {
             throw new SchemaException("Undefined schema `{$role}`, not found");
         }

@@ -142,6 +142,7 @@ final class Transaction implements TransactionInterface
     {
         $heap = $this->orm->getHeap();
         foreach ($heap as $e) {
+            // optimize to only scan over affected entities
             $node = $heap->get($e);
 
             // marked as being deleted and has no external claims (GC like approach)

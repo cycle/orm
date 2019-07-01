@@ -26,6 +26,7 @@ Features:
 - designed to work in long-running applications, immutable service core, reconnects
 - dirty state, sync exceptions do not break entity map state
 - supports MySQL, MariaDB, PostgresSQL, SQLServer, SQLite
+- schema scaffolding and migrations
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - supports custom persiters, disposable UoW, custom column types, FKs to non primary columns
 - compatible with Doctrine Collections and Zend Hydrator

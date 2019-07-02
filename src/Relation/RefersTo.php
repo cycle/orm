@@ -18,7 +18,7 @@ use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Schema;
 
 /**
- * Variation of belongs-to relation which provides the ability to be self. Relation can be used
+ * Variation of belongs-to relation which provides the ability to be self linked. Relation can be used
  * to create cyclic references. Relation does not trigger store operation of referenced object!
  */
 class RefersTo extends AbstractRelation implements DependencyInterface

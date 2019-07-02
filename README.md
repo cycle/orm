@@ -5,7 +5,7 @@
 [![Codecov](https://codecov.io/gh/cycle/orm/graph/badge.svg)](https://codecov.io/gh/cycle/orm)
 <a href="https://discord.gg/TFeEmCs"><img src="https://img.shields.io/badge/discord-chat-magenta.svg"></a>
 
-Cycle is PHP DataMapper ORM and Data Modelling engine designed to work in classic and long-running PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options to model datasets and support dynamic schema configuration. ORM can work with plain PHP objects and support annotation declarations.
+Cycle is PHP DataMapper ORM and Data Modelling engine designed to safely work in classic and long-running PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options to model datasets and support dynamic schema configuration. ORM can work with plain PHP objects and support annotation declarations.
 
 <p align="center">
 	<a href="https://github.com/cycle/docs"><b>Documentation</b></a> | <a href="https://github.com/cycle/docs/issues/3">Comparison with Eloquent and Doctrine</a>
@@ -26,6 +26,7 @@ Features:
 - designed to work in long-running applications, immutable service core, reconnects
 - dirty state, sync exceptions do not break entity map state
 - supports MySQL, MariaDB, PostgresSQL, SQLServer, SQLite
+- schema scaffolding and migrations
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - supports custom persiters, disposable UoW, custom column types, FKs to non primary columns
 - compatible with Doctrine Collections and Zend Hydrator

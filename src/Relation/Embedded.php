@@ -244,7 +244,7 @@ final class Embedded implements RelationInterface
      */
     protected function fetchKey(?Node $state, string $key)
     {
-        if (is_null($state)) {
+        if ($state === null) {
             return null;
         }
 

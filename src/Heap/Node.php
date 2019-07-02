@@ -93,7 +93,7 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public function getStatus(): int
     {
-        if (!is_null($this->state)) {
+        if ($this->state !== null) {
             return $this->state->getStatus();
         }
 
@@ -117,7 +117,7 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public function getData(): array
     {
-        if (!is_null($this->state)) {
+        if ($this->state !== null) {
             return $this->state->getData();
         }
 
@@ -152,7 +152,7 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public function syncState(): array
     {
-        if (is_null($this->state)) {
+        if ($this->state === null) {
             return [];
         }
 

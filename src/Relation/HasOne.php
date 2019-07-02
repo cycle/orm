@@ -38,13 +38,13 @@ class HasOne extends AbstractRelation
             $related = $this->resolve($related);
         }
 
-        if (is_null($related)) {
+        if ($related === null) {
             if ($related === $original) {
                 // no changes
                 return new Nil();
             }
 
-            if (!is_null($original)) {
+            if ($original !== null) {
                 return $this->deleteOriginal($original);
             }
         }
@@ -62,7 +62,7 @@ class HasOne extends AbstractRelation
             $this->outerKey
         );
 
-        if (is_null($original)) {
+        if ($original === null) {
             return $rStore;
         }
 

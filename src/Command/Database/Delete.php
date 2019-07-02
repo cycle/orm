@@ -61,7 +61,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         bool $fresh = false,
         int $stream = self::DATA
     ) {
-        if ($fresh || !is_null($value)) {
+        if ($fresh || $value !== null) {
             $this->freeScope($key);
         }
 

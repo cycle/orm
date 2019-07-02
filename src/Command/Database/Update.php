@@ -118,7 +118,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
             return;
         }
 
-        if ($fresh || !is_null($value)) {
+        if ($fresh || $value !== null) {
             $this->freeContext($key);
         }
 

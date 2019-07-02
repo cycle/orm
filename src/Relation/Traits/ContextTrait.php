@@ -75,7 +75,7 @@ trait ContextTrait
      */
     protected function fetchKey(?Node $state, string $key)
     {
-        if (is_null($state)) {
+        if ($state === null) {
             return null;
         }
 
@@ -94,6 +94,7 @@ trait ContextTrait
     /**
      * True is given relation is required for the object to be saved (i.e. NOT NULL).
      *
+     * @todo rename to isNullable and inverse the logic
      * @return bool
      */
     abstract public function isNotNullable(): bool;

@@ -110,7 +110,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function count(string $column = null): int
     {
-        if (is_null($column)) {
+        if ($column === null) {
             // @tuneyourserver solves the issue with counting on queries with joins.
             $column = sprintf("DISTINCT(%s)", $this->getLoader()->getPK());
         }

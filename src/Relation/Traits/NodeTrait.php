@@ -24,7 +24,7 @@ trait NodeTrait
      */
     protected function getNode($entity, int $claim = 0): ?Node
     {
-        if (is_null($entity)) {
+        if ($entity === null) {
             return null;
         }
 
@@ -34,7 +34,7 @@ trait NodeTrait
 
         $node = $this->orm->getHeap()->get($entity);
 
-        if (is_null($node)) {
+        if ($node === null) {
             // possibly rely on relation target role, it will allow context switch
             $node = new Node(Node::NEW, [], $this->orm->getMapper($entity)->getRole());
             $this->orm->getHeap()->attach($entity, $node);

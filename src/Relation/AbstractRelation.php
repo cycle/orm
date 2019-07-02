@@ -173,7 +173,6 @@ abstract class AbstractRelation implements RelationInterface
             return $reference->__resolve();
         }
 
-        $scope = $reference->__scope();
-        return $this->orm->get($reference->__role(), key($scope), current($scope), true);
+        return $this->orm->get($reference->__role(), $reference->__scope(), true);
     }
 }

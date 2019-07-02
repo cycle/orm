@@ -6,7 +6,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
@@ -70,11 +69,8 @@ class UserPromise extends User implements PromiseInterface
     public function __resolve()
     {
         if (!is_null($this->__orm)) {
-            $key = key($this->__scope);
-            $value = $this->__scope[$key];
-
             // entity has already been loaded in memory
-            if (!is_null($e = $this->__orm->getHeap()->find($this->__target, $key, $value))) {
+            if (!is_null($e = $this->__orm->getHeap()->find($this->__target, $this->__scope))) {
                 $this->__orm = null;
                 return $this->__resolved = $e;
             }

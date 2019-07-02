@@ -98,10 +98,10 @@ final class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function get(string $role, string $key, $value, bool $load = true)
+    public function get(string $role, array $scope, bool $load = true)
     {
         $role = $this->resolveRole($role);
-        if (!is_null($e = $this->heap->find($role, $key, $value))) {
+        if (!is_null($e = $this->heap->find($role, $scope))) {
             return $e;
         }
 
@@ -109,7 +109,7 @@ final class ORM implements ORMInterface
             return null;
         }
 
-        return $this->getRepository($role)->findOne([$key => $value]);
+        return $this->getRepository($role)->findOne($scope);
     }
 
     /**
@@ -124,7 +124,7 @@ final class ORM implements ORMInterface
         $id = $data[$pk] ?? null;
 
         if ($node !== Node::NEW && !empty($id)) {
-            $e = $this->heap->find($role, $pk, $id);
+            $e = $this->heap->find($role, [$pk => $id]);
             if ($e !== null) {
                 $node = $this->heap->get($e);
 
@@ -291,7 +291,7 @@ final class ORM implements ORMInterface
     public function promise(string $role, array $scope)
     {
         if (count($scope) === 1) {
-            $e = $this->heap->find($role, key($scope), current($scope));
+            $e = $this->heap->find($role, $scope);
             if ($e !== null) {
                 return $e;
             }

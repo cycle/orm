@@ -6,7 +6,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
@@ -149,7 +148,7 @@ abstract class DatetimeTest extends BaseTest
 
     public function testUpdate()
     {
-        $e = $this->orm->get('user', 'id', 1);
+        $e = $this->orm->get('user', ['id' => 1]);
         $e->time_created = new \DateTimeImmutable('tomorrow 10pm');
 
         $this->captureWriteQueries();

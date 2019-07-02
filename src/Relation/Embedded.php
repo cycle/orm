@@ -112,7 +112,7 @@ final class Embedded implements RelationInterface
         /** @var ORMInterface $orm */
         $orm = $this->orm;
 
-        $e = $orm->getHeap()->find($this->target, $this->primaryKey, $primaryKey);
+        $e = $orm->getHeap()->find($this->target, [$this->primaryKey => $primaryKey]);
         if ($e !== null) {
             return [$e, $e];
         }
@@ -232,8 +232,7 @@ final class Embedded implements RelationInterface
             return $reference->__resolve();
         }
 
-        $scope = $reference->__scope();
-        return $this->orm->get($reference->__role(), key($scope), current($scope), true);
+        return $this->orm->get($reference->__role(), $reference->__scope(), true);
     }
 
     /**

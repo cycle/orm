@@ -21,7 +21,7 @@ final class EmbeddedNode extends AbstractNode
      */
     protected function push(array &$data)
     {
-        if (empty($this->parent)) {
+        if ($this->parent === null) {
             throw new ParserException("Unable to register data tree, parent is missing");
         }
 

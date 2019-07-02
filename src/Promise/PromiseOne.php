@@ -69,7 +69,7 @@ final class PromiseOne implements PromiseInterface
      */
     public function __resolve()
     {
-        if (is_null($this->orm)) {
+        if ($this->orm === null) {
             return $this->resolved;
         }
 
@@ -79,10 +79,7 @@ final class PromiseOne implements PromiseInterface
             // nothing to proxy to
             $this->orm = null;
         } else {
-            $key = key($this->scope);
-            $value = $this->scope[$key];
-
-            $this->resolved = $this->orm->get($this->target, $key, $value, true);
+            $this->resolved = $this->orm->get($this->target, $this->scope, true);
         }
 
         $this->orm = null;

@@ -68,7 +68,7 @@ final class RelationMap
             }
 
             $item = $data[$name];
-            if (is_object($item) || is_null($item)) {
+            if (is_object($item) || $item === null) {
                 // cyclic initialization
                 $node->setRelation($name, $item);
                 continue;
@@ -167,7 +167,7 @@ final class RelationMap
         $related,
         $original
     ): ?CommandInterface {
-        if (($related instanceof ReferenceInterface || is_null($related)) && $related === $original) {
+        if (($related instanceof ReferenceInterface || $related === null) && $related === $original) {
             // no changes in non changed promised relation
             return null;
         }

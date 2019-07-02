@@ -33,12 +33,11 @@ interface ORMInterface extends SourceProviderInterface
      * Get/load entity by unique key/value pair.
      *
      * @param string $role
-     * @param string $key
-     * @param mixed  $value
+     * @param array  $scope KV pair to locate the model, currently only support one pair.
      * @param bool   $load
      * @return object|null
      */
-    public function get(string $role, string $key, $value, bool $load = true);
+    public function get(string $role, array $scope, bool $load = true);
 
     /**
      * Create new entity based on given role and input data. Method will attempt to re-use

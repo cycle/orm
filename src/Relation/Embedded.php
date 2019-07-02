@@ -105,14 +105,15 @@ final class Embedded implements RelationInterface
      */
     public function initPromise(Node $parentNode): array
     {
-        if (empty($primaryKey = $this->fetchKey($parentNode, $this->primaryKey))) {
+        $primaryKey = $this->fetchKey($parentNode, $this->primaryKey);
+        if (empty($primaryKey)) {
             return [null, null];
         }
 
         /** @var ORMInterface $orm */
         $orm = $this->orm;
 
-        $e = $orm->getHeap()->find($this->target, $this->primaryKey, $primaryKey);
+        $e = $orm->getHeap()->find($this->target, [$this->primaryKey => $primaryKey]);
         if ($e !== null) {
             return [$e, $e];
         }
@@ -232,8 +233,7 @@ final class Embedded implements RelationInterface
             return $reference->__resolve();
         }
 
-        $scope = $reference->__scope();
-        return $this->orm->get($reference->__role(), key($scope), current($scope), true);
+        return $this->orm->get($reference->__role(), $reference->__scope(), true);
     }
 
     /**
@@ -245,7 +245,7 @@ final class Embedded implements RelationInterface
      */
     protected function fetchKey(?Node $state, string $key)
     {
-        if (is_null($state)) {
+        if ($state === null) {
             return null;
         }
 

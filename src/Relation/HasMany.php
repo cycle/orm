@@ -68,7 +68,8 @@ class HasMany extends AbstractRelation
      */
     public function initPromise(Node $node): array
     {
-        if (empty($innerKey = $this->fetchKey($node, $this->innerKey))) {
+        $innerKey = $this->fetchKey($node, $this->innerKey);
+        if ($innerKey === null) {
             return [new ArrayCollection(), null];
         }
 

@@ -31,8 +31,8 @@ class RefersTo extends AbstractRelation implements DependencyInterface
     public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         // refers-to relation is always nullable (as opposite to belongs-to)
-        if (is_null($related)) {
-            if (!is_null($original)) {
+        if ($related === null) {
+            if ($original !== null) {
                 $store->register($this->innerKey, null, true);
             }
 
@@ -43,7 +43,8 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $this->assertValid($rNode);
 
         // related object exists, we can update key immediately
-        if (!is_null($outerKey = $this->fetchKey($rNode, $this->outerKey))) {
+        $outerKey = $this->fetchKey($rNode, $this->outerKey);
+        if ($outerKey !== null) {
             if ($outerKey != $this->fetchKey($node, $this->innerKey)) {
                 $store->register($this->innerKey, $outerKey, true);
             }

@@ -74,7 +74,7 @@ final class PromiseMany implements PromiseInterface
      */
     public function __resolve()
     {
-        if (is_null($this->orm)) {
+        if ($this->orm === null) {
             return $this->resolved;
         }
 

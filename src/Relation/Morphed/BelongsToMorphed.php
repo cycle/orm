@@ -39,17 +39,18 @@ class BelongsToMorphed extends BelongsTo
      */
     public function initPromise(Node $node): array
     {
-        if (is_null($innerKey = $this->fetchKey($node, $this->innerKey))) {
+        $innerKey = $this->fetchKey($node, $this->innerKey);
+        if ($innerKey === null) {
             return [null, null];
         }
 
         /** @var string $target */
         $target = $this->fetchKey($node, $this->morphKey);
-        if (is_null($target)) {
+        if ($target === null) {
             return [null, null];
         }
 
-        $e = $this->orm->getHeap()->find($target, $this->outerKey, $innerKey);
+        $e = $this->orm->getHeap()->find($target, [$this->outerKey => $innerKey]);
         if ($e !== null) {
             return [$e, $e];
         }
@@ -66,7 +67,7 @@ class BelongsToMorphed extends BelongsTo
     {
         $wrappedStore = parent::queue($store, $entity, $node, $related, $original);
 
-        if (is_null($related)) {
+        if ($related === null) {
             if ($this->fetchKey($node, $this->morphKey) !== null) {
                 $store->register($this->morphKey, null, true);
                 $node->register($this->morphKey, null, true);

@@ -98,10 +98,12 @@ final class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function get(string $role, string $key, $value, bool $load = true)
+    public function get(string $role, array $scope, bool $load = true)
     {
         $role = $this->resolveRole($role);
-        if (!is_null($e = $this->heap->find($role, $key, $value))) {
+        $e = $this->heap->find($role, $scope);
+
+        if ($e !== null) {
             return $e;
         }
 
@@ -109,7 +111,7 @@ final class ORM implements ORMInterface
             return null;
         }
 
-        return $this->getRepository($role)->findOne([$key => $value]);
+        return $this->getRepository($role)->findOne($scope);
     }
 
     /**
@@ -124,7 +126,7 @@ final class ORM implements ORMInterface
         $id = $data[$pk] ?? null;
 
         if ($node !== Node::NEW && !empty($id)) {
-            $e = $this->heap->find($role, $pk, $id);
+            $e = $this->heap->find($role, [$pk => $id]);
             if ($e !== null) {
                 $node = $this->heap->get($e);
 
@@ -179,6 +181,10 @@ final class ORM implements ORMInterface
      */
     public function getSchema(): SchemaInterface
     {
+        if ($this->schema === null) {
+            throw new ORMException("ORM is not configured, schema is missing");
+        }
+
         return $this->schema;
     }
 
@@ -287,7 +293,7 @@ final class ORM implements ORMInterface
     public function promise(string $role, array $scope)
     {
         if (count($scope) === 1) {
-            $e = $this->heap->find($role, key($scope), current($scope));
+            $e = $this->heap->find($role, $scope);
             if ($e !== null) {
                 return $e;
             }
@@ -313,7 +319,7 @@ final class ORM implements ORMInterface
         $mapper = $this->getMapper($entity);
 
         $node = $this->heap->get($entity);
-        if (is_null($node)) {
+        if ($node === null) {
             // automatic entity registration
             $node = new Node(Node::NEW, [], $mapper->getRole());
             $this->heap->attach($entity, $node);
@@ -343,7 +349,7 @@ final class ORM implements ORMInterface
     public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
     {
         $node = $this->heap->get($entity);
-        if ($entity instanceof ReferenceInterface || is_null($node)) {
+        if ($entity instanceof ReferenceInterface || $node === null) {
             // nothing to do, what about promises?
             return new Nil();
         }

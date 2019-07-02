@@ -217,7 +217,7 @@ abstract class BaseTest extends TestCase
      */
     protected function dropDatabase(Database $database = null)
     {
-        if (empty($database)) {
+        if ($database === null) {
             return;
         }
 

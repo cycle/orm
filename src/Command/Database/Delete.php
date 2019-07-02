@@ -36,7 +36,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
      */
     public function isReady(): bool
     {
-        return empty($this->waitScope);
+        return $this->waitScope === [];
     }
 
     /**
@@ -44,7 +44,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
      */
     public function execute()
     {
-        if (empty($this->scope)) {
+        if ($this->scope === []) {
             throw new CommandException("Unable to execute delete command without a scope");
         }
 
@@ -61,7 +61,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         bool $fresh = false,
         int $stream = self::DATA
     ) {
-        if ($fresh || !is_null($value)) {
+        if ($fresh || $value !== null) {
             $this->freeScope($key);
         }
 

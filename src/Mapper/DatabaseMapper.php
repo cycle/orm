@@ -97,7 +97,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setData($columns);
 
         $columns[$this->primaryKey] = $this->nextPrimaryKey();
-        if (is_null($columns[$this->primaryKey])) {
+        if ($columns[$this->primaryKey] === null) {
             unset($columns[$this->primaryKey]);
         }
 

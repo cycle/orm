@@ -59,7 +59,7 @@ final class PivotedPromise implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->orm);
+        return $this->orm === null;
     }
 
     /**
@@ -85,7 +85,7 @@ final class PivotedPromise implements PromiseInterface
      */
     public function __resolve()
     {
-        if (is_null($this->orm)) {
+        if ($this->orm === null) {
             return $this->resolved;
         }
 

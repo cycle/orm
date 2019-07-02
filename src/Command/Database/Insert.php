@@ -50,7 +50,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      */
     public function isReady(): bool
     {
-        return empty($this->waitContext);
+        return $this->waitContext === [];
     }
 
     /**
@@ -77,7 +77,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      */
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
     {
-        if ($fresh || !is_null($value)) {
+        if ($fresh || $value !== null) {
             $this->freeContext($key);
         }
 

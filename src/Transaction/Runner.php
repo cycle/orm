@@ -38,7 +38,7 @@ final class Runner implements RunnerInterface
         if ($command instanceof DatabaseCommand && !empty($command->getDatabase())) {
             $driver = $command->getDatabase()->getDriver();
 
-            if (!empty($driver) && !in_array($driver, $this->drivers, true)) {
+            if ($driver !== null && !in_array($driver, $this->drivers, true)) {
                 $driver->beginTransaction();
                 $this->drivers[] = $driver;
             }

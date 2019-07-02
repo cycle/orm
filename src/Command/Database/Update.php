@@ -65,7 +65,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      */
     public function isReady(): bool
     {
-        return empty($this->waitContext) && empty($this->waitScope);
+        return $this->waitContext === [] && $this->waitScope === [];
     }
 
     /**
@@ -83,7 +83,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      */
     public function execute()
     {
-        if (empty($this->scope)) {
+        if ($this->scope === []) {
             throw new CommandException("Unable to execute update command without a scope");
         }
 
@@ -99,7 +99,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      */
     public function isEmpty(): bool
     {
-        return (empty($this->data) && empty($this->context)) || empty($this->scope);
+        return ($this->data === [] && $this->context === []) || $this->scope === [];
     }
 
     /**
@@ -118,7 +118,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
             return;
         }
 
-        if ($fresh || !is_null($value)) {
+        if ($fresh || $value !== null) {
             $this->freeContext($key);
         }
 

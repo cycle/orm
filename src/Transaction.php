@@ -107,7 +107,7 @@ final class Transaction implements TransactionInterface
                     $this->runner->run($do);
                 }
 
-                if (count($this->runner) === $lastExecuted && !empty($pending)) {
+                if (count($this->runner) === $lastExecuted && $pending !== []) {
                     throw new TransactionException("Unable to complete: " . $this->listCommands($pending));
                 }
 

@@ -42,7 +42,8 @@ class MorphedHasOne extends HasOne
      */
     public function initPromise(Node $node): array
     {
-        if (is_null($innerKey = $this->fetchKey($node, $this->innerKey))) {
+        $innerKey = $this->fetchKey($node, $this->innerKey);
+        if ($innerKey === null) {
             return [null, null];
         }
 
@@ -62,7 +63,7 @@ class MorphedHasOne extends HasOne
     {
         $rStore = parent::queue($store, $entity, $node, $related, $original);
 
-        if ($rStore instanceof CC && !is_null($related)) {
+        if ($rStore instanceof CC && $related !== null) {
             $rNode = $this->getNode($related);
 
             if ($this->fetchKey($rNode, $this->morphKey) != $node->getRole()) {

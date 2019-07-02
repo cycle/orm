@@ -41,7 +41,7 @@ class ProfilePromise extends Profile implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return empty($this->__orm);
+        return $this->__orm === null;
     }
 
     /**

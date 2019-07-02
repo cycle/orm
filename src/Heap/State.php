@@ -75,7 +75,7 @@ final class State implements ConsumerInterface, ProducerInterface
      */
     public function setData(array $data)
     {
-        if (empty($data)) {
+        if ($data === []) {
             return;
         }
 
@@ -97,8 +97,8 @@ final class State implements ConsumerInterface, ProducerInterface
     /**
      * Set the reference to the object creation command (non executed).
      *
-     * @internal
      * @param ContextCarrierInterface|null $cmd
+     * @internal
      */
     public function setCommand(ContextCarrierInterface $cmd = null)
     {
@@ -106,8 +106,8 @@ final class State implements ConsumerInterface, ProducerInterface
     }
 
     /**
-     * @internal
      * @return null|ContextCarrierInterface
+     * @internal
      */
     public function getCommand(): ?ContextCarrierInterface
     {
@@ -117,9 +117,9 @@ final class State implements ConsumerInterface, ProducerInterface
     /**
      * Storage to store temporary cross entity links.
      *
-     * @internal
      * @param string $type
      * @return \SplObjectStorage
+     * @internal
      */
     public function getStorage(string $type): \SplObjectStorage
     {

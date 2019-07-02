@@ -106,7 +106,7 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
      */
     public function isReady(): bool
     {
-        return empty($this->waitContext);
+        return $this->waitContext === [];
     }
 
     /**

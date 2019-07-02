@@ -105,7 +105,8 @@ final class Embedded implements RelationInterface
      */
     public function initPromise(Node $parentNode): array
     {
-        if (empty($primaryKey = $this->fetchKey($parentNode, $this->primaryKey))) {
+        $primaryKey = $this->fetchKey($parentNode, $this->primaryKey);
+        if (empty($primaryKey)) {
             return [null, null];
         }
 

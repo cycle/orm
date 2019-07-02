@@ -50,7 +50,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      */
     public function isReady(): bool
     {
-        return empty($this->waitContext);
+        return $this->waitContext === [];
     }
 
     /**

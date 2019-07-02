@@ -69,7 +69,7 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public function getState(): State
     {
-        if (empty($this->state)) {
+        if ($this->state === null) {
             $this->state = new State($this->status, $this->data);
         }
 

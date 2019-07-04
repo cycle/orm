@@ -2,7 +2,7 @@
   "name": "cycle/orm",
   "type": "library",
   "license": "MIT",
-  "description": "DataMapper and ORM for long-running processes",
+  "description": "PHP DataMapper ORM and Data Modelling Engine",
   "require": {
     "php": "^7.1",
     "ext-pdo": "*",

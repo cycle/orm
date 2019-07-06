@@ -6,7 +6,6 @@ services:
   - docker
 
 php:
-  - 7.1
   - 7.2
   - 7.3
 
@@ -30,18 +29,6 @@ after_success:
 
 jobs:
   include:
-    # Testing various PostgresSQL version
-    - stage: Test
-      php: 7.1
-      addons:
-        postgresql: "9.2"
-      env:
-        - "DB=postgres POSTGRES=9.2 PHP=7.1"
-      before_install:
-        - psql -c 'create database spiral;' -U postgres
-      script:
-        - vendor/bin/phpunit tests/ORM/Driver/Postgres
-
     # Testing various PostgresSQL version
     - stage: Test
       php: 7.2
@@ -112,7 +99,7 @@ jobs:
 
     # MariaDB
     - stage: Test
-      php: 7.1
+      php: 7.2
       addons:
         mariadb: "10.0"
       env:

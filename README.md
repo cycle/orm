@@ -29,6 +29,7 @@ Features:
 - schema scaffolding and migrations
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - supports custom persiters, disposable UoW, custom column types, FKs to non primary columns
+- use with or without annotations, proxy classes and auto-migrations 
 - compatible with Doctrine Collections and Zend Hydrator
 
 Extensions:

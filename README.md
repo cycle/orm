@@ -5,7 +5,7 @@
 [![Codecov](https://codecov.io/gh/cycle/orm/graph/badge.svg)](https://codecov.io/gh/cycle/orm)
 <a href="https://discord.gg/TFeEmCs"><img src="https://img.shields.io/badge/discord-chat-magenta.svg"></a>
 
-Cycle is PHP DataMapper ORM and Data Modelling engine designed to safely work in classic and long-running PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options to model datasets and support dynamic schema configuration. ORM can work with plain PHP objects and support annotation declarations.
+Cycle is PHP DataMapper ORM and Data Modelling engine designed to safely work in classic and long-running PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options to model datasets and support dynamic schema configuration. ORM can work with plain PHP objects and support annotation declarations as extension.
 
 <p align="center">
 	<a href="https://github.com/cycle/docs"><b>Documentation</b></a> | <a href="https://github.com/cycle/docs/issues/3">Comparison with Eloquent and Doctrine</a>

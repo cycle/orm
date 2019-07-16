@@ -96,7 +96,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_INSERT);
         $state->setData($columns);
 
-        $columns[$this->primaryKey] = $this->nextPrimaryKey();
+        $columns[$this->primaryKey] = $columns[$this->primaryKey] ?? $this->nextPrimaryKey();
         if ($columns[$this->primaryKey] === null) {
             unset($columns[$this->primaryKey]);
         }

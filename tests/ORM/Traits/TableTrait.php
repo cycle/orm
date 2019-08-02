@@ -27,7 +27,7 @@ trait TableTrait
         $renderer->renderColumns($schema, $columns, $defaults);
 
         foreach ($fk as $column => $options) {
-            $schema->foreignKey($column)->references($options['table'], $options['column']);
+            $schema->foreignKey([$column])->references($options['table'], [$options['column']]);
         }
 
         if (!empty($pk)) {
@@ -41,7 +41,7 @@ trait TableTrait
      * @param string $from
      * @param string $fromKey
      * @param string $to
-     * @param string $toTable
+     * @param string $toColumn
      * @param string $onDelete
      * @param string $onUpdate
      */
@@ -49,12 +49,12 @@ trait TableTrait
         string $from,
         string $fromKey,
         string $to,
-        string $toTable,
+        string $toColumn,
         string $onDelete = ForeignKeyInterface::CASCADE,
         string $onUpdate = ForeignKeyInterface::CASCADE
     ) {
         $schema = $this->getDatabase()->table($from)->getSchema();
-        $schema->foreignKey($fromKey)->references($to, $toTable)->onDelete($onDelete)->onUpdate($onUpdate);
+        $schema->foreignKey([$fromKey])->references($to, [$toColumn])->onDelete($onDelete)->onUpdate($onUpdate);
         $schema->save();
     }
 

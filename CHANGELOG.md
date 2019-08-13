@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.1.8 (16.07.2019)
+--------------------
+- CS: @invisible renamed to @internal
+
 v1.1.7 (16.07.2019)
 --------------------
 - DatabaseMapper will not generate new PK if value has been set by user

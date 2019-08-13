@@ -14,10 +14,7 @@ namespace Cycle\ORM\Heap\Traits;
  */
 trait VisitorTrait
 {
-    /**
-     * @invisible
-     * @var array
-     */
+    /** @var array @internal */
     private $visited = [];
 
     /**

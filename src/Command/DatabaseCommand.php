@@ -13,10 +13,7 @@ use Spiral\Database\DatabaseInterface;
 
 abstract class DatabaseCommand implements CommandInterface
 {
-    /**
-     * @invisible
-     * @var DatabaseInterface
-     */
+    /** @var DatabaseInterface @internal */
     protected $db;
 
     /** @var string|null */

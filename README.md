@@ -27,7 +27,7 @@ Features:
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - disposable UoW, custom column types, FKs to non primary columns
 - use with or without annotations, proxy classes and auto-migrations 
-- compatible with Doctrine Collections and Zend Hydrator
+- compatible with Doctrine Collections, Doctrine Annotations and Zend Hydrator
 
 Extensions:
 ---------

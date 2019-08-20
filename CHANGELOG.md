@@ -1,6 +1,6 @@
 # CHANGELOG 
 
-v1.1.8 (16.07.2019)
+v1.1.8 (13.08.2019)
 --------------------
 - CS: @invisible renamed to @internal
 

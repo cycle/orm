@@ -200,7 +200,6 @@ abstract class HasManyNestedConditionTest extends BaseTest
     // only load posts with comments
     public function testFetchFiltered()
     {
-        $this->enableProfiling();
         $selector = new Select($this->orm, User::class);
         $selector->load('posts', [
             'where' => function (Select\QueryBuilder $qb) {

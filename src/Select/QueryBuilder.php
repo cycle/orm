@@ -70,13 +70,13 @@ final class QueryBuilder
     }
 
     /**
-     * Access to underlying loader. Immutable.
+     * Access to underlying loader.
      *
      * @return AbstractLoader
      */
     public function getLoader(): AbstractLoader
     {
-        return clone $this->loader;
+        return $this->loader;
     }
 
     /**

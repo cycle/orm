@@ -18,6 +18,7 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Spiral\Database\Injection\Expression;
 
 abstract class HasManyNestedConditionTest extends BaseTest
 {
@@ -47,9 +48,9 @@ abstract class HasManyNestedConditionTest extends BaseTest
             'message' => 'string'
         ]);
 
-        $this->makeFK('post', 'user_id', 'user', 'id');
-        $this->makeFK('comment', 'user_id', 'user', 'id');
-        $this->makeFK('comment', 'post_id', 'post', 'id');
+        $this->makeFK('post', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
+        $this->makeFK('comment', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
+        $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
 
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
@@ -65,6 +66,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 [1, 'post 1'],
                 [1, 'post 2'],
                 [1, 'post 3'],
+                [2, 'post 4'],
             ]
         );
 
@@ -72,8 +74,8 @@ abstract class HasManyNestedConditionTest extends BaseTest
             ['user_id', 'post_id', 'message'],
             [
                 [1, 1, 'msg 1'],
-                [1, 1, 'msg 2'],
-                [1, 2, 'msg 3'],
+                [2, 1, 'msg 2'],
+                [2, 2, 'msg 3'],
             ]
         );
 
@@ -128,7 +130,6 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'post_id', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
             ]
         ]));
     }
@@ -157,7 +158,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
                             ],
                             [
                                 'id'      => 2,
-                                'user_id' => 1,
+                                'user_id' => 2,
                                 'post_id' => 1,
                                 'message' => 'msg 2',
                             ],
@@ -170,7 +171,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
                         'comments' => [
                             [
                                 'id'      => 3,
-                                'user_id' => 1,
+                                'user_id' => 2,
                                 'post_id' => 2,
                                 'message' => 'msg 3',
                             ],
@@ -190,9 +191,14 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 'id'      => 2,
                 'email'   => 'another@world.com',
                 'balance' => 200.0,
-                'posts'   =>
+                'posts'   => [
                     [
+                        'id'       => 4,
+                        'user_id'  => 2,
+                        'title'    => 'post 4',
+                        'comments' => []
                     ],
+                ]
             ],
         ], $selector->fetchData());
     }
@@ -200,8 +206,8 @@ abstract class HasManyNestedConditionTest extends BaseTest
     // only load posts with comments
     public function testFetchFiltered()
     {
-        $selector = new Select($this->orm, User::class);
-        $selector->load('posts', [
+        $users = new Select($this->orm, User::class);
+        $users->load('posts', [
             'where' => function (Select\QueryBuilder $qb) {
                 $qb->distinct()->where('comments.id', '!=', null);
             }
@@ -231,6 +237,125 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 'balance' => 200.0,
                 'posts'   => [],
             ],
-        ], $selector->fetchData());
+        ], $users->fetchData());
+    }
+
+    // only load posts without comments
+    public function testFetchFilteredNoComments()
+    {
+        $users = new Select($this->orm, User::class);
+        $users->load('posts', [
+            'where' => function (Select\QueryBuilder $qb) {
+                $qb->distinct()
+                    ->with('comments', ['method' => Select\JoinableLoader::LEFT_JOIN])
+                    ->where('comments.id', '=', null);
+            }
+        ])->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'posts'   => [
+                    [
+                        'id'      => 3,
+                        'user_id' => 1,
+                        'title'   => 'post 3',
+                    ],
+                ],
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'posts'   => [
+                    [
+                        'id'      => 4,
+                        'user_id' => 2,
+                        'title'   => 'post 4',
+                    ],
+                ],
+            ],
+        ], $users->fetchData());
+    }
+
+    // only load posts with comments left by post author
+    public function testFetchCrossLinked()
+    {
+        $users = new Select($this->orm, User::class);
+        $users->load('posts', [
+            'where' => function (Select\QueryBuilder $qb) {
+                $qb->distinct()
+                    ->where(
+                        'comments.user_id',
+                        '=',
+                        new Expression($qb->resolve('user_id'))
+                    );
+            }
+        ])->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'posts'   => [
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'title'   => 'post 1'
+                    ],
+                ],
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'posts'   => [],
+            ],
+        ], $users->fetchData());
+    }
+
+    // find all users which have posts without comments and load all posts with comments
+    public function testFindUsersWithoutPostCommentsLoadPostsWithComments()
+    {
+        $users = new Select($this->orm, User::class);
+        $users
+            ->with('posts.comments', [
+                'method' => Select\JoinableLoader::LEFT_JOIN,
+            ])
+            ->where('posts.comments.id', null)
+            ->load('posts', [
+                'where' => function (Select\QueryBuilder $qb) {
+                    $qb->distinct()->where('comments.id', '!=', null);
+                }
+            ])->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'posts'   => [
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'title'   => 'post 1'
+                    ],
+                    [
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'title'   => 'post 2'
+                    ],
+                ],
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'posts'   => [],
+            ],
+        ], $users->fetchData());
     }
 }

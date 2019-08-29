@@ -164,6 +164,20 @@ final class QueryBuilder
     }
 
     /**
+     * Join relation without loading it's data.
+     *
+     * @param string $relation
+     * @param array  $options
+     * @return QueryBuilder
+     */
+    public function with(string $relation, array $options = []): self
+    {
+        $this->loader->loadRelation($relation, $options, true, false);
+
+        return $this;
+    }
+
+    /**
      * Find loader associated with given entity/relation alias.
      *
      * @param string $name

@@ -50,7 +50,7 @@ abstract class RefersToRelationTest extends BaseTest
                 Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance', 'comment_id'],
-                Schema::SCHEMA      => [],
+                Schema::TYPECAST    => ['id' => 'int'],
                 Schema::RELATIONS   => [
                     'lastComment' => [
                         Relation::TYPE   => Relation::REFERS_TO,
@@ -274,6 +274,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $s = new Select($this->orm, User::class);
+
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNull($u->lastComment);

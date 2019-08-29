@@ -160,16 +160,16 @@ abstract class AbstractLoader implements LoaderInterface
             $options['load'] = true;
         }
 
+        if (isset($loaders[$relation])) {
+            // overwrite existing loader options
+            return $loaders[$relation] = $loaders[$relation]->withContext($this, $options);
+        }
+
         if ($join) {
             if (empty($options['method']) || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])) {
                 // let's tell our loaded that it's method is JOIN (forced)
                 $options['method'] = self::JOIN;
             }
-        }
-
-        if (isset($loaders[$relation])) {
-            // overwrite existing loader options
-            return $loaders[$relation] = $loaders[$relation]->withContext($this, $options);
         }
 
         try {

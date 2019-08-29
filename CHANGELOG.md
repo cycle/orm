@@ -1,5 +1,10 @@
 # CHANGELOG 
 
+v1.1.9 (28.08.2019)
+--------------------
+- added ability to easier query nested relations inside `with`->`where` conditions
+- added ability overwrite default loader method when no options are set
+
 v1.1.8 (13.08.2019)
 --------------------
 - CS: @invisible renamed to @internal

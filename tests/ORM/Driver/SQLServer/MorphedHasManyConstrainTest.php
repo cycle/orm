@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
 
-class MorphedHasManyConstrainTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyConstrainTest 
-{ 
-    const DRIVER = "sqlserver"; 
+class MorphedHasManyConstrainTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyConstrainTest
+{
+    const DRIVER = "sqlserver";
 }

@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
 
-class PersistRepositoryTest extends \Cycle\ORM\Tests\PersistRepositoryTest 
-{ 
-    const DRIVER = "sqlserver"; 
+class PersistRepositoryTest extends \Cycle\ORM\Tests\PersistRepositoryTest
+{
+    const DRIVER = "sqlserver";
 }

@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class DatetimeTest extends \Cycle\ORM\Tests\DatetimeTest 
-{ 
-    const DRIVER = "mysql"; 
+class DatetimeTest extends \Cycle\ORM\Tests\DatetimeTest
+{
+    const DRIVER = "mysql";
 }

@@ -14,5 +14,4 @@ namespace Cycle\ORM\Relation;
  */
 interface DependencyInterface extends RelationInterface
 {
-
 }

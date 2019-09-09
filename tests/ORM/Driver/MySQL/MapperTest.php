@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class MapperTest extends \Cycle\ORM\Tests\MapperTest 
-{ 
-    const DRIVER = "mysql"; 
+class MapperTest extends \Cycle\ORM\Tests\MapperTest
+{
+    const DRIVER = "mysql";
 }

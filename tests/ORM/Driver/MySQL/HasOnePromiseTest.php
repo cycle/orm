@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class HasOnePromiseTest extends \Cycle\ORM\Tests\HasOnePromiseTest 
-{ 
-    const DRIVER = "mysql"; 
+class HasOnePromiseTest extends \Cycle\ORM\Tests\HasOnePromiseTest
+{
+    const DRIVER = "mysql";
 }

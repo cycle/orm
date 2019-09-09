@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres; 
+namespace Cycle\ORM\Tests\Driver\Postgres;
 
-class InstantiatorTest extends \Cycle\ORM\Tests\InstantiatorTest 
-{ 
-    const DRIVER = "postgres"; 
+class InstantiatorTest extends \Cycle\ORM\Tests\InstantiatorTest
+{
+    const DRIVER = "postgres";
 }

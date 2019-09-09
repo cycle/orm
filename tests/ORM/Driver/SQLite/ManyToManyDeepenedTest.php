@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite; 
+namespace Cycle\ORM\Tests\Driver\SQLite;
 
-class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest 
-{ 
-    const DRIVER = "sqlite"; 
+class ManyToManyDeepenedTest extends \Cycle\ORM\Tests\ManyToManyDeepenedTest
+{
+    const DRIVER = "sqlite";
 }

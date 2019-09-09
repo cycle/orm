@@ -111,11 +111,9 @@ abstract class AbstractNode
         $data = $this->fetchData($offset, $row);
 
         if ($this->deduplicate($data)) {
-
             $this->collectReferences($data);
             $this->ensurePlaceholders($data);
             $this->push($data);
-
         } elseif ($this->parent !== null) {
             // register duplicate rows in each parent row
             $this->push($data);

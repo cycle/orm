@@ -17,47 +17,46 @@ class SplitCommandTest extends TestCase
 {
     public function testNeverExecuted()
     {
-        $command = new Split(new TestContextCommand(), new TestContextCommand());
+        $textContextCommand = new class implements ContextCarrierInterface
+        {
+            private $executed = false;
+
+            public function isReady(): bool
+            {
+                return true;
+            }
+
+            public function isExecuted(): bool
+            {
+                return $this->executed;
+            }
+
+            public function execute()
+            {
+                $this->executed = true;
+            }
+
+            public function complete()
+            {
+            }
+
+            public function rollBack()
+            {
+            }
+
+            public function waitContext(string $key, bool $required = true)
+            {
+            }
+
+            public function getContext(): array
+            {
+            }
+
+            public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
+            {
+            }
+        };
+        $command = new Split($textContextCommand, new TestContextCommand());
         $this->assertFalse($command->isExecuted());
-    }
-}
-
-class TestContextCommand implements ContextCarrierInterface
-{
-    private $executed = false;
-
-    public function isReady(): bool
-    {
-        return true;
-    }
-
-    public function isExecuted(): bool
-    {
-        return $this->executed;
-    }
-
-    public function execute()
-    {
-        $this->executed = true;
-    }
-
-    public function complete()
-    {
-    }
-
-    public function rollBack()
-    {
-    }
-
-    public function waitContext(string $key, bool $required = true)
-    {
-    }
-
-    public function getContext(): array
-    {
-    }
-
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
-    {
     }
 }

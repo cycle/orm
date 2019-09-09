@@ -17,8 +17,36 @@ class ConditionCommandTest extends TestCase
 {
     public function testIterate()
     {
+        $testCommand = new class implements CommandInterface
+        {
+            private $executed = false;
+
+            public function isReady(): bool
+            {
+                return true;
+            }
+
+            public function isExecuted(): bool
+            {
+                return $this->executed;
+            }
+
+            public function execute()
+            {
+                $this->executed = true;
+            }
+
+            public function complete()
+            {
+            }
+
+            public function rollBack()
+            {
+            }
+        };
+
         $c = new Condition(
-            new TestCommand(),
+            $testCommand,
             function () {
                 return true;
             }
@@ -56,34 +84,4 @@ class ConditionCommandTest extends TestCase
         $n->execute();
         $this->assertTrue($c->isExecuted());
     }
-}
-
-
-class TestCommand implements CommandInterface
-{
-    private $executed = false;
-
-    public function isReady(): bool
-    {
-        return true;
-    }
-
-    public function isExecuted(): bool
-    {
-        return $this->executed;
-    }
-
-    public function execute()
-    {
-        $this->executed = true;
-    }
-
-    public function complete()
-    {
-    }
-
-    public function rollBack()
-    {
-    }
-
 }

@@ -12,12 +12,16 @@ namespace Cycle\ORM\Tests\Command;
 use Cycle\ORM\Command\Branch\Condition;
 use Cycle\ORM\Command\CommandInterface;
 use PHPUnit\Framework\TestCase;
+use TestCommand;
 
 class ConditionCommandTest extends TestCase
 {
-    public function testIterate()
+    private $testCommand;
+
+    protected function setUp()
     {
-        $testCommand = new class implements CommandInterface
+        parent::setUp();
+        $this->testCommand = new class implements CommandInterface
         {
             private $executed = false;
 
@@ -44,23 +48,27 @@ class ConditionCommandTest extends TestCase
             {
             }
         };
+    }
 
+
+    public function testIterate()
+    {
         $c = new Condition(
-            $testCommand,
+            $this->testCommand,
             function () {
                 return true;
             }
         );
 
         foreach ($c as $n) {
-            $this->assertInstanceOf(TestCommand::class, $n);
+            $this->assertInstanceOf(get_class($this->testCommand), $n);
         }
     }
 
     public function testIterateEmpty()
     {
         $c = new Condition(
-            new TestCommand(),
+            $this->testCommand,
             function () {
                 return false;
             }
@@ -72,7 +80,7 @@ class ConditionCommandTest extends TestCase
     public function testExecuted()
     {
         $c = new Condition(
-            new TestCommand(),
+            $this->testCommand,
             function () {
                 return true;
             }

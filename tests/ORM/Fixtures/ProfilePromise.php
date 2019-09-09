@@ -16,13 +16,13 @@ use Cycle\ORM\Select;
 class ProfilePromise extends Profile implements PromiseInterface
 {
     /** @var ORMInterface|null @internal */
-    private $__orm;
+    private $orm;
 
     /** @var string|null */
-    private $__target;
+    private $target;
 
     /** @var array */
-    private $__scope;
+    private $scope;
 
     /**
      * @param ORMInterface $orm
@@ -31,9 +31,9 @@ class ProfilePromise extends Profile implements PromiseInterface
      */
     public function __construct(ORMInterface $orm, string $target, array $scope)
     {
-        $this->__orm = $orm;
-        $this->__target = $target;
-        $this->__scope = $scope;
+        $this->orm = $orm;
+        $this->target = $target;
+        $this->scope = $scope;
     }
 
     /**
@@ -41,7 +41,7 @@ class ProfilePromise extends Profile implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return $this->__orm === null;
+        return $this->orm === null;
     }
 
     /**
@@ -49,7 +49,7 @@ class ProfilePromise extends Profile implements PromiseInterface
      */
     public function __role(): string
     {
-        return $this->__target;
+        return $this->target;
     }
 
     /**
@@ -57,7 +57,7 @@ class ProfilePromise extends Profile implements PromiseInterface
      */
     public function __scope(): array
     {
-        return $this->__scope;
+        return $this->scope;
     }
 
     /**
@@ -65,15 +65,15 @@ class ProfilePromise extends Profile implements PromiseInterface
      */
     public function __resolve()
     {
-        if (!is_null($this->__orm)) {
-            $select = new Select($this->__orm, $this->__target);
+        if (!is_null($this->orm)) {
+            $select = new Select($this->orm, $this->target);
             $data = $select->constrain(
-                $this->__orm->getSource($this->__target)->getConstrain()
-            )->where($this->__scope)->fetchData();
+                $this->orm->getSource($this->target)->getConstrain()
+            )->where($this->scope)->fetchData();
 
-            $this->__orm->getMapper($this->__target)->hydrate($this, $data[0]);
+            $this->orm->getMapper($this->target)->hydrate($this, $data[0]);
 
-            $this->__orm = null;
+            $this->orm = null;
         }
 
         return $this;

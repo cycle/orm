@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite; 
+namespace Cycle\ORM\Tests\Driver\SQLite;
 
-class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest 
-{ 
-    const DRIVER = "sqlite"; 
+class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest
+{
+    const DRIVER = "sqlite";
 }

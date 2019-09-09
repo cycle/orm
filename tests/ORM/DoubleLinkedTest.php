@@ -92,7 +92,7 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
-        list ($a, $b) = $selector->orderBy('id')->fetchAll();
+        list($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertSame($b, $a->cyclic->__resolve());
@@ -133,7 +133,7 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
-        list ($a, $b) = $selector->orderBy('id')->fetchAll();
+        list($a, $b) = $selector->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertSame($a, $b->cyclic);

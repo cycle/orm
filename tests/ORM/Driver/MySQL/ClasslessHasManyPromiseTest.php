@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class ClasslessHasManyPromiseTest extends \Cycle\ORM\Tests\Classless\ClasslessHasManyPromiseTest 
-{ 
-    const DRIVER = "mysql"; 
+class ClasslessHasManyPromiseTest extends \Cycle\ORM\Tests\Classless\ClasslessHasManyPromiseTest
+{
+    const DRIVER = "mysql";
 }

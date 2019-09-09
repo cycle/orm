@@ -20,5 +20,4 @@ use Cycle\ORM\Command\Branch\Split;
  */
 interface InitCarrierInterface extends ContextCarrierInterface
 {
-
 }

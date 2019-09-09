@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
 
-class HasManyNestedConditionTest extends \Cycle\ORM\Tests\HasManyNestedConditionTest 
-{ 
-    const DRIVER = "sqlserver"; 
+class HasManyNestedConditionTest extends \Cycle\ORM\Tests\HasManyNestedConditionTest
+{
+    const DRIVER = "sqlserver";
 }

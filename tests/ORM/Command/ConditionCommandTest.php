@@ -12,27 +12,63 @@ namespace Cycle\ORM\Tests\Command;
 use Cycle\ORM\Command\Branch\Condition;
 use Cycle\ORM\Command\CommandInterface;
 use PHPUnit\Framework\TestCase;
+use TestCommand;
 
 class ConditionCommandTest extends TestCase
 {
+    private $testCommand;
+
+    protected function setUp()
+    {
+        parent::setUp();
+        $this->testCommand = new class implements CommandInterface
+        {
+            private $executed = false;
+
+            public function isReady(): bool
+            {
+                return true;
+            }
+
+            public function isExecuted(): bool
+            {
+                return $this->executed;
+            }
+
+            public function execute()
+            {
+                $this->executed = true;
+            }
+
+            public function complete()
+            {
+            }
+
+            public function rollBack()
+            {
+            }
+        };
+    }
+
+
     public function testIterate()
     {
         $c = new Condition(
-            new TestCommand(),
+            $this->testCommand,
             function () {
                 return true;
             }
         );
 
         foreach ($c as $n) {
-            $this->assertInstanceOf(TestCommand::class, $n);
+            $this->assertInstanceOf(get_class($this->testCommand), $n);
         }
     }
 
     public function testIterateEmpty()
     {
         $c = new Condition(
-            new TestCommand(),
+            $this->testCommand,
             function () {
                 return false;
             }
@@ -44,7 +80,7 @@ class ConditionCommandTest extends TestCase
     public function testExecuted()
     {
         $c = new Condition(
-            new TestCommand(),
+            $this->testCommand,
             function () {
                 return true;
             }
@@ -56,34 +92,4 @@ class ConditionCommandTest extends TestCase
         $n->execute();
         $this->assertTrue($c->isExecuted());
     }
-}
-
-
-class TestCommand implements CommandInterface
-{
-    private $executed = false;
-
-    public function isReady(): bool
-    {
-        return true;
-    }
-
-    public function isExecuted(): bool
-    {
-        return $this->executed;
-    }
-
-    public function execute()
-    {
-        $this->executed = true;
-    }
-
-    public function complete()
-    {
-    }
-
-    public function rollBack()
-    {
-    }
-
 }

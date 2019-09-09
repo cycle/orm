@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;

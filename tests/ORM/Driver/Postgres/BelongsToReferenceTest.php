@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres; 
+namespace Cycle\ORM\Tests\Driver\Postgres;
 
-class BelongsToReferenceTest extends \Cycle\ORM\Tests\BelongsToReferenceTest 
-{ 
-    const DRIVER = "postgres"; 
+class BelongsToReferenceTest extends \Cycle\ORM\Tests\BelongsToReferenceTest
+{
+    const DRIVER = "postgres";
 }

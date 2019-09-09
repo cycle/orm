@@ -17,10 +17,6 @@ use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
-if (!BaseTest::$config['benchmark']) {
-    return;
-}
-
 abstract class BenchmarkClasslessDoubleLinkedTest extends BaseTest
 {
     use TableTrait;

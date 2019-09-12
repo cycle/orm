@@ -23,7 +23,7 @@ Features:
 - works with directed graphs and cyclic graphs using command chains
 - designed to work in long-running applications, immutable service core, reconnects
 - supports MySQL, MariaDB, PostgresSQL, SQLServer, SQLite
-- schema scaffolding and migrations
+- schema scaffolding, introspection and migrations
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
 - disposable UoW, custom column types, FKs to non primary columns
 - use with or without annotations, proxy classes and auto-migrations 

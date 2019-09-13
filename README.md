@@ -21,13 +21,13 @@ Features:
 - column-to-field mapping, single table inheritance, value objects support
 - custom persist strategies, dirty state, safe entity map
 - works with directed graphs and cyclic graphs using command chains
-- designed to work in long-running applications, immutable service core, reconnects
+- designed to work in long-running applications, immutable service core
 - supports MySQL, MariaDB, PostgresSQL, SQLServer, SQLite
-- schema scaffolding, introspection and migrations
+- schema scaffolding, introspection, and migrations
 - supports global query constrains, UUIDs as PK, soft deletes, auto timestamps
-- disposable UoW, custom column types, FKs to non primary columns
-- use with or without annotations, proxy classes and auto-migrations 
-- compatible with Doctrine Collections, Doctrine Annotations and Zend Hydrator
+- disposable UoW, custom column types, FKs to non-primary columns
+- use with or without annotations, proxy classes, and auto-migrations 
+- compatible with Doctrine Collections, Doctrine Annotations, and Zend Hydrator
 
 Extensions:
 ---------

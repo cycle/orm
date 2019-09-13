@@ -5,7 +5,7 @@
 [![Codecov](https://codecov.io/gh/cycle/orm/graph/badge.svg)](https://codecov.io/gh/cycle/orm)
 <a href="https://discord.gg/TFeEmCs"><img src="https://img.shields.io/badge/discord-chat-magenta.svg"></a>
 
-Cycle is PHP DataMapper ORM and Data Modelling engine designed to safely work in classic and daemonized PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options to model datasets and support dynamic mapping schema at runtime. Engine can work with plain PHP objects, support annotation declarations and proxies via extensions.
+Cycle is PHP DataMapper ORM and Data Modelling engine designed to safely work in classic and daemonized PHP applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options to model datasets and supports dynamic mapping schema at runtime. The engine can work with plain PHP objects, support annotation declarations, and proxies via extensions.
 
 <p align="center">
 	<a href="https://github.com/cycle/docs"><b>Documentation</b></a> | <a href="https://github.com/cycle/docs/issues/3">Comparison with Eloquent and Doctrine</a>
@@ -41,4 +41,3 @@ cycle/migrations | [![Latest Stable Version](https://poser.pugx.org/cycle/migrat
 License:
 --------
 The MIT License (MIT). Please see [`LICENSE`](./LICENSE) for more information. Maintained by [Spiral Scout](https://spiralscout.com).
-

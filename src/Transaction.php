@@ -126,13 +126,13 @@ final class Transaction implements TransactionInterface
                 // we are ready to commit all changes to our representation layer
                 $this->syncHeap();
             }
+
+            // resetting the scope
+            $this->persist = $this->delete = [];
+            $this->known = new \SplObjectStorage();
         }
 
         $this->runner->complete();
-
-        // resetting the scope
-        $this->persist = $this->delete = [];
-        $this->known = new \SplObjectStorage();
     }
 
     /**

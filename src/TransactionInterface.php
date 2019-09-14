@@ -38,6 +38,8 @@ interface TransactionInterface
      * Execute all nested commands in transaction, if failed - transaction MUST automatically
      * rollback and exception instance MUST be thrown.
      *
+     * Attention, Transaction is clean after this invocation, you must assemble new transaction to retry.
+     *
      * @throws \Throwable
      */
     public function run();

@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.1.10 (14.09.2019)
+--------------------
+- Transaction object always empty after `run` method + docs
+
 v1.1.9 (28.08.2019)
 --------------------
 - added ability to easier query nested relations inside `with`->`where` conditions

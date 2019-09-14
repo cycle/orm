@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite; 
+namespace Cycle\ORM\Tests\Driver\SQLite;
 
-class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest 
-{ 
-    const DRIVER = "sqlite"; 
+class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest
+{
+    const DRIVER = "sqlite";
 }

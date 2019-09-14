@@ -11,5 +11,4 @@ namespace Cycle\ORM\Exception;
 
 class SelectorException extends ORMException
 {
-
 }

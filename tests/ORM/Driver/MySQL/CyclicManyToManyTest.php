@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class CyclicManyToManyTest extends \Cycle\ORM\Tests\CyclicManyToManyTest 
-{ 
-    const DRIVER = "mysql"; 
+class CyclicManyToManyTest extends \Cycle\ORM\Tests\CyclicManyToManyTest
+{
+    const DRIVER = "mysql";
 }

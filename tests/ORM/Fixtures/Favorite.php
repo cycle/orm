@@ -11,5 +11,4 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 class Favorite
 {
-
 }

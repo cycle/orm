@@ -22,7 +22,6 @@ final class Nil implements ContextCarrierInterface
      */
     public function waitContext(string $key, bool $required = true)
     {
-
     }
 
     /**

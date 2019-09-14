@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class InstantiatorTest extends \Cycle\ORM\Tests\InstantiatorTest 
-{ 
-    const DRIVER = "mysql"; 
+class InstantiatorTest extends \Cycle\ORM\Tests\InstantiatorTest
+{
+    const DRIVER = "mysql";
 }

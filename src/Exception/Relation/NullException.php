@@ -13,5 +13,4 @@ use Cycle\ORM\Exception\RelationException;
 
 class NullException extends RelationException
 {
-
 }

@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
 
-class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest 
-{ 
-    const DRIVER = "sqlserver"; 
+class ClasslessInverseRelationTest extends \Cycle\ORM\Tests\Classless\ClasslessInverseRelationTest
+{
+    const DRIVER = "sqlserver";
 }

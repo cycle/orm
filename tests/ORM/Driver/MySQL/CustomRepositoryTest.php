@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest 
-{ 
-    const DRIVER = "mysql"; 
+class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest
+{
+    const DRIVER = "mysql";
 }

@@ -16,16 +16,16 @@ use Cycle\ORM\Select;
 class UserPromise extends User implements PromiseInterface
 {
     /** @var ORMInterface|null @internal */
-    private $__orm;
+    private $orm;
 
     /** @var string|null */
-    private $__target;
+    private $target;
 
     /** @var array */
-    private $__scope;
+    private $scope;
 
     /** @var User */
-    private $__resolved;
+    private $resolved;
 
     /**
      * @param ORMInterface $orm
@@ -34,9 +34,9 @@ class UserPromise extends User implements PromiseInterface
      */
     public function __construct(ORMInterface $orm, string $target, array $scope)
     {
-        $this->__orm = $orm;
-        $this->__target = $target;
-        $this->__scope = $scope;
+        $this->orm = $orm;
+        $this->target = $target;
+        $this->scope = $scope;
     }
 
     /**
@@ -44,7 +44,7 @@ class UserPromise extends User implements PromiseInterface
      */
     public function __loaded(): bool
     {
-        return $this->__orm === null;
+        return $this->orm === null;
     }
 
     /**
@@ -52,7 +52,7 @@ class UserPromise extends User implements PromiseInterface
      */
     public function __role(): string
     {
-        return $this->__target;
+        return $this->target;
     }
 
     /**
@@ -60,7 +60,7 @@ class UserPromise extends User implements PromiseInterface
      */
     public function __scope(): array
     {
-        return $this->__scope;
+        return $this->scope;
     }
 
     /**
@@ -68,23 +68,23 @@ class UserPromise extends User implements PromiseInterface
      */
     public function __resolve()
     {
-        if (!is_null($this->__orm)) {
+        if (!is_null($this->orm)) {
             // entity has already been loaded in memory
-            if (!is_null($e = $this->__orm->getHeap()->find($this->__target, $this->__scope))) {
-                $this->__orm = null;
-                return $this->__resolved = $e;
+            if (!is_null($e = $this->orm->getHeap()->find($this->target, $this->scope))) {
+                $this->orm = null;
+                return $this->resolved = $e;
             }
 
             // Fetching from the database
-            $select = new Select($this->__orm, $this->__target);
-            $this->__resolved = $select->constrain(
-                $this->__orm->getSource($this->__target)->getConstrain()
-            )->fetchOne($this->__scope);
+            $select = new Select($this->orm, $this->target);
+            $this->resolved = $select->constrain(
+                $this->orm->getSource($this->target)->getConstrain()
+            )->fetchOne($this->scope);
 
-            $this->__orm = null;
+            $this->orm = null;
         }
 
-        return $this->__resolved;
+        return $this->resolved;
     }
 
     public function getID()

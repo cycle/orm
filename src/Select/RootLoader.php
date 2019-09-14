@@ -152,7 +152,6 @@ final class RootLoader extends AbstractLoader
      */
     protected function getColumns(): array
     {
-
         return $this->define(Schema::COLUMNS);
     }
 }

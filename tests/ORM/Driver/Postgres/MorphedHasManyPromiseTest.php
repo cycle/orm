@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres; 
+namespace Cycle\ORM\Tests\Driver\Postgres;
 
-class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest 
-{ 
-    const DRIVER = "postgres"; 
+class MorphedHasManyPromiseTest extends \Cycle\ORM\Tests\Morphed\MorphedHasManyPromiseTest
+{
+    const DRIVER = "postgres";
 }

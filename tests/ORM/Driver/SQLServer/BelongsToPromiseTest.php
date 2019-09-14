@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
 
-class BelongsToPromiseTest extends \Cycle\ORM\Tests\BelongsToPromiseTest 
-{ 
-    const DRIVER = "sqlserver"; 
+class BelongsToPromiseTest extends \Cycle\ORM\Tests\BelongsToPromiseTest
+{
+    const DRIVER = "sqlserver";
 }

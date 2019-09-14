@@ -50,7 +50,8 @@ abstract class TableRendererTest extends BaseTest
             [
                 'id'   => 'primary',
                 'name' => 'string'
-            ], [
+            ],
+            [
                 'name' => null
             ]
         );

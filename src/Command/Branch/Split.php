@@ -12,7 +12,8 @@ namespace Cycle\ORM\Command\Branch;
 use Cycle\ORM\Command\ContextCarrierInterface;
 
 /**
- * Splits input context command into 2 destinations: original create command (usually insert) and delayed update command.
+ * Splits input context command into 2 destinations:
+ * original create command (usually insert) and delayed update command.
  * Used to properly unfold cyclic graphs by keeping the reference data in update and solves the issue of multiple
  * parent by sending the data to the first command.
  *

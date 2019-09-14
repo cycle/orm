@@ -23,7 +23,8 @@ use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
 /**
- * This tests provides ability to create deep linked trees using pivoted entity. We did not plan to have such functionality
+ * This tests provides ability to create deep linked trees using pivoted entity.
+ * We did not plan to have such functionality
  * but the side effect of having pivot loader to behave as normal made it possible.
  */
 abstract class ManyToManyDeepenedTest extends BaseTest

@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class EmbeddedLoaderTest extends \Cycle\ORM\Tests\EmbeddedLoaderTest 
-{ 
-    const DRIVER = "mysql"; 
+class EmbeddedLoaderTest extends \Cycle\ORM\Tests\EmbeddedLoaderTest
+{
+    const DRIVER = "mysql";
 }

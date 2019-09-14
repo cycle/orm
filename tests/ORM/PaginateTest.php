@@ -32,7 +32,6 @@ abstract class PaginateTest extends BaseTest
         ]);
 
         for ($i = 0; $i < 100; $i++) {
-
             $this->getDatabase()->table('user')->insertMultiple(['email', 'balance'], [
                 [$i . '@world.com', $i * 100],
             ]);

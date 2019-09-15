@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.1.11 (15.09.2019)
+--------------------
+- added support for Zend/Hydrator 3.0
+
 v1.1.10 (14.09.2019)
 --------------------
 - Transaction object always empty after `run` method + docs

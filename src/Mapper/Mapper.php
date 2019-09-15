@@ -46,7 +46,12 @@ class Mapper extends DatabaseMapper
         $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
 
-        $this->hydrator = new Hydrator\Reflection();
+        if (class_exists('Zend\Hydrator\ReflectionHydrator')) {
+            $this->hydrator = new Hydrator\ReflectionHydrator();
+        } else {
+            $this->hydrator = new Hydrator\Reflection();
+        }
+
         $this->instantiator = new Instantiator\Instantiator();
     }
 

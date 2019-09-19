@@ -1,5 +1,11 @@
 # CHANGELOG 
 
+v1.1.12 (19.09.2019)
+--------------------
+- joined filters are always called prior to joined loaders
+- ability to reference the column of joined relation in loaded relation where condition while using INLOAD
+- added constants for relation fetch methods `Select::SINGLE_QUERY` and `Select::OUTER_QUERY`
+
 v1.1.11 (15.09.2019)
 --------------------
 - added support for Zend/Hydrator 3.0

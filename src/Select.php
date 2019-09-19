@@ -12,6 +12,7 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Parser\OutputNode;
 use Cycle\ORM\Select\ConstrainInterface;
+use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use Spiral\Database\Query\SelectQuery;
@@ -38,6 +39,12 @@ use Spiral\Pagination\PaginableInterface;
  */
 final class Select implements \IteratorAggregate, \Countable, PaginableInterface
 {
+    // load relation data within same query
+    public const SINGLE_QUERY = JoinableLoader::INLOAD;
+
+    // load related data after the query
+    public const OUTER_QUERY = JoinableLoader::POSTLOAD;
+
     /** @var ORMInterface @internal */
     private $orm;
 

@@ -261,14 +261,15 @@ abstract class AbstractLoader implements LoaderInterface
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         $query = $this->applyConstrain(clone $query);
+
+        foreach ($this->join as $loader) {
+            $query = $loader->configureQuery($query);
+        }
+
         foreach ($this->load as $loader) {
             if ($loader instanceof JoinableInterface && $loader->isJoined()) {
                 $query = $loader->configureQuery($query);
             }
-        }
-
-        foreach ($this->join as $loader) {
-            $query = $loader->configureQuery($query);
         }
 
         return $query;

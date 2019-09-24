@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.1.14 (24.09.2019)
+--------------------
+- added shortcut to specify relation load constrains using `load` option
+
 v1.1.13 (24.09.2019)
 --------------------
 - cyclic relations initialization only applied to non-resolved entity references

@@ -132,7 +132,7 @@ final class ORM implements ORMInterface
                 $node = $this->heap->get($e);
 
                 // entity already been loaded, let's update it's relations with new context
-                // update will only be applied for non-resolved relation promises
+                // update will only be applied for non-resolved cyclic relation promises
                 return $m->hydrate(
                     $e,
                     $this->getRelationMap($role)->merge($node, $data, $m->extract($e))

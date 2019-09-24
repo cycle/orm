@@ -32,6 +32,14 @@ jobs:
   include:
     # Testing various PostgresSQL version
     - stage: Test
+      php: 7.4snapshot
+      before_install:
+        - echo "Testing SQLite on 7.4"
+      script:
+        - vendor/bin/phpunit tests/ORM/Driver/SQLite
+
+    # Testing various PostgresSQL version
+    - stage: Test
       php: 7.2
       addons:
         postgresql: "9.2"

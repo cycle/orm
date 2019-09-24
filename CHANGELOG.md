@@ -1,5 +1,10 @@
 # CHANGELOG 
 
+v1.1.13 (24.09.2019)
+--------------------
+- cyclic relations initialization only applied to non-resolved entity references
+- bugfix: entity columns and relations are no longer altered if entity fetched from database multiple times #33
+
 v1.1.12 (19.09.2019)
 --------------------
 - joined filters are always called prior to joined loaders

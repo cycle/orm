@@ -48,10 +48,10 @@ final class Relation
     public const WHERE = 41;
 
     // Many-To-Many relation(s) options
-    public const THOUGH_INNER_KEY = 50;
-    public const THOUGH_OUTER_KEY = 51;
-    public const THOUGH_ENTITY    = 52;
-    public const THOUGH_WHERE     = 54;
+    public const THROUGH_INNER_KEY = 50;
+    public const THROUGH_OUTER_KEY = 51;
+    public const THROUGH_ENTITY    = 52;
+    public const THROUGH_WHERE     = 54;
 
     // Relation pre-fetch mode
     public const LOAD_PROMISE = 10;

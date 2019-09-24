@@ -570,12 +570,12 @@ abstract class ManyToManyConstrainTest extends BaseTest
                         Relation::TARGET => Tag::class,
                         Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                                Relation::CASCADE          => true,
-                                Relation::THOUGH_ENTITY    => TagContext::class,
-                                Relation::INNER_KEY        => 'id',
-                                Relation::OUTER_KEY        => 'id',
-                                Relation::THOUGH_INNER_KEY => 'user_id',
-                                Relation::THOUGH_OUTER_KEY => 'tag_id',
+                                Relation::CASCADE           => true,
+                                Relation::THROUGH_ENTITY    => TagContext::class,
+                                Relation::INNER_KEY         => 'id',
+                                Relation::OUTER_KEY         => 'id',
+                                Relation::THROUGH_INNER_KEY => 'user_id',
+                                Relation::THROUGH_OUTER_KEY => 'tag_id',
                             ] + $rSchema,
                     ]
                 ]

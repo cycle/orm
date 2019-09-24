@@ -41,9 +41,9 @@ class ManyToMany extends Relation\AbstractRelation
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
-        $this->pivotEntity = $this->schema[Relation::THOUGH_ENTITY] ?? null;
-        $this->thoughtInnerKey = $this->schema[Relation::THOUGH_INNER_KEY] ?? null;
-        $this->thoughtOuterKey = $this->schema[Relation::THOUGH_OUTER_KEY] ?? null;
+        $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY] ?? null;
+        $this->thoughtInnerKey = $this->schema[Relation::THROUGH_INNER_KEY] ?? null;
+        $this->thoughtOuterKey = $this->schema[Relation::THROUGH_OUTER_KEY] ?? null;
     }
 
     /**

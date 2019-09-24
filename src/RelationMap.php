@@ -83,6 +83,40 @@ final class RelationMap
     }
 
     /**
+     * Init non initialized reference relations with real entities.
+     *
+     * @param Node  $node
+     * @param array $data
+     * @param array $current
+     * @return array
+     */
+    public function merge(Node $node, array $data, array $current): array
+    {
+        $merged = [];
+        foreach ($this->relations as $name => $relation) {
+            if (!array_key_exists($name, $data)) {
+                continue;
+            }
+
+            // automatically resolve entity pointers (cyclic relations)
+            if ($this->sameReference($current[$name] ?? null, $node->getRelation($name))) {
+                $item = $data[$name];
+                if (is_object($item) || $item === null) {
+                    $merged[$name] = $item;
+                    $node->setRelation($name, $item);
+                    continue;
+                }
+
+                // init relation for the entity and for state and the same time
+                list($merged[$name], $orig) = $relation->init($node, $item);
+                $node->setRelation($name, $orig);
+            }
+        }
+
+        return $merged;
+    }
+
+    /**
      * Queue entity relations.
      *
      * @param CC     $parentStore
@@ -141,7 +175,7 @@ final class RelationMap
             }
         }
 
-        if (count($sequence) === 1) {
+        if (\count($sequence) === 1) {
             return current($sequence->getCommands());
         }
 
@@ -184,5 +218,21 @@ final class RelationMap
         $parentNode->getState()->setRelation($relation->getName(), $related);
 
         return $relStore;
+    }
+
+    /**
+     * Check if both references are equal.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     * @return bool
+     */
+    private function sameReference($a, $b): bool
+    {
+        if (!$a instanceof ReferenceInterface || !$b instanceof ReferenceInterface) {
+            return false;
+        }
+
+        return $a->__role() === $b->__role() && $a->__scope() === $b->__scope();
     }
 }

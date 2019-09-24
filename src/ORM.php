@@ -127,11 +127,16 @@ final class ORM implements ORMInterface
 
         if ($node !== Node::NEW && !empty($id)) {
             $e = $this->heap->find($role, [$pk => $id]);
+
             if ($e !== null) {
                 $node = $this->heap->get($e);
 
                 // entity already been loaded, let's update it's relations with new context
-                return $m->hydrate($e, $this->getRelationMap($role)->init($node, $data));
+                // update will only be applied for non-resolved relation promises
+                return $m->hydrate(
+                    $e,
+                    $this->getRelationMap($role)->merge($node, $data, $m->extract($e))
+                );
             }
         }
 
@@ -258,13 +263,13 @@ final class ORM implements ORMInterface
 
         $source = new Source(
             $this->factory->database($this->schema->define($role, Schema::DATABASE)),
-            $this->schema->define($role, Schema::TABLE)
+            (string)$this->schema->define($role, Schema::TABLE)
         );
 
         $constrain = $this->schema->define($role, Schema::CONSTRAIN);
         if ($constrain !== null) {
             $source = $source->withConstrain(
-                is_object($constrain) ? $constrain : $this->factory->make($constrain)
+                is_object($constrain) ? $constrain : $this->factory->make((string)$constrain)
             );
         }
 
@@ -292,7 +297,7 @@ final class ORM implements ORMInterface
      */
     public function promise(string $role, array $scope)
     {
-        if (count($scope) === 1) {
+        if (\count($scope) === 1) {
             $e = $this->heap->find($role, $scope);
             if ($e !== null) {
                 return $e;

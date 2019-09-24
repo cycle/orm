@@ -649,4 +649,64 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertInstanceOf(User::class, $result[0]);
         $this->assertEquals(1, $result[0]->id);
     }
+
+    public function testDoNotOverwriteRelation()
+    {
+        $select = new Select($this->orm, User::class);
+
+        $u = $select->load('profile')->wherePK(1)->fetchOne();
+
+        $newProfile = new Profile();
+        $newProfile->image = 'new';
+        $u->profile = $newProfile;
+
+        $u2 = $this->orm->getRepository(User::class)->findByPK(1);
+        $this->assertSame('new', $u2->profile->image);
+
+        $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
+            ->select()->load('profile')->wherePK(1)->fetchOne();
+
+        $this->assertSame('image.png', $u3->profile->image);
+
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+
+        $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
+            ->select()->load('profile')->wherePK(1)->fetchOne();
+
+        $this->assertSame('new', $u4->profile->image);
+    }
+
+    public function testDoNotOverwritePromisedRelation()
+    {
+        $select = new Select($this->orm, User::class);
+        $u = $select->wherePK(1)->fetchOne();
+
+        $newProfile = new Profile();
+        $newProfile->image = 'new';
+        $u->profile = $newProfile;
+
+        // relation is already set prior to loading
+        $u2 = $this->orm->getRepository(User::class)
+            ->select()
+            ->load('profile')
+            ->wherePK(1)->fetchOne();
+
+        $this->assertSame('new', $u2->profile->image);
+
+        $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
+            ->select()->load('profile')->wherePK(1)->fetchOne();
+
+        $this->assertSame('image.png', $u3->profile->image);
+
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+
+        $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
+            ->select()->load('profile')->wherePK(1)->fetchOne();
+
+        $this->assertSame('new', $u4->profile->image);
+    }
 }

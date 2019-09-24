@@ -53,6 +53,18 @@ final class Relation
     public const THROUGH_ENTITY    = 52;
     public const THROUGH_WHERE     = 54;
 
+    /** @deprecated  */
+    public const THOUGH_INNER_KEY = 50;
+
+    /** @deprecated  */
+    public const THOUGH_OUTER_KEY = 51;
+
+    /** @deprecated  */
+    public const THOUGH_ENTITY    = 52;
+
+    /** @deprecated  */
+    public const THOUGH_WHERE     = 54;
+
     // Relation pre-fetch mode
     public const LOAD_PROMISE = 10;
     public const LOAD_EAGER   = 11;

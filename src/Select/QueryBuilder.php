@@ -275,7 +275,7 @@ final class QueryBuilder
     }
 
     /**
-     * Walk thought method arguments using given function.
+     * Walk through method arguments using given function.
      *
      * @param array    $input
      * @param callable $func

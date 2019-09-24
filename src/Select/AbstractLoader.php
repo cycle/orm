@@ -215,7 +215,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function loadData(AbstractNode $node)
     {
-        // loading data thought child loaders
+        // loading data through child loaders
         foreach ($this->load as $relation => $loader) {
             $loader->loadData($node->getNode($relation));
         }

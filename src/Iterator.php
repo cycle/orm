@@ -46,7 +46,7 @@ final class Iterator implements \IteratorAggregate
     public function getIterator(): \Generator
     {
         foreach ($this->source as $index => $data) {
-            // though-like relations
+            // through-like relations
             if (isset($data['@'])) {
                 $index = $data;
                 unset($index['@']);

@@ -14,7 +14,7 @@ use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 
 /**
- * Node (metadata) carries meta information about entity state, changes forwards data to other points thought
+ * Node (metadata) carries meta information about entity state, changes forwards data to other points through
  * inner states.
  */
 final class Node implements ProducerInterface, ConsumerInterface

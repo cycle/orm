@@ -27,10 +27,10 @@ class ManyToMany extends Relation\AbstractRelation
     private $pivotEntity;
 
     /** @var string */
-    protected $thoughtInnerKey;
+    protected $throughInnerKey;
 
     /** @var string */
-    protected $thoughtOuterKey;
+    protected $throughOuterKey;
 
     /**
      * @param ORMInterface $orm
@@ -42,8 +42,8 @@ class ManyToMany extends Relation\AbstractRelation
     {
         parent::__construct($orm, $name, $target, $schema);
         $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY] ?? null;
-        $this->thoughtInnerKey = $this->schema[Relation::THROUGH_INNER_KEY] ?? null;
-        $this->thoughtOuterKey = $this->schema[Relation::THROUGH_OUTER_KEY] ?? null;
+        $this->throughInnerKey = $this->schema[Relation::THROUGH_INNER_KEY] ?? null;
+        $this->throughOuterKey = $this->schema[Relation::THROUGH_OUTER_KEY] ?? null;
     }
 
     /**
@@ -172,7 +172,7 @@ class ManyToMany extends Relation\AbstractRelation
             $this->innerKey,
             $pStore,
             $pNode,
-            $this->thoughtInnerKey
+            $this->throughInnerKey
         );
 
         $this->forwardContext(
@@ -180,7 +180,7 @@ class ManyToMany extends Relation\AbstractRelation
             $this->outerKey,
             $pStore,
             $pNode,
-            $this->thoughtOuterKey
+            $this->throughOuterKey
         );
 
         $sequence = new Sequence();

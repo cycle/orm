@@ -92,7 +92,7 @@ final class Schema implements SchemaInterface
      */
     public function resolveAlias(string $entity): ?string
     {
-        // walk thought all children until parent entity found
+        // walk throught all children until parent entity found
         while (isset($this->aliases[$entity])) {
             $entity = $this->aliases[$entity];
         }

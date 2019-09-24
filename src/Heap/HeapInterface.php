@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Heap;
 
 /**
- * Manages set of entities, their states and quick access though indexes.
+ * Manages set of entities, their states and quick access through indexes.
  */
 interface HeapInterface
 {

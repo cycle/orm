@@ -50,7 +50,7 @@ trait ChainTrait
             );
         }
 
-        // load nested relation thought chain (chainOptions prior to user options)
+        // load nested relation through chain (chainOptions prior to user options)
         return $child->loadRelation(substr($chain, $position + 1), $options, $join, $load);
     }
 

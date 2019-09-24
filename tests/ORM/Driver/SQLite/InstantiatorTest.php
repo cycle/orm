@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class InstantiatorTest extends \Cycle\ORM\Tests\InstantiatorTest
-{
-    const DRIVER = "sqlite";
+class InstantiatorTest extends \Cycle\ORM\Tests\InstantiatorTest 
+{ 
+    const DRIVER = "sqlite"; 
 }

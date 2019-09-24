@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class ManyToManyPromiseTest extends \Cycle\ORM\Tests\ManyToManyPromiseTest
-{
-    const DRIVER = "postgres";
+class ManyToManyPromiseTest extends \Cycle\ORM\Tests\ManyToManyPromiseTest 
+{ 
+    const DRIVER = "postgres"; 
 }

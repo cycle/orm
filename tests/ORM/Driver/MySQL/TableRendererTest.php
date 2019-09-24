@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class TableRendererTest extends \Cycle\ORM\Tests\TableRendererTest
-{
-    const DRIVER = "mysql";
+class TableRendererTest extends \Cycle\ORM\Tests\TableRendererTest 
+{ 
+    const DRIVER = "mysql"; 
 }

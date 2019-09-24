@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class HasManySourceTest extends \Cycle\ORM\Tests\HasManySourceTest
-{
-    const DRIVER = "sqlite";
+class HasManySourceTest extends \Cycle\ORM\Tests\HasManySourceTest 
+{ 
+    const DRIVER = "sqlite"; 
 }

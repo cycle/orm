@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer;
+namespace Cycle\ORM\Tests\Driver\SQLServer; 
 
-class MapperTest extends \Cycle\ORM\Tests\MapperTest
-{
-    const DRIVER = "sqlserver";
+class MapperTest extends \Cycle\ORM\Tests\MapperTest 
+{ 
+    const DRIVER = "sqlserver"; 
 }

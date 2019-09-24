@@ -38,6 +38,7 @@ class ManyToManyLoader extends JoinableLoader
         'as'        => null,
         'using'     => null,
         'where'     => null,
+        'pivot'     => null
     ];
 
     /** @var PivotLoader */
@@ -94,10 +95,10 @@ class ManyToManyLoader extends JoinableLoader
         bool $join = false,
         bool $load = false
     ): LoaderInterface {
-        if ($relation == '@') {
+        if ($relation === '@' || $relation === '@.@') {
             unset($options['method']);
-
-            if (!empty($options)) {
+            if ($options !== []) {
+                // re-configure
                 $this->pivot = $this->pivot->withContext($this, $options);
             }
 

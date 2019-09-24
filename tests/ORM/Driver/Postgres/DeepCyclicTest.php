@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class DeepCyclicTest extends \Cycle\ORM\Tests\DeepCyclicTest
-{
-    const DRIVER = "postgres";
+class DeepCyclicTest extends \Cycle\ORM\Tests\DeepCyclicTest 
+{ 
+    const DRIVER = "postgres"; 
 }

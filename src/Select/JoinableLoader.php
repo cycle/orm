@@ -214,6 +214,15 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 // this is initial set of columns (remove all existed)
                 $this->mountColumns($query, $this->options['minify'], '', true);
             }
+
+            // custom load constrains
+            if ($this->options['load'] instanceof \Closure) {
+
+                $proxy = new QueryBuilder($this->orm, $query, $this);
+                $proxy = $proxy->withForward($this->isJoined() ? 'onWhere' : 'where');
+
+                call_user_func($this->options['load'], $proxy);
+            }
         }
 
         return parent::configureQuery($query);

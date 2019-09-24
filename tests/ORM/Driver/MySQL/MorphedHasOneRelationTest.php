@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class MorphedHasOneRelationTest extends \Cycle\ORM\Tests\Morphed\MorphedHasOneRelationTest
-{
-    const DRIVER = "mysql";
+class MorphedHasOneRelationTest extends \Cycle\ORM\Tests\Morphed\MorphedHasOneRelationTest 
+{ 
+    const DRIVER = "mysql"; 
 }

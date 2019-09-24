@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest
-{
-    const DRIVER = "postgres";
+class SoftDeletesTest extends \Cycle\ORM\Tests\SoftDeletesTest 
+{ 
+    const DRIVER = "postgres"; 
 }

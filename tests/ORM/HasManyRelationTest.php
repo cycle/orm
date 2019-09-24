@@ -141,6 +141,7 @@ abstract class HasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
+
     public function testFetchRelationInload()
     {
         $selector = new Select($this->orm, User::class);
@@ -166,6 +167,89 @@ abstract class HasManyRelationTest extends BaseTest
                         'id'      => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
+                    ],
+                ],
+            ],
+            [
+                'id'       => 2,
+                'email'    => 'another@world.com',
+                'balance'  => 200.0,
+                'comments' => [],
+            ],
+        ], $selector->fetchData());
+    }
+
+    public function testFetchRelationLoaded()
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->load('comments', [
+            'load' => function (Select\QueryBuilder $q) {
+                $q->orderBy('id', 'DESC');
+            }
+        ])->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'       => 1,
+                'email'    => 'hello@world.com',
+                'balance'  => 100.0,
+                'comments' => [
+                    [
+                        'id'      => 3,
+                        'user_id' => 1,
+                        'message' => 'msg 3',
+                    ],
+                    [
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'message' => 'msg 2',
+                    ],
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'message' => 'msg 1',
+                    ],
+                ],
+            ],
+            [
+                'id'       => 2,
+                'email'    => 'another@world.com',
+                'balance'  => 200.0,
+                'comments' => [],
+            ],
+        ], $selector->fetchData());
+    }
+
+    public function testFetchRelationLoadedInload()
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->load('comments', [
+            'method' => Select::SINGLE_QUERY,
+            'load'   => function (Select\QueryBuilder $q) {
+                $q->orderBy('id', 'DESC');
+            }
+        ])->orderBy('user.id');
+
+        $this->assertEquals([
+            [
+                'id'       => 1,
+                'email'    => 'hello@world.com',
+                'balance'  => 100.0,
+                'comments' => [
+                    [
+                        'id'      => 3,
+                        'user_id' => 1,
+                        'message' => 'msg 3',
+                    ],
+                    [
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'message' => 'msg 2',
+                    ],
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'message' => 'msg 1',
                     ],
                 ],
             ],

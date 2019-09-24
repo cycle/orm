@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres;
+namespace Cycle\ORM\Tests\Driver\Postgres; 
 
-class UUIDTest extends \Cycle\ORM\Tests\UUIDTest
-{
-    const DRIVER = "postgres";
+class UUIDTest extends \Cycle\ORM\Tests\UUIDTest 
+{ 
+    const DRIVER = "postgres"; 
 }

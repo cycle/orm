@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite;
+namespace Cycle\ORM\Tests\Driver\SQLite; 
 
-class HasOneProxyTest extends \Cycle\ORM\Tests\HasOneProxyTest
-{
-    const DRIVER = "sqlite";
+class HasOneProxyTest extends \Cycle\ORM\Tests\HasOneProxyTest 
+{ 
+    const DRIVER = "sqlite"; 
 }

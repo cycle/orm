@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL;
+namespace Cycle\ORM\Tests\Driver\MySQL; 
 
-class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest
-{
-    const DRIVER = "mysql";
+class QueryBuilderTest extends \Cycle\ORM\Tests\QueryBuilderTest 
+{ 
+    const DRIVER = "mysql"; 
 }

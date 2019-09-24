@@ -123,9 +123,9 @@ abstract class AbstractLoader implements LoaderInterface
      * Load the relation.
      *
      * @param string $relation Relation name, or chain of relations separated by.
-     * @param array  $options Loader options (to be applied to last chain element only).
-     * @param bool   $join When set to true loaders will be forced into JOIN mode.
-     * @param bool   $load Load relation data.
+     * @param array  $options  Loader options (to be applied to last chain element only).
+     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
+     * @param bool   $load     Load relation data.
      * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
@@ -157,7 +157,7 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         if ($load) {
-            $options['load'] = true;
+            $options['load'] = $options['load'] ?? true;
         }
 
         if (isset($loaders[$relation])) {

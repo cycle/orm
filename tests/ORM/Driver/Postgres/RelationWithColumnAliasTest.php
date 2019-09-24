@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\Postgres; 
+namespace Cycle\ORM\Tests\Driver\Postgres;
 
-class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest 
-{ 
-    const DRIVER = "postgres"; 
+class RelationWithColumnAliasTest extends \Cycle\ORM\Tests\RelationWithColumnAliasTest
+{
+    const DRIVER = "postgres";
 }

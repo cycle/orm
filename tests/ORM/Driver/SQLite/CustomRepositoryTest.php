@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLite; 
+namespace Cycle\ORM\Tests\Driver\SQLite;
 
-class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest 
-{ 
-    const DRIVER = "sqlite"; 
+class CustomRepositoryTest extends \Cycle\ORM\Tests\CustomRepositoryTest
+{
+    const DRIVER = "sqlite";
 }

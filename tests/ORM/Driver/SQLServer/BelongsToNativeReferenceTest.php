@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
 
-class BelongsToNativeReferenceTest extends \Cycle\ORM\Tests\BelongsToNativeReferenceTest 
-{ 
-    const DRIVER = "sqlserver"; 
+class BelongsToNativeReferenceTest extends \Cycle\ORM\Tests\BelongsToNativeReferenceTest
+{
+    const DRIVER = "sqlserver";
 }

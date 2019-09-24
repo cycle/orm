@@ -21,8 +21,7 @@ class ConditionCommandTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->testCommand = new class implements CommandInterface
-        {
+        $this->testCommand = new class implements CommandInterface {
             private $executed = false;
 
             public function isReady(): bool

@@ -217,7 +217,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
             // custom load constrains
             if ($this->options['load'] instanceof \Closure) {
-
                 $proxy = new QueryBuilder($this->orm, $query, $this);
                 $proxy = $proxy->withForward($this->isJoined() ? 'onWhere' : 'where');
 

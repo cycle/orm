@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\SQLServer; 
+namespace Cycle\ORM\Tests\Driver\SQLServer;
 
-class ManyToManyConstrainedPivotTest extends \Cycle\ORM\Tests\ManyToManyConstrainedPivotTest 
-{ 
-    const DRIVER = "sqlserver"; 
+class ManyToManyConstrainedPivotTest extends \Cycle\ORM\Tests\ManyToManyConstrainedPivotTest
+{
+    const DRIVER = "sqlserver";
 }

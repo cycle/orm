@@ -7,9 +7,9 @@
  */
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Driver\MySQL; 
+namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class ManyToManyConstrainedTest extends \Cycle\ORM\Tests\ManyToManyConstrainedTest 
-{ 
-    const DRIVER = "mysql"; 
+class ManyToManyConstrainedTest extends \Cycle\ORM\Tests\ManyToManyConstrainedTest
+{
+    const DRIVER = "mysql";
 }

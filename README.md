@@ -48,7 +48,7 @@ $users = $orm->getRepository(User::class)
     ->select()
     ->where('active', true)
     ->load('orders', [
-    	'method' => Select::SINGLE_QUERY, // all *-many relations loaded using WHERE IN by default
+    	'method' => Select::SINGLE_QUERY, // by default all *-many relations loaded using WHERE IN 
         'load'   => function($q){
             $q->where('paid', true)->orderBy('timeCreated', 'DESC');
         }

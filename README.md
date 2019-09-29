@@ -37,7 +37,8 @@ $users = $orm->getRepository(User::class)
     ->select()
     ->where('active', true)
     ->load('orders', [
-        'load' => function($q){
+    	'method' => Select::SINGLE_QUERY,
+        'load'   => function($q){
             $q->where('paid', true)->orderBy('timeCreated', 'DESC');
         }
     ])

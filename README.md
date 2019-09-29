@@ -29,6 +29,29 @@ Features:
 - use with or without annotations, proxy classes, and auto-migrations 
 - compatible with Doctrine Collections, Doctrine Annotations, and Zend Hydrator
 
+Example
+---------
+
+```php
+$users = $orm->getRepository(User::class)
+    ->select()
+    ->where('active', true)
+    ->load('orders', [
+        'load' => function($q){
+	     $q->where('paid', true)->orderBy('timeCreated', 'DESC');
+        }
+    ])
+    ->fetchAll();
+
+$t = new Transaction($orm);
+
+foreach($users as $user) {
+    $t->persist($user);
+}
+
+$t->run();
+```
+
 Extensions:
 ---------
 | Component | Current Status        

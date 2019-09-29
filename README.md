@@ -38,7 +38,7 @@ $users = $orm->getRepository(User::class)
     ->where('active', true)
     ->load('orders', [
         'load' => function($q){
-	     $q->where('paid', true)->orderBy('timeCreated', 'DESC');
+            $q->where('paid', true)->orderBy('timeCreated', 'DESC');
         }
     ])
     ->fetchAll();

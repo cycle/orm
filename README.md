@@ -33,6 +33,8 @@ Example
 ---------
 
 ```php
+// load all active users and pre-load their paid orders sorted from newest to olders
+// the pre-load will be complete using LEFT JOIN
 $users = $orm->getRepository(User::class)
     ->select()
     ->where('active', true)

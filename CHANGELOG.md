@@ -1,5 +1,10 @@
 # CHANGELOG 
 
+v1.1.15 (02.10.2019)
+--------------------
+- minimum PHP version is set as 7.2 as stated in documentation
+- fixed typo THOUGH => THROUGH, old constants marked as deprecated 
+
 v1.1.14 (24.09.2019)
 --------------------
 - added shortcut to specify relation load constrains using `load` option

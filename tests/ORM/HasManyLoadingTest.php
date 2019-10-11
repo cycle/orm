@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -28,7 +29,7 @@ abstract class HasManyLoadingTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -97,7 +98,7 @@ abstract class HasManyLoadingTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
@@ -134,11 +135,11 @@ abstract class HasManyLoadingTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchRelationLoaded()
+    public function testFetchRelationLoaded(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', [
-            'load' => function (Select\QueryBuilder $q) {
+            'load' => function (Select\QueryBuilder $q): void {
                 $q->orderBy('id', 'DESC');
             }
         ])->orderBy('user.id');
@@ -175,12 +176,12 @@ abstract class HasManyLoadingTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchRelationLoadedInload()
+    public function testFetchRelationLoadedInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', [
             'method' => Select::SINGLE_QUERY,
-            'load'   => function (Select\QueryBuilder $q) {
+            'load'   => function (Select\QueryBuilder $q): void {
                 $q->orderBy('id', 'DESC');
             }
         ])->orderBy('user.id');

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,7 +25,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -86,7 +87,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         );
     }
 
-    public function testOrderedByScope()
+    public function testOrderedByScope(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC'])
@@ -103,17 +104,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedByScopeDESC()
+    public function testOrderedByScopeDESC(): void
     {
         $this->orm = $this->withTagSchema([]);
 
@@ -130,17 +131,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[3]->name);
-        $this->assertSame("tag b", $a->tags[2]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testScopeInload()
+    public function testScopeInload(): void
     {
         $this->orm = $this->withTagSchema([]);
 
@@ -158,17 +159,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCInload()
+    public function testOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([]);
 
@@ -186,17 +187,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[3]->name);
-        $this->assertSame("tag b", $a->tags[2]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testGlobalConstrain()
+    public function testGlobalConstrain(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class       => [
@@ -259,17 +260,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(0);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testGlobalConstrainDESC()
+    public function testGlobalConstrainDESC(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class       => [
@@ -332,17 +333,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(0);
 
-        $this->assertSame("tag a", $a->tags[3]->name);
-        $this->assertSame("tag b", $a->tags[2]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testGlobalConstrainDESCButASC()
+    public function testGlobalConstrainDESCButASC(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class       => [
@@ -407,17 +408,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(0);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testGlobalConstrainPromised()
+    public function testGlobalConstrainPromised(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class       => [
@@ -481,17 +482,17 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(2);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testGlobalConstrainDESCPromised()
+    public function testGlobalConstrainDESCPromised(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class       => [
@@ -555,14 +556,14 @@ abstract class ManyToManyConstrainedTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(2);
 
-        $this->assertSame("tag a", $a->tags[3]->name);
-        $this->assertSame("tag b", $a->tags[2]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
     protected function withTagSchema(array $tagSchema)

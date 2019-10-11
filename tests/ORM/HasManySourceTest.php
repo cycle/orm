@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,7 @@ abstract class HasManySourceTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -95,7 +96,7 @@ abstract class HasManySourceTest extends BaseTest
         ]));
     }
 
-    public function testSelectUsers()
+    public function testSelectUsers(): void
     {
         $s = new Select($this->orm, User::class);
         $res = $s->orderBy('user.id')->fetchAll();
@@ -105,7 +106,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('another@world.com', $res[1]->email);
     }
 
-    public function testSelectUsersWithScope()
+    public function testSelectUsersWithScope(): void
     {
         $s = new Select($this->orm, User::class);
         $res = $s->constrain(new Select\QueryConstrain(['@.balance' => 100]))->fetchAll();
@@ -114,7 +115,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('hello@world.com', $res[0]->email);
     }
 
-    public function testSelectUserScopeCanNotBeOverwritten()
+    public function testSelectUserScopeCanNotBeOverwritten(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain(['@.balance' => 100]));
@@ -124,7 +125,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertCount(0, $res);
     }
 
-    public function testSelectUserScopeCanNotBeOverwritten2()
+    public function testSelectUserScopeCanNotBeOverwritten2(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain(['@.balance' => 100]));
@@ -134,7 +135,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertCount(0, $res);
     }
 
-    public function testScopeWithOrderBy()
+    public function testScopeWithOrderBy(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
@@ -146,7 +147,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('hello@world.com', $res[1]->email);
     }
 
-    public function testRelated()
+    public function testRelated(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
@@ -170,7 +171,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testRelatedScope()
+    public function testRelatedScope(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
@@ -187,7 +188,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 4', $a->comments[0]->message);
     }
 
-    public function testRelatedScopeInload()
+    public function testRelatedScopeInload(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
@@ -205,7 +206,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 4', $a->comments[0]->message);
     }
 
-    public function testRelatedScopeOrdered()
+    public function testRelatedScopeOrdered(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
@@ -225,7 +226,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 2.3', $b->comments[0]->message);
     }
 
-    public function testRelatedScopeOrderedInload()
+    public function testRelatedScopeOrderedInload(): void
     {
         $s = new Select($this->orm, User::class);
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
@@ -246,7 +247,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 2.3', $b->comments[0]->message);
     }
 
-    public function testScopeViaMapperRelation()
+    public function testScopeViaMapperRelation(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -297,7 +298,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 2.3', $b->comments[0]->message);
     }
 
-    public function testScopeViaMapperRelationInload()
+    public function testScopeViaMapperRelationInload(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -350,7 +351,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 2.3', $b->comments[0]->message);
     }
 
-    public function testScopeViaMapperRelationPromise()
+    public function testScopeViaMapperRelationPromise(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -402,7 +403,7 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 2.3', $b->comments[0]->message);
     }
 
-    public function testScopeViaMapperRelationPromiseShort()
+    public function testScopeViaMapperRelationPromiseShort(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [

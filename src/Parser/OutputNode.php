@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,11 +25,12 @@ abstract class OutputNode extends AbstractNode
     protected $result = [];
 
     /**
-     * {@inheritdoc}
+     * Destructing.
      */
-    protected function push(array &$data)
+    public function __destruct()
     {
-        $this->result[] = &$data;
+        $this->result = [];
+        parent::__destruct();
     }
 
     /**
@@ -42,11 +44,10 @@ abstract class OutputNode extends AbstractNode
     }
 
     /**
-     * Destructing.
+     * {@inheritdoc}
      */
-    public function __destruct()
+    protected function push(array &$data): void
     {
-        $this->result = [];
-        parent::__destruct();
+        $this->result[] = &$data;
     }
 }

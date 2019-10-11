@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\SQLServer;
 
 class ClasslessHasOneCyclicTest extends \Cycle\ORM\Tests\Classless\ClasslessHasOneCyclicTest
 {
-    const DRIVER = "sqlserver";
+    public const DRIVER = 'sqlserver';
 }

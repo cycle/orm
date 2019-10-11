@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -66,6 +67,51 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     }
 
     /**
+     * Remove nested loaders and clean ORM link.
+     */
+    public function __destruct()
+    {
+        $this->orm = null;
+        $this->loader = null;
+        $this->builder = null;
+    }
+
+    /**
+     * Bypassing call to primary select query.
+     *
+     * @param string $name
+     * @param array  $arguments
+     * @return $this|mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
+            $proxy = new QueryBuilder($this->orm, $this->loader->buildQuery(), $this->loader);
+
+            // aggregations
+            return $proxy->__call($name, $arguments);
+        }
+
+        $result = $this->getBuilder()->__call($name, $arguments);
+        if ($result instanceof QueryBuilder) {
+            return $this;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Cloning with loader tree cloning.
+     *
+     * @attention at this moment binded query parameters would't be cloned!
+     */
+    public function __clone()
+    {
+        $this->loader = clone $this->loader;
+        $this->builder = new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
+    }
+
+    /**
      * Create new Selector with applied scope. By default no constrain used.
      *
      * @param ConstrainInterface|null $constrain
@@ -119,7 +165,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     {
         if ($column === null) {
             // @tuneyourserver solves the issue with counting on queries with joins.
-            $column = sprintf("DISTINCT(%s)", $this->getLoader()->getPK());
+            $column = sprintf('DISTINCT(%s)', $this->getLoader()->getPK());
         }
 
         return (int)$this->__call('count', [$column]);
@@ -144,30 +190,6 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
         $this->loader->getQuery()->offset($offset);
 
         return $this;
-    }
-
-    /**
-     * Bypassing call to primary select query.
-     *
-     * @param string $name
-     * @param array  $arguments
-     * @return $this|mixed
-     */
-    public function __call(string $name, array $arguments)
-    {
-        if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            $proxy = new QueryBuilder($this->orm, $this->loader->buildQuery(), $this->loader);
-
-            // aggregations
-            return $proxy->__call($name, $arguments);
-        }
-
-        $result = $this->getBuilder()->__call($name, $arguments);
-        if ($result instanceof QueryBuilder) {
-            return $this;
-        }
-
-        return $result;
     }
 
     /**
@@ -398,27 +420,6 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function sqlStatement(): string
     {
         return $this->buildQuery()->sqlStatement();
-    }
-
-    /**
-     * Cloning with loader tree cloning.
-     *
-     * @attention at this moment binded query parameters would't be cloned!
-     */
-    public function __clone()
-    {
-        $this->loader = clone $this->loader;
-        $this->builder = new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
-    }
-
-    /**
-     * Remove nested loaders and clean ORM link.
-     */
-    public function __destruct()
-    {
-        $this->orm = null;
-        $this->loader = null;
-        $this->builder = null;
     }
 
     /**

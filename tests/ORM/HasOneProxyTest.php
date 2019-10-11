@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -26,7 +27,7 @@ abstract class HasOneProxyTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -130,7 +131,7 @@ abstract class HasOneProxyTest extends BaseTest
         ]))->withPromiseFactory(new PromiseFactory());
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
@@ -156,7 +157,7 @@ abstract class HasOneProxyTest extends BaseTest
     }
 
 
-    public function testFetchPromises()
+    public function testFetchPromises(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');

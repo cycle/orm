@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\SQLite;
 
 class BelongsToNativeReferenceTest extends \Cycle\ORM\Tests\BelongsToNativeReferenceTest
 {
-    const DRIVER = "sqlite";
+    public const DRIVER = 'sqlite';
 }

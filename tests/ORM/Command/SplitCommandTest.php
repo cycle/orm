@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -15,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 class SplitCommandTest extends TestCase
 {
-    public function testNeverExecuted()
+    public function testNeverExecuted(): void
     {
         $command = new Split(new TestContextCommand(), new TestContextCommand());
         $this->assertFalse($command->isExecuted());

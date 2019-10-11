@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -6,7 +7,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-
 
 namespace Cycle\ORM\Tests;
 
@@ -19,7 +19,7 @@ abstract class FollowupTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -52,7 +52,7 @@ abstract class FollowupTest extends BaseTest
         ]));
     }
 
-    public function testSnapUser()
+    public function testSnapUser(): void
     {
         $u = new User();
         $u->email = 'email';
@@ -67,7 +67,7 @@ abstract class FollowupTest extends BaseTest
         $this->assertSame('email', $snap['email']);
     }
 
-    public function testSnapAgain()
+    public function testSnapAgain(): void
     {
         $u = new User();
         $u->email = 'email';
@@ -98,7 +98,7 @@ abstract class FollowupTest extends BaseTest
                           ->table('user_snapshots')
                           ->select('*')
                           ->where('user_id', $u->id)
-                          ->orderBy('id', "DESC")
+                          ->orderBy('id', 'DESC')
                           ->limit(1)
                           ->fetchAll()[0];
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -57,6 +58,22 @@ final class EmbeddedLoader implements JoinableInterface
                 $this->columns[$internal] = $external;
             }
         }
+    }
+
+    /**
+     * Destruct loader.
+     */
+    final public function __destruct()
+    {
+        $this->parent = null;
+    }
+
+    /**
+     * Ensure state of every nested loader.
+     */
+    public function __clone()
+    {
+        $this->parent = null;
     }
 
     /**
@@ -142,25 +159,9 @@ final class EmbeddedLoader implements JoinableInterface
     /**
      * @inheritDoc
      */
-    public function loadData(AbstractNode $node)
+    public function loadData(AbstractNode $node): void
     {
         // embedded entities does not support inner loaders... for now! :)
-    }
-
-    /**
-     * Ensure state of every nested loader.
-     */
-    public function __clone()
-    {
-        $this->parent = null;
-    }
-
-    /**
-     * Destruct loader.
-     */
-    final public function __destruct()
-    {
-        $this->parent = null;
     }
 
     /**

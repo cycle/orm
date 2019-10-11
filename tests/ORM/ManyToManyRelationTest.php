@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,7 +25,7 @@ abstract class ManyToManyRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -125,13 +126,13 @@ abstract class ManyToManyRelationTest extends BaseTest
         ]));
     }
 
-    public function testInitRelation()
+    public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
         $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $u->tags);
     }
 
-    public function testLoadRelation()
+    public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')->orderBy('id', 'ASC');
@@ -184,7 +185,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testWithNoColumns()
+    public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, User::class);
         $data = $selector->with('tags')->buildQuery()->fetchAll();
@@ -192,7 +193,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertSame(3, count($data[0]));
     }
 
-    public function testLoadRelationInload()
+    public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags', [
@@ -248,7 +249,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testRelationContextAccess()
+    public function testRelationContextAccess(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -281,14 +282,14 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertEquals('primary', $b->tags->getPivot($b->tags[0])->as);
     }
 
-    public function testCreateWithManyToManyCascadeNoContext()
+    public function testCreateWithManyToManyCascadeNoContext(): void
     {
         $u = new User();
-        $u->email = "many@email.com";
+        $u->email = 'many@email.com';
         $u->balance = 900;
 
         $t = new Tag();
-        $t->name = "my tag";
+        $t->name = 'my tag';
 
         $u->tags->add($t);
 
@@ -299,21 +300,21 @@ abstract class ManyToManyRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
-        $this->assertSame("many@email.com", $u->email);
+        $this->assertSame('many@email.com', $u->email);
         $this->assertCount(1, $u->tags);
-        $this->assertSame("my tag", $u->tags[0]->name);
+        $this->assertSame('my tag', $u->tags[0]->name);
 
         $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
     }
 
-    public function testCreateWithManyToManyPivotContextArray()
+    public function testCreateWithManyToManyPivotContextArray(): void
     {
         $u = new User();
-        $u->email = "many@email.com";
+        $u->email = 'many@email.com';
         $u->balance = 900;
 
         $t = new Tag();
-        $t->name = "my tag";
+        $t->name = 'my tag';
 
         $u->tags->add($t);
         $u->tags->setPivot($t, ['as' => 'super']);
@@ -325,22 +326,22 @@ abstract class ManyToManyRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
-        $this->assertSame("many@email.com", $u->email);
+        $this->assertSame('many@email.com', $u->email);
         $this->assertCount(1, $u->tags);
-        $this->assertSame("my tag", $u->tags[0]->name);
+        $this->assertSame('my tag', $u->tags[0]->name);
 
         $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
         $this->assertSame('super', $u->tags->getPivot($u->tags[0])->as);
     }
 
-    public function testCreateWithManyToManyNoWrites()
+    public function testCreateWithManyToManyNoWrites(): void
     {
         $u = new User();
-        $u->email = "many@email.com";
+        $u->email = 'many@email.com';
         $u->balance = 900;
 
         $t = new Tag();
-        $t->name = "my tag";
+        $t->name = 'my tag';
 
         $u->tags->add($t);
         $u->tags->setPivot($t, ['as' => 'super']);
@@ -360,14 +361,14 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testCreateWithManyToManyPivotContext()
+    public function testCreateWithManyToManyPivotContext(): void
     {
         $u = new User();
-        $u->email = "many@email.com";
+        $u->email = 'many@email.com';
         $u->balance = 900;
 
         $t = new Tag();
-        $t->name = "my tag";
+        $t->name = 'my tag';
 
         $pc = new TagContext();
         $pc->as = 'super';
@@ -385,15 +386,15 @@ abstract class ManyToManyRelationTest extends BaseTest
         $selector->fetchOne();
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
-        $this->assertSame("many@email.com", $u->email);
+        $this->assertSame('many@email.com', $u->email);
         $this->assertCount(1, $u->tags);
-        $this->assertSame("my tag", $u->tags[0]->name);
+        $this->assertSame('my tag', $u->tags[0]->name);
 
         $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
         $this->assertSame('super', $u->tags->getPivot($u->tags[0])->as);
     }
 
-    public function testUnlinkManyToManyAndReplaceSome()
+    public function testUnlinkManyToManyAndReplaceSome(): void
     {
         $tagSelector = new Select($this->orm, Tag::class);
 
@@ -406,13 +407,13 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $a->tags->remove(0);
         $a->tags->add($tagSelector->wherePK(3)->fetchOne());
-        $a->tags->getPivot($a->tags[1])->as = "new";
+        $a->tags->getPivot($a->tags[1])->as = 'new';
 
         // remove all
         $b->tags->clear();
 
         $t = new Tag();
-        $t->name = "new tag";
+        $t->name = 'new tag';
 
         $pc = new TagContext();
         $pc->as = 'super';
@@ -445,10 +446,10 @@ abstract class ManyToManyRelationTest extends BaseTest
          */
         list($a, $b) = $selector->load('tags')->fetchAll();
 
-        $this->assertSame("tag b", $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[0]->name);
         $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);
 
-        $this->assertSame("new tag", $b->tags[0]->name);
+        $this->assertSame('new tag', $b->tags[0]->name);
         $this->assertSame('super', $b->tags->getPivot($b->tags[0])->as);
     }
 }

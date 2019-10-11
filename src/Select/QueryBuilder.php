@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -60,6 +61,23 @@ final class QueryBuilder
     }
 
     /**
+     * Forward call to underlying target.
+     *
+     * @param string $func
+     * @param array  $args
+     * @return SelectQuery|mixed
+     */
+    public function __call(string $func, array $args)
+    {
+        $result = call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
+        if ($result === $this->query) {
+            return $this;
+        }
+
+        return $result;
+    }
+
+    /**
      * Get currently associated query. Immutable.
      *
      * @return SelectQuery|null
@@ -106,23 +124,6 @@ final class QueryBuilder
     }
 
     /**
-     * Forward call to underlying target.
-     *
-     * @param string $func
-     * @param array  $args
-     * @return SelectQuery|mixed
-     */
-    public function __call(string $func, array $args)
-    {
-        $result = call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
-        if ($result === $this->query) {
-            return $this;
-        }
-
-        return $result;
-    }
-
-    /**
      * Resolve given object.field identifier into proper table alias and column name.
      * Attention, calling this method would not affect loaded relations, you must call with/load directly!
      *
@@ -154,7 +155,7 @@ final class QueryBuilder
         $loader = $this->findLoader(substr($identifier, 0, $split), $autoload);
         if ($loader !== null) {
             return sprintf(
-                "%s.%s.",
+                '%s.%s.',
                 $loader->getAlias(),
                 $loader->fieldAlias(substr($identifier, $split + 1))
             );
@@ -191,7 +192,7 @@ final class QueryBuilder
             return null;
         }
 
-        if ($name == "" || $name == "@" || $name == $this->loader->getTarget() || $name == $this->loader->getAlias()) {
+        if ($name == '' || $name == '@' || $name == $this->loader->getTarget() || $name == $this->loader->getAlias()) {
             return $this->loader;
         }
 
@@ -210,13 +211,13 @@ final class QueryBuilder
     {
         if ($this->forward != null) {
             switch (strtolower($call)) {
-                case "where":
+                case 'where':
                     $call = $this->forward;
                     break;
-                case "orwhere":
+                case 'orwhere':
                     $call = 'or' . ucfirst($this->forward);
                     break;
-                case "andwhere":
+                case 'andwhere':
                     $call = 'and' . ucfirst($this->forward);
                     break;
             }
@@ -247,7 +248,7 @@ final class QueryBuilder
         }
 
         if ($args[0] instanceof \Closure) {
-            $args[0] = $args[0] = function ($q) use ($args) {
+            $args[0] = $args[0] = function ($q) use ($args): void {
                 $args[0]($this->withQuery($q));
             };
         }
@@ -261,14 +262,14 @@ final class QueryBuilder
      * @param mixed $identifier
      * @param mixed $value
      */
-    private function wrap(&$identifier, &$value)
+    private function wrap(&$identifier, &$value): void
     {
         if (!is_numeric($identifier)) {
             $identifier = $this->resolve($identifier);
         }
 
         if ($value instanceof \Closure) {
-            $value = function ($q) use ($value) {
+            $value = function ($q) use ($value): void {
                 $value($this->withQuery($q));
             };
         }

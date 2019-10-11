@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class SelectorTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -94,7 +95,7 @@ abstract class SelectorTest extends BaseTest
         ]));
     }
 
-    public function testStableStatement()
+    public function testStableStatement(): void
     {
         $s = new Select($this->orm, User::class);
         $s->load('comments', ['method' => JoinableLoader::INLOAD]);
@@ -105,7 +106,7 @@ abstract class SelectorTest extends BaseTest
         $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());
     }
 
-    public function testSelectCustomSQL()
+    public function testSelectCustomSQL(): void
     {
         $s = new Select($this->orm, User::class);
         $s->with('comments', ['method' => JoinableLoader::INLOAD]);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -35,7 +36,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 throw new NullException("Relation {$this} can not be null");
             }
 
-            if ($original!== null) {
+            if ($original !== null) {
                 // reset the key
                 $store->register($this->innerKey, null, true);
             }

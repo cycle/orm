@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
@@ -32,11 +33,12 @@ class TestLogger implements LoggerInterface
         return $this->countReads;
     }
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         if (!empty($context['query'])) {
             $sql = strtolower($context['query']);
-            if (strpos($sql, 'insert') === 0 ||
+            if (
+                strpos($sql, 'insert') === 0 ||
                 strpos($sql, 'update') === 0 ||
                 strpos($sql, 'delete') === 0
             ) {
@@ -75,12 +77,12 @@ class TestLogger implements LoggerInterface
         }
     }
 
-    public function display()
+    public function display(): void
     {
         $this->display = true;
     }
 
-    public function hide()
+    public function hide(): void
     {
         $this->display = false;
     }
@@ -88,7 +90,8 @@ class TestLogger implements LoggerInterface
     protected function isPostgresSystemQuery(string $query): bool
     {
         $query = strtolower($query);
-        if (strpos($query, 'tc.constraint_name') ||
+        if (
+            strpos($query, 'tc.constraint_name') ||
             strpos($query, 'pg_indexes') ||
             strpos($query, 'tc.constraint_name') ||
             strpos($query, 'pg_constraint') ||

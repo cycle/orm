@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
@@ -8,7 +9,7 @@ use Cycle\ORM\Select\QueryBuilder;
 
 class ShortLeveledHasManyConstrain implements ConstrainInterface
 {
-    public function apply(QueryBuilder $query)
+    public function apply(QueryBuilder $query): void
     {
         $query->where('level', '>=', 3)->orderBy('level', 'DESC');
     }

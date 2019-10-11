@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -92,8 +93,8 @@ class UserPromise extends User implements PromiseInterface
         return $this->__resolve()->getID();
     }
 
-    public function addComment(Comment $c)
+    public function addComment(Comment $c): void
     {
-        return $this->__resolve()->addComment($c);
+        $this->__resolve()->addComment($c);
     }
 }

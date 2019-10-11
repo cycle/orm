@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -68,6 +69,29 @@ final class ORM implements ORMInterface
 
         $this->heap = new Heap();
         $this->generator = new CommandGenerator();
+    }
+
+    /**
+     * Reset related objects cache.
+     */
+    public function __clone()
+    {
+        $this->heap = new Heap();
+        $this->mappers = [];
+        $this->relmaps = [];
+        $this->indexes = [];
+        $this->sources = [];
+        $this->repositories = [];
+    }
+
+    /**
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return [
+            'schema' => $this->schema
+        ];
     }
 
     /**
@@ -187,7 +211,7 @@ final class ORM implements ORMInterface
     public function getSchema(): SchemaInterface
     {
         if ($this->schema === null) {
-            throw new ORMException("ORM is not configured, schema is missing");
+            throw new ORMException('ORM is not configured, schema is missing');
         }
 
         return $this->schema;
@@ -361,29 +385,6 @@ final class ORM implements ORMInterface
 
         // currently we rely on db to delete all nested records (or soft deletes)
         return $this->generator->generateDelete($this->getMapper($node->getRole()), $entity, $node);
-    }
-
-    /**
-     * Reset related objects cache.
-     */
-    public function __clone()
-    {
-        $this->heap = new Heap();
-        $this->mappers = [];
-        $this->relmaps = [];
-        $this->indexes = [];
-        $this->sources = [];
-        $this->repositories = [];
-    }
-
-    /**
-     * @return array
-     */
-    public function __debugInfo()
-    {
-        return [
-            'schema' => $this->schema
-        ];
     }
 
     /**

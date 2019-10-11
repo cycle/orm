@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,7 +25,7 @@ abstract class UUIDColumnTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -53,7 +54,7 @@ abstract class UUIDColumnTest extends BaseTest
         ]));
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -84,7 +85,7 @@ abstract class UUIDColumnTest extends BaseTest
         $this->assertEquals($e->uuid->toString(), $result->uuid->toString());
     }
 
-    public function testFetchData()
+    public function testFetchData(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -105,7 +106,7 @@ abstract class UUIDColumnTest extends BaseTest
         $this->assertEquals($e->uuid->toString(), $result[0]['uuid']->toString());
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $e = new User();
         $e->email = 'test@email.com';

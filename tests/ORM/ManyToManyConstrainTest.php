@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -84,7 +85,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         );
     }
 
-    public function testOrdered()
+    public function testOrdered(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -101,17 +102,17 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESC()
+    public function testOrderedDESC(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -128,17 +129,17 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[3]->name);
-        $this->assertSame("tag b", $a->tags[2]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedInload()
+    public function testOrderedInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -157,17 +158,17 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCInload()
+    public function testOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -186,17 +187,17 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[3]->name);
-        $this->assertSame("tag b", $a->tags[2]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedPromisedASC()
+    public function testOrderedPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -215,17 +216,17 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(2);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
-        $this->assertSame("tag b", $a->tags[1]->name);
-        $this->assertSame("tag d", $a->tags[2]->name);
-        $this->assertSame("tag e", $a->tags[3]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedPromisedDESC()
+    public function testOrderedPromisedDESC(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -244,17 +245,17 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(2);
 
-        $this->assertSame("tag a", $a->tags[3]->name);
-        $this->assertSame("tag b", $a->tags[2]->name);
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedAndWhere()
+    public function testOrderedAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -272,15 +273,15 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag d", $a->tags[0]->name);
-        $this->assertSame("tag e", $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[0]->name);
+        $this->assertSame('tag e', $a->tags[1]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCAndWhere()
+    public function testOrderedDESCAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -298,15 +299,15 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedAndWhereInload()
+    public function testOrderedAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -326,15 +327,15 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag d", $a->tags[0]->name);
-        $this->assertSame("tag e", $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[0]->name);
+        $this->assertSame('tag e', $a->tags[1]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCAndWhereInload()
+    public function testOrderedDESCAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -354,15 +355,15 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(3, $b->tags);
 
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedAndWherePromise()
+    public function testOrderedAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -382,15 +383,15 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(2);
 
-        $this->assertSame("tag d", $a->tags[0]->name);
-        $this->assertSame("tag e", $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[0]->name);
+        $this->assertSame('tag e', $a->tags[1]->name);
 
-        $this->assertSame("tag c", $b->tags[0]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[2]->name);
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCAndWherePromise()
+    public function testOrderedDESCAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -410,15 +411,15 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(3, $b->tags);
         $this->assertNumReads(2);
 
-        $this->assertSame("tag d", $a->tags[1]->name);
-        $this->assertSame("tag e", $a->tags[0]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
 
-        $this->assertSame("tag c", $b->tags[2]->name);
-        $this->assertSame("tag d", $b->tags[1]->name);
-        $this->assertSame("tag f", $b->tags[0]->name);
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testCustomWhere()
+    public function testCustomWhere(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -438,10 +439,10 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(1, $a->tags);
         $this->assertCount(0, $b->tags);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
     }
 
-    public function testCustomWhereInload()
+    public function testCustomWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -461,10 +462,10 @@ abstract class ManyToManyConstrainTest extends BaseTest
 
         $this->assertCount(1, $a->tags);
 
-        $this->assertSame("tag a", $a->tags[0]->name);
+        $this->assertSame('tag a', $a->tags[0]->name);
     }
 
-    public function testWithWhere()
+    public function testWithWhere(): void
     {
         $this->orm = $this->withTagSchema([
             Relation::WHERE => ['@.level' => ['>=' => 6]]
@@ -478,7 +479,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('another@world.com', $res[0]->email);
     }
 
-    public function testWithWhereAltered()
+    public function testWithWhereAltered(): void
     {
         $this->orm = $this->withTagSchema([
             Relation::WHERE => ['@.level' => ['>=' => 6]]
@@ -495,7 +496,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('another@world.com', $res[1]->email);
     }
 
-    public function testLimitParentSelection()
+    public function testLimitParentSelection(): void
     {
         $this->orm = $this->withTagSchema([]);
 
@@ -515,7 +516,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\LoaderException
      */
-    public function testLimitParentSelectionError()
+    public function testLimitParentSelectionError(): void
     {
         $this->orm = $this->withTagSchema([]);
 
@@ -531,7 +532,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     /**
      * @expectedException \Spiral\Database\Exception\StatementException
      */
-    public function testInvalidOrderBy()
+    public function testInvalidOrderBy(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'ASC']),

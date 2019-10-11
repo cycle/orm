@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -51,7 +52,7 @@ abstract class DatabaseCommand implements CommandInterface
     /**
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         $this->executed = true;
     }
@@ -59,7 +60,7 @@ abstract class DatabaseCommand implements CommandInterface
     /**
      * {@inheritdoc}
      */
-    public function complete()
+    public function complete(): void
     {
         // nothing to do
     }
@@ -67,7 +68,7 @@ abstract class DatabaseCommand implements CommandInterface
     /**
      * {@inheritdoc}
      */
-    public function rollBack()
+    public function rollBack(): void
     {
         // nothing to do
     }

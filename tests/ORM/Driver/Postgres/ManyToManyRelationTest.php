@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\Postgres;
 
 class ManyToManyRelationTest extends \Cycle\ORM\Tests\ManyToManyRelationTest
 {
-    const DRIVER = "postgres";
+    public const DRIVER = 'postgres';
 }

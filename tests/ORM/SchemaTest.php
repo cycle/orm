@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -16,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 
 class SchemaTest extends TestCase
 {
-    public function testSchema()
+    public function testSchema(): void
     {
         $schema = new Schema([
             User::class => [
@@ -31,7 +32,7 @@ class SchemaTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\SchemaException
      */
-    public function testSchemaException()
+    public function testSchemaException(): void
     {
         $schema = new Schema([
             User::class => [
@@ -42,7 +43,7 @@ class SchemaTest extends TestCase
         $schema->define(Profile::class, 1);
     }
 
-    public function testSchemaNull()
+    public function testSchemaNull(): void
     {
         $schema = new Schema([
             User::class => [

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\MySQL;
 
 class BidirectionTest extends \Cycle\ORM\Tests\BidirectionTest
 {
-    const DRIVER = "mysql";
+    public const DRIVER = 'mysql';
 }

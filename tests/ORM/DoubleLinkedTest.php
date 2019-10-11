@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class DoubleLinkedTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -70,7 +71,7 @@ abstract class DoubleLinkedTest extends BaseTest
         ]));
     }
 
-    public function testCreateDoubleLink()
+    public function testCreateDoubleLink(): void
     {
         $c1 = new Cyclic();
         $c2 = new Cyclic();
@@ -108,7 +109,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testCreateDoubleLinkWithInverted()
+    public function testCreateDoubleLinkWithInverted(): void
     {
         $c1 = new Cyclic();
         $c2 = new Cyclic();
@@ -141,12 +142,12 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    public function testSelfReference()
+    public function testSelfReference(): void
     {
         $c1 = new Cyclic();
 
         // inverted
-        $c1->name = "self-reference";
+        $c1->name = 'self-reference';
         $c1->cyclic = $c1;
         $c1->other = $c1;
 

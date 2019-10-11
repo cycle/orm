@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -26,7 +27,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -100,7 +101,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 //        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
 //    }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, 'user');
         $selector->load('comments')->orderBy('user.id');
@@ -137,7 +138,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testPromised()
+    public function testPromised(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
@@ -150,7 +151,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertInstanceOf(PromiseInterface::class, $u->comments->getPromise());
     }
 
-    public function testHasManyPromiseLoaded()
+    public function testHasManyPromiseLoaded(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
@@ -165,7 +166,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertTrue($p->__loaded());
     }
 
-    public function testHasManyPromiseRole()
+    public function testHasManyPromiseRole(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
@@ -178,7 +179,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertSame('comment', $p->__role());
     }
 
-    public function testHasManyPromiseScope()
+    public function testHasManyPromiseScope(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
@@ -193,7 +194,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         ], $p->__scope());
     }
 
-    public function testPromisedEmpty()
+    public function testPromisedEmpty(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
@@ -204,7 +205,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertNumReads(1);
     }
 
-    public function testNoChanges()
+    public function testNoChanges(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
@@ -219,7 +220,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    public function testNoChangesWithNoChildren()
+    public function testNoChangesWithNoChildren(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
@@ -234,7 +235,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    public function testRemoveChildren()
+    public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, 'user');
 
@@ -256,7 +257,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertSame('msg 3', $e->comments[1]->message);
     }
 
-    public function testAddAndRemoveChildren()
+    public function testAddAndRemoveChildren(): void
     {
         $selector = new Select($this->orm, 'user');
 
@@ -265,7 +266,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $e->comments->remove(1);
 
         $c = $this->orm->make('comment');
-        $c->message = "msg 4";
+        $c->message = 'msg 4';
         $e->comments->add($c);
 
         $tr = new Transaction($this->orm);
@@ -283,7 +284,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertSame('msg 4', $e->comments[2]->message);
     }
 
-    public function testSliceAndSaveToAnotherParent()
+    public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, 'user');
         list($a, $b) = $selector->orderBy('user.id')->fetchAll();
@@ -296,7 +297,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
             $a->comments->removeElement($c);
         }
 
-        $b->comments[0]->message = "new b";
+        $b->comments[0]->message = 'new b';
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);

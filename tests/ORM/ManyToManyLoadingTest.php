@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -28,7 +29,7 @@ abstract class ManyToManyLoadingTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -164,11 +165,11 @@ abstract class ManyToManyLoadingTest extends BaseTest
         ]));
     }
 
-    public function testLoadSortedByPivot()
+    public function testLoadSortedByPivot(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags', [
-            'load' => function (Select\QueryBuilder $q) {
+            'load' => function (Select\QueryBuilder $q): void {
                 $q->orderBy('@.@.as', 'DESC');
             }
         ])->orderBy('id', 'ASC');
@@ -221,12 +222,12 @@ abstract class ManyToManyLoadingTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoadSortedByPivotInload()
+    public function testLoadSortedByPivotInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags', [
             'method' => Select::SINGLE_QUERY,
-            'load'   => function (Select\QueryBuilder $q) {
+            'load'   => function (Select\QueryBuilder $q): void {
                 $q->orderBy('@.@.as', 'DESC');
             }
         ])->orderBy('id', 'ASC');

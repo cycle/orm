@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -27,7 +28,7 @@ trait AliasTrait
      * @param string $alias
      * @param string $relation
      */
-    private function registerPath(string $alias, string $relation)
+    private function registerPath(string $alias, string $relation): void
     {
         $this->aliasPaths[$alias] = $relation;
     }

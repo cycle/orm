@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\MySQL;
 
 class HasOnePromiseTest extends \Cycle\ORM\Tests\HasOnePromiseTest
 {
-    const DRIVER = "mysql";
+    public const DRIVER = 'mysql';
 }

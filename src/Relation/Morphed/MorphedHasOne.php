@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -82,7 +83,7 @@ class MorphedHasOne extends HasOne
      *
      * @throws RelationException
      */
-    protected function assertValid(Node $related)
+    protected function assertValid(Node $related): void
     {
         // no need to validate morphed relation yet
     }

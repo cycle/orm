@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral, Core Components
  *
@@ -37,10 +38,10 @@ final class ArrayNode extends AbstractNode
     /**
      * {@inheritdoc}
      */
-    protected function push(array &$data)
+    protected function push(array &$data): void
     {
         if ($this->parent === null) {
-            throw new ParserException("Unable to register data tree, parent is missing.");
+            throw new ParserException('Unable to register data tree, parent is missing.');
         }
 
         if (is_null($data[$this->innerKey])) {

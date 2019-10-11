@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -25,7 +26,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -128,7 +129,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
         ]));
     }
 
-    public function testLoadRelation()
+    public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags');
@@ -182,7 +183,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testRelationContextAccess()
+    public function testRelationContextAccess(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -219,7 +220,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    public function testNoQueries()
+    public function testNoQueries(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -238,7 +239,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    public function testUnlinkManyToManyAndReplaceSome()
+    public function testUnlinkManyToManyAndReplaceSome(): void
     {
         $tagSelector = new Select($this->orm, Tag::class);
 
@@ -252,13 +253,13 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $a->tags->remove(0);
 
         $a->tags->add($tagSelector->wherePK(3)->fetchOne());
-        $a->tags->getPivot($a->tags[1])->as = "new";
+        $a->tags->getPivot($a->tags[1])->as = 'new';
 
         // remove all
         $b->tags->clear();
 
         $t = new Tag();
-        $t->name = "new tag";
+        $t->name = 'new tag';
 
         $pc = new TagContext();
         $pc->as = 'super';
@@ -291,10 +292,10 @@ abstract class ManyToManyPromiseTest extends BaseTest
          */
         list($a, $b) = $selector->load('tags')->fetchAll();
 
-        $this->assertSame("tag b", $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[0]->name);
         $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);
 
-        $this->assertSame("new tag", $b->tags[0]->name);
+        $this->assertSame('new tag', $b->tags[0]->name);
         $this->assertSame('super', $b->tags->getPivot($b->tags[0])->as);
     }
 }

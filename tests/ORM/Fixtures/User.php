@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -81,7 +82,7 @@ class User implements ImagedInterface
         return $this->id;
     }
 
-    public function addComment(Comment $c)
+    public function addComment(Comment $c): void
     {
         $this->lastComment = $c;
         $this->comments->add($c);

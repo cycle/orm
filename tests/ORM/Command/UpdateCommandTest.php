@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -17,7 +18,7 @@ use Spiral\Database\DatabaseInterface;
 
 class UpdateCommandTest extends TestCase
 {
-    public function testIsEmpty()
+    public function testIsEmpty(): void
     {
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
@@ -29,7 +30,7 @@ class UpdateCommandTest extends TestCase
         $this->assertTrue($cmd->isReady());
     }
 
-    public function testIsEmptyData()
+    public function testIsEmptyData(): void
     {
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
@@ -41,7 +42,7 @@ class UpdateCommandTest extends TestCase
         $this->assertSame(['name' => 'value'], $cmd->getData());
     }
 
-    public function testIsEmptyContext()
+    public function testIsEmptyContext(): void
     {
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
@@ -54,7 +55,7 @@ class UpdateCommandTest extends TestCase
         $this->assertSame(['key' => 'value'], $cmd->getContext());
     }
 
-    public function testWhere()
+    public function testWhere(): void
     {
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
@@ -70,7 +71,7 @@ class UpdateCommandTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\CommandException
      */
-    public function testNoScope()
+    public function testNoScope(): void
     {
         $cmd = new Update(
             m::mock(DatabaseInterface::class),

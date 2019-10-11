@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -22,7 +23,7 @@ abstract class EagerTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -126,7 +127,7 @@ abstract class EagerTest extends BaseTest
         ]));
     }
 
-    public function testFetchEager()
+    public function testFetchEager(): void
     {
         $selector = new Select($this->orm, User::class);
 

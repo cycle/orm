@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -33,11 +34,11 @@ use Spiral\Database\Driver\Handler;
 
 abstract class BaseTest extends TestCase
 {
-    // tests configuration
-    public static $config;
 
     // currently active driver
     public const DRIVER = null;
+    // tests configuration
+    public static $config;
 
     // cross test driver cache
     public static $driverCache = [];
@@ -65,7 +66,7 @@ abstract class BaseTest extends TestCase
     /**
      * Init all we need.
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -102,7 +103,7 @@ abstract class BaseTest extends TestCase
     /**
      * Cleanup.
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->assertClearState($this->orm);
 
@@ -157,7 +158,7 @@ abstract class BaseTest extends TestCase
     /**
      * Start counting update/insert/delete queries.
      */
-    public function captureWriteQueries()
+    public function captureWriteQueries(): void
     {
         $this->numWrites = $this->logger->countWriteQueries();
     }
@@ -165,7 +166,7 @@ abstract class BaseTest extends TestCase
     /**
      * @param int $numWrites
      */
-    public function assertNumWrites(int $numWrites)
+    public function assertNumWrites(int $numWrites): void
     {
         $queries = $this->logger->countWriteQueries() - $this->numWrites;
 
@@ -181,7 +182,7 @@ abstract class BaseTest extends TestCase
     /**
      * Start counting update/insert/delete queries.
      */
-    public function captureReadQueries()
+    public function captureReadQueries(): void
     {
         $this->numReads = $this->logger->countReadQueries();
     }
@@ -189,7 +190,7 @@ abstract class BaseTest extends TestCase
     /**
      * @param int $numReads
      */
-    public function assertNumReads(int $numReads)
+    public function assertNumReads(int $numReads): void
     {
         $queries = $this->logger->countReadQueries() - $this->numReads;
 
@@ -213,7 +214,7 @@ abstract class BaseTest extends TestCase
     /**
      * @param Database|null $database
      */
-    protected function dropDatabase(Database $database = null)
+    protected function dropDatabase(Database $database = null): void
     {
         if ($database === null) {
             return;
@@ -239,7 +240,7 @@ abstract class BaseTest extends TestCase
     /**
      * For debug purposes only.
      */
-    protected function enableProfiling()
+    protected function enableProfiling(): void
     {
         if (!is_null($this->logger)) {
             $this->logger->display();
@@ -249,28 +250,28 @@ abstract class BaseTest extends TestCase
     /**
      * For debug purposes only.
      */
-    protected function disableProfiling()
+    protected function disableProfiling(): void
     {
         if (!is_null($this->logger)) {
             $this->logger->hide();
         }
     }
 
-    protected function save($e)
+    protected function save($e): void
     {
         $tr = new Transaction($this->orm);
         $tr->persist($e);
         $tr->run();
     }
 
-    protected function assertSQL($expected, $given)
+    protected function assertSQL($expected, $given): void
     {
         $expected = preg_replace("/[ \s\'\[\]\"]+/", ' ', $expected);
         $given = preg_replace("/[ \s'\[\]\"]+/", ' ', $given);
         $this->assertSame($expected, $given);
     }
 
-    protected function assertClearState(ORM $orm)
+    protected function assertClearState(ORM $orm): void
     {
         $r = new \ReflectionClass(Node::class);
 
@@ -303,7 +304,7 @@ abstract class BaseTest extends TestCase
         array $entity,
         array $stateData,
         array $relations
-    ) {
+    ): void {
         foreach ($entity as $name => $eValue) {
             if (array_key_exists($name, $stateData)) {
                 $this->assertEquals(

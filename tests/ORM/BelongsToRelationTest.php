@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -26,7 +27,7 @@ abstract class BelongsToRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -129,7 +130,7 @@ abstract class BelongsToRelationTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user')->orderBy('profile.id');
@@ -168,7 +169,7 @@ abstract class BelongsToRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testWithNoColumns()
+    public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $data = $selector->with('user')->buildQuery()->fetchAll();
@@ -176,7 +177,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame(3, count($data[0]));
     }
 
-    public function testFetchRelationInload()
+    public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user', ['method' => Select\JoinableLoader::INLOAD])
@@ -216,7 +217,7 @@ abstract class BelongsToRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testAccessEntities()
+    public function testAccessEntities(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user')->orderBy('profile.id');
@@ -237,7 +238,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame($result[1]->user, $result[2]->user);
     }
 
-    public function testCreateWithRelations()
+    public function testCreateWithRelations(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -279,7 +280,7 @@ abstract class BelongsToRelationTest extends BaseTest
         ], $selector->wherePK(4)->fetchData());
     }
 
-    public function testNoWriteQueries()
+    public function testNoWriteQueries(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -304,7 +305,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testSetExistedParent()
+    public function testSetExistedParent(): void
     {
         $s = new Select($this->orm, User::class);
         $u = $s->wherePK(1)->fetchOne();
@@ -342,7 +343,7 @@ abstract class BelongsToRelationTest extends BaseTest
         ], $selector->wherePK(4)->fetchData());
     }
 
-    public function testChangeParent()
+    public function testChangeParent(): void
     {
         $s = new Select($this->orm, Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
@@ -372,7 +373,7 @@ abstract class BelongsToRelationTest extends BaseTest
         )->fetchData());
     }
 
-    public function testExchangeParents()
+    public function testExchangeParents(): void
     {
         $s = new Select($this->orm, Profile::class);
         list($a, $b) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
@@ -405,7 +406,7 @@ abstract class BelongsToRelationTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\Relation\NullException
      */
-    public function testSetNullException()
+    public function testSetNullException(): void
     {
         $s = new Select($this->orm, Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
@@ -423,7 +424,7 @@ abstract class BelongsToRelationTest extends BaseTest
         }
     }
 
-    public function testSetNull()
+    public function testSetNull(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
@@ -508,14 +509,14 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame(null, $p->user);
     }
 
-    public function testNested()
+    public function testNested(): void
     {
         $n = new Nested();
         $n->label = 'nested label';
         $n->profile = new Profile();
         $n->profile->image = 'profile';
         $n->profile->user = new User();
-        $n->profile->user->email = "new@email.com";
+        $n->profile->user->email = 'new@email.com';
         $n->profile->user->balance = 999;
 
         $this->captureWriteQueries();
@@ -537,7 +538,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame('new@email.com', $n->profile->user->email);
     }
 
-    public function testWhereNested()
+    public function testWhereNested(): void
     {
         $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s->with('profile.user')
@@ -547,7 +548,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame('nested-label', $n->label);
     }
 
-    public function testWhereNestedWithAlias()
+    public function testWhereNestedWithAlias(): void
     {
         $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s

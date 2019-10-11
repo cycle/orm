@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -29,7 +30,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -99,7 +100,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
@@ -136,7 +137,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchRelationInload()
+    public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])->orderBy('user.id');
@@ -173,7 +174,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchRelationInloadNativeColumnName()
+    public function testFetchRelationInloadNativeColumnName(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])->orderBy('user.id_int');
@@ -210,7 +211,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchOneWhere()
+    public function testFetchOneWhere(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
@@ -243,7 +244,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchOneWhereTargeted()
+    public function testFetchOneWhereTargeted(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
@@ -276,7 +277,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchOneWhereAliased()
+    public function testFetchOneWhereAliased(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector
@@ -310,7 +311,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testAccessRelated()
+    public function testAccessRelated(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -330,7 +331,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertEquals('msg 3', $a->comments[2]->message);
     }
 
-    public function testFilterByRelated()
+    public function testFilterByRelated(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -343,7 +344,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertEquals(1, $all[0]->id);
     }
 
-    public function testFilterByRelatedExpression()
+    public function testFilterByRelatedExpression(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -358,7 +359,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertEquals(1, $all[0]->id);
     }
 
-    public function testNoWrite()
+    public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -375,7 +376,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testCreateWithRelations()
+    public function testCreateWithRelations(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -436,7 +437,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         ], $selector->wherePK(3)->fetchData());
     }
 
-    public function testRemoveChildren()
+    public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id')->load('comments');
@@ -462,7 +463,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertSame('msg 3', $e->comments[1]->message);
     }
 
-    public function testAddAndRemoveChildren()
+    public function testAddAndRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
@@ -473,7 +474,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $e->comments->remove(1);
 
         $c = new Comment();
-        $c->message = "msg 4";
+        $c->message = 'msg 4';
         $e->comments->add($c);
 
         $this->captureWriteQueries();
@@ -502,7 +503,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertSame('msg 4', $e->comments[2]->message);
     }
 
-    public function testSliceAndSaveToAnotherParent()
+    public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -519,7 +520,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
             $a->comments->removeElement($c);
         }
 
-        $b->comments[0]->message = "new b";
+        $b->comments[0]->message = 'new b';
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);

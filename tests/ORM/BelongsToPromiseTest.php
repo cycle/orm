@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,7 +25,7 @@ abstract class BelongsToPromiseTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -108,7 +109,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -132,7 +133,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchPromises()
+    public function testFetchPromises(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -153,7 +154,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertEquals('hello@world.com', $a->user->__resolve()->email);
     }
 
-    public function testFetchPromisesFromHeap()
+    public function testFetchPromisesFromHeap(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -179,7 +180,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertEquals('hello@world.com', $a->user->__resolve()->email);
     }
 
-    public function testNoWriteOperations()
+    public function testNoWriteOperations(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
@@ -191,7 +192,7 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testAssignPromiseAsRelation()
+    public function testAssignPromiseAsRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();

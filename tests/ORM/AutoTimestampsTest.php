@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -21,7 +22,7 @@ abstract class AutoTimestampsTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -53,7 +54,7 @@ abstract class AutoTimestampsTest extends BaseTest
         ]));
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -71,7 +72,7 @@ abstract class AutoTimestampsTest extends BaseTest
         $this->assertInstanceOf(\DateTimeInterface::class, $data[0]['updated_at']);
     }
 
-    public function testNoWrites()
+    public function testNoWrites(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -88,7 +89,7 @@ abstract class AutoTimestampsTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $u = new User();
         $u->email = 'test@email.com';

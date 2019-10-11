@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class HasOneCyclicTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -67,7 +68,7 @@ abstract class HasOneCyclicTest extends BaseTest
         ]));
     }
 
-    public function testFetchCyclic()
+    public function testFetchCyclic(): void
     {
         $selector = new Select($this->orm, Cyclic::class);
         $selector->load('cyclic')->orderBy('cyclic.id');
@@ -102,7 +103,7 @@ abstract class HasOneCyclicTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchCyclicRelation()
+    public function testFetchCyclicRelation(): void
     {
         $selector = new Select($this->orm, Cyclic::class);
         list($a, $b, $c) = $selector->load('cyclic')->orderBy('cyclic.id')->fetchAll();
@@ -112,7 +113,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $this->assertSame($c, $c->cyclic);
     }
 
-    public function testUpdateCyclic()
+    public function testUpdateCyclic(): void
     {
         $selector = new Select($this->orm, Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
@@ -131,7 +132,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $this->assertSame($c, $c->cyclic);
     }
 
-    public function testCyclicWithoutLoad()
+    public function testCyclicWithoutLoad(): void
     {
         $selector = new Select($this->orm, Cyclic::class);
         $c = $selector->wherePK(3)->fetchOne();
@@ -139,10 +140,10 @@ abstract class HasOneCyclicTest extends BaseTest
         $this->assertSame($c, $c->cyclic);
     }
 
-    public function testCreateCyclic()
+    public function testCreateCyclic(): void
     {
         $c = new Cyclic();
-        $c->name = "new";
+        $c->name = 'new';
         $c->cyclic = $c;
 
         $this->captureWriteQueries();

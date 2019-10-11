@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -39,7 +40,7 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
-    public function addCommand(CommandInterface $command)
+    public function addCommand(CommandInterface $command): void
     {
         if ($command instanceof Nil) {
             return;
@@ -84,7 +85,7 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         // nothing
     }
@@ -92,7 +93,7 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
-    public function complete()
+    public function complete(): void
     {
         // nothing
     }
@@ -100,7 +101,7 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     /**
      * {@inheritdoc}
      */
-    public function rollBack()
+    public function rollBack(): void
     {
         // nothing
     }

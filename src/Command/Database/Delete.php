@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -18,7 +19,8 @@ use Spiral\Database\DatabaseInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
-    use ScopeTrait, ErrorTrait;
+    use ScopeTrait;
+    use ErrorTrait;
 
     /**
      * @param DatabaseInterface $db
@@ -42,10 +44,10 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
     /**
      * Inserting data into associated table.
      */
-    public function execute()
+    public function execute(): void
     {
         if ($this->scope === []) {
-            throw new CommandException("Unable to execute delete command without a scope");
+            throw new CommandException('Unable to execute delete command without a scope');
         }
 
         $this->db->delete($this->table, $this->scope)->run();
@@ -60,7 +62,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         $value,
         bool $fresh = false,
         int $stream = self::DATA
-    ) {
+    ): void {
         if ($fresh || $value !== null) {
             $this->freeScope($key);
         }

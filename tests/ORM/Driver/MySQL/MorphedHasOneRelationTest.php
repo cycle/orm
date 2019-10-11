@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\MySQL;
 
 class MorphedHasOneRelationTest extends \Cycle\ORM\Tests\Morphed\MorphedHasOneRelationTest
 {
-    const DRIVER = "mysql";
+    public const DRIVER = 'mysql';
 }

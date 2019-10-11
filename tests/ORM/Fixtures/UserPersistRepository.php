@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -35,7 +36,7 @@ class UserPersistRepository extends Repository
      *
      * @throws \Throwable
      */
-    public function save(User $user, bool $cascade = true)
+    public function save(User $user, bool $cascade = true): void
     {
         $this->transaction->persist(
             $user,

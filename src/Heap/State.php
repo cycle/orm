@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -21,7 +22,9 @@ use Cycle\ORM\Heap\Traits\VisitorTrait;
  */
 final class State implements ConsumerInterface, ProducerInterface
 {
-    use RelationTrait, ClaimTrait, VisitorTrait;
+    use RelationTrait;
+    use ClaimTrait;
+    use VisitorTrait;
 
     /** @var int */
     private $state;
@@ -73,7 +76,7 @@ final class State implements ConsumerInterface, ProducerInterface
      *
      * @param array $data
      */
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         if ($data === []) {
             return;
@@ -100,7 +103,7 @@ final class State implements ConsumerInterface, ProducerInterface
      * @param ContextCarrierInterface|null $cmd
      * @internal
      */
-    public function setCommand(ContextCarrierInterface $cmd = null)
+    public function setCommand(ContextCarrierInterface $cmd = null): void
     {
         $this->command = $cmd;
     }
@@ -139,7 +142,7 @@ final class State implements ConsumerInterface, ProducerInterface
         string $target,
         bool $trigger = false,
         int $stream = ConsumerInterface::DATA
-    ) {
+    ): void {
         $this->consumers[$key][] = [$consumer, $target, $stream];
 
         if ($trigger || !empty($this->data[$key])) {
@@ -155,7 +158,7 @@ final class State implements ConsumerInterface, ProducerInterface
         $value,
         bool $fresh = false,
         int $stream = self::DATA
-    ) {
+    ): void {
         if (!$fresh) {
             // custom, non value objects can be supported here
             $fresh = ($this->data[$key] ?? null) != $value;

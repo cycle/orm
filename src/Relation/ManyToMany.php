@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,14 +24,14 @@ use Doctrine\Common\Collections\Collection;
 
 class ManyToMany extends Relation\AbstractRelation
 {
-    /** @var string|null */
-    private $pivotEntity;
 
     /** @var string */
     protected $throughInnerKey;
 
     /** @var string */
     protected $throughOuterKey;
+    /** @var string|null */
+    private $pivotEntity;
 
     /**
      * @param ORMInterface $orm

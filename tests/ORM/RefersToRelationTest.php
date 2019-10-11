@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,7 @@ abstract class RefersToRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -86,14 +87,14 @@ abstract class RefersToRelationTest extends BaseTest
         ]));
     }
 
-    public function testCreateUserWithDoubleReference()
+    public function testCreateUserWithDoubleReference(): void
     {
         $u = new User();
-        $u->email = "email@email.com";
+        $u->email = 'email@email.com';
         $u->balance = 100;
 
         $c = new Comment();
-        $c->message = "last comment";
+        $c->message = 'last comment';
 
         $u->addComment($c);
 
@@ -112,14 +113,14 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertSame($u->lastComment, $u->comments[0]);
     }
 
-    public function testCreateUserToExistedReference()
+    public function testCreateUserToExistedReference(): void
     {
         $u = new User();
-        $u->email = "email@email.com";
+        $u->email = 'email@email.com';
         $u->balance = 100;
 
         $c = new Comment();
-        $c->message = "last comment";
+        $c->message = 'last comment';
 
         $u->addComment($c);
 
@@ -132,7 +133,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertNumWrites(3);
 
         $u2 = new User();
-        $u2->email = "second@email.com";
+        $u2->email = 'second@email.com';
         $u2->balance = 200;
         $u2->lastComment = $c;
 
@@ -149,10 +150,10 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertEquals($u3->lastComment->id, $u->comments[0]->id);
     }
 
-    public function testCreateWhenParentExists()
+    public function testCreateWhenParentExists(): void
     {
         $u = new User();
-        $u->email = "email@email.com";
+        $u->email = 'email@email.com';
         $u->balance = 100;
 
 
@@ -161,7 +162,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->run();
 
         $c = new Comment();
-        $c->message = "last comment";
+        $c->message = 'last comment';
 
         $u->addComment($c);
 
@@ -183,14 +184,14 @@ abstract class RefersToRelationTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\TransactionException
      */
-    public function testCreateWithoutProperDependency()
+    public function testCreateWithoutProperDependency(): void
     {
         $u = new User();
-        $u->email = "email@email.com";
+        $u->email = 'email@email.com';
         $u->balance = 100;
 
         $c = new Comment();
-        $c->message = "last comment";
+        $c->message = 'last comment';
 
         $u->lastComment = $c;
         try {
@@ -204,14 +205,14 @@ abstract class RefersToRelationTest extends BaseTest
         }
     }
 
-    public function testAssignParentAsUpdate()
+    public function testAssignParentAsUpdate(): void
     {
         $u = new User();
-        $u->email = "email@email.com";
+        $u->email = 'email@email.com';
         $u->balance = 100;
 
         $c = new Comment();
-        $c->message = "last comment";
+        $c->message = 'last comment';
         $u->comments->add($c);
 
         $tr = new Transaction($this->orm);
@@ -239,14 +240,14 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertSame($u->lastComment, $u->comments[0]);
     }
 
-    public function testSetNull()
+    public function testSetNull(): void
     {
         $u = new User();
-        $u->email = "email@email.com";
+        $u->email = 'email@email.com';
         $u->balance = 100;
 
         $c = new Comment();
-        $c->message = "last comment";
+        $c->message = 'last comment';
         $u->addComment($c);
 
         $this->captureWriteQueries();

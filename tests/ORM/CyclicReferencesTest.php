@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -25,7 +26,7 @@ abstract class CyclicReferencesTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -155,7 +156,7 @@ abstract class CyclicReferencesTest extends BaseTest
         ]));
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -202,7 +203,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->id, $u1->favorites[0]->favoredBy[0]->id);
     }
 
-    public function testCreateMultipleLinkedTrees()
+    public function testCreateMultipleLinkedTrees(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -276,7 +277,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u1->favorites[0]->id, $u2->favorites[0]->id);
     }
 
-    public function testCreateMultipleLinkedTreesExchange()
+    public function testCreateMultipleLinkedTreesExchange(): void
     {
         $u = new User();
         $u->email = 'u1@email.com';

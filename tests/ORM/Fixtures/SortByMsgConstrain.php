@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Cycle DataMapper ORM
  *
@@ -13,7 +16,7 @@ use Cycle\ORM\Select\QueryBuilder;
 
 class SortByMsgConstrain implements ConstrainInterface
 {
-    public function apply(QueryBuilder $query)
+    public function apply(QueryBuilder $query): void
     {
         $query->orderBy('message', 'ASC');
     }

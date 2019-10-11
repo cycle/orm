@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -21,7 +22,7 @@ abstract class ColumnAliasesTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -53,7 +54,7 @@ abstract class ColumnAliasesTest extends BaseTest
         ]));
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -71,7 +72,7 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
     }
 
-    public function testFindAll()
+    public function testFindAll(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findAll();
@@ -87,7 +88,7 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertEquals(200.0, $result[1]->balance);
     }
 
-    public function testCloned()
+    public function testCloned(): void
     {
         $r = $this->orm->getRepository(User::class);
 
@@ -97,7 +98,7 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertNotSame($r->select(), $r2->select());
     }
 
-    public function testFindOne()
+    public function testFindOne(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne();
@@ -108,7 +109,7 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
-    public function testFindDirectOneWithWhere()
+    public function testFindDirectOneWithWhere(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id_int' => 2]);
@@ -119,7 +120,7 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testFindDirectNull()
+    public function testFindDirectNull(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id_int' => 3]);
@@ -127,7 +128,7 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertNull($result);
     }
 
-    public function testFindDirectByPK()
+    public function testFindDirectByPK(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findByPK(2);
@@ -138,7 +139,7 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testFindDirectImmutable()
+    public function testFindDirectImmutable(): void
     {
         /** @var Repository $r */
         $r = $this->orm->getRepository(User::class);

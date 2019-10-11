@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\SQLite;
 
 class CyclicManyToManyTest extends \Cycle\ORM\Tests\CyclicManyToManyTest
 {
-    const DRIVER = "sqlite";
+    public const DRIVER = 'sqlite';
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -20,7 +21,7 @@ trait ClaimTrait
     /**
      * Add reference to the related entity.
      */
-    public function addClaim()
+    public function addClaim(): void
     {
         $this->numClaims++;
     }
@@ -28,7 +29,7 @@ trait ClaimTrait
     /**
      * Un-claim reference to the related entity.
      */
-    public function decClaim()
+    public function decClaim(): void
     {
         $this->numClaims--;
     }

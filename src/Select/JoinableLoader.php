@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,8 @@ use Spiral\Database\StatementInterface;
  */
 abstract class JoinableLoader extends AbstractLoader implements JoinableInterface
 {
-    use ColumnsTrait, ConstrainTrait;
+    use ColumnsTrait;
+    use ConstrainTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -91,7 +93,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return $this->options['as'];
         }
 
-        throw new LoaderException("Unable to resolve loader alias");
+        throw new LoaderException('Unable to resolve loader alias');
     }
 
     /**
@@ -107,7 +109,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
         if ($loader->getSource()->getDatabase() !== $parent->getSource()->getDatabase()) {
             if ($loader->isJoined()) {
-                throw new LoaderException("Unable to join tables located in different databases");
+                throw new LoaderException('Unable to join tables located in different databases');
             }
 
             // loader is not joined, let's make sure that POSTLOAD is used
@@ -141,7 +143,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     /**
      * {@inheritdoc}
      */
-    public function loadData(AbstractNode $node)
+    public function loadData(AbstractNode $node): void
     {
         if ($this->isJoined() || !$this->isLoaded()) {
             // load data for all nested relations
@@ -205,7 +207,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         if ($this->isLoaded()) {
             if ($this->isJoined()) {
                 if ($query->getLimit() != 0) {
-                    throw new LoaderException("Unable to load data using join with limit on parent query");
+                    throw new LoaderException('Unable to load data using join with limit on parent query');
                 }
 
                 // mounting the columns to parent query

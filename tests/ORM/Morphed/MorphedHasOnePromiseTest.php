@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -26,7 +27,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -147,7 +148,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         ]));
     }
 
-    public function testAccessEntity()
+    public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
@@ -162,7 +163,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertNumReads(2);
     }
 
-    public function testNoWrite()
+    public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
@@ -176,7 +177,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testSetNull()
+    public function testSetNull(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
@@ -207,7 +208,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertSame('user-2-image.png', $b->image->__resolve()->url);
     }
 
-    public function testExchangeParentsSameType()
+    public function testExchangeParentsSameType(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
@@ -243,7 +244,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertSame('user-2-image.png', $a->image->__resolve()->url);
     }
 
-    public function testReplaceExisted()
+    public function testReplaceExisted(): void
     {
         $count = (new Select($this->orm, Image::class))->count();
 
@@ -274,11 +275,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertSame($count, (new Select($this->orm, Image::class))->count());
     }
 
-    public function testCreateWithRelated()
+    public function testCreateWithRelated(): void
     {
         $p = new Post();
-        $p->title = "post title";
-        $p->content = "post content";
+        $p->title = 'post title';
+        $p->content = 'post content';
 
         $p->image = new Image();
         $p->image->url = 'new-post.png';
@@ -300,11 +301,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $selector = new Select($this->orm, Post::class);
         $p = $selector->wherePK(5)->fetchOne();
 
-        $this->assertSame("post title", $p->title);
-        $this->assertSame("new-post.png", $p->image->__resolve()->url);
+        $this->assertSame('post title', $p->title);
+        $this->assertSame('new-post.png', $p->image->__resolve()->url);
     }
 
-    public function testMoveToAnotherParent()
+    public function testMoveToAnotherParent(): void
     {
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
@@ -326,12 +327,12 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
 
-        $this->assertSame("post-image.png", $u->image->__resolve()->url);
+        $this->assertSame('post-image.png', $u->image->__resolve()->url);
         $this->assertSame(null, $p->image->__resolve());
     }
 
 
-    public function testChangeParents()
+    public function testChangeParents(): void
     {
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
@@ -362,7 +363,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
-        $this->assertSame("post-2-image.png", $u->image->__resolve()->url);
-        $this->assertSame("user-image.png", $p->image->__resolve()->url);
+        $this->assertSame('post-2-image.png', $u->image->__resolve()->url);
+        $this->assertSame('user-image.png', $p->image->__resolve()->url);
     }
 }

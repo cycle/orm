@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,7 +25,7 @@ abstract class BelongsToProxyTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -93,7 +94,7 @@ abstract class BelongsToProxyTest extends BaseTest
         ]))->withPromiseFactory(new PromiseFactory());
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -112,7 +113,7 @@ abstract class BelongsToProxyTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchProxied()
+    public function testFetchProxied(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -133,7 +134,7 @@ abstract class BelongsToProxyTest extends BaseTest
         $this->assertEquals(2, $b->user->getID());
     }
 
-    public function testLoaded()
+    public function testLoaded(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -149,7 +150,7 @@ abstract class BelongsToProxyTest extends BaseTest
         $this->assertTrue($a->user->__loaded());
     }
 
-    public function testRole()
+    public function testRole(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -167,7 +168,7 @@ abstract class BelongsToProxyTest extends BaseTest
         ], $a->user->__scope());
     }
 
-    public function testScope()
+    public function testScope(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');

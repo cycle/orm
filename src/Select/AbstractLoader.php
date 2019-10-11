@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -41,7 +42,8 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait, AliasTrait;
+    use ChainTrait;
+    use AliasTrait;
 
     // Loading methods for data loaders.
     public const INLOAD    = 1;
@@ -81,6 +83,32 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
+     * Destruct loader.
+     */
+    final public function __destruct()
+    {
+        $this->parent = null;
+        $this->load = [];
+        $this->join = [];
+    }
+
+    /**
+     * Ensure state of every nested loader.
+     */
+    public function __clone()
+    {
+        $this->parent = null;
+
+        foreach ($this->load as $name => $loader) {
+            $this->load[$name] = $loader->withContext($this);
+        }
+
+        foreach ($this->join as $name => $loader) {
+            $this->join[$name] = $loader->withContext($this);
+        }
+    }
+
+    /**
      * @return string
      */
     public function getTarget(): string
@@ -106,7 +134,7 @@ abstract class AbstractLoader implements LoaderInterface
         // check that given options are known
         if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
             throw new LoaderException(sprintf(
-                "Relation %s does not support option: %s",
+                'Relation %s does not support option: %s',
                 get_class($this),
                 join(',', $wrong)
             ));
@@ -180,9 +208,9 @@ abstract class AbstractLoader implements LoaderInterface
                 $this->target,
                 $relation
             );
-        } catch (SchemaException|FactoryException $e) {
+        } catch (SchemaException | FactoryException $e) {
             throw new LoaderException(
-                sprintf("Unable to create loader: %s", $e->getMessage()),
+                sprintf('Unable to create loader: %s', $e->getMessage()),
                 $e->getCode(),
                 $e
             );
@@ -213,38 +241,12 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * @param AbstractNode $node
      */
-    public function loadData(AbstractNode $node)
+    public function loadData(AbstractNode $node): void
     {
         // loading data through child loaders
         foreach ($this->load as $relation => $loader) {
             $loader->loadData($node->getNode($relation));
         }
-    }
-
-    /**
-     * Ensure state of every nested loader.
-     */
-    public function __clone()
-    {
-        $this->parent = null;
-
-        foreach ($this->load as $name => $loader) {
-            $this->load[$name] = $loader->withContext($this);
-        }
-
-        foreach ($this->join as $name => $loader) {
-            $this->join[$name] = $loader->withContext($this);
-        }
-    }
-
-    /**
-     * Destruct loader.
-     */
-    final public function __destruct()
-    {
-        $this->parent = null;
-        $this->load = [];
-        $this->join = [];
     }
 
     /**

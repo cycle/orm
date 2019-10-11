@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -15,7 +16,7 @@ use Cycle\ORM\Select\QueryBuilder;
 
 class NotDeletedConstrain implements ConstrainInterface
 {
-    public function apply(QueryBuilder $query)
+    public function apply(QueryBuilder $query): void
     {
         $query->where('deleted_at', '=', null);
     }

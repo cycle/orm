@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\SQLite;
 
 class HasManyRelationTest extends \Cycle\ORM\Tests\HasManyRelationTest
 {
-    const DRIVER = "sqlite";
+    public const DRIVER = 'sqlite';
 }

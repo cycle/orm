@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -26,7 +27,7 @@ trait ContextTrait
      * @param string $key
      * @param bool   $required
      */
-    public function waitContext(string $key, bool $required = true)
+    public function waitContext(string $key, bool $required = true): void
     {
         if ($required) {
             $this->waitContext[$key] = null;
@@ -45,7 +46,7 @@ trait ContextTrait
      * @param string $name
      * @param mixed  $value
      */
-    protected function setContext(string $name, $value)
+    protected function setContext(string $name, $value): void
     {
         $this->context[$name] = $value;
     }
@@ -55,7 +56,7 @@ trait ContextTrait
      *
      * @param string $key
      */
-    protected function freeContext(string $key)
+    protected function freeContext(string $key): void
     {
         unset($this->waitContext[$key]);
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -30,7 +31,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
      *
      * @param ContextCarrierInterface $command
      */
-    public function addPrimary(ContextCarrierInterface $command)
+    public function addPrimary(ContextCarrierInterface $command): void
     {
         $this->addCommand($command);
         $this->primary = $command;
@@ -42,7 +43,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
     public function getPrimary(): ContextCarrierInterface
     {
         if (empty($this->primary)) {
-            throw new CommandException("Primary sequence command is not set");
+            throw new CommandException('Primary sequence command is not set');
         }
 
         return $this->primary;
@@ -72,7 +73,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
         $value,
         bool $fresh = false,
         int $stream = ConsumerInterface::DATA
-    ) {
+    ): void {
         $this->getPrimary()->register($key, $value, $fresh, $stream);
     }
 
@@ -96,7 +97,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
     /**
      * {@inheritdoc}
      */
-    public function addCommand(CommandInterface $command)
+    public function addCommand(CommandInterface $command): void
     {
         if ($command instanceof Nil) {
             return;
@@ -141,7 +142,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
     /**
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         // nothing
     }
@@ -149,7 +150,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
     /**
      * {@inheritdoc}
      */
-    public function complete()
+    public function complete(): void
     {
         // nothing
     }
@@ -157,7 +158,7 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
     /**
      * {@inheritdoc}
      */
-    public function rollBack()
+    public function rollBack(): void
     {
         // nothing
     }

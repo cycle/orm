@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -14,7 +15,7 @@ use Cycle\ORM\Select\QueryBuilder;
 
 class SortByIDConstrain implements ConstrainInterface
 {
-    public function apply(QueryBuilder $query)
+    public function apply(QueryBuilder $query): void
     {
         $query->orderBy('id', 'ASC');
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\Postgres;
 
 class HasManySourceTest extends \Cycle\ORM\Tests\HasManySourceTest
 {
-    const DRIVER = "postgres";
+    public const DRIVER = 'postgres';
 }

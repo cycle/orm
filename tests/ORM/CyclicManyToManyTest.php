@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -6,7 +7,6 @@
  * @author    Anton Titov (Wolfy-J)
  */
 declare(strict_types=1);
-
 
 namespace Cycle\ORM\Tests;
 
@@ -25,7 +25,7 @@ abstract class CyclicManyToManyTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -142,7 +142,7 @@ abstract class CyclicManyToManyTest extends BaseTest
         ]));
     }
 
-    public function testLoadRelation()
+    public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')->orderBy('id', 'ASC');
@@ -195,14 +195,14 @@ abstract class CyclicManyToManyTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testCreateFromUser()
+    public function testCreateFromUser(): void
     {
         $u = new User();
-        $u->email = "hello@world.com";
+        $u->email = 'hello@world.com';
         $u->balance = 1;
 
         $tag = new Tag();
-        $tag->name = "hello";
+        $tag->name = 'hello';
 
         $u->tags->add($tag);
 
@@ -216,14 +216,14 @@ abstract class CyclicManyToManyTest extends BaseTest
         $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
     }
 
-    public function testCreateFromTag()
+    public function testCreateFromTag(): void
     {
         $u = new User();
-        $u->email = "hello@world.com";
+        $u->email = 'hello@world.com';
         $u->balance = 1;
 
         $tag = new Tag();
-        $tag->name = "hello";
+        $tag->name = 'hello';
 
         $tag->users->add($u);
 
@@ -237,14 +237,14 @@ abstract class CyclicManyToManyTest extends BaseTest
         $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
     }
 
-    public function testCreateCyclic()
+    public function testCreateCyclic(): void
     {
         $u = new User();
-        $u->email = "hello@world.com";
+        $u->email = 'hello@world.com';
         $u->balance = 1;
 
         $tag = new Tag();
-        $tag->name = "hello";
+        $tag->name = 'hello';
 
         $tag->users->add($u);
         $u->tags->add($tag);

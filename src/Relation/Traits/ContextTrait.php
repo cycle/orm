@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -20,6 +21,14 @@ use Cycle\ORM\Heap\Node;
  */
 trait ContextTrait
 {
+
+    /**
+     * True is given relation is required for the object to be saved (i.e. NOT NULL).
+     *
+     * @todo rename to isNullable and inverse the logic
+     * @return bool
+     */
+    abstract public function isNotNullable(): bool;
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
@@ -90,12 +99,4 @@ trait ContextTrait
      * @return string
      */
     abstract protected function columnName(Node $node, string $field): string;
-
-    /**
-     * True is given relation is required for the object to be saved (i.e. NOT NULL).
-     *
-     * @todo rename to isNullable and inverse the logic
-     * @return bool
-     */
-    abstract public function isNotNullable(): bool;
 }

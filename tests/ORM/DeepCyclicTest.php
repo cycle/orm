@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class DeepCyclicTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -68,13 +69,13 @@ abstract class DeepCyclicTest extends BaseTest
         ]));
     }
 
-    public function testCreateDeepCyclic()
+    public function testCreateDeepCyclic(): void
     {
-        $c1 = new Cyclic("C1");
-        $c2 = new Cyclic("C2");
-        $c3 = new Cyclic("C3");
-        $c4 = new Cyclic("C4");
-        $c5 = new Cyclic("C5");
+        $c1 = new Cyclic('C1');
+        $c2 = new Cyclic('C2');
+        $c3 = new Cyclic('C3');
+        $c4 = new Cyclic('C4');
+        $c5 = new Cyclic('C5');
 
         // double cycling
         $c1->cyclic = $c5;
@@ -120,13 +121,13 @@ abstract class DeepCyclicTest extends BaseTest
     }
 
     // make sure that graph transformation is homogeneous
-    public function testCreateDeepCyclicPartial()
+    public function testCreateDeepCyclicPartial(): void
     {
-        $c1 = new Cyclic("C1");
-        $c2 = new Cyclic("C2");
-        $c3 = new Cyclic("C3");
-        $c4 = new Cyclic("C4");
-        $c5 = new Cyclic("C5");
+        $c1 = new Cyclic('C1');
+        $c2 = new Cyclic('C2');
+        $c3 = new Cyclic('C3');
+        $c4 = new Cyclic('C4');
+        $c5 = new Cyclic('C5');
 
         // double cycling
         $c1->cyclic = $c5;
@@ -169,13 +170,13 @@ abstract class DeepCyclicTest extends BaseTest
     }
 
     // make sure that graph transformation is homogeneous
-    public function testCreateDeepCyclicPartial2()
+    public function testCreateDeepCyclicPartial2(): void
     {
-        $c1 = new Cyclic("C1");
-        $c2 = new Cyclic("C2");
-        $c3 = new Cyclic("C3");
-        $c4 = new Cyclic("C4");
-        $c5 = new Cyclic("C5");
+        $c1 = new Cyclic('C1');
+        $c2 = new Cyclic('C2');
+        $c3 = new Cyclic('C3');
+        $c4 = new Cyclic('C4');
+        $c5 = new Cyclic('C5');
 
         // double cycling
         $c1->cyclic = $c5;
@@ -218,13 +219,13 @@ abstract class DeepCyclicTest extends BaseTest
     }
 
     // make sure that graph transformation is homogeneous
-    public function testOverlappingCycles()
+    public function testOverlappingCycles(): void
     {
-        $c1 = new Cyclic("C1");
-        $c2 = new Cyclic("C2");
-        $c3 = new Cyclic("C3");
-        $c4 = new Cyclic("C4");
-        $c5 = new Cyclic("C5");
+        $c1 = new Cyclic('C1');
+        $c2 = new Cyclic('C2');
+        $c3 = new Cyclic('C3');
+        $c4 = new Cyclic('C4');
+        $c5 = new Cyclic('C5');
 
         // double cycling
         $c1->cyclic = $c5;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -25,7 +26,9 @@ use Spiral\Database\DatabaseInterface;
  */
 final class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
 {
-    use ContextTrait, ScopeTrait, ErrorTrait;
+    use ContextTrait;
+    use ScopeTrait;
+    use ErrorTrait;
 
     /** @var array */
     protected $data = [];
@@ -81,10 +84,10 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     /**
      * Update data in associated table.
      */
-    public function execute()
+    public function execute(): void
     {
         if ($this->scope === []) {
-            throw new CommandException("Unable to execute update command without a scope");
+            throw new CommandException('Unable to execute update command without a scope');
         }
 
         if (!$this->isEmpty()) {
@@ -105,7 +108,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     /**
      * @inheritdoc
      */
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         if ($stream == self::SCOPE) {
             if (empty($value)) {
@@ -138,7 +141,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      * @param string $key
      * @param mixed  $value
      */
-    public function registerAppendix(string $key, $value)
+    public function registerAppendix(string $key, $value): void
     {
         $this->appendix[$key] = $value;
     }

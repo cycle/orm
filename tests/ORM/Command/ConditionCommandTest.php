@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -18,10 +19,10 @@ class ConditionCommandTest extends TestCase
 {
     private $testCommand;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
-        $this->testCommand = new class implements CommandInterface {
+        $this->testCommand = new class() implements CommandInterface {
             private $executed = false;
 
             public function isReady(): bool
@@ -34,23 +35,23 @@ class ConditionCommandTest extends TestCase
                 return $this->executed;
             }
 
-            public function execute()
+            public function execute(): void
             {
                 $this->executed = true;
             }
 
-            public function complete()
+            public function complete(): void
             {
             }
 
-            public function rollBack()
+            public function rollBack(): void
             {
             }
         };
     }
 
 
-    public function testIterate()
+    public function testIterate(): void
     {
         $c = new Condition(
             $this->testCommand,
@@ -64,7 +65,7 @@ class ConditionCommandTest extends TestCase
         }
     }
 
-    public function testIterateEmpty()
+    public function testIterateEmpty(): void
     {
         $c = new Condition(
             $this->testCommand,
@@ -76,7 +77,7 @@ class ConditionCommandTest extends TestCase
         $this->assertCount(0, iterator_to_array($c));
     }
 
-    public function testExecuted()
+    public function testExecuted(): void
     {
         $c = new Condition(
             $this->testCommand,

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,8 @@ use Spiral\Database\DatabaseInterface;
  */
 final class Insert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
 {
-    use ContextTrait, ErrorTrait;
+    use ContextTrait;
+    use ErrorTrait;
 
     // Special identifier to forward insert key into
     public const INSERT_ID = '@lastInsertID';
@@ -64,9 +66,9 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         string $target,
         bool $trigger = false,
         int $stream = ConsumerInterface::DATA
-    ) {
+    ): void {
         if ($trigger) {
-            throw new CommandException("Insert command can only forward keys after the execution");
+            throw new CommandException('Insert command can only forward keys after the execution');
         }
 
         $this->consumers[$key][] = [$consumer, $target, $stream];
@@ -75,7 +77,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     /**
      * @inheritdoc
      */
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         if ($fresh || $value !== null) {
             $this->freeContext($key);
@@ -97,7 +99,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     /**
      * Insert data into associated table.
      */
-    public function execute()
+    public function execute(): void
     {
         $data = $this->getData();
         $insertID = $this->db->insert($this->table)->values($data)->run();

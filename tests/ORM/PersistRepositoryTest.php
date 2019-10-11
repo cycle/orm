@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -19,7 +20,7 @@ abstract class PersistRepositoryTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -51,14 +52,14 @@ abstract class PersistRepositoryTest extends BaseTest
         ]));
     }
 
-    public function testPersist()
+    public function testPersist(): void
     {
         /** @var UserPersistRepository $users */
         $users = $this->orm->getRepository(User::class);
 
 
         $u = new User();
-        $u->email = "test@email.com";
+        $u->email = 'test@email.com';
         $u->balance = 1000;
 
         $this->assertNull($u->id);

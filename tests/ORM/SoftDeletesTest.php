@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,7 @@ abstract class SoftDeletesTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -54,7 +55,7 @@ abstract class SoftDeletesTest extends BaseTest
         ]));
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -68,7 +69,7 @@ abstract class SoftDeletesTest extends BaseTest
         $this->assertNull($data[0]['deleted_at']);
     }
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $u = new User();
         $u->email = 'test@email.com';

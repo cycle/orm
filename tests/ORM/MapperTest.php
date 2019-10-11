@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class MapperTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -54,7 +55,7 @@ abstract class MapperTest extends BaseTest
         ]));
     }
 
-    public function testFetchData()
+    public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -72,7 +73,7 @@ abstract class MapperTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testAssertRole()
+    public function testAssertRole(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
@@ -80,17 +81,17 @@ abstract class MapperTest extends BaseTest
         $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
     }
 
-    public function testMakeByRole()
+    public function testMakeByRole(): void
     {
         $this->assertInstanceOf(User::class, $this->orm->make('user'));
     }
 
-    public function testMakeByClass()
+    public function testMakeByClass(): void
     {
         $this->assertInstanceOf(User::class, $this->orm->make(User::class));
     }
 
-    public function testAssertRoleViaClass()
+    public function testAssertRoleViaClass(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -98,7 +99,7 @@ abstract class MapperTest extends BaseTest
         $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
     }
 
-    public function testFetchAll()
+    public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchAll();
@@ -114,7 +115,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(200.0, $result[1]->balance);
     }
 
-    public function testFetchOne()
+    public function testFetchOne(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -125,10 +126,10 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
-    public function testFetchSame()
+    public function testFetchSame(): void
     {
         $u = new User();
-        $u->email = "test";
+        $u->email = 'test';
         $u->balance = 100;
 
         (new Transaction($this->orm))->persist($u)->run();
@@ -144,7 +145,7 @@ abstract class MapperTest extends BaseTest
         $this->assertSame($u, $result);
     }
 
-    public function testNoWrite()
+    public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -157,7 +158,7 @@ abstract class MapperTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testWhere()
+    public function testWhere(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
@@ -168,7 +169,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
@@ -186,7 +187,7 @@ abstract class MapperTest extends BaseTest
         $this->assertFalse($this->orm->getHeap()->has($result));
     }
 
-    public function testHeap()
+    public function testHeap(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -206,7 +207,7 @@ abstract class MapperTest extends BaseTest
         );
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -230,7 +231,7 @@ abstract class MapperTest extends BaseTest
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
     }
 
-    public function testStoreWithUpdate()
+    public function testStoreWithUpdate(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -257,7 +258,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(400, $result->balance);
     }
 
-    public function testRepositoryFindAll()
+    public function testRepositoryFindAll(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findAll();
@@ -273,7 +274,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(200.0, $result[1]->balance);
     }
 
-    public function testRepositoryFindOne()
+    public function testRepositoryFindOne(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne();
@@ -284,7 +285,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
-    public function testRepositoryFindOneWithWhere()
+    public function testRepositoryFindOneWithWhere(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 2]);
@@ -295,7 +296,7 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testLoadDoesNotOverwriteValues()
+    public function testLoadDoesNotOverwriteValues(): void
     {
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         $u->email = 'test@email.com';

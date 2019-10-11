@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -21,6 +22,14 @@ final class Heap implements HeapInterface, \IteratorAggregate
      * Heap constructor.
      */
     public function __construct()
+    {
+        $this->clean();
+    }
+
+    /**
+     * Heap destructor.
+     */
+    public function __destruct()
     {
         $this->clean();
     }
@@ -69,7 +78,7 @@ final class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function attach($entity, Node $node, array $index = [])
+    public function attach($entity, Node $node, array $index = []): void
     {
         $this->storage->offsetSet($entity, $node);
 
@@ -86,7 +95,7 @@ final class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function detach($entity)
+    public function detach($entity): void
     {
         if (!$this->has($entity)) {
             return;
@@ -109,17 +118,9 @@ final class Heap implements HeapInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function clean()
+    public function clean(): void
     {
         $this->paths = [];
         $this->storage = new \SplObjectStorage();
-    }
-
-    /**
-     * Heap destructor.
-     */
-    public function __destruct()
-    {
-        $this->clean();
     }
 }

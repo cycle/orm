@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -86,7 +87,7 @@ final class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    public function run()
+    public function run(): void
     {
         try {
             $commands = $this->initCommands();
@@ -108,7 +109,7 @@ final class Transaction implements TransactionInterface
                 }
 
                 if (count($this->runner) === $lastExecuted && $pending !== []) {
-                    throw new TransactionException("Unable to complete: " . $this->listCommands($pending));
+                    throw new TransactionException('Unable to complete: ' . $this->listCommands($pending));
                 }
 
                 $commands = $pending;
@@ -138,7 +139,7 @@ final class Transaction implements TransactionInterface
     /**
      * Sync all entity states with generated changes.
      */
-    protected function syncHeap()
+    protected function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
         foreach ($heap as $e) {
@@ -162,7 +163,7 @@ final class Transaction implements TransactionInterface
     /**
      * Reset heap to it's initial state and remove all the changes.
      */
-    protected function resetHeap()
+    protected function resetHeap(): void
     {
         $heap = $this->orm->getHeap();
         foreach ($heap as $e) {

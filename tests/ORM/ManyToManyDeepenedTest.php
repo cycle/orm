@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -31,7 +32,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -168,7 +169,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         ]));
     }
 
-    public function testLoadRelation()
+    public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags.@.image')->orderBy('id', 'ASC');
@@ -232,7 +233,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoadRelationInload()
+    public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector
@@ -299,7 +300,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testAccessLoadedBranch()
+    public function testAccessLoadedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags.@.image')->orderBy('id', 'ASC');
@@ -337,7 +338,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         $this->assertEquals('second.png', $b->tags->getPivot($b->tags[0])->image->url);
     }
 
-    public function testUpdateLoadedBranch()
+    public function testUpdateLoadedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags.@.image')->orderBy('id', 'ASC');
@@ -373,7 +374,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         $this->assertSame('new.gif', $b->tags->getPivot($b->tags[0])->image->url);
     }
 
-    public function testFilterByPivotedBranch()
+    public function testFilterByPivotedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector

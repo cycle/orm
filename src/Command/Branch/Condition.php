@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -64,7 +65,7 @@ final class Condition implements CommandInterface, \IteratorAggregate
      * @inheritdoc
      * @codeCoverageIgnore
      */
-    public function execute()
+    public function execute(): void
     {
         // nothing to do
     }
@@ -73,7 +74,7 @@ final class Condition implements CommandInterface, \IteratorAggregate
      * @inheritdoc
      * @codeCoverageIgnore
      */
-    public function complete()
+    public function complete(): void
     {
         // nothing to do
     }
@@ -82,7 +83,7 @@ final class Condition implements CommandInterface, \IteratorAggregate
      * @inheritdoc
      * @codeCoverageIgnore
      */
-    public function rollBack()
+    public function rollBack(): void
     {
         // nothing to do
     }

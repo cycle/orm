@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -24,7 +25,7 @@ abstract class InstantiatorTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -76,16 +77,16 @@ abstract class InstantiatorTest extends BaseTest
         ]));
     }
 
-    public function testInitRelation()
+    public function testInitRelation(): void
     {
         $u = $this->orm->make(WithConstructor::class);
         $this->assertInstanceOf(ArrayCollection::class, $u->comments);
         $this->assertNull($u->called);
     }
 
-    public function testConstructor()
+    public function testConstructor(): void
     {
-        $u = new WithConstructor("email");
+        $u = new WithConstructor('email');
 
         $t = new Transaction($this->orm);
         $t->persist($u);
@@ -94,6 +95,6 @@ abstract class InstantiatorTest extends BaseTest
         $selector = new Select(clone $this->orm, 'user');
         $u = $selector->fetchOne();
 
-        $this->assertSame("email", $u->email);
+        $this->assertSame('email', $u->email);
     }
 }

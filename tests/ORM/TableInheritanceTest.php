@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class TableInheritanceTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -61,7 +62,7 @@ abstract class TableInheritanceTest extends BaseTest
         ]));
     }
 
-    public function testFetchData()
+    public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -91,7 +92,7 @@ abstract class TableInheritanceTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testIterate()
+    public function testIterate(): void
     {
         $selector = new Select($this->orm, User::class);
         list($a, $b, $c) = $selector->orderBy('id')->fetchAll();
@@ -105,7 +106,7 @@ abstract class TableInheritanceTest extends BaseTest
         $this->assertSame('*', $b->permissions);
     }
 
-    public function testStoreNormalAndInherited()
+    public function testStoreNormalAndInherited(): void
     {
         $u = new User();
         $u->email = 'user@email.com';

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -16,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 
 class NodeTest extends TestCase
 {
-    public function testRoot()
+    public function testRoot(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
 
@@ -41,7 +42,7 @@ class NodeTest extends TestCase
         ], $node->getResult());
     }
 
-    public function testRootDuplicate()
+    public function testRootDuplicate(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
 
@@ -68,7 +69,7 @@ class NodeTest extends TestCase
         ], $node->getResult());
     }
 
-    public function testSingular()
+    public function testSingular(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->joinNode('balance', new SingularNode(
@@ -115,7 +116,7 @@ class NodeTest extends TestCase
         ], $node->getResult());
     }
 
-    public function testGetReferences()
+    public function testGetReferences(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->linkNode('balance', $child = new SingularNode(
@@ -141,7 +142,7 @@ class NodeTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\ParserException
      */
-    public function testGetReferencesWithoutParent()
+    public function testGetReferencesWithoutParent(): void
     {
         $child = new SingularNode(
             ['id', 'user_id', 'balance'],
@@ -153,7 +154,7 @@ class NodeTest extends TestCase
         $child->getReferences();
     }
 
-    public function testSingularOverExternal()
+    public function testSingularOverExternal(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->linkNode('balance', $child = new SingularNode(
@@ -212,7 +213,7 @@ class NodeTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\ParserException
      */
-    public function testSingularInvalidReference()
+    public function testSingularInvalidReference(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->linkNode('balance', $child = new SingularNode(
@@ -245,7 +246,7 @@ class NodeTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\ParserException
      */
-    public function testInvalidColumnCount()
+    public function testInvalidColumnCount(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->joinNode('balance', new SingularNode(
@@ -266,7 +267,7 @@ class NodeTest extends TestCase
         }
     }
 
-    public function testGetNode()
+    public function testGetNode(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->joinNode('balance', $child = new SingularNode(
@@ -282,7 +283,7 @@ class NodeTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\ParserException
      */
-    public function testGetUndefinedNode()
+    public function testGetUndefinedNode(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->getNode('balance');
@@ -291,7 +292,7 @@ class NodeTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\ParserException
      */
-    public function testSingularParseWithoutParent()
+    public function testSingularParseWithoutParent(): void
     {
         $node = new SingularNode(
             ['id', 'user_id', 'balance'],
@@ -303,7 +304,7 @@ class NodeTest extends TestCase
         $node->parseRow(0, [1, 10, 10]);
     }
 
-    public function testArray()
+    public function testArray(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->joinNode('lines', new ArrayNode(
@@ -365,7 +366,7 @@ class NodeTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\ParserException
      */
-    public function testArrayInvalidReference()
+    public function testArrayInvalidReference(): void
     {
         $node = new RootNode(['id', 'email'], 'id');
         $node->linkNode('balance', $child = new ArrayNode(
@@ -398,7 +399,7 @@ class NodeTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\ParserException
      */
-    public function testArrayWithoutParent()
+    public function testArrayWithoutParent(): void
     {
         $node = new ArrayNode(
             ['id', 'user_id', 'balance'],

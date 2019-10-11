@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -18,7 +19,7 @@ abstract class ORMTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -50,7 +51,7 @@ abstract class ORMTest extends BaseTest
         ]));
     }
 
-    public function testORMGet()
+    public function testORMGet(): void
     {
         $this->assertNull($this->orm->get(User::class, ['id' => 1], false));
         $this->assertInstanceOf(User::class, $this->orm->get(User::class, ['id' => 1], true));
@@ -62,13 +63,13 @@ abstract class ORMTest extends BaseTest
         $this->assertCount(1, $this->orm->getSchema()->getRoles());
     }
 
-    public function testORMClone()
+    public function testORMClone(): void
     {
         $orm = $this->orm->withFactory($this->orm->getFactory());
         $this->assertNotSame($orm, $this->orm);
     }
 
-    public function testORMGetByRole()
+    public function testORMGetByRole(): void
     {
         $this->assertNull($this->orm->get('user', ['id' => 1], false));
         $this->assertInstanceOf(User::class, $this->orm->get('user', ['id' => 1], true));

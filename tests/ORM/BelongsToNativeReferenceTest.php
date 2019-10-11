@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -25,7 +26,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -109,7 +110,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
         ]))->withPromiseFactory(null);
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -133,7 +134,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchPromises()
+    public function testFetchPromises(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
@@ -144,7 +145,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
         $this->assertSame(null, $c->user);
     }
 
-    public function testNoWriteOperations()
+    public function testNoWriteOperations(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
@@ -159,7 +160,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testCreateWithoutObject()
+    public function testCreateWithoutObject(): void
     {
         $p = new Profile();
         $p->user = new Reference('user', ['id' => 1]);

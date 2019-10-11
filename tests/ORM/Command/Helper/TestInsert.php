@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Command\Helper;
 
@@ -14,7 +15,8 @@ use Spiral\Database\DatabaseInterface;
 
 class TestInsert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
 {
-    use ContextTrait, ErrorTrait;
+    use ContextTrait;
+    use ErrorTrait;
 
     // Special identifier to forward insert key into
     public const INSERT_ID = '@lastInsertID';
@@ -55,9 +57,9 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
         string $target,
         bool $trigger = false,
         int $stream = ConsumerInterface::DATA
-    ) {
+    ): void {
         if ($trigger) {
-            throw new CommandException("Insert command can only forward keys after the execution");
+            throw new CommandException('Insert command can only forward keys after the execution');
         }
 
         $this->consumers[$key][] = [$consumer, $target, $stream];
@@ -66,7 +68,7 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
     /**
      * @inheritdoc
      */
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         if ($fresh || !is_null($value)) {
             $this->freeContext($key);
@@ -88,7 +90,7 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
     /**
      * Insert data into associated table.
      */
-    public function execute()
+    public function execute(): void
     {
         $update = true;
         $data = $this->getData();

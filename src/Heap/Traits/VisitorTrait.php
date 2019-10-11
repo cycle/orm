@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -33,7 +34,7 @@ trait VisitorTrait
      *
      * @param string $branch
      */
-    public function markVisited(string $branch)
+    public function markVisited(string $branch): void
     {
         $this->visited[$branch] = null;
     }

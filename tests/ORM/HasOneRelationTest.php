@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -27,7 +28,7 @@ abstract class HasOneRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -129,12 +130,12 @@ abstract class HasOneRelationTest extends BaseTest
         ]));
     }
 
-    public function testHasInSchema()
+    public function testHasInSchema(): void
     {
         $this->assertSame(['profile'], $this->orm->getSchema()->getRelations('user'));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
@@ -159,7 +160,7 @@ abstract class HasOneRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testWithNoColumns()
+    public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, User::class);
         $data = $selector->with('profile')->buildQuery()->fetchAll();
@@ -167,7 +168,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame(3, count($data[0]));
     }
 
-    public function testFetchRelationPostload()
+    public function testFetchRelationPostload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile', ['method' => JoinableLoader::POSTLOAD]);
@@ -192,7 +193,7 @@ abstract class HasOneRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testAccessEntities()
+    public function testAccessEntities(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
@@ -206,13 +207,13 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals(null, $result[1]->profile);
     }
 
-    public function testCreateWithRelations()
+    public function testCreateWithRelations(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
         $e->profile = new Profile();
-        $e->profile->image = "magic.gif";
+        $e->profile->image = 'magic.gif';
 
         $tr = new Transaction($this->orm);
         $tr->persist($e);
@@ -229,13 +230,13 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame($e->id, $this->orm->getHeap()->get($e->profile)->getData()['user_id']);
     }
 
-    public function testMountRelation()
+    public function testMountRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $e = $selector->where('id', 2)->fetchOne();
 
         $e->profile = new Profile();
-        $e->profile->image = "secondary.gif";
+        $e->profile->image = 'secondary.gif';
 
         $tr = new Transaction($this->orm);
         $tr->persist($e);
@@ -268,13 +269,13 @@ abstract class HasOneRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testCreateAndUpdateRelatedData()
+    public function testCreateAndUpdateRelatedData(): void
     {
         $selector = new Select($this->orm, User::class);
         $e = $selector->where('id', 2)->fetchOne();
 
         $e->profile = new Profile();
-        $e->profile->image = "secondary.gif";
+        $e->profile->image = 'secondary.gif';
 
         $tr = new Transaction($this->orm);
         $tr->persist($e);
@@ -311,7 +312,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('updated.png', $e->profile->image);
     }
 
-    public function testDeleteChildrenByAssigningNull()
+    public function testDeleteChildrenByAssigningNull(): void
     {
         $selector = new Select($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
@@ -327,7 +328,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame(null, $e->profile);
     }
 
-    public function testDeleteNullableChild()
+    public function testDeleteNullableChild(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
@@ -398,7 +399,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame(1, (new Select($this->orm, Profile::class))->count());
     }
 
-    public function testAssignNewChild()
+    public function testAssignNewChild(): void
     {
         $selector = new Select($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
@@ -421,7 +422,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('new.jpg', $e->profile->image);
     }
 
-    public function testMoveToAnotherEntity()
+    public function testMoveToAnotherEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
@@ -447,13 +448,13 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals($p->id, $b->profile->id);
     }
 
-    public function testExchange()
+    public function testExchange(): void
     {
         $selector = new Select($this->orm, User::class);
         list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
         $b->profile = new Profile();
-        $b->profile->image = "secondary.gif";
+        $b->profile->image = 'secondary.gif';
 
         $tr = new Transaction($this->orm);
         $tr->persist($b);
@@ -483,7 +484,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('secondary.gif', $a->profile->image);
     }
 
-    public function testFetchNestedRelation()
+    public function testFetchNestedRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile.nested');
@@ -513,7 +514,7 @@ abstract class HasOneRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchNestedRelationPostload()
+    public function testFetchNestedRelationPostload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile', ['method' => JoinableLoader::POSTLOAD]);
@@ -544,7 +545,7 @@ abstract class HasOneRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testUpdateNestedChild()
+    public function testUpdateNestedChild(): void
     {
         $selector = new Select($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
@@ -561,7 +562,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('new-label', $e->profile->nested->label);
     }
 
-    public function testChangeNestedChild()
+    public function testChangeNestedChild(): void
     {
         $selector = new Select($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
@@ -579,7 +580,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('another', $e->profile->nested->label);
     }
 
-    public function testNoWriteQueries()
+    public function testNoWriteQueries(): void
     {
         $selector = new Select($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
@@ -602,7 +603,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testFindByRelatedID()
+    public function testFindByRelatedID(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -614,7 +615,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals(1, $result[0]->id);
     }
 
-    public function testFindByRelatedIDAliased()
+    public function testFindByRelatedIDAliased(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -626,7 +627,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals(1, $result[0]->id);
     }
 
-    public function testFindByRelatedIDArray()
+    public function testFindByRelatedIDArray(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -638,7 +639,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals(1, $result[0]->id);
     }
 
-    public function testFindByRelatedColumn()
+    public function testFindByRelatedColumn(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -650,7 +651,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertEquals(1, $result[0]->id);
     }
 
-    public function testDoNotOverwriteRelation()
+    public function testDoNotOverwriteRelation(): void
     {
         $select = new Select($this->orm, User::class);
 
@@ -678,7 +679,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('new', $u4->profile->image);
     }
 
-    public function testDoNotOverwritePromisedRelation()
+    public function testDoNotOverwritePromisedRelation(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->wherePK(1)->fetchOne();

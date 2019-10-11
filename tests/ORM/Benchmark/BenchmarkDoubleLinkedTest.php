@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         if (!BaseTest::$config['benchmark']) {
             $this->markTestSkipped();
@@ -73,7 +74,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         ]));
     }
 
-    public function testClean()
+    public function testClean(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
@@ -81,7 +82,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         for ($i = 0; $i < 10000; $i++) {
             // inverted
             $c1 = new Cyclic();
-            $c1->name = "clean";
+            $c1->name = 'clean';
 
             $tr->persist($c1, 1);
         }
@@ -89,7 +90,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         $tr->run();
     }
 
-    public function testMemoryUsage()
+    public function testMemoryUsage(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
@@ -97,7 +98,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         for ($i = 0; $i < 10000; $i++) {
             // inverted
             $c1 = new Cyclic();
-            $c1->name = "self-reference";
+            $c1->name = 'self-reference';
             $c1->cyclic = $c1;
 
             $tr->persist($c1);
@@ -106,7 +107,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         $tr->run();
     }
 
-    public function testMemoryUsageOther()
+    public function testMemoryUsageOther(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
@@ -114,7 +115,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         for ($i = 0; $i < 10000; $i++) {
             // inverted
             $c1 = new Cyclic();
-            $c1->name = "self-reference";
+            $c1->name = 'self-reference';
             $c1->other = $c1;
 
             $tr->persist($c1);
@@ -123,7 +124,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         $tr->run();
     }
 
-    public function testMemoryUsageDouble()
+    public function testMemoryUsageDouble(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
         $tr = new Transaction($this->orm);
@@ -131,7 +132,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
         for ($i = 0; $i < 10000; $i++) {
             // inverted
             $c1 = new Cyclic();
-            $c1->name = "self-reference";
+            $c1->name = 'self-reference';
             $c1->cyclic = $c1;
             $c1->other = $c1;
 

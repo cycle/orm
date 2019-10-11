@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -56,7 +57,7 @@ abstract class DatabaseMapper implements MapperInterface
     public function __construct(ORMInterface $orm, string $role)
     {
         if (!$orm instanceof Select\SourceProviderInterface) {
-            throw new MapperException("Source factory is missing");
+            throw new MapperException('Source factory is missing');
         }
 
         $this->orm = $orm;

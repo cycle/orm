@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -18,7 +19,7 @@ use Cycle\ORM\Tests\Command\Helper\TestInsert;
 
 class SequenceCommandTest extends TestCase
 {
-    public function testNestedCommands()
+    public function testNestedCommands(): void
     {
         $command = new Sequence();
 
@@ -43,7 +44,7 @@ class SequenceCommandTest extends TestCase
         $command->rollBack();
     }
 
-    public function testNeverExecuted()
+    public function testNeverExecuted(): void
     {
         $command = new Sequence();
         $this->assertTrue($command->isReady());
@@ -53,13 +54,13 @@ class SequenceCommandTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\CommandException
      */
-    public function testGetLeadingBad()
+    public function testGetLeadingBad(): void
     {
         $command = new ContextSequence();
         $command->getContext();
     }
 
-    public function testGetContext()
+    public function testGetContext(): void
     {
         $command = new ContextSequence();
         $command->addPrimary($lead = m::mock(TestInsert::class));

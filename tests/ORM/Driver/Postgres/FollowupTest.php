@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\Postgres;
 
 class FollowupTest extends \Cycle\ORM\Tests\FollowupTest
 {
-    const DRIVER = "postgres";
+    public const DRIVER = 'postgres';
 }

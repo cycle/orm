@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -26,7 +27,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -147,7 +148,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
@@ -190,7 +191,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchAnother()
+    public function testFetchAnother(): void
     {
         $selector = new Select($this->orm, Post::class);
         $selector->load('comments')->orderBy('post.id');
@@ -253,7 +254,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoadOverlapping()
+    public function testLoadOverlapping(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector
@@ -354,7 +355,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testAccessEntity()
+    public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
@@ -371,7 +372,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertSame('third comment', $a->comments[2]->message);
     }
 
-    public function testNoWrite()
+    public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
@@ -385,7 +386,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testDeleteComment()
+    public function testDeleteComment(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
@@ -417,7 +418,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertCount(0, $b->comments);
     }
 
-    public function testMoveToAnotherParent()
+    public function testMoveToAnotherParent(): void
     {
         /**
          * @var User $a
@@ -460,7 +461,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertSame('third comment', $a->comments[1]->message);
     }
 
-    public function testMoveToAnother()
+    public function testMoveToAnother(): void
     {
         /**
          * @var User $a

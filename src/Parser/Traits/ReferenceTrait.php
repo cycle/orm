@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -56,7 +57,7 @@ trait ReferenceTrait
      *
      * @throws ParserException
      */
-    final protected function mount(string $container, string $key, $criteria, array &$data)
+    final protected function mount(string $container, string $key, $criteria, array &$data): void
     {
         if ($criteria === self::LAST_REFERENCE) {
             end($this->references[$key]);
@@ -102,7 +103,7 @@ trait ReferenceTrait
      *
      * @throws ParserException
      */
-    final protected function mountArray(string $container, string $key, $criteria, array &$data)
+    final protected function mountArray(string $container, string $key, $criteria, array &$data): void
     {
         if (!array_key_exists($criteria, $this->references[$key])) {
             throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
@@ -125,7 +126,7 @@ trait ReferenceTrait
      *
      * @throws ParserException
      */
-    final protected function trackReference(string $key)
+    final protected function trackReference(string $key): void
     {
         if (!in_array($key, $this->columns)) {
             throw new ParserException(
@@ -149,7 +150,7 @@ trait ReferenceTrait
      * @param array $data
      * @see deduplicate()
      */
-    final protected function collectReferences(array &$data)
+    final protected function collectReferences(array &$data): void
     {
         foreach ($this->trackReferences as $key) {
             if (!empty($data[$key])) {

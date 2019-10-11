@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -46,7 +47,7 @@ final class TableRenderer
      *
      * @throws SchemaException
      */
-    public function renderColumns(AbstractTable $table, array $columns, array $defaults)
+    public function renderColumns(AbstractTable $table, array $columns, array $defaults): void
     {
         $primaryKeys = [];
         foreach ($columns as $name => $definition) {
@@ -96,7 +97,7 @@ final class TableRenderer
      * @throws SchemaException
      * @see  AbstractColumn
      */
-    protected function renderColumn(AbstractColumn $column, array $type, bool $hasDefault, $default = null)
+    protected function renderColumn(AbstractColumn $column, array $type, bool $hasDefault, $default = null): void
     {
         // ORM force EVERY column to NOT NULL state unless different is said
         $column->nullable(false);
@@ -147,11 +148,13 @@ final class TableRenderer
      */
     protected function parse(string $table, string $column, string $definition): array
     {
-        if (!preg_match(
-            '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<flags>.+))?/i',
-            $definition,
-            $type
-        )) {
+        if (
+            !preg_match(
+                '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<flags>.+))?/i',
+                $definition,
+                $type
+            )
+        ) {
             throw new SchemaException("Invalid column type definition in '{$table}'.'{$column}'");
         }
 

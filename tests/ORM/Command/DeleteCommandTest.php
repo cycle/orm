@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -19,7 +20,7 @@ class DeleteCommandTest extends TestCase
     /**
      * @expectedException \Cycle\ORM\Exception\CommandException
      */
-    public function testNoScope()
+    public function testNoScope(): void
     {
         $cmd = new Delete(
             m::mock(DatabaseInterface::class),

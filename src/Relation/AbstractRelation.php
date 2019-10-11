@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,8 @@ use Cycle\ORM\Select\SourceProviderInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    use Traits\ContextTrait, Relation\Traits\NodeTrait;
+    use Traits\ContextTrait;
+    use Relation\Traits\NodeTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;
@@ -59,6 +61,15 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
+     * @return string
+     */
+    public function __toString()
+    {
+        // this is incorrect class
+        return sprintf('%s(%s)->%s', $this->name, get_class($this), $this->target);
+    }
+
+    /**
      * @inheritdoc
      */
     public function getName(): string
@@ -90,15 +101,6 @@ abstract class AbstractRelation implements RelationInterface
     public function extract($data)
     {
         return $data;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        // this is incorrect class
-        return sprintf("%s(%s)->%s", $this->name, get_class($this), $this->target);
     }
 
     /**
@@ -154,10 +156,10 @@ abstract class AbstractRelation implements RelationInterface
      *
      * @throws RelationException
      */
-    protected function assertValid(Node $related)
+    protected function assertValid(Node $related): void
     {
         if ($related->getRole() != $this->target) {
-            throw new RelationException(sprintf("Unable to link %s, given `%s`", $this, $related->getRole()));
+            throw new RelationException(sprintf('Unable to link %s, given `%s`', $this, $related->getRole()));
         }
     }
 

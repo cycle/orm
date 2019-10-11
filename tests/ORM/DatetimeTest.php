@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -37,7 +38,7 @@ abstract class DatetimeTest extends BaseTest
      */
     protected $b;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -77,7 +78,7 @@ abstract class DatetimeTest extends BaseTest
         ]));
     }
 
-    public function testFetchAll()
+    public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchAll();
@@ -101,7 +102,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertSameTimestamp($this->b, $result[1]->time_created, 0);
     }
 
-    public function testNoWrite()
+    public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -114,7 +115,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -146,7 +147,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $e = $this->orm->get('user', ['id' => 1]);
         $e->time_created = new \DateTimeImmutable('tomorrow 10pm');
@@ -175,7 +176,7 @@ abstract class DatetimeTest extends BaseTest
      * @param \DateTimeInterface $b
      * @param int                $max
      */
-    protected function assertSameTimestamp(\DateTimeInterface $a, \DateTimeInterface $b, int $max)
+    protected function assertSameTimestamp(\DateTimeInterface $a, \DateTimeInterface $b, int $max): void
     {
         $diff = abs($a->getTimestamp() - $b->getTimestamp());
         $this->assertTrue($diff <= $max, 'Invalid time internal');

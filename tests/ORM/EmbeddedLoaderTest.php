@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -23,7 +24,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -117,7 +118,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ]));
     }
 
-    public function testLoadDataNoRelation()
+    public function testLoadDataNoRelation(): void
     {
         $selector = new Select($this->orm, User::class);
 
@@ -135,7 +136,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoadDataLoadRelation()
+    public function testLoadDataLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
@@ -164,7 +165,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoadDataLoadAutomatically()
+    public function testLoadDataLoadAutomatically(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class            => [
@@ -228,7 +229,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoadDataLoadTypecast()
+    public function testLoadDataLoadTypecast(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class            => [
@@ -299,7 +300,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFilterByEmbeddedDoNotLoad()
+    public function testFilterByEmbeddedDoNotLoad(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->where('credentials.username', 'user1');
@@ -313,7 +314,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFilterAndLoad()
+    public function testFilterAndLoad(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector
@@ -334,7 +335,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testDeduplicate()
+    public function testDeduplicate(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector
@@ -384,7 +385,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testDeduplicateInload()
+    public function testDeduplicateInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector

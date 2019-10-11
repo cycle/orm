@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -23,7 +24,7 @@ abstract class EmbeddedRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -78,7 +79,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         ]));
     }
 
-    public function testFetchData()
+    public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
@@ -105,7 +106,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testInitRelation()
+    public function testInitRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
@@ -119,7 +120,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user2', $b->credentials->username);
     }
 
-    public function testInitRelationFetchOne()
+    public function testInitRelationFetchOne(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
@@ -128,10 +129,10 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user1', $u->credentials->username);
     }
 
-    public function testCreateUserWithEmbedded()
+    public function testCreateUserWithEmbedded(): void
     {
         $u = new User();
-        $u->email = "new@email.com";
+        $u->email = 'new@email.com';
         $u->balance = 900;
         $u->credentials->username = 'user3';
         $u->credentials->password = 'pass3';
@@ -151,7 +152,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user3', $u2->credentials->username);
     }
 
-    public function testNoWrites()
+    public function testNoWrites(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
@@ -163,7 +164,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testUpdateEmbeddedValue()
+    public function testUpdateEmbeddedValue(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
@@ -202,7 +203,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('newpass', $u2->credentials->password);
     }
 
-    public function testInitRelationReferenceNothing()
+    public function testInitRelationReferenceNothing(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
@@ -214,7 +215,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testUpdateEmbeddedDirectly()
+    public function testUpdateEmbeddedDirectly(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector
@@ -243,7 +244,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('altered', $u2->credentials->username);
     }
 
-    public function testResolvePromise()
+    public function testResolvePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
@@ -251,7 +252,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user1', $u->credentials->__resolve()->username);
     }
 
-    public function testChangePromise()
+    public function testChangePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
@@ -271,7 +272,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user3', $u2->credentials->username);
     }
 
-    public function testSavePromise()
+    public function testSavePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
@@ -285,7 +286,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    public function testMovePromise()
+    public function testMovePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
@@ -317,7 +318,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user2', $u4->credentials->username);
     }
 
-    public function testMoveClonedEmbedding()
+    public function testMoveClonedEmbedding(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
@@ -349,7 +350,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user2', $u4->credentials->username);
     }
 
-    public function testSelectEmbeddable()
+    public function testSelectEmbeddable(): void
     {
         $selector = new Select($this->orm, UserCredentials::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
@@ -357,7 +358,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('user1', $u->username);
     }
 
-    public function testChangeWhole()
+    public function testChangeWhole(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
@@ -383,7 +384,7 @@ abstract class EmbeddedRelationTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\Relation\NullException
      */
-    public function testNullify()
+    public function testNullify(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();

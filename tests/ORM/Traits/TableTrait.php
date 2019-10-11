@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -20,7 +21,7 @@ trait TableTrait
      * @param array  $columns
      * @param array  $fk
      */
-    public function makeTable(string $table, array $columns, array $fk = [], $pk = null, $defaults = [])
+    public function makeTable(string $table, array $columns, array $fk = [], $pk = null, $defaults = []): void
     {
         $schema = $this->getDatabase()->table($table)->getSchema();
         $renderer = new TableRenderer();
@@ -52,7 +53,7 @@ trait TableTrait
         string $toColumn,
         string $onDelete = ForeignKeyInterface::CASCADE,
         string $onUpdate = ForeignKeyInterface::CASCADE
-    ) {
+    ): void {
         $schema = $this->getDatabase()->table($from)->getSchema();
         $schema->foreignKey([$fromKey])->references($to, [$toColumn])->onDelete($onDelete)->onUpdate($onUpdate);
         $schema->save();
@@ -67,7 +68,7 @@ trait TableTrait
         string $table,
         array $columns,
         bool $unique
-    ) {
+    ): void {
         $schema = $this->getDatabase()->table($table)->getSchema();
         $schema->index($columns)->unique($unique);
         $schema->save();

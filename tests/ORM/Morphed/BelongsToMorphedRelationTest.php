@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -28,7 +29,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -160,7 +161,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         ]));
     }
 
-    public function testGetParent()
+    public function testGetParent(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $this->assertInstanceOf(PromiseInterface::class, $c->parent);
@@ -171,7 +172,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNumReads(1);
     }
 
-    public function testNoWritesNotLoaded()
+    public function testNoWritesNotLoaded(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $this->assertInstanceOf(PromiseInterface::class, $c->parent);
@@ -183,7 +184,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testGetParentLoaded()
+    public function testGetParentLoaded(): void
     {
         $u = $this->orm->getRepository(User::class)->findByPK(1);
 
@@ -193,7 +194,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertSame('hello@world.com', $c->parent->email);
     }
 
-    public function testNoWritesLoaded()
+    public function testNoWritesLoaded(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $this->assertInstanceOf(PromiseInterface::class, $c->parent);
@@ -207,7 +208,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testGetParentPostloaded()
+    public function testGetParentPostloaded(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $this->assertInstanceOf(PromiseInterface::class, $c->parent);
@@ -220,7 +221,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNumReads(0);
     }
 
-    public function testCreateWithMorphedExistedParent()
+    public function testCreateWithMorphedExistedParent(): void
     {
         $c = new Image();
         $c->url = 'test.png';
@@ -251,14 +252,14 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNumReads(1);
     }
 
-    public function testCreateWithNewParent()
+    public function testCreateWithNewParent(): void
     {
         $c = new Image();
         $c->url = 'test.png';
 
         $c->parent = new Post();
-        $c->parent->title = "post title";
-        $c->parent->content = "post content";
+        $c->parent->title = 'post title';
+        $c->parent->content = 'post content';
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -284,7 +285,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNumReads(1);
     }
 
-    public function testSetParentAndUpdateParent()
+    public function testSetParentAndUpdateParent(): void
     {
         $c = new Image();
         $c->url = 'test.png';
@@ -317,7 +318,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNumReads(1);
     }
 
-    public function testChangeParentWithLoading()
+    public function testChangeParentWithLoading(): void
     {
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
@@ -342,7 +343,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertInstanceOf(User::class, $c2->parent->__resolve());
     }
 
-    public function testChangeParentWithoutLoading()
+    public function testChangeParentWithoutLoading(): void
     {
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
@@ -364,7 +365,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertInstanceOf(User::class, $c2->parent->__resolve());
     }
 
-    public function testChangeParentLoadedAfter()
+    public function testChangeParentLoadedAfter(): void
     {
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
@@ -389,7 +390,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertInstanceOf(User::class, $c2->parent->__resolve());
     }
 
-    public function testSetNull()
+    public function testSetNull(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $c->parent = null;

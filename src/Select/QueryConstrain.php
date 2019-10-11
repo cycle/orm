@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -33,7 +34,7 @@ final class QueryConstrain implements ConstrainInterface
     /**
      * @inheritdoc
      */
-    public function apply(QueryBuilder $query)
+    public function apply(QueryBuilder $query): void
     {
         $query->where($this->where)->orderBy($this->orderBy);
     }

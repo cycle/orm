@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -78,7 +79,7 @@ final class PivotedStorage
      * @param object $entity
      * @param mixed  $pivot
      */
-    public function set($entity, $pivot)
+    public function set($entity, $pivot): void
     {
         $this->context->offsetSet($entity, $pivot);
     }

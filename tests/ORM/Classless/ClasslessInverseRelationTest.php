@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -102,7 +103,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, 'user');
         $selector->load('profile.user')->orderBy('user.id');
@@ -141,7 +142,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testSelfReferenceEntity()
+    public function testSelfReferenceEntity(): void
     {
         $selector = new Select($this->orm, 'user');
         $selector->load('profile.user')->orderBy('user.id');
@@ -152,7 +153,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
         $this->assertSame($b, $b->profile->user);
     }
 
-    public function testCyclicThoughtInverse()
+    public function testCyclicThoughtInverse(): void
     {
         $u = $this->orm->make('user');
         $u->email = 'cyclic@email.com';

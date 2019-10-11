@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -29,6 +30,19 @@ final class Schema implements SchemaInterface
     {
         // split into two?
         [$this->schema, $this->aliases] = $this->normalize($schema);
+    }
+
+    /**
+     * @param array $an_array
+     * @return Schema
+     */
+    public static function __set_state($an_array): Schema
+    {
+        $schema = new self([]);
+        $schema->schema = $an_array['schema'];
+        $schema->aliases = $an_array['aliases'];
+
+        return $schema;
     }
 
     /**
@@ -146,19 +160,6 @@ final class Schema implements SchemaInterface
         }
 
         return [$result, $aliases];
-    }
-
-    /**
-     * @param array $an_array
-     * @return Schema
-     */
-    public static function __set_state($an_array): Schema
-    {
-        $schema = new self([]);
-        $schema->schema = $an_array['schema'];
-        $schema->aliases = $an_array['aliases'];
-
-        return $schema;
     }
 
     /**

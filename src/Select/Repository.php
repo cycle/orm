@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -28,6 +29,14 @@ class Repository implements RepositoryInterface
     public function __construct(Select $select)
     {
         $this->select = $select;
+    }
+
+    /**
+     * Repositories are always immutable by default.
+     */
+    public function __clone()
+    {
+        $this->select = clone $this->select;
     }
 
     /**
@@ -62,13 +71,5 @@ class Repository implements RepositoryInterface
     public function select(): Select
     {
         return clone $this->select;
-    }
-
-    /**
-     * Repositories are always immutable by default.
-     */
-    public function __clone()
-    {
-        $this->select = clone $this->select;
     }
 }

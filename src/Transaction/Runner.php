@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -27,7 +28,7 @@ final class Runner implements RunnerInterface
     /**
      * @inheritdoc
      */
-    public function run(CommandInterface $command)
+    public function run(CommandInterface $command): void
     {
         // found the same link from multiple branches
         if ($command->isExecuted()) {
@@ -60,7 +61,7 @@ final class Runner implements RunnerInterface
     /**
      * @inheritdoc
      */
-    public function complete()
+    public function complete(): void
     {
         // commit all of the open and normalized database transactions
         foreach (array_reverse($this->drivers) as $driver) {
@@ -80,7 +81,7 @@ final class Runner implements RunnerInterface
     /**
      * @inheritdoc
      */
-    public function rollback()
+    public function rollback(): void
     {
         // close all open and normalized database transactions
         foreach (array_reverse($this->drivers) as $driver) {

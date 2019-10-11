@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -86,7 +87,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
         );
     }
 
-    public function testLoadRelation()
+    public function testLoadRelation(): void
     {
         $this->orm = $this->withPivotSchema([
 
@@ -202,7 +203,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoadRelationOrderByPivotColumn()
+    public function testLoadRelationOrderByPivotColumn(): void
     {
         $this->orm = $this->withPivotSchema([
             Schema::CONSTRAIN => SortByLevelDESCConstrain::class,
@@ -314,7 +315,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testLoaderRelationWithConstrain()
+    public function testLoaderRelationWithConstrain(): void
     {
         $this->orm = $this->withPivotSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain(

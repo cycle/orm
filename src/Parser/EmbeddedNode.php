@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -19,10 +20,10 @@ final class EmbeddedNode extends AbstractNode
     /**
      * @param array $data
      */
-    protected function push(array &$data)
+    protected function push(array &$data): void
     {
         if ($this->parent === null) {
-            throw new ParserException("Unable to register data tree, parent is missing");
+            throw new ParserException('Unable to register data tree, parent is missing');
         }
 
         $this->parent->mount(

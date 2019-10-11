@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -15,6 +16,16 @@ use Cycle\ORM\Select\LoaderInterface;
 
 trait ChainTrait
 {
+
+    /**
+     * @inheritdoc
+     */
+    abstract public function loadRelation(
+        string $relation,
+        array $options,
+        bool $join = false,
+        bool $load = false
+    ): LoaderInterface;
     /**
      * Check if given relation points to the relation chain.
      *
@@ -53,14 +64,4 @@ trait ChainTrait
         // load nested relation through chain (chainOptions prior to user options)
         return $child->loadRelation(substr($chain, $position + 1), $options, $join, $load);
     }
-
-    /**
-     * @inheritdoc
-     */
-    abstract public function loadRelation(
-        string $relation,
-        array $options,
-        bool $join = false,
-        bool $load = false
-    ): LoaderInterface;
 }

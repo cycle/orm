@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -14,7 +15,7 @@ use Spiral\Database\Schema\AbstractTable;
 
 abstract class TableRendererTest extends BaseTest
 {
-    public function testRenderString()
+    public function testRenderString(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -40,7 +41,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertFalse($column->isNullable());
     }
 
-    public function testRenderStringNullDefault()
+    public function testRenderStringNullDefault(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -66,7 +67,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($column->isNullable());
     }
 
-    public function testRenderStringNullDeclared()
+    public function testRenderStringNullDeclared(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -89,7 +90,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($column->isNullable());
     }
 
-    public function testRenderStringNullableDeclared()
+    public function testRenderStringNullableDeclared(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -112,7 +113,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($column->isNullable());
     }
 
-    public function testRenderEnum()
+    public function testRenderEnum(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -138,7 +139,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertFalse($column->isNullable());
     }
 
-    public function testRenderEnumNullDefault()
+    public function testRenderEnumNullDefault(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -166,7 +167,7 @@ abstract class TableRendererTest extends BaseTest
         $this->assertTrue($column->isNullable());
     }
 
-    public function testRenderEnumNullSecond()
+    public function testRenderEnumNullSecond(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -197,7 +198,7 @@ abstract class TableRendererTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\SchemaException
      */
-    public function testRenderBadDeclaration()
+    public function testRenderBadDeclaration(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -214,7 +215,7 @@ abstract class TableRendererTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\SchemaException
      */
-    public function testRenderBadDeclaration2()
+    public function testRenderBadDeclaration2(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -231,7 +232,7 @@ abstract class TableRendererTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\SchemaException
      */
-    public function testRenderBadDeclaration3()
+    public function testRenderBadDeclaration3(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();

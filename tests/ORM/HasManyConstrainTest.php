@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,7 @@ abstract class HasManyConstrainTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -64,7 +65,7 @@ abstract class HasManyConstrainTest extends BaseTest
         );
     }
 
-    public function testOrdered()
+    public function testOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -85,7 +86,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[2]->message);
     }
 
-    public function testOrderedASC()
+    public function testOrderedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -106,7 +107,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testOrderedASCInload()
+    public function testOrderedASCInload(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -129,7 +130,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testOrderedPromisedASC()
+    public function testOrderedPromisedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -150,7 +151,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testOrderedAndWhere()
+    public function testOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -169,7 +170,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
-    public function testOrderedAndWherePromised()
+    public function testOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -188,7 +189,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
-    public function testOrderedAndWhereReversed()
+    public function testOrderedAndWhereReversed(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -207,7 +208,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testOrderedAndWhereReversedInload()
+    public function testOrderedAndWhereReversedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -228,7 +229,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testOrderedAndWhereReversedPromised()
+    public function testOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -247,7 +248,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testCustomWhere()
+    public function testCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -266,7 +267,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testCustomWhereInload()
+    public function testCustomWhereInload(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -286,7 +287,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testWithWhere()
+    public function testWithWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE => ['@.level' => 4]
@@ -299,7 +300,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('hello@world.com', $res[0]->email);
     }
 
-    public function testWithWhereAltered()
+    public function testWithWhereAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE => ['@.level' => 4]
@@ -315,7 +316,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('another@world.com', $res[1]->email);
     }
 
-    public function testLimitParentSelection()
+    public function testLimitParentSelection(): void
     {
         $this->orm = $this->withCommentsSchema([
         ]);
@@ -333,7 +334,7 @@ abstract class HasManyConstrainTest extends BaseTest
     /**
      * @expectedException \Cycle\ORM\Exception\LoaderException
      */
-    public function testLimitParentSelectionError()
+    public function testLimitParentSelectionError(): void
     {
         $this->orm = $this->withCommentsSchema([]);
 
@@ -343,7 +344,7 @@ abstract class HasManyConstrainTest extends BaseTest
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
-    public function testInloadWithOrderAndWhere()
+    public function testInloadWithOrderAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE   => ['@.level' => ['>=' => 3]],
@@ -370,7 +371,7 @@ abstract class HasManyConstrainTest extends BaseTest
     /**
      * @expectedException \Spiral\Database\Exception\StatementException
      */
-    public function testInvalidOrderBy()
+    public function testInvalidOrderBy(): void
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE   => ['@.level' => ['>=' => 3]],

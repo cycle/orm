@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ trait ScopeTrait
      *
      * @param string $key
      */
-    public function waitScope(string $key)
+    public function waitScope(string $key): void
     {
         $this->waitScope[$key] = true;
     }
@@ -41,7 +42,7 @@ trait ScopeTrait
      * @param string $key
      * @param mixed  $value
      */
-    protected function setScope(string $key, $value)
+    protected function setScope(string $key, $value): void
     {
         $this->scope[$key] = $value;
     }
@@ -51,7 +52,7 @@ trait ScopeTrait
      *
      * @param string $key
      */
-    protected function freeScope(string $key)
+    protected function freeScope(string $key): void
     {
         unset($this->waitScope[$key]);
     }

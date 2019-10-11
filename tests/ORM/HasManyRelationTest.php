@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -28,7 +29,7 @@ abstract class HasManyRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -98,13 +99,13 @@ abstract class HasManyRelationTest extends BaseTest
         ]));
     }
 
-    public function testInitRelation()
+    public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
         $this->assertInstanceOf(ArrayCollection::class, $u->comments);
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
@@ -142,7 +143,7 @@ abstract class HasManyRelationTest extends BaseTest
     }
 
 
-    public function testFetchRelationInload()
+    public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])->orderBy('user.id');
@@ -179,14 +180,14 @@ abstract class HasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testWithNoColumns()
+    public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, User::class);
         $data = $selector->with('comments')->buildQuery()->fetchAll();
         $this->assertSame(3, count($data[0]));
     }
 
-    public function testAccessRelated()
+    public function testAccessRelated(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -206,7 +207,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals('msg 3', $a->comments[2]->message);
     }
 
-    public function testNoWrite()
+    public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -223,7 +224,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
-    public function testCreateWithRelations()
+    public function testCreateWithRelations(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -284,7 +285,7 @@ abstract class HasManyRelationTest extends BaseTest
         ], $selector->wherePK(3)->fetchData());
     }
 
-    public function testRemoveChildren()
+    public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id')->load('comments');
@@ -310,7 +311,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSame('msg 3', $e->comments[1]->message);
     }
 
-    public function testRemoveChildrenNullable()
+    public function testRemoveChildrenNullable(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class    => [
@@ -373,7 +374,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSame(3, (new Select($this->orm, Comment::class))->count());
     }
 
-    public function testAddAndRemoveChildren()
+    public function testAddAndRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
@@ -384,7 +385,7 @@ abstract class HasManyRelationTest extends BaseTest
         $e->comments->remove(1);
 
         $c = new Comment();
-        $c->message = "msg 4";
+        $c->message = 'msg 4';
         $e->comments->add($c);
 
         $this->captureWriteQueries();
@@ -413,7 +414,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSame('msg 4', $e->comments[2]->message);
     }
 
-    public function testSliceAndSaveToAnotherParent()
+    public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, User::class);
         /**
@@ -430,7 +431,7 @@ abstract class HasManyRelationTest extends BaseTest
             $a->comments->removeElement($c);
         }
 
-        $b->comments[0]->message = "new b";
+        $b->comments[0]->message = 'new b';
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);

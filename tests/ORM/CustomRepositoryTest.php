@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -21,7 +22,7 @@ abstract class CustomRepositoryTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -54,7 +55,7 @@ abstract class CustomRepositoryTest extends BaseTest
         ]));
     }
 
-    public function testFindAll()
+    public function testFindAll(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findAll();
@@ -70,7 +71,7 @@ abstract class CustomRepositoryTest extends BaseTest
         $this->assertEquals(200.0, $result[1]->balance);
     }
 
-    public function testCloned()
+    public function testCloned(): void
     {
         $r = $this->orm->getRepository(User::class);
 
@@ -80,7 +81,7 @@ abstract class CustomRepositoryTest extends BaseTest
         $this->assertNotSame($r->select(), $r2->select());
     }
 
-    public function testFindByEmailOne()
+    public function testFindByEmailOne(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findByEmail('hello@world.com');
@@ -91,7 +92,7 @@ abstract class CustomRepositoryTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
-    public function testFindOne()
+    public function testFindOne(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne();
@@ -102,7 +103,7 @@ abstract class CustomRepositoryTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
-    public function testFindOneWithWhere()
+    public function testFindOneWithWhere(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 2]);
@@ -113,7 +114,7 @@ abstract class CustomRepositoryTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testFindNull()
+    public function testFindNull(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 3]);
@@ -121,7 +122,7 @@ abstract class CustomRepositoryTest extends BaseTest
         $this->assertNull($result);
     }
 
-    public function testFindByPK()
+    public function testFindByPK(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findByPK(2);
@@ -132,7 +133,7 @@ abstract class CustomRepositoryTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testFindImmutable()
+    public function testFindImmutable(): void
     {
         /** @var Repository $r */
         $r = $this->orm->getRepository(User::class);

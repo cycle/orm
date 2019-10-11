@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -28,7 +29,7 @@ use Cycle\ORM\Select\SourceProviderInterface;
  */
 final class Embedded implements RelationInterface
 {
-    use  Relation\Traits\NodeTrait;
+    use Relation\Traits\NodeTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;

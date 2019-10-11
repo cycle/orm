@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -18,7 +19,7 @@ trait RelationTrait
      * @param string $name
      * @param mixed  $context
      */
-    public function setRelation(string $name, $context)
+    public function setRelation(string $name, $context): void
     {
         $this->relations[$name] = $context;
         unset($this->data[$name]);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -90,7 +91,7 @@ class BelongsToMorphed extends BelongsTo
      *
      * @throws RelationException
      */
-    protected function assertValid(Node $related)
+    protected function assertValid(Node $related): void
     {
         // no need to validate morphed relation yet
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\Postgres;
 
 class ColumnAliasesTest extends \Cycle\ORM\Tests\ColumnAliasesTest
 {
-    const DRIVER = "postgres";
+    public const DRIVER = 'postgres';
 }

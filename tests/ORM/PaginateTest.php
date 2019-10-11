@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -21,7 +22,7 @@ abstract class PaginateTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -51,14 +52,14 @@ abstract class PaginateTest extends BaseTest
         ]));
     }
 
-    public function testFetchData()
+    public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
 
         $this->assertSame(100, $selector->count());
     }
 
-    public function testPaginate()
+    public function testPaginate(): void
     {
         $selector = new Select($this->orm, User::class);
 

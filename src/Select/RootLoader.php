@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -27,16 +28,17 @@ use Spiral\Database\StatementInterface;
  */
 final class RootLoader extends AbstractLoader
 {
-    use ColumnsTrait, ConstrainTrait;
-
-    /** @var SelectQuery */
-    private $query;
+    use ColumnsTrait;
+    use ConstrainTrait;
 
     /** @var array */
     protected $options = [
         'load'      => true,
         'constrain' => true,
     ];
+
+    /** @var SelectQuery */
+    private $query;
 
     /**
      * @param ORMInterface $orm
@@ -46,12 +48,21 @@ final class RootLoader extends AbstractLoader
     {
         parent::__construct($orm, $target);
         $this->query = $this->getSource()->getDatabase()->select()->from(
-            sprintf("%s AS %s", $this->getSource()->getTable(), $this->getAlias())
+            sprintf('%s AS %s', $this->getSource()->getTable(), $this->getAlias())
         );
 
         foreach ($this->getEagerRelations() as $relation) {
             $this->loadRelation($relation, [], false, true);
         }
+    }
+
+    /**
+     * Clone the underlying query.
+     */
+    public function __clone()
+    {
+        $this->query = clone $this->query;
+        parent::__clone();
     }
 
     /**
@@ -95,7 +106,7 @@ final class RootLoader extends AbstractLoader
     /**
      * {@inheritdoc}
      */
-    public function loadData(AbstractNode $node)
+    public function loadData(AbstractNode $node): void
     {
         $statement = $this->buildQuery()->run();
 
@@ -109,15 +120,6 @@ final class RootLoader extends AbstractLoader
         foreach ($this->load as $relation => $loader) {
             $loader->loadData($node->getNode($relation));
         }
-    }
-
-    /**
-     * Clone the underlying query.
-     */
-    public function __clone()
-    {
-        $this->query = clone $this->query;
-        parent::__clone();
     }
 
     /**

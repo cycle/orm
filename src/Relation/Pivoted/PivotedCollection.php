@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -49,7 +50,7 @@ final class PivotedCollection extends ArrayCollection implements PivotedCollecti
     /**
      * @inheritdoc
      */
-    public function setPivot($element, $pivot)
+    public function setPivot($element, $pivot): void
     {
         $this->pivotContext[$element] = $pivot;
     }

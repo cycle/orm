@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,7 +25,7 @@ trait DuplicateTrait
     /**
      * @param string $column
      */
-    protected function setDuplicateCriteria(string $column)
+    protected function setDuplicateCriteria(string $column): void
     {
         $this->duplicateCriteria = $column;
     }

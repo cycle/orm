@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -23,7 +24,7 @@ abstract class BidirectionTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -105,7 +106,7 @@ abstract class BidirectionTest extends BaseTest
         ]));
     }
 
-    public function testFetchData()
+    public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
@@ -137,7 +138,7 @@ abstract class BidirectionTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testRemoveCommentFromUser()
+    public function testRemoveCommentFromUser(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
@@ -156,7 +157,7 @@ abstract class BidirectionTest extends BaseTest
         $this->assertCount(1, $u->comments);
     }
 
-    public function testRemoveFromCommentEnd()
+    public function testRemoveFromCommentEnd(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
@@ -175,7 +176,7 @@ abstract class BidirectionTest extends BaseTest
         $this->assertCount(1, $u->comments);
     }
 
-    public function testRemoveFromCommentEndDoublePersist()
+    public function testRemoveFromCommentEndDoublePersist(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
@@ -195,7 +196,7 @@ abstract class BidirectionTest extends BaseTest
         $this->assertCount(1, $u->comments);
     }
 
-    public function testDoubleRemoval()
+    public function testDoubleRemoval(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();

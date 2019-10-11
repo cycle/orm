@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -24,7 +25,7 @@ abstract class LinkedTreeTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -101,7 +102,7 @@ abstract class LinkedTreeTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelations()
+    public function testFetchRelations(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->orderBy('user.id');
@@ -134,7 +135,7 @@ abstract class LinkedTreeTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testCreateDoubleLinked()
+    public function testCreateDoubleLinked(): void
     {
         $u1 = new User();
         $u1->email = 'u1@email.com';
@@ -145,7 +146,7 @@ abstract class LinkedTreeTest extends BaseTest
         $u2->balance = 100;
 
         $n = new Nested();
-        $n->label = "nested to u1 and u2";
+        $n->label = 'nested to u1 and u2';
 
         $u1->nested = $n;
         $u2->owned = $n;

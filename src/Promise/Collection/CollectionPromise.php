@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -40,7 +41,7 @@ class CollectionPromise extends AbstractLazyCollection implements CollectionProm
     /**
      * @inheritdoc
      */
-    protected function doInitialize()
+    protected function doInitialize(): void
     {
         $this->collection = new ArrayCollection($this->promise->__resolve());
     }

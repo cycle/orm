@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -16,7 +17,7 @@ use Spiral\Database\DatabaseInterface;
 
 class InsertCommandTest extends TestCase
 {
-    public function testDatabase()
+    public function testDatabase(): void
     {
         $cmd = new Insert(
             $db = m::mock(DatabaseInterface::class),
@@ -27,7 +28,7 @@ class InsertCommandTest extends TestCase
         $this->assertSame($db, $cmd->getDatabase());
     }
 
-    public function testIsEmpty()
+    public function testIsEmpty(): void
     {
         $cmd = new Insert(
             $db = m::mock(DatabaseInterface::class),
@@ -38,7 +39,7 @@ class InsertCommandTest extends TestCase
         $this->assertTrue($cmd->isReady());
     }
 
-    public function testIsEmptyData()
+    public function testIsEmptyData(): void
     {
         $cmd = new Insert(
             m::mock(DatabaseInterface::class),

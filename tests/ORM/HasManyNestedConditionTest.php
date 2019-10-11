@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -24,7 +25,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -134,7 +135,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
         ]));
     }
 
-    public function testFetchRelation()
+    public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('posts.comments')->orderBy('user.id');
@@ -204,11 +205,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
     }
 
     // only load posts with comments
-    public function testFetchFiltered()
+    public function testFetchFiltered(): void
     {
         $users = new Select($this->orm, User::class);
         $users->load('posts', [
-            'where' => function (Select\QueryBuilder $qb) {
+            'where' => function (Select\QueryBuilder $qb): void {
                 $qb->distinct()->where('comments.id', '!=', null);
             }
         ])->orderBy('user.id');
@@ -241,11 +242,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
     }
 
     // only load posts without comments
-    public function testFetchFilteredNoComments()
+    public function testFetchFilteredNoComments(): void
     {
         $users = new Select($this->orm, User::class);
         $users->load('posts', [
-            'where' => function (Select\QueryBuilder $qb) {
+            'where' => function (Select\QueryBuilder $qb): void {
                 $qb->distinct()
                     ->with('comments', ['method' => Select\JoinableLoader::LEFT_JOIN])
                     ->where('comments.id', '=', null);
@@ -281,11 +282,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
     }
 
     // only load posts with comments left by post author
-    public function testFetchCrossLinked()
+    public function testFetchCrossLinked(): void
     {
         $users = new Select($this->orm, User::class);
         $users->load('posts', [
-            'where' => function (Select\QueryBuilder $qb) {
+            'where' => function (Select\QueryBuilder $qb): void {
                 $qb->distinct()
                     ->where(
                         'comments.user_id',
@@ -318,7 +319,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
     }
 
     // find all users which have posts without comments and load all posts with comments
-    public function testFindUsersWithoutPostCommentsLoadPostsWithComments()
+    public function testFindUsersWithoutPostCommentsLoadPostsWithComments(): void
     {
         $users = new Select($this->orm, User::class);
         $users
@@ -327,7 +328,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
             ])
             ->where('posts.comments.id', null)
             ->load('posts', [
-                'where' => function (Select\QueryBuilder $qb) {
+                'where' => function (Select\QueryBuilder $qb): void {
                     $qb->distinct()->where('comments.id', '!=', null);
                 }
             ])->orderBy('user.id');

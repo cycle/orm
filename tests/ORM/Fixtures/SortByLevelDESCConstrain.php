@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -15,7 +16,7 @@ use Cycle\ORM\Select\QueryBuilder;
 
 class SortByLevelDESCConstrain implements ConstrainInterface
 {
-    public function apply(QueryBuilder $query)
+    public function apply(QueryBuilder $query): void
     {
         $query->orderBy('level', 'DESC');
     }

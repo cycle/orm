@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -67,7 +68,7 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function waitContext(string $key, bool $required = true)
+    public function waitContext(string $key, bool $required = true): void
     {
         if ($required) {
             $this->contextPath[$key] = $this->head;
@@ -96,7 +97,7 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
         $value,
         bool $fresh = false,
         int $stream = self::DATA
-    ) {
+    ): void {
         if (isset($this->contextPath[$key])) {
             $this->contextPath[$key]->register($key, $value, $fresh, $stream);
         }
@@ -106,7 +107,7 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
      * @inheritdoc
      * @codeCoverageIgnore
      */
-    public function execute()
+    public function execute(): void
     {
         // delegated
     }
@@ -115,7 +116,7 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
      * @inheritdoc
      * @codeCoverageIgnore
      */
-    public function complete()
+    public function complete(): void
     {
         // delegated
     }
@@ -124,7 +125,7 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
      * @inheritdoc
      * @codeCoverageIgnore
      */
-    public function rollBack()
+    public function rollBack(): void
     {
         // delegated
     }

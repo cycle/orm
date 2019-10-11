@@ -1,11 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-
 use Spiral\Tokenizer;
 
 error_reporting(E_ALL | E_STRICT);
@@ -49,7 +51,7 @@ foreach ($classes as $class) {
 
     echo "Found {$class->getName()}\n";
     foreach ($databases as $driver => $details) {
-        $filename = sprintf("%s/%s.php", $details['directory'], $class->getShortName());
+        $filename = sprintf('%s/%s.php', $details['directory'], $class->getShortName());
 
         file_put_contents(
             $filename,
@@ -63,11 +65,11 @@ foreach ($classes as $class) {
  */
 declare(strict_types=1);
 
-namespace %s; 
+namespace %s;
 
-class %s extends \%s 
-{ 
-    const DRIVER = "%s"; 
+class %s extends \%s
+{
+    const DRIVER = "%s";
 }',
                 $details['namespace'],
                 $class->getShortName(),

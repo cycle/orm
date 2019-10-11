@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral, Core Components
  *
@@ -20,7 +21,7 @@ final class Nil implements ContextCarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function waitContext(string $key, bool $required = true)
+    public function waitContext(string $key, bool $required = true): void
     {
     }
 
@@ -35,7 +36,7 @@ final class Nil implements ContextCarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         // nothing to do
     }
@@ -59,7 +60,7 @@ final class Nil implements ContextCarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function execute()
+    public function execute(): void
     {
         // nothing to do
     }
@@ -67,7 +68,7 @@ final class Nil implements ContextCarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function complete()
+    public function complete(): void
     {
         // nothing to do
     }
@@ -75,7 +76,7 @@ final class Nil implements ContextCarrierInterface
     /**
      * {@inheritdoc}
      */
-    public function rollBack()
+    public function rollBack(): void
     {
         // nothing to do
     }

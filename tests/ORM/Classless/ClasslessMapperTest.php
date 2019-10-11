@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -22,7 +23,7 @@ abstract class ClasslessMapperTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -53,7 +54,7 @@ abstract class ClasslessMapperTest extends BaseTest
         ]));
     }
 
-    public function testFetchData()
+    public function testFetchData(): void
     {
         $selector = new Select($this->orm, 'user');
 
@@ -71,7 +72,7 @@ abstract class ClasslessMapperTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testFetchAll()
+    public function testFetchAll(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchAll();
@@ -87,7 +88,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertEquals(200.0, $result[1]->balance);
     }
 
-    public function testFetchOne()
+    public function testFetchOne(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
@@ -98,7 +99,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
-    public function testAssertRole()
+    public function testAssertRole(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
@@ -106,7 +107,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
     }
 
-    public function testWhere()
+    public function testWhere(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->where('id', 2)->fetchOne();
@@ -116,7 +117,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->where('id', 2)->fetchOne();
@@ -134,7 +135,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertFalse($this->orm->getHeap()->has($result));
     }
 
-    public function testHeap()
+    public function testHeap(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
@@ -154,7 +155,7 @@ abstract class ClasslessMapperTest extends BaseTest
         );
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $e = $this->orm->make('user');
         $this->assertSame(Node::NEW, $this->orm->getHeap()->get($e)->getStatus());
@@ -181,7 +182,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
     }
 
-    public function testStoreWithUpdate()
+    public function testStoreWithUpdate(): void
     {
         $e = $this->orm->make('user');
         $e->email = 'test@email.com';
@@ -207,7 +208,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertEquals(400, $result->balance);
     }
 
-    public function testRepositoryFindAll()
+    public function testRepositoryFindAll(): void
     {
         $r = $this->orm->getRepository('user');
         $result = $r->findAll();
@@ -221,7 +222,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertEquals(200.0, $result[1]->balance);
     }
 
-    public function testRepositoryFindOne()
+    public function testRepositoryFindOne(): void
     {
         $r = $this->orm->getRepository('user');
         $result = $r->findOne();
@@ -231,7 +232,7 @@ abstract class ClasslessMapperTest extends BaseTest
         $this->assertEquals(100.0, $result->balance);
     }
 
-    public function testRepositoryFindOneWithWhere()
+    public function testRepositoryFindOneWithWhere(): void
     {
         $r = $this->orm->getRepository('user');
         $result = $r->findOne(['id' => 2]);

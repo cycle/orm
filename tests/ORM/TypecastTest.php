@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -23,7 +24,7 @@ abstract class TypecastTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -62,7 +63,7 @@ abstract class TypecastTest extends BaseTest
         ]));
     }
 
-    public function testFetchAll()
+    public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchAll();
@@ -80,7 +81,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(false, $result[1]->active);
     }
 
-    public function testAssertRole()
+    public function testAssertRole(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
@@ -88,17 +89,17 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
     }
 
-    public function testMakeByRole()
+    public function testMakeByRole(): void
     {
         $this->assertInstanceOf(User::class, $this->orm->make('user'));
     }
 
-    public function testMakeByClass()
+    public function testMakeByClass(): void
     {
         $this->assertInstanceOf(User::class, $this->orm->make(User::class));
     }
 
-    public function testAssertRoleViaClass()
+    public function testAssertRoleViaClass(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -106,7 +107,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
     }
 
-    public function testFetchOne()
+    public function testFetchOne(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -117,7 +118,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(100.0, $result->balance);
     }
 
-    public function testWhere()
+    public function testWhere(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
@@ -128,7 +129,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(200.0, $result->balance);
     }
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 2)->fetchOne();
@@ -146,7 +147,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertFalse($this->orm->getHeap()->has($result));
     }
 
-    public function testHeap()
+    public function testHeap(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
@@ -167,7 +168,7 @@ abstract class TypecastTest extends BaseTest
         );
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -192,7 +193,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
     }
 
-    public function testStoreWithUpdate()
+    public function testStoreWithUpdate(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
@@ -221,7 +222,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(true, $result->active);
     }
 
-    public function testRepositoryFindAll()
+    public function testRepositoryFindAll(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findAll();
@@ -237,7 +238,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(200.0, $result[1]->balance);
     }
 
-    public function testRepositoryFindOne()
+    public function testRepositoryFindOne(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne();
@@ -248,7 +249,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertSame(100.0, $result->balance);
     }
 
-    public function testRepositoryFindOneWithWhere()
+    public function testRepositoryFindOneWithWhere(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 2]);

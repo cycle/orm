@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -90,7 +91,7 @@ final class PivotedPromise implements PromiseInterface
         }
 
         if (!$this->orm instanceof Select\SourceProviderInterface) {
-            throw new ORMException("PivotedPromise require ORM to implement SourceFactoryInterface");
+            throw new ORMException('PivotedPromise require ORM to implement SourceFactoryInterface');
         }
 
         $table = $this->orm->getSource($this->target)->getTable();

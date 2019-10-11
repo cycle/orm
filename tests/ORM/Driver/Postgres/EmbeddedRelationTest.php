@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -11,5 +12,5 @@ namespace Cycle\ORM\Tests\Driver\Postgres;
 
 class EmbeddedRelationTest extends \Cycle\ORM\Tests\EmbeddedRelationTest
 {
-    const DRIVER = "postgres";
+    public const DRIVER = 'postgres';
 }

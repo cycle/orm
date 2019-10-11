@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -63,7 +64,7 @@ final class PivotedCollectionPromise extends AbstractLazyCollection implements
     /**
      * @inheritdoc
      */
-    public function setPivot($element, $pivot)
+    public function setPivot($element, $pivot): void
     {
         $this->initialize();
         $this->collection->setPivot($element, $pivot);
@@ -81,7 +82,7 @@ final class PivotedCollectionPromise extends AbstractLazyCollection implements
     /**
      * @inheritdoc
      */
-    protected function doInitialize()
+    protected function doInitialize(): void
     {
         $storage = $this->promise->__resolve();
         $this->collection = new PivotedCollection($storage->getElements(), $storage->getContext());

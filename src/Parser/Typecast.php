@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -51,21 +52,6 @@ final class Typecast implements TypecastInterface
     }
 
     /**
-     * @param callable $rule
-     * @param mixed    $value
-     * @return mixed
-     */
-    private function invoke($rule, $value)
-    {
-        if (is_string($rule) && method_exists($this, $rule)) {
-            // default rules
-            $rule = [self::class, $rule];
-        }
-
-        return call_user_func($rule, $value, $this->database);
-    }
-
-    /**
      * @param mixed $value
      * @return int
      */
@@ -104,5 +90,20 @@ final class Typecast implements TypecastInterface
     public static function datetime($value, DatabaseInterface $db): ?\DateTimeInterface
     {
         return new \DateTimeImmutable($value, $db->getDriver()->getTimezone());
+    }
+
+    /**
+     * @param callable $rule
+     * @param mixed    $value
+     * @return mixed
+     */
+    private function invoke($rule, $value)
+    {
+        if (is_string($rule) && method_exists($this, $rule)) {
+            // default rules
+            $rule = [self::class, $rule];
+        }
+
+        return call_user_func($rule, $value, $this->database);
     }
 }

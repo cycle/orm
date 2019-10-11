@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -55,6 +56,16 @@ final class Node implements ProducerInterface, ConsumerInterface
     }
 
     /**
+     * Reset state.
+     */
+    public function __destruct()
+    {
+        $this->data = [];
+        $this->state = null;
+        $this->relations = [];
+    }
+
+    /**
      * @return string
      */
     public function getRole(): string
@@ -105,7 +116,7 @@ final class Node implements ProducerInterface, ConsumerInterface
      *
      * @param array $data
      */
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $this->getState()->setData($data);
     }
@@ -133,14 +144,14 @@ final class Node implements ProducerInterface, ConsumerInterface
         string $target,
         bool $trigger = false,
         int $stream = self::DATA
-    ) {
+    ): void {
         $this->getState()->forward($key, $consumer, $target, $trigger, $stream);
     }
 
     /**
      * @inheritdoc
      */
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         $this->getState()->register($key, $value, $fresh, $stream);
     }
@@ -172,19 +183,9 @@ final class Node implements ProducerInterface, ConsumerInterface
     /**
      * Reset point state and flush all the changes.
      */
-    public function resetState()
+    public function resetState(): void
     {
         $this->state = null;
-    }
-
-    /**
-     * Reset state.
-     */
-    public function __destruct()
-    {
-        $this->data = [];
-        $this->state = null;
-        $this->relations = [];
     }
 
     /**

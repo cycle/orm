@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
@@ -19,20 +20,20 @@ class TestContextCommand implements ContextCarrierInterface
         return $this->executed;
     }
 
-    public function execute()
+    public function execute(): void
     {
         $this->executed = true;
     }
 
-    public function complete()
+    public function complete(): void
     {
     }
 
-    public function rollBack()
+    public function rollBack(): void
     {
     }
 
-    public function waitContext(string $key, bool $required = true)
+    public function waitContext(string $key, bool $required = true): void
     {
     }
 
@@ -40,7 +41,7 @@ class TestContextCommand implements ContextCarrierInterface
     {
     }
 
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA)
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
     }
 }

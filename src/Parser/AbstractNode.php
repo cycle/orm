@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -25,16 +26,17 @@ use Cycle\ORM\Parser\Traits\ReferenceTrait;
  */
 abstract class AbstractNode
 {
-    use DuplicateTrait, ReferenceTrait;
-
-    // Indicates tha data must be placed at the last registered reference
-    protected const LAST_REFERENCE = ['~'];
+    use DuplicateTrait;
+    use ReferenceTrait;
 
     // Typecasting types
     public const STRING  = 1;
     public const INTEGER = 2;
     public const FLOAT   = 3;
     public const BOOL    = 4;
+
+    // Indicates tha data must be placed at the last registered reference
+    protected const LAST_REFERENCE = ['~'];
 
     /**
      * Indicates that node data is joined to parent row and must receive part of incoming row
@@ -92,9 +94,20 @@ abstract class AbstractNode
     }
 
     /**
+     * Destructing.
+     */
+    public function __destruct()
+    {
+        $this->parent = null;
+        $this->nodes = [];
+        $this->references = [];
+        $this->trackReferences = [];
+    }
+
+    /**
      * @param TypecastInterface $typecast
      */
-    final public function setTypecast(TypecastInterface $typecast)
+    final public function setTypecast(TypecastInterface $typecast): void
     {
         $this->typecast = $typecast;
     }
@@ -157,7 +170,7 @@ abstract class AbstractNode
     public function getReferences(): array
     {
         if ($this->parent === null) {
-            throw new ParserException("Unable to aggregate reference values, parent is missing");
+            throw new ParserException('Unable to aggregate reference values, parent is missing');
         }
 
         if (empty($this->parent->references[$this->outerKey])) {
@@ -176,7 +189,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    final public function linkNode(string $container, AbstractNode $node)
+    final public function linkNode(string $container, AbstractNode $node): void
     {
         $this->nodes[$container] = $node;
         $node->container = $container;
@@ -196,7 +209,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    final public function joinNode(string $container, AbstractNode $node)
+    final public function joinNode(string $container, AbstractNode $node): void
     {
         $node->joined = true;
         $this->linkNode($container, $node);
@@ -217,17 +230,6 @@ abstract class AbstractNode
         }
 
         return $this->nodes[$container];
-    }
-
-    /**
-     * Destructing.
-     */
-    public function __destruct()
-    {
-        $this->parent = null;
-        $this->nodes = [];
-        $this->references = [];
-        $this->trackReferences = [];
     }
 
     /**
@@ -260,7 +262,7 @@ abstract class AbstractNode
             return $result;
         } catch (\Exception $e) {
             throw new ParserException(
-                "Unable to parse incoming row: " . $e->getMessage(),
+                'Unable to parse incoming row: ' . $e->getMessage(),
                 $e->getCode(),
                 $e
             );
@@ -272,7 +274,7 @@ abstract class AbstractNode
      *
      * @param array $data
      */
-    private function ensurePlaceholders(array &$data)
+    private function ensurePlaceholders(array &$data): void
     {
         //Let's force placeholders for every sub loaded
         foreach ($this->nodes as $name => $node) {

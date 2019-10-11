@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cycle DataMapper ORM
  *
@@ -14,19 +15,19 @@ use PHPUnit\Framework\TestCase;
 
 class StateTest extends TestCase
 {
-    public function testPush()
+    public function testPush(): void
     {
-        $s = new Node(Node::MANAGED, [], "parent");
+        $s = new Node(Node::MANAGED, [], 'parent');
 
         $s->register('user_id', 1);
 
         $this->assertSame(1, $s->getData()['user_id']);
     }
 
-    public function testForward()
+    public function testForward(): void
     {
-        $s = new Node(Node::MANAGED, [], "parent");
-        $c = new Node(Node::MANAGED, [], "child");
+        $s = new Node(Node::MANAGED, [], 'parent');
+        $c = new Node(Node::MANAGED, [], 'child');
 
         $s->forward('id', $c, 'user_id');
         $s->register('id', 1);
@@ -34,20 +35,20 @@ class StateTest extends TestCase
         $this->assertSame(1, $c->getData()['user_id']);
     }
 
-    public function testForwardDefault()
+    public function testForwardDefault(): void
     {
-        $s = new Node(Node::MANAGED, ['id' => 1], "parent");
-        $c = new Node(Node::MANAGED, [], "child");
+        $s = new Node(Node::MANAGED, ['id' => 1], 'parent');
+        $c = new Node(Node::MANAGED, [], 'child');
 
         $s->forward('id', $c, 'user_id');
 
         $this->assertSame(1, $c->getData()['user_id']);
     }
 
-    public function testForwardDefaultTrigger()
+    public function testForwardDefaultTrigger(): void
     {
-        $s = new Node(Node::MANAGED, ['id' => 1], "parent");
-        $c = new Node(Node::MANAGED, [], "child");
+        $s = new Node(Node::MANAGED, ['id' => 1], 'parent');
+        $c = new Node(Node::MANAGED, [], 'child');
 
         $s->forward('id', $c, 'user_id', true);
 

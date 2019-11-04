@@ -68,12 +68,17 @@ final class Heap implements HeapInterface, \IteratorAggregate
      */
     public function find(string $role, array $scope)
     {
-        foreach ($scope as $key => $value) {
-            // first match for now
-            return $this->paths[$role][$key][$value] ?? null;
+        if (count($scope) === 1) {
+            return $this->paths[$role][key($scope)][current($scope)] ?? null;
         }
 
-        return null;
+        $key = $value = '';
+        foreach ($scope as $k => $v) {
+            $key .= $k;
+            $value .= $value . '/';
+        }
+
+        return $this->paths[$role][$key][$value] ?? null;
     }
 
     /**
@@ -83,13 +88,25 @@ final class Heap implements HeapInterface, \IteratorAggregate
     {
         $this->storage->offsetSet($entity, $node);
 
+        $data = $node->getData();
         foreach ($index as $key) {
-            if (!isset($node->getData()[$key])) {
-                continue;
+            if (is_array($key)) {
+                $keyName = $value = '';
+                foreach ($key as $k) {
+                    $keyName .= $k; // chance of collision?
+                    $value .= $data[$k] . '/';
+                }
+                $key = $keyName;
+            } else {
+                if (!isset($data[$key])) {
+                    continue;
+                }
+
+                $value = $data[$key];
             }
 
-            $this->paths[get_class($entity)][$key][$node->getData()[$key]] = $entity;
-            $this->paths[$node->getRole()][$key][$node->getData()[$key]] = $entity;
+            $this->paths[get_class($entity)][$key][$value] = $entity;
+            $this->paths[$node->getRole()][$key][$value] = $entity;
         }
     }
 

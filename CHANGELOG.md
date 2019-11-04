@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.1.16 (04.11.2019)
+--------------------
+- Select methods return typehinted as self instead of $this to improve compatibility with PHPStorm
+
 v1.1.15 (02.10.2019)
 --------------------
 - the minimum PHP version is set as 7.2 as stated in the documentation

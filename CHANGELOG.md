@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.1.17 (07.11.2019)
+--------------------
+- bugfix: invalid target resolution in lazy-loaded many-to-many relations
+
 v1.1.16 (04.11.2019)
 --------------------
 - Select methods return typehinted as self instead of $this to improve compatibility with PHPStorm

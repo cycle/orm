@@ -33,7 +33,7 @@ final class PivotedPromise implements PromiseInterface
     /** @var string */
     private $target;
 
-    /** @var array */
+    /** @var array @internal */
     private $relationSchema = [];
 
     /** @var mixed */
@@ -107,7 +107,7 @@ final class PivotedPromise implements PromiseInterface
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
             'constrain' => $this->orm->getSource($this->target)->getConstrain(),
-            'as'        => $table,
+            'as'        => $this->target,
             'method'    => JoinableLoader::POSTLOAD
         ]);
 

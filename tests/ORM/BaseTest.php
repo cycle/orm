@@ -151,8 +151,6 @@ abstract class BaseTest extends TestCase
             ]);
         }
 
-        $this->driver->setProfiling(true);
-
         return static::$driverCache[static::DRIVER] = $this->driver;
     }
 

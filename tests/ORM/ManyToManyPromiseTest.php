@@ -37,7 +37,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
             'balance' => 'float'
         ]);
 
-        $this->makeTable('tag', [
+        $this->makeTable('tags', [
             'id'   => 'primary',
             'name' => 'string'
         ]);
@@ -50,7 +50,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
         ]);
 
         $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
-        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
+        $this->makeFK('tag_user_map', 'tag_id', 'tags', 'id');
 
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
@@ -60,7 +60,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
             ]
         );
 
-        $this->getDatabase()->table('tag')->insertMultiple(
+        $this->getDatabase()->table('tags')->insertMultiple(
             ['name'],
             [
                 ['tag a'],
@@ -108,7 +108,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
                 Schema::ROLE        => 'tag',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag',
+                Schema::TABLE       => 'tags',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name'],
                 Schema::TYPECAST    => ['id' => 'int'],
@@ -298,5 +298,14 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
         $this->assertSame('new tag', $b->tags[0]->name);
         $this->assertSame('super', $b->tags->getPivot($b->tags[0])->as);
+    }
+
+    public function testResolvePromise(): void
+    {
+        /** @var User $u */
+        $u = $this->orm->get('user', ['id' => 1]);
+
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionPromise::class, $u->tags);
+        $this->assertCount(2, $u->tags->toArray());
     }
 }

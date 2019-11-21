@@ -182,7 +182,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return true;
         }
 
-        return in_array($this->getMethod(), [self::INLOAD, self::JOIN, self::LEFT_JOIN]);
+        return in_array($this->getMethod(), [self::INLOAD, self::JOIN, self::LEFT_JOIN], true);
     }
 
     /**
@@ -206,10 +206,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     {
         if ($this->isLoaded()) {
             if ($this->isJoined()) {
-                if ($query->getLimit() != 0) {
-                    throw new LoaderException('Unable to load data using join with limit on parent query');
-                }
-
                 // mounting the columns to parent query
                 $this->mountColumns($query, $this->options['minify']);
             } else {

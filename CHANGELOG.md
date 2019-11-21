@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.1.16 (20.11.2019)
+--------------------
+- the limit exception is not thrown on joined singular relations 
+
 v1.1.15 (02.10.2019)
 --------------------
 - the minimum PHP version is set as 7.2 as stated in the documentation

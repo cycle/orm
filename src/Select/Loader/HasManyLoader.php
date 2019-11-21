@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
+use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ArrayNode;
@@ -54,6 +55,10 @@ class HasManyLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
+        if ($this->isLoaded() && $this->isJoined() && $query->getLimit() !== 0) {
+            throw new LoaderException('Unable to load data using join with limit on parent query');
+        }
+
         if (!empty($this->options['using'])) {
             // use pre-defined query
             return parent::configureQuery($query, $outerKeys);

@@ -6,6 +6,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -24,14 +25,14 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method $this distinct()
- * @method $this where(...$args);
- * @method $this andWhere(...$args);
- * @method $this orWhere(...$args);
- * @method $this having(...$args);
- * @method $this andHaving(...$args);
- * @method $this orHaving(...$args);
- * @method $this orderBy($expression, $direction = 'ASC');
+ * @method self distinct()
+ * @method self where(...$args);
+ * @method self andWhere(...$args);
+ * @method self orWhere(...$args);
+ * @method self having(...$args);
+ * @method self andHaving(...$args);
+ * @method self orHaving(...$args);
+ * @method self orderBy($expression, $direction = 'ASC');
  *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
@@ -81,7 +82,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *
      * @param string $name
      * @param array  $arguments
-     * @return $this|mixed
+     * @return self|mixed
      */
     public function __call(string $name, array $arguments)
     {

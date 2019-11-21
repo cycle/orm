@@ -35,8 +35,8 @@ class TestLogger implements LoggerInterface
 
     public function log($level, $message, array $context = []): void
     {
-        if (!empty($context['query'])) {
-            $sql = strtolower($context['query']);
+        if (!empty($context['elapsed'])) {
+            $sql = strtolower($message);
             if (
                 strpos($sql, 'insert') === 0 ||
                 strpos($sql, 'update') === 0 ||

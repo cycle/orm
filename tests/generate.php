@@ -1,13 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Cycle DataMapper ORM
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
+declare(strict_types=1);
+
 use Spiral\Tokenizer;
 
 error_reporting(E_ALL | E_STRICT);

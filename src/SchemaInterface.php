@@ -6,6 +6,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -34,7 +35,7 @@ interface SchemaInterface
     public const SCHEMA       = 14;
 
     /**
-     * Return all roles defined withing the schema.
+     * Return all roles defined within the schema.
      *
      * @return array
      */
@@ -49,7 +50,7 @@ interface SchemaInterface
     public function getRelations(string $role): array;
 
     /**
-     * Check is given role has definition within the schema.
+     * Check if the given role has a definition within the schema.
      *
      * @param string $role
      * @return bool

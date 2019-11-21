@@ -1,8 +1,16 @@
 # CHANGELOG 
 
-v1.1.16 (20.11.2019)
+v1.1.18 (20.11.2019)
 --------------------
 - the limit exception is not thrown on joined singular relations 
+
+v1.1.17 (07.11.2019)
+--------------------
+- bugfix: invalid target resolution in lazy-loaded many-to-many relations
+
+v1.1.16 (04.11.2019)
+--------------------
+- Select methods return typehinted as self instead of $this to improve compatibility with PHPStorm
 
 v1.1.15 (02.10.2019)
 --------------------

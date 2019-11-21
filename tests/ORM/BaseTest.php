@@ -6,6 +6,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
@@ -149,8 +150,6 @@ abstract class BaseTest extends TestCase
                 'options' => []
             ]);
         }
-
-        $this->driver->setProfiling(true);
 
         return static::$driverCache[static::DRIVER] = $this->driver;
     }

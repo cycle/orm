@@ -25,19 +25,19 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method self distinct()
- * @method self where(...$args);
- * @method self andWhere(...$args);
- * @method self orWhere(...$args);
- * @method self having(...$args);
- * @method self andHaving(...$args);
- * @method self orHaving(...$args);
- * @method self orderBy($expression, $direction = 'ASC');
+ * @method Select distinct()
+ * @method Select where(...$args);
+ * @method Select andWhere(...$args);
+ * @method Select orWhere(...$args);
+ * @method Select having(...$args);
+ * @method Select andHaving(...$args);
+ * @method Select orHaving(...$args);
+ * @method Select orderBy($expression, $direction = 'ASC');
  *
- * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
- * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
- * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
- * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
+ * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
+ * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
+ * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
+ * @method mixed sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
 final class Select implements \IteratorAggregate, \Countable, PaginableInterface
 {
@@ -82,7 +82,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *
      * @param string $name
      * @param array  $arguments
-     * @return self|mixed
+     * @return Select|mixed
      */
     public function __call(string $name, array $arguments)
     {
@@ -149,7 +149,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      * Shortcut to where method to set AND condition for entity primary key.
      *
      * @param string|int $id
-     * @return $this|self
+     * @return $this|Select
      */
     public function wherePK($id): self
     {
@@ -337,7 +337,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *
      * @param string|array $relation
      * @param array        $options
-     * @return $this|self
+     * @return $this|Select
      * @see load()
      */
     public function with($relation, array $options = []): self

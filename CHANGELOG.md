@@ -3,6 +3,7 @@
 v1.1.18 (20.11.2019)
 --------------------
 - the limit exception is not thrown on joined singular relations 
+- Select doc-block improvement (better IDE integration)
 
 v1.1.17 (07.11.2019)
 --------------------

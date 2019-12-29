@@ -15,6 +15,7 @@ use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Exception\ORMException;
+use Cycle\ORM\Exception\RepositoryException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
@@ -58,6 +59,11 @@ final class ORM implements ORMInterface
 
     /** @var SourceInterface[] */
     private $sources = [];
+
+    /**
+     * @var string
+     */
+    private $defaultRepositoryClass = Repository::class;
 
     /**
      * @param FactoryInterface     $factory
@@ -207,6 +213,25 @@ final class ORM implements ORMInterface
     }
 
     /**
+     * Add possibility for defining default repository class instead of builtin
+     * @param string $repositoryClass
+     * @return ORMInterface
+     */
+    public function withDefaultRepository(string $repositoryClass): ORMInterface
+    {
+        $orm = clone $this;
+
+        if (!in_array(RepositoryInterface::class, class_implements($repositoryClass))){
+            throw new RepositoryException($repositoryClass);
+        }
+
+        $orm->defaultRepositoryClass = $repositoryClass;
+
+        return $orm;
+    }
+
+
+    /**
      * @inheritdoc
      */
     public function getSchema(): SchemaInterface
@@ -260,7 +285,7 @@ final class ORM implements ORMInterface
             return $this->repositories[$role];
         }
 
-        $repository = $this->getSchema()->define($role, Schema::REPOSITORY) ?? Repository::class;
+        $repository = $this->getSchema()->define($role, Schema::REPOSITORY) ?? $this->defaultRepositoryClass;
         $params = ['orm' => $this, 'role' => $role];
 
         if ($this->getSchema()->define($role, Schema::TABLE) !== null) {

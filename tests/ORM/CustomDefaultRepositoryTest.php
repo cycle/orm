@@ -15,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\DatabaseManager;
 
-
 class CustomDefaultRepositoryTest extends TestCase
 {
     private $orm;

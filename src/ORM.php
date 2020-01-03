@@ -66,7 +66,7 @@ final class ORM implements ORMInterface
     private $defaultRepositoryClass = Repository::class;
 
     /**
-     * @param FactoryInterface     $factory
+     * @param FactoryInterface $factory
      * @param SchemaInterface|null $schema
      */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
@@ -221,7 +221,7 @@ final class ORM implements ORMInterface
     {
         $orm = clone $this;
 
-        if (!in_array(RepositoryInterface::class, class_implements($repositoryClass))){
+        if (!in_array(RepositoryInterface::class, class_implements($repositoryClass))) {
             throw new RepositoryException($repositoryClass);
         }
 

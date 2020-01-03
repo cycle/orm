@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
@@ -13,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\User;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\DatabaseManager;
-
 
 
 class CustomDefaultRepositoryTest extends TestCase

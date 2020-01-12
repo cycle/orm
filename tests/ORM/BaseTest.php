@@ -32,6 +32,7 @@ use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\Driver;
 use Spiral\Database\Driver\Handler;
+use Spiral\Database\Schema\HandlerInterface;
 
 abstract class BaseTest extends TestCase
 {
@@ -226,7 +227,7 @@ abstract class BaseTest extends TestCase
                 $schema->dropForeignKey($foreign->getColumns());
             }
 
-            $schema->save(Handler::DROP_FOREIGN_KEYS);
+            $schema->save(HandlerInterface::DROP_FOREIGN_KEYS);
         }
 
         foreach ($database->getTables() as $table) {

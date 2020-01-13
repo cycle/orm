@@ -105,7 +105,7 @@ final class ORM implements ORMInterface
     {
         if (is_object($entity)) {
             $node = $this->getHeap()->get($entity);
-            if (!is_null($node)) {
+            if ($node !== null) {
                 return $node->getRole();
             }
 
@@ -150,7 +150,7 @@ final class ORM implements ORMInterface
         $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
         $id = $data[$pk] ?? null;
 
-        if ($node !== Node::NEW && !empty($id)) {
+        if ($node !== Node::NEW && $id !== null) {
             $e = $this->heap->find($role, [$pk => $id]);
 
             if ($e !== null) {
@@ -173,7 +173,10 @@ final class ORM implements ORMInterface
         $this->heap->attach($e, $node, $this->getIndexes($m->getRole()));
 
         // hydrate entity with it's data, relations and proxies
-        return $m->hydrate($e, $this->getRelationMap($role)->init($node, $prepared));
+        return $m->hydrate(
+            $e,
+            $this->getRelationMap($role)->init($node, $prepared)
+        );
     }
 
     /**
@@ -260,6 +263,7 @@ final class ORM implements ORMInterface
             return $this->repositories[$role];
         }
 
+        // todo: alter default repository
         $repository = $this->getSchema()->define($role, Schema::REPOSITORY) ?? Repository::class;
         $params = ['orm' => $this, 'role' => $role];
 
@@ -356,7 +360,7 @@ final class ORM implements ORMInterface
         }
 
         $cmd = $this->generator->generateStore($mapper, $entity, $node);
-        if ($mode != TransactionInterface::MODE_CASCADE) {
+        if ($mode !== TransactionInterface::MODE_CASCADE) {
             return $cmd;
         }
 

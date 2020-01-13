@@ -14,6 +14,7 @@ namespace Cycle\ORM\Parser;
 use Cycle\ORM\Exception\ParserException;
 use Cycle\ORM\Parser\Traits\DuplicateTrait;
 use Cycle\ORM\Parser\Traits\ReferenceTrait;
+use Throwable;
 
 /**
  * Represents data node in a tree with ability to parse line of results, split it into sub
@@ -28,13 +29,6 @@ use Cycle\ORM\Parser\Traits\ReferenceTrait;
 abstract class AbstractNode
 {
     use DuplicateTrait;
-    use ReferenceTrait;
-
-    // Typecasting types
-    public const STRING  = 1;
-    public const INTEGER = 2;
-    public const FLOAT   = 3;
-    public const BOOL    = 4;
 
     // Indicates tha data must be placed at the last registered reference
     protected const LAST_REFERENCE = ['~'];
@@ -59,7 +53,7 @@ abstract class AbstractNode
      *
      * @var null|string
      */
-    protected $outerKey = null;
+    protected $outerKey;
 
     /**
      * Node location in a tree. Set when node is registered.
@@ -79,10 +73,27 @@ abstract class AbstractNode
      * @internal
      * @var TypecastInterface|null
      */
-    protected $typecast = null;
+    protected $typecast;
 
     /** @var AbstractNode[] */
     protected $nodes = [];
+
+    /**
+     * Tree parts associated with reference keys and key values:
+     * $this->collectedReferences[id][ID_VALUE] = [ITEM1, ITEM2, ...].
+     *
+     * @internal
+     * @var array
+     */
+    protected $references = [];
+
+    /**
+     * Set of keys to be aggregated by Parser while parsing results.
+     *
+     * @internal
+     * @var array
+     */
+    protected $trackReferences = [];
 
     /**
      * @param array       $columns  When columns are empty original line will be returned as result.
@@ -103,12 +114,13 @@ abstract class AbstractNode
         $this->nodes = [];
         $this->references = [];
         $this->trackReferences = [];
+        $this->duplicates = [];
     }
 
     /**
      * @param TypecastInterface $typecast
      */
-    final public function setTypecast(TypecastInterface $typecast): void
+    public function setTypecast(TypecastInterface $typecast): void
     {
         $this->typecast = $typecast;
     }
@@ -120,13 +132,22 @@ abstract class AbstractNode
      * @param array $row
      * @return int Must return number of parsed columns.
      */
-    final public function parseRow(int $offset, array $row): int
+    public function parseRow(int $offset, array $row): int
     {
         $data = $this->fetchData($offset, $row);
 
         if ($this->deduplicate($data)) {
-            $this->collectReferences($data);
-            $this->ensurePlaceholders($data);
+            foreach ($this->trackReferences as $key) {
+                if (!empty($data[$key])) {
+                    $this->references[$key][$data[$key]][] = &$data;
+                }
+            }
+
+            //Let's force placeholders for every sub loaded
+            foreach ($this->nodes as $name => $node) {
+                $data[$name] = $node instanceof ArrayNode ? [] : null;
+            }
+
             $this->push($data);
         } elseif ($this->parent !== null) {
             // register duplicate rows in each parent row
@@ -190,14 +211,22 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    final public function linkNode(string $container, AbstractNode $node): void
+    public function linkNode(string $container, AbstractNode $node): void
     {
         $this->nodes[$container] = $node;
         $node->container = $container;
         $node->parent = $this;
 
-        if (!empty($node->outerKey)) {
-            $this->trackReference($node->outerKey);
+        if ($node->outerKey !== null) {
+            if (!in_array($node->outerKey, $this->columns, true)) {
+                throw new ParserException(
+                    "Unable to create reference, key `{$node->outerKey}` does not exist"
+                );
+            }
+
+            if (!in_array($node->outerKey, $this->trackReferences, true)) {
+                $this->trackReferences[] = $node->outerKey;
+            }
         }
     }
 
@@ -210,7 +239,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    final public function joinNode(string $container, AbstractNode $node): void
+    public function joinNode(string $container, AbstractNode $node): void
     {
         $node->joined = true;
         $this->linkNode($container, $node);
@@ -224,13 +253,98 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    final public function getNode(string $container): AbstractNode
+    public function getNode(string $container): AbstractNode
     {
         if (!isset($this->nodes[$container])) {
-            throw new ParserException("Undefined node `{$container}`.");
+            throw new ParserException("Undefined node `{$container}`");
         }
 
         return $this->nodes[$container];
+    }
+
+    /**
+     * Mount record data into internal data storage under specified container using reference key
+     * (inner key) and reference criteria (outer key value).
+     *
+     * Example (default ORM Loaders):
+     * $this->parent->mount('profile', 'id', 1, [
+     *      'id' => 100,
+     *      'user_id' => 1,
+     *      ...
+     * ]);
+     *
+     * In this example "id" argument is inner key of "user" record and it's linked to outer key
+     * "user_id" in "profile" record, which defines reference criteria as 1.
+     *
+     * Attention, data WILL be referenced to new memory location!
+     *
+     * @param string $container
+     * @param string $key
+     * @param mixed  $criteria
+     * @param array  $data
+     *
+     * @throws ParserException
+     */
+    protected function mount(string $container, string $key, $criteria, array &$data): void
+    {
+        if ($criteria === self::LAST_REFERENCE) {
+            end($this->references[$key]);
+            $criteria = key($this->references[$key]);
+        }
+
+        if (!array_key_exists($criteria, $this->references[$key])) {
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
+        }
+
+        foreach ($this->references[$key][$criteria] as &$subset) {
+            if (isset($subset[$container])) {
+                // back reference!
+                $data = &$subset[$container];
+            } else {
+                $subset[$container] = &$data;
+            }
+
+            unset($subset);
+        }
+    }
+
+    /**
+     * Mount record data into internal data storage under specified container using reference key
+     * (inner key) and reference criteria (outer key value).
+     *
+     * Example (default ORM Loaders):
+     * $this->parent->mountArray('comments', 'id', 1, [
+     *      'id' => 100,
+     *      'user_id' => 1,
+     *      ...
+     * ]);
+     *
+     * In this example "id" argument is inner key of "user" record and it's linked to outer key
+     * "user_id" in "profile" record, which defines reference criteria as 1.
+     *
+     * Add added records will be added as array items.
+     *
+     * @param string $container
+     * @param string $key
+     * @param mixed  $criteria
+     * @param array  $data
+     *
+     * @throws ParserException
+     */
+    protected function mountArray(string $container, string $key, $criteria, array &$data): void
+    {
+        if (!array_key_exists($criteria, $this->references[$key])) {
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
+        }
+
+        foreach ($this->references[$key][$criteria] as &$subset) {
+            if (!in_array($data, $subset[$container], true)) {
+                $subset[$container][] = &$data;
+            }
+
+            unset($subset);
+            continue;
+        }
     }
 
     /**
@@ -261,25 +375,12 @@ abstract class AbstractNode
             }
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             throw new ParserException(
                 'Unable to parse incoming row: ' . $e->getMessage(),
                 $e->getCode(),
                 $e
             );
-        }
-    }
-
-    /**
-     * Create placeholders for each of sub nodes.
-     *
-     * @param array $data
-     */
-    private function ensurePlaceholders(array &$data): void
-    {
-        //Let's force placeholders for every sub loaded
-        foreach ($this->nodes as $name => $node) {
-            $data[$name] = $node instanceof ArrayNode ? [] : null;
         }
     }
 }

@@ -53,7 +53,7 @@ class Repository implements RepositoryInterface
      */
     public function findOne(array $scope = [])
     {
-        return $this->select()->where($scope)->fetchOne();
+        return $this->select()->fetchOne($scope);
     }
 
     /**

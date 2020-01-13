@@ -348,13 +348,13 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
             return $this;
         }
 
-        foreach ($relation as $name => $options) {
-            if (is_string($options)) {
+        foreach ($relation as $name => $subOption) {
+            if (is_string($subOption)) {
                 //Array of relation names
-                $this->with($options, []);
+                $this->with($subOption, []);
             } else {
                 //Multiple relations or relation with addition load options
-                $this->with($name, $options);
+                $this->with($name, $subOption);
             }
         }
 
@@ -371,13 +371,17 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function fetchOne(array $query = null)
     {
-        $data = (clone $this)->where($query)->fetchData();
+        $data = (clone $this)->where($query)->limit(1)->fetchData();
 
-        if (empty($data[0])) {
+        if (!isset($data[0])) {
             return null;
         }
 
-        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED);
+        return $this->orm->make(
+            $this->loader->getTarget(),
+            $data[0],
+            Node::MANAGED
+        );
     }
 
     /**
@@ -395,7 +399,11 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function getIterator(): Iterator
     {
-        return new Iterator($this->orm, $this->loader->getTarget(), $this->fetchData());
+        return new Iterator(
+            $this->orm,
+            $this->loader->getTarget(),
+            $this->fetchData()
+        );
     }
 
     /**

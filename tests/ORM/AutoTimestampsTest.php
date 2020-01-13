@@ -27,32 +27,39 @@ abstract class AutoTimestampsTest extends BaseTest
     {
         parent::setUp();
 
-        $this->makeTable('user', [
-            'id'         => 'primary',
-            'email'      => 'string',
-            'balance'    => 'float',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime'
-        ]);
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => TimestampedMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance', 'created_at', 'updated_at'],
-                Schema::TYPECAST    => [
-                    'id'         => 'int',
-                    'balance'    => 'float',
-                    'created_at' => 'datetime',
-                    'updated_at' => 'datetime'
-                ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+        $this->makeTable(
+            'user',
+            [
+                'id'         => 'primary',
+                'email'      => 'string',
+                'balance'    => 'float',
+                'created_at' => 'datetime',
+                'updated_at' => 'datetime'
             ]
-        ]));
+        );
+
+        $this->orm = $this->withSchema(
+            new Schema(
+                [
+                    User::class => [
+                        Schema::ROLE        => 'user',
+                        Schema::MAPPER      => TimestampedMapper::class,
+                        Schema::DATABASE    => 'default',
+                        Schema::TABLE       => 'user',
+                        Schema::PRIMARY_KEY => 'id',
+                        Schema::COLUMNS     => ['id', 'email', 'balance', 'created_at', 'updated_at'],
+                        Schema::TYPECAST    => [
+                            'id'         => 'int',
+                            'balance'    => 'float',
+                            'created_at' => 'datetime',
+                            'updated_at' => 'datetime'
+                        ],
+                        Schema::SCHEMA      => [],
+                        Schema::RELATIONS   => []
+                    ]
+                ]
+            )
+        );
     }
 
     public function testCreate(): void
@@ -100,22 +107,13 @@ abstract class AutoTimestampsTest extends BaseTest
 
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
-        $updatedAt = $s->fetchData()[0]['updated_at'];
 
         $u = $s->fetchOne();
 
         $u->balance = 200;
 
-        sleep(1);
-
         $this->captureWriteQueries();
         (new Transaction($orm))->persist($u)->run();
         $this->assertNumWrites(1);
-
-        $orm = $this->orm->withHeap(new Heap());
-        $s = new Select($orm, User::class);
-        $updatedAt2 = $s->fetchData()[0]['updated_at'];
-
-        $this->assertNotEquals($updatedAt, $updatedAt2);
     }
 }

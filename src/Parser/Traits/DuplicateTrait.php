@@ -18,7 +18,7 @@ namespace Cycle\ORM\Parser\Traits;
 trait DuplicateTrait
 {
     /** @var string @internal */
-    protected $duplicateCriteria = null;
+    protected $duplicateCriteria;
 
     /** @var array @internal */
     protected $duplicates = [];
@@ -46,7 +46,7 @@ trait DuplicateTrait
             return true;
         }
 
-        $criteria = $this->duplicateCriteria($data);
+        $criteria = (string)$data[$this->duplicateCriteria];
 
         if (isset($this->duplicates[$criteria])) {
             // duplicate is presented, let's reduplicate
@@ -59,16 +59,5 @@ trait DuplicateTrait
         $this->duplicates[$criteria] = &$data;
 
         return true;
-    }
-
-    /**
-     * Calculate duplication criteria.
-     *
-     * @param array $data
-     * @return string
-     */
-    protected function duplicateCriteria(array &$data): string
-    {
-        return (string)$data[$this->duplicateCriteria];
     }
 }

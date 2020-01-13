@@ -111,7 +111,7 @@ abstract class TypecastTest extends BaseTest
     public function testFetchOne(): void
     {
         $selector = new Select($this->orm, User::class);
-        $result = $selector->fetchOne();
+        $result = $selector->wherePK(1)->fetchOne();
 
         $this->assertInstanceOf(User::class, $result);
         $this->assertSame(1, $result->id);
@@ -151,7 +151,7 @@ abstract class TypecastTest extends BaseTest
     public function testHeap(): void
     {
         $selector = new Select($this->orm, User::class);
-        $result = $selector->fetchOne();
+        $result = $selector->wherePK(1)->fetchOne();
 
         $this->assertEquals(1, $result->id);
 

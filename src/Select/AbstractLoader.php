@@ -134,11 +134,13 @@ abstract class AbstractLoader implements LoaderInterface
     {
         // check that given options are known
         if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
-            throw new LoaderException(sprintf(
-                'Relation %s does not support option: %s',
-                get_class($this),
-                join(',', $wrong)
-            ));
+            throw new LoaderException(
+                sprintf(
+                    'Relation %s does not support option: %s',
+                    get_class($this),
+                    join(',', $wrong)
+                )
+            );
         }
 
         $loader = clone $this;
@@ -263,7 +265,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
-        $query = $this->applyConstrain(clone $query);
+        $query = $this->applyConstrain($query);
 
         foreach ($this->join as $loader) {
             $query = $loader->configureQuery($query);

@@ -116,7 +116,7 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        if ($this->isLoaded() && $this->isJoined() && $query->getLimit() !== 0) {
+        if ($this->isLoaded() && $this->isJoined() && (int)$query->getLimit() !== 0) {
             throw new LoaderException('Unable to load data using join with limit on parent query');
         }
 

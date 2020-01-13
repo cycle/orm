@@ -45,7 +45,7 @@ final class SingularNode extends AbstractNode
             throw new ParserException('Unable to register data tree, parent is missing');
         }
 
-        if (is_null($data[$this->innerKey])) {
+        if ($data[$this->innerKey] === null) {
             //No data was loaded
             return;
         }

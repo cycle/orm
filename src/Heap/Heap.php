@@ -11,9 +11,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-final class Heap implements HeapInterface, \IteratorAggregate
+use IteratorAggregate;
+use SplObjectStorage;
+use UnexpectedValueException;
+
+final class Heap implements HeapInterface, IteratorAggregate
 {
-    /** @var \SplObjectStorage */
+    /** @var SplObjectStorage */
     private $storage;
 
     /** @var array */
@@ -36,9 +40,9 @@ final class Heap implements HeapInterface, \IteratorAggregate
     }
 
     /**
-     * @return \SplObjectStorage
+     * @return SplObjectStorage
      */
-    public function getIterator(): \SplObjectStorage
+    public function getIterator(): SplObjectStorage
     {
         return $this->storage;
     }
@@ -58,7 +62,7 @@ final class Heap implements HeapInterface, \IteratorAggregate
     {
         try {
             return $this->storage->offsetGet($entity);
-        } catch (\UnexpectedValueException $e) {
+        } catch (UnexpectedValueException $e) {
             return null;
         }
     }
@@ -75,7 +79,7 @@ final class Heap implements HeapInterface, \IteratorAggregate
         $key = $value = '';
         foreach ($scope as $k => $v) {
             $key .= $k;
-            $value .= $value . '/';
+            $value .= $v . '/';
         }
 
         return $this->paths[$role][$key][$value] ?? null;
@@ -115,11 +119,11 @@ final class Heap implements HeapInterface, \IteratorAggregate
      */
     public function detach($entity): void
     {
-        if (!$this->has($entity)) {
+        $node = $this->get($entity);
+        if ($node === null) {
             return;
         }
 
-        $node = $this->get($entity);
         $role = $node->getRole();
 
         // erase all the indexes

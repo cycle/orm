@@ -45,7 +45,7 @@ final class ArrayNode extends AbstractNode
             throw new ParserException('Unable to register data tree, parent is missing.');
         }
 
-        if (is_null($data[$this->innerKey])) {
+        if ($data[$this->innerKey] === null) {
             // no data was parsed
             return;
         }

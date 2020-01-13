@@ -31,13 +31,13 @@ use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\Driver;
-use Spiral\Database\Driver\Handler;
+use Spiral\Database\Driver\HandlerInterface;
 
 abstract class BaseTest extends TestCase
 {
-
     // currently active driver
     public const DRIVER = null;
+
     // tests configuration
     public static $config;
 
@@ -72,11 +72,13 @@ abstract class BaseTest extends TestCase
         parent::setUp();
 
         $this->dbal = new DatabaseManager(new DatabaseConfig());
-        $this->dbal->addDatabase(new Database(
-            'default',
-            '',
-            $this->getDriver()
-        ));
+        $this->dbal->addDatabase(
+            new Database(
+                'default',
+                '',
+                $this->getDriver()
+            )
+        );
 
         $this->logger = new TestLogger();
         $this->getDriver()->setLogger($this->logger);
@@ -92,10 +94,12 @@ abstract class BaseTest extends TestCase
             $this->logger->display();
         }
 
-        $this->orm = new ORM(new Factory(
-            $this->dbal,
-            RelationConfig::getDefault()
-        ));
+        $this->orm = new ORM(
+            new Factory(
+                $this->dbal,
+                RelationConfig::getDefault()
+            )
+        );
 
         // use promises by default
         $this->orm = $this->orm->withPromiseFactory(new PromiseFactory());
@@ -143,12 +147,15 @@ abstract class BaseTest extends TestCase
         if (!isset($this->driver)) {
             $class = $config['driver'];
 
-            $this->driver = new $class([
-                'connection' => $config['conn'],
-                'username' => $config['user'],
-                'password' => $config['pass'],
-                'options' => []
-            ]);
+            $this->driver = new $class(
+                [
+                    'connection' => $config['conn'],
+                    'username'   => $config['user'],
+                    'password'   => $config['pass'],
+                    'options'    => [],
+                    'queryCache' => true
+                ]
+            );
         }
 
         return static::$driverCache[static::DRIVER] = $this->driver;
@@ -226,7 +233,7 @@ abstract class BaseTest extends TestCase
                 $schema->dropForeignKey($foreign->getColumns());
             }
 
-            $schema->save(Handler::DROP_FOREIGN_KEYS);
+            $schema->save(HandlerInterface::DROP_FOREIGN_KEYS);
         }
 
         foreach ($database->getTables() as $table) {

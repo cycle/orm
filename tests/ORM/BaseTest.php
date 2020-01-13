@@ -31,8 +31,7 @@ use Spiral\Database\Config\DatabaseConfig;
 use Spiral\Database\Database;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Driver\Driver;
-use Spiral\Database\Driver\Handler;
-use Spiral\Database\Schema\HandlerInterface;
+use Spiral\Database\Driver\HandlerInterface;
 
 abstract class BaseTest extends TestCase
 {

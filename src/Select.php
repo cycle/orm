@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Parser\OutputNode;
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
@@ -409,13 +408,11 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     /**
      * Load data tree from database and linked loaders in a form of array.
      *
-     * @param OutputNode $node When empty node will be created automatically by root relation
-     *                         loader.
      * @return array
      */
-    public function fetchData(OutputNode $node = null): array
+    public function fetchData(): array
     {
-        $node = $node ?? $this->loader->createNode();
+        $node = $this->loader->createNode();
         $this->loader->loadData($node);
 
         return $node->getResult();

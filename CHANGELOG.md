@@ -1,5 +1,10 @@
 # CHANGELOG 
 
+v1.2.0 (13.01.2020)
+--------------------
+- performance optimizations in Node parsers, Select builder, Typecast
+- 33% performance improvement (with updated DBAL)
+
 v1.1.18 (20.11.2019)
 --------------------
 - the limit exception is not thrown on joined singular relations 

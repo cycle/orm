@@ -163,7 +163,12 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         $statement = $this->configureQuery($this->initQuery(), $references)->run();
 
         foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {
-            $node->parseRow(0, $row);
+            try {
+                $node->parseRow(0, $row);
+            } catch (\Throwable $e) {
+                echo 'x';
+                throw $e;
+            }
         }
 
         $statement->close();

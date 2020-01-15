@@ -124,6 +124,15 @@ final class RootLoader extends AbstractLoader
     }
 
     /**
+     * @inheritdoc
+     */
+    public function isLoaded(): bool
+    {
+        // root loader is always loaded
+        return true;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function configureQuery(SelectQuery $query): SelectQuery

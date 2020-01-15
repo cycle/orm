@@ -154,9 +154,9 @@ abstract class AbstractLoader implements LoaderInterface
      * Load the relation.
      *
      * @param string $relation Relation name, or chain of relations separated by.
-     * @param array  $options  Loader options (to be applied to last chain element only).
-     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
-     * @param bool   $load     Load relation data.
+     * @param array  $options Loader options (to be applied to last chain element only).
+     * @param bool   $join When set to true loaders will be forced into JOIN mode.
+     * @param bool   $load Load relation data.
      * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
@@ -253,6 +253,13 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
+     * Indicates that loader loads data.
+     *
+     * @return bool
+     */
+    abstract public function isLoaded(): bool;
+
+    /**
      * Create input node for the loader.
      *
      * @return AbstractNode
@@ -306,7 +313,7 @@ abstract class AbstractLoader implements LoaderInterface
     {
         $relations = $this->orm->getSchema()->define($this->target, Schema::RELATIONS) ?? [];
         foreach ($relations as $relation => $schema) {
-            if (($schema[Relation::LOAD] ?? null) == Relation::LOAD_EAGER) {
+            if (($schema[Relation::LOAD] ?? null) === Relation::LOAD_EAGER) {
                 yield $relation;
             }
         }

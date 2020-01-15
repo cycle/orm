@@ -6,6 +6,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
@@ -14,13 +15,12 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\Post;
+use Cycle\ORM\Tests\Fixtures\Group;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
-class DeepEmbeddedTest extends BaseTest
+abstract class DeepEmbeddedTest extends BaseTest
 {
     use TableTrait;
 
@@ -68,22 +68,22 @@ class DeepEmbeddedTest extends BaseTest
         $this->orm = $this->withSchema(
             new Schema(
                 [
-                    Post::class            => [
-                        Schema::ROLE        => 'post',
+                    Group::class           => [
+                        Schema::ROLE        => 'group',
                         Schema::MAPPER      => Mapper::class,
                         Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'post',
+                        Schema::TABLE       => 'group',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'email', 'balance'],
+                        Schema::COLUMNS     => ['id', 'name'],
                         Schema::SCHEMA      => [],
                         Schema::RELATIONS   => [
-                            'comments' => [
+                            'users' => [
                                 Relation::TYPE   => Relation::HAS_MANY,
-                                Relation::TARGET => Comment::class,
+                                Relation::TARGET => User::class,
                                 Relation::SCHEMA => [
                                     Relation::CASCADE   => true,
                                     Relation::INNER_KEY => 'id',
-                                    Relation::OUTER_KEY => 'user_id',
+                                    Relation::OUTER_KEY => 'group_id',
                                 ],
                             ]
                         ]
@@ -94,13 +94,13 @@ class DeepEmbeddedTest extends BaseTest
                         Schema::DATABASE    => 'default',
                         Schema::TABLE       => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'email', 'balance'],
+                        Schema::COLUMNS     => ['id', 'group_id', 'email', 'balance'],
                         Schema::SCHEMA      => [],
                         Schema::RELATIONS   => [
                             'credentials' => [
                                 Relation::TYPE   => Relation::EMBEDDED,
                                 Relation::TARGET => 'user:credentials',
-                                Relation::LOAD   => Relation::LOAD_EAGER,
+                                Relation::LOAD   => Relation::LOAD_EAGER, // IMPORTANT!
                                 Relation::SCHEMA => [],
                             ],
                         ]
@@ -126,9 +126,135 @@ class DeepEmbeddedTest extends BaseTest
 
     public function testFetchData(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $selector->load('credentials');
+        $selector = new Select($this->orm, Group::class);
+        $selector->load('users');
 
-        dump($selector->fetchData());
+        $this->assertSame(
+            [
+                [
+                    'id'    => '1',
+                    'name'  => 'first',
+                    'users' => [
+                        [
+                            'id'          => '1',
+                            'group_id'    => '1',
+                            'email'       => 'hello@world.com',
+                            'balance'     => '100.0',
+                            'credentials' => [
+                                'username' => 'user1',
+                                'password' => 'pass1',
+                            ],
+                        ],
+                        [
+                            'id'          => '2',
+                            'group_id'    => '1',
+                            'email'       => 'another@world.com',
+                            'balance'     => '200.0',
+                            'credentials' => [
+                                'username' => 'user2',
+                                'password' => 'pass2',
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'id'    => '2',
+                    'name'  => 'second',
+                    'users' => [
+                        [
+                            'id'          => '3',
+                            'group_id'    => '2',
+                            'email'       => 'third@world.com',
+                            'balance'     => '200.0',
+                            'credentials' => [
+                                'username' => 'user3',
+                                'password' => 'pass3',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            $selector->fetchData()
+        );
+    }
+
+    public function testWithRelationIgnoreEager(): void
+    {
+        $selector = new Select($this->orm, Group::class);
+        $selector->with('users');
+
+        $this->assertSame(
+            [
+                [
+                    'id'   => '1',
+                    'name' => 'first',
+                ],
+                [
+                    'id'   => '2',
+                    'name' => 'second',
+                ],
+            ],
+            $selector->fetchData()
+        );
+
+        // only parent entity!
+        $this->assertCount(2, $selector->buildQuery()->getColumns());
+    }
+
+    public function testFetchDataViaJoin(): void
+    {
+        $selector = new Select($this->orm, Group::class);
+        $selector->with('users', ['as' => 'users'])
+                 ->load('users', ['using' => 'users']);
+
+        $this->assertSame(
+            [
+                [
+                    'id'    => '1',
+                    'name'  => 'first',
+                    'users' => [
+                        [
+                            'id'          => '1',
+                            'group_id'    => '1',
+                            'email'       => 'hello@world.com',
+                            'balance'     => '100.0',
+                            'credentials' => [
+                                'username' => 'user1',
+                                'password' => 'pass1',
+                            ],
+                        ],
+                        [
+                            'id'          => '2',
+                            'group_id'    => '1',
+                            'email'       => 'another@world.com',
+                            'balance'     => '200.0',
+                            'credentials' => [
+                                'username' => 'user2',
+                                'password' => 'pass2',
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'id'    => '2',
+                    'name'  => 'second',
+                    'users' => [
+                        [
+                            'id'          => '3',
+                            'group_id'    => '2',
+                            'email'       => 'third@world.com',
+                            'balance'     => '200.0',
+                            'credentials' => [
+                                'username' => 'user3',
+                                'password' => 'pass3',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            $selector->fetchData()
+        );
+
+        $this->assertCount(8, $selector->buildQuery()->getColumns());
     }
 }

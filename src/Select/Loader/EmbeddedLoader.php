@@ -132,8 +132,7 @@ final class EmbeddedLoader implements JoinableInterface
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        if ($this->isLoaded()) {
-            // todo: columns loaded when child relation called via with()
+        if ($this->isLoaded() && $this->parent->isLoaded()) {
             $this->mountColumns($query, $this->options['minify'] ?? true);
         }
 

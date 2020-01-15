@@ -49,7 +49,7 @@ trait ConstrainTrait
     protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if ($this->constrain !== null) {
-            $this->constrain->apply(new QueryBuilder($this->orm, $query, $this));
+            $this->constrain->apply(new QueryBuilder($query, $this));
         }
 
         return $query;

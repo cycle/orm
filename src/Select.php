@@ -11,11 +11,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Countable;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
+use IteratorAggregate;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Pagination\PaginableInterface;
 
@@ -38,7 +40,7 @@ use Spiral\Pagination\PaginableInterface;
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method mixed sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-final class Select implements \IteratorAggregate, \Countable, PaginableInterface
+final class Select implements IteratorAggregate, Countable, PaginableInterface
 {
     // load relation data within same query
     public const SINGLE_QUERY = JoinableLoader::INLOAD;
@@ -63,7 +65,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     {
         $this->orm = $orm;
         $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
-        $this->builder = new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
+        $this->builder = new QueryBuilder($this->getLoader()->getQuery(), $this->loader);
     }
 
     /**
@@ -86,13 +88,13 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function __call(string $name, array $arguments)
     {
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            $proxy = new QueryBuilder($this->orm, $this->loader->buildQuery(), $this->loader);
-
             // aggregations
-            return $proxy->__call($name, $arguments);
+            return $this->builder->withQuery(
+                $this->loader->buildQuery()
+            )->__call($name, $arguments);
         }
 
-        $result = $this->getBuilder()->__call($name, $arguments);
+        $result = $this->builder->__call($name, $arguments);
         if ($result instanceof QueryBuilder) {
             return $this;
         }
@@ -108,7 +110,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function __clone()
     {
         $this->loader = clone $this->loader;
-        $this->builder = new QueryBuilder($this->orm, $this->getLoader()->getQuery(), $this->loader);
+        $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
 
     /**
@@ -141,7 +143,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function buildQuery(): SelectQuery
     {
-        return $this->getLoader()->buildQuery();
+        return $this->loader->buildQuery();
     }
 
     /**
@@ -152,7 +154,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function wherePK($id): self
     {
-        return $this->__call('where', [$this->getLoader()->getPK(), $id]);
+        return $this->__call('where', [$this->loader->getPK(), $id]);
     }
 
     /**
@@ -165,7 +167,7 @@ final class Select implements \IteratorAggregate, \Countable, PaginableInterface
     {
         if ($column === null) {
             // @tuneyourserver solves the issue with counting on queries with joins.
-            $column = sprintf('DISTINCT(%s)', $this->getLoader()->getPK());
+            $column = sprintf('DISTINCT(%s)', $this->loader->getPK());
         }
 
         return (int)$this->__call('count', [$column]);

@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
+use Closure;
 use Cycle\ORM\Exception\BuilderException;
-use Cycle\ORM\ORMInterface;
 use Spiral\Database\Driver\Compiler;
 use Spiral\Database\Query\SelectQuery;
 
@@ -37,9 +37,6 @@ use Spiral\Database\Query\SelectQuery;
  */
 final class QueryBuilder
 {
-    /** @var ORMInterface @internal */
-    private $orm;
-
     /** @var SelectQuery */
     private $query;
 
@@ -50,13 +47,11 @@ final class QueryBuilder
     private $forward;
 
     /**
-     * @param ORMInterface   $orm
      * @param SelectQuery    $query
      * @param AbstractLoader $loader
      */
-    public function __construct(ORMInterface $orm, SelectQuery $query, AbstractLoader $loader)
+    public function __construct(SelectQuery $query, AbstractLoader $loader)
     {
-        $this->orm = $orm;
         $this->query = $query;
         $this->loader = $loader;
     }
@@ -248,7 +243,7 @@ final class QueryBuilder
             $args[0] = $this->walkRecursive($args[0], [$this, 'wrap']);
         }
 
-        if ($args[0] instanceof \Closure) {
+        if ($args[0] instanceof Closure) {
             $args[0] = $args[0] = function ($q) use ($args): void {
                 $args[0]($this->withQuery($q));
             };
@@ -269,7 +264,7 @@ final class QueryBuilder
             $identifier = $this->resolve($identifier);
         }
 
-        if ($value instanceof \Closure) {
+        if ($value instanceof Closure) {
             $value = function ($q) use ($value): void {
                 $value($this->withQuery($q));
             };

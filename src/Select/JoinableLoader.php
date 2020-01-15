@@ -85,12 +85,12 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function getAlias(): string
     {
-        if (!empty($this->options['using'])) {
+        if ($this->options['using'] !== null) {
             //We are using another relation (presumably defined by with() to load data).
             return $this->options['using'];
         }
 
-        if (!empty($this->options['as'])) {
+        if ($this->options['as'] !== null) {
             return $this->options['as'];
         }
 
@@ -216,7 +216,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
             // custom load constrains
             if ($this->options['load'] instanceof \Closure) {
-                $proxy = new QueryBuilder($this->orm, $query, $this);
+                $proxy = new QueryBuilder($query, $this);
                 $proxy = $proxy->withForward($this->isJoined() ? 'onWhere' : 'where');
 
                 call_user_func($this->options['load'], $proxy);
@@ -233,7 +233,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if ($this->constrain !== null) {
-            $builder = new QueryBuilder($this->orm, $query, $this);
+            $builder = new QueryBuilder($query, $this);
             if ($this->isJoined()) {
                 $builder = $builder->withForward('onWhere');
             }

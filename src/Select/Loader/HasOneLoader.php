@@ -48,7 +48,7 @@ class HasOneLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        if (!empty($this->options['using'])) {
+        if ($this->options['using'] !== null) {
             // use pre-defined query
             return parent::configureQuery($query, $outerKeys);
         }

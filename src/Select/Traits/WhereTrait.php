@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
 
+use Closure;
 use Cycle\ORM\Select\QueryBuilder;
 use Spiral\Database\Query\SelectQuery;
 
@@ -20,10 +21,10 @@ use Spiral\Database\Query\SelectQuery;
 trait WhereTrait
 {
     /**
-     * @param SelectQuery    $query
-     * @param string         $table  Table name to be automatically inserted into where conditions at place of {@}.
-     * @param string         $target Query target section (accepts: where, having, onWhere, on)
-     * @param array|\Closure $where  Where conditions in a form or short array form.
+     * @param SelectQuery   $query
+     * @param string        $table Table name to be automatically inserted into where conditions at place of {@}.
+     * @param string        $target Query target section (accepts: where, having, onWhere, on)
+     * @param array|Closure $where Where conditions in a form or short array form.
      * @return SelectQuery
      */
     private function setWhere(SelectQuery $query, string $table, string $target, $where = null): SelectQuery
@@ -33,7 +34,7 @@ trait WhereTrait
             return $query;
         }
 
-        $proxy = new QueryBuilder($this->orm, $query, $this);
+        $proxy = new QueryBuilder($query, $this);
         $proxy = $proxy->withForward($target);
 
         return $proxy->where($where)->getQuery();

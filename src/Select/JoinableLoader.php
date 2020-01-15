@@ -214,12 +214,12 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 $this->mountColumns($query, $this->options['minify'], '', true);
             }
 
-            // custom load constrains
-            if (is_callable($this->options['load'], true)) {
-                $proxy = new QueryBuilder($query, $this);
-                $proxy = $proxy->withForward($this->isJoined() ? 'onWhere' : 'where');
+            if ($this->options['load'] instanceof ConstrainInterface) {
+                $this->options['load']->apply($this->makeQueryBuilder($query));
+            }
 
-                ($this->options['load'])($proxy);
+            if (is_callable($this->options['load'], true)) {
+                ($this->options['load'])($this->makeQueryBuilder($query));
             }
         }
 
@@ -233,12 +233,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if ($this->constrain !== null) {
-            $builder = new QueryBuilder($query, $this);
-            if ($this->isJoined()) {
-                $builder = $builder->withForward('onWhere');
-            }
-
-            $this->constrain->apply($builder);
+            $this->constrain->apply($this->makeQueryBuilder($query));
         }
 
         return $query;
@@ -342,5 +337,19 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     protected function getColumns(): array
     {
         return $this->define(Schema::COLUMNS);
+    }
+
+    /**
+     * @param SelectQuery $query
+     * @return QueryBuilder
+     */
+    private function makeQueryBuilder(SelectQuery $query): QueryBuilder
+    {
+        $builder = new QueryBuilder($query, $this);
+        if ($this->isJoined()) {
+            return $builder->withForward('onWhere');
+        }
+
+        return $builder;
     }
 }

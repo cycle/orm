@@ -80,7 +80,7 @@ class HasManyLoader extends JoinableLoader
             $query->where($localKey, 'IN', new Parameter($outerKeys));
         }
 
-        //User specified WHERE conditions
+        // user specified WHERE conditions
         $this->setWhere(
             $query,
             $this->getAlias(),

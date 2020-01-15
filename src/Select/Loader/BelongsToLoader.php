@@ -17,6 +17,7 @@ use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
@@ -25,6 +26,8 @@ use Spiral\Database\Query\SelectQuery;
  */
 class BelongsToLoader extends JoinableLoader
 {
+    use WhereTrait;
+
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
@@ -64,6 +67,14 @@ class BelongsToLoader extends JoinableLoader
             // relation is loaded using external query
             $query->where($localKey, 'IN', new Parameter($outerKeys));
         }
+
+        // user specified WHERE conditions
+        $this->setWhere(
+            $query,
+            $this->getAlias(),
+            $this->isJoined() ? 'onWhere' : 'where',
+            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+        );
 
         return parent::configureQuery($query);
     }

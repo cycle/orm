@@ -215,11 +215,11 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             }
 
             // custom load constrains
-            if ($this->options['load'] instanceof \Closure) {
+            if (is_callable($this->options['load'], true)) {
                 $proxy = new QueryBuilder($query, $this);
                 $proxy = $proxy->withForward($this->isJoined() ? 'onWhere' : 'where');
 
-                call_user_func($this->options['load'], $proxy);
+                ($this->options['load'])($proxy);
             }
         }
 

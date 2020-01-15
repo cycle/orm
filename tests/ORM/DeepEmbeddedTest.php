@@ -76,6 +76,7 @@ abstract class DeepEmbeddedTest extends BaseTest
                         Schema::PRIMARY_KEY => 'id',
                         Schema::COLUMNS     => ['id', 'name'],
                         Schema::SCHEMA      => [],
+                        Schema::TYPECAST    => ['id' => 'int'],
                         Schema::RELATIONS   => [
                             'users' => [
                                 Relation::TYPE   => Relation::HAS_MANY,
@@ -96,6 +97,7 @@ abstract class DeepEmbeddedTest extends BaseTest
                         Schema::PRIMARY_KEY => 'id',
                         Schema::COLUMNS     => ['id', 'group_id', 'email', 'balance'],
                         Schema::SCHEMA      => [],
+                        Schema::TYPECAST    => ['id' => 'int', 'group_id' => 'int', 'balance' => 'float'],
                         Schema::RELATIONS   => [
                             'credentials' => [
                                 Relation::TYPE   => Relation::EMBEDDED,
@@ -117,6 +119,7 @@ abstract class DeepEmbeddedTest extends BaseTest
                             'password' => 'creds_password',
                         ],
                         Schema::SCHEMA      => [],
+                        Schema::TYPECAST    => ['id' => 'int'],
                         Schema::RELATIONS   => []
                     ]
                 ]
@@ -132,24 +135,24 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->assertSame(
             [
                 [
-                    'id'    => '1',
+                    'id'    => 1,
                     'name'  => 'first',
                     'users' => [
                         [
-                            'id'          => '1',
-                            'group_id'    => '1',
+                            'id'          => 1,
+                            'group_id'    => 1,
                             'email'       => 'hello@world.com',
-                            'balance'     => '100.0',
+                            'balance'     => 100.0,
                             'credentials' => [
                                 'username' => 'user1',
                                 'password' => 'pass1',
                             ],
                         ],
                         [
-                            'id'          => '2',
-                            'group_id'    => '1',
+                            'id'          => 2,
+                            'group_id'    => 1,
                             'email'       => 'another@world.com',
-                            'balance'     => '200.0',
+                            'balance'     => 200.0,
                             'credentials' => [
                                 'username' => 'user2',
                                 'password' => 'pass2',
@@ -158,14 +161,14 @@ abstract class DeepEmbeddedTest extends BaseTest
                     ],
                 ],
                 [
-                    'id'    => '2',
+                    'id'    => 2,
                     'name'  => 'second',
                     'users' => [
                         [
-                            'id'          => '3',
-                            'group_id'    => '2',
+                            'id'          => 3,
+                            'group_id'    => 2,
                             'email'       => 'third@world.com',
-                            'balance'     => '200.0',
+                            'balance'     => 200.0,
                             'credentials' => [
                                 'username' => 'user3',
                                 'password' => 'pass3',
@@ -186,11 +189,11 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->assertSame(
             [
                 [
-                    'id'   => '1',
+                    'id'   => 1,
                     'name' => 'first',
                 ],
                 [
-                    'id'   => '2',
+                    'id'   => 2,
                     'name' => 'second',
                 ],
             ],
@@ -210,24 +213,24 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->assertSame(
             [
                 [
-                    'id'    => '1',
+                    'id'    => 1,
                     'name'  => 'first',
                     'users' => [
                         [
-                            'id'          => '1',
-                            'group_id'    => '1',
+                            'id'          => 1,
+                            'group_id'    => 1,
                             'email'       => 'hello@world.com',
-                            'balance'     => '100.0',
+                            'balance'     => 100.0,
                             'credentials' => [
                                 'username' => 'user1',
                                 'password' => 'pass1',
                             ],
                         ],
                         [
-                            'id'          => '2',
-                            'group_id'    => '1',
+                            'id'          => 2,
+                            'group_id'    => 1,
                             'email'       => 'another@world.com',
-                            'balance'     => '200.0',
+                            'balance'     => 200.0,
                             'credentials' => [
                                 'username' => 'user2',
                                 'password' => 'pass2',
@@ -236,14 +239,14 @@ abstract class DeepEmbeddedTest extends BaseTest
                     ],
                 ],
                 [
-                    'id'    => '2',
+                    'id'    => 2,
                     'name'  => 'second',
                     'users' => [
                         [
-                            'id'          => '3',
-                            'group_id'    => '2',
+                            'id'          => 3,
+                            'group_id'    => 2,
                             'email'       => 'third@world.com',
-                            'balance'     => '200.0',
+                            'balance'     => 200.0,
                             'credentials' => [
                                 'username' => 'user3',
                                 'password' => 'pass3',

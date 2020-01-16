@@ -209,7 +209,8 @@ abstract class DeepEmbeddedTest extends BaseTest
         $selector = new Select($this->orm, Group::class);
         $selector->with('users', ['as' => 'users'])
             ->load('users', ['using' => 'users'])
-            ->orderBy('id', 'ASC');
+            ->orderBy('id', 'ASC')
+            ->orderBy('users.id', 'ASC');
 
         $this->assertSame(
             [

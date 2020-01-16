@@ -130,7 +130,7 @@ abstract class DeepEmbeddedTest extends BaseTest
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, Group::class);
-        $selector->load('users');
+        $selector->load('users')->orderBy('id', 'ASC');
 
         $this->assertSame(
             [
@@ -184,7 +184,7 @@ abstract class DeepEmbeddedTest extends BaseTest
     public function testWithRelationIgnoreEager(): void
     {
         $selector = new Select($this->orm, Group::class);
-        $selector->with('users');
+        $selector->with('users')->orderBy('id', 'ASC');
 
         $this->assertSame(
             [
@@ -208,7 +208,8 @@ abstract class DeepEmbeddedTest extends BaseTest
     {
         $selector = new Select($this->orm, Group::class);
         $selector->with('users', ['as' => 'users'])
-                 ->load('users', ['using' => 'users']);
+            ->load('users', ['using' => 'users'])
+            ->orderBy('id', 'ASC');
 
         $this->assertSame(
             [

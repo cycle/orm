@@ -1,5 +1,13 @@
 # CHANGELOG 
 
+v1.2.1 (16.01.2020)
+--------------------
+- [bugfix] embedded relations data was loaded with parent entity even when not required
+- simplified query builder creation within joinable loader
+- added support for callable `load` option (where alternative) for all relations
+- added support for where in all relations
+- code-style changes (optimizations)
+
 v1.2.0 (13.01.2020)
 --------------------
 - performance optimizations in Node parsers, Select builder, Typecast

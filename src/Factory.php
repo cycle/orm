@@ -190,7 +190,7 @@ final class Factory implements FactoryInterface
         }
 
         $source = new Source(
-            $this->factory->database($schema->define($role, Schema::DATABASE)),
+            $this->database($schema->define($role, Schema::DATABASE)),
             $schema->define($role, Schema::TABLE)
         );
 

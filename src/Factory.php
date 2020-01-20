@@ -151,10 +151,7 @@ final class Factory implements FactoryInterface
      * @inheritDoc
      */
     public function repository(
-        ORMInterface $orm,
-        SchemaInterface $schema,
-        string $role,
-        ?Select $select
+        SchemaInterface $schema, string $role, ?Select $select
     ): RepositoryInterface
     {
         $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
@@ -163,11 +160,7 @@ final class Factory implements FactoryInterface
             throw new TypecastException($class . ' not implement RepositoryInterface');
         }
 
-        return $this->factory->make($class, [
-            'orm' => $orm,
-            'role' => $role,
-            'select' => $select
-        ]);
+        return $this->factory->make($class, ['select' => $select]);
     }
 
     /**
@@ -218,7 +211,7 @@ final class Factory implements FactoryInterface
     {
         $clone = clone $this;
 
-        $clone->defaults = array_merge($this->defaults, $defaults);
+        $clone->defaults = $defaults + $this->defaults;
 
         return $clone;
     }

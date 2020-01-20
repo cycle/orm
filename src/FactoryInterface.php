@@ -56,17 +56,13 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     /**
      * Create repository associated with given role,
      *
-     * @param ORMInterface $orm
      * @param SchemaInterface $schema
      * @param string $role
      * @param Select $select
      * @return RepositoryInterface
      */
     public function repository(
-        ORMInterface $orm,
-        SchemaInterface $schema,
-        string $role,
-        ?Select $select
+        SchemaInterface $schema, string $role, ?Select $select
     ): RepositoryInterface;
 
     /**

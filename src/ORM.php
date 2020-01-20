@@ -268,7 +268,7 @@ final class ORM implements ORMInterface
             $select->constrain($this->getSource($role)->getConstrain());
         }
 
-        return $this->repositories[$role] = $this->factory->repository($this, $this->schema, $role, $select);
+        return $this->repositories[$role] = $this->factory->repository($this->schema, $role, $select);
     }
 
     /**

@@ -20,8 +20,6 @@ use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\Select\Repository;
-use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
 
 /**
@@ -60,7 +58,7 @@ final class ORM implements ORMInterface
     private $sources = [];
 
     /**
-     * @param FactoryInterface     $factory
+     * @param FactoryInterface $factory
      * @param SchemaInterface|null $schema
      */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
@@ -263,16 +261,14 @@ final class ORM implements ORMInterface
             return $this->repositories[$role];
         }
 
-        // todo: alter default repository
-        $repository = $this->getSchema()->define($role, Schema::REPOSITORY) ?? Repository::class;
-        $params = ['orm' => $this, 'role' => $role];
+        $select = null;
 
-        if ($this->getSchema()->define($role, Schema::TABLE) !== null) {
-            $params['select'] = new Select($this, $role);
-            $params['select']->constrain($this->getSource($role)->getConstrain());
+        if ($this->schema->define($role, Schema::TABLE) !== null) {
+            $select = new Select($this, $role);
+            $select->constrain($this->getSource($role)->getConstrain());
         }
 
-        return $this->repositories[$role] = $this->factory->make($repository, $params);
+        return $this->repositories[$role] = $this->factory->repository($this, $this->schema, $role, $select);
     }
 
     /**
@@ -284,25 +280,7 @@ final class ORM implements ORMInterface
             return $this->sources[$role];
         }
 
-        $source = $this->schema->define($role, Schema::SOURCE) ?? Source::class;
-        if ($source !== Source::class) {
-            // custom implementation
-            return $this->factory->make($source, ['orm' => $this, 'role' => $role]);
-        }
-
-        $source = new Source(
-            $this->factory->database($this->schema->define($role, Schema::DATABASE)),
-            (string)$this->schema->define($role, Schema::TABLE)
-        );
-
-        $constrain = $this->schema->define($role, Schema::CONSTRAIN);
-        if ($constrain !== null) {
-            $source = $source->withConstrain(
-                is_object($constrain) ? $constrain : $this->factory->make((string)$constrain)
-            );
-        }
-
-        return $this->sources[$role] = $source;
+        return $this->sources[$role] = $this->factory->source($this, $this->schema, $role);
     }
 
     /**

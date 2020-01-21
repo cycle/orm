@@ -149,6 +149,7 @@ final class Factory implements FactoryInterface
      * @inheritDoc
      */
     public function repository(
+        ORMInterface $orm,
         SchemaInterface $schema,
         string $role,
         ?Select $select
@@ -159,7 +160,7 @@ final class Factory implements FactoryInterface
             throw new TypecastException($class . ' not implement RepositoryInterface');
         }
 
-        return $this->factory->make($class, ['select' => $select]);
+        return $this->factory->make($class, ['select' => $select, 'orm' => $orm]);
     }
 
     /**
@@ -187,12 +188,12 @@ final class Factory implements FactoryInterface
 
         $constrain = $schema->define($role, Schema::CONSTRAIN) ?? $this->defaults[Schema::CONSTRAIN];
 
-        if (!is_subclass_of($constrain, ConstrainInterface::class)) {
-            throw new TypecastException($constrain . ' not implement ConstrainInterface');
-        }
-
         if ($constrain === null) {
             return $source;
+        }
+
+        if (!is_subclass_of($constrain, ConstrainInterface::class)) {
+            throw new TypecastException($constrain . ' not implement ConstrainInterface');
         }
 
         return $source->withConstrain(is_object($constrain) ? $constrain : $this->factory->make($constrain));

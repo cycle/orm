@@ -62,7 +62,9 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * @return RepositoryInterface
      */
     public function repository(
-        SchemaInterface $schema, string $role, ?Select $select
+        SchemaInterface $schema,
+        string $role,
+        ?Select $select
     ): RepositoryInterface;
 
     /**

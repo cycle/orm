@@ -54,8 +54,7 @@ final class Factory implements FactoryInterface
         RelationConfig $config = null,
         CoreFactory $factory = null,
         ContainerInterface $container = null
-    )
-    {
+    ) {
         $this->dbal = $dbal;
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
@@ -71,8 +70,10 @@ final class Factory implements FactoryInterface
     /**
      * @inheritdoc
      */
-    public function make(string $alias, array $parameters = [])
-    {
+    public function make(
+        string $alias,
+        array $parameters = []
+    ) {
         return $this->factory->make($alias, $parameters);
     }
 
@@ -83,8 +84,7 @@ final class Factory implements FactoryInterface
         ORMInterface $orm,
         SchemaInterface $schema,
         string $role
-    ): MapperInterface
-    {
+    ): MapperInterface {
         $class = $schema->define($role, Schema::MAPPER) ?? $this->defaults[Schema::MAPPER];
 
         if (!is_subclass_of($class, MapperInterface::class)) {
@@ -106,8 +106,7 @@ final class Factory implements FactoryInterface
         SchemaInterface $schema,
         string $role,
         string $relation
-    ): LoaderInterface
-    {
+    ): LoaderInterface {
         $schema = $schema->defineRelation($role, $relation);
 
         return $this->config->getLoader($schema[Relation::TYPE])->resolve($this->factory, [
@@ -126,8 +125,7 @@ final class Factory implements FactoryInterface
         SchemaInterface $schema,
         string $role,
         string $relation
-    ): RelationInterface
-    {
+    ): RelationInterface {
         $relSchema = $schema->defineRelation($role, $relation);
         $type = $relSchema[Relation::TYPE];
 
@@ -151,9 +149,10 @@ final class Factory implements FactoryInterface
      * @inheritDoc
      */
     public function repository(
-        SchemaInterface $schema, string $role, ?Select $select
-    ): RepositoryInterface
-    {
+        SchemaInterface $schema,
+        string $role,
+        ?Select $select
+    ): RepositoryInterface {
         $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
 
         if (!is_subclass_of($class, RepositoryInterface::class)) {
@@ -170,8 +169,7 @@ final class Factory implements FactoryInterface
         ORMInterface $orm,
         SchemaInterface $schema,
         string $role
-    ): SourceInterface
-    {
+    ): SourceInterface {
         $source = $schema->define($role, Schema::SOURCE) ?? $this->defaults[Schema::SOURCE];
 
         if (!is_subclass_of($source, SourceInterface::class)) {
@@ -188,18 +186,16 @@ final class Factory implements FactoryInterface
         );
 
         $constrain = $schema->define($role, Schema::CONSTRAIN) ?? $this->defaults[Schema::CONSTRAIN];
-        if ($constrain !== null) {
 
-            if (!is_subclass_of($constrain, ConstrainInterface::class)) {
-                throw new TypecastException($constrain . ' not implement ConstrainInterface');
-            }
-
-            $source = $source->withConstrain(
-                is_object($constrain) ? $constrain : $this->factory->make($constrain)
-            );
+        if (!is_subclass_of($constrain, ConstrainInterface::class)) {
+            throw new TypecastException($constrain . ' not implement ConstrainInterface');
         }
 
-        return $source;
+        if ($constrain === null) {
+            return $source;
+        }
+
+        return $source->withConstrain(is_object($constrain) ? $constrain : $this->factory->make($constrain));
     }
 
     /**

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Cycle\ORM\Tests\Fixtures;
-
 
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\SourceInterface;

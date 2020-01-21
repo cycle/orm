@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Cycle\ORM\Tests;
-
 
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Factory;
@@ -29,7 +27,6 @@ class FactoryTest extends BaseTest
     {
         parent::setUp();
 
-
         $this->orm = $this->withSchema(new Schema([
             User::class => [
                 Schema::ROLE => 'user',
@@ -45,14 +42,14 @@ class FactoryTest extends BaseTest
         $this->factory = new Factory($this->dbal);
     }
 
-    function testShouldMakeDefaultMapper()
+    public function testShouldMakeDefaultMapper()
     {
         $mapper = $this->factory->mapper($this->orm, $this->orm->getSchema(), 'user');
 
         self::assertInstanceOf(Mapper::class, $mapper);
     }
 
-    function testShouldChangeDefaultMapperClass()
+    public function testShouldChangeDefaultMapperClass()
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::MAPPER => TimestampedMapper::class,
@@ -63,7 +60,7 @@ class FactoryTest extends BaseTest
         self::assertInstanceOf(TimestampedMapper::class, $mapper);
     }
 
-    function testShouldThrowExceptionIfDefaultMapperClassNotImplementMapperInterface()
+    public function testShouldThrowExceptionIfDefaultMapperClassNotImplementMapperInterface()
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::MAPPER => User::class,
@@ -74,15 +71,14 @@ class FactoryTest extends BaseTest
         $this->factory->mapper($this->orm, $this->orm->getSchema(), 'user');
     }
 
-
-    function testShouldMakeDefaultRepository()
+    public function testShouldMakeDefaultRepository()
     {
         $result = $this->factory->repository($this->orm->getSchema(), 'user', new Select($this->orm, 'user'));
 
         self::assertInstanceOf(Repository::class, $result);
     }
 
-    function testShouldChangeDefaultRepositoryClass()
+    public function testShouldChangeDefaultRepositoryClass()
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::REPOSITORY => UserRepository::class,
@@ -93,7 +89,7 @@ class FactoryTest extends BaseTest
         self::assertInstanceOf(UserRepository::class, $mapper);
     }
 
-    function testShouldThrowExceptionIfDefaultRepositoryClassNotImplementRepositoryInterface()
+    public function testShouldThrowExceptionIfDefaultRepositoryClassNotImplementRepositoryInterface()
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::REPOSITORY => User::class,
@@ -104,15 +100,14 @@ class FactoryTest extends BaseTest
         $this->factory->repository($this->orm->getSchema(), 'user', new Select($this->orm, 'user'));
     }
 
-
-    function testShouldMakeDefaultSource()
+    public function testShouldMakeDefaultSource()
     {
         $result = $this->factory->source($this->orm, $this->orm->getSchema(), 'user');
 
         self::assertInstanceOf(Source::class, $result);
     }
 
-    function testShouldChangeDefaultSourceClass()
+    public function testShouldChangeDefaultSourceClass()
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::SOURCE => DifferentSource::class,
@@ -123,7 +118,7 @@ class FactoryTest extends BaseTest
         self::assertInstanceOf(DifferentSource::class, $result);
     }
 
-    function testShouldThrowExceptionIfDefaultSourceClassNotImplementSourceInterface()
+    public function testShouldThrowExceptionIfDefaultSourceClassNotImplementSourceInterface()
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::SOURCE => User::class,

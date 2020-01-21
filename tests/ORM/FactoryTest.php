@@ -73,7 +73,11 @@ class FactoryTest extends BaseTest
 
     public function testShouldMakeDefaultRepository()
     {
-        $result = $this->factory->repository($this->orm, $this->orm->getSchema(), 'user', new Select($this->orm, 'user'));
+        $result = $this->factory->repository(
+            $this->orm,
+            $this->orm->getSchema(),
+            'user',
+            new Select($this->orm, 'user'));
 
         self::assertInstanceOf(Repository::class, $result);
     }
@@ -84,9 +88,13 @@ class FactoryTest extends BaseTest
             Schema::REPOSITORY => UserRepository::class,
         ]);
 
-        $mapper = $this->factory->repository($this->orm, $this->orm->getSchema(), 'user', new Select($this->orm, 'user'));
+        $result = $this->factory->repository(
+            $this->orm,
+            $this->orm->getSchema(),
+            'user',
+            new Select($this->orm, 'user'));
 
-        self::assertInstanceOf(UserRepository::class, $mapper);
+        self::assertInstanceOf(UserRepository::class, $result);
     }
 
     public function testShouldThrowExceptionIfDefaultRepositoryClassNotImplementRepositoryInterface()

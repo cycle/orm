@@ -165,7 +165,7 @@ final class Factory implements FactoryInterface
         $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
 
         if (!is_subclass_of($class, RepositoryInterface::class)) {
-            throw new TypecastException($class . ' does not implement ' . MapperInterface::class);
+            throw new TypecastException($class . ' does not implement ' . RepositoryInterface::class);
         }
 
         return $this->factory->make($class, ['select' => $select, 'orm' => $orm]);

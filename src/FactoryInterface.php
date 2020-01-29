@@ -13,6 +13,7 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Database\DatabaseProviderInterface;
 
@@ -24,9 +25,9 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     /**
      * Create mapper associated with given role.
      *
-     * @param ORMInterface    $orm
+     * @param ORMInterface $orm
      * @param SchemaInterface $schema
-     * @param string          $role
+     * @param string $role
      * @return MapperInterface
      */
     public function mapper(
@@ -38,10 +39,10 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     /**
      * Create loader associated with specific entity and relation.
      *
-     * @param ORMInterface    $orm
+     * @param ORMInterface $orm
      * @param SchemaInterface $schema
-     * @param string          $role
-     * @param string          $relation
+     * @param string $role
+     * @param string $relation
      * @return LoaderInterface
      */
     public function loader(
@@ -51,13 +52,44 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $relation
     ): LoaderInterface;
 
+
+    /**
+     * Create repository associated with given role,
+     *
+     * @param ORMInterface $orm
+     * @param SchemaInterface $schema
+     * @param string $role
+     * @param Select $select
+     * @return RepositoryInterface
+     */
+    public function repository(
+        ORMInterface $orm,
+        SchemaInterface $schema,
+        string $role,
+        ?Select $select
+    ): RepositoryInterface;
+
+    /**
+     * Create source associated with given role
+     *
+     * @param ORMInterface $orm
+     * @param SchemaInterface $schema
+     * @param string $role
+     * @return SourceInterface
+     */
+    public function source(
+        ORMInterface $orm,
+        SchemaInterface $schema,
+        string $role
+    ): SourceInterface;
+
     /**
      * Create relation associated with specific entity and relation.
      *
-     * @param ORMInterface    $orm
+     * @param ORMInterface $orm
      * @param SchemaInterface $schema
-     * @param string          $role
-     * @param string          $relation
+     * @param string $role
+     * @param string $relation
      * @return RelationInterface
      */
     public function relation(

@@ -168,7 +168,7 @@ final class Factory implements FactoryInterface
             throw new TypecastException($class . ' does not implement ' . RepositoryInterface::class);
         }
 
-        return $this->factory->make($class, ['select' => $select, 'orm' => $orm]);
+        return $this->factory->make($class, compact('select', 'orm'));
     }
 
     /**

@@ -41,7 +41,12 @@ final class Factory implements FactoryInterface
     private $dbal;
 
     /** @var array<string, string> */
-    private $defaults = [];
+    private $defaults = [
+        Schema::REPOSITORY => Repository::class,
+        Schema::SOURCE     => Source::class,
+        Schema::MAPPER     => Mapper::class,
+        Schema::CONSTRAIN  => null,
+    ];
 
     /**
      * @param DatabaseProviderInterface $dbal
@@ -59,12 +64,6 @@ final class Factory implements FactoryInterface
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
         $this->container = $container ?? new Container();
-        $this->defaults = [
-            Schema::REPOSITORY => Repository::class,
-            Schema::SOURCE     => Source::class,
-            Schema::MAPPER     => Mapper::class,
-            Schema::CONSTRAIN  => null,
-        ];
     }
 
     /**
@@ -88,7 +87,7 @@ final class Factory implements FactoryInterface
         $class = $schema->define($role, Schema::MAPPER) ?? $this->defaults[Schema::MAPPER];
 
         if (!is_subclass_of($class, MapperInterface::class)) {
-            throw new TypecastException($class . ' not implement MapperInterface');
+            throw new TypecastException($class . ' does not implement ' . MapperInterface::class);
         }
 
         return $this->factory->make(
@@ -166,7 +165,7 @@ final class Factory implements FactoryInterface
         $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
 
         if (!is_subclass_of($class, RepositoryInterface::class)) {
-            throw new TypecastException($class . ' not implement RepositoryInterface');
+            throw new TypecastException($class . ' does not implement ' . MapperInterface::class);
         }
 
         return $this->factory->make($class, ['select' => $select, 'orm' => $orm]);
@@ -183,7 +182,7 @@ final class Factory implements FactoryInterface
         $source = $schema->define($role, Schema::SOURCE) ?? $this->defaults[Schema::SOURCE];
 
         if (!is_subclass_of($source, SourceInterface::class)) {
-            throw new TypecastException($source . ' not implement SourceInterface');
+            throw new TypecastException($source . ' does not implement ' . SourceInterface::class);
         }
 
         if ($source !== Source::class) {
@@ -202,7 +201,7 @@ final class Factory implements FactoryInterface
         }
 
         if (!is_subclass_of($constrain, ConstrainInterface::class)) {
-            throw new TypecastException($constrain . ' not implement ConstrainInterface');
+            throw new TypecastException($constrain . ' does not implement ' . ConstrainInterface::class);
         }
 
         return $source->withConstrain(is_object($constrain) ? $constrain : $this->factory->make($constrain));

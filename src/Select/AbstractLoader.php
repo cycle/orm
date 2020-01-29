@@ -197,7 +197,7 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         if ($join) {
-            if (empty($options['method']) || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN])) {
+            if (empty($options['method']) || !in_array($options['method'], [self::JOIN, self::LEFT_JOIN], true)) {
                 // let's tell our loaded that it's method is JOIN (forced)
                 $options['method'] = self::JOIN;
             }

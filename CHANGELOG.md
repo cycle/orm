@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.2.2 (29.01.2020)
+--------------------
+- added the support for custom default sources, repositories and mappers by @mrakolice 
+
 v1.2.1 (16.01.2020)
 --------------------
 - [bugfix] embedded relations data was loaded with parent entity even when not required

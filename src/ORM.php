@@ -58,7 +58,7 @@ final class ORM implements ORMInterface
     private $sources = [];
 
     /**
-     * @param FactoryInterface $factory
+     * @param FactoryInterface     $factory
      * @param SchemaInterface|null $schema
      */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)

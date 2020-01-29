@@ -45,9 +45,9 @@ final class Factory implements FactoryInterface
 
     /**
      * @param DatabaseProviderInterface $dbal
-     * @param RelationConfig $config
-     * @param CoreFactory|null $factory
-     * @param ContainerInterface|null $container
+     * @param RelationConfig            $config
+     * @param CoreFactory|null          $factory
+     * @param ContainerInterface|null   $container
      */
     public function __construct(
         DatabaseProviderInterface $dbal,
@@ -61,9 +61,9 @@ final class Factory implements FactoryInterface
         $this->container = $container ?? new Container();
         $this->defaults = [
             Schema::REPOSITORY => Repository::class,
-            Schema::SOURCE => Source::class,
-            Schema::MAPPER => Mapper::class,
-            Schema::CONSTRAIN => null,
+            Schema::SOURCE     => Source::class,
+            Schema::MAPPER     => Mapper::class,
+            Schema::CONSTRAIN  => null,
         ];
     }
 
@@ -91,11 +91,14 @@ final class Factory implements FactoryInterface
             throw new TypecastException($class . ' not implement MapperInterface');
         }
 
-        return $this->factory->make($class, [
-            'orm' => $orm,
-            'role' => $role,
-            'schema' => $schema->define($role, Schema::SCHEMA)
-        ]);
+        return $this->factory->make(
+            $class,
+            [
+                'orm'    => $orm,
+                'role'   => $role,
+                'schema' => $schema->define($role, Schema::SCHEMA)
+            ]
+        );
     }
 
     /**
@@ -109,12 +112,15 @@ final class Factory implements FactoryInterface
     ): LoaderInterface {
         $schema = $schema->defineRelation($role, $relation);
 
-        return $this->config->getLoader($schema[Relation::TYPE])->resolve($this->factory, [
-            'orm' => $orm,
-            'name' => $relation,
-            'target' => $schema[Relation::TARGET],
-            'schema' => $schema[Relation::SCHEMA]
-        ]);
+        return $this->config->getLoader($schema[Relation::TYPE])->resolve(
+            $this->factory,
+            [
+                'orm'    => $orm,
+                'name'   => $relation,
+                'target' => $schema[Relation::TARGET],
+                'schema' => $schema[Relation::SCHEMA]
+            ]
+        );
     }
 
     /**
@@ -129,12 +135,15 @@ final class Factory implements FactoryInterface
         $relSchema = $schema->defineRelation($role, $relation);
         $type = $relSchema[Relation::TYPE];
 
-        return $this->config->getRelation($type)->resolve($this->factory, [
-            'orm' => $orm,
-            'name' => $relation,
-            'target' => $relSchema[Relation::TARGET],
-            'schema' => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
-        ]);
+        return $this->config->getRelation($type)->resolve(
+            $this->factory,
+            [
+                'orm'    => $orm,
+                'name'   => $relation,
+                'target' => $relSchema[Relation::TARGET],
+                'schema' => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
+            ]
+        );
     }
 
     /**
@@ -201,6 +210,7 @@ final class Factory implements FactoryInterface
 
     /**
      * Add default classes for resolve
+     *
      * @param array $defaults
      * @return FactoryInterface
      */

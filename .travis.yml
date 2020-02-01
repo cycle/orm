@@ -32,7 +32,7 @@ jobs:
   include:
     # Testing various PostgresSQL version
     - stage: Test
-      php: 7.4snapshot
+      php: 7.4
       before_install:
         - echo "Testing SQLite on 7.4"
       script:

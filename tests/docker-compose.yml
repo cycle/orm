@@ -20,18 +20,8 @@ services:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_ROOT_HOST: "%"
 
-  mysql_55:
-    image: mysql:5.5
-    restart: 'always'
-    ports:
-      - "13305:3306"
-    environment:
-      MYSQL_DATABASE: "spiral"
-      MYSQL_ROOT_PASSWORD: "root"
-      MYSQL_ROOT_HOST: "%"
-
   postgres:
-    image: postgres:11
+    image: postgres:12
     restart: always
     ports:
       - "15432:5432"

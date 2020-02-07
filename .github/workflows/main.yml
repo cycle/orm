@@ -1,0 +1,155 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Check coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Restore Composer Cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+      - name: Install Dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Check CS
+        run: vendor/bin/spiral-cs check src tests
+  test:
+    needs: lint
+    name: Test PHP ${{ matrix.php-versions }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['7.2', '7.3', '7.4']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup DB services
+        run: |
+          cd tests
+          docker-compose up -d
+          cd ..
+      - name: Setup PHP ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v1
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: pcov
+          tools: pecl
+          extensions: mbstring, pdo, pdo_sqlsrv
+      - name: Install MS SQL Server deps
+        run: |
+          bash ./tests/install-sqlsrv.sh
+          sudo sed -i.bak '/^extension="pdo_sqlsrv.so"/d' /etc/php/${{ matrix.php-versions }}/cli/php.ini
+          sudo bash -c 'printf "; priority=30\nextension=pdo_sqlsrv.so\n" > /etc/php/${{ matrix.php-versions }}/mods-available/pdo_sqlsrv.ini'
+          sudo phpenmod -s cli -v ${{ matrix.php-versions }} pdo_sqlsrv
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Restore Composer Cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+      - name: Install Dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Execute Tests
+        run: |
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+  test_postgres:
+    needs: lint
+    name: Test PostgreSQL ${{ matrix.configs.postgres-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configs: [
+        {php-version: 7.2, postgres-version: 9.6},
+        {php-version: 7.3, postgres-version: 10},
+        {php-version: 7.3, postgres-version: 11}
+        ]
+    services:
+      postgres:
+        image: postgres:${{ matrix.configs.postgres-version }}
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: spiral
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP ${{ matrix.configs.php-version }}
+        run: sudo update-alternatives --set php /usr/bin/php${{ matrix.configs.php-version }}
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Restore Composer Cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+      - name: Install Dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Execute Tests
+        env:
+          DB: postgres
+          POSTGRES: ${{ matrix.configs.postgres-version }}
+        run: |
+          vendor/bin/phpunit tests/ORM/Driver/Postgres
+  test_mariadb:
+    needs: lint
+    name: Test MariaDB ${{ matrix.configs.mariadb-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configs: [
+          #          {php-version: 7.2, mariadb-version: 10.2},
+        {php-version: 7.3, mariadb-version: 10.4}
+        ]
+    services:
+      mariadb:
+        image: mariadb:${{ matrix.configs.mariadb-version }}
+        ports:
+          - 23306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: spiral
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP ${{ matrix.configs.php-version }}
+        run: sudo update-alternatives --set php /usr/bin/php${{ matrix.configs.php-version }}
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Restore Composer Cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+      - name: Install Dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Execute Tests
+        env:
+          DB: mariadb
+          MARIADB: ${{ matrix.configs.mariadb-version }}
+        run: |
+          vendor/bin/phpunit tests/ORM/Driver/MySQL

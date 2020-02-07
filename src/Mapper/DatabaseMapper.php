@@ -107,7 +107,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getDatabase(),
             $this->source->getTable(),
             $this->mapColumns($columns),
-            $this->primaryKey
+            $this->primaryColumn
         );
 
         if (!array_key_exists($this->primaryKey, $columns)) {

@@ -1,5 +1,12 @@
 # CHANGELOG 
 
+v1.2.3 (07.02.2020)
+--------------------
+- bumped PHPUnit version to 8
+- removed Travis tests
+- added GitHub Actions
+- suppressed PK introspection on Postgres insert queries 
+
 v1.2.2 (29.01.2020)
 --------------------
 - added the support for custom default sources, repositories and mappers by @mrakolice 

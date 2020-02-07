@@ -19,6 +19,7 @@ use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Exception\CommandException;
 use Spiral\Database\DatabaseInterface;
+use Spiral\Database\Driver\Postgres\Query\PostgresInsertQuery;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
@@ -34,6 +35,9 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     /** @var array */
     protected $data;
 
+    /** @var string|null */
+    protected $primaryKey;
+
     /** @var ConsumerInterface[] */
     protected $consumers = [];
 
@@ -41,11 +45,17 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      * @param DatabaseInterface $db
      * @param string            $table
      * @param array             $data
+     * @param string|null       $primaryKey
      */
-    public function __construct(DatabaseInterface $db, string $table, array $data = [], callable $generateID = null)
-    {
+    public function __construct(
+        DatabaseInterface $db,
+        string $table,
+        array $data = [],
+        string $primaryKey = null
+    ) {
         parent::__construct($db, $table);
         $this->data = $data;
+        $this->primaryKey = $primaryKey;
     }
 
     /**
@@ -103,7 +113,13 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     public function execute(): void
     {
         $data = $this->getData();
-        $insertID = $this->db->insert($this->table)->values($data)->run();
+
+        $insert = $this->db->insert($this->table)->values($data);
+        if ($this->primaryKey !== null && $insert instanceof PostgresInsertQuery) {
+            $insert->returning($this->primaryKey);
+        }
+
+        $insertID = $insert->run();
 
         foreach ($this->consumers as $key => $consumers) {
             $fresh = true;

@@ -17,12 +17,12 @@ Features:
 ---------
 - clean and fast Data Mapper
 - ORM with has-one, has-many, many-through-many and polymorphic relations
-- Plain Old PHP objects, [AR](https://github.com/cycle/docs/blob/master/advanced/active-record.md), Custom objects or [same entity type for multiple repositories](tests/ORM/Classless)
+- Plain Old PHP objects, [ActiveRecord](https://github.com/cycle/docs/blob/master/advanced/active-record.md), Custom objects or [same entity type for multiple repositories](tests/ORM/Classless)
 - eager and lazy loading, query builder with multiple fetch strategies
 - embedded entities, lazy/eager loaded embedded partials
 - runtime configuration with/without code-generation
 - column-to-field mapping, single table inheritance, value objects support
-- custom persist strategies, dirty state, safe entity map
+- hackable: persist strategies, mappers, relations, transactions
 - works with directed graphs and cyclic graphs using command chains
 - designed to work in long-running applications, immutable service core
 - supports MySQL, MariaDB, PostgresSQL, SQLServer, SQLite

@@ -85,7 +85,7 @@ class HasOne extends AbstractRelation
     {
         $rNode = $this->getNode($original);
 
-        if (!$this->isNotNullable()) {
+        if ($this->isNullable()) {
             $store = $this->orm->queueStore($original);
             $store->register($this->outerKey, null, true);
             $rNode->getState()->decClaim();

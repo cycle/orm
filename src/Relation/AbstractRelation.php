@@ -105,17 +105,15 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
-     * Indicates that relation can not be nullable.
-     *
-     * @return bool
+     * @inheritDoc
      */
-    protected function isNotNullable(): bool
+    protected function isNullable(): bool
     {
         if (array_key_exists(Relation::NULLABLE, $this->schema)) {
-            return !$this->schema[Relation::NULLABLE];
+            return $this->schema[Relation::NULLABLE];
         }
 
-        return true;
+        return false;
     }
 
     /**

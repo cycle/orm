@@ -24,12 +24,11 @@ trait ContextTrait
 {
 
     /**
-     * True is given relation is required for the object to be saved (i.e. NOT NULL).
+     * True if given relation is not required for the object to be saved (i.e. NULL).
      *
-     * @todo rename to isNullable and inverse the logic
      * @return bool
      */
-    abstract public function isNotNullable(): bool;
+    abstract public function isNullable(): bool;
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
@@ -45,7 +44,7 @@ trait ContextTrait
         $toColumn = $this->columnName($to, $toKey);
 
         // do not execute until the key is given
-        $carrier->waitContext($toColumn, $this->isNotNullable());
+        $carrier->waitContext($toColumn, !$this->isNullable());
 
         // forward key from state to the command (on change)
         $to->forward($toKey, $carrier, $toColumn);

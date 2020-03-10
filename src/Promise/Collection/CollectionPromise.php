@@ -42,14 +42,6 @@ class CollectionPromise extends AbstractLazyCollection implements CollectionProm
     }
 
     /**
-     * @inheritdoc
-     */
-    protected function doInitialize(): void
-    {
-        $this->collection = new ArrayCollection($this->promise->__resolve());
-    }
-
-    /**
      * @inheritDoc
      */
     public function matching(Criteria $criteria)
@@ -57,5 +49,13 @@ class CollectionPromise extends AbstractLazyCollection implements CollectionProm
         $this->initialize();
 
         return $this->collection->matching($criteria);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function doInitialize(): void
+    {
+        $this->collection = new ArrayCollection($this->promise->__resolve());
     }
 }

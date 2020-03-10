@@ -1,5 +1,11 @@
 # CHANGELOG 
 
+v1.2.4 (10.03.2020)
+--------------------
+- minor performance optimizations
+- all collection promises are Selectable
+- reverted notNull relation logic by @mishfish
+
 v1.2.3 (07.02.2020)
 --------------------
 - bumped PHPUnit version to 8

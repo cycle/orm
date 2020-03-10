@@ -73,7 +73,8 @@ final class Heap implements HeapInterface, IteratorAggregate
     public function find(string $role, array $scope)
     {
         if (count($scope) === 1) {
-            return $this->paths[$role][key($scope)][current($scope)] ?? null;
+            $key = key($scope);
+            return $this->paths[$role][key($scope)][$scope[$key]] ?? null;
         }
 
         $key = $value = '';

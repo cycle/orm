@@ -14,13 +14,16 @@ namespace Cycle\ORM\Relation\Pivoted;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Doctrine\Common\Collections\AbstractLazyCollection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Selectable;
 
 /**
  * Collection at top of pivoted (entity + context entity) promise.
  */
 final class PivotedCollectionPromise extends AbstractLazyCollection implements
     CollectionPromiseInterface,
-    PivotedCollectionInterface
+    PivotedCollectionInterface,
+    Selectable
 {
     /** @var PivotedPromise */
     protected $promise;
@@ -78,6 +81,16 @@ final class PivotedCollectionPromise extends AbstractLazyCollection implements
     {
         $this->initialize();
         return $this->collection->getPivotContext();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function matching(Criteria $criteria)
+    {
+        $this->initialize();
+
+        return $this->collection->matching($criteria);
     }
 
     /**

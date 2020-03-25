@@ -287,6 +287,10 @@ abstract class AbstractNode
     protected function mount(string $container, string $key, $criteria, array &$data): void
     {
         if ($criteria === self::LAST_REFERENCE) {
+            if ($this->references[$key] === null) {
+                return;
+            }
+
             end($this->references[$key]);
             $criteria = key($this->references[$key]);
         }

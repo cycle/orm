@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.2.5 (25.03.2020)
+--------------------
+- do not load embedded object when parent not loaded
+
 v1.2.4 (10.03.2020)
 --------------------
 - minor performance optimizations

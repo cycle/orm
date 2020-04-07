@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.2.6 (07.04.2020)
+--------------------
+- `zendframework/zend-hydrator` replaced with `laminas/laminas-hydrator`
+
 v1.2.5 (25.03.2020)
 --------------------
 - do not load embedded object when parent not loaded

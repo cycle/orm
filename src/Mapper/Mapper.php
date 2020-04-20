@@ -48,7 +48,7 @@ class Mapper extends DatabaseMapper
         $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
 
-        $this->hydrator = class_exists('Laminas\Hydrator\ReflectionHydrator') 
+        $this->hydrator = class_exists('Laminas\Hydrator\ReflectionHydrator')
             ? new Hydrator\ReflectionHydrator()
             : new Hydrator\Reflection();
 

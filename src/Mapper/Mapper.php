@@ -14,7 +14,7 @@ namespace Cycle\ORM\Mapper;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
 use Doctrine\Instantiator;
-use Zend\Hydrator;
+use Laminas\Hydrator;
 
 /**
  * Provide the ability to carry data over the specific class instances. Supports table inheritance using
@@ -48,11 +48,9 @@ class Mapper extends DatabaseMapper
         $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
 
-        if (class_exists('Zend\Hydrator\ReflectionHydrator')) {
-            $this->hydrator = new Hydrator\ReflectionHydrator();
-        } else {
-            $this->hydrator = new Hydrator\Reflection();
-        }
+        $this->hydrator = class_exists('Laminas\Hydrator\ReflectionHydrator')
+            ? new Hydrator\ReflectionHydrator()
+            : new Hydrator\Reflection();
 
         $this->instantiator = new Instantiator\Instantiator();
     }

@@ -109,11 +109,7 @@ abstract class AbstractRelation implements RelationInterface
      */
     protected function isNullable(): bool
     {
-        if (array_key_exists(Relation::NULLABLE, $this->schema)) {
-            return $this->schema[Relation::NULLABLE];
-        }
-
-        return false;
+        return !empty($this->schema[Relation::NULLABLE]);
     }
 
     /**

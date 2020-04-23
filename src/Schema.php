@@ -67,7 +67,7 @@ final class Schema implements SchemaInterface
      */
     public function defines(string $role): bool
     {
-        return array_key_exists($role, $this->schema) || array_key_exists($role, $this->aliases);
+        return isset($this->schema[$role]) || isset($this->aliases[$role]);
     }
 
     /**

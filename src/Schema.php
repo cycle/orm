@@ -81,11 +81,7 @@ final class Schema implements SchemaInterface
             throw new SchemaException("Undefined schema `{$role}`, not found");
         }
 
-        if (!array_key_exists($property, $this->schema[$role])) {
-            return null;
-        }
-
-        return $this->schema[$role][$property];
+        return $this->schema[$role][$property] ?? null;
     }
 
     /**

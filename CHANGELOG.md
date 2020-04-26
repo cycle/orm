@@ -1,5 +1,10 @@
 # CHANGELOG 
 
+v1.2.7 (26.04.2020)
+--------------------
+- a number of performance optimizations by @pine3ree
+- laminas hydrators used directly by @pine3ree
+
 v1.2.6 (07.04.2020)
 --------------------
 - `zendframework/zend-hydrator` replaced with `laminas/laminas-hydrator`

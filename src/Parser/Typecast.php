@@ -41,7 +41,7 @@ final class Typecast implements TypecastInterface
     {
         try {
             foreach ($this->rules as $key => $rule) {
-                if (!array_key_exists($key, $values) || $values[$key] === null) {
+                if (!isset($values[$key])) {
                     continue;
                 }
 

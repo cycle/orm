@@ -67,7 +67,7 @@ final class Schema implements SchemaInterface
      */
     public function defines(string $role): bool
     {
-        return array_key_exists($role, $this->schema) || array_key_exists($role, $this->aliases);
+        return isset($this->schema[$role]) || isset($this->aliases[$role]);
     }
 
     /**
@@ -81,11 +81,7 @@ final class Schema implements SchemaInterface
             throw new SchemaException("Undefined schema `{$role}`, not found");
         }
 
-        if (!array_key_exists($property, $this->schema[$role])) {
-            return null;
-        }
-
-        return $this->schema[$role][$property];
+        return $this->schema[$role][$property] ?? null;
     }
 
     /**

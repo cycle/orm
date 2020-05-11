@@ -11,20 +11,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use Cycle\ORM\Heap\Heap;
-use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 
 abstract class HasManyLoadingTest extends BaseTest
 {

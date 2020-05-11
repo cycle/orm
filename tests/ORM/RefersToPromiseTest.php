@@ -136,7 +136,7 @@ abstract class RefersToPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
-        list($a, $b, $c) = $selector->fetchAll();
+        [$a, $b, $c] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->user);
         $this->assertInstanceOf(PromiseInterface::class, $b->user);
@@ -157,7 +157,7 @@ abstract class RefersToPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
-        list($a, $b, $c) = $selector->fetchAll();
+        [$a, $b, $c] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->user);
         $this->assertInstanceOf(PromiseInterface::class, $b->user);

@@ -27,6 +27,7 @@ trait ChainTrait
         bool $join = false,
         bool $load = false
     ): LoaderInterface;
+
     /**
      * Check if given relation points to the relation chain.
      *
@@ -39,15 +40,15 @@ trait ChainTrait
     }
 
     /**
-     * @see loadRelation()
-     * @see joinRelation()
-     *
      * @param string $chain
      * @param array  $options Final loader options.
      * @param bool   $join    See loadRelation().
      * @return LoaderInterface
      *
      * @throws LoaderException When one of the elements can not be chained.
+     * @see joinRelation()
+     *
+     * @see loadRelation()
      */
     protected function loadChain(string $chain, array $options, bool $join, bool $load): LoaderInterface
     {

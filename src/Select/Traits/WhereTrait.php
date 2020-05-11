@@ -22,9 +22,9 @@ trait WhereTrait
 {
     /**
      * @param SelectQuery   $query
-     * @param string        $table Table name to be automatically inserted into where conditions at place of {@}.
+     * @param string        $table  Table name to be automatically inserted into where conditions at place of {@}.
      * @param string        $target Query target section (accepts: where, having, onWhere, on)
-     * @param array|Closure $where Where conditions in a form or short array form.
+     * @param array|Closure $where  Where conditions in a form or short array form.
      * @return SelectQuery
      */
     private function setWhere(SelectQuery $query, string $table, string $target, $where = null): SelectQuery

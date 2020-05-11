@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -207,7 +208,7 @@ abstract class BelongsToRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user', ['method' => Select\JoinableLoader::INLOAD])
-            ->orderBy('profile.id');
+                 ->orderBy('profile.id');
 
         $this->assertEquals([
             [
@@ -402,10 +403,10 @@ abstract class BelongsToRelationTest extends BaseTest
     public function testExchangeParents(): void
     {
         $s = new Select($this->orm, Profile::class);
-        list($a, $b) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-            ->load('user')->fetchAll();
+        [$a, $b] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
+                     ->load('user')->fetchAll();
 
-        list($a->user, $b->user) = [$b->user, $a->user];
+        [$a->user, $b->user] = [$b->user, $a->user];
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -422,18 +423,17 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
-        list($a2, $b2) = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-            ->load('user')->fetchAll();
+        [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
+                       ->load('user')->fetchAll();
 
         $this->assertSame($a->user->id, $a2->user->id);
         $this->assertSame($b->user->id, $b2->user->id);
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\Relation\NullException
-     */
     public function testSetNullException(): void
     {
+        $this->expectException(NullException::class);
+
         $s = new Select($this->orm, Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
@@ -568,8 +568,8 @@ abstract class BelongsToRelationTest extends BaseTest
     {
         $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s->with('profile.user')
-            ->where('profile.user.id', 1)
-            ->fetchOne();
+               ->where('profile.user.id', 1)
+               ->fetchOne();
 
         $this->assertSame('nested-label', $n->label);
     }

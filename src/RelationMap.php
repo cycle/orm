@@ -64,7 +64,7 @@ final class RelationMap
                     continue;
                 }
 
-                list($data[$name], $orig) = $relation->initPromise($node);
+                [$data[$name], $orig] = $relation->initPromise($node);
                 $node->setRelation($name, $orig);
                 continue;
             }
@@ -77,7 +77,7 @@ final class RelationMap
             }
 
             // init relation for the entity and for state and the same time
-            list($data[$name], $orig) = $relation->init($node, $item);
+            [$data[$name], $orig] = $relation->init($node, $item);
             $node->setRelation($name, $orig);
         }
 
@@ -110,7 +110,7 @@ final class RelationMap
                 }
 
                 // init relation for the entity and for state and the same time
-                list($merged[$name], $orig) = $relation->init($node, $item);
+                [$merged[$name], $orig] = $relation->init($node, $item);
                 $node->setRelation($name, $orig);
             }
         }

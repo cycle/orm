@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Tests\Util\TableRenderer as Renderer;
 use Spiral\Database\Schema\AbstractTable;
 
@@ -196,11 +197,10 @@ abstract class TableRendererTest extends BaseTest
         $this->assertFalse($column->isNullable());
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\SchemaException
-     */
     public function testRenderBadDeclaration(): void
     {
+        $this->expectException(SchemaException::class);
+
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
 
@@ -213,11 +213,10 @@ abstract class TableRendererTest extends BaseTest
         );
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\SchemaException
-     */
     public function testRenderBadDeclaration2(): void
     {
+        $this->expectException(SchemaException::class);
+
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
 
@@ -230,11 +229,10 @@ abstract class TableRendererTest extends BaseTest
         );
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\SchemaException
-     */
     public function testRenderBadDeclaration3(): void
     {
+        $this->expectException(SchemaException::class);
+
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
 

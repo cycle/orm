@@ -160,7 +160,7 @@ abstract class HasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->profile);
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);
@@ -180,7 +180,7 @@ abstract class HasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->profile);
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);
@@ -194,7 +194,7 @@ abstract class HasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->profile);
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);
@@ -206,7 +206,7 @@ abstract class HasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->profile);
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);
@@ -220,7 +220,7 @@ abstract class HasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->profile);
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);
@@ -255,7 +255,7 @@ abstract class HasOnePromiseTest extends BaseTest
     public function testRemoveAssignment(): void
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('id')->fetchAll();
+        [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $a->profile = null;
 
@@ -274,7 +274,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('id')->fetchAll();
+        [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $this->assertNull($a->profile->__resolve());
         $this->assertNull($b->profile->__resolve());
@@ -283,7 +283,7 @@ abstract class HasOnePromiseTest extends BaseTest
     public function testMoveToAnotherUser(): void
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('id')->fetchAll();
+        [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $b->profile = $a->profile;
         $a->profile = null;
@@ -304,7 +304,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('user.id')->load('profile')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
         $this->assertNull($a->profile);
         $this->assertEquals(1, $b->profile->id);
@@ -313,7 +313,7 @@ abstract class HasOnePromiseTest extends BaseTest
     public function testMoveToAnotherUserPartial(): void
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('id')->fetchAll();
+        [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $b->profile = $a->profile;
         $a->profile = null;
@@ -333,7 +333,7 @@ abstract class HasOnePromiseTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->orderBy('user.id')->load('profile')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
         $this->assertNull($a->profile);
         $this->assertEquals(1, $b->profile->id);

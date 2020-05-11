@@ -426,13 +426,13 @@ abstract class HasOneRelationTest extends BaseTest
     public function testMoveToAnotherEntity(): void
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
         $this->assertNotNull($a->profile);
         $this->assertNull($b->profile);
 
         $p = $a->profile;
-        list($b->profile, $a->profile) = [$a->profile, null];
+        [$b->profile, $a->profile] = [$a->profile, null];
 
         $tr = new Transaction($this->orm);
         $tr->persist($a);
@@ -442,7 +442,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($b->profile));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
         $this->assertNull($a->profile);
         $this->assertNotNull($b->profile);
@@ -452,7 +452,7 @@ abstract class HasOneRelationTest extends BaseTest
     public function testExchange(): void
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
         $b->profile = new Profile();
         $b->profile->image = 'secondary.gif';
@@ -465,11 +465,11 @@ abstract class HasOneRelationTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
         $this->assertSame('image.png', $a->profile->image);
         $this->assertSame('secondary.gif', $b->profile->image);
 
-        list($a->profile, $b->profile) = [$b->profile, $a->profile];
+        [$a->profile, $b->profile] = [$b->profile, $a->profile];
 
         $tr = new Transaction($this->orm);
         $tr->persist($a);
@@ -480,7 +480,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
-        list($a, $b) = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
         $this->assertSame('image.png', $b->profile->image);
         $this->assertSame('secondary.gif', $a->profile->image);
     }
@@ -666,7 +666,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('new', $u2->profile->image);
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
-            ->select()->load('profile')->wherePK(1)->fetchOne();
+                        ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('image.png', $u3->profile->image);
 
@@ -675,7 +675,7 @@ abstract class HasOneRelationTest extends BaseTest
         $t->run();
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
-            ->select()->load('profile')->wherePK(1)->fetchOne();
+                        ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('new', $u4->profile->image);
     }
@@ -691,14 +691,14 @@ abstract class HasOneRelationTest extends BaseTest
 
         // relation is already set prior to loading
         $u2 = $this->orm->getRepository(User::class)
-            ->select()
-            ->load('profile')
-            ->wherePK(1)->fetchOne();
+                        ->select()
+                        ->load('profile')
+                        ->wherePK(1)->fetchOne();
 
         $this->assertSame('new', $u2->profile->image);
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
-            ->select()->load('profile')->wherePK(1)->fetchOne();
+                        ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('image.png', $u3->profile->image);
 
@@ -707,7 +707,7 @@ abstract class HasOneRelationTest extends BaseTest
         $t->run();
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
-            ->select()->load('profile')->wherePK(1)->fetchOne();
+                        ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('new', $u4->profile->image);
     }

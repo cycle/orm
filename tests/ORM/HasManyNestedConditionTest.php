@@ -249,8 +249,8 @@ abstract class HasManyNestedConditionTest extends BaseTest
         $users->load('posts', [
             'where' => function (Select\QueryBuilder $qb): void {
                 $qb->distinct()
-                    ->with('comments', ['method' => Select\JoinableLoader::LEFT_JOIN])
-                    ->where('comments.id', '=', null);
+                   ->with('comments', ['method' => Select\JoinableLoader::LEFT_JOIN])
+                   ->where('comments.id', '=', null);
             }
         ])->orderBy('user.id');
 
@@ -289,11 +289,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
         $users->load('posts', [
             'where' => function (Select\QueryBuilder $qb): void {
                 $qb->distinct()
-                    ->where(
-                        'comments.user_id',
-                        '=',
-                        new Expression($qb->resolve('user_id'))
-                    );
+                   ->where(
+                       'comments.user_id',
+                       '=',
+                       new Expression($qb->resolve('user_id'))
+                   );
             }
         ])->orderBy('user.id');
 

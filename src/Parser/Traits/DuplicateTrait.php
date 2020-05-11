@@ -46,7 +46,7 @@ trait DuplicateTrait
             return true;
         }
 
-        $criteria = (string)$data[$this->duplicateCriteria];
+        $criteria = (string) $data[$this->duplicateCriteria];
 
         if (isset($this->duplicates[$criteria])) {
             // duplicate is presented, let's reduplicate

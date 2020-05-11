@@ -172,7 +172,7 @@ final class Factory implements FactoryInterface
             $class,
             [
                 'select' => $select,
-                'orm' => $orm,
+                'orm'    => $orm,
                 'role'   => $role,
             ]
         );

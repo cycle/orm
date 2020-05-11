@@ -22,7 +22,6 @@ use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Doctrine\Common\Collections\ArrayCollection;
 
 abstract class ClasslessHasManyPromiseTest extends BaseTest
 {
@@ -163,7 +162,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         /** @var PromiseInterface $p */
         $this->assertFalse($p->__loaded());
-        $this->assertInternalType('array', $p->__resolve());
+        $this->assertIsArray($p->__resolve());
         $this->assertTrue($p->__loaded());
     }
 
@@ -288,7 +287,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, 'user');
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -320,7 +319,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'user');
 
-        list($a, $b) = $selector->load('comments', [
+        [$a, $b] = $selector->load('comments', [
             'method' => Select\JoinableLoader::INLOAD,
             'as'     => 'comment'
         ])->orderBy('user.id')->fetchAll();

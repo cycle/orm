@@ -156,7 +156,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(Collection::class, $a->comments);
         $this->assertInstanceOf(Collection::class, $b->comments);
@@ -173,7 +173,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -187,7 +187,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $a->comments->remove(0);
 
@@ -209,7 +209,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -223,7 +223,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
          */
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $b->comments = $a->comments->slice(0, 1);
         foreach ($b->comments as $c) {
@@ -248,7 +248,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(1, $b->comments);

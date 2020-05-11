@@ -153,7 +153,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->image);
         $this->assertInstanceOf(PromiseInterface::class, $b->image);
@@ -168,7 +168,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -182,7 +182,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $a->image = null;
 
@@ -203,7 +203,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->image);
         $this->assertSame('user-2-image.png', $b->image->__resolve()->url);
@@ -213,9 +213,9 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
-        list($a->image, $b->image) = [$b->image, $a->image];
+        [$a->image, $b->image] = [$b->image, $a->image];
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
@@ -239,7 +239,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertSame('user-image.png', $b->image->__resolve()->url);
         $this->assertSame('user-2-image.png', $a->image->__resolve()->url);
@@ -338,7 +338,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
-        list($u->image, $p->image) = [$p->image, $u->image];
+        [$u->image, $p->image] = [$p->image, $u->image];
 
         $this->captureReadQueries();
         $this->captureWriteQueries();

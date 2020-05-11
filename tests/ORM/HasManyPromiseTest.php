@@ -163,7 +163,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
         /** @var PromiseInterface $p */
         $this->assertFalse($p->__loaded());
-        $this->assertInternalType('array', $p->__resolve());
+        $this->assertIsArray($p->__resolve());
         $this->assertTrue($p->__loaded());
     }
 
@@ -296,7 +296,7 @@ abstract class HasManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -332,7 +332,7 @@ abstract class HasManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('comments', [
+        [$a, $b] = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
             'as'     => 'comment'
         ])->orderBy('user.id')->fetchAll();

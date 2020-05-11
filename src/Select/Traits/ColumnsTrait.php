@@ -33,9 +33,9 @@ trait ColumnsTrait
      * Set columns into SelectQuery.
      *
      * @param SelectQuery $query
-     * @param bool        $minify Minify column names (will work in case when query parsed in
+     * @param bool        $minify    Minify column names (will work in case when query parsed in
      *                               FETCH_NUM mode).
-     * @param string      $prefix Prefix to be added for each column name.
+     * @param string      $prefix    Prefix to be added for each column name.
      * @param bool        $overwrite When set to true existed columns will be removed.
      * @return SelectQuery
      */

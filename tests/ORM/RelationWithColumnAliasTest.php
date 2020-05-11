@@ -319,7 +319,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('comments')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('comments')->orderBy('user.id')->fetchAll();
 
         $this->assertInstanceOf(Collection::class, $a->comments);
         $this->assertInstanceOf(Collection::class, $b->comments);
@@ -367,7 +367,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('comments')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('comments')->orderBy('user.id')->fetchAll();
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -511,7 +511,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('comments')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('comments')->orderBy('user.id')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -547,7 +547,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('comments', [
+        [$a, $b] = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
             'as'     => 'comment'
         ])->orderBy('user.id_int')->fetchAll();

@@ -29,8 +29,8 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
 
     /**
      * @param DatabaseInterface $db
-     * @param string $table
-     * @param array $data
+     * @param string            $table
+     * @param array             $data
      */
     public function __construct(DatabaseInterface $db, string $table, array $data = [], callable $generateID = null)
     {

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Parser;
 
+use Cycle\ORM\Exception\ParserException;
 use Cycle\ORM\Parser\ArrayNode;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\SingularNode;
@@ -140,11 +141,10 @@ class NodeTest extends TestCase
         $this->assertSame([1, 2, 3], $child->getReferences());
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\ParserException
-     */
     public function testGetReferencesWithoutParent(): void
     {
+        $this->expectException(ParserException::class);
+
         $child = new SingularNode(
             ['id', 'user_id', 'balance'],
             'id',
@@ -211,11 +211,11 @@ class NodeTest extends TestCase
         ], $node->getResult());
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\ParserException
-     */
+
     public function testSingularInvalidReference(): void
     {
+        $this->expectException(ParserException::class);
+
         $node = new RootNode(['id', 'email'], 'id');
         $node->linkNode('balance', $child = new SingularNode(
             ['id', 'user_id', 'balance'],
@@ -244,11 +244,10 @@ class NodeTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\ParserException
-     */
     public function testInvalidColumnCount(): void
     {
+        $this->expectException(ParserException::class);
+
         $node = new RootNode(['id', 'email'], 'id');
         $node->joinNode('balance', new SingularNode(
             ['id', 'user_id', 'balance'],
@@ -281,20 +280,19 @@ class NodeTest extends TestCase
         $this->assertInstanceOf(SingularNode::class, $node->getNode('balance'));
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\ParserException
-     */
+
     public function testGetUndefinedNode(): void
     {
+        $this->expectException(ParserException::class);
+
         $node = new RootNode(['id', 'email'], 'id');
         $node->getNode('balance');
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\ParserException
-     */
     public function testSingularParseWithoutParent(): void
     {
+        $this->expectException(ParserException::class);
+
         $node = new SingularNode(
             ['id', 'user_id', 'balance'],
             'id',
@@ -363,12 +361,10 @@ class NodeTest extends TestCase
         ], $node->getResult());
     }
 
-
-    /**
-     * @expectedException \Cycle\ORM\Exception\ParserException
-     */
     public function testArrayInvalidReference(): void
     {
+        $this->expectException(ParserException::class);
+
         $node = new RootNode(['id', 'email'], 'id');
         $node->linkNode('balance', $child = new ArrayNode(
             ['id', 'user_id', 'balance'],
@@ -397,11 +393,10 @@ class NodeTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\ParserException
-     */
     public function testArrayWithoutParent(): void
     {
+        $this->expectException(ParserException::class);
+
         $node = new ArrayNode(
             ['id', 'user_id', 'balance'],
             'id',

@@ -139,7 +139,7 @@ abstract class BelongsToReferenceTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
-        list($a, $b, $c) = $selector->fetchAll();
+        [$a, $b, $c] = $selector->fetchAll();
 
         $this->assertInstanceOf(ReferenceInterface::class, $a->user);
         $this->assertInstanceOf(ReferenceInterface::class, $b->user);

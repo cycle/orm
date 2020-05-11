@@ -162,7 +162,7 @@ abstract class HasOneProxyTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->profile);
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);

@@ -14,9 +14,10 @@ namespace Cycle\ORM\Tests\Command;
 use Cycle\ORM\Command\Branch\ContextSequence;
 use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Exception\CommandException;
+use Cycle\ORM\Tests\Command\Helper\TestInsert;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Cycle\ORM\Tests\Command\Helper\TestInsert;
 
 class SequenceCommandTest extends TestCase
 {
@@ -52,11 +53,10 @@ class SequenceCommandTest extends TestCase
         $this->assertFalse($command->isExecuted());
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\CommandException
-     */
     public function testGetLeadingBad(): void
     {
+        $this->expectException(CommandException::class);
+
         $command = new ContextSequence();
         $command->getContext();
     }

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -30,11 +31,10 @@ class SchemaTest extends TestCase
         $this->assertSame('value', $schema->define(User::class, 1));
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\SchemaException
-     */
     public function testSchemaException(): void
     {
+        $this->expectException(SchemaException::class);
+
         $schema = new Schema([
             User::class => [
                 1 => 'value'

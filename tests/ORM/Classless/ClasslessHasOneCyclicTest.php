@@ -106,7 +106,7 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
     public function testFetchCyclicRelation(): void
     {
         $selector = new Select($this->orm, 'cyclic');
-        list($a, $b, $c) = $selector->load('cyclic')->orderBy('cyclic.id')->fetchAll();
+        [$a, $b, $c] = $selector->load('cyclic')->orderBy('cyclic.id')->fetchAll();
 
         $this->assertSame($b, $a->cyclic);
         $this->assertSame(null, $b->cyclic);

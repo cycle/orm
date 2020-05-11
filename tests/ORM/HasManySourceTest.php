@@ -16,10 +16,10 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
+use Cycle\ORM\Tests\Fixtures\LeveledHasManyConstrain;
+use Cycle\ORM\Tests\Fixtures\ShortLeveledHasManyConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Tests\Fixtures\ShortLeveledHasManyConstrain;
-use Cycle\ORM\Tests\Fixtures\LeveledHasManyConstrain;
 
 abstract class HasManySourceTest extends BaseTest
 {
@@ -30,8 +30,8 @@ abstract class HasManySourceTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
+            'id'      => 'primary',
+            'email'   => 'string',
             'balance' => 'float'
         ]);
 
@@ -44,9 +44,9 @@ abstract class HasManySourceTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id' => 'primary',
+            'id'      => 'primary',
             'user_id' => 'integer',
-            'level' => 'integer',
+            'level'   => 'integer',
             'message' => 'string'
         ]);
 
@@ -64,20 +64,20 @@ abstract class HasManySourceTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
                     'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE => true,
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -85,14 +85,14 @@ abstract class HasManySourceTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
+                Schema::ROLE        => 'comment',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => []
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
     }
@@ -155,7 +155,7 @@ abstract class HasManySourceTest extends BaseTest
 
         $res = $s->load('comments')->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->captureReadQueries();
         $this->assertCount(4, $a->comments);
@@ -181,7 +181,7 @@ abstract class HasManySourceTest extends BaseTest
             'constrain' => new Select\QueryConstrain(['@.level' => 4])
         ])->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -195,11 +195,11 @@ abstract class HasManySourceTest extends BaseTest
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD,
+            'method'    => Select\JoinableLoader::INLOAD,
             'constrain' => new Select\QueryConstrain(['@.level' => 4])
         ])->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -216,7 +216,7 @@ abstract class HasManySourceTest extends BaseTest
             'constrain' => new Select\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
         ])->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(1, $b->comments);
@@ -233,11 +233,11 @@ abstract class HasManySourceTest extends BaseTest
         $s->constrain(new Select\QueryConstrain([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD,
+            'method'    => Select\JoinableLoader::INLOAD,
             'constrain' => new Select\QueryConstrain(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
         ])->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(1, $b->comments);
@@ -251,20 +251,20 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelation(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
                     'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE => true,
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -272,14 +272,14 @@ abstract class HasManySourceTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
+                Schema::ROLE        => 'comment',
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::CONSTRAIN => LeveledHasManyConstrain::class
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAIN   => LeveledHasManyConstrain::class
             ]
         ]));
 
@@ -288,7 +288,7 @@ abstract class HasManySourceTest extends BaseTest
 
         $res = $s->load('comments')->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(1, $b->comments);
@@ -302,20 +302,20 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelationInload(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
                     'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE => true,
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -323,14 +323,14 @@ abstract class HasManySourceTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
+                Schema::ROLE        => 'comment',
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::CONSTRAIN => LeveledHasManyConstrain::class
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAIN   => LeveledHasManyConstrain::class
             ]
         ]));
 
@@ -341,7 +341,7 @@ abstract class HasManySourceTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(1, $b->comments);
@@ -355,20 +355,20 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelationPromise(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
                     'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE => true,
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -376,15 +376,15 @@ abstract class HasManySourceTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
+                Schema::ROLE        => 'comment',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::CONSTRAIN => LeveledHasManyConstrain::class
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAIN   => LeveledHasManyConstrain::class
             ]
         ]));
 
@@ -393,7 +393,7 @@ abstract class HasManySourceTest extends BaseTest
 
         $res = $s->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(1, $b->comments);
@@ -407,20 +407,20 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelationPromiseShort(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
                     'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TYPE   => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE => true,
+                            Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
@@ -428,15 +428,15 @@ abstract class HasManySourceTest extends BaseTest
                 ]
             ],
             Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
+                Schema::ROLE        => 'comment',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::CONSTRAIN => ShortLeveledHasManyConstrain::class
+                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAIN   => ShortLeveledHasManyConstrain::class
             ]
         ]));
 
@@ -445,7 +445,7 @@ abstract class HasManySourceTest extends BaseTest
 
         $res = $s->fetchAll();
 
-        list($b, $a) = $res;
+        [$b, $a] = $res;
 
         $this->assertCount(2, $a->comments);
         $this->assertCount(1, $b->comments);

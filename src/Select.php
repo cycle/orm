@@ -170,7 +170,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             $column = sprintf('DISTINCT(%s)', $this->loader->getPK());
         }
 
-        return (int)$this->__call('count', [$column]);
+        return (int) $this->__call('count', [$column]);
     }
 
     /**

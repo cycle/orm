@@ -69,7 +69,7 @@ class Uuid implements ValueInterface
         }
 
         $uuid = new static();
-        $uuid->uuid = UuidBody::fromBytes((string)$value);
+        $uuid->uuid = UuidBody::fromBytes((string) $value);
 
         return $uuid;
     }

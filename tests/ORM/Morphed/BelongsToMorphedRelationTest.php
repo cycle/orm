@@ -327,7 +327,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertInstanceOf(User::class, $c1->parent->__resolve());
         $this->assertInstanceOf(Post::class, $c2->parent->__resolve());
 
-        list($c1->parent, $c2->parent) = [$c2->parent, $c1->parent];
+        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -349,7 +349,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
-        list($c1->parent, $c2->parent) = [$c2->parent, $c1->parent];
+        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -374,7 +374,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         $u = $this->orm->getRepository(Post::class)->findByPK(1);
 
-        list($c1->parent, $c2->parent) = [$c2->parent, $c1->parent];
+        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);

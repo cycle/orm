@@ -145,7 +145,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testSimpleWhere(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a) = $select->where('id', 2)->fetchAll();
+        [$a] = $select->where('id', 2)->fetchAll();
 
         $this->assertSame(2, $a->id);
     }
@@ -153,7 +153,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testOrderBy(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->orderBy('id')->fetchAll();
+        [$a, $b] = $select->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
         $this->assertSame(2, $b->id);
@@ -162,7 +162,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testOrderByArray(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->orderBy([
+        [$a, $b] = $select->orderBy([
             'id' => 'DESC'
         ])->fetchAll();
 
@@ -173,7 +173,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testOrWhere(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->where('id', 2)->orWhere('id', 1)->orderBy('id')->fetchAll();
+        [$a, $b] = $select->where('id', 2)->orWhere('id', 1)->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
         $this->assertSame(2, $b->id);
@@ -182,7 +182,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereIN(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->where('id', new Parameter([1, 2]))->orderBy('id')->fetchAll();
+        [$a, $b] = $select->where('id', new Parameter([1, 2]))->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
         $this->assertSame(2, $b->id);
@@ -191,7 +191,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereShortSyntax(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a) = $select->where([
+        [$a] = $select->where([
             'id' => 2
         ])->orderBy('id')->fetchAll();
 
@@ -201,7 +201,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereShortSyntaxIn(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->where([
+        [$a, $b] = $select->where([
             'id' => new Parameter([1, 2])
         ])->orderBy('id')->fetchAll();
 
@@ -212,7 +212,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testInComplexArray(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->where([
+        [$a, $b] = $select->where([
             'id' => ['>' => 0, '<' => 3]
         ])->orderBy('id')->fetchAll();
 
@@ -223,7 +223,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testInComplexArrayVerify(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a) = $select->where([
+        [$a] = $select->where([
             'user.id' => [
                 '>'  => 1,
                 '<=' => 2
@@ -236,7 +236,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testRelationOr(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where('comments.message', 'msg 3')
             ->orWhere('comments.message', 'msg 1')
@@ -249,7 +249,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testRelationComplexParameter(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where([
                 'comments.message' => new Parameter(['msg 3', 'msg 1'])
@@ -263,7 +263,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testRelationAliased(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments', ['as' => 'c'])
             ->where([
                 'c.message' => new Parameter(['msg 3', 'msg 1'])
@@ -277,7 +277,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testRelationComplexArray(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where([
                 'comments.id' => [
@@ -295,7 +295,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testRelationComplexArrayAliased(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments', ['as' => 'cc'])
             ->where([
                 'cc.id' => [
@@ -312,7 +312,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testRelationComplexArrayVerify(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a) = $select
+        [$a] = $select
             ->with('comments')
             ->where([
                 'comments.id' => [
@@ -328,7 +328,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereClosure(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a) = $select
+        [$a] = $select
             ->where(function (Select\QueryBuilder $q): void {
                 $q->where('id', 2);
             })
@@ -340,7 +340,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereClosureRelation(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a) = $select
+        [$a] = $select
             ->with('comments')
             ->where(function (Select\QueryBuilder $q): void {
                 $q->where('comments.message', 'msg 3');
@@ -354,7 +354,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
 
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where([
                 '@or' => [
@@ -372,7 +372,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
 
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments', ['as' => 'comment_relation'])
             ->where([
                 '@or' => [
@@ -389,7 +389,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereClosureOr(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->where(function (Select\QueryBuilder $q): void {
                 $q->where('id', 2);
             })
@@ -405,7 +405,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereClosureRelationWithOr(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where(function (Select\QueryBuilder $q): void {
                 $q->where('comments.message', 'msg 3')->orWhere('id', 1);
@@ -419,7 +419,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testBetween(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where('comments.id', 'between', 1, 4)
             ->orderBy('id')->fetchAll();
@@ -431,7 +431,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testBetweenArray(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where(['comments.id' => ['between' => [1, 4]]])
             ->orderBy('id')->fetchAll();
@@ -443,7 +443,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereNestedClosure(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select
+        [$a, $b] = $select
             ->with('comments')
             ->where(function (Select\QueryBuilder $q): void {
                 $q->where('comments.message', 'msg 3')->orWhere(function (Select\QueryBuilder $q): void {
@@ -459,7 +459,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereForRelation(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a) = $select->with('comments', [
+        [$a] = $select->with('comments', [
             'where' => function (Select\QueryBuilder $q): void {
                 $q->where('message', 'msg 3');
             }
@@ -471,7 +471,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereForRelationVerify(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->with('comments', [
+        [$a, $b] = $select->with('comments', [
             'where' => function (Select\QueryBuilder $q): void {
                 $q->where('message', 'msg 3')->orWhere('message', 'msg 1');
             }
@@ -484,7 +484,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testWhereForRelationArray(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->with('comments', [
+        [$a, $b] = $select->with('comments', [
             'where' => ['id' => ['in' => new Parameter([1, 3])]]
         ])->orderBy('id')->fetchAll();
 
@@ -495,7 +495,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testLoadRelationsBuilder(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->load('comments', [
+        [$a, $b] = $select->load('comments', [
             'where' => ['message' => 'msg 1']
         ])->orderBy('id')->fetchAll();
 
@@ -510,7 +510,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testLoadRelationsBuilderMultiple(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->load('comments', [
+        [$a, $b] = $select->load('comments', [
             'where' => function ($q): void {
                 $q->where('message', new Parameter(['msg 1', 'msg 3']));
             }
@@ -528,7 +528,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testLoadRelationsBuilderInload(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->load('comments', [
+        [$a, $b] = $select->load('comments', [
             'where'  => ['message' => 'msg 1'],
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('id')->fetchAll();
@@ -544,7 +544,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testLoadRelationsBuilderInloadVerify(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->load('comments', [
+        [$a, $b] = $select->load('comments', [
             'where'  => ['message' => 'msg 3'],
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('id')->fetchAll();
@@ -560,7 +560,7 @@ abstract class QueryBuilderTest extends BaseTest
     public function testLoadRelationsBuilderMultipleInload(): void
     {
         $select = new Select($this->orm, User::class);
-        list($a, $b) = $select->load('comments', [
+        [$a, $b] = $select->load('comments', [
             'where'  => function (Select\QueryBuilder $q): void {
                 $q->where('message', new Parameter(['msg 1', 'msg 3']));
             },

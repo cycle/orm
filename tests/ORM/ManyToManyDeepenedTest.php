@@ -310,7 +310,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
@@ -348,7 +348,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
@@ -371,7 +371,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
         $this->assertSame('new.gif', $b->tags->getPivot($b->tags[0])->image->url);
     }
 

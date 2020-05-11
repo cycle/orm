@@ -97,7 +97,7 @@ abstract class BelongsToPromiseTest extends BaseTest
                     'user' => [
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
-                        Relation::LOAD => Relation::LOAD_PROMISE,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',
@@ -138,7 +138,7 @@ abstract class BelongsToPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
-        list($a, $b, $c) = $selector->fetchAll();
+        [$a, $b, $c] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->user);
         $this->assertInstanceOf(PromiseInterface::class, $b->user);
@@ -159,7 +159,7 @@ abstract class BelongsToPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
-        list($a, $b, $c) = $selector->fetchAll();
+        [$a, $b, $c] = $selector->fetchAll();
 
         $this->assertInstanceOf(PromiseInterface::class, $a->user);
         $this->assertInstanceOf(PromiseInterface::class, $b->user);

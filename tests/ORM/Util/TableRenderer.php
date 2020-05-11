@@ -92,7 +92,7 @@ final class TableRenderer
      * @param AbstractColumn $column
      * @param array          $type
      * @param bool           $hasDefault Must be set to true if default value was set by user.
-     * @param mixed          $default Default value declared by record schema.
+     * @param mixed          $default    Default value declared by record schema.
      *
      * @throws SchemaException
      * @see  AbstractColumn

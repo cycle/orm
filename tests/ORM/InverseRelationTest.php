@@ -151,7 +151,7 @@ abstract class InverseRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('profile.user')->orderBy('user.id');
 
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertSame($a, $a->profile->user);
         $this->assertSame($b, $b->profile->user);

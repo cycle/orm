@@ -95,7 +95,7 @@ abstract class AbstractNode
     protected $trackReferences = [];
 
     /**
-     * @param array       $columns When columns are empty original line will be returned as result.
+     * @param array       $columns  When columns are empty original line will be returned as result.
      * @param string|null $outerKey Defines column name in parent Node to be aggregated.
      */
     public function __construct(array $columns, string $outerKey = null)

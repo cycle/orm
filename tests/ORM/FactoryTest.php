@@ -31,13 +31,13 @@ class FactoryTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE => 'user',
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
+                Schema::ROLE        => 'user',
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => []
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
             ]
         ]));
 

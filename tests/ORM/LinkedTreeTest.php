@@ -194,7 +194,7 @@ abstract class LinkedTreeTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 
-        list($u1, $u2) = $selector->fetchAll();
+        [$u1, $u2] = $selector->fetchAll();
         $this->assertSame($u1->nested, $u2->owned);
     }
 }

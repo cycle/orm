@@ -193,7 +193,7 @@ abstract class UUIDTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($b, $a) = $selector->load('comments')->orderBy('user.email')->fetchAll();
+        [$b, $a] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
         $this->assertInstanceOf(Collection::class, $a->comments);
         $this->assertInstanceOf(Collection::class, $b->comments);
@@ -213,7 +213,7 @@ abstract class UUIDTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('comments')->orderBy('user.email')->fetchAll();
+        [$a, $b] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -247,7 +247,7 @@ abstract class UUIDTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->assertInternalType('string', $e->id);
+        $this->assertIsString($e->id);
         $this->assertEquals(36, strlen($e->id));
 
         $this->assertTrue($this->orm->getHeap()->has($e));
@@ -358,7 +358,7 @@ abstract class UUIDTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($b, $a) = $selector->load('comments')->orderBy('user.email')->fetchAll();
+        [$b, $a] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -394,7 +394,7 @@ abstract class UUIDTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($b, $a) = $selector->load('comments', [
+        [$b, $a] = $selector->load('comments', [
             'method' => Select\JoinableLoader::INLOAD,
             'as'     => 'comment'
         ])->orderBy('user.email')->fetchAll();

@@ -100,7 +100,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
@@ -125,7 +125,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC'])
         ])->fetchAll();
 
@@ -152,7 +152,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'method'    => Select\JoinableLoader::INLOAD,
             'constrain' => new Select\QueryConstrain([], ['@.level' => 'ASC'])
         ])->orderBy('user.id')->fetchAll();
@@ -180,7 +180,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'method'    => Select\JoinableLoader::INLOAD,
             'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC'])
         ])->orderBy('user.id')->fetchAll();
@@ -254,7 +254,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(4, $a->tags);
@@ -327,7 +327,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(4, $a->tags);
@@ -400,7 +400,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'constrain' => new SortByLevelConstrain()
         ])->orderBy('user.id')->fetchAll();
 
@@ -476,7 +476,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(4, $a->tags);
@@ -550,7 +550,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(4, $a->tags);

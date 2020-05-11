@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Morphed;
 
+use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -21,6 +22,7 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Spiral\Database\Exception\StatementException;
 
 abstract class MorphedHasManyConstrainTest extends BaseTest
 {
@@ -96,7 +98,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -117,7 +119,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -138,7 +140,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
+        [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -159,7 +161,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
+        [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -180,7 +182,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->load('comments', [
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
             'method' => Select\JoinableLoader::INLOAD
         ])->fetchAll();
 
@@ -203,7 +205,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->load('comments', [
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('user.id')->fetchAll();
 
@@ -226,7 +228,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, Post::class))->load('comments', [
+        [$a, $b] = (new Select($this->orm, Post::class))->load('comments', [
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('post.id', 'ASC')->fetchAll();
 
@@ -249,7 +251,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, Post::class))->load('comments', [
+        [$a, $b] = (new Select($this->orm, Post::class))->load('comments', [
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('post.id', 'ASC')->fetchAll();
 
@@ -272,7 +274,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -294,7 +296,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -313,7 +315,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -331,7 +333,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
-        list($a, $b) = (new Select($this->orm, Post::class))->fetchAll();
+        [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
 
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
@@ -353,7 +355,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
+        [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -372,7 +374,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Select($this->orm, Post::class))->fetchAll();
+        [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(3, $a->comments);
@@ -393,7 +395,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->load('comments')->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -412,7 +414,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->load('comments', [
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
             'method' => Select\JoinableLoader::INLOAD
         ])->fetchAll();
 
@@ -434,7 +436,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
-        list($a, $b) = (new Select($this->orm, User::class))->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(2, $b->comments);
@@ -454,7 +456,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         ]);
 
         // overwrites default one
-        list($a, $b) = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
+        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
             'where' => ['@.level' => 1]
         ])->fetchAll();
 
@@ -473,7 +475,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         ]);
 
         // overwrites default one
-        list($a, $b) = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
+        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
             'where'  => ['@.level' => 1],
             'method' => Select\JoinableLoader::INLOAD
         ])->fetchAll();
@@ -529,11 +531,10 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         $this->assertCount(4, $res[0]->comments);
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\LoaderException
-     */
     public function testLimitParentSelectionError(): void
     {
+        $this->expectException(LoaderException::class);
+
         $this->orm = $this->withCommentsSchema([]);
 
         // do not allow limits with joined and loaded relations
@@ -566,11 +567,10 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
     }
 
-    /**
-     * @expectedException \Spiral\Database\Exception\StatementException
-     */
     public function testInvalidOrderBy(): void
     {
+        $this->expectException(StatementException::class);
+
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE   => ['@.level' => ['>=' => 3]],
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'DESC']),

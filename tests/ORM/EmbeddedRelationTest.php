@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
@@ -112,7 +113,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
 
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(UserCredentials::class, $a->credentials);
         $this->assertInstanceOf(UserCredentials::class, $b->credentials);
@@ -382,11 +383,10 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertSame('new-pass', $u2->credentials->password);
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\Relation\NullException
-     */
     public function testNullify(): void
     {
+        $this->expectException(NullException::class);
+
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 

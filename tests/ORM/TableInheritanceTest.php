@@ -96,7 +96,7 @@ abstract class TableInheritanceTest extends BaseTest
     public function testIterate(): void
     {
         $selector = new Select($this->orm, User::class);
-        list($a, $b, $c) = $selector->orderBy('id')->fetchAll();
+        [$a, $b, $c] = $selector->orderBy('id')->fetchAll();
 
         $this->assertInstanceOf(User::class, $a);
         $this->assertNotInstanceOf(Admin::class, $a);

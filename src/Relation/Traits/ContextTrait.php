@@ -29,6 +29,7 @@ trait ContextTrait
      * @return bool
      */
     abstract public function isNullable(): bool;
+
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *

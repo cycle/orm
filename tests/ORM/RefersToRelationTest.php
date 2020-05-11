@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
@@ -157,7 +158,6 @@ abstract class RefersToRelationTest extends BaseTest
         $u->email = 'email@email.com';
         $u->balance = 100;
 
-
         $tr = new Transaction($this->orm);
         $tr->persist($u);
         $tr->run();
@@ -182,11 +182,10 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertSame($u->lastComment, $u->comments[0]);
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\TransactionException
-     */
     public function testCreateWithoutProperDependency(): void
     {
+        $this->expectException(TransactionException::class);
+
         $u = new User();
         $u->email = 'email@email.com';
         $u->balance = 100;

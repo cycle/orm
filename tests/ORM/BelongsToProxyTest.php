@@ -123,7 +123,7 @@ abstract class BelongsToProxyTest extends BaseTest
          * @var Post $a
          * @var Post $b
          */
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertInstanceOf(User::class, $a->user);
         $this->assertInstanceOf(User::class, $b->user);
@@ -144,7 +144,7 @@ abstract class BelongsToProxyTest extends BaseTest
          * @var Post $a
          * @var Post $b
          */
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertFalse($a->user->__loaded());
         $this->assertEquals(1, $a->user->getID());
@@ -160,7 +160,7 @@ abstract class BelongsToProxyTest extends BaseTest
          * @var Post $a
          * @var Post $b
          */
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertEquals('user', $a->user->__role());
 
@@ -178,7 +178,7 @@ abstract class BelongsToProxyTest extends BaseTest
          * @var Post $a
          * @var Post $b
          */
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->assertEquals([
             'id' => 1

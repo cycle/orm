@@ -13,6 +13,7 @@ namespace Cycle\ORM\Tests\Command;
 
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Exception\CommandException;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
@@ -69,11 +70,10 @@ class UpdateCommandTest extends TestCase
         $this->assertSame(['key' => 'value'], $cmd->getScope());
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\CommandException
-     */
     public function testNoScope(): void
     {
+        $this->expectException(CommandException::class);
+
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',

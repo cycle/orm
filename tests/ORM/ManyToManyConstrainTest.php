@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -19,6 +20,7 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Spiral\Database\Exception\StatementException;
 
 abstract class ManyToManyConstrainTest extends BaseTest
 {
@@ -98,7 +100,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
@@ -125,7 +127,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
@@ -152,7 +154,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('user.id')->fetchAll();
 
@@ -181,7 +183,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('user.id')->fetchAll();
 
@@ -210,7 +212,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(4, $a->tags);
@@ -239,7 +241,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(4, $a->tags);
@@ -269,7 +271,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
         $this->assertCount(2, $a->tags);
         $this->assertCount(3, $b->tags);
@@ -295,7 +297,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
         $this->assertCount(2, $a->tags);
         $this->assertCount(3, $b->tags);
@@ -321,7 +323,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('user.id')->fetchAll();
 
@@ -349,7 +351,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD
         ])->orderBy('user.id')->fetchAll();
 
@@ -377,7 +379,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(2, $a->tags);
@@ -405,7 +407,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(2, $a->tags);
@@ -433,7 +435,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags', [
+        [$a, $b] = $selector->load('tags', [
             'where' => ['@.level' => 1]
         ])->orderBy('user.id')->fetchAll();
 
@@ -456,7 +458,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a) = $selector->load('tags', [
+        [$a] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD,
             'where'  => ['@.level' => 1]
         ])->orderBy('user.id')->fetchAll();
@@ -514,11 +516,10 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertCount(4, $res[0]->tags);
     }
 
-    /**
-     * @expectedException \Cycle\ORM\Exception\LoaderException
-     */
     public function testLimitParentSelectionError(): void
     {
+        $this->expectException(LoaderException::class);
+
         $this->orm = $this->withTagSchema([]);
 
         $selector = new Select($this->orm, User::class);
@@ -530,11 +531,10 @@ abstract class ManyToManyConstrainTest extends BaseTest
             ->orderBy('user.id')->fetchAll();
     }
 
-    /**
-     * @expectedException \Spiral\Database\Exception\StatementException
-     */
     public function testInvalidOrderBy(): void
     {
+        $this->expectException(StatementException::class);
+
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'ASC']),
         ]);

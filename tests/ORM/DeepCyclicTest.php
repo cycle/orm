@@ -101,7 +101,7 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
-        list($c1, $c2, $c3, $c4, $c5) = $selector
+        [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')
             ->load('other')
             ->orderBy('cyclic.name')
@@ -150,7 +150,7 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
-        list($c1, $c2, $c3, $c4, $c5) = $selector
+        [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')
             ->load('other')
             ->orderBy('cyclic.name')
@@ -199,7 +199,7 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
-        list($c1, $c2, $c3, $c4, $c5) = $selector
+        [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')
             ->load('other')
             ->orderBy('cyclic.name')
@@ -253,7 +253,7 @@ abstract class DeepCyclicTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
-        list($c1, $c2, $c3, $c4, $c5) = $selector
+        [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')
             ->load('other')
             ->orderBy('cyclic.name')

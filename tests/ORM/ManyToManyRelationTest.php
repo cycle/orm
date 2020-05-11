@@ -258,7 +258,7 @@ abstract class ManyToManyRelationTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
@@ -404,7 +404,7 @@ abstract class ManyToManyRelationTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $a->tags->remove(0);
         $a->tags->add($tagSelector->wherePK(3)->fetchOne());
@@ -445,7 +445,7 @@ abstract class ManyToManyRelationTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertSame('tag b', $a->tags[0]->name);
         $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);

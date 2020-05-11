@@ -191,7 +191,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->captureReadQueries();
         $this->assertCount(2, $a->tags);
@@ -228,7 +228,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->captureReadQueries();
 
@@ -249,7 +249,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $a->tags->remove(0);
 
@@ -291,7 +291,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
          * @var User $a
          * @var User $b
          */
-        list($a, $b) = $selector->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertSame('tag b', $a->tags[0]->name);
         $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);

@@ -87,6 +87,11 @@ final class PivotedPromise implements PromiseInterface
      */
     public function __resolve()
     {
+        /*
+         * This method emulates the selection of MtM nodes by skipping parent relation (as it usually done
+         * in query) and injecting parent ID instead.
+         */
+
         if ($this->orm === null) {
             return $this->resolved;
         }
@@ -95,14 +100,16 @@ final class PivotedPromise implements PromiseInterface
             throw new ORMException('PivotedPromise require ORM to implement SourceFactoryInterface');
         }
 
-        $table = $this->orm->getSource($this->target)->getTable();
-
         // getting scoped query
-        $root = new Select\RootLoader($this->orm, $this->target);
-        $query = $root->buildQuery();
+        $query = (new Select\RootLoader($this->orm, $this->target))->buildQuery();
 
         // responsible for all the scoping
-        $loader = new ManyToManyLoader($this->orm, $table, $this->target, $this->relationSchema);
+        $loader = new ManyToManyLoader(
+            $this->orm,
+            $this->orm->getSource($this->target)->getTable(),
+            $this->target,
+            $this->relationSchema
+        );
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
@@ -113,8 +120,11 @@ final class PivotedPromise implements PromiseInterface
 
         $query = $loader->configureQuery($query, [$this->innerKey]);
 
-        // we are going to add pivot node into virtual root node to aggregate the results
-        $root = new RootNode([$this->relationSchema[Relation::INNER_KEY]], $this->relationSchema[Relation::INNER_KEY]);
+        // we are going to add pivot node into virtual root node (only ID) to aggregate the results
+        $root = new RootNode(
+            [$this->relationSchema[Relation::INNER_KEY]],
+            $this->relationSchema[Relation::INNER_KEY]
+        );
 
         $node = $loader->createNode();
         $root->linkNode('output', $node);
@@ -127,6 +137,9 @@ final class PivotedPromise implements PromiseInterface
             $node->parseRow(0, $row);
         }
         $iterator->close();
+
+        // load all eager relations, forbid loader to re-fetch data (make it think it was joined)
+        $loader->withContext($loader, ['method' => JoinableLoader::INLOAD])->loadData($node);
 
         $elements = [];
         $pivotData = new \SplObjectStorage();

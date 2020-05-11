@@ -166,7 +166,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             try {
                 $node->parseRow(0, $row);
             } catch (\Throwable $e) {
-                echo 'x';
                 throw $e;
             }
         }

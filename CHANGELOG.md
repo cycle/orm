@@ -1,5 +1,11 @@
 # CHANGELOG 
 
+v1.2.8 (11.05.2020)
+--------------------
+- fixed compatibility issues with PHPUnit8 (no more warnings)
+- [bugfix] MtM relation did not load eager relations when selected via promise #94  
+- added more MtM tests
+
 v1.2.7 (26.04.2020)
 --------------------
 - a number of performance optimizations by @pine3ree

@@ -23,6 +23,7 @@ use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
+use Spiral\Database\StatementInterface;
 
 class ManyToManyLoader extends JoinableLoader
 {
@@ -177,6 +178,17 @@ class ManyToManyLoader extends JoinableLoader
         $node->joinNode('@', parent::createNode());
 
         return $node;
+    }
+
+    /**
+     * @param AbstractNode $node
+     */
+    protected function loadChild(AbstractNode $node): void
+    {
+        $node = $node->getNode('@');
+        foreach ($this->load as $relation => $loader) {
+            $loader->loadData($node->getNode($relation));
+        }
     }
 
     /**

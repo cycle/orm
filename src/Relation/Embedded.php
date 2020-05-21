@@ -81,6 +81,14 @@ final class Embedded implements RelationInterface
     }
 
     /**
+     * @return string
+     */
+    public function getTarget(): string
+    {
+        return $this->target;
+    }
+
+    /**
      * @inheritDoc
      */
     public function isCascade(): bool

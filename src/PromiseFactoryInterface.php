@@ -28,5 +28,9 @@ interface PromiseFactoryInterface
      * @param array        $scope
      * @return PromiseInterface
      */
-    public function promise(ORMInterface $orm, string $role, array $scope): PromiseInterface;
+    public function promise(
+        ORMInterface $orm,
+        string $role,
+        array $scope
+    ): PromiseInterface;
 }

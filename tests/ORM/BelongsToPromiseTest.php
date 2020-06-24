@@ -243,6 +243,6 @@ abstract class BelongsToPromiseTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
 
-        $this->assertSame('400.0', $p->user->__resolve()->balance);
+        $this->assertSame(400, (int)$p->user->__resolve()->balance);
     }
 }

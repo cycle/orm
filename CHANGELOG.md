@@ -1,5 +1,10 @@
 # CHANGELOG 
 
+v1.2.9 (24.06.2020)
+--------------------
+- fixed bug causing ORM to disable relation graph pointing to Promises in related entities
+- more promise related tests
+
 v1.2.8 (11.05.2020)
 --------------------
 - fixed compatibility issues with PHPUnit8 (no more warnings)

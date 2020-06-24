@@ -79,17 +79,17 @@ trait ContextTrait
     /**
      * Fetch key from the state.
      *
-     * @param Node   $state
+     * @param Node   $node
      * @param string $key
      * @return mixed|null
      */
-    protected function fetchKey(?Node $state, string $key)
+    protected function fetchKey(?Node $node, string $key)
     {
-        if ($state === null) {
+        if ($node === null) {
             return null;
         }
 
-        return $state->getData()[$key] ?? null;
+        return $node->getData()[$key] ?? null;
     }
 
     /**

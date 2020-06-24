@@ -15,6 +15,7 @@ use Cycle\ORM\Command\Branch\ContextSequence;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\DependencyInterface;
 use Cycle\ORM\Relation\RelationInterface;
@@ -203,7 +204,11 @@ final class RelationMap
         $related,
         $original
     ): ?CommandInterface {
-        if (($related instanceof ReferenceInterface || $related === null) && $related === $original) {
+        if (
+            ($related instanceof ReferenceInterface || $related === null)
+            && !($related instanceof PromiseInterface && $related->__loaded())
+            && $related === $original
+        ) {
             // no changes in non changed promised relation
             return null;
         }

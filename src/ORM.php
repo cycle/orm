@@ -18,6 +18,7 @@ use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\SourceInterface;
@@ -323,6 +324,10 @@ final class ORM implements ORMInterface
      */
     public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
     {
+        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
+            $entity = $entity->__resolve();
+        }
+
         if ($entity instanceof ReferenceInterface) {
             // we do not expect to store promises
             return new Nil();
@@ -360,6 +365,10 @@ final class ORM implements ORMInterface
      */
     public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
     {
+        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
+            $entity = $entity->__resolve();
+        }
+
         $node = $this->heap->get($entity);
         if ($entity instanceof ReferenceInterface || $node === null) {
             // nothing to do, what about promises?

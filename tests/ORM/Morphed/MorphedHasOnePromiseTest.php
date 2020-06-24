@@ -332,7 +332,6 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertSame(null, $p->image->__resolve());
     }
 
-
     public function testChangeParents(): void
     {
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);

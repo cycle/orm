@@ -29,6 +29,13 @@ interface RelationInterface
     public function getName(): string;
 
     /**
+     * Target entity role.
+     *
+     * @return string
+     */
+    public function getTarget(): string;
+
+    /**
      * Must return true to trigger queue.
      *
      * @return bool

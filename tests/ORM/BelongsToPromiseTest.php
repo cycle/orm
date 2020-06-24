@@ -222,4 +222,27 @@ abstract class BelongsToPromiseTest extends BaseTest
         $this->assertInstanceOf(User::class, $p->user->__resolve());
         $this->assertEquals('hello@world.com', $p->user->__resolve()->email);
     }
+
+    public function testEditPromised(): void
+    {
+        $selector = new Select($this->orm, Profile::class);
+        $p = $selector->wherePK(1)->fetchOne();
+
+        $p->user->__resolve()->balance = 400;
+
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($p);
+        $tr->run();
+
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), Profile::class);
+        $p = $selector->wherePK(1)->fetchOne();
+
+        $this->assertSame('400.0', $p->user->__resolve()->balance);
+    }
 }

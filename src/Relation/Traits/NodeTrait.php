@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 
 trait NodeTrait
@@ -28,6 +29,10 @@ trait NodeTrait
     {
         if ($entity === null) {
             return null;
+        }
+
+        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
+            $entity = $entity->__resolve();
         }
 
         if ($entity instanceof ReferenceInterface) {

@@ -79,6 +79,14 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
+     * @return string
+     */
+    public function getTarget(): string
+    {
+        return $this->target;
+    }
+
+    /**
      * @inheritdoc
      */
     public function isCascade(): bool

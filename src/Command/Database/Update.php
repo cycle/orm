@@ -51,6 +51,18 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     }
 
     /**
+     * Wait for the context value.
+     *
+     * @param string $key
+     * @param bool   $required
+     */
+    public function waitContext(string $key, bool $required = true): void
+    {
+        // update command are always "soft" and must wait for all incoming keys
+        $this->waitContext[$key] = null;
+    }
+
+    /**
      * Avoid opening transaction when no changes are expected.
      *
      * @return null|DatabaseInterface

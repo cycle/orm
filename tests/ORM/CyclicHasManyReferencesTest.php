@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
-use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -48,16 +47,16 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         ]);
 
         $this->makeTable('comment', [
-            'id'            => 'primary',
-            'post_id'       => 'integer',
-            'user_id'       => 'integer',
-            'message'       => 'string',
-            'created_at'    => 'timestamp',
-            'updated_at'    => 'timestamp',
+            'id'         => 'primary',
+            'post_id'    => 'integer',
+            'user_id'    => 'integer',
+            'message'    => 'string',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
         ]);
 
         $this->orm = $this->withSchema(new Schema([
-            User::class     => [
+            User::class    => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => TimestampedMapper::class,
                 Schema::DATABASE    => 'default',
@@ -67,7 +66,7 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
             ],
-            Comment::class  => [
+            Comment::class => [
                 Schema::ROLE        => 'comment',
                 Schema::MAPPER      => TimestampedMapper::class,
                 Schema::DATABASE    => 'default',
@@ -76,7 +75,7 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'post_id', 'message', 'created_at', 'updated_at'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
-                    'user'      => [
+                    'user' => [
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
@@ -87,7 +86,7 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
                     ],
                 ]
             ],
-            Post::class     => [
+            Post::class    => [
                 Schema::ROLE        => 'post',
                 Schema::MAPPER      => TimestampedMapper::class,
                 Schema::DATABASE    => 'default',
@@ -135,7 +134,6 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
 
         $p->addComment($c);
 
-        $this->enableProfiling();
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
@@ -189,27 +187,32 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         $p->addComment($c1);
         $p->addComment($c2);
 
-        $this->enableProfiling();
         $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
         $tr->persist($p);
         $tr->run();
 
+        $this->assertNumWrites(6);
+
         $c3 = new Comment();
         $c3->user = $u2;
-        $c3->message = 'hello again';
+        $c3->message = 'hello again 2';
 
         $p->addComment($c3);
+
+        $this->captureWriteQueries();
 
         $tr = new Transaction($this->orm);
         $tr->persist($p);
         $tr->run();
 
+        //$this->assertNumWrites(1);
+
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Post::class);
         $selector->load('lastComment.user')
-            ->load('comments.user');
+                 ->load('comments.user');
 
         $p1 = $selector->wherePK(1)->fetchOne();
 

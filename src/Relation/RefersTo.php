@@ -46,6 +46,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 
         // related object exists, we can update key immediately
         $outerKey = $this->fetchKey($rNode, $this->outerKey);
+
         if ($outerKey !== null) {
             if ($outerKey != $this->fetchKey($node, $this->innerKey)) {
                 $store->register($this->innerKey, $outerKey, true);
@@ -63,6 +64,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         // fastest way to identify the entity
         $pk = $this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
 
+        //dump('<<<------------------');
+
+        // todo: BUG IS HERE
         $this->forwardContext(
             $rNode,
             $this->outerKey,
@@ -70,6 +74,16 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $node,
             $this->innerKey
         );
+//
+//        dump(
+//            [
+//                $rNode,
+//                $node,
+//                $update
+//            ]
+//        );
+//
+//        dump("-------------------->>>\n\n");
 
         // set where condition for update query
         $this->forwardScope(

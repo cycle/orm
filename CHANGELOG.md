@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.2.10 (16.07.2020)
+--------------------
+- [bugfix] causing incorrect command order while updating transitive key for RefersTo relation
+
 v1.2.9 (24.06.2020)
 --------------------
 - fixed bug causing ORM to disable relation graph pointing to Promises in related entities

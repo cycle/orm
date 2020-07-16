@@ -53,6 +53,11 @@ trait ContextTrait
         // link 2 keys and trigger cascade falling right now (if exists)
         $from->forward($fromKey, $to, $toKey, true);
 
+        // edge case while updating transitive key (exists in acceptor but does not exists in provider)
+        if (!array_key_exists($fromKey, $from->getInitialData())) {
+            $carrier->waitContext($toColumn, !$this->isNullable());
+        }
+
         return $carrier;
     }
 

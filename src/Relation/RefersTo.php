@@ -64,9 +64,6 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         // fastest way to identify the entity
         $pk = $this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
 
-        //dump('<<<------------------');
-
-        // todo: BUG IS HERE
         $this->forwardContext(
             $rNode,
             $this->outerKey,
@@ -74,16 +71,6 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $node,
             $this->innerKey
         );
-//
-//        dump(
-//            [
-//                $rNode,
-//                $node,
-//                $update
-//            ]
-//        );
-//
-//        dump("-------------------->>>\n\n");
 
         // set where condition for update query
         $this->forwardScope(

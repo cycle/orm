@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.2.11 (22.07.2020)
+--------------------
+- [bugfix] incorrect update sequence for nullable numeric values  
+
 v1.2.10 (16.07.2020)
 --------------------
 - [bugfix] causing incorrect command order while updating transitive key for RefersTo relation

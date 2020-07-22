@@ -33,7 +33,7 @@ abstract class MapperTest extends BaseTest
             [
                 'id'      => 'primary',
                 'email'   => 'string',
-                'balance' => 'float'
+                'balance' => 'float,nullable'
             ]
         );
 
@@ -55,6 +55,7 @@ abstract class MapperTest extends BaseTest
                         Schema::TABLE       => 'user',
                         Schema::PRIMARY_KEY => 'id',
                         Schema::COLUMNS     => ['id', 'email', 'balance'],
+                        Schema::TYPECAST    => ['balance' => 'float'],
                         Schema::SCHEMA      => [],
                         Schema::RELATIONS   => []
                     ]
@@ -326,5 +327,34 @@ abstract class MapperTest extends BaseTest
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
         $this->assertSame('test@email.com', $u4->email);
+    }
+
+    public function testNullableValuesInASndOut(): void
+    {
+        $u = $this->orm->getRepository(User::class)->findByPK(1);
+        $this->assertEquals(100.0, (float) $u->balance);
+        $u->balance = 0.0;
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $u = $this->orm->getRepository(User::class)->findByPK(1);
+        $this->assertEquals(0.0, (float) $u->balance);
+
+        $u->balance = null;
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $u = $this->orm->getRepository(User::class)->findByPK(1);
+        $this->assertNull($u->balance);
     }
 }

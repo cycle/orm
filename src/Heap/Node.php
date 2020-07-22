@@ -204,9 +204,13 @@ final class Node implements ProducerInterface, ConsumerInterface
      * @param mixed $b
      * @return int
      */
-    private static function compare($a, $b): int
+    public static function compare($a, $b): int
     {
         if ($a == $b) {
+            if (($a === null) !== ($b === null)) {
+                return 1;
+            }
+
             return 0;
         }
 

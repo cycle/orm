@@ -28,7 +28,7 @@ final class EmbeddedLoader implements JoinableInterface
 {
     use ColumnsTrait;
 
-    /** @var ORMInterface */
+    /** @var ORMInterface @internal */
     private $orm;
 
     /** @var string */

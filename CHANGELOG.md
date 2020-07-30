@@ -1,5 +1,9 @@
 # CHANGELOG 
 
+v1.2.12 (30.07.2020)
+--------------------
+- [bugfix] fixes typo in eager loading  
+
 v1.2.11 (22.07.2020)
 --------------------
 - [bugfix] incorrect update sequence for nullable numeric values  

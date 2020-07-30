@@ -132,7 +132,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             $loader->setConstrain($this->getSource()->getConstrain());
         }
 
-        if ($this->isLoaded()) {
+        if ($loader->isLoaded()) {
             foreach ($loader->getEagerRelations() as $relation) {
                 $loader->loadRelation($relation, [], false, true);
             }

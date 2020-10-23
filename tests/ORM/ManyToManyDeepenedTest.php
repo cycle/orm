@@ -301,6 +301,73 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testLoadRelationPostload(): void
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector
+            ->load('tags', ['method' => Select\JoinableLoader::INLOAD])
+            ->load('tags.@.image', ['method' => Select\JoinableLoader::POSTLOAD])
+            ->orderBy('id', 'ASC');
+
+        $this->assertSame([
+            [
+                'id'      => 1,
+                'email'   => 'hello@world.com',
+                'balance' => 100.0,
+                'tags'    => [
+                    [
+                        'id'      => 1,
+                        'user_id' => 1,
+                        'tag_id'  => 1,
+                        'as'      => 'primary',
+                        'image'   => [
+                            'id'        => 1,
+                            'url'       => 'first.jpg',
+                            'parent_id' => 1,
+                        ],
+                        '@'       => [
+                            'id'   => 1,
+                            'name' => 'tag a',
+                        ],
+                    ],
+                    [
+                        'id'      => 2,
+                        'user_id' => 1,
+                        'tag_id'  => 2,
+                        'as'      => 'secondary',
+                        'image'   => null,
+                        '@'       => [
+                            'id'   => 2,
+                            'name' => 'tag b',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'id'      => 2,
+                'email'   => 'another@world.com',
+                'balance' => 200.0,
+                'tags'    => [
+                    [
+                        'id'      => 3,
+                        'user_id' => 2,
+                        'tag_id'  => 3,
+                        'as'      => 'primary',
+                        'image'   => [
+                            'id'        => 2,
+                            'url'       => 'second.png',
+                            'parent_id' => 3,
+                        ],
+                        '@'       => [
+                            'id'   => 3,
+                            'name' => 'tag c',
+                        ],
+                    ],
+                ],
+            ],
+        ], $selector->fetchData());
+    }
+
     public function testAccessLoadedBranch(): void
     {
         $selector = new Select($this->orm, User::class);

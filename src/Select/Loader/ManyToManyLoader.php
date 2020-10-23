@@ -185,10 +185,12 @@ class ManyToManyLoader extends JoinableLoader
      */
     protected function loadChild(AbstractNode $node): void
     {
-        $node = $node->getNode('@');
+        $rootNode = $node->getNode('@');
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->getNode($relation));
+            $loader->loadData($rootNode->getNode($relation));
         }
+
+        $this->pivot->loadChild($node);
     }
 
     /**

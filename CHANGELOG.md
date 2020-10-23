@@ -1,12 +1,16 @@
-# CHANGELOG 
+# CHANGELOG
+
+v1.2.13 (23.10.2020)
+--------------------
+- [bugfix] fixes cascade POSTLOAD relations in pivoted chains of ManyToMany relation
 
 v1.2.12 (30.07.2020)
 --------------------
-- [bugfix] fixes typo in eager loading  
+- [bugfix] fixes typo in eager loading
 
 v1.2.11 (22.07.2020)
 --------------------
-- [bugfix] incorrect update sequence for nullable numeric values  
+- [bugfix] incorrect update sequence for nullable numeric values
 
 v1.2.10 (16.07.2020)
 --------------------
@@ -16,12 +20,12 @@ v1.2.9 (24.06.2020)
 --------------------
 - fixed bug causing ORM to disable relation graph pointing to Promises in related entities
 - more promise related tests
-- adds getTarget to RelationInterface 
+- adds getTarget to RelationInterface
 
 v1.2.8 (11.05.2020)
 --------------------
 - fixed compatibility issues with PHPUnit8 (no more warnings)
-- [bugfix] MtM relation did not load eager relations when selected via promise #94  
+- [bugfix] MtM relation did not load eager relations when selected via promise #94
 - added more MtM tests
 
 v1.2.7 (26.04.2020)
@@ -48,11 +52,11 @@ v1.2.3 (07.02.2020)
 - bumped PHPUnit version to 8
 - removed Travis tests
 - added GitHub Actions
-- suppressed PK introspection on Postgres insert queries 
+- suppressed PK introspection on Postgres insert queries
 
 v1.2.2 (29.01.2020)
 --------------------
-- added the support for custom default sources, repositories and mappers by @mrakolice 
+- added the support for custom default sources, repositories and mappers by @mrakolice
 
 v1.2.1 (16.01.2020)
 --------------------
@@ -69,7 +73,7 @@ v1.2.0 (13.01.2020)
 
 v1.1.18 (20.11.2019)
 --------------------
-- the limit exception is not thrown on joined singular relations 
+- the limit exception is not thrown on joined singular relations
 - Select doc-block improvement (better IDE integration)
 
 v1.1.17 (07.11.2019)
@@ -83,7 +87,7 @@ v1.1.16 (04.11.2019)
 v1.1.15 (02.10.2019)
 --------------------
 - the minimum PHP version is set as 7.2 as stated in the documentation
-- fixed typo THOUGH => THROUGH, old constants marked as deprecated 
+- fixed typo THOUGH => THROUGH, old constants marked as deprecated
 
 v1.1.14 (24.09.2019)
 --------------------

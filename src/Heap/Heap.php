@@ -99,7 +99,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                 $keyName = $value = '';
                 foreach ($key as $k) {
                     $keyName .= $k; // chance of collision?
-                    $value .= $data[$k] . '/';
+                    $value .= (string)$data[$k] . '/';
                 }
                 $key = $keyName;
             } else {
@@ -107,7 +107,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                     continue;
                 }
 
-                $value = $data[$key];
+                $value = (string)$data[$key];
             }
 
             $this->paths[get_class($entity)][$key][$value] = $entity;

@@ -63,4 +63,16 @@ final class PivotedCollection extends ArrayCollection implements PivotedCollecti
     {
         return $this->pivotContext;
     }
+
+    /**
+     * @param array $elements
+     * @return PivotedCollection
+     */
+    protected function createFrom(array $elements)
+    {
+        $new = parent::createFrom($elements);
+        $new->pivotContext = $this->pivotContext;
+
+        return $new;
+    }
 }

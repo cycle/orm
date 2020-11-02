@@ -13,6 +13,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -22,6 +23,7 @@ use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Doctrine\Common\Collections\Collection;
 
 abstract class ManyToManyPromiseTest extends BaseTest
 {
@@ -51,6 +53,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
         $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
         $this->makeFK('tag_user_map', 'tag_id', 'tags', 'id');
+        $this->makeIndex('tag_user_map', ['user_id', 'tag_id'], true);
 
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
@@ -298,6 +301,60 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
         $this->assertSame('new tag', $b->tags[0]->name);
         $this->assertSame('super', $b->tags->getPivot($b->tags[0])->as);
+    }
+
+    public function testReassign(): void
+    {
+        $tagSelect = new Select($this->orm, Tag::class);
+        $userSelect = new Select($this->orm, User::class);
+
+        /**
+         * @var User $user
+         */
+        $user = $userSelect->load('tags')->fetchOne(['id' => 1]);
+
+        $this->assertInstanceOf(Collection::class, $user->tags);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($user);
+        $tr->run();
+        $this->assertNumWrites(0);
+
+        $wantTags = ['tag a', 'tag c'];
+
+        foreach ($wantTags as $wantTag) {
+            $found = false;
+
+            foreach ($user->tags as $tag) {
+                if ($tag->name === $wantTag) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                $newTag = $tagSelect->fetchOne(['name' => $wantTag]);
+                $user->tags->add($newTag);
+            }
+        }
+
+        $user->tags = $user->tags->filter(function ($t) use ($wantTags) {
+            return in_array($t->name, $wantTags);
+        });
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($user);
+        $tr->run();
+        $this->assertNumWrites(2);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $user = (new Select($this->orm, User::class))->fetchOne(['id' => 1]);
+        $this->assertCount(2, $user->tags);
+        $this->assertSame('tag a', $user->tags[0]->name);
+        $this->assertSame('tag c', $user->tags[1]->name);
     }
 
     public function testResolvePromise(): void

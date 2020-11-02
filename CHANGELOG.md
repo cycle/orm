@@ -1,8 +1,12 @@
 # CHANGELOG
 
+v1.2.15 (02.11.2020)
+--------------------
+- fixes loss of pivot context on pivoted collection clone
+
 v1.2.14 (30.10.2020)
 --------------------
-- improved UUID serialization in Heap by @thenotsoft 
+- improved UUID serialization in Heap by @thenotsoft
 
 v1.2.13 (23.10.2020)
 --------------------

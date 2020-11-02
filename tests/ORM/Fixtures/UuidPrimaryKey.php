@@ -15,12 +15,12 @@ class UuidPrimaryKey
         $this->id = $id;
     }
 
-    public function getId(): string
+    public function __toString(): string
     {
         return $this->id;
     }
 
-    public function __toString(): string
+    public function getId(): string
     {
         return $this->id;
     }

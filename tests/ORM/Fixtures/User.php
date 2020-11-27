@@ -20,6 +20,7 @@ class User implements ImagedInterface
     public $id;
     public $email;
     public $balance;
+    public $user_code;
 
     /** @var Profile */
     public $profile;

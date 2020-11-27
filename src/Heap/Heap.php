@@ -74,6 +74,9 @@ final class Heap implements HeapInterface, IteratorAggregate
     {
         if (count($scope) === 1) {
             $key = key($scope);
+            if (is_object($scope[$key])) {
+                $scope[$key] = (string)$scope[$key];
+            }
             return $this->paths[$role][$key][$scope[$key]] ?? null;
         }
 

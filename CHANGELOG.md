@@ -1,8 +1,12 @@
 # CHANGELOG
 
-v1.2.16 (04.14.2020)
+v1.2.17 (04.14.2020)
 --------------------
 - allows LEFT JOIN for ManyToMany loader
+
+v1.2.16 (27.11.2020)
+--------------------
+- added the ability to use objects as Heap keys by @thenotsoft
 
 v1.2.15 (02.11.2020)
 --------------------

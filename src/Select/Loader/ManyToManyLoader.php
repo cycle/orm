@@ -136,7 +136,8 @@ class ManyToManyLoader extends JoinableLoader
                 $this->parentKey(Relation::INNER_KEY)
             );
 
-            $query->innerJoin(
+            $query->join(
+                $this->getJoinMethod(),
                 $this->getJoinTable()
             )->on(
                 $this->localKey(Relation::OUTER_KEY),
@@ -147,7 +148,8 @@ class ManyToManyLoader extends JoinableLoader
             // since underlying loader believes it's loaded)
             $query->columns([]);
 
-            $query->innerJoin(
+            $query->join(
+                $this->getJoinMethod(),
                 $this->pivot->getJoinTable()
             )->on(
                 $this->pivot->localKey(Relation::THROUGH_OUTER_KEY),

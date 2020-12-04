@@ -58,6 +58,11 @@ class ManyToMany extends Relation\AbstractRelation
 
         $iterator = new Iterator($this->orm, $this->target, $data);
         foreach ($iterator as $pivot => $entity) {
+            if (!is_array($pivot)) {
+                // skip partially selected entities (DB level filter)
+                continue;
+            }
+
             $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
             $elements[] = $entity;
         }

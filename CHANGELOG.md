@@ -1,5 +1,9 @@
 # CHANGELOG
 
+v1.2.16 (04.14.2020)
+--------------------
+- allows LEFT JOIN for ManyToMany loader
+
 v1.2.15 (02.11.2020)
 --------------------
 - fixes loss of pivot context on pivoted collection clone

@@ -67,7 +67,7 @@ class Repository implements RepositoryInterface
     /**
      * Get selector associated with the repository.
      *
-     * @return Select|iterable
+     * @return Select
      */
     public function select(): Select
     {

@@ -1,6 +1,14 @@
 # CHANGELOG
 
-v1.2.17 (04.14.2020)
+v1.3.1 (24.12.2020)
+--------------------
+- bugfix: column mapping for embedded entities now excludes custom properties by @thenotsoft
+
+v1.3.0 (23.12.2020)
+--------------------
+- added PHP8 support
+
+v1.2.17 (04.12.2020)
 --------------------
 - allows LEFT JOIN for ManyToMany loader
 

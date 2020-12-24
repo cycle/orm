@@ -192,7 +192,7 @@ final class Embedded implements RelationInterface
      */
     protected function getChanges($related, State $state): array
     {
-        $data = $this->mapper->extract($related);
+        $data = array_intersect_key($this->mapper->extract($related), $this->columns);
 
         return array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
     }

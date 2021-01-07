@@ -20,7 +20,6 @@ use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
-use Psr\Container\ContainerInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Spiral\Database\DatabaseInterface;
@@ -33,9 +32,6 @@ final class Factory implements FactoryInterface
 
     /** @var CoreFactory */
     private $factory;
-
-    /** @var ContainerInterface */
-    private $container;
 
     /** @var DatabaseProviderInterface */
     private $dbal;
@@ -50,20 +46,17 @@ final class Factory implements FactoryInterface
 
     /**
      * @param DatabaseProviderInterface $dbal
-     * @param RelationConfig            $config
-     * @param CoreFactory|null          $factory
-     * @param ContainerInterface|null   $container
+     * @param RelationConfig|null $config
+     * @param CoreFactory|null $factory
      */
     public function __construct(
         DatabaseProviderInterface $dbal,
         RelationConfig $config = null,
-        CoreFactory $factory = null,
-        ContainerInterface $container = null
+        CoreFactory $factory = null
     ) {
         $this->dbal = $dbal;
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
-        $this->container = $container ?? new Container();
     }
 
     /**

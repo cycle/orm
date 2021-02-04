@@ -159,7 +159,7 @@ final class ORM implements ORMInterface
                 // update will only be applied for non-resolved cyclic relation promises
                 return $m->hydrate(
                     $e,
-                    $this->getRelationMap($role)->merge($node, $data, [])
+                    $this->getRelationMap($role)->merge($node, $data, $this->extractEmptyEntity($e))
                 );
             }
         }
@@ -418,5 +418,20 @@ final class ORM implements ORMInterface
         }
 
         return $this->relmaps[$role] = new RelationMap($this, $relations);
+    }
+
+    private function extractEmptyEntity(object $entity): array
+    {
+        $class = get_class($entity);
+        $array = (array)$entity;
+        $result = [];
+        foreach ($array as $key => $value) {
+            if (strpos($key, "\0") === false) {
+                $result[$key] = $value;
+            } else {
+                $result[substr($key, strrchr($key, "\0") + 1)] = $value;
+            }
+        }
+        return $result;
     }
 }

@@ -422,15 +422,10 @@ final class ORM implements ORMInterface
 
     private function extractEmptyEntity(object $entity): array
     {
-        $class = get_class($entity);
-        $array = (array)$entity;
         $result = [];
-        foreach ($array as $key => $value) {
-            if (strpos($key, "\0") === false) {
-                $result[$key] = $value;
-            } else {
-                $result[substr($key, strrchr($key, "\0") + 1)] = $value;
-            }
+        foreach ((array)$entity as $key => $value) {
+            $newKey = strpos($key, "\0") === false ? $key : substr($key, strrpos($key, "\0") + 1);
+            $result[$newKey] = $value;
         }
         return $result;
     }

@@ -159,7 +159,7 @@ final class ORM implements ORMInterface
                 // update will only be applied for non-resolved cyclic relation promises
                 return $m->hydrate(
                     $e,
-                    $this->getRelationMap($role)->merge($node, $data, $m->extract($e))
+                    $this->getRelationMap($role)->merge($node, $data, [])
                 );
             }
         }

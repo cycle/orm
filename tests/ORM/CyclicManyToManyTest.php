@@ -102,7 +102,6 @@ abstract class CyclicManyToManyTest extends BaseTest
                             Relation::THROUGH_INNER_KEY => 'user_id',
                             Relation::THROUGH_OUTER_KEY => 'tag_id',
                             Relation::WHERE => [],
-                            Relation::THROUGH_WHERE => [],
                         ],
                     ]
                 ]

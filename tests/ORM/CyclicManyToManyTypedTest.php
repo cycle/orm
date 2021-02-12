@@ -17,12 +17,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Tag;
-use Cycle\ORM\Tests\Fixtures\TagContext;
+use Cycle\ORM\Tests\Fixtures\TagContextTyped;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
-abstract class CyclicManyToManyTest extends BaseTest
+abstract class CyclicManyToManyTypedTest extends BaseTest
 {
     use TableTrait;
 
@@ -96,12 +96,13 @@ abstract class CyclicManyToManyTest extends BaseTest
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
                             Relation::NULLABLE          => false,
-                            Relation::THROUGH_ENTITY    => TagContext::class,
+                            Relation::THROUGH_ENTITY    => TagContextTyped::class,
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THROUGH_INNER_KEY => 'user_id',
                             Relation::THROUGH_OUTER_KEY => 'tag_id',
                             Relation::WHERE => [],
+                            Relation::THROUGH_WHERE => [],
                         ],
                     ]
                 ]
@@ -123,7 +124,7 @@ abstract class CyclicManyToManyTest extends BaseTest
                         Relation::SCHEMA => [
                             Relation::CASCADE           => true,
                             Relation::NULLABLE          => false,
-                            Relation::THROUGH_ENTITY    => TagContext::class,
+                            Relation::THROUGH_ENTITY    => TagContextTyped::class,
                             Relation::INNER_KEY         => 'id',
                             Relation::OUTER_KEY         => 'id',
                             Relation::THROUGH_INNER_KEY => 'tag_id',
@@ -134,7 +135,7 @@ abstract class CyclicManyToManyTest extends BaseTest
                     ]
                 ]
             ],
-            TagContext::class => [
+            TagContextTyped::class => [
                 Schema::ROLE        => 'tag_context',
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
@@ -146,123 +147,6 @@ abstract class CyclicManyToManyTest extends BaseTest
                 Schema::RELATIONS   => []
             ]
         ]));
-    }
-
-    public function testLoadRelation(): void
-    {
-        $selector = new Select($this->orm, User::class);
-        $selector->load('tags')->orderBy('id', 'ASC');
-
-        $this->assertSame([
-            [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
-                'balance' => 100.0,
-                'tags'    => [
-                    [
-                        'id'      => 1,
-                        'user_id' => 1,
-                        'tag_id'  => 1,
-                        'as'      => 'primary',
-                        '@'       => [
-                            'id'   => 1,
-                            'name' => 'tag a',
-                        ],
-                    ],
-                    [
-                        'id'      => 2,
-                        'user_id' => 1,
-                        'tag_id'  => 2,
-                        'as'      => 'secondary',
-                        '@'       => [
-                            'id'   => 2,
-                            'name' => 'tag b',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'id'      => 2,
-                'email'   => 'another@world.com',
-                'balance' => 200.0,
-                'tags'    => [
-                    [
-                        'id'      => 3,
-                        'user_id' => 2,
-                        'tag_id'  => 3,
-                        'as'      => 'primary',
-                        '@'       => [
-                            'id'   => 3,
-                            'name' => 'tag c',
-                        ]
-                    ],
-                ],
-            ],
-        ], $selector->fetchData());
-    }
-
-    public function testCreateFromUser(): void
-    {
-        $u = new User();
-        $u->email = 'hello@world.com';
-        $u->balance = 1;
-
-        $tag = new Tag();
-        $tag->name = 'hello';
-
-        $u->tags->add($tag);
-
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-
-        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
-
-        $this->assertSame($tag->id, $u2->tags->get(0)->id);
-        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
-    }
-
-    public function testCreateFromTag(): void
-    {
-        $u = new User();
-        $u->email = 'hello@world.com';
-        $u->balance = 1;
-
-        $tag = new Tag();
-        $tag->name = 'hello';
-
-        $tag->users->add($u);
-
-        $t = new Transaction($this->orm);
-        $t->persist($tag);
-        $t->run();
-
-        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
-
-        $this->assertSame($tag->id, $u2->tags->get(0)->id);
-        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
-    }
-
-    public function testCreateCyclic(): void
-    {
-        $u = new User();
-        $u->email = 'hello@world.com';
-        $u->balance = 1;
-
-        $tag = new Tag();
-        $tag->name = 'hello';
-
-        $tag->users->add($u);
-        $u->tags->add($tag);
-
-        $t = new Transaction($this->orm);
-        $t->persist($tag);
-        $t->run();
-
-        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
-
-        $this->assertSame($tag->id, $u2->tags->get(0)->id);
-        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
     }
 
     public function testCreateCyclicWithExisting(): void
@@ -279,11 +163,7 @@ abstract class CyclicManyToManyTest extends BaseTest
 
         $t = new Transaction($this->orm);
         $t->persist($tag);
-        $t->run();
 
-        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
-        // mb these assertions are incorrect
-        $this->assertSame($tag->id, $u2->tags->get(0)->id);
-        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
+        $t->run();
     }
 }

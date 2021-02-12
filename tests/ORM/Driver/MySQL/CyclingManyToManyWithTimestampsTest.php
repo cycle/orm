@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Driver\MySQL;
 
-class UUIDTypehintTest extends \Cycle\ORM\Tests\UUIDTypehintTest
+class CyclingManyToManyWithTimestampsTest extends \Cycle\ORM\Tests\CyclingManyToManyWithTimestampsTest
 {
     public const DRIVER = 'mysql';
 }

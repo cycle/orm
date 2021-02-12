@@ -20,7 +20,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 \Cycle\ORM\Tests\BaseTest::$config = [
     'debug'     => false,
     'strict'    => true,
-    'benchmark' => false,
+    'benchmark' => true,
     'sqlite'    => [
         'driver'     => Database\Driver\SQLite\SQLiteDriver::class,
         'check'      => static function () {

@@ -33,6 +33,9 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var array */
     private $data;
 
+    /** @var array */
+    private $transactionData = [];
+
     /** @var null|ContextCarrierInterface */
     private $command;
 
@@ -50,6 +53,7 @@ final class State implements ConsumerInterface, ProducerInterface
     {
         $this->state = $state;
         $this->data = $data;
+        $this->transactionData = $data;
     }
 
     /**
@@ -96,6 +100,16 @@ final class State implements ConsumerInterface, ProducerInterface
     public function getData(): array
     {
         return $this->data;
+    }
+
+    /**
+     * Get current state data.
+     *
+     * @return array
+     */
+    public function getTransactionData(): array
+    {
+        return $this->transactionData;
     }
 
     /**
@@ -163,6 +177,10 @@ final class State implements ConsumerInterface, ProducerInterface
         if (!$fresh) {
             // custom, non value objects can be supported here
             $fresh = ($this->data[$key] ?? null) != $value;
+        }
+
+        if (!array_key_exists($key, $this->transactionData)) {
+            $this->transactionData[$key] = $value;
         }
 
         $this->data[$key] = $value;

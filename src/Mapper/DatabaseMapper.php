@@ -120,7 +120,7 @@ abstract class DatabaseMapper implements MapperInterface
         $data = $this->fetchFields($entity);
 
         // in a future mapper must support solid states
-        $changes = array_udiff_assoc($data, $state->getData(), [Node::class, 'compare']);
+        $changes = array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
         unset($changes[$this->primaryKey]);
 
         $changedColumns = $this->mapColumns($changes);

@@ -11,11 +11,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContextTyped;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -28,6 +26,11 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
 
     public function setUp(): void
     {
+        if (!version_compare(PHP_VERSION, '7.4', '>=')) {
+            $this->markTestSkipped('PHP7.4 required');
+            return;
+        }
+
         parent::setUp();
 
         $this->makeTable('user', [
@@ -155,8 +158,7 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
         $u->email = 'hello@world.com';
         $u->balance = 1;
 
-        $tagRepo = $this->orm->getRepository(Tag::class);
-        $tag = $tagRepo->findByPK(1);
+        $tag = $this->orm->getRepository(Tag::class)->findByPK(1);
 
         $tag->users->add($u);
         $u->tags->add($tag);

@@ -11,10 +11,12 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
+use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\Branch\Sequence;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
@@ -170,9 +172,10 @@ class ManyToMany extends Relation\AbstractRelation
             $pivot = $this->initPivot($node, $related, $pivot);
         }
 
+        $pNode = $this->getNode($pivot);
+
         // defer the insert until pivot keys are resolved
         $pStore = $this->orm->queueStore($pivot);
-        $pNode = $this->getNode($pivot);
 
         $this->forwardContext(
             $node,
@@ -211,16 +214,32 @@ class ManyToMany extends Relation\AbstractRelation
      */
     protected function initPivot(Node $node, $related, $pivot)
     {
-        $relNode = $this->getNode($related);
-        if ($node->getState()->getStorage($this->pivotEntity)->contains($relNode)) {
-            return $node->getState()->getStorage($this->pivotEntity)->offsetGet($relNode);
+        [$source, $target] = $this->sortRelation($node, $this->getNode($related));
+
+        if ($source->getState()->getStorage($this->pivotEntity)->contains($target)) {
+            return $source->getState()->getStorage($this->pivotEntity)->offsetGet($target);
         }
 
         $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
 
-        $node->getState()->getStorage($this->pivotEntity)->offsetSet($relNode, $entity);
-        $relNode->getState()->getStorage($this->pivotEntity)->offsetSet($node, $entity);
+        $source->getState()->getStorage($this->pivotEntity)->offsetSet($target, $entity);
 
         return $entity;
+    }
+
+    /**
+     * Keep only one relation branch as primary branch.
+     *
+     * @param Node $node
+     * @param Node $related
+     * @return array<Node, Node>
+     */
+    private function sortRelation(Node $node, Node $related): array
+    {
+        // always use single storage
+        $list = [$node->getRole() => $node, $related->getRole() => $related];
+        ksort($list);
+
+        return array_values($list);
     }
 }

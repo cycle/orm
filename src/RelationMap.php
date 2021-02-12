@@ -86,40 +86,6 @@ final class RelationMap
     }
 
     /**
-     * Init non initialized reference relations with real entities.
-     *
-     * @param Node  $node
-     * @param array $data
-     * @param array $current
-     * @return array
-     */
-    public function merge(Node $node, array $data, array $current): array
-    {
-        $merged = [];
-        foreach ($this->relations as $name => $relation) {
-            if (!array_key_exists($name, $data)) {
-                continue;
-            }
-
-            // automatically resolve entity pointers (cyclic relations)
-            if ($this->sameReference($current[$name] ?? null, $node->getRelation($name))) {
-                $item = $data[$name];
-                if (is_object($item) || $item === null) {
-                    $merged[$name] = $item;
-                    $node->setRelation($name, $item);
-                    continue;
-                }
-
-                // init relation for the entity and for state and the same time
-                [$merged[$name], $orig] = $relation->init($node, $item);
-                $node->setRelation($name, $orig);
-            }
-        }
-
-        return $merged;
-    }
-
-    /**
      * Queue entity relations.
      *
      * @param CC     $parentStore

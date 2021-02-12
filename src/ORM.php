@@ -155,11 +155,10 @@ final class ORM implements ORMInterface
             if ($e !== null) {
                 $node = $this->heap->get($e);
 
-                // entity already been loaded, let's update it's relations with new context
-                // update will only be applied for non-resolved cyclic relation promises
+                // new set of data and relations always overwrite entity state
                 return $m->hydrate(
                     $e,
-                    $this->getRelationMap($role)->merge($node, $data, $m->extract($e))
+                    $this->getRelationMap($role)->init($node, $data)
                 );
             }
         }

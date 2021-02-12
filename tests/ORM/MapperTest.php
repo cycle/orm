@@ -309,24 +309,26 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(200.0, $result->balance);
     }
 
-    public function testLoadDoesNotOverwriteValues(): void
+    public function testLoadOverwriteValues(): void
     {
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         $u->email = 'test@email.com';
         $this->assertSame('test@email.com', $u->email);
 
         $u2 = $this->orm->getRepository(User::class)->findByPK(1);
-        $this->assertSame('test@email.com', $u2->email);
+        $this->assertSame('hello@world.com', $u2->email);
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
         $this->assertSame('hello@world.com', $u3->email);
 
+        $this->captureWriteQueries();
         $t = new Transaction($this->orm);
         $t->persist($u);
         $t->run();
+        $this->assertNumWrites(0);
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
-        $this->assertSame('test@email.com', $u4->email);
+        $this->assertSame('hello@world.com', $u4->email);
     }
 
     public function testNullableValuesInASndOut(): void

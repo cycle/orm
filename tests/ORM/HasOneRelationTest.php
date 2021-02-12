@@ -680,7 +680,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertSame('new', $u4->profile->image);
     }
 
-    public function testDoNotOverwritePromisedRelation(): void
+    public function testOverwritePromisedRelation(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->wherePK(1)->fetchOne();
@@ -695,7 +695,7 @@ abstract class HasOneRelationTest extends BaseTest
                         ->load('profile')
                         ->wherePK(1)->fetchOne();
 
-        $this->assertSame('new', $u2->profile->image);
+        $this->assertSame('image.png', $u2->profile->image);
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
                         ->select()->load('profile')->wherePK(1)->fetchOne();
@@ -706,9 +706,17 @@ abstract class HasOneRelationTest extends BaseTest
         $t->persist($u);
         $t->run();
 
+        // ovewrite values
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
                         ->select()->load('profile')->wherePK(1)->fetchOne();
 
-        $this->assertSame('new', $u4->profile->image);
+        $this->assertSame('image.png', $u4->profile->image);
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+
+        $this->assertNumWrites(0);
     }
 }

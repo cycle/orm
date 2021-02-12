@@ -79,8 +79,7 @@ jobs:
         {php-version: 7.2, postgres-version: 9.6},
         {php-version: 7.3, postgres-version: 10},
         {php-version: 7.3, postgres-version: 11},
-        {php-version: 7.4, postgres-version: 9.6},
-        {php-version: 8.0, postgres-version: 9.6}
+        {php-version: 7.4, postgres-version: 9.6}
         ]
     services:
       postgres:

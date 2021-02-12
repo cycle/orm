@@ -33,8 +33,8 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         $this->makeTable('user', [
             'id'         => 'primary',
             'email'      => 'string',
-            'created_at' => 'timestamp',
-            'updated_at' => 'timestamp',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ]);
 
         $this->makeTable('post', [
@@ -42,8 +42,8 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
             'title'           => 'string',
             'content'         => 'string',
             'last_comment_id' => 'integer,nullable',
-            'created_at'      => 'timestamp',
-            'updated_at'      => 'timestamp',
+            'created_at'      => 'datetime',
+            'updated_at'      => 'datetime',
         ]);
 
         $this->makeTable('comment', [
@@ -51,8 +51,8 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
             'post_id'    => 'integer',
             'user_id'    => 'integer',
             'message'    => 'string',
-            'created_at' => 'timestamp',
-            'updated_at' => 'timestamp',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ]);
 
         $this->orm = $this->withSchema(new Schema([

@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['7.2', '7.3', '7.4']
+        php-versions: ['7.2', '7.3', '7.4', '8.0']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
           docker-compose up -d
           cd ..
       - name: Setup PHP ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v1
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: pcov
@@ -78,7 +78,9 @@ jobs:
         configs: [
         {php-version: 7.2, postgres-version: 9.6},
         {php-version: 7.3, postgres-version: 10},
-        {php-version: 7.3, postgres-version: 11}
+        {php-version: 7.3, postgres-version: 11},
+        {php-version: 7.4, postgres-version: 9.6},
+        {php-version: 8.0, postgres-version: 9.6}
         ]
     services:
       postgres:
@@ -120,7 +122,8 @@ jobs:
       matrix:
         configs: [
           #          {php-version: 7.2, mariadb-version: 10.2},
-        {php-version: 7.3, mariadb-version: 10.4}
+        {php-version: 7.3, mariadb-version: 10.4},
+        {php-version: 7.4, mariadb-version: 10.4}
         ]
     services:
       mariadb:

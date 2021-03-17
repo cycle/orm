@@ -128,8 +128,10 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
 
         foreach ($this->consumers as $key => $consumers) {
             $fresh = true;
-            if ($key === self::INSERT_ID || $key === $this->primaryKey) {
+            if ($key === self::INSERT_ID) {
                 $value = $insertID;
+            } elseif ($key === $this->primaryKey) {
+                $value = $data[$key] ?? $insertID;
             } else {
                 $value = $data[$key] ?? null;
             }

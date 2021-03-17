@@ -38,7 +38,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     /** @var string|null */
     protected $primaryKey;
 
-    /** @var ConsumerInterface[] */
+    /** @var ConsumerInterface[][] */
     protected $consumers = [];
 
     /**

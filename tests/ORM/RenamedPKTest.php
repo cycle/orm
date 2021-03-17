@@ -59,8 +59,6 @@ abstract class RenamedPKTest extends BaseTest
         $u->setId(2);
         $u->setKey(42);
 
-        $_POST['entity'] = $u;
-
         (new Transaction($this->orm))->persist($u)->run();
 
         $s = new Select($this->orm->withHeap(new Heap()), Identity::class);

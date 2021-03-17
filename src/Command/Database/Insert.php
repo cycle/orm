@@ -36,9 +36,6 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     protected $data;
 
     /** @var string|null */
-    protected $primaryKey;
-
-    /** @var string|null */
     protected $primaryField;
 
     /** @var ConsumerInterface[][] */
@@ -49,18 +46,15 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      * @param string            $table
      * @param array             $data
      * @param string|null       $primaryField
-     * @param string|null       $primaryKey
      */
     public function __construct(
         DatabaseInterface $db,
         string $table,
         array $data = [],
-        string $primaryField = null,
-        string $primaryKey = null
+        string $primaryField = null
     ) {
         parent::__construct($db, $table);
         $this->data = $data;
-        $this->primaryKey = $primaryKey;
         $this->primaryField = $primaryField;
     }
 
@@ -131,8 +125,6 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
             $fresh = true;
             if ($key === self::INSERT_ID) {
                 $value = $insertID;
-            } elseif ($key === $this->primaryKey) {
-                $value = $data[$key] ?? $insertID;
             } else {
                 $value = $data[$key] ?? null;
             }

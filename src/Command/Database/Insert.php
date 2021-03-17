@@ -36,7 +36,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     protected $data;
 
     /** @var string|null */
-    protected $primaryField;
+    protected $primaryKey;
 
     /** @var ConsumerInterface[][] */
     protected $consumers = [];
@@ -45,17 +45,17 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      * @param DatabaseInterface $db
      * @param string            $table
      * @param array             $data
-     * @param string|null       $primaryField
+     * @param string|null       $primaryKey
      */
     public function __construct(
         DatabaseInterface $db,
         string $table,
         array $data = [],
-        string $primaryField = null
+        string $primaryKey = null
     ) {
         parent::__construct($db, $table);
         $this->data = $data;
-        $this->primaryField = $primaryField;
+        $this->primaryKey = $primaryKey;
     }
 
     /**
@@ -115,8 +115,8 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         $data = $this->getData();
 
         $insert = $this->db->insert($this->table)->values($data);
-        if ($this->primaryField !== null && $insert instanceof PostgresInsertQuery) {
-            $insert->returning($this->primaryField);
+        if ($this->primaryKey !== null && $insert instanceof PostgresInsertQuery) {
+            $insert->returning($this->primaryKey);
         }
 
         $insertID = $insert->run();

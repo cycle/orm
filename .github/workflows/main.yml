@@ -76,7 +76,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup PHP ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v1
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: pcov

@@ -10,7 +10,7 @@ class RenamedPKTest extends \Cycle\ORM\Tests\RenamedPKTest
     {
         parent::setUp();
 
-        $this->getDatabase()->query('SET IDENTITY_INSERT simple_entity ON')->fetch();
+        $this->getDatabase()->execute('SET IDENTITY_INSERT simple_entity ON');
     }
 
     public const DRIVER = 'sqlserver';

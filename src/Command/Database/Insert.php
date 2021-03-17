@@ -133,6 +133,8 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
                 $value = $insertID;
             } elseif ($key === $this->primaryKey) {
                 $value = $data[$key] ?? $insertID;
+            } else {
+                $value = $data[$key] ?? null;
             }
 
             foreach ($consumers as $id => $consumer) {

@@ -103,7 +103,8 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getDatabase(),
             $this->source->getTable(),
             $this->mapColumns($columns),
-            $this->primaryColumn
+            $this->primaryColumn,
+            $this->primaryKey
         );
 
         $key = isset($columns[$this->primaryKey]) ? $this->primaryKey : Insert::INSERT_ID;

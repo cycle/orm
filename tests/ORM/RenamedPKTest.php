@@ -24,6 +24,7 @@ abstract class RenamedPKTest extends BaseTest
             'simple_entity',
             [
                 'identity_id' => 'primary',
+                'identity_key' => 'integer',
             ]
         );
 
@@ -38,9 +39,11 @@ abstract class RenamedPKTest extends BaseTest
                         Schema::PRIMARY_KEY => 'id',
                         Schema::COLUMNS     => [
                             'id' => 'identity_id',
+                            'key' => 'identity_key',
                         ],
                         Schema::TYPECAST    => [
                             'id' => 'int',
+                            'key' => 'int',
                         ],
                         Schema::SCHEMA      => [],
                         Schema::RELATIONS   => []
@@ -50,19 +53,13 @@ abstract class RenamedPKTest extends BaseTest
         );
     }
 
-    public function testCreateEmpty(): void
-    {
-        $u = new Identity();
-
-        (new Transaction($this->orm))->persist($u)->run();
-
-        $this->assertIsInt($u->getId());
-    }
-
     public function testCreateWithPredefinedId(): void
     {
         $u = new Identity();
-        $u->setId(1);
+        $u->setId(2);
+        $u->setKey(42);
+
+        $_POST['entity'] = $u;
 
         (new Transaction($this->orm))->persist($u)->run();
 
@@ -70,6 +67,7 @@ abstract class RenamedPKTest extends BaseTest
         $data = $s->fetchData();
 
         $this->assertIsInt(current($data)['id']);
-        $this->assertIsInt($u->getId());
+        $this->assertSame(2, $u->getId());
+        $this->assertSame(42, $u->getKey());
     }
 }

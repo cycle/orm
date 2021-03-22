@@ -68,7 +68,7 @@ abstract class HasManyConstrainTest extends BaseTest
         );
     }
 
-    public function testOrdered(): void
+    public function testConstrainOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -89,7 +89,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[2]->message);
     }
 
-    public function testOrderedASC(): void
+    public function testConstrainOrderedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -110,7 +110,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testOrderedASCInload(): void
+    public function testConstrainOrderedAscInLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -133,7 +133,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testOrderedPromisedASC(): void
+    public function testConstrainOrderedPromisedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -154,11 +154,11 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testOrderedAndWhere(): void
+    public function testConstrainOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -173,11 +173,11 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
-    public function testOrderedAndWherePromised(): void
+    public function testConstrainOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
@@ -192,11 +192,11 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
-    public function testOrderedAndWhereReversed(): void
+    public function testConstrainOrderedAndWhereReversed(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -211,11 +211,11 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testOrderedAndWhereReversedInload(): void
+    public function testConstrainOrderedAndWhereReversedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
@@ -232,11 +232,11 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testOrderedAndWhereReversedPromised(): void
+    public function testConstrainOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
@@ -251,11 +251,11 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testCustomWhere(): void
+    public function testConstrainOrderedAndCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         // overwrites default one
@@ -270,11 +270,11 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testCustomWhereInload(): void
+    public function testConstrainOrderedAndCustomWhereInload(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         // overwrites default one
@@ -290,10 +290,105 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
+    public function testOrderByWithConstrainOrdered(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::SCHEMA  => [
+                Relation::ORDER_BY => ['@.level' => 'DESC'],
+            ],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[2]->message);
+        $this->assertSame('msg 1', $a->comments[3]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        $this->assertSame('msg 2.1', $b->comments[2]->message);
+    }
+
+    public function testWithOrderByInLoad(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA  => [
+                Relation::ORDER_BY => ['@.level' => 'ASC'],
+            ]
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
+            'method' => JoinableLoader::INLOAD
+        ])->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[3]->message);
+        $this->assertSame('msg 3', $a->comments[2]->message);
+        $this->assertSame('msg 2', $a->comments[1]->message);
+        $this->assertSame('msg 1', $a->comments[0]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[2]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        $this->assertSame('msg 2.1', $b->comments[0]->message);
+    }
+
+    public function testWithOrderByAltered(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA  => [
+                Relation::ORDER_BY => ['@.level' => 'DESC'],
+            ]
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
+            'orderBy' => ['@.level' => 'ASC']
+        ])->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[3]->message);
+        $this->assertSame('msg 3', $a->comments[2]->message);
+        $this->assertSame('msg 2', $a->comments[1]->message);
+        $this->assertSame('msg 1', $a->comments[0]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[2]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        $this->assertSame('msg 2.1', $b->comments[0]->message);
+    }
+
+    public function testWithOrderByAndWhere(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA  => [
+                Relation::WHERE => ['@.level' => ['>=' => 2]],
+                Relation::ORDER_BY => ['@.level' => 'ASC'],
+            ]
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
+
+        $this->assertCount(3, $a->comments);
+        $this->assertCount(2, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[2]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[0]->message);
+        $this->assertSame('msg 2.3', $b->comments[1]->message);
+        $this->assertSame('msg 2.2', $b->comments[0]->message);
+    }
+
     public function testWithWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE => ['@.level' => 4]
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => 4]]
         ]);
 
         // second user has been filtered out
@@ -306,7 +401,7 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE => ['@.level' => 4]
+            Relation::SCHEMA=> ['@.level' => 4]
         ]);
 
         // second user has been filtered out
@@ -346,10 +441,10 @@ abstract class HasManyConstrainTest extends BaseTest
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
-    public function testInloadWithOrderAndWhere(): void
+    public function testInloadWithConstrainOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE   => ['@.level' => ['>=' => 3]],
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
@@ -375,7 +470,7 @@ abstract class HasManyConstrainTest extends BaseTest
         $this->expectException(StatementException::class);
 
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE   => ['@.level' => ['>=' => 3]],
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'DESC']),
         ]);
 
@@ -387,16 +482,13 @@ abstract class HasManyConstrainTest extends BaseTest
 
     protected function withCommentsSchema(array $relationSchema)
     {
-        $eSchema = [];
-        $rSchema = [];
 
+        $eSchema = [];
         if (isset($relationSchema[Schema::CONSTRAIN])) {
             $eSchema[Schema::CONSTRAIN] = $relationSchema[Schema::CONSTRAIN];
         }
 
-        if (isset($relationSchema[Relation::WHERE])) {
-            $rSchema[Relation::WHERE] = $relationSchema[Relation::WHERE];
-        }
+        $rSchema = $relationSchema[Relation::SCHEMA] ?? [];
 
         return $this->orm->withSchema(new Schema([
             User::class    => [

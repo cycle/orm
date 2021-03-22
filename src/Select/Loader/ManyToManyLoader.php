@@ -20,6 +20,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
@@ -27,6 +28,7 @@ use Spiral\Database\StatementInterface;
 
 class ManyToManyLoader extends JoinableLoader
 {
+    use OrderByTrait;
     use WhereTrait;
 
     /**
@@ -42,7 +44,8 @@ class ManyToManyLoader extends JoinableLoader
         'as'        => null,
         'using'     => null,
         'where'     => null,
-        'pivot'     => null
+        'orderBy'   => null,
+        'pivot'     => null,
     ];
 
     /** @var PivotLoader */
@@ -55,6 +58,8 @@ class ManyToManyLoader extends JoinableLoader
     {
         parent::__construct($orm, $name, $target, $schema);
         $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THROUGH_ENTITY], $schema);
+        $this->options['where'] = $schema[Relation::WHERE] ?? [];
+        $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
     }
 
     /**
@@ -166,6 +171,13 @@ class ManyToManyLoader extends JoinableLoader
             $this->getAlias(),
             $this->isJoined() ? 'onWhere' : 'where',
             $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+        );
+
+        // user specified ORDER_BY rules
+        $this->setOrderBy(
+            $query,
+            $this->getAlias(),
+            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []
         );
 
         return parent::configureQuery($this->pivot->configureQuery($query));

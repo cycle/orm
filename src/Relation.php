@@ -48,6 +48,7 @@ final class Relation
 
     // Selections
     public const WHERE = 41;
+    public const ORDER_BY = 42;
 
     // Many-To-Many relation(s) options
     public const THROUGH_INNER_KEY = 50;

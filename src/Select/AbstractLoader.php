@@ -138,7 +138,7 @@ abstract class AbstractLoader implements LoaderInterface
                 sprintf(
                     'Relation %s does not support option: %s',
                     get_class($this),
-                    join(',', $wrong)
+                    implode(',', $wrong)
                 )
             );
         }

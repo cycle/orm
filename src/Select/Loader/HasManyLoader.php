@@ -19,12 +19,14 @@ use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
 class HasManyLoader extends JoinableLoader
 {
+    use OrderByTrait;
     use WhereTrait;
 
     /**
@@ -40,6 +42,7 @@ class HasManyLoader extends JoinableLoader
         'as'        => null,
         'using'     => null,
         'where'     => null,
+        'orderBy'   => null,
     ];
 
     /**
@@ -49,6 +52,7 @@ class HasManyLoader extends JoinableLoader
     {
         parent::__construct($orm, $name, $target, $schema);
         $this->options['where'] = $schema[Relation::WHERE] ?? [];
+        $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
     }
 
     /**
@@ -86,6 +90,13 @@ class HasManyLoader extends JoinableLoader
             $this->getAlias(),
             $this->isJoined() ? 'onWhere' : 'where',
             $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+        );
+
+        // user specified ORDER_BY rules
+        $this->setOrderBy(
+            $query,
+            $this->getAlias(),
+            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []
         );
 
         return parent::configureQuery($query);

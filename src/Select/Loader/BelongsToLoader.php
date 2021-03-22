@@ -11,14 +11,12 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\SingularNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
@@ -28,7 +26,6 @@ use Spiral\Database\Query\SelectQuery;
  */
 class BelongsToLoader extends JoinableLoader
 {
-    use OrderByTrait;
     use WhereTrait;
 
     /**
@@ -44,18 +41,7 @@ class BelongsToLoader extends JoinableLoader
         'as'        => null,
         'using'     => null,
         'where'     => null,
-        'orderBy'   => null,
     ];
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
-    {
-        parent::__construct($orm, $name, $target, $schema);
-        $this->options['where'] = $schema[Relation::WHERE] ?? [];
-        $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
-    }
 
     /**
      * {@inheritdoc}
@@ -88,13 +74,6 @@ class BelongsToLoader extends JoinableLoader
             $this->getAlias(),
             $this->isJoined() ? 'onWhere' : 'where',
             $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
-        );
-
-        // user specified ORDER_BY rules
-        $this->setOrderBy(
-            $query,
-            $this->getAlias(),
-            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []
         );
 
         return parent::configureQuery($query);

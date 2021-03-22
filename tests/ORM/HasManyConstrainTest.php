@@ -482,7 +482,6 @@ abstract class HasManyConstrainTest extends BaseTest
 
     protected function withCommentsSchema(array $relationSchema)
     {
-
         $eSchema = [];
         if (isset($relationSchema[Schema::CONSTRAIN])) {
             $eSchema[Schema::CONSTRAIN] = $relationSchema[Schema::CONSTRAIN];

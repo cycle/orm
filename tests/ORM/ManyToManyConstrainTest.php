@@ -88,7 +88,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         );
     }
 
-    public function testOrdered(): void
+    public function testConstrainOrdered(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -115,7 +115,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESC(): void
+    public function testConstrainOrderedDesc(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -142,7 +142,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedInload(): void
+    public function testConstrainOrderedInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -171,7 +171,174 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCInload(): void
+    public function testWithOrderByAndConstrainOrdered(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->load('tags')->fetchAll();
+
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
+
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
+    }
+
+    public function testWithOrderByAsc(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->load('tags')->fetchAll();
+
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
+
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
+    }
+
+    public function testWithOrderByDesc(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'DESC']],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->load('tags')->fetchAll();
+
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('tag a', $a->tags[3]->name);
+        $this->assertSame('tag b', $a->tags[2]->name);
+        $this->assertSame('tag d', $a->tags[1]->name);
+        $this->assertSame('tag e', $a->tags[0]->name);
+
+        $this->assertSame('tag c', $b->tags[2]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[0]->name);
+    }
+
+    public function testWithOrderByInload(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->load('tags', [
+            'method' => Select\JoinableLoader::INLOAD
+        ])->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
+
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
+    }
+
+    public function testWithOrderByPromisedASC(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
+
+        $this->captureReadQueries();
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+        $this->assertNumReads(2);
+
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
+
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
+    }
+
+    public function testWithOrderByAltered(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'DESC']],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->load('tags', ['orderBy' => ['@.level' => 'ASC']])->fetchAll();
+
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
+
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
+    }
+
+    public function testConstrainOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -200,7 +367,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedPromisedASC(): void
+    public function testConstrainOrderedPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
@@ -229,7 +396,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedPromisedDESC(): void
+    public function testConstrainOrderedPromisedDESC(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
@@ -258,11 +425,11 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedAndWhere(): void
+    public function testConstrainOrderedAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -284,11 +451,39 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCAndWhere(): void
+    public function testWithOrderByAndWhere(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA  => [
+                Relation::WHERE => ['@.level' => ['>=' => 3]],
+                Relation::ORDER_BY => ['@.level' => 'ASC'],
+            ],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(2, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('tag d', $a->tags[0]->name);
+        $this->assertSame('tag e', $a->tags[1]->name);
+
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
+    }
+
+    public function testConstrainOrderedDESCAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -310,11 +505,11 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedAndWhereInload(): void
+    public function testConstrainOrderedAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -338,11 +533,11 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testOrderedDESCAndWhereInload(): void
+    public function testConstrainOrderedDESCAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -366,11 +561,11 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testOrderedAndWherePromise(): void
+    public function testConstrainOrderedAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -398,7 +593,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -426,7 +621,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -449,7 +644,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 3]]
+            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -471,7 +666,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testWithWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::WHERE => ['@.level' => ['>=' => 6]]
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 6]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -547,15 +742,11 @@ abstract class ManyToManyConstrainTest extends BaseTest
     protected function withTagSchema(array $relationSchema)
     {
         $eSchema = [];
-        $rSchema = [];
-
         if (isset($relationSchema[Schema::CONSTRAIN])) {
             $eSchema[Schema::CONSTRAIN] = $relationSchema[Schema::CONSTRAIN];
         }
 
-        if (isset($relationSchema[Relation::WHERE])) {
-            $rSchema[Relation::WHERE] = $relationSchema[Relation::WHERE];
-        }
+        $rSchema = $relationSchema[Relation::SCHEMA] ?? [];
 
         return $this->withSchema(new Schema([
             User::class       => [

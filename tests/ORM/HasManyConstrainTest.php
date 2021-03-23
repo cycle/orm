@@ -401,7 +401,7 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::SCHEMA=> ['@.level' => 4]
+            Relation::SCHEMA => ['@.level' => 4]
         ]);
 
         // second user has been filtered out

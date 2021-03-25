@@ -35,7 +35,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         // refers-to relation is always nullable (as opposite to belongs-to)
         if ($related === null) {
             if ($original !== null) {
-                $store->register($this->innerKey, null, true);
+                $store->register($this->columnName($node, $this->innerKey), null, true);
             }
 
             return new Nil();
@@ -49,7 +49,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 
         if ($outerKey !== null) {
             if ($outerKey != $this->fetchKey($node, $this->innerKey)) {
-                $store->register($this->innerKey, $outerKey, true);
+                $store->register($this->columnName($node, $this->innerKey), $outerKey, true);
             }
 
             return new Nil();

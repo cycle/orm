@@ -39,7 +39,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
             if ($original !== null) {
                 // reset the key
-                $store->register($this->innerKey, null, true);
+                $store->register($this->columnName($node, $this->innerKey), null, true);
             }
 
             // nothing to do

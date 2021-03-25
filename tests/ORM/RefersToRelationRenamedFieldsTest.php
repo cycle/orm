@@ -77,4 +77,5 @@ abstract class RefersToRelationRenamedFieldsTest extends RefersToRelationTest
                 Schema::RELATIONS   => [],
             ],
         ]));
-    }}
+    }
+}

@@ -11,12 +11,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\Branch\Sequence;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
@@ -27,14 +25,14 @@ use Doctrine\Common\Collections\Collection;
 
 class ManyToMany extends Relation\AbstractRelation
 {
-
     /** @var string */
     protected $throughInnerKey;
 
     /** @var string */
     protected $throughOuterKey;
+
     /** @var string|null */
-    private $pivotEntity;
+    protected $pivotEntity;
 
     /**
      * @param ORMInterface $orm
@@ -232,14 +230,15 @@ class ManyToMany extends Relation\AbstractRelation
      *
      * @param Node $node
      * @param Node $related
-     * @return array<Node, Node>
+     * @return Node[]
      */
-    private function sortRelation(Node $node, Node $related): array
+    protected function sortRelation(Node $node, Node $related): array
     {
         // always use single storage
-        $list = [$node->getRole() => $node, $related->getRole() => $related];
-        ksort($list);
+        if ($related->getState()->getStorage($this->pivotEntity)->contains($node)) {
+            return [$related, $node];
+        }
 
-        return array_values($list);
+        return [$node, $related];
     }
 }

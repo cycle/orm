@@ -24,7 +24,7 @@ abstract class RenamedPKTest extends BaseTest
             'simple_entity',
             [
                 'identity_id' => 'primary',
-                'identity_key' => 'integer',
+                'identity_key' => 'integer,nullable',
             ]
         );
 
@@ -51,6 +51,15 @@ abstract class RenamedPKTest extends BaseTest
                 ]
             )
         );
+    }
+
+    public function testCreateEmpty(): void
+    {
+        $u = new Identity();
+
+        (new Transaction($this->orm))->persist($u)->run();
+
+        $this->assertIsInt($u->getId());
     }
 
     public function testCreateWithPredefinedId(): void

@@ -149,12 +149,32 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
-     * @param string|int $id
+     * @param string|int|string[]|int[] $id
      * @return $this|Select
      */
     public function wherePK($id): self
     {
-        return $this->__call('where', [$this->loader->getPK(), $id]);
+        $pk = $this->loader->getPK();
+        if (is_array($pk)) {
+            if (!is_array($id) || count($pk) !== count($id)) {
+                throw new \InvalidArgumentException('Primary key should contain %d values.', count($pk));
+            }
+
+            $values = array_values($id);
+            $i = 0;
+            foreach ($pk as $key) {
+                $this->__call('where', [$key, $values[$i]]);
+                ++$i;
+            }
+            return $this;
+            # todo: it is better but not works :(
+            // $keys = (array)$this->orm->getSchema()->define($this->loader->getTarget(), Schema::PRIMARY_KEY);
+            // return $this->__call('where', array_diff($keys, array_keys($id)) === []
+            //     ? $id
+            //     : array_combine($keys, $id)
+            // );
+        }
+        return $this->__call('where', [$pk, $id]);
     }
 
     /**

@@ -22,9 +22,9 @@ final class RootNode extends OutputNode
      * @param array  $columns
      * @param string $primaryKey
      */
-    public function __construct(array $columns, string $primaryKey)
+    public function __construct(array $columns, string ...$primaryKeys)
     {
         parent::__construct($columns, null);
-        $this->setDuplicateCriteria($primaryKey);
+        $this->setDuplicateCriteria(...$primaryKeys);
     }
 }

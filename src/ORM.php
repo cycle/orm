@@ -147,10 +147,21 @@ final class ORM implements ORMInterface
 
         // unique entity identifier
         $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-        $id = $data[$pk] ?? null;
+        if (is_array($pk)) {
+            $ids = [];
+            foreach ($pk as $key) {
+                if (!isset($data[$key])) {
+                    $ids = null;
+                    break;
+                }
+                $ids[$key] = $data[$key];
+            }
+        } else {
+            $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
+        }
 
-        if ($node !== Node::NEW && $id !== null) {
-            $e = $this->heap->find($role, [$pk => $id]);
+        if ($node !== Node::NEW && $ids !== null) {
+            $e = $this->heap->find($role, $ids);
 
             if ($e !== null) {
                 $node = $this->heap->get($e);
@@ -390,10 +401,10 @@ final class ORM implements ORMInterface
             return $this->indexes[$role];
         }
 
-        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+        $pk = (array)$this->schema->define($role, Schema::PRIMARY_KEY);
         $keys = $this->schema->define($role, Schema::FIND_BY_KEYS) ?? [];
 
-        return $this->indexes[$role] = array_unique(array_merge([$pk], $keys));
+        return $this->indexes[$role] = array_unique(array_merge($pk, $keys));
     }
 
     /**

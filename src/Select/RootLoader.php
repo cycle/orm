@@ -77,11 +77,20 @@ final class RootLoader extends AbstractLoader
     /**
      * Get primary key column identifier (aliased).
      *
-     * @return string
+     * @return string|string[]
      */
-    public function getPK(): string
+    public function getPK()
     {
-        return $this->getAlias() . '.' . $this->fieldAlias($this->define(Schema::PRIMARY_KEY));
+        $pk = $this->define(Schema::PRIMARY_KEY);
+        if (is_array($pk)) {
+            $result = [];
+            foreach ($pk as $key) {
+                $result[] = $this->getAlias() . '.' . $this->fieldAlias($key);
+            }
+            return $result;
+        }
+
+        return $this->getAlias() . '.' . $this->fieldAlias($pk);
     }
 
     /**
@@ -147,7 +156,7 @@ final class RootLoader extends AbstractLoader
      */
     protected function initNode(): AbstractNode
     {
-        $node = new RootNode($this->columnNames(), $this->define(Schema::PRIMARY_KEY));
+        $node = new RootNode($this->columnNames(), ...(array)$this->define(Schema::PRIMARY_KEY));
 
         $typecast = $this->define(Schema::TYPECAST);
         if ($typecast !== null) {

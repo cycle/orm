@@ -51,6 +51,12 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string */
     protected $primaryColumn;
 
+    /** @var string[] */
+    protected $primaryColumns = [];
+
+    /** @var string[] */
+    protected $primaryKeys;
+
     /**
      * @param ORMInterface $orm
      * @param string       $role
@@ -66,8 +72,16 @@ abstract class DatabaseMapper implements MapperInterface
 
         $this->source = $orm->getSource($role);
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
-        $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $this->primaryColumn = $this->columns[$this->primaryKey] ?? $this->primaryKey;
+
+        $primaryKeys = (array)$orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $primaryKey = implode(':', $primaryKeys);
+        $this->primaryKey = $primaryKey;
+        $this->primaryColumn = $this->columns[$primaryKey] ?? $primaryKey;
+
+        $this->primaryKeys = $primaryKeys;
+        foreach ($this->primaryKeys as $PK) {
+            $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
+        }
 
         // Resolve field names
         foreach ($this->columns as $name => $column) {
@@ -103,11 +117,17 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getDatabase(),
             $this->source->getTable(),
             $this->mapColumns($columns),
-            $this->primaryColumn
+            ...$this->primaryColumns
         );
 
-        $key = isset($columns[$this->primaryKey]) ? $this->primaryColumn : Insert::INSERT_ID;
-        $insert->forward($key, $state, $this->primaryKey);
+        if (count($this->primaryKeys) === 1) {
+            $key = isset($columns[$this->primaryKey]) ? $this->primaryColumn : Insert::INSERT_ID;
+            $insert->forward($key, $state, $this->primaryKey);
+        } else {
+            foreach ($this->primaryKeys as $num => $pk) {
+                $insert->forward($this->primaryColumns[$num], $state, $pk);
+            }
+        }
 
         return $insert;
     }

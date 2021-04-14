@@ -24,9 +24,11 @@ trait ScopeTrait
      *
      * @param string $key
      */
-    public function waitScope(string $key): void
+    public function waitScope(string ...$keys): void
     {
-        $this->waitScope[$key] = true;
+        foreach ($keys as $key) {
+            $this->waitScope[$key] = true;
+        }
     }
 
     /**

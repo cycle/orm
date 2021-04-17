@@ -8,6 +8,7 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\Pivoted\PivotedCollection;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\RbacItemAbstract;
@@ -116,5 +117,44 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         self::assertCount(1, $fetchedRole->children);
         self::assertInstanceOf(RbacPermission::class, $fetchedRole->children->first());
         self::assertSame('writeUser', $fetchedRole->children->first()->name);
+    }
+
+    public function testClearAndFillRelation(): void
+    {
+        $role = new RbacRole('superAdmin');
+
+        $permission = new RbacPermission('writeUser');
+
+        $role->children->add($permission);
+        $permission->parents->add($role);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($role);
+        $tr->run();
+
+        unset($role, $permission);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        /** @var RbacRole $fetchedRole */
+        $fetchedRole = (new Select($this->orm, 'rbac_item'))->wherePK('superAdmin')->fetchOne();
+        /** @var RbacPermission $fetchedPermission */
+        $fetchedPermission = (new Select($this->orm, 'rbac_item'))->wherePK('writeUser')->fetchOne();
+
+        $fetchedRole->children->removeElement($fetchedPermission);
+        $fetchedPermission->parents->removeElement($fetchedRole);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($fetchedRole);
+        $tr->run();
+
+        $fetchedRole->children->add($fetchedPermission);
+        $fetchedPermission->parents->add($fetchedRole);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($fetchedRole);
+        $tr->run();
+
+        self::assertTrue(true);
     }
 }

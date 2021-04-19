@@ -34,6 +34,26 @@ abstract class CompositePKTest extends BaseTest
         $this->assertSame(null, current($data)['key3']);
     }
 
+    public function testRemoveCreated(): void
+    {
+        $this->createTable1();
+        $u1 = new CompositePK();
+        $u1->key1 = 1;
+        $u1->key2 = 2;
+        $u2 = new CompositePK();
+        $u2->key1 = 3;
+        $u2->key2 = 4;
+        (new Transaction($this->orm))->persist($u1)->run();
+
+        (new Transaction($this->orm))
+            ->delete($u1)
+            ->delete($u2)
+            ->run();
+
+        $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))->fetchData();
+        $this->assertSame([], $data);
+    }
+
     public function testCreateWithHalfSame(): void
     {
         $this->createTable1();

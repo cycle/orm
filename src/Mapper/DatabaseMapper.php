@@ -170,14 +170,16 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_DELETE);
         $state->decClaim();
 
-        $delete->waitScope($this->primaryColumn);
-        $state->forward(
-            $this->primaryKey,
-            $delete,
-            $this->primaryColumn,
-            true,
-            ConsumerInterface::SCOPE
-        );
+        $delete->waitScope(...$this->primaryColumns);
+        foreach ($this->primaryKeys as $i => $key) {
+            $state->forward(
+                $key,
+                $delete,
+                $this->primaryColumns[$i],
+                true,
+                ConsumerInterface::SCOPE
+            );
+        }
 
         return $delete;
     }

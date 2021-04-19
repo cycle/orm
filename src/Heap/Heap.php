@@ -17,6 +17,9 @@ use UnexpectedValueException;
 
 final class Heap implements HeapInterface, IteratorAggregate
 {
+    private const KEY_SEPARATOR = ':';
+    private const VALUE_SEPARATOR = '/';
+
     /** @var SplObjectStorage */
     private $storage;
 
@@ -80,11 +83,8 @@ final class Heap implements HeapInterface, IteratorAggregate
             return $this->paths[$role][$key][$scope[$key]] ?? null;
         }
 
-        $key = $value = '';
-        foreach ($scope as $k => $v) {
-            $key .= $k;
-            $value .= $v . '/';
-        }
+        $key = implode(self::KEY_SEPARATOR, array_keys($scope));
+        $value = $this->escapeValues($scope);
 
         return $this->paths[$role][$key][$value] ?? null;
     }
@@ -99,12 +99,13 @@ final class Heap implements HeapInterface, IteratorAggregate
         $data = $node->getData();
         foreach ($index as $key) {
             if (is_array($key)) {
-                $keyName = $value = '';
+                // $keyName = $value = '';
+                $values = [];
                 foreach ($key as $k) {
-                    $keyName .= $k; // chance of collision?
-                    $value .= (string)$data[$k] . '/';
+                    $values[] = (string) $data[$k];
                 }
-                $key = $keyName;
+                $value = $this->escapeValues($values);
+                $key = implode(self::KEY_SEPARATOR, $key);
             } else {
                 if (!isset($data[$key])) {
                     continue;
@@ -134,7 +135,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         if (isset($this->paths[$role])) {
             $keys = array_keys($this->paths[$role]);
             foreach ($keys as $key) {
-                unset($this->paths[$role][$key][$node->getData()[$key]]);
+                unset($this->paths[$role][$key][$this->extractNodeValueByKey($node, $key)]);
             }
         }
 
@@ -148,5 +149,33 @@ final class Heap implements HeapInterface, IteratorAggregate
     {
         $this->paths = [];
         $this->storage = new \SplObjectStorage();
+    }
+
+    private function extractNodeValueByKey(Node $node, string $key): string
+    {
+        $composite = strpos($key, self::KEY_SEPARATOR) !== false;
+
+        if (!$composite) {
+            return (string) $node->getData()[$key];
+        }
+
+        $data = [];
+        foreach (explode(self::KEY_SEPARATOR, $key) as $k) {
+            $data[] = $node->getData()[$k];
+        }
+        return $this->escapeValues($data);
+    }
+
+    private function escapeValues(array $values): string
+    {
+        $result = '';
+        foreach ($values as $value) {
+            $result .= str_replace(
+                    self::VALUE_SEPARATOR,
+                    self::VALUE_SEPARATOR . self::VALUE_SEPARATOR,
+                    (string) $value
+                ) . self::VALUE_SEPARATOR;
+        }
+        return $result;
     }
 }

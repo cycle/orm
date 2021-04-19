@@ -21,9 +21,9 @@ interface ScopeCarrierInterface extends CommandInterface, ConsumerInterface
     /**
      * Wait for the scope value. Command must not be ready until the value come.
      *
-     * @param string $key
+     * @param string ...$keys
      */
-    public function waitScope(string $key);
+    public function waitScope(string ...$keys);
 
     /**
      * @return array

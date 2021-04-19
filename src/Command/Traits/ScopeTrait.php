@@ -22,7 +22,7 @@ trait ScopeTrait
     /**
      * Wait for the context value.
      *
-     * @param string $key
+     * @param string ...$keys
      */
     public function waitScope(string ...$keys): void
     {

@@ -71,6 +71,8 @@ abstract class BaseTest extends TestCase
     {
         parent::setUp();
 
+        $this->getDriver()->rollbackTransaction();
+
         $this->dbal = new DatabaseManager(new DatabaseConfig());
         $this->dbal->addDatabase(
             new Database(

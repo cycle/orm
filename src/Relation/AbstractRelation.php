@@ -45,6 +45,12 @@ abstract class AbstractRelation implements RelationInterface
     /** @var string */
     protected $outerKey;
 
+    /** @var string[] */
+    protected $innerKeys;
+
+    /** @var string[] */
+    protected $outerKeys;
+
     /**
      * @param ORMInterface $orm
      * @param string       $name
@@ -57,8 +63,12 @@ abstract class AbstractRelation implements RelationInterface
         $this->name = $name;
         $this->target = $target;
         $this->schema = $schema;
+        // $this->innerKey = implode(':', $schema[Relation::INNER_KEY]);
+        // $this->outerKey = implode(':', $schema[Relation::OUTER_KEY]);
         $this->innerKey = $schema[Relation::INNER_KEY];
         $this->outerKey = $schema[Relation::OUTER_KEY];
+        $this->innerKeys = (array)$schema[Relation::INNER_KEY];
+        $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
     }
 
     /**

@@ -187,7 +187,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     {
         if ($column === null) {
             // @tuneyourserver solves the issue with counting on queries with joins.
-            $column = sprintf('DISTINCT(%s)', $this->loader->getPK());
+            $pk = $this->loader->getPK();
+            $column = is_array($pk)
+                ? '*'
+                : sprintf('DISTINCT(%s)', $pk);
         }
 
         return (int) $this->__call('count', [$column]);

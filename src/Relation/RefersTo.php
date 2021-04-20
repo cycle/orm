@@ -66,10 +66,10 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 
         $this->forwardContext(
             $rNode,
-            $this->outerKey,
+            $this->outerKeys,
             $update,
             $node,
-            $this->innerKey
+            $this->innerKeys
         );
 
         // set where condition for update query

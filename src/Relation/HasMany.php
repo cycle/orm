@@ -142,10 +142,10 @@ class HasMany extends AbstractRelation
 
         $this->forwardContext(
             $node,
-            $this->innerKey,
+            $this->innerKeys,
             $relStore,
             $relNode,
-            $this->outerKey
+            $this->outerKeys
         );
 
         return $relStore;

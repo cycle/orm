@@ -55,6 +55,12 @@ abstract class AbstractNode
     protected $outerKey;
 
     /**
+     * Declared column list which must be aggregated in a parent node. i.e. Parent Key
+     * @var string[]
+     */
+    protected $outerKeys;
+
+    /**
      * Node location in a tree. Set when node is registered.
      *
      * @internal
@@ -86,6 +92,9 @@ abstract class AbstractNode
      */
     protected $references = [];
 
+    /** @var MultiKeyCollection */
+    protected $referencesNew;
+
     /**
      * Set of keys to be aggregated by Parser while parsing results.
      *
@@ -95,13 +104,16 @@ abstract class AbstractNode
     protected $trackReferences = [];
 
     /**
-     * @param array       $columns  When columns are empty original line will be returned as result.
-     * @param string|null $outerKey Defines column name in parent Node to be aggregated.
+     * @param array $columns  When columns are empty original line will be returned as result.
+     * @param array|string|null $outerKey Defines column name in parent Node to be aggregated.
      */
-    public function __construct(array $columns, string $outerKey = null)
+    public function __construct(array $columns, $outerKey = null)
     {
         $this->columns = $columns;
-        $this->outerKey = $outerKey;
+        #todo: fix
+        $this->outerKey = $outerKey === null ? $outerKey : $this->packKeys((array)$outerKey);
+        $this->outerKeys = (array)$outerKey;
+        $this->referencesNew = new MultiKeyCollection();
     }
 
     /**
@@ -112,6 +124,7 @@ abstract class AbstractNode
         $this->parent = null;
         $this->nodes = [];
         $this->references = [];
+        $this->referencesNew = new MultiKeyCollection();
         $this->trackReferences = [];
         $this->duplicates = [];
     }
@@ -136,11 +149,25 @@ abstract class AbstractNode
         $data = $this->fetchData($offset, $row);
 
         if ($this->deduplicate($data)) {
-            foreach ($this->trackReferences as $key) {
-                if (!empty($data[$key])) {
-                    $this->references[$key][$data[$key]][] = &$data;
+
+            foreach ($this->referencesNew->getIndexes() as $index) {
+                try {
+                    $this->referencesNew->addItem($index, $data);
+                } catch (\Throwable $e) {
                 }
             }
+            // foreach ($this->trackReferences as $key) {
+            //     if (!empty($data[$key])) {
+            //         $this->references[$key][$data[$key]][] = &$data;
+            //     }
+            // }
+            # mine
+            // foreach ($this->trackReferences as $key) {
+            //     $values = $this->intersectDataString($key, $data);
+            //     if ($values !== null) {
+            //         $this->references[$key][$values][] = &$data;
+            //     }
+            // }
 
             //Let's force placeholders for every sub loaded
             foreach ($this->nodes as $name => $node) {
@@ -191,14 +218,29 @@ abstract class AbstractNode
     public function getReferences(): array
     {
         if ($this->parent === null) {
-            throw new ParserException('Unable to aggregate reference values, parent is missing');
+            throw new ParserException('Unable to aggregate reference values, parent is missing.');
         }
+        if (!$this->parent->referencesNew->hasIndex($this->outerKey)) {
+            return [];
+        }
+
+        return $this->parent->referencesNew->getIndexAssoc($this->outerKey);
 
         if (empty($this->parent->references[$this->outerKey])) {
             return [];
         }
 
         return array_keys($this->parent->references[$this->outerKey]);
+
+        // if (empty($this->outerKeys)) {
+        //     return [];
+        // }
+        // $result = [];
+        // foreach ($this->outerKeys as $key) {
+        //     $result[] = array_keys((array) $this->parent->references[$key]);
+        // }
+        //
+        // return array_merge(...$result);
     }
 
     /**
@@ -216,15 +258,33 @@ abstract class AbstractNode
         $node->container = $container;
         $node->parent = $this;
 
-        if ($node->outerKey !== null) {
-            if (!in_array($node->outerKey, $this->columns, true)) {
-                throw new ParserException(
-                    "Unable to create reference, key `{$node->outerKey}` does not exist"
-                );
-            }
+        // if ($node->outerKey !== null) {
+        //     if (!in_array($node->outerKey, $this->columns, true)) {
+        //         throw new ParserException(
+        //             "Unable to create reference, key `{$node->outerKey}` does not exist"
+        //         );
+        //     }
+        //
+        //     if (!in_array($node->outerKey, $this->trackReferences, true)) {
+        //         $this->trackReferences[] = $node->outerKey;
+        //     }
+        // }
 
+        if (!empty($node->outerKeys)) {
+            foreach ($node->outerKeys as $key) {
+                if (!in_array($key, $this->columns, true)) {
+                    throw new ParserException("Unable to create reference, key `{$key}` does not exist.");
+                }
+
+                // if (!in_array($key, $this->trackReferences, true)) {
+                //     $this->trackReferences[] = $key;
+                // }
+            }
             if (!in_array($node->outerKey, $this->trackReferences, true)) {
                 $this->trackReferences[] = $node->outerKey;
+            }
+            if (!$this->referencesNew->hasIndex($node->outerKey)) {
+                $this->referencesNew->createIndex($node->outerKey, $node->outerKeys);
             }
         }
     }
@@ -279,27 +339,28 @@ abstract class AbstractNode
      *
      * @param string $container
      * @param string $key
-     * @param mixed  $criteria
-     * @param array  $data
+     * @param array $criteria
+     * @param array $data
      *
      * @throws ParserException
      */
-    protected function mount(string $container, string $key, $criteria, array &$data): void
+    protected function mount(string $container, string $key, array $criteria, array &$data): void
     {
         if ($criteria === self::LAST_REFERENCE) {
-            if (!isset($this->references[$key])) {
+            // if (!isset($this->references[$key])) {
+            if (!$this->referencesNew->hasIndex($key)) {
                 return;
             }
-
-            end($this->references[$key]);
-            $criteria = key($this->references[$key]);
+            $criteria = $this->referencesNew->getLastItemKeys($key);
         }
 
-        if (!array_key_exists($criteria, $this->references[$key])) {
-            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
+        if (!$this->referencesNew->getItemsCount($key, $criteria)) {
+        // if (!array_key_exists($criteria, $this->references[$key])) {
+            throw new ParserException(sprintf('Undefined reference `%s` "%s".', $key, implode(':', $criteria)));
+            // throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }
 
-        foreach ($this->references[$key][$criteria] as &$subset) {
+        foreach ($this->referencesNew->getItemsSubset($key, $criteria) as &$subset) {
             if (isset($subset[$container])) {
                 // back reference!
                 $data = &$subset[$container];
@@ -336,6 +397,7 @@ abstract class AbstractNode
      */
     protected function mountArray(string $container, string $key, $criteria, array &$data): void
     {
+        # todo: make $key arrayable
         if (!array_key_exists($criteria, $this->references[$key])) {
             throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }
@@ -385,5 +447,38 @@ abstract class AbstractNode
                 $e
             );
         }
+    }
+
+    protected function intersectData(array $keys, array $data): array
+    {
+        $result = [];
+        foreach ($keys as $key) {
+            $result[$key] = $data[$key];
+        }
+        return $result;
+    }
+    protected function intersectDataString(string $keys, array $data): ?string
+    {
+        $keyList = $this->unpackKeys($keys);
+        $result = [];
+        foreach ($keyList as $key) {
+            if (!isset($data[$key])) {
+                return null;
+            }
+            $result[$key] = $data[$key];
+        }
+        return $this->packCriteria($result);
+    }
+    protected function unpackKeys(string $keys): array
+    {
+        return explode(":", $keys);
+    }
+    protected function packKeys(array $keys): string
+    {
+        return implode(":", $keys);
+    }
+    protected function packCriteria(array $data): string
+    {
+        return implode('/', $data);
     }
 }

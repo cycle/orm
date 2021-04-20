@@ -58,10 +58,10 @@ class HasOne extends AbstractRelation
         // store command with mounted context paths
         $rStore = $this->forwardContext(
             $node,
-            $this->innerKey,
+            $this->innerKeys,
             $rStore,
             $rNode,
-            $this->outerKey
+            $this->outerKeys
         );
 
         if ($original === null) {
@@ -87,7 +87,9 @@ class HasOne extends AbstractRelation
 
         if ($this->isNullable()) {
             $store = $this->orm->queueStore($original);
-            $store->register($this->outerKey, null, true);
+            foreach ($this->outerKey as $oKey) {
+                $store->register($oKey, null, true);
+            }
             $rNode->getState()->decClaim();
 
             return new Condition($store, function () use ($rNode) {

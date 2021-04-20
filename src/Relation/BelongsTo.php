@@ -52,10 +52,10 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
         $this->forwardContext(
             $rNode,
-            $this->outerKey,
+            $this->outerKeys,
             $store,
             $node,
-            $this->innerKey
+            $this->innerKeys
         );
 
         return $rStore;

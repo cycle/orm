@@ -60,6 +60,19 @@ trait TableTrait
         $schema->save();
     }
 
+        public function makeCompositeFK(
+        string $from,
+        array $fromKeys,
+        string $to,
+        array $toColumns,
+        string $onDelete = ForeignKeyInterface::CASCADE,
+        string $onUpdate = ForeignKeyInterface::CASCADE
+    ): void {
+        $schema = $this->getDatabase()->table($from)->getSchema();
+        $schema->foreignKey($fromKeys)->references($to, $toColumns)->onDelete($onDelete)->onUpdate($onUpdate);
+        $schema->save();
+    }
+
     /**
      * @param string $table
      * @param array  $columns

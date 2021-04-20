@@ -108,6 +108,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_INSERT);
         $state->setData($columns);
 
+        #todo
         $columns[$this->primaryKey] = $columns[$this->primaryKey] ?? $this->nextPrimaryKey();
         if ($columns[$this->primaryKey] === null) {
             unset($columns[$this->primaryKey]);
@@ -141,7 +142,9 @@ abstract class DatabaseMapper implements MapperInterface
 
         // in a future mapper must support solid states
         $changes = array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
-        unset($changes[$this->primaryKey]);
+        foreach ($this->primaryKeys as $pk) {
+            unset($changes[$pk]);
+        }
 
         $changedColumns = $this->mapColumns($changes);
 
@@ -149,14 +152,16 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
 
-        // we are trying to update entity without PK right now
-        $state->forward(
-            $this->primaryKey,
-            $update,
-            $this->primaryColumn,
-            true,
-            ConsumerInterface::SCOPE
-        );
+        foreach ($this->primaryKeys as $i => $pk) {
+            // we are trying to update entity without PK right now
+            $state->forward(
+                $pk,
+                $update,
+                $this->primaryColumns[$i],
+                true,
+                ConsumerInterface::SCOPE
+            );
+        }
 
         return $update;
     }

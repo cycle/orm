@@ -21,19 +21,22 @@ final class SingularNode extends AbstractNode
 {
     /** @var string */
     protected $innerKey;
+    /** @var string[] */
+    protected $innerKeys;
 
     /**
-     * @param array       $columns
-     * @param string      $primaryKey
-     * @param string      $innerKey Inner relation key (for example user_id)
-     * @param string|null $outerKey Outer (parent) relation key (for example id = parent.id)
+     * @param array              $columns
+     * @param string|array       $primaryKey
+     * @param string|array       $innerKey Inner relation key (for example user_id)
+     * @param string|array|null  $outerKey Outer (parent) relation key (for example id = parent.id)
      */
-    public function __construct(array $columns, string $primaryKey, string $innerKey, string $outerKey)
+    public function __construct(array $columns, $primaryKey, $innerKey, $outerKey)
     {
         parent::__construct($columns, $outerKey);
-        $this->setDuplicateCriteria($primaryKey);
+        $this->setDuplicateCriteria(...(array)$primaryKey);
 
-        $this->innerKey = $innerKey;
+        $this->innerKey = implode(':', $innerKey);
+        $this->innerKeys = $innerKey;
     }
 
     /**
@@ -42,18 +45,20 @@ final class SingularNode extends AbstractNode
     protected function push(array &$data): void
     {
         if ($this->parent === null) {
-            throw new ParserException('Unable to register data tree, parent is missing');
+            throw new ParserException('Unable to register data tree, parent is missing.');
         }
 
-        if ($data[$this->innerKey] === null) {
-            //No data was loaded
-            return;
+        foreach ($this->innerKeys as $key) {
+            if ($data[$key] === null) {
+                //No data was loaded
+                return;
+            }
         }
 
         $this->parent->mount(
             $this->container,
             $this->outerKey,
-            $data[$this->innerKey],
+            $this->intersectData($this->innerKeys, $data),
             $data
         );
     }

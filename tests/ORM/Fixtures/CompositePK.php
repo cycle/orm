@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 class CompositePK
 {
     public $key1;
@@ -14,4 +16,9 @@ class CompositePK
     public $child_entity;
 
     public $children;
+
+    public function __construct()
+    {
+        $this->children = new ArrayCollection();
+    }
 }

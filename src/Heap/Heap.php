@@ -24,7 +24,7 @@ final class Heap implements HeapInterface, IteratorAggregate
     private $storage;
 
     /** @var array */
-    private $paths = [];
+    public $paths = [];
 
     /**
      * Heap constructor.
@@ -92,17 +92,16 @@ final class Heap implements HeapInterface, IteratorAggregate
     /**
      * @inheritdoc
      */
-    public function attach($entity, Node $node, array $index = []): void
+    public function attach(object $entity, Node $node, array $index = []): void
     {
         $this->storage->offsetSet($entity, $node);
 
         $data = $node->getData();
         foreach ($index as $key) {
             if (is_array($key)) {
-                // $keyName = $value = '';
                 $values = [];
                 foreach ($key as $k) {
-                    $values[] = (string) $data[$k];
+                    $values[] = (string) ($data[$k] ?? "\0");
                 }
                 $value = $this->escapeValues($values);
                 $key = implode(self::KEY_SEPARATOR, $key);

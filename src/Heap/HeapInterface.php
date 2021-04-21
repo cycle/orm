@@ -49,7 +49,7 @@ interface HeapInterface
      * @param Node   $node
      * @param array  $index
      */
-    public function attach($entity, Node $node, array $index = []);
+    public function attach(object $entity, Node $node, array $index = []);
 
     /**
      * Detach entity from the Heap.

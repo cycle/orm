@@ -21,6 +21,30 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 {
     use TableTrait;
 
+    protected const
+        CHILD_CONTAINER = 'child_entity',
+
+        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101],
+        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102],
+        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201],
+        PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202],
+
+        CHILD_1_1 = ['key1' => 1, 'key2' => 1, 'key3' => null, 'parent_key1' => 1, 'parent_key2' => 1],
+        CHILD_2_1 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2],
+        CHILD_3_1 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1],
+
+        PARENT_1_FULL = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1_1],
+        PARENT_2_FULL = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2_1],
+        PARENT_3_FULL = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3_1],
+        PARENT_4_FULL = self::PARENT_4 + [self::CHILD_CONTAINER => null],
+
+        SET_FULL = [
+            self::PARENT_1_FULL,
+            self::PARENT_2_FULL,
+            self::PARENT_3_FULL,
+            self::PARENT_4_FULL,
+        ];
+
     public function setUp(): void
     {
         parent::setUp();
@@ -39,85 +63,32 @@ abstract class HasOneCompositeKeyTest extends BaseTest
                 'field1' => 'bigInteger,primary',
                 'field2' => 'bigInteger,primary',
                 'field3' => 'string,nullable',
-                'parent_field1' => 'bigInteger',
-                'parent_field2' => 'bigInteger',
+                'parent_field1' => 'bigInteger,null',
+                'parent_field2' => 'bigInteger,null',
             ]
         );
-        $this->makeIndex('child_entity', ['parent_field1', 'parent_field2'], false);
 
         $this->makeCompositeFK('child_entity', ['parent_field1', 'parent_field2'], 'parent_entity', ['pField1', 'pField2']);
 
         $this->getDatabase()->table('parent_entity')->insertMultiple(
             ['pField1', 'pField2', 'pField3'],
             [
-                [1, 1, 101],
-                [1, 2, 102],
-                [2, 1, 201],
-                [2, 2, 202],
+                self::PARENT_1,
+                self::PARENT_2,
+                self::PARENT_3,
+                self::PARENT_4,
             ]
         );
         $this->getDatabase()->table('child_entity')->insertMultiple(
-            ['field1', 'field2', 'parent_field1', 'parent_field2'],
+            ['field1', 'field2', 'field3', 'parent_field1', 'parent_field2'],
             [
-                [1, 1, 1, 1],
-                [1, 2, 1, 2],
-                [1, 3, 2, 1],
+                self::CHILD_1_1,
+                self::CHILD_2_1,
+                self::CHILD_3_1,
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema([
-            CompositePK::class => [
-                Schema::ROLE        => 'parent_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'parent_entity',
-                Schema::MAPPER      => Mapper::class,
-                Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
-                    'key1' => 'pField1',
-                    'key2' => 'pField2',
-                    'key3' => 'pField3',
-                ],
-                Schema::TYPECAST    => [
-                    'key1' => 'int',
-                    'key2' => 'int',
-                    'key3' => 'int',
-                ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
-                    'child_entity' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
-                        Relation::TARGET => CompositePKChild::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::INNER_KEY => ['key1', 'key2'],
-                            Relation::OUTER_KEY => ['parent_key1', 'parent_key2'],
-                        ],
-                    ]
-                ]
-            ],
-            CompositePKChild::class => [
-                Schema::ROLE        => 'child_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'child_entity',
-                Schema::MAPPER      => Mapper::class,
-                Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
-                    'key1'        => 'field1',
-                    'key2'        => 'field2',
-                    'key3'        => 'field3',
-                    'parent_key1' => 'parent_field1',
-                    'parent_key2' => 'parent_field2',
-                ],
-                Schema::TYPECAST    => [
-                    'key1' => 'int',
-                    'key2' => 'int',
-                    'parent_key1' => 'int',
-                    'parent_key2' => 'int',
-                ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
-        ]));
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
 
         $this->logger->display();
     }
@@ -132,53 +103,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load('child_entity');
 
-        $this->assertSame(
-            [
-                [
-                    'key1' => 1,
-                    'key2' => 1,
-                    'key3' => 101,
-                    'child_entity' => [
-                        'key1' => 1,
-                        'key2' => 1,
-                        'key3' => null,
-                        'parent_key1' => 1,
-                        'parent_key2' => 1,
-                    ],
-                ],
-                [
-                    'key1' => 1,
-                    'key2' => 2,
-                    'key3' => 102,
-                    'child_entity' => [
-                        'key1' => 1,
-                        'key2' => 2,
-                        'key3' => null,
-                        'parent_key1' => 1,
-                        'parent_key2' => 2,
-                    ],
-                ],
-                [
-                    'key1' => 2,
-                    'key2' => 1,
-                    'key3' => 201,
-                    'child_entity' => [
-                        'key1' => 1,
-                        'key2' => 3,
-                        'key3' => null,
-                        'parent_key1' => 2,
-                        'parent_key2' => 1,
-                    ],
-                ],
-                [
-                    'key1' => 2,
-                    'key2' => 2,
-                    'key3' => 202,
-                    'child_entity' => null,
-                ],
-            ],
-            $selector->fetchData()
-        );
+        $this->assertSame(self::SET_FULL, $selector->fetchData());
     }
 
     public function testWithNoColumns(): void
@@ -194,53 +119,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load('child_entity', ['method' => JoinableLoader::POSTLOAD]);
 
-        $this->assertSame(
-            [
-                [
-                    'key1' => 1,
-                    'key2' => 1,
-                    'key3' => 101,
-                    'child_entity' => [
-                        'key1' => 1,
-                        'key2' => 1,
-                        'key3' => null,
-                        'parent_key1' => 1,
-                        'parent_key2' => 1,
-                    ],
-                ],
-                [
-                    'key1' => 1,
-                    'key2' => 2,
-                    'key3' => 102,
-                    'child_entity' => [
-                        'key1' => 1,
-                        'key2' => 2,
-                        'key3' => null,
-                        'parent_key1' => 1,
-                        'parent_key2' => 2,
-                    ],
-                ],
-                [
-                    'key1' => 2,
-                    'key2' => 1,
-                    'key3' => 201,
-                    'child_entity' => [
-                        'key1' => 1,
-                        'key2' => 3,
-                        'key3' => null,
-                        'parent_key1' => 2,
-                        'parent_key2' => 1,
-                    ],
-                ],
-                [
-                    'key1' => 2,
-                    'key2' => 2,
-                    'key3' => 202,
-                    'child_entity' => null,
-                ],
-            ],
-            $selector->fetchData()
-        );
+        $this->assertSame(self::SET_FULL, $selector->fetchData());
     }
 
     public function testAccessEntities(): void
@@ -404,143 +283,90 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $this->assertSame('foo', $e->child_entity->key3);
     }
 
-    // public function testDeleteNullableChild(): void
-    // {
-    //     $this->orm = $this->withSchema(new Schema([
-    //         CompositePK::class    => [
-    //             Schema::ROLE        => 'user',
-    //             Schema::MAPPER      => Mapper::class,
-    //             Schema::DATABASE    => 'default',
-    //             Schema::TABLE       => 'user',
-    //             Schema::PRIMARY_KEY => 'id',
-    //             Schema::COLUMNS     => ['id', 'email', 'balance'],
-    //             Schema::SCHEMA      => [],
-    //             Schema::RELATIONS   => [
-    //                 'child_entity' => [
-    //                     Relation::TYPE   => Relation::HAS_ONE,
-    //                     Relation::TARGET => CompositePKChild::class,
-    //                     Relation::SCHEMA => [
-    //                         Relation::CASCADE   => true,
-    //                         Relation::NULLABLE  => true,
-    //                         Relation::INNER_KEY => 'id',
-    //                         Relation::OUTER_KEY => 'user_id',
-    //                     ],
-    //                 ]
-    //             ]
-    //         ],
-    //         CompositePKChild::class => [
-    //             Schema::ROLE        => 'child_entity',
-    //             Schema::MAPPER      => Mapper::class,
-    //             Schema::DATABASE    => 'default',
-    //             Schema::TABLE       => 'child_entity',
-    //             Schema::PRIMARY_KEY => 'id',
-    //             Schema::COLUMNS     => ['id', 'user_id', 'image'],
-    //             Schema::SCHEMA      => [],
-    //             Schema::RELATIONS   => [
-    //                 'nested' => [
-    //                     Relation::TYPE   => Relation::HAS_ONE,
-    //                     Relation::TARGET => Nested::class,
-    //                     Relation::SCHEMA => [
-    //                         Relation::CASCADE   => true,
-    //                         Relation::INNER_KEY => 'id',
-    //                         Relation::OUTER_KEY => 'child_entity_id',
-    //                     ],
-    //                 ]
-    //             ]
-    //         ],
-    //         Nested::class  => [
-    //             Schema::ROLE        => 'nested',
-    //             Schema::MAPPER      => Mapper::class,
-    //             Schema::DATABASE    => 'default',
-    //             Schema::TABLE       => 'nested',
-    //             Schema::PRIMARY_KEY => 'id',
-    //             Schema::COLUMNS     => ['id', 'child_entity_id', 'label'],
-    //             Schema::SCHEMA      => [],
-    //             Schema::RELATIONS   => []
-    //         ]
-    //     ]));
-    //
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity')->fetchOne();
-    //     $e->child_entity = null;
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($e);
-    //     $tr->run();
-    //
-    //     $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity')->fetchOne();
-    //
-    //     $this->assertSame(null, $e->child_entity);
-    //     $this->assertSame(1, (new Select($this->orm, CompositePKChild::class))->count());
-    // }
+    public function testDeleteNullableChild(): void
+    {
+        $schemaArray = $this->getSchemaArray();
+        $schemaArray[CompositePK::class][Schema::RELATIONS]['child_entity'][Relation::SCHEMA][Relation::NULLABLE] = true;
 
-    // public function testMoveToAnotherEntity(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     [$a, $b] = $selector->load('child_entity')->orderBy('user.id')->fetchAll();
-    //
-    //     $this->assertNotNull($a->child_entity);
-    //     $this->assertNull($b->child_entity);
-    //
-    //     $p = $a->child_entity;
-    //     [$b->child_entity, $a->child_entity] = [$a->child_entity, null];
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($a);
-    //     $tr->persist($b);
-    //     $tr->run();
-    //
-    //     $this->assertTrue($this->orm->getHeap()->has($b->child_entity));
-    //
-    //     $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-    //     [$a, $b] = $selector->load('child_entity')->orderBy('user.id')->fetchAll();
-    //
-    //     $this->assertNull($a->child_entity);
-    //     $this->assertNotNull($b->child_entity);
-    //     $this->assertEquals($p->id, $b->child_entity->id);
-    // }
+        $this->orm = $this->withSchema(new Schema($schemaArray));
 
-    // public function testExchange(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     [$a, $b] = $selector->load('child_entity')->orderBy('user.id')->fetchAll();
-    //
-    //     $b->child_entity = new CompositePKChild();
-    //     $b->child_entity->image = 'secondary.gif';
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($b);
-    //     $tr->run();
-    //
-    //     // reset state
-    //     $this->orm = $this->orm->withHeap(new Heap());
-    //
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     [$a, $b] = $selector->load('child_entity')->orderBy('user.id')->fetchAll();
-    //     $this->assertSame('image.png', $a->child_entity->image);
-    //     $this->assertSame('secondary.gif', $b->child_entity->image);
-    //
-    //     [$a->child_entity, $b->child_entity] = [$b->child_entity, $a->child_entity];
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($a);
-    //     $tr->persist($b);
-    //     $tr->run();
-    //
-    //     // reset state
-    //     $this->orm = $this->orm->withHeap(new Heap());
-    //
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     [$a, $b] = $selector->load('child_entity')->orderBy('user.id')->fetchAll();
-    //     $this->assertSame('image.png', $b->child_entity->image);
-    //     $this->assertSame('secondary.gif', $a->child_entity->image);
-    // }
+        $e = (new Select($this->orm, CompositePK::class))
+            ->wherePK([1, 1])
+            ->load('child_entity')
+            ->fetchOne();
+        $e->child_entity = null;
+
+        (new Transaction($this->orm))->persist($e)->run();
+
+        $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->wherePK([1, 1])
+            ->load('child_entity')
+            ->fetchOne();
+
+        $this->assertSame(null, $e->child_entity);
+        $this->assertSame(3, (new Select($this->orm, CompositePKChild::class))->count());
+    }
+
+    public function testMoveToAnotherEntity(): void
+    {
+        $selector = new Select($this->orm, CompositePK::class);
+        [$a, $b] = $selector->load('child_entity')
+            ->where('parent_entity.key3', '>', 200)
+            ->orderBy('parent_entity.key3')
+            ->fetchAll();
+
+        $this->assertNotNull($a->child_entity);
+        $this->assertNull($b->child_entity);
+
+        $compareChild = $a->child_entity;
+        [$b->child_entity, $a->child_entity] = [$a->child_entity, null];
+
+        (new Transaction($this->orm))
+            ->persist($a)
+            ->persist($b)
+            ->run();
+
+        $this->assertTrue($this->orm->getHeap()->has($b->child_entity));
+
+        $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
+        [$a, $b] = $selector->load('child_entity')
+            ->where('parent_entity.key3', '>', 200)
+            ->orderBy('parent_entity.key3')
+            ->fetchAll();
+
+        $this->assertNull($a->child_entity);
+        $this->assertNotNull($b->child_entity);
+        $this->assertEquals($compareChild, $b->child_entity);
+    }
+
+    public function testExchange(): void
+    {
+        [$a, $b, $c, $d] = (new Select($this->orm, CompositePK::class))
+            ->load('child_entity')
+            ->orderBy('parent_entity.key3')
+            ->fetchAll();
+        $this->assertSame(self::CHILD_1_1['key3'], $a->child_entity->key3);
+        $this->assertSame(self::CHILD_2_1['key3'], $b->child_entity->key3);
+
+        [$a->child_entity, $b->child_entity] = [$b->child_entity, $a->child_entity];
+
+        (new Transaction($this->orm))->persist($a)->persist($b)->run();
+
+        // reset state
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        [$a, $b] = (new Select($this->orm, CompositePK::class))
+            ->load('child_entity')
+            ->orderBy('parent_entity.key3')
+            ->fetchAll();
+        $this->assertSame(self::CHILD_2_1['key3'], $a->child_entity->key3);
+        $this->assertSame(self::CHILD_1_1['key3'], $b->child_entity->key3);
+    }
 
     // public function testFetchNestedRelation(): void
     // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $selector->load('child_entity.nested');
+    //     $selector = (new Select($this->orm, CompositePK::class))
+    //         ->load('child_entity.nested');
     //
     //     $this->assertEquals([
     //         [
@@ -566,7 +392,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //         ]
     //     ], $selector->fetchData());
     // }
-    //
+
     // public function testFetchNestedRelationPostload(): void
     // {
     //     $selector = new Select($this->orm, CompositePK::class);
@@ -597,7 +423,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //         ]
     //     ], $selector->fetchData());
     // }
-    //
+
     // public function testUpdateNestedChild(): void
     // {
     //     $selector = new Select($this->orm, CompositePK::class);
@@ -614,7 +440,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //
     //     $this->assertSame('new-label', $e->child_entity->nested->label);
     // }
-    //
+
     // public function testChangeNestedChild(): void
     // {
     //     $selector = new Select($this->orm, CompositePK::class);
@@ -632,7 +458,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //
     //     $this->assertSame('another', $e->child_entity->nested->label);
     // }
-    //
+
     // public function testNoWriteQueries(): void
     // {
     //     $selector = new Select($this->orm, CompositePK::class);
@@ -655,120 +481,180 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //     $tr->run();
     //     $this->assertNumWrites(0);
     // }
-    //
-    // public function testFindByRelatedID(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //
-    //     $selector->with('child_entity')->where('child_entity.id', 1);
-    //
-    //     $result = $selector->fetchAll();
-    //     $this->assertCount(1, $result);
-    //     $this->assertInstanceOf(CompositePK::class, $result[0]);
-    //     $this->assertEquals(1, $result[0]->id);
-    // }
-    //
-    // public function testFindByRelatedIDAliased(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //
-    //     $selector->with('child_entity', ['as' => 'child_entity_relation'])->where('child_entity.id', 1);
-    //
-    //     $result = $selector->fetchAll();
-    //     $this->assertCount(1, $result);
-    //     $this->assertInstanceOf(CompositePK::class, $result[0]);
-    //     $this->assertEquals(1, $result[0]->id);
-    // }
-    //
-    // public function testFindByRelatedIDArray(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //
-    //     $selector->with('child_entity')->where('child_entity.id', new Parameter([1]));
-    //
-    //     $result = $selector->fetchAll();
-    //     $this->assertCount(1, $result);
-    //     $this->assertInstanceOf(CompositePK::class, $result[0]);
-    //     $this->assertEquals(1, $result[0]->id);
-    // }
-    //
-    // public function testFindByRelatedColumn(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //
-    //     $selector->with('child_entity')->where('child_entity.image', '=', 'image.png');
-    //
-    //     $result = $selector->fetchAll();
-    //     $this->assertCount(1, $result);
-    //     $this->assertInstanceOf(CompositePK::class, $result[0]);
-    //     $this->assertEquals(1, $result[0]->id);
-    // }
-    //
-    // public function testDoNotOverwriteRelation(): void
-    // {
-    //     $select = new Select($this->orm, CompositePK::class);
-    //
-    //     $u = $select->load('child_entity')->wherePK(1)->fetchOne();
-    //
-    //     $newCompositePKChild = new CompositePKChild();
-    //     $newCompositePKChild->image = 'new';
-    //     $u->child_entity = $newCompositePKChild;
-    //
-    //     $u2 = $this->orm->getRepository(CompositePK::class)->findByPK(1);
-    //     $this->assertSame('new', $u2->child_entity->image);
-    //
-    //     $u3 = $this->orm->withHeap(new Heap())->getRepository(CompositePK::class)
-    //                     ->select()->load('child_entity')->wherePK(1)->fetchOne();
-    //
-    //     $this->assertSame('image.png', $u3->child_entity->image);
-    //
-    //     $t = new Transaction($this->orm);
-    //     $t->persist($u);
-    //     $t->run();
-    //
-    //     $u4 = $this->orm->withHeap(new Heap())->getRepository(CompositePK::class)
-    //                     ->select()->load('child_entity')->wherePK(1)->fetchOne();
-    //
-    //     $this->assertSame('new', $u4->child_entity->image);
-    // }
-    //
-    // public function testOverwritePromisedRelation(): void
-    // {
-    //     $select = new Select($this->orm, CompositePK::class);
-    //     $u = $select->wherePK(1)->fetchOne();
-    //
-    //     $newCompositePKChild = new CompositePKChild();
-    //     $newCompositePKChild->image = 'new';
-    //     $u->child_entity = $newCompositePKChild;
-    //
-    //     // relation is already set prior to loading
-    //     $u2 = $this->orm->getRepository(CompositePK::class)
-    //                     ->select()
-    //                     ->load('child_entity')
-    //                     ->wherePK(1)->fetchOne();
-    //
-    //     $this->assertSame('image.png', $u2->child_entity->image);
-    //
-    //     $u3 = $this->orm->withHeap(new Heap())->getRepository(CompositePK::class)
-    //                     ->select()->load('child_entity')->wherePK(1)->fetchOne();
-    //
-    //     $this->assertSame('image.png', $u3->child_entity->image);
-    //
-    //     $t = new Transaction($this->orm);
-    //     $t->persist($u);
-    //     $t->run();
-    //
-    //     // ovewrite values
-    //     $u4 = $this->orm->withHeap(new Heap())->getRepository(CompositePK::class)
-    //                     ->select()->load('child_entity')->wherePK(1)->fetchOne();
-    //
-    //     $this->assertSame('image.png', $u4->child_entity->image);
-    //
-    //     $this->captureWriteQueries();
-    //     $t = new Transaction($this->orm);
-    //     $t->persist($u);
-    //     $t->run();
-    //
-    //     $this->assertNumWrites(0);
-    // }
+
+    public function testFindByRelatedID(): void
+    {
+        $selector = (new Select($this->orm, CompositePK::class))
+            ->with('child_entity')
+            ->where([
+                'child_entity.key1' => self::CHILD_1_1['key1'],
+                'child_entity.key2' => self::CHILD_1_1['key2'],
+            ]);
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(CompositePK::class, $result[0]);
+        $this->assertEquals([self::PARENT_1], $selector->fetchData());
+    }
+
+    public function testFindByRelatedIDAliased(): void
+    {
+        $selector = (new Select($this->orm, CompositePK::class))
+            ->with('child_entity', ['as' => 'child_entity_relation'])
+            ->where([
+                'child_entity.key1' => self::CHILD_1_1['key1'],
+                'child_entity.key2' => self::CHILD_1_1['key2'],
+            ]);
+
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(CompositePK::class, $result[0]);
+        $this->assertEquals([self::PARENT_1], $selector->fetchData());
+    }
+
+    public function testFindByRelatedIDArray(): void
+    {
+        $selector = (new Select($this->orm, CompositePK::class))
+            ->with('child_entity')
+            ->where([
+                'child_entity.key1' => new Parameter([self::CHILD_1_1['key1']]),
+                'child_entity.key2' => new Parameter([self::CHILD_1_1['key2']]),
+            ]);
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(CompositePK::class, $result[0]);
+        $this->assertEquals([self::PARENT_1], $selector->fetchData());
+    }
+
+    public function testFindByRelatedColumn(): void
+    {
+        $selector = new Select($this->orm, CompositePK::class);
+
+        $selector->with('child_entity')->where('child_entity.key3', '=', null);
+
+        $result = $selector->fetchAll();
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(CompositePK::class, $result[0]);
+        $this->assertEquals([self::PARENT_1], $selector->fetchData());
+    }
+
+    public function testDoNotOverwriteRelation(): void
+    {
+        $u = (new Select($this->orm, CompositePK::class))
+            ->load('child_entity')
+            ->wherePK([1, 1])
+            ->fetchOne();
+
+        $newCompositePKChild = new CompositePKChild();
+        $newCompositePKChild->key1 = 1;
+        $newCompositePKChild->key2 = 1;
+        $newCompositePKChild->key3 = 'new';
+        $u->child_entity = $newCompositePKChild;
+
+        $u2 = $this->orm
+            ->getRepository(CompositePK::class)
+            ->findByPK([1, 1]);
+        $this->assertSame($u2, $u);
+        $this->assertSame('new', $u2->child_entity->key3);
+
+        $u3 = $this->orm->withHeap(new Heap())
+            ->getRepository(CompositePK::class)
+            ->select()
+            ->load('child_entity')
+            ->wherePK([1, 1])
+            ->fetchOne();
+
+        $this->assertSame(self::CHILD_1_1['key3'], $u3->child_entity->key3);
+
+        (new Transaction($this->orm))->persist($u)->run();
+
+        $u4 = $this->orm->withHeap(new Heap())->getRepository(CompositePK::class)
+                        ->select()->load('child_entity')->wherePK([1, 1])->fetchOne();
+
+        $this->assertSame('new', $u4->child_entity->key3);
+    }
+
+    public function testOverwritePromisedRelation(): void
+    {
+        $u = (new Select($this->orm, CompositePK::class))->wherePK([1, 1])->fetchOne();
+
+        $newCompositePKChild = new CompositePKChild();
+        $newCompositePKChild->key1 = 8;
+        $newCompositePKChild->key2 = 8;
+        $newCompositePKChild->key3 = 'new';
+        $u->child_entity = $newCompositePKChild;
+
+        // relation is already set prior to loading
+        $u2 = $this->orm->getRepository(CompositePK::class)
+            ->select()
+            ->load('child_entity')
+            ->wherePK([1, 1])->fetchOne();
+
+        $this->assertSame($u, $u2);
+        // Overwritten
+        $this->assertSame(self::CHILD_1_1['key3'], $u2->child_entity->key3);
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($u)->run();
+        $this->assertNumWrites(0);
+    }
+
+    private function getSchemaArray(): array
+    {
+        return [
+            CompositePK::class => [
+                Schema::ROLE        => 'parent_entity',
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'parent_entity',
+                Schema::MAPPER      => Mapper::class,
+                Schema::PRIMARY_KEY => ['key1', 'key2'],
+                Schema::COLUMNS     => [
+                    'key1' => 'pField1',
+                    'key2' => 'pField2',
+                    'key3' => 'pField3',
+                ],
+                Schema::TYPECAST    => [
+                    'key1' => 'int',
+                    'key2' => 'int',
+                    'key3' => 'int',
+                ],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    self::CHILD_CONTAINER => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => CompositePKChild::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => ['key1', 'key2'],
+                            Relation::OUTER_KEY => ['parent_key1', 'parent_key2'],
+                        ],
+                    ]
+                ]
+            ],
+            CompositePKChild::class => [
+                Schema::ROLE        => 'child_entity',
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'child_entity',
+                Schema::MAPPER      => Mapper::class,
+                Schema::PRIMARY_KEY => ['key1', 'key2'],
+                Schema::COLUMNS     => [
+                    'key1'        => 'field1',
+                    'key2'        => 'field2',
+                    'key3'        => 'field3',
+                    'parent_key1' => 'parent_field1',
+                    'parent_key2' => 'parent_field2',
+                ],
+                Schema::TYPECAST    => [
+                    'key1' => 'int',
+                    'key2' => 'int',
+                    'parent_key1' => 'int',
+                    'parent_key2' => 'int',
+                ],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ];
+    }
 }

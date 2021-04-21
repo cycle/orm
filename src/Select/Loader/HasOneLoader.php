@@ -74,7 +74,7 @@ class HasOneLoader extends JoinableLoader
             // relation is loaded using external query
             $fields = array_map(function (string $key) use ($localPrefix) {
                 return $localPrefix . $this->fieldAlias($key);
-            }, $this->schema[Relation::OUTER_KEY]);
+            }, (array)$this->schema[Relation::OUTER_KEY]);
 
             if (count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));

@@ -25,11 +25,11 @@ use Doctrine\Common\Collections\Collection;
 
 class ManyToMany extends Relation\AbstractRelation
 {
-    /** @var string */
-    protected $throughInnerKey;
+    /** @var string[] */
+    protected $throughInnerKeys;
 
-    /** @var string */
-    protected $throughOuterKey;
+    /** @var string[] */
+    protected $throughOuterKeys;
 
     /** @var string|null */
     protected $pivotEntity;
@@ -44,8 +44,9 @@ class ManyToMany extends Relation\AbstractRelation
     {
         parent::__construct($orm, $name, $target, $schema);
         $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY] ?? null;
-        $this->throughInnerKey = $this->schema[Relation::THROUGH_INNER_KEY] ?? null;
-        $this->throughOuterKey = $this->schema[Relation::THROUGH_OUTER_KEY] ?? null;
+
+        $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
+        $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
     }
 
     /**
@@ -98,9 +99,13 @@ class ManyToMany extends Relation\AbstractRelation
      */
     public function initPromise(Node $node): array
     {
-        $innerKey = $this->fetchKey($node, $this->innerKey);
-        if ($innerKey === null) {
-            return [new Pivoted\PivotedCollection(), null];
+        $innerKeys = [];
+        foreach ($this->innerKeys as $key) {
+            $innerKey = $this->fetchKey($node, $key);
+            if ($innerKey === null) {
+                return [new Pivoted\PivotedCollection(), null];
+            }
+            $innerKeys[$key] = $innerKey;
         }
 
         // will take care of all the loading and scoping
@@ -108,7 +113,7 @@ class ManyToMany extends Relation\AbstractRelation
             $this->orm,
             $this->target,
             $this->schema,
-            $innerKey
+            $innerKeys
         );
 
         return [new Pivoted\PivotedCollectionPromise($p), $p];
@@ -177,18 +182,18 @@ class ManyToMany extends Relation\AbstractRelation
 
         $this->forwardContext(
             $node,
-            $this->innerKey,
+            $this->innerKeys,
             $pStore,
             $pNode,
-            $this->throughInnerKey
+            $this->throughInnerKeys
         );
 
         $this->forwardContext(
             $rNode,
-            $this->outerKey,
+            $this->outerKeys,
             $pStore,
             $pNode,
-            $this->throughOuterKey
+            $this->throughOuterKeys
         );
 
         $sequence = new Sequence();

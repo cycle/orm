@@ -35,8 +35,8 @@ final class SingularNode extends AbstractNode
         parent::__construct($columns, $outerKey);
         $this->setDuplicateCriteria(...(array)$primaryKey);
 
-        $this->innerKey = implode(':', $innerKey);
-        $this->innerKeys = $innerKey;
+        $this->innerKeys = (array)$innerKey;
+        $this->innerKey = $this->packKeys($this->innerKeys);
     }
 
     /**

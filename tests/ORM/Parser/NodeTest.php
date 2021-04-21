@@ -138,7 +138,7 @@ class NodeTest extends TestCase
             $node->parseRow(0, $row);
         }
 
-        $this->assertSame([1, 2, 3], $child->getReferences());
+        $this->assertSame([['id' => 1], ['id' => 2], ['id' => 3]], $child->getReferences());
     }
 
     public function testGetReferencesWithoutParent(): void
@@ -152,6 +152,7 @@ class NodeTest extends TestCase
             'id'
         );
 
+        # todo : remove or edit
         $child->getReferences();
     }
 
@@ -363,7 +364,6 @@ class NodeTest extends TestCase
 
     public function testArrayInvalidReference(): void
     {
-        $this->expectException(ParserException::class);
 
         $node = new RootNode(['id', 'email'], 'id');
         $node->linkNode('balance', $child = new ArrayNode(
@@ -387,6 +387,8 @@ class NodeTest extends TestCase
             [1, 1, 100],
             [2, -1, 200]
         ];
+
+        $this->expectException(ParserException::class);
 
         foreach ($childData as $row) {
             $child->parseRow(0, $row);

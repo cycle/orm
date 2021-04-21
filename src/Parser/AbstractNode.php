@@ -123,9 +123,8 @@ abstract class AbstractNode
     {
         $this->parent = null;
         $this->nodes = [];
-        $this->references = [];
         $this->referencesNew = new MultiKeyCollection();
-        $this->trackReferences = [];
+        // $this->trackReferences = [];
         $this->duplicates = [];
     }
 
@@ -226,11 +225,11 @@ abstract class AbstractNode
 
         return $this->parent->referencesNew->getIndexAssoc($this->outerKey);
 
-        if (empty($this->parent->references[$this->outerKey])) {
-            return [];
-        }
-
-        return array_keys($this->parent->references[$this->outerKey]);
+        // if (empty($this->parent->references[$this->outerKey])) {
+        //     return [];
+        // }
+        //
+        // return array_keys($this->parent->references[$this->outerKey]);
 
         // if (empty($this->outerKeys)) {
         //     return [];
@@ -280,9 +279,9 @@ abstract class AbstractNode
                 //     $this->trackReferences[] = $key;
                 // }
             }
-            if (!in_array($node->outerKey, $this->trackReferences, true)) {
-                $this->trackReferences[] = $node->outerKey;
-            }
+            // if (!in_array($node->outerKey, $this->trackReferences, true)) {
+            //     $this->trackReferences[] = $node->outerKey;
+            // }
             if (!$this->referencesNew->hasIndex($node->outerKey)) {
                 $this->referencesNew->createIndex($node->outerKey, $node->outerKeys);
             }
@@ -338,29 +337,29 @@ abstract class AbstractNode
      * Attention, data WILL be referenced to new memory location!
      *
      * @param string $container
-     * @param string $key
+     * @param string $index
      * @param array $criteria
      * @param array $data
      *
      * @throws ParserException
      */
-    protected function mount(string $container, string $key, array $criteria, array &$data): void
+    protected function mount(string $container, string $index, array $criteria, array &$data): void
     {
         if ($criteria === self::LAST_REFERENCE) {
             // if (!isset($this->references[$key])) {
-            if (!$this->referencesNew->hasIndex($key)) {
+            if (!$this->referencesNew->hasIndex($index)) {
                 return;
             }
-            $criteria = $this->referencesNew->getLastItemKeys($key);
+            $criteria = $this->referencesNew->getLastItemKeys($index);
         }
 
-        if (!$this->referencesNew->getItemsCount($key, $criteria)) {
+        if (!$this->referencesNew->getItemsCount($index, $criteria)) {
         // if (!array_key_exists($criteria, $this->references[$key])) {
-            throw new ParserException(sprintf('Undefined reference `%s` "%s".', $key, implode(':', $criteria)));
+            throw new ParserException(sprintf('Undefined reference `%s` "%s".', $index, implode(':', $criteria)));
             // throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }
 
-        foreach ($this->referencesNew->getItemsSubset($key, $criteria) as &$subset) {
+        foreach ($this->referencesNew->getItemsSubset($index, $criteria) as &$subset) {
             if (isset($subset[$container])) {
                 // back reference!
                 $data = &$subset[$container];
@@ -389,27 +388,37 @@ abstract class AbstractNode
      * Add added records will be added as array items.
      *
      * @param string $container
-     * @param string $key
+     * @param string $index
      * @param mixed  $criteria
      * @param array  $data
      *
      * @throws ParserException
      */
-    protected function mountArray(string $container, string $key, $criteria, array &$data): void
+    protected function mountArray(string $container, string $index, $criteria, array &$data): void
     {
         # todo: make $key arrayable
-        if (!array_key_exists($criteria, $this->references[$key])) {
-            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
+        // if (!array_key_exists($criteria, $this->references[$index])) {
+        //     throw new ParserException("Undefined reference `{$index}`.`{$criteria}`");
+        // }
+        if (!$this->referencesNew->hasIndex($index)) {
+            throw new ParserException("Undefined index `{$index}`.");
         }
 
-        foreach ($this->references[$key][$criteria] as &$subset) {
+        foreach ($this->referencesNew->getItemsSubset($index, $criteria) as &$subset) {
             if (!in_array($data, $subset[$container], true)) {
                 $subset[$container][] = &$data;
             }
-
-            unset($subset);
-            continue;
         }
+        unset($subset);
+
+        // foreach ($this->references[$index][$criteria] as &$subset) {
+        //     if (!in_array($data, $subset[$container], true)) {
+        //         $subset[$container][] = &$data;
+        //     }
+        //
+        //     unset($subset);
+        //     continue;
+        // }
     }
 
     /**

@@ -63,12 +63,10 @@ abstract class AbstractRelation implements RelationInterface
         $this->name = $name;
         $this->target = $target;
         $this->schema = $schema;
-        // $this->innerKey = implode(':', $schema[Relation::INNER_KEY]);
-        // $this->outerKey = implode(':', $schema[Relation::OUTER_KEY]);
-        $this->innerKey = $schema[Relation::INNER_KEY];
-        $this->outerKey = $schema[Relation::OUTER_KEY];
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
+        $this->innerKey = $this->packKeys($this->innerKeys);
+        $this->outerKey = $this->packKeys($this->outerKeys);
     }
 
     /**
@@ -189,5 +187,10 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return $this->orm->get($reference->__role(), $reference->__scope(), true);
+    }
+
+    protected function packKeys(array $keys): string
+    {
+        return implode(":", $keys);
     }
 }

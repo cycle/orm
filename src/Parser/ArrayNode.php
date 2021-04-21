@@ -22,6 +22,9 @@ final class ArrayNode extends AbstractNode
     /** @var string */
     protected $innerKey;
 
+    /** @var string[] */
+    protected $innerKeys;
+
     /**
      * @param array       $columns
      * @param string      $primaryKey
@@ -33,7 +36,8 @@ final class ArrayNode extends AbstractNode
         parent::__construct($columns, $outerKey);
         $this->setDuplicateCriteria($primaryKey);
 
-        $this->innerKey = $innerKey;
+        $this->innerKeys = (array)$innerKey;
+        $this->innerKey = $this->packKeys($this->innerKeys);
     }
 
     /**
@@ -53,7 +57,7 @@ final class ArrayNode extends AbstractNode
         $this->parent->mountArray(
             $this->container,
             $this->outerKey,
-            $data[$this->innerKey],
+            $this->intersectData($this->innerKeys, $data),
             $data
         );
     }

@@ -157,7 +157,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         $pk = $this->loader->getPK();
         if (is_array($pk)) {
             if (!is_array($id) || count($pk) !== count($id)) {
-                throw new \InvalidArgumentException('Primary key should contain %d values.', count($pk));
+                throw new \InvalidArgumentException(sprintf('Primary key should contain %d values.', count($pk)));
             }
 
             $values = array_values($id);

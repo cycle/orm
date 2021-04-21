@@ -4,14 +4,29 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
 
+use Cycle\ORM\Exception\ParserException;
+
+/**
+ * @internal
+ */
 final class MultiKeyCollection
 {
-    /** @var string[][] */
+    /**
+     * [Index] = [key1, key2, ...]
+     * @var string[][]
+     */
     private $indexes = [];
 
+    /**
+     * [Index][key1-value][key2-value][...] = [ITEM1, ITEM2, ...].
+     */
     private $data = [];
 
-    private $lastItem = [];
+    /**
+     * Contains key values of last added item for each Index
+     * [index] = [key1-value, key2-value, ...]
+     */
+    private $lastItemKeys = [];
 
     public function hasIndex(string $outerKey): bool
     {
@@ -43,9 +58,9 @@ final class MultiKeyCollection
         return $this->getValues($this->data[$index], $values);
     }
 
-    public function &getLastItemKeys(string $index)
+    public function getLastItemKeys(string $index): array
     {
-        return $this->lastItem[$index];
+        return $this->lastItemKeys[$index];
     }
 
     public function addItem(string $index, array &$data): void
@@ -61,7 +76,7 @@ final class MultiKeyCollection
             $pull = &$pull[$keyValue];
         }
         $pull[] = &$data;
-        $this->lastItem[$index] = $itemKeys;
+        $this->lastItemKeys[$index] = $itemKeys;
         // return count($pull);
     }
 
@@ -72,7 +87,7 @@ final class MultiKeyCollection
             $base = [$this->indexes[$index][0] => $key];
             $result[] = $this->extractAssoc($data, $base, $this->indexes[$index], 1);
         }
-        return array_merge(...$result);
+        return $result === [] ? [] : array_merge(...$result);
     }
 
     /**
@@ -96,7 +111,7 @@ final class MultiKeyCollection
         $value = &$dataSet;
         foreach ($keys as $key) {
             if (!array_key_exists($key, $value)) {
-                throw new \RuntimeException('Value not found.');
+                throw new ParserException("Value not found.");
             }
             $value = &$value[$key];
         }

@@ -379,6 +379,31 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $this->assertSame(2, (new Select($this->orm, CompositePKChild::class))->count());
     }
 
+    public function testAssignNewChild(): void
+    {
+        $selector = new Select($this->orm, CompositePK::class);
+        $e = $selector->wherePK([1, 1])->load('child_entity')->fetchOne();
+
+        $oP = $e->child_entity;
+        $e->child_entity = new CompositePKChild();
+        $e->child_entity->key1 = 100;
+        $e->child_entity->key2 = 200;
+        $e->child_entity->key3 = 'foo';
+
+        (new Transaction($this->orm))
+            ->persist($e)
+            ->run();
+
+        $this->assertFalse($this->orm->getHeap()->has($oP));
+        $this->assertTrue($this->orm->getHeap()->has($e->child_entity));
+
+        $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
+        $e = $selector->wherePK([1, 1])->load('child_entity')->fetchOne();
+
+        $this->assertNotEquals($oP, $e->child_entity);
+        $this->assertSame('foo', $e->child_entity->key3);
+    }
+
     // public function testDeleteNullableChild(): void
     // {
     //     $this->orm = $this->withSchema(new Schema([
@@ -449,30 +474,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //     $this->assertSame(null, $e->child_entity);
     //     $this->assertSame(1, (new Select($this->orm, CompositePKChild::class))->count());
     // }
-    //
-    // public function testAssignNewChild(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity')->fetchOne();
-    //
-    //     $oP = $e->child_entity;
-    //     $e->child_entity = new CompositePKChild();
-    //     $e->child_entity->image = 'new.jpg';
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($e);
-    //     $tr->run();
-    //
-    //     $this->assertFalse($this->orm->getHeap()->has($oP));
-    //     $this->assertTrue($this->orm->getHeap()->has($e->child_entity));
-    //
-    //     $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity')->fetchOne();
-    //
-    //     $this->assertNotEquals($oP, $e->child_entity->id);
-    //     $this->assertSame('new.jpg', $e->child_entity->image);
-    // }
-    //
+
     // public function testMoveToAnotherEntity(): void
     // {
     //     $selector = new Select($this->orm, CompositePK::class);
@@ -498,7 +500,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //     $this->assertNotNull($b->child_entity);
     //     $this->assertEquals($p->id, $b->child_entity->id);
     // }
-    //
+
     // public function testExchange(): void
     // {
     //     $selector = new Select($this->orm, CompositePK::class);
@@ -534,7 +536,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     //     $this->assertSame('image.png', $b->child_entity->image);
     //     $this->assertSame('secondary.gif', $a->child_entity->image);
     // }
-    //
+
     // public function testFetchNestedRelation(): void
     // {
     //     $selector = new Select($this->orm, CompositePK::class);

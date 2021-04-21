@@ -35,13 +35,13 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2],
         CHILD_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1],
 
-        NESTED_1 = ['key1' => 1, 'key3' => 'foo', 'parent_key1' => 1, 'parent_key2' => 1],
+        NESTED_1 = ['key3' => 'foo', 'parent_key1' => 1, 'parent_key2' => 1],
 
         PARENT_1_LOADED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1],
         PARENT_2_LOADED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2],
         PARENT_3_LOADED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3],
         PARENT_4_LOADED = self::PARENT_4 + [self::CHILD_CONTAINER => null],
-        PARENT_1_NESTED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1 + [self::NESTED_CONTAINER => self::NESTED_1]],
+        PARENT_1_NESTED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1 + [self::NESTED_CONTAINER => self::NESTED_1 + ['key1' => 1]]],
         PARENT_2_NESTED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2 + [self::NESTED_CONTAINER => null]],
         PARENT_3_NESTED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3 + [self::NESTED_CONTAINER => null]],
         PARENT_4_NESTED = self::PARENT_4 + [self::CHILD_CONTAINER => null],
@@ -92,6 +92,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         );
 
         $this->makeCompositeFK('child_entity', ['parent_field1', 'parent_field2'], 'parent_entity', ['pField1', 'pField2']);
+        $this->makeCompositeFK('nested_entity', ['parent_field1', 'parent_field2'], 'child_entity', ['field1', 'field2']);
 
         $this->getDatabase()->table('parent_entity')->insertMultiple(
             ['pField1', 'pField2', 'pField3'],
@@ -111,7 +112,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ]
         );
         $this->getDatabase()->table('nested_entity')->insertMultiple(
-            ['field1', 'field3', 'parent_field1', 'parent_field2'],
+            ['field3', 'parent_field1', 'parent_field2'],
             [
                 self::NESTED_1,
             ]

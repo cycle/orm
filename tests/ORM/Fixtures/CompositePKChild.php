@@ -16,5 +16,6 @@ class CompositePKChild
     public $parent_key3;
     public $parent_key4;
 
+    public $parent;
     public $nested;
 }

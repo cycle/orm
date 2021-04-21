@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-class CompositePKChild
+class CompositePKNested
 {
     public $key1;
     public $key2;
@@ -15,6 +15,4 @@ class CompositePKChild
     public $parent_key2;
     public $parent_key3;
     public $parent_key4;
-
-    public $nested;
 }

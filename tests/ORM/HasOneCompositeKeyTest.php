@@ -13,6 +13,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
+use Cycle\ORM\Tests\Fixtures\CompositePKNested;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Spiral\Database\Injection\Parameter;
@@ -23,26 +24,39 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
     protected const
         CHILD_CONTAINER = 'child_entity',
+        NESTED_CONTAINER = 'nested',
 
         PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101],
         PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102],
         PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201],
         PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202],
 
-        CHILD_1_1 = ['key1' => 1, 'key2' => 1, 'key3' => null, 'parent_key1' => 1, 'parent_key2' => 1],
-        CHILD_2_1 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2],
-        CHILD_3_1 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1],
+        CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null, 'parent_key1' => 1, 'parent_key2' => 1],
+        CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2],
+        CHILD_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1],
 
-        PARENT_1_FULL = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1_1],
-        PARENT_2_FULL = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2_1],
-        PARENT_3_FULL = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3_1],
-        PARENT_4_FULL = self::PARENT_4 + [self::CHILD_CONTAINER => null],
+        NESTED_1 = ['key1' => 1, 'key3' => 'foo', 'parent_key1' => 1, 'parent_key2' => 1],
 
-        SET_FULL = [
-            self::PARENT_1_FULL,
-            self::PARENT_2_FULL,
-            self::PARENT_3_FULL,
-            self::PARENT_4_FULL,
+        PARENT_1_LOADED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1],
+        PARENT_2_LOADED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2],
+        PARENT_3_LOADED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3],
+        PARENT_4_LOADED = self::PARENT_4 + [self::CHILD_CONTAINER => null],
+        PARENT_1_NESTED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1 + [self::NESTED_CONTAINER => self::NESTED_1]],
+        PARENT_2_NESTED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2 + [self::NESTED_CONTAINER => null]],
+        PARENT_3_NESTED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3 + [self::NESTED_CONTAINER => null]],
+        PARENT_4_NESTED = self::PARENT_4 + [self::CHILD_CONTAINER => null],
+
+        FULL_LOADED = [
+            self::PARENT_1_LOADED,
+            self::PARENT_2_LOADED,
+            self::PARENT_3_LOADED,
+            self::PARENT_4_LOADED,
+        ],
+        FULL_NESTED = [
+            self::PARENT_1_NESTED,
+            self::PARENT_2_NESTED,
+            self::PARENT_3_NESTED,
+            self::PARENT_4_NESTED,
         ];
 
     public function setUp(): void
@@ -67,6 +81,15 @@ abstract class HasOneCompositeKeyTest extends BaseTest
                 'parent_field2' => 'bigInteger,null',
             ]
         );
+        $this->makeTable(
+            'nested_entity',
+            [
+                'field1' => 'primary',
+                'field3' => 'string,null',
+                'parent_field1' => 'bigInteger,null',
+                'parent_field2' => 'bigInteger,null',
+            ]
+        );
 
         $this->makeCompositeFK('child_entity', ['parent_field1', 'parent_field2'], 'parent_entity', ['pField1', 'pField2']);
 
@@ -82,9 +105,15 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $this->getDatabase()->table('child_entity')->insertMultiple(
             ['field1', 'field2', 'field3', 'parent_field1', 'parent_field2'],
             [
-                self::CHILD_1_1,
-                self::CHILD_2_1,
-                self::CHILD_3_1,
+                self::CHILD_1,
+                self::CHILD_2,
+                self::CHILD_3,
+            ]
+        );
+        $this->getDatabase()->table('nested_entity')->insertMultiple(
+            ['field1', 'field3', 'parent_field1', 'parent_field2'],
+            [
+                self::NESTED_1,
             ]
         );
 
@@ -103,7 +132,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load('child_entity');
 
-        $this->assertSame(self::SET_FULL, $selector->fetchData());
+        $this->assertSame(self::FULL_LOADED, $selector->fetchData());
     }
 
     public function testWithNoColumns(): void
@@ -119,7 +148,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load('child_entity', ['method' => JoinableLoader::POSTLOAD]);
 
-        $this->assertSame(self::SET_FULL, $selector->fetchData());
+        $this->assertSame(self::FULL_LOADED, $selector->fetchData());
     }
 
     public function testAccessEntities(): void
@@ -336,7 +365,10 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
         $this->assertNull($a->child_entity);
         $this->assertNotNull($b->child_entity);
-        $this->assertEquals($compareChild, $b->child_entity);
+        $this->assertEquals(
+            [$compareChild->key1, $compareChild->key2],
+            [$b->child_entity->key1, $b->child_entity->key2]
+        );
     }
 
     public function testExchange(): void
@@ -345,8 +377,8 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->load('child_entity')
             ->orderBy('parent_entity.key3')
             ->fetchAll();
-        $this->assertSame(self::CHILD_1_1['key3'], $a->child_entity->key3);
-        $this->assertSame(self::CHILD_2_1['key3'], $b->child_entity->key3);
+        $this->assertSame(self::CHILD_1['key3'], $a->child_entity->key3);
+        $this->assertSame(self::CHILD_2['key3'], $b->child_entity->key3);
 
         [$a->child_entity, $b->child_entity] = [$b->child_entity, $a->child_entity];
 
@@ -359,136 +391,88 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->load('child_entity')
             ->orderBy('parent_entity.key3')
             ->fetchAll();
-        $this->assertSame(self::CHILD_2_1['key3'], $a->child_entity->key3);
-        $this->assertSame(self::CHILD_1_1['key3'], $b->child_entity->key3);
+        $this->assertSame(self::CHILD_2['key3'], $a->child_entity->key3);
+        $this->assertSame(self::CHILD_1['key3'], $b->child_entity->key3);
     }
 
-    // public function testFetchNestedRelation(): void
-    // {
-    //     $selector = (new Select($this->orm, CompositePK::class))
-    //         ->load('child_entity.nested');
-    //
-    //     $this->assertEquals([
-    //         [
-    //             'id'      => 1,
-    //             'email'   => 'hello@world.com',
-    //             'balance' => 100.0,
-    //             'child_entity' => [
-    //                 'id'      => 1,
-    //                 'user_id' => 1,
-    //                 'image'   => 'image.png',
-    //                 'nested'  => [
-    //                     'id'         => 1,
-    //                     'child_entity_id' => 1,
-    //                     'label'      => 'nested-label',
-    //                 ]
-    //             ]
-    //         ],
-    //         [
-    //             'id'      => 2,
-    //             'email'   => 'another@world.com',
-    //             'balance' => 200.0,
-    //             'child_entity' => null
-    //         ]
-    //     ], $selector->fetchData());
-    // }
+    public function testFetchNestedRelation(): void
+    {
+        $selector = (new Select($this->orm, CompositePK::class))
+            ->load('child_entity.nested');
 
-    // public function testFetchNestedRelationPostload(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $selector->load('child_entity', ['method' => JoinableLoader::POSTLOAD]);
-    //     $selector->load('child_entity.nested');
-    //
-    //     $this->assertEquals([
-    //         [
-    //             'id'      => 1,
-    //             'email'   => 'hello@world.com',
-    //             'balance' => 100.0,
-    //             'child_entity' => [
-    //                 'id'      => 1,
-    //                 'user_id' => 1,
-    //                 'image'   => 'image.png',
-    //                 'nested'  => [
-    //                     'id'         => 1,
-    //                     'child_entity_id' => 1,
-    //                     'label'      => 'nested-label',
-    //                 ]
-    //             ]
-    //         ],
-    //         [
-    //             'id'      => 2,
-    //             'email'   => 'another@world.com',
-    //             'balance' => 200.0,
-    //             'child_entity' => null
-    //         ]
-    //     ], $selector->fetchData());
-    // }
+        $this->assertEquals(self::FULL_NESTED, $selector->fetchData());
+    }
 
-    // public function testUpdateNestedChild(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity.nested')->fetchOne();
-    //
-    //     $e->child_entity->nested->label = 'new-label';
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($e);
-    //     $tr->run();
-    //
-    //     $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity.nested')->fetchOne();
-    //
-    //     $this->assertSame('new-label', $e->child_entity->nested->label);
-    // }
+    public function testFetchNestedRelationPostload(): void
+    {
+        $selector = new Select($this->orm, CompositePK::class);
+        $selector->load('child_entity', ['method' => JoinableLoader::POSTLOAD]);
+        $selector->load('child_entity.nested');
 
-    // public function testChangeNestedChild(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity.nested')->fetchOne();
-    //
-    //     $e->child_entity->nested = new Nested();
-    //     $e->child_entity->nested->label = 'another';
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($e);
-    //     $tr->run();
-    //
-    //     $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity.nested')->fetchOne();
-    //
-    //     $this->assertSame('another', $e->child_entity->nested->label);
-    // }
+        $this->assertEquals(self::FULL_NESTED, $selector->fetchData());
+    }
 
-    // public function testNoWriteQueries(): void
-    // {
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity.nested')->fetchOne();
-    //
-    //     $e->child_entity->nested = new Nested();
-    //     $e->child_entity->nested->label = 'another';
-    //
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($e);
-    //     $tr->run();
-    //
-    //     $this->orm = $this->orm->withHeap(new Heap());
-    //     $selector = new Select($this->orm, CompositePK::class);
-    //     $e = $selector->wherePK(1)->load('child_entity.nested')->fetchOne();
-    //
-    //     $this->captureWriteQueries();
-    //     $tr = new Transaction($this->orm);
-    //     $tr->persist($e);
-    //     $tr->run();
-    //     $this->assertNumWrites(0);
-    // }
+    public function testUpdateNestedChild(): void
+    {
+        $selector = new Select($this->orm, CompositePK::class);
+        $e = $selector->wherePK([1, 1])->load('child_entity.nested')->fetchOne();
+
+        $e->child_entity->nested->key3 = 'new-label';
+
+        (new Transaction($this->orm))->persist($e)->run();
+
+        $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
+        $e = $selector->wherePK([1, 1])->load('child_entity.nested')->fetchOne();
+
+        $this->assertSame('new-label', $e->child_entity->nested->key3);
+    }
+
+    public function testChangeNestedChild(): void
+    {
+        $selector = new Select($this->orm, CompositePK::class);
+        $e = $selector->wherePK([1, 1])->load('child_entity.nested')->fetchOne();
+
+        $e->child_entity->nested = new CompositePKNested();
+        $e->child_entity->nested->key3 = 'another';
+
+        (new Transaction($this->orm))->persist($e)->run();
+
+        $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->wherePK([1, 1])
+            ->load('child_entity.nested')->fetchOne();
+
+        $this->assertSame('another', $e->child_entity->nested->key3);
+    }
+
+    public function testNoWriteQueries(): void
+    {
+        $e = (new Select($this->orm, CompositePK::class))
+            ->wherePK([1, 1])
+            ->load('child_entity.nested')
+            ->fetchOne();
+
+        $e->child_entity->nested = new CompositePKNested();
+
+        (new Transaction($this->orm))->persist($e)->run();
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $e = (new Select($this->orm, CompositePK::class))
+            ->wherePK([1, 1])
+            ->load('child_entity.nested')
+            ->fetchOne();
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($e)->run();
+        $this->assertNumWrites(0);
+    }
 
     public function testFindByRelatedID(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))
             ->with('child_entity')
             ->where([
-                'child_entity.key1' => self::CHILD_1_1['key1'],
-                'child_entity.key2' => self::CHILD_1_1['key2'],
+                'child_entity.key1' => self::CHILD_1['key1'],
+                'child_entity.key2' => self::CHILD_1['key2'],
             ]);
 
         $result = $selector->fetchAll();
@@ -502,8 +486,8 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $selector = (new Select($this->orm, CompositePK::class))
             ->with('child_entity', ['as' => 'child_entity_relation'])
             ->where([
-                'child_entity.key1' => self::CHILD_1_1['key1'],
-                'child_entity.key2' => self::CHILD_1_1['key2'],
+                'child_entity.key1' => self::CHILD_1['key1'],
+                'child_entity.key2' => self::CHILD_1['key2'],
             ]);
 
 
@@ -518,8 +502,8 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $selector = (new Select($this->orm, CompositePK::class))
             ->with('child_entity')
             ->where([
-                'child_entity.key1' => new Parameter([self::CHILD_1_1['key1']]),
-                'child_entity.key2' => new Parameter([self::CHILD_1_1['key2']]),
+                'child_entity.key1' => new Parameter([self::CHILD_1['key1']]),
+                'child_entity.key2' => new Parameter([self::CHILD_1['key2']]),
             ]);
 
         $result = $selector->fetchAll();
@@ -566,7 +550,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->wherePK([1, 1])
             ->fetchOne();
 
-        $this->assertSame(self::CHILD_1_1['key3'], $u3->child_entity->key3);
+        $this->assertSame(self::CHILD_1['key3'], $u3->child_entity->key3);
 
         (new Transaction($this->orm))->persist($u)->run();
 
@@ -594,7 +578,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
         $this->assertSame($u, $u2);
         // Overwritten
-        $this->assertSame(self::CHILD_1_1['key3'], $u2->child_entity->key3);
+        $this->assertSame(self::CHILD_1['key3'], $u2->child_entity->key3);
 
         $this->captureWriteQueries();
         (new Transaction($this->orm))->persist($u)->run();
@@ -653,8 +637,38 @@ abstract class HasOneCompositeKeyTest extends BaseTest
                     'parent_key2' => 'int',
                 ],
                 Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    self::NESTED_CONTAINER => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => CompositePKNested::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => ['key1', 'key2'],
+                            Relation::OUTER_KEY => ['parent_key1', 'parent_key2'],
+                        ],
+                    ]
+                ]
+            ],
+            CompositePKNested::class => [
+                Schema::ROLE        => 'nested_entity',
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'nested_entity',
+                Schema::MAPPER      => Mapper::class,
+                Schema::PRIMARY_KEY => ['key1'],
+                Schema::COLUMNS     => [
+                    'key1'        => 'field1',
+                    'key3'        => 'field3',
+                    'parent_key1' => 'parent_field1',
+                    'parent_key2' => 'parent_field2',
+                ],
+                Schema::TYPECAST    => [
+                    'key1' => 'int',
+                    'parent_key1' => 'int',
+                    'parent_key2' => 'int',
+                ],
+                Schema::SCHEMA      => [],
                 Schema::RELATIONS   => []
-            ]
+            ],
         ];
     }
 }

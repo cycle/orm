@@ -124,7 +124,6 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
 
     public function testFetchLimitAndSortByParent(): void
     {
-        $this->logger->display();
         $selector = (new Select($this->orm, CompositePKChild::class))
             ->with(self::PARENT_CONTAINER, ['as' => 'parent_entity'])
             ->load(self::PARENT_CONTAINER, ['using' => 'parent_entity'])

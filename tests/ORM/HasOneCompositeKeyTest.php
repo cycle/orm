@@ -119,8 +119,6 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-
-        $this->logger->display();
     }
 
     public function testHasInSchema(): void

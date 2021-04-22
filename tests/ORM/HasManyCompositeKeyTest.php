@@ -13,7 +13,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
-use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -368,7 +367,6 @@ abstract class HasManyCompositeKeyTest extends BaseTest
 
         $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
 
-        $this->logger->display();
         /**
          * @var CompositePK $a
          * @var CompositePK $b

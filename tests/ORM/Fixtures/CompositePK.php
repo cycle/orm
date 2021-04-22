@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
+use Cycle\ORM\Relation\Pivoted\PivotedCollection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 class CompositePK
@@ -16,9 +17,11 @@ class CompositePK
     public $child_entity;
 
     public $children;
+    public $pivoted;
 
     public function __construct()
     {
         $this->children = new ArrayCollection();
+        $this->pivoted = new PivotedCollection();
     }
 }

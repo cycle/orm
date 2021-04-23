@@ -35,7 +35,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         // refers-to relation is always nullable (as opposite to belongs-to)
         if ($related === null) {
             if ($original !== null) {
-                $store->register($this->columnName($node, $this->innerKey), null, true);
+                foreach ($this->innerKeys as $innerKey) {
+                    $store->register($this->columnName($node, $innerKey), null, true);
+                }
             }
 
             return new Nil();
@@ -45,15 +47,19 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $this->assertValid($rNode);
 
         // related object exists, we can update key immediately
-        $outerKey = $this->fetchKey($rNode, $this->outerKey);
+        foreach ($this->outerKeys as $i => $outerKey) {
+            $outerValue = $this->fetchKey($rNode, $outerKey);
+            $innerKey = $this->innerKeys[$i];
 
-        if ($outerKey !== null) {
-            if ($outerKey != $this->fetchKey($node, $this->innerKey)) {
-                $store->register($this->columnName($node, $this->innerKey), $outerKey, true);
+            if ($outerValue !== null) {
+                if ($outerValue != $this->fetchKey($node, $innerKey)) {
+                    $store->register($this->columnName($node, $innerKey), $outerValue, true);
+                }
+
+                return new Nil();
             }
-
-            return new Nil();
         }
+
 
         // update parent entity once related instance is able to provide us context key
         $update = new Update(
@@ -62,7 +68,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         );
 
         // fastest way to identify the entity
-        $pk = $this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
+        $pk = (array)$this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
 
         $this->forwardContext(
             $rNode,
@@ -73,12 +79,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         );
 
         // set where condition for update query
-        $this->forwardScope(
-            $node,
-            $pk,
-            $update,
-            $pk
-        );
+        $this->forwardScope($node, $pk, $update, $pk);
 
         return $update;
     }

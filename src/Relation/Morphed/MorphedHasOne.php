@@ -44,15 +44,16 @@ class MorphedHasOne extends HasOne
      */
     public function initPromise(Node $node): array
     {
-        $innerKey = $this->fetchKey($node, $this->innerKey);
-        if ($innerKey === null) {
-            return [null, null];
+        $innerValues = [];
+        foreach ($this->innerKeys as $i => $innerKey) {
+            $innerValue = $this->fetchKey($node, $innerKey);
+            if ($innerValue === null) {
+                return [null, null];
+            }
+            $innerValues[] = $innerValue;
         }
 
-        $scope = [
-            $this->outerKey => $innerKey,
-            $this->morphKey => $node->getRole()
-        ];
+        $scope = array_combine($this->outerKeys, $innerValues) + [$this->morphKey => $node->getRole()];
 
         $r = $this->orm->promise($this->target, $scope);
         return [$r, $r];

@@ -453,8 +453,6 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             return in_array($t->key3, $wantTags);
         });
 
-        $this->logger->display();
-
         $this->captureWriteQueries();
         (new Transaction($this->orm))->persist($u)->run();
         // Insert 1 pivot

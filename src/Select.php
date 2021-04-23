@@ -158,7 +158,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         $pk = $this->loader->getPK();
         $pk = is_array($pk) && count($pk) > 1 ? $pk : ((array)$pk)[0];
         # todo: support assoc ids [key1 => value1, ...]
-        if (is_array($pk)) {
+        if (is_array($pk) && count($pk) > 1) {
             $assoc = [];
             foreach ($ids as $id) {
                 $id = $id instanceof Parameter ? $id->getValue() : $id;

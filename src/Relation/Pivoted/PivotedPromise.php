@@ -122,8 +122,8 @@ final class PivotedPromise implements PromiseInterface
 
         // we are going to add pivot node into virtual root node (only ID) to aggregate the results
         $root = new RootNode(
-            [$this->relationSchema[Relation::INNER_KEY]],
-            $this->relationSchema[Relation::INNER_KEY]
+            (array)$this->relationSchema[Relation::INNER_KEY],
+            ...(array)$this->relationSchema[Relation::INNER_KEY]
         );
 
         $node = $loader->createNode();

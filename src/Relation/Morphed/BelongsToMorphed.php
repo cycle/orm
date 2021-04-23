@@ -41,10 +41,15 @@ class BelongsToMorphed extends BelongsTo
      */
     public function initPromise(Node $node): array
     {
-        $innerKey = $this->fetchKey($node, $this->innerKey);
-        if ($innerKey === null) {
-            return [null, null];
+        $innerValues = [];
+        foreach ($this->innerKeys as $i => $innerKey) {
+            $innerValue = $this->fetchKey($node, $innerKey);
+            if ($innerValue === null) {
+                return [null, null];
+            }
+            $innerValues[] = $innerValue;
         }
+
 
         /** @var string $target */
         $target = $this->fetchKey($node, $this->morphKey);
@@ -52,12 +57,12 @@ class BelongsToMorphed extends BelongsTo
             return [null, null];
         }
 
-        $e = $this->orm->getHeap()->find($target, [$this->outerKey => $innerKey]);
+        $e = $this->orm->getHeap()->find($target, array_combine($this->outerKeys, $innerValues));
         if ($e !== null) {
             return [$e, $e];
         }
 
-        $e = $this->orm->promise($target, [$this->outerKey => $innerKey]);
+        $e = $this->orm->promise($target, array_combine($this->outerKeys, $innerValues));
 
         return [$e, $e];
     }

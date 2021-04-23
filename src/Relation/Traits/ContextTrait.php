@@ -70,17 +70,19 @@ trait ContextTrait
      * parent entity. Creates promise.
      *
      * @param Node   $from
-     * @param string $fromKey
+     * @param string[] $fromKeys
      * @param CS     $carrier
-     * @param string $toKey
+     * @param string[] $toKeys
      * @return CS
      */
-    protected function forwardScope(Node $from, string $fromKey, CS $carrier, string $toKey): CS
+    protected function forwardScope(Node $from, array $fromKeys, CS $carrier, array $toKeys): CS
     {
-        $column = $this->columnName($from, $toKey);
+        foreach ($fromKeys as $i => $fromKey) {
+            $column = $this->columnName($from, $toKeys[$i]);
 
-        $carrier->waitScope($column);
-        $from->forward($fromKey, $carrier, $column, true, ConsumerInterface::SCOPE);
+            $carrier->waitScope($column);
+            $from->forward($fromKey, $carrier, $column, true, ConsumerInterface::SCOPE);
+        }
 
         return $carrier;
     }

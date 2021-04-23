@@ -40,9 +40,6 @@ abstract class AbstractRelation implements RelationInterface
     protected $schema;
 
     /** @var string */
-    protected $innerKey;
-
-    /** @var string */
     protected $outerKey;
 
     /** @var string[] */
@@ -65,7 +62,6 @@ abstract class AbstractRelation implements RelationInterface
         $this->schema = $schema;
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
-        $this->innerKey = $this->packKeys($this->innerKeys);
         $this->outerKey = $this->packKeys($this->outerKeys);
     }
 

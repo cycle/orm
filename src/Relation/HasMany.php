@@ -70,17 +70,19 @@ class HasMany extends AbstractRelation
      */
     public function initPromise(Node $node): array
     {
-        $innerKey = $this->fetchKey($node, $this->innerKey);
-        if ($innerKey === null) {
-            return [new ArrayCollection(), null];
+        $innerValues = [];
+        foreach ($this->innerKeys as $i => $innerKey) {
+            $innerValue = $this->fetchKey($node, $innerKey);
+            if ($innerValue === null) {
+                return [new ArrayCollection(), null];
+            }
+            $innerValues[] = $innerValue;
         }
 
         $p = new PromiseMany(
             $this->orm,
             $this->target,
-            [
-                $this->outerKey => $innerKey
-            ],
+            array_combine($this->outerKeys, $innerValues),
             $this->schema[Relation::WHERE] ?? []
         );
 

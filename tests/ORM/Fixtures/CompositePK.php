@@ -16,6 +16,11 @@ class CompositePK
 
     public $child_entity;
 
+    public $child_key1;
+    public $child_key2;
+    public $child_key3;
+    public $child_key4;
+
     public $children;
     public $pivoted;
 

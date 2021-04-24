@@ -14,6 +14,7 @@ namespace Cycle\ORM\Command\Database;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
+use Cycle\ORM\Command\Traits\CommandTrait;
 use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
@@ -30,6 +31,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     use ContextTrait;
     use ScopeTrait;
     use ErrorTrait;
+    use CommandTrait;
 
     /** @var array */
     protected $data = [];
@@ -81,7 +83,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      */
     public function isReady(): bool
     {
-        return $this->waitContext === [] && $this->waitScope === [];
+        return $this->waitContext === [] && $this->waitScope === [] && $this->isCommandsExecuted();
     }
 
     /**

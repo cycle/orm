@@ -80,11 +80,11 @@ interface RelationInterface
      * @param CC     $store
      * @param object $entity
      * @param Node   $node
-     * @param object $related
+     * @param object|null $related
      * @param object $original
      * @return CommandInterface
      *
      * @throws RelationException
      */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface;
+    public function queue(CC $store, object $entity, Node $node, ?object $related, ?object $original): CommandInterface;
 }

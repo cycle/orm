@@ -65,7 +65,7 @@ final class MultiKeyCollection
 
     public function addItem(string $index, array &$data): void
     {
-        $pull = &$this->data[$index];
+        $pool = &$this->data[$index];
         $itemKeys = [];
         foreach ($this->indexes[$index] as $key) {
             $keyValue = $data[$key] ?? null;
@@ -73,9 +73,12 @@ final class MultiKeyCollection
                 throw new \InvalidArgumentException("Invalid value on the key `$key`.");
             }
             $itemKeys[] = $keyValue;
-            $pull = &$pull[$keyValue];
+            if (!array_key_exists($keyValue, $pool)) {
+                $pool[$keyValue] = [];
+            }
+            $pool = &$pool[$keyValue];
         }
-        $pull[] = &$data;
+        $pool[] = &$data;
         $this->lastItemKeys[$index] = $itemKeys;
         // return count($pull);
     }

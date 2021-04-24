@@ -332,7 +332,7 @@ final class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
+    public function queueStore(object $entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
     {
         if ($entity instanceof PromiseInterface && $entity->__loaded()) {
             $entity = $entity->__resolve();

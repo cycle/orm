@@ -14,6 +14,7 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
@@ -30,7 +31,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, ?object $related, $original): CommandInterface
     {
         // refers-to relation is always nullable (as opposite to belongs-to)
         if ($related === null) {
@@ -46,20 +47,24 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $rNode = $this->getNode($related);
         $this->assertValid($rNode);
 
+        $returnNil = true;
         // related object exists, we can update key immediately
         foreach ($this->outerKeys as $i => $outerKey) {
             $outerValue = $this->fetchKey($rNode, $outerKey);
             $innerKey = $this->innerKeys[$i];
 
-            if ($outerValue !== null) {
-                if ($outerValue != $this->fetchKey($node, $innerKey)) {
-                    $store->register($this->columnName($node, $innerKey), $outerValue, true);
-                }
-
-                return new Nil();
+            if ($outerValue === null) {
+                $returnNil = false;
+                continue;
+            }
+            if ($outerValue != $this->fetchKey($node, $innerKey)) {
+                $store->register($this->columnName($node, $innerKey), $outerValue, true);
             }
         }
-
+        if ($returnNil) {
+            $this->forwardContext($rNode, $this->outerKeys, $store, $node, $this->innerKeys);
+            return new Nil();
+        }
 
         // update parent entity once related instance is able to provide us context key
         $update = new Update(
@@ -67,16 +72,13 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $this->getSource($node->getRole())->getTable()
         );
 
+        $this->forwardContext($rNode, $this->outerKeys, $update, $node, $this->innerKeys);
+        if ($store instanceof Insert) {
+            $update->waitCommand($store);
+        }
+
         // fastest way to identify the entity
         $pk = (array)$this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
-
-        $this->forwardContext(
-            $rNode,
-            $this->outerKeys,
-            $update,
-            $node,
-            $this->innerKeys
-        );
 
         // set where condition for update query
         $this->forwardScope($node, $pk, $update, $pk);

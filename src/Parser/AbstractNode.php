@@ -466,28 +466,8 @@ abstract class AbstractNode
         }
         return $result;
     }
-    protected function intersectDataString(string $keys, array $data): ?string
-    {
-        $keyList = $this->unpackKeys($keys);
-        $result = [];
-        foreach ($keyList as $key) {
-            if (!isset($data[$key])) {
-                return null;
-            }
-            $result[$key] = $data[$key];
-        }
-        return $this->packCriteria($result);
-    }
-    protected function unpackKeys(string $keys): array
-    {
-        return explode(":", $keys);
-    }
     protected function packKeys(array $keys): string
     {
         return implode(":", $keys);
-    }
-    protected function packCriteria(array $data): string
-    {
-        return implode('/', $data);
     }
 }

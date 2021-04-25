@@ -36,9 +36,9 @@ class ManyToMany extends Relation\AbstractRelation
 
     /**
      * @param ORMInterface $orm
-     * @param string       $name
-     * @param string       $target
-     * @param array        $schema
+     * @param string $name
+     * @param string $target
+     * @param array $schema
      */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
@@ -149,6 +149,8 @@ class ManyToMany extends Relation\AbstractRelation
             if (!$related->has($item)) {
                 // todo: add support for nullable pivot entities
                 $sequence->addCommand($this->orm->queueDelete($original->get($item)));
+                $sequence->addCommand($this->orm->queueStore($item));
+                $original->getContext()->offsetUnset($item);
             }
         }
 
@@ -158,9 +160,9 @@ class ManyToMany extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node                   $node
-     * @param object                 $related
-     * @param object                 $pivot
+     * @param Node $node
+     * @param object $related
+     * @param object $pivot
      * @param Pivoted\PivotedStorage $storage
      * @return CommandInterface
      */
@@ -210,9 +212,9 @@ class ManyToMany extends Relation\AbstractRelation
      * Since many to many relation can overlap from two directions we have to properly resolve the pivot entity upon
      * it's generation. This is achieved using temporary mapping associated with each of the entity states.
      *
-     * @param Node   $node
+     * @param Node $node
      * @param object $related
-     * @param mixed  $pivot
+     * @param mixed $pivot
      * @return mixed|object|null
      */
     protected function initPivot(Node $node, $related, $pivot)

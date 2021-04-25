@@ -79,7 +79,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         int $stream = ConsumerInterface::DATA
     ): void {
         if ($trigger) {
-            throw new CommandException('Insert command can only forward keys after the execution');
+            throw new CommandException('Insert command can only forward keys after the execution.');
         }
 
         $this->consumers[$key][] = [$consumer, $target, $stream];

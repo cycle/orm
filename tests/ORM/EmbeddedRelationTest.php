@@ -140,9 +140,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u->credentials->password = 'pass3';
 
         $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
+        $this->save($u);
         $this->assertNumWrites(1);
 
         $this->assertSame(3, $u->id);
@@ -300,9 +298,7 @@ abstract class EmbeddedRelationTest extends BaseTest
 
         $this->captureWriteQueries();
         $this->captureReadQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
+        $this->save($u);
         $this->assertNumWrites(1);
         $this->assertNumReads(1);
 

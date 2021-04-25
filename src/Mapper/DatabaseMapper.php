@@ -152,8 +152,8 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
 
+        // we are trying to update entity without PK right now
         foreach ($this->primaryKeys as $i => $pk) {
-            // we are trying to update entity without PK right now
             $state->forward(
                 $pk,
                 $update,

@@ -47,8 +47,8 @@ final class Embedded implements RelationInterface
     /** @var MapperInterface */
     protected $mapper;
 
-    /** @var string */
-    protected $primaryKey;
+    /** @var string[] */
+    protected $primaryKeys;
 
     /** @var array */
     protected $columns = [];
@@ -68,7 +68,7 @@ final class Embedded implements RelationInterface
         $this->mapper = $this->orm->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
-        $this->primaryKey = $this->orm->getSchema()->define($target, Schema::PRIMARY_KEY);
+        $this->primaryKeys = (array)$this->orm->getSchema()->define($target, Schema::PRIMARY_KEY);
         $this->columns = $this->orm->getSchema()->define($target, Schema::COLUMNS);
     }
 
@@ -102,8 +102,10 @@ final class Embedded implements RelationInterface
      */
     public function init(Node $node, array $data): array
     {
-        // ensure proper object reference
-        $data[$this->primaryKey] = $node->getData()[$this->primaryKey];
+        foreach ($this->primaryKeys as $key) {
+            // ensure proper object reference
+            $data[$key] = $node->getData()[$key];
+        }
 
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
 
@@ -115,21 +117,26 @@ final class Embedded implements RelationInterface
      */
     public function initPromise(Node $parentNode): array
     {
-        $primaryKey = $this->fetchKey($parentNode, $this->primaryKey);
-        if (empty($primaryKey)) {
-            return [null, null];
+        $values = [];
+        foreach ($this->primaryKeys as $key) {
+            $value = $this->fetchKey($parentNode, $key);
+            if (empty($value)) {
+                return [null, null];
+            }
+            $values[] = $value;
         }
 
         /** @var ORMInterface $orm */
         $orm = $this->orm;
 
-        $e = $orm->getHeap()->find($this->target, [$this->primaryKey => $primaryKey]);
+        $pk = array_combine($this->primaryKeys, $values);
+        $e = $orm->getHeap()->find($this->target, $pk);
         if ($e !== null) {
             return [$e, $e];
         }
 
-        $r = $this->orm->promise($this->target, [$this->primaryKey => $primaryKey]);
-        return [$r, [$this->primaryKey => $primaryKey]];
+        $r = $this->orm->promise($this->target, $pk);
+        return [$r, $pk];
     }
 
     /**
@@ -160,7 +167,7 @@ final class Embedded implements RelationInterface
         }
 
         if ($related === null) {
-            throw new NullException("Embedded relation `{$this->name}` can't be null");
+            throw new NullException("Embedded relation `{$this->name}` can't be null.");
         }
 
         $state = $this->getNode($related)->getState();
@@ -190,9 +197,13 @@ final class Embedded implements RelationInterface
      * @param State $state
      * @return array
      */
-    protected function getChanges($related, State $state): array
+    protected function getChanges(object $related, State $state): array
     {
         $data = array_intersect_key($this->mapper->extract($related), $this->columns);
+        // Embedded entity does not override PK values of the parent
+        foreach ($this->primaryKeys as $key) {
+            unset($data[$key]);
+        }
 
         return array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
     }
@@ -228,7 +239,7 @@ final class Embedded implements RelationInterface
             return 0;
         }
 
-        return ($a > $b) ? 1 : -1;
+        return $a <=> $b;
     }
 
     /**

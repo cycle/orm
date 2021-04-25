@@ -265,10 +265,12 @@ abstract class BaseTest extends TestCase
         }
     }
 
-    protected function save($e): void
+    protected function save(object ...$entities): void
     {
         $tr = new Transaction($this->orm);
-        $tr->persist($e);
+        foreach ($entities as $entity) {
+            $tr->persist($entity);
+        }
         $tr->run();
     }
 

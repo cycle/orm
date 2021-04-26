@@ -264,9 +264,9 @@ class ManyToManyLoader extends JoinableLoader
     {
         $node = new SingularNode(
             $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::THROUGH_OUTER_KEY]
+            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->schema[Relation::OUTER_KEY],
+            (array)$this->schema[Relation::THROUGH_OUTER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

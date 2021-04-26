@@ -107,9 +107,9 @@ class HasOneLoader extends JoinableLoader
     {
         $node = new SingularNode(
             $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::INNER_KEY]
+            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->schema[Relation::OUTER_KEY],
+            (array)$this->schema[Relation::INNER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

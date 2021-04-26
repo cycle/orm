@@ -28,11 +28,6 @@ final class MultiKeyCollection
      */
     private $lastItemKeys = [];
 
-    public function hasIndex(string $outerKey): bool
-    {
-        return array_key_exists($outerKey, $this->indexes);
-    }
-
     public function createIndex(string $name, array $keys): void
     {
         $this->indexes[$name] = $keys;
@@ -42,6 +37,16 @@ final class MultiKeyCollection
     public function getIndexes(): array
     {
         return array_keys($this->indexes);
+    }
+
+    public function hasIndex(string $outerKey): bool
+    {
+        return array_key_exists($outerKey, $this->indexes);
+    }
+
+    public function getIndex(string $indexName): array
+    {
+        return $this->indexes[$indexName] ?? [];
     }
 
     public function getItemsCount(string $index, array $values): int

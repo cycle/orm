@@ -156,7 +156,7 @@ final class RootLoader extends AbstractLoader
      */
     protected function initNode(): AbstractNode
     {
-        $node = new RootNode($this->columnNames(), ...(array)$this->define(Schema::PRIMARY_KEY));
+        $node = new RootNode($this->columnNames(), (array)$this->define(Schema::PRIMARY_KEY));
 
         $typecast = $this->define(Schema::TYPECAST);
         if ($typecast !== null) {

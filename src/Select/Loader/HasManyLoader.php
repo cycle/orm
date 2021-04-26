@@ -126,9 +126,9 @@ class HasManyLoader extends JoinableLoader
     {
         $node = new ArrayNode(
             $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::INNER_KEY]
+            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->schema[Relation::OUTER_KEY],
+            (array)$this->schema[Relation::INNER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

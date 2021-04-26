@@ -72,9 +72,9 @@ class PivotLoader extends JoinableLoader
     {
         $node = new ArrayNode(
             $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::THROUGH_INNER_KEY],
-            $this->schema[Relation::INNER_KEY]
+            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->schema[Relation::THROUGH_INNER_KEY],
+            (array)$this->schema[Relation::INNER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

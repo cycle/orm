@@ -146,7 +146,7 @@ final class EmbeddedLoader implements JoinableInterface
     {
         $node = new EmbeddedNode(
             $this->columnNames(),
-            $this->orm->getSchema()->define($this->parent->getTarget(), Schema::PRIMARY_KEY)
+            (array)$this->orm->getSchema()->define($this->parent->getTarget(), Schema::PRIMARY_KEY)
         );
 
         $typecast = $this->define(Schema::TYPECAST);

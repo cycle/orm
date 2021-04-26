@@ -25,18 +25,18 @@ final class SingularNode extends AbstractNode
     protected $innerKeys;
 
     /**
-     * @param array              $columns
-     * @param string|array       $primaryKey
-     * @param string|array       $innerKey Inner relation key (for example user_id)
-     * @param string|array|null  $outerKey Outer (parent) relation key (for example id = parent.id)
+     * @param array      $columns
+     * @param array      $primaryKeys
+     * @param array      $innerKeys Inner relation key (for example user_id)
+     * @param array|null $outerKeys Outer (parent) relation key (for example id = parent.id)
      */
-    public function __construct(array $columns, $primaryKey, $innerKey, $outerKey)
+    public function __construct(array $columns, array $primaryKeys, array $innerKeys, ?array $outerKeys)
     {
-        parent::__construct($columns, $outerKey);
-        $this->setDuplicateCriteria(...(array)$primaryKey);
+        parent::__construct($columns, $outerKeys);
+        $this->setDuplicateCriteria($primaryKeys);
 
-        $this->innerKeys = (array)$innerKey;
-        $this->innerKey = $this->packKeys($this->innerKeys);
+        $this->innerKeys = $innerKeys;
+        $this->innerKey = $this->makeIndexName($this->innerKeys);
     }
 
     /**
@@ -57,7 +57,7 @@ final class SingularNode extends AbstractNode
 
         $this->parent->mount(
             $this->container,
-            $this->outerKey,
+            $this->indexName,
             $this->intersectData($this->innerKeys, $data),
             $data
         );

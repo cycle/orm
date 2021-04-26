@@ -23,17 +23,16 @@ final class ArrayNode extends AbstractNode
     protected $innerKeys;
 
     /**
-     * @param array              $columns
-     * @param array|string       $primaryKey
-     * @param array|string       $innerKey Inner relation key (for example user_id)
-     * @param array|string|null  $outerKey Outer (parent) relation key (for example id = parent.id)
+     * @param array      $columns
+     * @param array      $primaryKeys
+     * @param array      $innerKeys Inner relation key (for example user_id)
+     * @param array|null $outerKeys Outer (parent) relation key (for example id = parent.id)
      */
-    public function __construct(array $columns, $primaryKey, $innerKey, $outerKey)
+    public function __construct(array $columns, array $primaryKeys, array $innerKeys, ?array $outerKeys)
     {
-        parent::__construct($columns, $outerKey);
-        $this->setDuplicateCriteria(...(array)$primaryKey);
-
-        $this->innerKeys = (array)$innerKey;
+        parent::__construct($columns, $outerKeys);
+        $this->setDuplicateCriteria($primaryKeys);
+        $this->innerKeys = $innerKeys;
     }
 
     /**
@@ -54,7 +53,7 @@ final class ArrayNode extends AbstractNode
 
         $this->parent->mountArray(
             $this->container,
-            $this->outerKey,
+            $this->indexName,
             $this->intersectData($this->innerKeys, $data),
             $data
         );

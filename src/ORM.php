@@ -177,20 +177,17 @@ final class ORM implements ORMInterface
         // init entity class and prepared (typecasted) data
         [$e, $prepared] = $m->init($data);
 
-        $node = new Node($node, $prepared, $m->getRole());
+        $nodeObject = new Node($node, $prepared, $m->getRole());
 
-        $this->heap->attach($e, $node, $this->getIndexes($m->getRole()));
+        $this->heap->attach($e, $nodeObject, $this->getIndexes($m->getRole()));
 
         // hydrate entity with it's data, relations and proxies
         return $m->hydrate(
             $e,
-            $this->getRelationMap($role)->init($node, $prepared)
+            $this->getRelationMap($role)->init($nodeObject, $prepared)
         );
     }
 
-    /**
-     * @inheritdoc
-     */
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;

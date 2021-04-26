@@ -19,7 +19,7 @@ namespace Cycle\ORM\Parser;
 final class RootNode extends OutputNode
 {
     /**
-     * @param array $columns
+     * @param string[] $columns
      * @param string[] $primaryKeys
      */
     public function __construct(array $columns, array $primaryKeys)

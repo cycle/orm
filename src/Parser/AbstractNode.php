@@ -130,7 +130,6 @@ abstract class AbstractNode
         $data = $this->fetchData($offset, $row);
 
         if ($this->deduplicate($data)) {
-
             foreach ($this->refValues->getIndexes() as $index) {
                 try {
                     $this->refValues->addItem($index, $data);

@@ -41,17 +41,11 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     /** @var ConsumerInterface[][] */
     protected $consumers = [];
 
-    /**
-     * @param DatabaseInterface $db
-     * @param string            $table
-     * @param array             $data
-     * @param string         ...$primaryKeys
-     */
     public function __construct(
         DatabaseInterface $db,
         string $table,
         array $data = [],
-        string ...$primaryKeys
+        array $primaryKeys = []
     ) {
         parent::__construct($db, $table);
         $this->data = $data;

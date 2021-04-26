@@ -86,8 +86,18 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ]
         );
 
-        $this->makeCompositeFK('child_entity', ['parent_field1', 'parent_field2'], 'parent_entity', ['pField1', 'pField2']);
-        $this->makeCompositeFK('nested_entity', ['parent_field1', 'parent_field2'], 'child_entity', ['field1', 'field2']);
+        $this->makeCompositeFK(
+            'child_entity',
+            ['parent_field1', 'parent_field2'],
+            'parent_entity',
+            ['pField1', 'pField2']
+        );
+        $this->makeCompositeFK(
+            'nested_entity',
+            ['parent_field1', 'parent_field2'],
+            'child_entity',
+            ['field1', 'field2']
+        );
 
         $this->getDatabase()->table('parent_entity')->insertMultiple(
             ['pField1', 'pField2', 'pField3'],

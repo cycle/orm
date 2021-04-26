@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Traits;
@@ -16,7 +9,7 @@ use Cycle\ORM\Command\CommandInterface;
 /**
  * Provides ability to carry command.
  */
-trait CommandTrait
+trait WaitCommandTrait
 {
     /** @var CommandInterface[] */
     protected $waitCommand = [];
@@ -28,7 +21,7 @@ trait CommandTrait
 
     public function isCommandsExecuted(): bool
     {
-        foreach ($this->waitCommand as $key => $command) {
+        foreach ($this->waitCommand as $command) {
             if (!$command->isExecuted()) {
                 return false;
             }

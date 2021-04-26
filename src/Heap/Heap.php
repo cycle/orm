@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
@@ -24,44 +17,29 @@ final class Heap implements HeapInterface, IteratorAggregate
     private $storage;
 
     /** @var array */
-    public $paths = [];
+    private $paths = [];
 
-    /**
-     * Heap constructor.
-     */
     public function __construct()
     {
         $this->clean();
     }
 
-    /**
-     * Heap destructor.
-     */
     public function __destruct()
     {
         $this->clean();
     }
 
-    /**
-     * @return SplObjectStorage
-     */
     public function getIterator(): SplObjectStorage
     {
         return $this->storage;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function has($entity): bool
+    public function has(object $entity): bool
     {
         return $this->storage->offsetExists($entity);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function get($entity): ?Node
+    public function get(object $entity): ?Node
     {
         try {
             return $this->storage->offsetGet($entity);
@@ -70,10 +48,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         }
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function find(string $role, array $scope)
+    public function find(string $role, array $scope): ?object
     {
         if (count($scope) === 1) {
             $key = key($scope);
@@ -89,9 +64,6 @@ final class Heap implements HeapInterface, IteratorAggregate
         return $this->paths[$role][$key][$value] ?? null;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function attach(object $entity, Node $node, array $index = []): void
     {
         $this->storage->offsetSet($entity, $node);
@@ -118,10 +90,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         }
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function detach($entity): void
+    public function detach(object $entity): void
     {
         $node = $this->get($entity);
         if ($node === null) {
@@ -141,9 +110,6 @@ final class Heap implements HeapInterface, IteratorAggregate
         $this->storage->offsetUnset($entity);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function clean(): void
     {
         $this->paths = [];
@@ -170,10 +136,10 @@ final class Heap implements HeapInterface, IteratorAggregate
         $result = '';
         foreach ($values as $value) {
             $result .= str_replace(
-                    self::VALUE_SEPARATOR,
-                    self::VALUE_SEPARATOR . self::VALUE_SEPARATOR,
-                    (string) $value
-                ) . self::VALUE_SEPARATOR;
+                self::VALUE_SEPARATOR,
+                self::VALUE_SEPARATOR . self::VALUE_SEPARATOR,
+                (string) $value
+            ) . self::VALUE_SEPARATOR;
         }
         return $result;
     }

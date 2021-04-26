@@ -71,8 +71,12 @@ abstract class HasManyCompositeKeyTest extends BaseTest
             ]
         );
 
-        $this->makeCompositeFK('child_entity', ['parent_field1', 'parent_field2'], 'parent_entity', ['pField1', 'pField2']);
-
+        $this->makeCompositeFK(
+            'child_entity',
+            ['parent_field1', 'parent_field2'],
+            'parent_entity',
+            ['pField1', 'pField2']
+        );
 
         $this->getDatabase()->table('parent_entity')->insertMultiple(
             ['pField1', 'pField2', 'pField3'],
@@ -263,7 +267,8 @@ abstract class HasManyCompositeKeyTest extends BaseTest
     public function testRemoveChildrenNullable(): void
     {
         $schemaArray = $this->getSchemaArray();
-        $schemaArray[CompositePK::class][Schema::RELATIONS][self::CHILD_CONTAINER][Relation::SCHEMA][Relation::NULLABLE] = true;
+        $relationSchema = &$schemaArray[CompositePK::class][Schema::RELATIONS][self::CHILD_CONTAINER][Relation::SCHEMA];
+        $relationSchema[Relation::NULLABLE] = true;
         $this->orm = $this->withSchema(new Schema($schemaArray));
 
         $selector = (new Select($this->orm, CompositePK::class))

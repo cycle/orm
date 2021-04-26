@@ -56,7 +56,12 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ]
         );
 
-        $this->makeCompositeFK('child_entity', ['parent_field1', 'parent_field2'], 'parent_entity', ['pField1', 'pField2']);
+        $this->makeCompositeFK(
+            'child_entity',
+            ['parent_field1', 'parent_field2'],
+            'parent_entity',
+            ['pField1', 'pField2']
+        );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }

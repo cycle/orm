@@ -123,8 +123,18 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             'as' => 'string,nullable'
         ]);
 
-        $this->makeCompositeFK('pivot_entity', ['parent_field_1', 'parent_field_2'], 'parent_entity', ['pField1', 'pField2']);
-        $this->makeCompositeFK('pivot_entity', ['child_field_1', 'child_field_2'], 'child_entity', ['field1', 'field2']);
+        $this->makeCompositeFK(
+            'pivot_entity',
+            ['parent_field_1', 'parent_field_2'],
+            'parent_entity',
+            ['pField1', 'pField2']
+        );
+        $this->makeCompositeFK(
+            'pivot_entity',
+            ['child_field_1', 'child_field_2'],
+            'child_entity',
+            ['field1', 'field2']
+        );
         $this->makeIndex('pivot_entity', ['parent_field_1', 'parent_field_2', 'child_field_1', 'child_field_2'], true);
 
         $this->getDatabase()->table('parent_entity')->insertMultiple(

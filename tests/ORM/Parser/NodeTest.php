@@ -352,7 +352,7 @@ class NodeTest extends TestCase
 
         $node->parseRow(0, [1, 10, 10]);
     }
-    
+
     private function createSingularNode(): SingularNode
     {
         return new SingularNode(['id', 'user_id', 'balance'], ['id'], ['user_id'], ['id']);

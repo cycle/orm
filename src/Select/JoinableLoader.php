@@ -153,7 +153,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return;
         }
 
-
         // Get list of reference key values aggregated by parent.
         $references = $node->getReferenceValues();
         if ($references === []) {

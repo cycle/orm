@@ -185,6 +185,9 @@ abstract class AbstractNode
      */
     public function getReferenceValues(): array
     {
+        if ($this->parent === null) {
+            throw new ParserException('Unable to aggregate reference values, parent is missing.');
+        }
         if (!$this->parent->refValues->hasIndex($this->indexName)) {
             return [];
         }

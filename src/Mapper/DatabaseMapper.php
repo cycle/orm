@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
@@ -57,10 +50,6 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string[] */
     protected $primaryKeys;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $role
-     */
     public function __construct(ORMInterface $orm, string $role)
     {
         if (!$orm instanceof Select\SourceProviderInterface) {
@@ -89,18 +78,12 @@ abstract class DatabaseMapper implements MapperInterface
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getRole(): string
     {
         return $this->role;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface
+    public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface
     {
         $columns = $this->fetchFields($entity);
 
@@ -133,10 +116,7 @@ abstract class DatabaseMapper implements MapperInterface
         return $insert;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface
+    public function queueUpdate(object $entity, Node $node, State $state): ContextCarrierInterface
     {
         $data = $this->fetchFields($entity);
 
@@ -166,10 +146,7 @@ abstract class DatabaseMapper implements MapperInterface
         return $update;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queueDelete($entity, Node $node, State $state): CommandInterface
+    public function queueDelete(object $entity, Node $node, State $state): CommandInterface
     {
         $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
         $state->setStatus(Node::SCHEDULED_DELETE);
@@ -205,7 +182,7 @@ abstract class DatabaseMapper implements MapperInterface
      * @param object $entity
      * @return array
      */
-    abstract protected function fetchFields($entity): array;
+    abstract protected function fetchFields(object $entity): array;
 
     /**
      * Map internal field names to database specific column names.

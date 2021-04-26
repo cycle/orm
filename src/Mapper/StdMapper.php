@@ -24,10 +24,7 @@ final class StdMapper extends DatabaseMapper
         return [new \stdClass(), $data];
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function hydrate($entity, array $data)
+    public function hydrate($entity, array $data): object
     {
         foreach ($data as $k => $v) {
             $entity->{$k} = $v;
@@ -36,9 +33,6 @@ final class StdMapper extends DatabaseMapper
         return $entity;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function extract($entity): array
     {
         return get_object_vars($entity);
@@ -50,7 +44,7 @@ final class StdMapper extends DatabaseMapper
      * @param object $entity
      * @return array
      */
-    protected function fetchFields($entity): array
+    protected function fetchFields(object $entity): array
     {
         return array_intersect_key(
             $this->extract($entity),

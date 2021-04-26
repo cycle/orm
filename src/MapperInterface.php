@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -47,7 +40,7 @@ interface MapperInterface
      *
      * @throws MapperException
      */
-    public function hydrate($entity, array $data);
+    public function hydrate(object $entity, array $data): object;
 
     /**
      * Extract all values from the entity.
@@ -55,41 +48,26 @@ interface MapperInterface
      * @param object $entity
      * @return array
      */
-    public function extract($entity): array;
+    public function extract(object $entity): array;
 
     /**
      * Initiate chain of commands require to store object and it's data into persistent storage.
      *
-     * @param object $entity
-     * @param Node   $node
-     * @param State  $state
-     * @return ContextCarrierInterface
-     *
      * @throws MapperException
      */
-    public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface;
+    public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface;
 
     /**
      * Initiate chain of commands required to update object in the persistent storage.
      *
-     * @param object $entity
-     * @param Node   $node
-     * @param State  $state
-     * @return ContextCarrierInterface
-     *
      * @throws MapperException
      */
-    public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface;
+    public function queueUpdate(object $entity, Node $node, State $state): ContextCarrierInterface;
 
     /**
      * Initiate sequence of of commands required to delete object from the persistent storage.
      *
-     * @param object $entity
-     * @param Node   $node
-     * @param State  $state
-     * @return CommandInterface
-     *
      * @throws MapperException
      */
-    public function queueDelete($entity, Node $node, State $state): CommandInterface;
+    public function queueDelete(object $entity, Node $node, State $state): CommandInterface;
 }

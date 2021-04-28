@@ -216,10 +216,7 @@ abstract class UUIDTest extends BaseTest
         [$a, $b] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($a, $b);
         $this->assertNumWrites(0);
     }
 
@@ -235,16 +232,12 @@ abstract class UUIDTest extends BaseTest
         $e->comments[1]->message = 'msg B';
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(3);
 
         // consecutive test
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(0);
 
         $this->assertIsString($e->id);

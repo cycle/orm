@@ -38,12 +38,6 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var array */
     protected $fields;
 
-    /** @var string */
-    protected $primaryKey;
-
-    /** @var string */
-    protected $primaryColumn;
-
     /** @var string[] */
     protected $primaryColumns = [];
 
@@ -62,19 +56,14 @@ abstract class DatabaseMapper implements MapperInterface
         $this->source = $orm->getSource($role);
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
 
-        $primaryKeys = (array)$orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $primaryKey = implode(':', $primaryKeys);
-        $this->primaryKey = $primaryKey;
-        $this->primaryColumn = $this->columns[$primaryKey] ?? $primaryKey;
-
-        $this->primaryKeys = $primaryKeys;
+        $this->primaryKeys = (array)$orm->getSchema()->define($role, Schema::PRIMARY_KEY);
         foreach ($this->primaryKeys as $PK) {
             $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
         }
 
         // Resolve field names
         foreach ($this->columns as $name => $column) {
-            $this->fields[] = is_numeric($name) ? $column : $name;
+            $this->fields[] = is_string($name) ? $name : $column;
         }
     }
 
@@ -85,28 +74,37 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface
     {
-        $columns = $this->fetchFields($entity);
+        $values = $this->fetchFields($entity);
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);
-        $state->setData($columns);
+        $state->setData($values);
 
-        #todo
-        $columns[$this->primaryKey] = $columns[$this->primaryKey] ?? $this->nextPrimaryKey();
-        if ($columns[$this->primaryKey] === null) {
-            unset($columns[$this->primaryKey]);
+        foreach ($this->primaryKeys as $key) {
+            if (!isset($values[$key])) {
+                $values = array_merge($values, $this->nextPrimaryKey($entity) ?? []);
+                break;
+            }
+        }
+
+        // clear PK
+        foreach ($this->primaryKeys as $key) {
+            if (array_key_exists($key, $values) && $values[$key] === null) {
+                unset($values[$key]);
+            }
         }
 
         $insert = new Insert(
             $this->source->getDatabase(),
             $this->source->getTable(),
-            $this->mapColumns($columns),
+            $this->mapColumns($values),
             $this->primaryColumns
         );
 
         if (count($this->primaryKeys) === 1) {
-            $key = isset($columns[$this->primaryKey]) ? $this->primaryColumn : Insert::INSERT_ID;
-            $insert->forward($key, $state, $this->primaryKey);
+            $key = $this->primaryKeys[0];
+            $column = isset($values[$key]) ? $this->primaryColumns[0] : Insert::INSERT_ID;
+            $insert->forward($column, $state, $key);
         } else {
             foreach ($this->primaryKeys as $num => $pk) {
                 $insert->forward($this->primaryColumns[$num], $state, $pk);
@@ -168,10 +166,8 @@ abstract class DatabaseMapper implements MapperInterface
 
     /**
      * Generate next sequential entity ID. Return null to use autoincrement value.
-     *
-     * @return mixed|null
      */
-    protected function nextPrimaryKey()
+    protected function nextPrimaryKey(object $entity): ?array
     {
         return null;
     }

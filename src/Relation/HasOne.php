@@ -30,7 +30,7 @@ class HasOne extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, ?object $related, ?object $original): CommandInterface
     {
         if ($original instanceof ReferenceInterface) {
             $original = $this->resolve($original);

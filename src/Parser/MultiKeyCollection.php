@@ -39,9 +39,9 @@ final class MultiKeyCollection
         return array_keys($this->indexes);
     }
 
-    public function hasIndex(string $outerKey): bool
+    public function hasIndex(string $index): bool
     {
-        return array_key_exists($outerKey, $this->indexes);
+        return array_key_exists($index, $this->indexes);
     }
 
     public function getIndex(string $indexName): array

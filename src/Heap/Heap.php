@@ -55,7 +55,8 @@ final class Heap implements HeapInterface, IteratorAggregate
 
         $isComposite = false;
         switch (count($scope)) {
-            case 0: return null;
+            case 0:
+                return null;
             case 1:
                 $indexName = key($scope);
                 break;
@@ -108,7 +109,8 @@ final class Heap implements HeapInterface, IteratorAggregate
             $isComposite = false;
             if (is_array($key)) {
                 switch (count($key)) {
-                    case 0: continue 2;
+                    case 0:
+                        continue 2;
                     case 1:
                         $indexName = current($key);
                         break;

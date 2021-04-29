@@ -20,7 +20,7 @@ class UUIDMapper extends Mapper
     /**
      * Generate entity primary key value.
      */
-    public function nextPrimaryKey(object $entity): array
+    public function nextPrimaryKey(): array
     {
         try {
             return [$this->primaryKeys[0] => Uuid::uuid4()->toString()];

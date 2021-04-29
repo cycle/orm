@@ -14,6 +14,7 @@ namespace Cycle\ORM\Heap;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
+use JetBrains\PhpStorm\ExpectedValues;
 
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
@@ -49,8 +50,12 @@ final class Node implements ProducerInterface, ConsumerInterface
      * @param array  $data
      * @param string $role
      */
-    public function __construct(int $status, array $data, string $role)
-    {
+    public function __construct(
+        #[ExpectedValues(valuesFromClass: self::class)]
+        int $status,
+        array $data,
+        string $role
+    ) {
         $this->status = $status;
         $this->data = $data;
         $this->role = $role;

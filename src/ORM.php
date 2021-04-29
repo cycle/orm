@@ -119,9 +119,6 @@ final class ORM implements ORMInterface
         return $this->schema->resolveAlias($entity);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function get(string $role, array $scope, bool $load = true)
     {
         $role = $this->resolveRole($role);

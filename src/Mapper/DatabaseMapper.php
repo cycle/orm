@@ -82,7 +82,7 @@ abstract class DatabaseMapper implements MapperInterface
 
         foreach ($this->primaryKeys as $key) {
             if (!isset($values[$key])) {
-                $values = array_merge($values, $this->nextPrimaryKey($entity) ?? []);
+                $values = array_merge($values, $this->nextPrimaryKey() ?? []);
                 break;
             }
         }
@@ -167,7 +167,7 @@ abstract class DatabaseMapper implements MapperInterface
     /**
      * Generate next sequential entity ID. Return null to use autoincrement value.
      */
-    protected function nextPrimaryKey(object $entity): ?array
+    protected function nextPrimaryKey(): ?array
     {
         return null;
     }

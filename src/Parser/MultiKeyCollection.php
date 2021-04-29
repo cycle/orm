@@ -44,11 +44,6 @@ final class MultiKeyCollection
         return array_key_exists($index, $this->indexes);
     }
 
-    public function getIndex(string $indexName): array
-    {
-        return $this->indexes[$indexName] ?? [];
-    }
-
     public function getItemsCount(string $index, array $values): int
     {
         try {

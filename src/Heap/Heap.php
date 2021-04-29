@@ -10,8 +10,7 @@ use UnexpectedValueException;
 
 final class Heap implements HeapInterface, IteratorAggregate
 {
-    private const KEY_SEPARATOR = ':';
-    private const VALUE_SEPARATOR = '/';
+    private const INDEX_KEY_SEPARATOR = ':';
 
     /** @var SplObjectStorage */
     private $storage;
@@ -50,18 +49,54 @@ final class Heap implements HeapInterface, IteratorAggregate
 
     public function find(string $role, array $scope): ?object
     {
-        if (count($scope) === 1) {
-            $key = key($scope);
-            if (is_object($scope[$key])) {
-                $scope[$key] = (string)$scope[$key];
-            }
-            return $this->paths[$role][$key][$scope[$key]] ?? null;
+        if (!array_key_exists($role, $this->paths) || count($this->paths[$role]) === 0) {
+            return null;
         }
 
-        $key = implode(self::KEY_SEPARATOR, array_keys($scope));
-        $value = $this->escapeValues($scope);
+        $isComposite = false;
+        switch (count($scope)) {
+            case 0: return null;
+            case 1:
+                $indexName = key($scope);
+                break;
+            default:
+                $isComposite = true;
+                $indexName = implode(self::INDEX_KEY_SEPARATOR, $scope);
+        }
 
-        return $this->paths[$role][$key][$value] ?? null;
+        if (!$isComposite) {
+            $value = (string) current($scope);
+            return $this->paths[$role][$indexName][$value] ?? null;
+        }
+        $result = null;
+        // Find index
+        if (!array_key_exists($indexName, $this->paths[$role])) {
+            $scopeKeys = array_keys($scope);
+            $scopeCount = count($scopeKeys);
+            foreach ($this->paths[$role] as $indexName => $values) {
+                $indexKeys = explode(self::INDEX_KEY_SEPARATOR, $indexName);
+                $keysCount = count($indexKeys);
+                if ($keysCount <= $scopeCount && count(array_intersect($indexKeys, $scopeKeys)) === $keysCount) {
+                    $result = &$this->paths[$role][$indexName];
+                    break;
+                }
+            }
+            // Index not found
+            if ($result === null) {
+                return null;
+            }
+        } else {
+            $result = &$this->paths[$role][$indexName];
+        }
+        $indexKeys = $indexKeys ?? explode(self::INDEX_KEY_SEPARATOR, $indexName);
+        foreach ($indexKeys as $key) {
+            $value = (string) $scope[$key];
+            if (!isset($result[$value])) {
+                return null;
+            }
+            $result = &$result[$value];
+        }
+        return $result;
     }
 
     public function attach(object $entity, Node $node, array $index = []): void
@@ -70,23 +105,44 @@ final class Heap implements HeapInterface, IteratorAggregate
 
         $data = $node->getData();
         foreach ($index as $key) {
+            $isComposite = false;
             if (is_array($key)) {
-                $values = [];
-                foreach ($key as $k) {
-                    $values[] = (string) ($data[$k] ?? "\0");
+                switch (count($key)) {
+                    case 0: continue 2;
+                    case 1:
+                        $indexName = current($key);
+                        break;
+                    default:
+                        $isComposite = true;
+                        $indexName = implode(self::INDEX_KEY_SEPARATOR, $key);
                 }
-                $value = $this->escapeValues($values);
-                $key = implode(self::KEY_SEPARATOR, $key);
             } else {
-                if (!isset($data[$key])) {
-                    continue;
-                }
-
-                $value = (string)$data[$key];
+                $indexName = $key;
             }
 
-            $this->paths[get_class($entity)][$key][$value] = $entity;
-            $this->paths[$node->getRole()][$key][$value] = $entity;
+            $rolePath = &$this->paths[$node->getRole()][$indexName];
+            // $classPath = &$this->paths[get_class($entity)][$indexName];
+
+            // composite key
+            if ($isComposite) {
+                foreach ($key as $k) {
+                    if (!isset($data[$k])) {
+                        continue 2;
+                    }
+                    $value = (string)$data[$k];
+                    $rolePath = &$rolePath[$value];
+                    // $classPath = &$classPath[$value];
+                }
+                $rolePath = $entity;
+                // $classPath = $entity;
+            } else {
+                if (!isset($data[$indexName])) {
+                    continue;
+                }
+                $value = (string)$data[$indexName];
+                $rolePath[$value] = $entity;
+                // $classPath[$value] = $entity;
+            }
         }
     }
 
@@ -101,10 +157,33 @@ final class Heap implements HeapInterface, IteratorAggregate
 
         // erase all the indexes
         if (isset($this->paths[$role])) {
-            $keys = array_keys($this->paths[$role]);
-            foreach ($keys as $key) {
-                unset($this->paths[$role][$key][$this->extractNodeValueByKey($node, $key)]);
+            $data = $node->getData();
+
+            foreach ($this->paths[$role] as $index => &$values) {
+                $keys = explode(self::INDEX_KEY_SEPARATOR, $index);
+                $j = count($keys) - 1;
+                $next = &$values;
+                $removeFrom = &$next;
+                $removeKey = null;
+                foreach ($keys as $i => $key) {
+                    $value = $data[$key] ?? null;
+                    if ($value === null || !array_key_exists($value, $next)) {
+                        continue 2;
+                    }
+                    // If last key
+                    if ($i === $j) {
+                        unset($removeFrom[$removeKey ?? $value]);
+                        break;
+                    }
+                    // Optimization to remove empty arrays
+                    if (count($next[$value]) > 1) {
+                        $removeFrom = &$next;
+                        $removeKey = $value;
+                    }
+                    $next = &$next[$value];
+                }
             }
+            unset($values);
         }
 
         $this->storage->offsetUnset($entity);
@@ -114,33 +193,5 @@ final class Heap implements HeapInterface, IteratorAggregate
     {
         $this->paths = [];
         $this->storage = new \SplObjectStorage();
-    }
-
-    private function extractNodeValueByKey(Node $node, string $key): string
-    {
-        $composite = strpos($key, self::KEY_SEPARATOR) !== false;
-
-        if (!$composite) {
-            return (string) $node->getData()[$key];
-        }
-
-        $data = [];
-        foreach (explode(self::KEY_SEPARATOR, $key) as $k) {
-            $data[] = $node->getData()[$k];
-        }
-        return $this->escapeValues($data);
-    }
-
-    private function escapeValues(array $values): string
-    {
-        $result = '';
-        foreach ($values as $value) {
-            $result .= str_replace(
-                self::VALUE_SEPARATOR,
-                self::VALUE_SEPARATOR . self::VALUE_SEPARATOR,
-                (string) $value
-            ) . self::VALUE_SEPARATOR;
-        }
-        return $result;
     }
 }

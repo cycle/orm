@@ -43,7 +43,7 @@ abstract class CompositePKTest extends BaseTest
         $u2 = new CompositePK();
         $u2->key1 = 3;
         $u2->key2 = 4;
-        (new Transaction($this->orm))->persist($u1)->run();
+        $this->save($u1);
 
         (new Transaction($this->orm))
             ->delete($u1)

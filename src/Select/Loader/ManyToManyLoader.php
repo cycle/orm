@@ -176,15 +176,7 @@ class ManyToManyLoader extends JoinableLoader
             $query->join(
                 $this->getJoinMethod(),
                 $this->pivot->getJoinTable()
-            )->on(
-                $on
-                // $this->pivot->localKey(Relation::THROUGH_OUTER_KEY),
-                // $this->localKey(Relation::OUTER_KEY)
-            );
-            // ->where(
-            //     $this->pivot->localKey(Relation::THROUGH_INNER_KEY),
-            //     new Parameter($outerKeys)
-            // );
+            )->on($on);
 
             $fields = array_map(function (string $key) use ($pivotPrefix) {
                 return $pivotPrefix . $this->pivot->fieldAlias($key);

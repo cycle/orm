@@ -184,7 +184,7 @@ abstract class AbstractNode
             return [];
         }
 
-        return $this->parent->indexedData->getIndexAssoc($this->indexName);
+        return $this->parent->indexedData->getCriteria($this->indexName, true);
     }
 
     /**

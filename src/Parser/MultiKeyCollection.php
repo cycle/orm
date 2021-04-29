@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Parser;
 
 use Cycle\ORM\Exception\ParserException;
+use Spiral\Database\Injection\Parameter;
 
 /**
  * @internal
@@ -83,12 +84,12 @@ final class MultiKeyCollection
         // return count($pull);
     }
 
-    public function getIndexAssoc(string $index): array
+    public function getCriteria(string $index, bool $useParameter = false): array
     {
         $result = [];
         foreach ($this->data[$index] as $key => $data) {
             $base = [$this->indexes[$index][0] => $key];
-            $result[] = $this->extractAssoc($data, $base, $this->indexes[$index], 1);
+            $result[] = $this->extractAssoc($data, $base, $this->indexes[$index], 1, true);
         }
         return $result === [] ? [] : array_merge(...$result);
     }
@@ -96,15 +97,25 @@ final class MultiKeyCollection
     /**
      * @param string[] $keys
      */
-    private function extractAssoc(array $data, array $base, array $keys, int $level): array
+    private function extractAssoc(array $data, array $base, array $keys, int $level, bool $useParameter): array
     {
+        // Optimization. Group last column values into single Parameter.
+        // For example, where condition will look like:
+        // key1="1" AND key2 IN (1, 2, 3)
+        // instead of:
+        // (key1="1" AND key2="1") OR (key1="1" AND key2="2") OR (key1="1" AND key2="3")
+        if ($useParameter && $level === count($keys) - 1 && count($data) > 1) {
+            return [$base + [$keys[$level] => new Parameter(array_keys($data))]];
+        }
+
         if ($level >= count($keys)) {
             return [$base];
         }
         $result = [];
+        $field = $keys[$level];
         foreach ($data as $key => $value) {
-            $base[$keys[$level]] = $key;
-            $result[] = $this->extractAssoc($value, $base, $keys, $level + 1);
+            $base[$field] = $key;
+            $result[] = $this->extractAssoc($value, $base, $keys, $level + 1, $useParameter);
         }
         return array_merge(...$result);
     }

@@ -121,9 +121,8 @@ abstract class DatabaseMapper implements MapperInterface
 
         // in a future mapper must support solid states
         $changes = array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
-        unset($changes[$this->primaryKey]);
-
         $changedColumns = $this->mapColumns($changes);
+        unset($changes[$this->primaryKey]);
 
         $update = new Update($this->source->getDatabase(), $this->source->getTable(), $changedColumns);
         $state->setStatus(Node::SCHEDULED_UPDATE);

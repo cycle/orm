@@ -234,7 +234,6 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    # todo test changing child PK
     public function testCreateAndUpdateRelatedData(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
@@ -278,6 +277,35 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $e = $selector->wherePK([2, 2])->load('child_entity')->fetchOne();
 
         $this->assertSame('bar', $e->child_entity->key3);
+    }
+
+    public function testChangeChildPK(): void
+    {
+        $selector = new Select($this->orm, CompositePK::class);
+        /** @var CompositePK $e */
+        $e = $selector->where(['key1' => 1, 'key2' => 1])
+            ->load('child_entity')
+            ->fetchOne();
+
+        $e->child_entity->key1 = 900;
+        $e->child_entity->key2 = 800;
+        $e->child_entity->key3 = 'foo foo';
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
+
+        // Re-select
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $selector = new Select($this->orm, CompositePK::class);
+        $e = $selector->wherePK([1, 1])
+            ->load('child_entity')
+            ->fetchOne();
+
+        $this->assertSame(900, $e->child_entity->key1);
+        $this->assertSame(800, $e->child_entity->key2);
+        $this->assertSame('foo foo', $e->child_entity->key3);
     }
 
     public function testDeleteChildrenByAssigningNull(): void

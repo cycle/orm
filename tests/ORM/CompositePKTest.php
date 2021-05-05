@@ -27,11 +27,39 @@ abstract class CompositePKTest extends BaseTest
         (new Transaction($this->orm))->persist($u)->run();
 
         $s = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-        $data = $s->fetchData();
+        $data = $s->fetchData()[0];
 
-        $this->assertSame(1, current($data)['key1']);
-        $this->assertSame(1, current($data)['key2']);
-        $this->assertSame(null, current($data)['key3']);
+        $this->assertSame(1, $data['key1']);
+        $this->assertSame(1, $data['key2']);
+        $this->assertSame(null, $data['key3']);
+    }
+
+    public function testChangePK(): void
+    {
+        $this->createTable1();
+
+        $u = new CompositePK();
+        $u->key1 = 1;
+        $u->key2 = 1;
+        $u->key3 = 8;
+
+        $this->save($u);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $e = (new Select($this->orm, CompositePK::class))
+            ->fetchOne();
+        $e->key1 = 2;
+        $e->key2 = 3;
+        $e->key3 = 9;
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
+
+        $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->fetchOne();
+        $this->assertSame(2, $e->key1);
+        $this->assertSame(3, $e->key2);
     }
 
     public function testRemoveCreated(): void

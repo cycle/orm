@@ -163,7 +163,7 @@ class HasMany extends AbstractRelation
 
         if ($this->isNullable()) {
             $store = $this->orm->queueStore($related);
-            $store->register($this->outerKey, null, true);
+            $store->register($this->columnName($rNode, $this->outerKey), null, true);
             $rNode->getState()->decClaim();
 
             return new Condition($store, function () use ($rNode) {

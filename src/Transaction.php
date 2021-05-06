@@ -147,6 +147,10 @@ final class Transaction implements TransactionInterface
             // optimize to only scan over affected entities
             $node = $heap->get($e);
 
+            if (!$node->hasState()) {
+                continue;
+            }
+
             // marked as being deleted and has no external claims (GC like approach)
             if ($node->getStatus() === Node::SCHEDULED_DELETE && !$node->getState()->hasClaims()) {
                 $heap->detach($e);

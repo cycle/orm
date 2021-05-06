@@ -41,7 +41,7 @@ final class Heap implements HeapInterface, IteratorAggregate
 
     public function getIterator(): SplObjectStorage
     {
-        return clone $this->storage;
+        return $this->storage;
     }
 
     /**

@@ -39,12 +39,9 @@ final class Heap implements HeapInterface, IteratorAggregate
         $this->clean();
     }
 
-    /**
-     * @return SplObjectStorage
-     */
     public function getIterator(): SplObjectStorage
     {
-        return $this->storage;
+        return clone $this->storage;
     }
 
     /**
@@ -95,6 +92,11 @@ final class Heap implements HeapInterface, IteratorAggregate
     public function attach($entity, Node $node, array $index = []): void
     {
         $this->storage->offsetSet($entity, $node);
+        $role = $node->getRole();
+
+        if ($node->hasState()) {
+            $this->eraseIndexes($role, $node->getInitialData(), $entity);
+        }
 
         $data = $node->getData();
         foreach ($index as $key) {
@@ -113,8 +115,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                 $value = (string)$data[$key];
             }
 
-            $this->paths[get_class($entity)][$key][$value] = $entity;
-            $this->paths[$node->getRole()][$key][$value] = $entity;
+            $this->paths[$role][$key][$value] = $entity;
         }
     }
 
@@ -130,12 +131,9 @@ final class Heap implements HeapInterface, IteratorAggregate
 
         $role = $node->getRole();
 
-        // erase all the indexes
-        if (isset($this->paths[$role])) {
-            $keys = array_keys($this->paths[$role]);
-            foreach ($keys as $key) {
-                unset($this->paths[$role][$key][$node->getData()[$key]]);
-            }
+        $this->eraseIndexes($role, $node->getData(), $entity);
+        if ($node->hasState()) {
+            $this->eraseIndexes($role, $node->getInitialData(), $entity);
         }
 
         $this->storage->offsetUnset($entity);
@@ -148,5 +146,23 @@ final class Heap implements HeapInterface, IteratorAggregate
     {
         $this->paths = [];
         $this->storage = new \SplObjectStorage();
+    }
+
+    private function eraseIndexes(string $role, array $data, object $entity): void
+    {
+        if (!isset($this->paths[$role])) {
+            return;
+        }
+        $keys = array_keys($this->paths[$role]);
+        foreach ($keys as $key) {
+            $value = isset($data[$key]) ? (string)$data[$key] : null;
+            if ($value === null) {
+                continue;
+            }
+            $current = &$this->paths[$role][$key];
+            if (isset($current[$value]) && $current[$value] === $entity) {
+                unset($current[$value]);
+            }
+        }
     }
 }

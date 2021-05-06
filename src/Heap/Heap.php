@@ -150,7 +150,7 @@ final class Heap implements HeapInterface, IteratorAggregate
 
     private function eraseIndexes(string $role, array $data, object $entity): void
     {
-        if (!isset($this->paths[$role])) {
+        if (!isset($this->paths[$role]) || empty($data)) {
             return;
         }
         $keys = array_keys($this->paths[$role]);

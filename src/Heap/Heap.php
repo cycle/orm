@@ -30,7 +30,7 @@ final class Heap implements HeapInterface, IteratorAggregate
 
     public function getIterator(): SplObjectStorage
     {
-        return $this->storage;
+        return clone $this->storage;
     }
 
     public function has(object $entity): bool
@@ -123,7 +123,6 @@ final class Heap implements HeapInterface, IteratorAggregate
             }
 
             $rolePath = &$this->paths[$node->getRole()][$indexName];
-            // $classPath = &$this->paths[get_class($entity)][$indexName];
 
             // composite key
             if ($isComposite) {
@@ -133,17 +132,14 @@ final class Heap implements HeapInterface, IteratorAggregate
                     }
                     $value = (string)$data[$k];
                     $rolePath = &$rolePath[$value];
-                    // $classPath = &$classPath[$value];
                 }
                 $rolePath = $entity;
-                // $classPath = $entity;
             } else {
                 if (!isset($data[$indexName])) {
                     continue;
                 }
                 $value = (string)$data[$indexName];
                 $rolePath[$value] = $entity;
-                // $classPath[$value] = $entity;
             }
         }
     }
@@ -159,33 +155,8 @@ final class Heap implements HeapInterface, IteratorAggregate
 
         // erase all the indexes
         if (isset($this->paths[$role])) {
-            $data = $node->getData();
-
-            foreach ($this->paths[$role] as $index => &$values) {
-                $keys = explode(self::INDEX_KEY_SEPARATOR, $index);
-                $j = count($keys) - 1;
-                $next = &$values;
-                $removeFrom = &$next;
-                $removeKey = null;
-                foreach ($keys as $i => $key) {
-                    $value = $data[$key] ?? null;
-                    if ($value === null || !array_key_exists($value, $next)) {
-                        continue 2;
-                    }
-                    // If last key
-                    if ($i === $j) {
-                        unset($removeFrom[$removeKey ?? $value]);
-                        break;
-                    }
-                    // Optimization to remove empty arrays
-                    if (count($next[$value]) > 1) {
-                        $removeFrom = &$next;
-                        $removeKey = $value;
-                    }
-                    $next = &$next[$value];
-                }
-            }
-            unset($values);
+            $this->removeCache($role, $node->getData(), $entity);
+            $this->removeCache($role, $node->getInitialData(), $entity);
         }
 
         $this->storage->offsetUnset($entity);
@@ -195,5 +166,39 @@ final class Heap implements HeapInterface, IteratorAggregate
     {
         $this->paths = [];
         $this->storage = new \SplObjectStorage();
+    }
+
+    private function removeCache(string $role, array $data, object $entity): void
+    {
+        foreach ($this->paths[$role] as $index => &$values) {
+            if (empty($values)) {
+                continue;
+            }
+            $keys = explode(self::INDEX_KEY_SEPARATOR, $index);
+            $j = count($keys) - 1;
+            $next = &$values;
+            $removeFrom = &$next;
+            $removeKey = null;
+            foreach ($keys as $i => $key) {
+                $value = isset($data[$key]) ? (string)$data[$key] : null;
+                if ($value === null || !array_key_exists($value, $next)) {
+                    continue 2;
+                }
+                // If last key
+                if ($i === $j) {
+                    $removeKey = $removeKey ?? $value;
+                    if ($next[$value] === $entity) {
+                        unset($removeFrom[$removeKey ?? $value]);
+                    }
+                    break;
+                }
+                // Optimization to remove empty arrays
+                if (count($next[$value]) > 1) {
+                    $removeFrom = &$next;
+                    $removeKey = $value;
+                }
+                $next = &$next[$value];
+            }
+        }
     }
 }

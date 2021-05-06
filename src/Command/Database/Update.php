@@ -120,12 +120,9 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
         return ($this->data === [] && $this->context === []) || $this->scope === [];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
-        if ($stream == self::SCOPE) {
+        if ($stream === self::SCOPE) {
             if (empty($value)) {
                 return;
             }

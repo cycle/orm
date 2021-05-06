@@ -153,6 +153,7 @@ final class Transaction implements TransactionInterface
                 continue;
             }
 
+            $heap->detach($e);
             // sync the current entity data with newly generated data
             $this->orm->getMapper($node->getRole())->hydrate($e, $node->syncState());
 

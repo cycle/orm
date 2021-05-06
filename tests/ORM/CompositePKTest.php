@@ -56,7 +56,7 @@ abstract class CompositePKTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(1);
 
-        $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+        $e = (new Select($this->orm, CompositePK::class))
             ->fetchOne();
         $this->assertSame(2, $e->key1);
         $this->assertSame(3, $e->key2);

@@ -66,7 +66,7 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
-    public function testCreateUserWithDoubleReference(): void
+    public function testCreateParentWithDoubleReference(): void
     {
         $u = new CompositePK();
         $u->key1 = 900;
@@ -99,7 +99,44 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
         $this->assertSame($u->child_entity, $u->children[0]);
     }
 
-    public function testCreateUserToExistedReference(): void
+    public function testUpdateParentPKWithDoubleReference(): void
+    {
+        $u = new CompositePK();
+        $u->key1 = 900;
+        $u->key2 = 901;
+        $u->key3 = 909;
+        $this->save($u);
+
+        // Change PK
+        $u->key1 = 300;
+        $u->key2 = 400;
+        // Create Child
+        $c = new CompositePKChild();
+        $c->key1 = 500;
+        $c->key2 = 501;
+        $c->key3 = 'last comment';
+        // Link Child with Parent
+        $u->child_entity = $c;
+        $u->children->add($c);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+
+        $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->load(self::CHILD_CONTAINER)
+            ->load(self::CHILDREN_CONTAINER)
+            ->fetchAll();
+
+        // Update PK + Insert Child + Link
+        $this->assertNumWrites(3);
+        $this->assertCount(1, $data);
+        $this->assertSame($data[0]->child_key1, $c->key1);
+        $this->assertSame($data[0]->child_key2, $c->key2);
+        $this->assertNotNull($data[0]->child_entity);
+        $this->assertSame($data[0]->child_entity, $data[0]->children[0]);
+    }
+
+    public function testCreateParentToExistedReference(): void
     {
         $u = new CompositePK();
         $u->key1 = 900;

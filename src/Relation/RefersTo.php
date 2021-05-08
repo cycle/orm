@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -14,8 +7,8 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
-use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
+use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Schema;
@@ -73,7 +66,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         );
 
         $this->forwardContext($rNode, $this->outerKeys, $update, $node, $this->innerKeys);
-        if ($store instanceof Insert) {
+        if ($store instanceof DatabaseCommand) {
             $update->waitCommand($store);
         }
 

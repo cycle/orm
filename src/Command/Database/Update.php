@@ -112,9 +112,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
         parent::execute();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isEmpty(): bool
     {
         return ($this->data === [] && $this->context === []) || $this->scope === [];

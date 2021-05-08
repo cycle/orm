@@ -93,6 +93,11 @@ final class Node implements ProducerInterface, ConsumerInterface
         return $this->state;
     }
 
+    public function hasState(): bool
+    {
+        return $this->state !== null;
+    }
+
     /**
      * Set new state value.
      *

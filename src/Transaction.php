@@ -147,18 +147,21 @@ final class Transaction implements TransactionInterface
             // optimize to only scan over affected entities
             $node = $heap->get($e);
 
+            if (!$node->hasState()) {
+                continue;
+            }
+
             // marked as being deleted and has no external claims (GC like approach)
-            if ($node->getStatus() == Node::SCHEDULED_DELETE && !$node->getState()->hasClaims()) {
+            if ($node->getStatus() === Node::SCHEDULED_DELETE && !$node->getState()->hasClaims()) {
                 $heap->detach($e);
                 continue;
             }
 
-            $heap->detach($e);
+            // reindex the entity while it has old data
+            $heap->attach($e, $node, $this->getIndexes($node->getRole()));
+
             // sync the current entity data with newly generated data
             $this->orm->getMapper($node->getRole())->hydrate($e, $node->syncState());
-
-            // reindex the entity
-            $heap->attach($e, $node, $this->getIndexes($node->getRole()));
         }
     }
 

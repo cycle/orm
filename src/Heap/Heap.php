@@ -30,7 +30,7 @@ final class Heap implements HeapInterface, IteratorAggregate
 
     public function getIterator(): SplObjectStorage
     {
-        return clone $this->storage;
+        return $this->storage;
     }
 
     public function has(object $entity): bool
@@ -103,6 +103,11 @@ final class Heap implements HeapInterface, IteratorAggregate
     public function attach(object $entity, Node $node, array $index = []): void
     {
         $this->storage->offsetSet($entity, $node);
+        $role = $node->getRole();
+
+        if ($node->hasState()) {
+            $this->eraseIndexes($role, $node->getInitialData(), $entity);
+        }
 
         $data = $node->getData();
         foreach ($index as $key) {
@@ -122,7 +127,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                 $indexName = $key;
             }
 
-            $rolePath = &$this->paths[$node->getRole()][$indexName];
+            $rolePath = &$this->paths[$role][$indexName];
 
             // composite key
             if ($isComposite) {
@@ -154,9 +159,9 @@ final class Heap implements HeapInterface, IteratorAggregate
         $role = $node->getRole();
 
         // erase all the indexes
-        if (isset($this->paths[$role])) {
-            $this->removeCache($role, $node->getData(), $entity);
-            $this->removeCache($role, $node->getInitialData(), $entity);
+        $this->eraseIndexes($role, $node->getData(), $entity);
+        if ($node->hasState()) {
+            $this->eraseIndexes($role, $node->getInitialData(), $entity);
         }
 
         $this->storage->offsetUnset($entity);
@@ -168,8 +173,11 @@ final class Heap implements HeapInterface, IteratorAggregate
         $this->storage = new \SplObjectStorage();
     }
 
-    private function removeCache(string $role, array $data, object $entity): void
+    private function eraseIndexes(string $role, array $data, object $entity): void
     {
+        if (!isset($this->paths[$role]) || empty($data)) {
+            return;
+        }
         foreach ($this->paths[$role] as $index => &$values) {
             if (empty($values)) {
                 continue;

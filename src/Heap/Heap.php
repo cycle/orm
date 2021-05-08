@@ -186,15 +186,14 @@ final class Heap implements HeapInterface, IteratorAggregate
             $j = count($keys) - 1;
             $next = &$values;
             $removeFrom = &$next;
-            $removeKey = null;
             foreach ($keys as $i => $key) {
                 $value = isset($data[$key]) ? (string)$data[$key] : null;
                 if ($value === null || !array_key_exists($value, $next)) {
                     continue 2;
                 }
+                $removeKey = $removeKey ?? $value;
                 // If last key
                 if ($i === $j) {
-                    $removeKey = $removeKey ?? $value;
                     if ($next[$value] === $entity) {
                         unset($removeFrom[$removeKey ?? $value]);
                     }

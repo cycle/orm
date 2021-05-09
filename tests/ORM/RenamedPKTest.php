@@ -69,7 +69,6 @@ abstract class RenamedPKTest extends BaseTest
         $this->save($u);
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
 

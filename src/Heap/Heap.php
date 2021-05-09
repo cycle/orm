@@ -62,7 +62,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                 break;
             default:
                 $isComposite = true;
-                $indexName = implode(self::INDEX_KEY_SEPARATOR, $scope);
+                $indexName = implode(self::INDEX_KEY_SEPARATOR, array_keys($scope));
         }
 
         if (!$isComposite) {
@@ -189,7 +189,7 @@ final class Heap implements HeapInterface, IteratorAggregate
             # Walk index
             foreach ($keys as $i => $key) {
                 $value = isset($data[$key]) ? (string)$data[$key] : null;
-                if ($value === null || !array_key_exists($value, $next)) {
+                if ($value === null || !isset($next[$value])) {
                     continue 2;
                 }
                 $removeKey = $removeKey ?? $value;

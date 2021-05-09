@@ -35,6 +35,9 @@ final class HeapCompositeKeysTest extends HeapTest
         INDEX_FIND_2_1 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1],
         INDEX_FIND_2_2 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2],
 
+        INDEX_FIELDS_BAD = [self::INDEX_FIELDS_1[0], self::INDEX_FIELDS_1[1], 'foo'],
+        INDEX_FIND_BAD = self::INDEX_FIND_1_1 + [self::INDEX_FIELDS_BAD[2] => null],
+
         ENTITY_SET_1 = [
             self::INDEX_FIELDS_1[0] => self::INDEX_VALUES_1_1[0],
             self::INDEX_FIELDS_1[1] => self::INDEX_VALUES_1_1[1],
@@ -45,6 +48,16 @@ final class HeapCompositeKeysTest extends HeapTest
             self::INDEX_FIELDS_1[1] => self::INDEX_VALUES_1_2[1],
             self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
         ];
+
+    public function testFindByShuffledCriteria(): void
+    {
+        $heap = $this->createHeap();
+        $node = new Node(Node::NEW, self::ENTITY_SET_1, 'user');
+        $entity = new User();
+        $heap->attach($entity, $node, [self::INDEX_FIELDS_1]);
+
+        $this->assertSame($entity, $heap->find('user', array_reverse(self::INDEX_FIND_1_1, true)), 'Found');
+    }
 
     public function testDetachSomeFromMultipleWithSamePartPK(): void
     {

@@ -21,7 +21,7 @@ class NodeTest extends TestCase
 {
     public function testRoot(): void
     {
-        $node = new RootNode(['id', 'email'], 'id');
+        $node = new RootNode(['id', 'email'], ['id']);
 
         $data = [
             [1, 'email@gmail.com'],
@@ -46,7 +46,7 @@ class NodeTest extends TestCase
 
     public function testRootDuplicate(): void
     {
-        $node = new RootNode(['id', 'email'], 'id');
+        $node = new RootNode(['id', 'email'], ['id']);
 
         $data = [
             [1, 'email@gmail.com'],
@@ -73,13 +73,8 @@ class NodeTest extends TestCase
 
     public function testSingular(): void
     {
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->joinNode('balance', new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->joinNode('balance', $this->createSingularNode());
 
         $data = [
             [1, 'email@gmail.com', 1, 1, 100],
@@ -120,13 +115,8 @@ class NodeTest extends TestCase
 
     public function testGetReferences(): void
     {
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->linkNode('balance', $child = new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->linkNode('balance', $child = $this->createSingularNode());
 
         $data = [
             [1, 'email@gmail.com'],
@@ -138,32 +128,22 @@ class NodeTest extends TestCase
             $node->parseRow(0, $row);
         }
 
-        $this->assertSame([1, 2, 3], $child->getReferences());
+        $this->assertSame([['id' => 1], ['id' => 2], ['id' => 3]], $child->getReferenceValues());
     }
 
     public function testGetReferencesWithoutParent(): void
     {
         $this->expectException(ParserException::class);
 
-        $child = new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        );
+        $child = $this->createSingularNode();
 
-        $child->getReferences();
+        $child->getReferenceValues();
     }
 
     public function testSingularOverExternal(): void
     {
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->linkNode('balance', $child = new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->linkNode('balance', $child = $this->createSingularNode());
 
         $data = [
             [1, 'email@gmail.com'],
@@ -216,13 +196,8 @@ class NodeTest extends TestCase
     {
         $this->expectException(ParserException::class);
 
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->linkNode('balance', $child = new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->linkNode('balance', $child = $this->createSingularNode());
 
         $data = [
             [1, 'email@gmail.com'],
@@ -248,13 +223,8 @@ class NodeTest extends TestCase
     {
         $this->expectException(ParserException::class);
 
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->joinNode('balance', new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->joinNode('balance', $this->createSingularNode());
 
         $data = [
             [1, 'email@gmail.com', 1, 1, 100],
@@ -269,13 +239,8 @@ class NodeTest extends TestCase
 
     public function testGetNode(): void
     {
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->joinNode('balance', $child = new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->joinNode('balance', $child = $this->createSingularNode());
 
         $this->assertInstanceOf(SingularNode::class, $node->getNode('balance'));
     }
@@ -285,7 +250,7 @@ class NodeTest extends TestCase
     {
         $this->expectException(ParserException::class);
 
-        $node = new RootNode(['id', 'email'], 'id');
+        $node = new RootNode(['id', 'email'], ['id']);
         $node->getNode('balance');
     }
 
@@ -293,25 +258,15 @@ class NodeTest extends TestCase
     {
         $this->expectException(ParserException::class);
 
-        $node = new SingularNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        );
+        $node = $this->createSingularNode();
 
         $node->parseRow(0, [1, 10, 10]);
     }
 
     public function testArray(): void
     {
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->joinNode('lines', new ArrayNode(
-            ['id', 'user_id', 'value'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->joinNode('lines', new ArrayNode(['id', 'user_id', 'value'], ['id'], ['user_id'], ['id']));
 
         $data = [
             [1, 'email@gmail.com', 1, 1, 100],
@@ -363,15 +318,9 @@ class NodeTest extends TestCase
 
     public function testArrayInvalidReference(): void
     {
-        $this->expectException(ParserException::class);
 
-        $node = new RootNode(['id', 'email'], 'id');
-        $node->linkNode('balance', $child = new ArrayNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        ));
+        $node = new RootNode(['id', 'email'], ['id']);
+        $node->linkNode('balance', $child = new ArrayNode(['id', 'user_id', 'balance'], ['id'], ['user_id'], ['id']));
 
         $data = [
             [1, 'email@gmail.com'],
@@ -388,6 +337,8 @@ class NodeTest extends TestCase
             [2, -1, 200]
         ];
 
+        $this->expectException(ParserException::class);
+
         foreach ($childData as $row) {
             $child->parseRow(0, $row);
         }
@@ -397,13 +348,13 @@ class NodeTest extends TestCase
     {
         $this->expectException(ParserException::class);
 
-        $node = new ArrayNode(
-            ['id', 'user_id', 'balance'],
-            'id',
-            'user_id',
-            'id'
-        );
+        $node = new ArrayNode(['id', 'user_id', 'balance'], ['id'], ['user_id'], ['id']);
 
         $node->parseRow(0, [1, 10, 10]);
+    }
+
+    private function createSingularNode(): SingularNode
+    {
+        return new SingularNode(['id', 'user_id', 'balance'], ['id'], ['user_id'], ['id']);
     }
 }

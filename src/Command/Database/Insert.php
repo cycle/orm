@@ -35,27 +35,21 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     /** @var array */
     protected $data;
 
-    /** @var string|null */
-    protected $primaryKey;
+    /** @var string[] */
+    protected $primaryKeys;
 
     /** @var ConsumerInterface[][] */
     protected $consumers = [];
 
-    /**
-     * @param DatabaseInterface $db
-     * @param string            $table
-     * @param array             $data
-     * @param string|null       $primaryKey
-     */
     public function __construct(
         DatabaseInterface $db,
         string $table,
         array $data = [],
-        string $primaryKey = null
+        array $primaryKeys = []
     ) {
         parent::__construct($db, $table);
         $this->data = $data;
-        $this->primaryKey = $primaryKey;
+        $this->primaryKeys = $primaryKeys;
     }
 
     /**
@@ -79,7 +73,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         int $stream = ConsumerInterface::DATA
     ): void {
         if ($trigger) {
-            throw new CommandException('Insert command can only forward keys after the execution');
+            throw new CommandException('Insert command can only forward keys after the execution.');
         }
 
         $this->consumers[$key][] = [$consumer, $target, $stream];
@@ -115,8 +109,8 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         $data = $this->getData();
 
         $insert = $this->db->insert($this->table)->values($data);
-        if ($this->primaryKey !== null && $insert instanceof PostgresInsertQuery) {
-            $insert->returning($this->primaryKey);
+        if (count($this->primaryKeys) === 1 && $insert instanceof PostgresInsertQuery) {
+            $insert->returning(current($this->primaryKeys));
         }
 
         $insertID = $insert->run();

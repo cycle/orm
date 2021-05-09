@@ -14,6 +14,7 @@ namespace Cycle\ORM\Command\Database;
 use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
+use Cycle\ORM\Command\Traits\WaitCommandTrait;
 use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
@@ -30,6 +31,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     use ContextTrait;
     use ScopeTrait;
     use ErrorTrait;
+    use WaitCommandTrait;
 
     /** @var array */
     protected $data = [];
@@ -81,7 +83,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      */
     public function isReady(): bool
     {
-        return $this->waitContext === [] && $this->waitScope === [];
+        return $this->waitContext === [] && $this->waitScope === [] && $this->isCommandsExecuted();
     }
 
     /**
@@ -110,20 +112,14 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
         parent::execute();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isEmpty(): bool
     {
         return ($this->data === [] && $this->context === []) || $this->scope === [];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
-        if ($stream == self::SCOPE) {
+        if ($stream === self::SCOPE) {
             if (empty($value)) {
                 return;
             }

@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
@@ -68,15 +61,12 @@ class Mapper extends DatabaseMapper
     /**
      * @inheritdoc
      */
-    public function hydrate($entity, array $data)
+    public function hydrate(object $entity, array $data): object
     {
         return $this->hydrator->hydrate($data, $entity);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function extract($entity): array
+    public function extract(object $entity): array
     {
         return $this->hydrator->extract($entity);
     }
@@ -87,7 +77,7 @@ class Mapper extends DatabaseMapper
      * @param object $entity
      * @return array
      */
-    protected function fetchFields($entity): array
+    protected function fetchFields(object $entity): array
     {
         $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
 

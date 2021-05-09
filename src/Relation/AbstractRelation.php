@@ -40,10 +40,13 @@ abstract class AbstractRelation implements RelationInterface
     protected $schema;
 
     /** @var string */
-    protected $innerKey;
-
-    /** @var string */
     protected $outerKey;
+
+    /** @var string[] */
+    protected $innerKeys;
+
+    /** @var string[] */
+    protected $outerKeys;
 
     /**
      * @param ORMInterface $orm
@@ -57,8 +60,9 @@ abstract class AbstractRelation implements RelationInterface
         $this->name = $name;
         $this->target = $target;
         $this->schema = $schema;
-        $this->innerKey = $schema[Relation::INNER_KEY];
-        $this->outerKey = $schema[Relation::OUTER_KEY];
+        $this->innerKeys = (array)$schema[Relation::INNER_KEY];
+        $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
+        $this->outerKey = $this->packKeys($this->outerKeys);
     }
 
     /**
@@ -162,7 +166,7 @@ abstract class AbstractRelation implements RelationInterface
     protected function assertValid(Node $related): void
     {
         if ($related->getRole() != $this->target) {
-            throw new RelationException(sprintf('Unable to link %s, given `%s`', $this, $related->getRole()));
+            throw new RelationException(sprintf('Unable to link %s, given `%s`.', $this, $related->getRole()));
         }
     }
 
@@ -179,5 +183,10 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return $this->orm->get($reference->__role(), $reference->__scope(), true);
+    }
+
+    protected function packKeys(array $keys): string
+    {
+        return implode(":", $keys);
     }
 }

@@ -17,18 +17,15 @@ namespace Cycle\ORM\Parser\Traits;
  */
 trait DuplicateTrait
 {
-    /** @var string @internal */
-    protected $duplicateCriteria;
+    /** @var string[] @internal */
+    protected $duplicateCriteria = [];
 
     /** @var array @internal */
     protected $duplicates = [];
 
-    /**
-     * @param string $column
-     */
-    protected function setDuplicateCriteria(string $column): void
+    protected function setDuplicateCriteria(array $columns): void
     {
-        $this->duplicateCriteria = $column;
+        $this->duplicateCriteria = $columns;
     }
 
     /**
@@ -42,11 +39,43 @@ trait DuplicateTrait
      */
     final protected function deduplicate(array &$data): bool
     {
-        if ($this->duplicateCriteria === null) {
+        if ($this->duplicateCriteria === []) {
             return true;
         }
 
-        $criteria = (string) $data[$this->duplicateCriteria];
+        return count($this->duplicateCriteria) === 1
+            ? $this->deduplicateSingle(current($this->duplicateCriteria), $data)
+            : $this->deduplicateMultiple($this->duplicateCriteria, $data);
+    }
+
+    private function deduplicateMultiple(array $keys, array &$data): bool
+    {
+        $zoom = &$this->duplicates;
+        $search = true;
+        $count = count($keys);
+        foreach ($keys as $key) {
+            --$count;
+            $criteria = (string)$data[$key];
+
+            if (!$search || !array_key_exists($criteria, $zoom)) {
+                $search = false;
+                if ($count === 0) {
+                    $zoom[$criteria] = &$data;
+                    return true;
+                }
+                $zoom[$criteria] = [];
+            }
+            $zoom = &$zoom[$criteria];
+        }
+        // duplicate is presented, let's reduplicate
+        $data = $zoom;
+
+        return false;
+    }
+
+    private function deduplicateSingle(string $key, array &$data): bool
+    {
+        $criteria = (string)$data[$key];
 
         if (isset($this->duplicates[$criteria])) {
             // duplicate is presented, let's reduplicate

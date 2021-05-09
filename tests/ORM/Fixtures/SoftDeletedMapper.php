@@ -31,15 +31,17 @@ class SoftDeletedMapper extends Mapper
             ['deleted_at' => new \DateTimeImmutable()]
         );
 
-        $cmd->waitScope($this->primaryColumn);
+        $cmd->waitScope(...$this->primaryColumns);
 
-        $state->forward(
-            $this->primaryKey,
-            $cmd,
-            $this->primaryColumn,
-            true,
-            ConsumerInterface::SCOPE
-        );
+        foreach ($this->primaryKeys as $i => $key) {
+            $state->forward(
+                $key,
+                $cmd,
+                $this->primaryColumns[$i],
+                true,
+                ConsumerInterface::SCOPE
+            );
+        }
 
         return $cmd;
     }

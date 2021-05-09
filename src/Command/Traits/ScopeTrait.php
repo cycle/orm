@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Traits;
@@ -16,22 +9,19 @@ trait ScopeTrait
     /** @var array */
     protected $scope = [];
 
-    /** @var array */
+    /** @var string[] */
     protected $waitScope = [];
 
     /**
      * Wait for the context value.
-     *
-     * @param string $key
      */
-    public function waitScope(string $key): void
+    public function waitScope(string ...$keys): void
     {
-        $this->waitScope[$key] = true;
+        foreach ($keys as $key) {
+            $this->waitScope[$key] = true;
+        }
     }
 
-    /**
-     * @return array
-     */
     public function getScope(): array
     {
         return $this->scope;
@@ -40,7 +30,6 @@ trait ScopeTrait
     /**
      * Set scope value.
      *
-     * @param string $key
      * @param mixed  $value
      */
     protected function setScope(string $key, $value): void
@@ -50,8 +39,6 @@ trait ScopeTrait
 
     /**
      * Indicate that context value is not required anymore.
-     *
-     * @param string $key
      */
     protected function freeScope(string $key): void
     {

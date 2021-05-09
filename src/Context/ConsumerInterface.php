@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Context;
 
+use JetBrains\PhpStorm\ExpectedValues;
+
 /**
  * Provides the ability to accept the forwarded key value.
  */
@@ -34,6 +36,7 @@ interface ConsumerInterface
         string $key,
         $value,
         bool $fresh = false,
+        #[ExpectedValues(valuesFromClass: self::class)]
         int $stream = self::DATA
     );
 }

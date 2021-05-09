@@ -29,7 +29,7 @@ final class EmbeddedNode extends AbstractNode
 
         $this->parent->mount(
             $this->container,
-            $this->outerKey,
+            $this->indexName,
             self::LAST_REFERENCE,
             $data
         );

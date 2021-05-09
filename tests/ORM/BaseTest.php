@@ -71,6 +71,8 @@ abstract class BaseTest extends TestCase
     {
         parent::setUp();
 
+        $this->getDriver()->rollbackTransaction();
+
         $this->dbal = new DatabaseManager(new DatabaseConfig());
         $this->dbal->addDatabase(
             new Database(
@@ -263,10 +265,12 @@ abstract class BaseTest extends TestCase
         }
     }
 
-    protected function save($e): void
+    protected function save(object ...$entities): void
     {
         $tr = new Transaction($this->orm);
-        $tr->persist($e);
+        foreach ($entities as $entity) {
+            $tr->persist($entity);
+        }
         $tr->run();
     }
 

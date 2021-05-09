@@ -20,10 +20,10 @@ class UUIDMapper extends Mapper
     /**
      * Generate entity primary key value.
      */
-    public function nextPrimaryKey()
+    public function nextPrimaryKey(): array
     {
         try {
-            return Uuid::uuid4()->toString();
+            return [$this->primaryKeys[0] => Uuid::uuid4()->toString()];
         } catch (\Exception $e) {
             throw new MapperException($e->getMessage(), $e->getCode(), $e);
         }

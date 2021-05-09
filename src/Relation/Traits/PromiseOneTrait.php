@@ -20,11 +20,16 @@ trait PromiseOneTrait
      */
     public function initPromise(Node $parentNode): array
     {
-        if (empty($innerKey = $this->fetchKey($parentNode, $this->innerKey))) {
-            return [null, null];
+        $scope = [];
+        foreach ($this->innerKeys as $i => $key) {
+            $innerValue = $this->fetchKey($parentNode, $key);
+            if (empty($innerValue)) {
+                return [null, null];
+            }
+            $scope[$this->outerKeys[$i]] = $innerValue;
         }
 
-        $r = $this->orm->promise($this->target, [$this->outerKey => $innerKey]);
+        $r = $this->orm->promise($this->target, $scope);
 
         return [$r, $r];
     }

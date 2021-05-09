@@ -36,8 +36,8 @@ final class PivotedPromise implements PromiseInterface
     /** @var array @internal */
     private $relationSchema = [];
 
-    /** @var mixed */
-    private $innerKey;
+    /** @var array */
+    private $innerKeys;
 
     /** @var null|PivotedStorage */
     private $resolved;
@@ -46,14 +46,14 @@ final class PivotedPromise implements PromiseInterface
      * @param ORMInterface $orm
      * @param string       $target
      * @param array        $relationSchema
-     * @param mixed        $innerKey
+     * @param array        $innerKeys
      */
-    public function __construct(ORMInterface $orm, string $target, array $relationSchema, $innerKey)
+    public function __construct(ORMInterface $orm, string $target, array $relationSchema, array $innerKeys)
     {
         $this->orm = $orm;
         $this->target = $target;
         $this->relationSchema = $relationSchema;
-        $this->innerKey = $innerKey;
+        $this->innerKeys = $innerKeys;
     }
 
     /**
@@ -78,7 +78,7 @@ final class PivotedPromise implements PromiseInterface
     public function __scope(): array
     {
         return [
-            $this->relationSchema[Relation::INNER_KEY] => $this->innerKey
+            $this->relationSchema[Relation::INNER_KEY] => $this->innerKeys
         ];
     }
 
@@ -118,19 +118,19 @@ final class PivotedPromise implements PromiseInterface
             'method'    => JoinableLoader::POSTLOAD
         ]);
 
-        $query = $loader->configureQuery($query, [$this->innerKey]);
+        $query = $loader->configureQuery($query, [$this->innerKeys]);
 
         // we are going to add pivot node into virtual root node (only ID) to aggregate the results
         $root = new RootNode(
-            [$this->relationSchema[Relation::INNER_KEY]],
-            $this->relationSchema[Relation::INNER_KEY]
+            (array)$this->relationSchema[Relation::INNER_KEY],
+            (array)$this->relationSchema[Relation::INNER_KEY]
         );
 
         $node = $loader->createNode();
         $root->linkNode('output', $node);
 
         // emulate presence of parent entity
-        $root->parseRow(0, [$this->innerKey]);
+        $root->parseRow(0, $this->innerKeys);
 
         $iterator = $query->getIterator();
         foreach ($iterator as $row) {

@@ -119,9 +119,6 @@ final class ORM implements ORMInterface
         return $this->schema->resolveAlias($entity);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function get(string $role, array $scope, bool $load = true)
     {
         $role = $this->resolveRole($role);
@@ -147,10 +144,21 @@ final class ORM implements ORMInterface
 
         // unique entity identifier
         $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-        $id = $data[$pk] ?? null;
+        if (is_array($pk)) {
+            $ids = [];
+            foreach ($pk as $key) {
+                if (!isset($data[$key])) {
+                    $ids = null;
+                    break;
+                }
+                $ids[$key] = $data[$key];
+            }
+        } else {
+            $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
+        }
 
-        if ($node !== Node::NEW && $id !== null) {
-            $e = $this->heap->find($role, [$pk => $id]);
+        if ($node !== Node::NEW && $ids !== null) {
+            $e = $this->heap->find($role, $ids);
 
             if ($e !== null) {
                 $node = $this->heap->get($e);
@@ -166,20 +174,17 @@ final class ORM implements ORMInterface
         // init entity class and prepared (typecasted) data
         [$e, $prepared] = $m->init($data);
 
-        $node = new Node($node, $prepared, $m->getRole());
+        $nodeObject = new Node($node, $prepared, $m->getRole());
 
-        $this->heap->attach($e, $node, $this->getIndexes($m->getRole()));
+        $this->heap->attach($e, $nodeObject, $this->getIndexes($m->getRole()));
 
         // hydrate entity with it's data, relations and proxies
         return $m->hydrate(
             $e,
-            $this->getRelationMap($role)->init($node, $prepared)
+            $this->getRelationMap($role)->init($nodeObject, $prepared)
         );
     }
 
-    /**
-     * @inheritdoc
-     */
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
@@ -321,7 +326,7 @@ final class ORM implements ORMInterface
     /**
      * @inheritdoc
      */
-    public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
+    public function queueStore(object $entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
     {
         if ($entity instanceof PromiseInterface && $entity->__loaded()) {
             $entity = $entity->__resolve();
@@ -339,6 +344,7 @@ final class ORM implements ORMInterface
             // automatic entity registration
             $node = new Node(Node::NEW, [], $mapper->getRole());
             $this->heap->attach($entity, $node);
+            // $this->heap->attach($entity, $node, $this->getIndexes($mapper->getRole()));
         }
 
         $cmd = $this->generator->generateStore($mapper, $entity, $node);

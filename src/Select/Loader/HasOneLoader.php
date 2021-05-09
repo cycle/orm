@@ -57,19 +57,36 @@ class HasOneLoader extends JoinableLoader
             return parent::configureQuery($query, $outerKeys);
         }
 
-        $localKey = $this->localKey(Relation::OUTER_KEY);
-
+        $localPrefix = $this->getAlias() . '.';
         if ($this->isJoined()) {
+            $parentKeys = (array)$this->schema[Relation::INNER_KEY];
+            $parentPrefix = $this->parent->getAlias() . '.';
+            $on = [];
+            foreach ((array)$this->schema[Relation::OUTER_KEY] as $i => $key) {
+                $field = $localPrefix . $this->fieldAlias($key);
+                $on[$field] = $parentPrefix . $this->parent->fieldAlias($parentKeys[$i]);
+            }
             $query->join(
                 $this->getJoinMethod(),
                 $this->getJoinTable()
-            )->on(
-                $localKey,
-                $this->parentKey(Relation::INNER_KEY)
-            );
+            )->on($on);
         } else {
             // relation is loaded using external query
-            $query->where($localKey, 'IN', new Parameter($outerKeys));
+            $fields = array_map(function (string $key) use ($localPrefix) {
+                return $localPrefix . $this->fieldAlias($key);
+            }, (array)$this->schema[Relation::OUTER_KEY]);
+
+            if (count($fields) === 1) {
+                $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
+            } else {
+                $query->andWhere(
+                    static function (SelectQuery $select) use ($outerKeys, $fields) {
+                        foreach ($outerKeys as $set) {
+                            $select->orWhere(array_combine($fields, array_values($set)));
+                        }
+                    }
+                );
+            }
         }
 
         // user specified WHERE conditions
@@ -90,9 +107,9 @@ class HasOneLoader extends JoinableLoader
     {
         $node = new SingularNode(
             $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::INNER_KEY]
+            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->schema[Relation::OUTER_KEY],
+            (array)$this->schema[Relation::INNER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

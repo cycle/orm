@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Traits;
@@ -17,13 +10,13 @@ use Spiral\Database\ForeignKeyInterface;
 
 trait TableTrait
 {
-    /**
-     * @param string $table
-     * @param array  $columns
-     * @param array  $fk
-     */
-    public function makeTable(string $table, array $columns, array $fk = [], $pk = null, $defaults = []): void
-    {
+    public function makeTable(
+        string $table,
+        array $columns,
+        array $fk = [],
+        array $pk = null,
+        array $defaults = []
+    ): void {
         $schema = $this->getDatabase()->table($table)->getSchema();
         $renderer = new TableRenderer();
         $renderer->renderColumns($schema, $columns, $defaults);
@@ -39,14 +32,6 @@ trait TableTrait
         $schema->save();
     }
 
-    /**
-     * @param string $from
-     * @param string $fromKey
-     * @param string $to
-     * @param string $toColumn
-     * @param string $onDelete
-     * @param string $onUpdate
-     */
     public function makeFK(
         string $from,
         string $fromKey,
@@ -60,11 +45,19 @@ trait TableTrait
         $schema->save();
     }
 
-    /**
-     * @param string $table
-     * @param array  $columns
-     * @param bool   $unique
-     */
+    public function makeCompositeFK(
+        string $from,
+        array $fromKeys,
+        string $to,
+        array $toColumns,
+        string $onDelete = ForeignKeyInterface::CASCADE,
+        string $onUpdate = ForeignKeyInterface::CASCADE
+    ): void {
+        $schema = $this->getDatabase()->table($from)->getSchema();
+        $schema->foreignKey($fromKeys)->references($to, $toColumns)->onDelete($onDelete)->onUpdate($onUpdate);
+        $schema->save();
+    }
+
     public function makeIndex(
         string $table,
         array $columns,
@@ -75,9 +68,5 @@ trait TableTrait
         $schema->save();
     }
 
-
-    /**
-     * @return Database
-     */
     abstract protected function getDatabase(): Database;
 }

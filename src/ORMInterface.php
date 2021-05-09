@@ -105,7 +105,7 @@ interface ORMInterface extends SourceProviderInterface
      * @param int    $mode
      * @return ContextCarrierInterface
      */
-    public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface;
+    public function queueStore(object $entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface;
 
     /**
      * Generate commands required to delete the entity.

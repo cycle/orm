@@ -18,6 +18,7 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use IteratorAggregate;
+use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Pagination\PaginableInterface;
 
@@ -149,12 +150,44 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
-     * @param string|int $id
+     * @param string|int|string[]|int[] $id
      * @return $this|Select
      */
-    public function wherePK($id): self
+    public function wherePK(...$ids): self
     {
-        return $this->__call('where', [$this->loader->getPK(), $id]);
+        $pk = $this->loader->getPK();
+        $pk = is_array($pk) && count($pk) > 1 ? $pk : ((array)$pk)[0];
+        # todo: support assoc ids [key1 => value1, ...]
+        if (is_array($pk) && count($pk) > 1) {
+            $assoc = [];
+            foreach ($ids as $id) {
+                $id = $id instanceof Parameter ? $id->getValue() : $id;
+                if (!is_array($id)) {
+                    throw new \InvalidArgumentException('Composite primary key must be defined using an array.');
+                }
+                if (count($pk) !== count($id)) {
+                    throw new \InvalidArgumentException(sprintf('Primary key should contain %d values.', count($pk)));
+                }
+
+                $values = array_values($id);
+                $i = 0;
+                $set = [];
+                foreach ($pk as $key) {
+                    $set[$key] = $values[$i];
+                    ++$i;
+                }
+                $assoc[] = $set;
+            }
+            $this->__call('where', [function (Select\QueryBuilder $q) use ($assoc) {
+                foreach ($assoc as $set) {
+                    $q->orWhere($set);
+                }
+            }]);
+            return $this;
+        }
+        return count($ids) > 1
+            ? $this->__call('where', [$pk, new Parameter($ids)])
+            : $this->__call('where', [$pk, current($ids)]);
     }
 
     /**
@@ -167,7 +200,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     {
         if ($column === null) {
             // @tuneyourserver solves the issue with counting on queries with joins.
-            $column = sprintf('DISTINCT(%s)', $this->loader->getPK());
+            $pk = $this->loader->getPK();
+            $column = is_array($pk)
+                ? '*'
+                : sprintf('DISTINCT(%s)', $pk);
         }
 
         return (int) $this->__call('count', [$column]);

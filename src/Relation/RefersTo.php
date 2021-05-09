@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -15,6 +8,7 @@ use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Command\Database\Update;
+use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Schema;
@@ -30,12 +24,14 @@ class RefersTo extends AbstractRelation implements DependencyInterface
     /**
      * @inheritdoc
      */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, ?object $related, $original): CommandInterface
     {
         // refers-to relation is always nullable (as opposite to belongs-to)
         if ($related === null) {
             if ($original !== null) {
-                $store->register($this->columnName($node, $this->innerKey), null, true);
+                foreach ($this->innerKeys as $innerKey) {
+                    $store->register($this->columnName($node, $innerKey), null, true);
+                }
             }
 
             return new Nil();
@@ -44,14 +40,22 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $rNode = $this->getNode($related);
         $this->assertValid($rNode);
 
+        $returnNil = true;
         // related object exists, we can update key immediately
-        $outerKey = $this->fetchKey($rNode, $this->outerKey);
+        foreach ($this->outerKeys as $i => $outerKey) {
+            $outerValue = $this->fetchKey($rNode, $outerKey);
+            $innerKey = $this->innerKeys[$i];
 
-        if ($outerKey !== null) {
-            if ($outerKey != $this->fetchKey($node, $this->innerKey)) {
-                $store->register($this->columnName($node, $this->innerKey), $outerKey, true);
+            if ($outerValue === null) {
+                $returnNil = false;
+                continue;
             }
-
+            if ($outerValue != $this->fetchKey($node, $innerKey)) {
+                $store->register($this->columnName($node, $innerKey), $outerValue, true);
+            }
+        }
+        if ($returnNil) {
+            $this->forwardContext($rNode, $this->outerKeys, $store, $node, $this->innerKeys);
             return new Nil();
         }
 
@@ -61,24 +65,16 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $this->getSource($node->getRole())->getTable()
         );
 
-        // fastest way to identify the entity
-        $pk = $this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
+        $this->forwardContext($rNode, $this->outerKeys, $update, $node, $this->innerKeys);
+        if ($store instanceof DatabaseCommand) {
+            $update->waitCommand($store);
+        }
 
-        $this->forwardContext(
-            $rNode,
-            $this->outerKey,
-            $update,
-            $node,
-            $this->innerKey
-        );
+        // fastest way to identify the entity
+        $pk = (array)$this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
 
         // set where condition for update query
-        $this->forwardScope(
-            $node,
-            $pk,
-            $update,
-            $pk
-        );
+        $this->forwardScope($node, $pk, $update, $pk);
 
         return $update;
     }

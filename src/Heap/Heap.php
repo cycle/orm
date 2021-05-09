@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
@@ -17,48 +10,35 @@ use UnexpectedValueException;
 
 final class Heap implements HeapInterface, IteratorAggregate
 {
-    /** @var SplObjectStorage */
+    private const INDEX_KEY_SEPARATOR = ':';
+
+    /** @var SplObjectStorage|null */
     private $storage;
 
     /** @var array */
     private $paths = [];
 
-    /**
-     * Heap constructor.
-     */
     public function __construct()
     {
         $this->clean();
     }
 
-    /**
-     * Heap destructor.
-     */
     public function __destruct()
     {
         $this->clean();
     }
 
-    /**
-     * @return SplObjectStorage
-     */
     public function getIterator(): SplObjectStorage
     {
         return $this->storage;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function has($entity): bool
+    public function has(object $entity): bool
     {
         return $this->storage->offsetExists($entity);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function get($entity): ?Node
+    public function get(object $entity): ?Node
     {
         try {
             return $this->storage->offsetGet($entity);
@@ -67,61 +47,109 @@ final class Heap implements HeapInterface, IteratorAggregate
         }
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function find(string $role, array $scope)
+    public function find(string $role, array $scope): ?object
     {
-        if (count($scope) === 1) {
-            $key = key($scope);
-            if (is_object($scope[$key])) {
-                $scope[$key] = (string)$scope[$key];
+        if (!array_key_exists($role, $this->paths) || count($this->paths[$role]) === 0) {
+            return null;
+        }
+
+        $isComposite = false;
+        switch (count($scope)) {
+            case 0:
+                return null;
+            case 1:
+                $indexName = key($scope);
+                break;
+            default:
+                $isComposite = true;
+                $indexName = implode(self::INDEX_KEY_SEPARATOR, $scope);
+        }
+
+        if (!$isComposite) {
+            $value = (string) current($scope);
+            return $this->paths[$role][$indexName][$value] ?? null;
+        }
+        $result = null;
+        // Find index
+        if (!array_key_exists($indexName, $this->paths[$role])) {
+            $scopeKeys = array_keys($scope);
+            $scopeCount = count($scopeKeys);
+            foreach ($this->paths[$role] as $indexName => $values) {
+                $indexKeys = explode(self::INDEX_KEY_SEPARATOR, $indexName);
+                $keysCount = count($indexKeys);
+                if ($keysCount <= $scopeCount && count(array_intersect($indexKeys, $scopeKeys)) === $keysCount) {
+                    $result = &$this->paths[$role][$indexName];
+                    break;
+                }
             }
-            return $this->paths[$role][$key][$scope[$key]] ?? null;
+            // Index not found
+            if ($result === null) {
+                return null;
+            }
+        } else {
+            $result = &$this->paths[$role][$indexName];
         }
-
-        $key = $value = '';
-        foreach ($scope as $k => $v) {
-            $key .= $k;
-            $value .= $v . '/';
+        $indexKeys = $indexKeys ?? explode(self::INDEX_KEY_SEPARATOR, $indexName);
+        foreach ($indexKeys as $key) {
+            $value = (string) $scope[$key];
+            if (!isset($result[$value])) {
+                return null;
+            }
+            $result = &$result[$value];
         }
-
-        return $this->paths[$role][$key][$value] ?? null;
+        return $result;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function attach($entity, Node $node, array $index = []): void
+    public function attach(object $entity, Node $node, array $index = []): void
     {
         $this->storage->offsetSet($entity, $node);
+        $role = $node->getRole();
+
+        if ($node->hasState()) {
+            $this->eraseIndexes($role, $node->getInitialData(), $entity);
+        }
 
         $data = $node->getData();
         foreach ($index as $key) {
+            $isComposite = false;
             if (is_array($key)) {
-                $keyName = $value = '';
-                foreach ($key as $k) {
-                    $keyName .= $k; // chance of collision?
-                    $value .= (string)$data[$k] . '/';
+                switch (count($key)) {
+                    case 0:
+                        continue 2;
+                    case 1:
+                        $indexName = current($key);
+                        break;
+                    default:
+                        $isComposite = true;
+                        $indexName = implode(self::INDEX_KEY_SEPARATOR, $key);
                 }
-                $key = $keyName;
             } else {
-                if (!isset($data[$key])) {
-                    continue;
-                }
-
-                $value = (string)$data[$key];
+                $indexName = $key;
             }
 
-            $this->paths[get_class($entity)][$key][$value] = $entity;
-            $this->paths[$node->getRole()][$key][$value] = $entity;
+            $rolePath = &$this->paths[$role][$indexName];
+
+            // composite key
+            if ($isComposite) {
+                foreach ($key as $k) {
+                    if (!isset($data[$k])) {
+                        continue 2;
+                    }
+                    $value = (string)$data[$k];
+                    $rolePath = &$rolePath[$value];
+                }
+                $rolePath = $entity;
+            } else {
+                if (!isset($data[$indexName])) {
+                    continue;
+                }
+                $value = (string)$data[$indexName];
+                $rolePath[$value] = $entity;
+            }
         }
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function detach($entity): void
+    public function detach(object $entity): void
     {
         $node = $this->get($entity);
         if ($node === null) {
@@ -131,22 +159,54 @@ final class Heap implements HeapInterface, IteratorAggregate
         $role = $node->getRole();
 
         // erase all the indexes
-        if (isset($this->paths[$role])) {
-            $keys = array_keys($this->paths[$role]);
-            foreach ($keys as $key) {
-                unset($this->paths[$role][$key][$node->getData()[$key]]);
-            }
+        $this->eraseIndexes($role, $node->getData(), $entity);
+        if ($node->hasState()) {
+            $this->eraseIndexes($role, $node->getInitialData(), $entity);
         }
 
         $this->storage->offsetUnset($entity);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function clean(): void
     {
         $this->paths = [];
         $this->storage = new \SplObjectStorage();
+    }
+
+    private function eraseIndexes(string $role, array $data, object $entity): void
+    {
+        if (!isset($this->paths[$role]) || empty($data)) {
+            return;
+        }
+        foreach ($this->paths[$role] as $index => &$values) {
+            if (empty($values)) {
+                continue;
+            }
+            $keys = explode(self::INDEX_KEY_SEPARATOR, $index);
+            $j = count($keys) - 1;
+            $next = &$values;
+            $removeFrom = &$next;
+            # Walk index
+            foreach ($keys as $i => $key) {
+                $value = isset($data[$key]) ? (string)$data[$key] : null;
+                if ($value === null || !array_key_exists($value, $next)) {
+                    continue 2;
+                }
+                $removeKey = $removeKey ?? $value;
+                // If last key
+                if ($i === $j) {
+                    if ($next[$value] === $entity) {
+                        unset($removeFrom[$removeKey ?? $value]);
+                    }
+                    break;
+                }
+                // Optimization to remove empty arrays
+                if (count($next[$value]) > 1) {
+                    $removeFrom = &$next[$value];
+                    $removeKey = null;
+                }
+                $next = &$next[$value];
+            }
+        }
     }
 }

@@ -131,38 +131,67 @@ class ManyToManyLoader extends JoinableLoader
             return parent::configureQuery($this->pivot->configureQuery($query), $outerKeys);
         }
 
+
+        $localPrefix = $this->getAlias() . '.';
+        $pivotPrefix = $this->pivot->getAlias() . '.';
+
         // Manually join pivoted table
         if ($this->isJoined()) {
+            $parentKeys = (array)$this->schema[Relation::INNER_KEY];
+            $throughOuterKeys = (array)$this->pivot->schema[Relation::THROUGH_OUTER_KEY];
+            $parentPrefix = $this->parent->getAlias() . '.';
+            $on = [];
+            foreach ((array)$this->pivot->schema[Relation::THROUGH_INNER_KEY] as $i => $key) {
+                $field = $pivotPrefix . $this->pivot->fieldAlias($key);
+                $on[$field] = $parentPrefix . $this->parent->fieldAlias($parentKeys[$i]);
+            }
+
             $query->join(
                 $this->getJoinMethod(),
                 $this->pivot->getJoinTable()
-            )->on(
-                $this->pivot->localKey(Relation::THROUGH_INNER_KEY),
-                $this->parentKey(Relation::INNER_KEY)
-            );
+            )->on($on);
+
+            $on = [];
+            foreach ((array)$this->schema[Relation::OUTER_KEY] as $i => $key) {
+                $field = $localPrefix . $this->fieldAlias($key);
+                $on[$field] = $pivotPrefix . $this->pivot->fieldAlias($throughOuterKeys[$i]);
+            }
 
             $query->join(
                 $this->getJoinMethod(),
                 $this->getJoinTable()
-            )->on(
-                $this->localKey(Relation::OUTER_KEY),
-                $this->pivot->localKey(Relation::THROUGH_OUTER_KEY)
-            );
+            )->on($on);
         } else {
             // reset all the columns when query is isolated (we have to do it manually
             // since underlying loader believes it's loaded)
             $query->columns([]);
 
+            $outerKeyList = (array)$this->schema[Relation::OUTER_KEY];
+            $on = [];
+            foreach ((array)$this->pivot->schema[Relation::THROUGH_OUTER_KEY] as $i => $key) {
+                $field = $pivotPrefix . $this->pivot->fieldAlias($key);
+                $on[$field] = $localPrefix . $this->fieldAlias($outerKeyList[$i]);
+            }
+
             $query->join(
                 $this->getJoinMethod(),
                 $this->pivot->getJoinTable()
-            )->on(
-                $this->pivot->localKey(Relation::THROUGH_OUTER_KEY),
-                $this->localKey(Relation::OUTER_KEY)
-            )->where(
-                $this->pivot->localKey(Relation::THROUGH_INNER_KEY),
-                new Parameter($outerKeys)
-            );
+            )->on($on);
+
+            $fields = array_map(function (string $key) use ($pivotPrefix) {
+                return $pivotPrefix . $this->pivot->fieldAlias($key);
+            }, (array)$this->pivot->schema[Relation::THROUGH_INNER_KEY]);
+            if (count($fields) === 1) {
+                $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
+            } else {
+                $query->andWhere(
+                    static function (SelectQuery $select) use ($outerKeys, $fields) {
+                        foreach ($outerKeys as $set) {
+                            $select->orWhere(array_combine($fields, array_values($set)));
+                        }
+                    }
+                );
+            }
         }
 
         // user specified WHERE conditions
@@ -227,9 +256,9 @@ class ManyToManyLoader extends JoinableLoader
     {
         $node = new SingularNode(
             $this->columnNames(),
-            $this->define(Schema::PRIMARY_KEY),
-            $this->schema[Relation::OUTER_KEY],
-            $this->schema[Relation::THROUGH_OUTER_KEY]
+            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->schema[Relation::OUTER_KEY],
+            (array)$this->schema[Relation::THROUGH_OUTER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

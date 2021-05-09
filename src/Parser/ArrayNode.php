@@ -19,21 +19,20 @@ use Cycle\ORM\Exception\ParserException;
  */
 final class ArrayNode extends AbstractNode
 {
-    /** @var string */
-    protected $innerKey;
+    /** @var string[] */
+    protected $innerKeys;
 
     /**
-     * @param array       $columns
-     * @param string      $primaryKey
-     * @param string      $innerKey Inner relation key (for example user_id)
-     * @param string|null $outerKey Outer (parent) relation key (for example id = parent.id)
+     * @param array      $columns
+     * @param array      $primaryKeys
+     * @param array      $innerKeys Inner relation key (for example user_id)
+     * @param array|null $outerKeys Outer (parent) relation key (for example id = parent.id)
      */
-    public function __construct(array $columns, string $primaryKey, string $innerKey, string $outerKey)
+    public function __construct(array $columns, array $primaryKeys, array $innerKeys, ?array $outerKeys)
     {
-        parent::__construct($columns, $outerKey);
-        $this->setDuplicateCriteria($primaryKey);
-
-        $this->innerKey = $innerKey;
+        parent::__construct($columns, $outerKeys);
+        $this->setDuplicateCriteria($primaryKeys);
+        $this->innerKeys = $innerKeys;
     }
 
     /**
@@ -45,15 +44,17 @@ final class ArrayNode extends AbstractNode
             throw new ParserException('Unable to register data tree, parent is missing.');
         }
 
-        if ($data[$this->innerKey] === null) {
-            // no data was parsed
-            return;
+        foreach ($this->innerKeys as $key) {
+            if ($data[$key] === null) {
+                // no data was parsed
+                return;
+            }
         }
 
         $this->parent->mountArray(
             $this->container,
-            $this->outerKey,
-            $data[$this->innerKey],
+            $this->indexName,
+            $this->intersectData($this->innerKeys, $data),
             $data
         );
     }

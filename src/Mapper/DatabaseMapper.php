@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
@@ -45,16 +38,12 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var array */
     protected $fields;
 
-    /** @var string */
-    protected $primaryKey;
+    /** @var string[] */
+    protected $primaryColumns = [];
 
-    /** @var string */
-    protected $primaryColumn;
+    /** @var string[] */
+    protected $primaryKeys;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $role
-     */
     public function __construct(ORMInterface $orm, string $role)
     {
         if (!$orm instanceof Select\SourceProviderInterface) {
@@ -66,108 +55,113 @@ abstract class DatabaseMapper implements MapperInterface
 
         $this->source = $orm->getSource($role);
         $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
-        $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $this->primaryColumn = $this->columns[$this->primaryKey] ?? $this->primaryKey;
+
+        $this->primaryKeys = (array)$orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        foreach ($this->primaryKeys as $PK) {
+            $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
+        }
 
         // Resolve field names
         foreach ($this->columns as $name => $column) {
-            $this->fields[] = is_numeric($name) ? $column : $name;
+            $this->fields[] = is_string($name) ? $name : $column;
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getRole(): string
     {
         return $this->role;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface
+    public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface
     {
-        $columns = $this->fetchFields($entity);
+        $values = $this->fetchFields($entity);
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);
-        $state->setData($columns);
+        $state->setData($values);
 
-        $columns[$this->primaryKey] = $columns[$this->primaryKey] ?? $this->nextPrimaryKey();
-        if ($columns[$this->primaryKey] === null) {
-            unset($columns[$this->primaryKey]);
+        foreach ($this->primaryKeys as $key) {
+            if (!isset($values[$key])) {
+                $values = array_merge($values, $this->nextPrimaryKey() ?? []);
+                break;
+            }
+        }
+
+        // clear PK
+        foreach ($this->primaryKeys as $key) {
+            if (array_key_exists($key, $values) && $values[$key] === null) {
+                unset($values[$key]);
+            }
         }
 
         $insert = new Insert(
             $this->source->getDatabase(),
             $this->source->getTable(),
-            $this->mapColumns($columns),
-            $this->primaryColumn
+            $this->mapColumns($values),
+            $this->primaryColumns
         );
 
-        $key = isset($columns[$this->primaryKey]) ? $this->primaryColumn : Insert::INSERT_ID;
-        $insert->forward($key, $state, $this->primaryKey);
+        if (count($this->primaryKeys) === 1) {
+            $key = $this->primaryKeys[0];
+            $column = isset($values[$key]) ? $this->primaryColumns[0] : Insert::INSERT_ID;
+            $insert->forward($column, $state, $key);
+        } else {
+            foreach ($this->primaryKeys as $num => $pk) {
+                $insert->forward($this->primaryColumns[$num], $state, $pk);
+            }
+        }
 
         return $insert;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface
+    public function queueUpdate(object $entity, Node $node, State $state): ContextCarrierInterface
     {
+        $fromData = $state->getTransactionData();
         $data = $this->fetchFields($entity);
 
         // in a future mapper must support solid states
-        $changes = array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
-        unset($changes[$this->primaryKey]);
-
-        $changedColumns = $this->mapColumns($changes);
-
-        $update = new Update($this->source->getDatabase(), $this->source->getTable(), $changedColumns);
+        $changes = array_udiff_assoc($data, $fromData, [Node::class, 'compare']);
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
+        $update = new Update($this->source->getDatabase(), $this->source->getTable(), $this->mapColumns($changes));
 
-        // we are trying to update entity without PK right now
-        $state->forward(
-            $this->primaryKey,
-            $update,
-            $this->primaryColumn,
-            true,
-            ConsumerInterface::SCOPE
-        );
+        foreach ($this->primaryKeys as $i => $pk) {
+            if (isset($fromData[$pk])) {
+                // set update criteria right now
+                $update->register($this->primaryColumns[$i], $fromData[$pk], false, ConsumerInterface::SCOPE);
+            } else {
+                // subscribe to PK update
+                $state->forward($pk, $update, $this->primaryColumns[$i], true, ConsumerInterface::SCOPE);
+            }
+        }
 
         return $update;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queueDelete($entity, Node $node, State $state): CommandInterface
+    public function queueDelete(object $entity, Node $node, State $state): CommandInterface
     {
         $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
         $state->setStatus(Node::SCHEDULED_DELETE);
         $state->decClaim();
 
-        $delete->waitScope($this->primaryColumn);
-        $state->forward(
-            $this->primaryKey,
-            $delete,
-            $this->primaryColumn,
-            true,
-            ConsumerInterface::SCOPE
-        );
+        $delete->waitScope(...$this->primaryColumns);
+        foreach ($this->primaryKeys as $i => $key) {
+            $state->forward(
+                $key,
+                $delete,
+                $this->primaryColumns[$i],
+                true,
+                ConsumerInterface::SCOPE
+            );
+        }
 
         return $delete;
     }
 
     /**
      * Generate next sequential entity ID. Return null to use autoincrement value.
-     *
-     * @return mixed|null
      */
-    protected function nextPrimaryKey()
+    protected function nextPrimaryKey(): ?array
     {
         return null;
     }
@@ -178,7 +172,7 @@ abstract class DatabaseMapper implements MapperInterface
      * @param object $entity
      * @return array
      */
-    abstract protected function fetchFields($entity): array;
+    abstract protected function fetchFields(object $entity): array;
 
     /**
      * Map internal field names to database specific column names.

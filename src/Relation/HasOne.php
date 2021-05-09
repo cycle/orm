@@ -30,7 +30,7 @@ class HasOne extends AbstractRelation
     /**
      * @inheritdoc
      */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, $entity, Node $node, ?object $related, ?object $original): CommandInterface
     {
         if ($original instanceof ReferenceInterface) {
             $original = $this->resolve($original);
@@ -58,10 +58,10 @@ class HasOne extends AbstractRelation
         // store command with mounted context paths
         $rStore = $this->forwardContext(
             $node,
-            $this->innerKey,
+            $this->innerKeys,
             $rStore,
             $rNode,
-            $this->outerKey
+            $this->outerKeys
         );
 
         if ($original === null) {
@@ -87,7 +87,9 @@ class HasOne extends AbstractRelation
 
         if ($this->isNullable()) {
             $store = $this->orm->queueStore($original);
-            $store->register($this->outerKey, null, true);
+            foreach ($this->outerKeys as $oKey) {
+                $store->register($this->columnName($rNode, $oKey), null, true);
+            }
             $rNode->getState()->decClaim();
 
             return new Condition($store, function () use ($rNode) {

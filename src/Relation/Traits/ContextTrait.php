@@ -33,29 +33,33 @@ trait ContextTrait
     /**
      * Configure context parameter using value from parent entity. Created promise.
      *
-     * @param Node      $from
-     * @param string    $fromKey
-     * @param CC        $carrier
-     * @param null|Node $to
-     * @param string    $toKey
+     * @param Node         $from
+     * @param array $fromKey
+     * @param CC           $carrier
+     * @param null|Node    $to
+     * @param array $toKey
      * @return CC
      */
-    protected function forwardContext(Node $from, string $fromKey, CC $carrier, Node $to, string $toKey): CC
+    protected function forwardContext(Node $from, array $fromKeys, CC $carrier, Node $to, array $toKeys): CC
     {
-        $toColumn = $this->columnName($to, $toKey);
+        foreach ($fromKeys as $i => $fromKey) {
+            $toKey = $toKeys[$i];
 
-        // do not execute until the key is given
-        $carrier->waitContext($toColumn, !$this->isNullable());
+            $toColumn = $this->columnName($to, $toKey);
 
-        // forward key from state to the command (on change)
-        $to->forward($toKey, $carrier, $toColumn);
-
-        // link 2 keys and trigger cascade falling right now (if exists)
-        $from->forward($fromKey, $to, $toKey, true);
-
-        // edge case while updating transitive key (exists in acceptor but does not exists in provider)
-        if (!array_key_exists($fromKey, $from->getInitialData())) {
+            // do not execute until the key is given
             $carrier->waitContext($toColumn, !$this->isNullable());
+
+            // forward key from state to the command (on change)
+            $to->forward($toKey, $carrier, $toColumn);
+
+            // link 2 keys and trigger cascade falling right now (if exists)
+            $from->forward($fromKey, $to, $toKey, true);
+
+            // edge case while updating transitive key (exists in acceptor but does not exists in provider)
+            if (!array_key_exists($fromKey, $from->getInitialData())) {
+                $carrier->waitContext($toColumn, !$this->isNullable());
+            }
         }
 
         return $carrier;
@@ -66,17 +70,19 @@ trait ContextTrait
      * parent entity. Creates promise.
      *
      * @param Node   $from
-     * @param string $fromKey
+     * @param string[] $fromKeys
      * @param CS     $carrier
-     * @param string $toKey
+     * @param string[] $toKeys
      * @return CS
      */
-    protected function forwardScope(Node $from, string $fromKey, CS $carrier, string $toKey): CS
+    protected function forwardScope(Node $from, array $fromKeys, CS $carrier, array $toKeys): CS
     {
-        $column = $this->columnName($from, $toKey);
+        foreach ($fromKeys as $i => $fromKey) {
+            $column = $this->columnName($from, $toKeys[$i]);
 
-        $carrier->waitScope($column);
-        $from->forward($fromKey, $carrier, $column, true, ConsumerInterface::SCOPE);
+            $carrier->waitScope($column);
+            $from->forward($fromKey, $carrier, $column, true, ConsumerInterface::SCOPE);
+        }
 
         return $carrier;
     }

@@ -12,7 +12,7 @@ final class Heap implements HeapInterface, IteratorAggregate
 {
     private const INDEX_KEY_SEPARATOR = ':';
 
-    /** @var SplObjectStorage */
+    /** @var SplObjectStorage|null */
     private $storage;
 
     /** @var array */
@@ -186,6 +186,7 @@ final class Heap implements HeapInterface, IteratorAggregate
             $j = count($keys) - 1;
             $next = &$values;
             $removeFrom = &$next;
+            # Walk index
             foreach ($keys as $i => $key) {
                 $value = isset($data[$key]) ? (string)$data[$key] : null;
                 if ($value === null || !array_key_exists($value, $next)) {
@@ -201,8 +202,8 @@ final class Heap implements HeapInterface, IteratorAggregate
                 }
                 // Optimization to remove empty arrays
                 if (count($next[$value]) > 1) {
-                    $removeFrom = &$next;
-                    $removeKey = $value;
+                    $removeFrom = &$next[$value];
+                    $removeKey = null;
                 }
                 $next = &$next[$value];
             }

@@ -127,8 +127,10 @@ abstract class DatabaseMapper implements MapperInterface
 
         foreach ($this->primaryKeys as $i => $pk) {
             if (isset($fromData[$pk])) {
+                // set update criteria right now
                 $update->register($this->primaryColumns[$i], $fromData[$pk], false, ConsumerInterface::SCOPE);
             } else {
+                // subscribe to PK update
                 $state->forward($pk, $update, $this->primaryColumns[$i], true, ConsumerInterface::SCOPE);
             }
         }

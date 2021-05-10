@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -33,18 +26,13 @@ final class RootLoader extends AbstractLoader
     use ConstrainTrait;
 
     /** @var array */
-    protected $options = [
+    protected array $options = [
         'load'      => true,
         'constrain' => true,
     ];
 
-    /** @var SelectQuery */
-    private $query;
+    private SelectQuery $query;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $target
-     */
     public function __construct(ORMInterface $orm, string $target)
     {
         parent::__construct($orm, $target);
@@ -66,9 +54,6 @@ final class RootLoader extends AbstractLoader
         parent::__clone();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getAlias(): string
     {
         return $this->target;
@@ -95,8 +80,6 @@ final class RootLoader extends AbstractLoader
 
     /**
      * Return base query associated with the loader.
-     *
-     * @return SelectQuery
      */
     public function getQuery(): SelectQuery
     {
@@ -105,17 +88,12 @@ final class RootLoader extends AbstractLoader
 
     /**
      * Compile query with all needed conditions, columns and etc.
-     *
-     * @return SelectQuery
      */
     public function buildQuery(): SelectQuery
     {
         return $this->configureQuery(clone $this->query);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadData(AbstractNode $node): void
     {
         $statement = $this->buildQuery()->run();
@@ -132,18 +110,12 @@ final class RootLoader extends AbstractLoader
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isLoaded(): bool
     {
         // root loader is always loaded
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         return parent::configureQuery(
@@ -151,9 +123,6 @@ final class RootLoader extends AbstractLoader
         );
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function initNode(): AbstractNode
     {
         $node = new RootNode($this->columnNames(), (array)$this->define(Schema::PRIMARY_KEY));
@@ -168,8 +137,6 @@ final class RootLoader extends AbstractLoader
 
     /**
      * Relation columns.
-     *
-     * @return array
      */
     protected function getColumns(): array
     {

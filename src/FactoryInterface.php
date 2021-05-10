@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -24,11 +17,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
     /**
      * Create mapper associated with given role.
-     *
-     * @param ORMInterface    $orm
-     * @param SchemaInterface $schema
-     * @param string          $role
-     * @return MapperInterface
      */
     public function mapper(
         ORMInterface $orm,
@@ -38,12 +26,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 
     /**
      * Create loader associated with specific entity and relation.
-     *
-     * @param ORMInterface    $orm
-     * @param SchemaInterface $schema
-     * @param string          $role
-     * @param string          $relation
-     * @return LoaderInterface
      */
     public function loader(
         ORMInterface $orm,
@@ -55,12 +37,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 
     /**
      * Create repository associated with given role,
-     *
-     * @param ORMInterface    $orm
-     * @param SchemaInterface $schema
-     * @param string          $role
-     * @param Select          $select
-     * @return RepositoryInterface
      */
     public function repository(
         ORMInterface $orm,
@@ -71,11 +47,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 
     /**
      * Create source associated with given role
-     *
-     * @param ORMInterface    $orm
-     * @param SchemaInterface $schema
-     * @param string          $role
-     * @return SourceInterface
      */
     public function source(
         ORMInterface $orm,
@@ -85,12 +56,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 
     /**
      * Create relation associated with specific entity and relation.
-     *
-     * @param ORMInterface    $orm
-     * @param SchemaInterface $schema
-     * @param string          $role
-     * @param string          $relation
-     * @return RelationInterface
      */
     public function relation(
         ORMInterface $orm,

@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -26,20 +19,13 @@ use Doctrine\Common\Collections\Collection;
 class ManyToMany extends Relation\AbstractRelation
 {
     /** @var string[] */
-    protected $throughInnerKeys;
+    protected array $throughInnerKeys;
 
     /** @var string[] */
-    protected $throughOuterKeys;
+    protected array $throughOuterKeys;
 
-    /** @var string|null */
-    protected $pivotEntity;
+    protected ?string $pivotEntity = null;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string $name
-     * @param string $target
-     * @param array $schema
-     */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
@@ -49,9 +35,6 @@ class ManyToMany extends Relation\AbstractRelation
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function init(Node $node, array $data): array
     {
         $elements = [];
@@ -74,9 +57,6 @@ class ManyToMany extends Relation\AbstractRelation
         ];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function extract($data)
     {
         if ($data instanceof CollectionPromiseInterface && !$data->isInitialized()) {
@@ -94,9 +74,6 @@ class ManyToMany extends Relation\AbstractRelation
         return new Pivoted\PivotedStorage();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function initPromise(Node $node): array
     {
         $innerKeys = [];
@@ -125,9 +102,9 @@ class ManyToMany extends Relation\AbstractRelation
      * @param Pivoted\PivotedStorage $related
      * @param Pivoted\PivotedStorage $original
      */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
     {
-        $original = $original ?? new Pivoted\PivotedStorage();
+        $original ??= new Pivoted\PivotedStorage();
 
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
@@ -160,13 +137,9 @@ class ManyToMany extends Relation\AbstractRelation
     /**
      * Link two entities together and create/update pivot context.
      *
-     * @param Node $node
-     * @param object $related
-     * @param object $pivot
-     * @param Pivoted\PivotedStorage $storage
-     * @return CommandInterface
+     * @param object|array|null $pivot
      */
-    protected function link(Node $node, $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
+    protected function link(Node $node, object $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
     {
         $rStore = $this->orm->queueStore($related);
         $rNode = $this->getNode($related, +1);
@@ -211,13 +184,8 @@ class ManyToMany extends Relation\AbstractRelation
     /**
      * Since many to many relation can overlap from two directions we have to properly resolve the pivot entity upon
      * it's generation. This is achieved using temporary mapping associated with each of the entity states.
-     *
-     * @param Node $node
-     * @param object $related
-     * @param mixed $pivot
-     * @return mixed|object|null
      */
-    protected function initPivot(Node $node, $related, $pivot)
+    protected function initPivot(Node $node, object $related, ?array $pivot): ?object
     {
         [$source, $target] = $this->sortRelation($node, $this->getNode($related));
 
@@ -235,8 +203,6 @@ class ManyToMany extends Relation\AbstractRelation
     /**
      * Keep only one relation branch as primary branch.
      *
-     * @param Node $node
-     * @param Node $related
      * @return Node[]
      */
     protected function sortRelation(Node $node, Node $related): array

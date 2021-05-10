@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -22,10 +15,7 @@ use Cycle\ORM\Heap\Node;
  */
 final class CommandGenerator
 {
-    /**
-     * @inheritdoc
-     */
-    public function generateStore(MapperInterface $mapper, $entity, Node $node): ContextCarrierInterface
+    public function generateStore(MapperInterface $mapper, object $entity, Node $node): ContextCarrierInterface
     {
         $state = $node->getState();
 
@@ -53,10 +43,7 @@ final class CommandGenerator
         return $split;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function generateDelete(MapperInterface $mapper, $entity, Node $node): CommandInterface
+    public function generateDelete(MapperInterface $mapper, object $entity, Node $node): CommandInterface
     {
         // currently we rely on db to delete all nested records (or soft deletes)
         return $mapper->queueDelete($entity, $node, $node->getState());

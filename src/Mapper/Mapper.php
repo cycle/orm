@@ -8,6 +8,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
 use Doctrine\Instantiator;
 use Laminas\Hydrator;
+use Laminas\Hydrator\ReflectionHydrator;
 
 /**
  * Provide the ability to carry data over the specific class instances. Supports table inheritance using
@@ -18,22 +19,14 @@ class Mapper extends DatabaseMapper
     // system column to store entity type
     public const ENTITY_TYPE = '_type';
 
-    /** @var string */
-    protected $entity;
+    protected string $entity;
 
-    /** @var array */
-    protected $children = [];
+    protected array $children = [];
 
-    /** @var Hydrator\HydratorInterface */
-    protected $hydrator;
+    protected ReflectionHydrator $hydrator;
 
-    /** @var Instantiator\InstantiatorInterface */
-    protected $instantiator;
+    protected Instantiator\Instantiator $instantiator;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $role
-     */
     public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct($orm, $role);
@@ -42,15 +35,12 @@ class Mapper extends DatabaseMapper
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
 
         $this->hydrator = class_exists('Laminas\Hydrator\ReflectionHydrator')
-            ? new Hydrator\ReflectionHydrator()
+            ? new ReflectionHydrator()
             : new Hydrator\Reflection();
 
         $this->instantiator = new Instantiator\Instantiator();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function init(array $data): array
     {
         $class = $this->resolveClass($data);
@@ -58,9 +48,6 @@ class Mapper extends DatabaseMapper
         return [$this->instantiator->instantiate($class), $data];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function hydrate(object $entity, array $data): object
     {
         return $this->hydrator->hydrate($data, $entity);
@@ -73,9 +60,6 @@ class Mapper extends DatabaseMapper
 
     /**
      * Get entity columns.
-     *
-     * @param object $entity
-     * @return array
      */
     protected function fetchFields(object $entity): array
     {
@@ -97,9 +81,6 @@ class Mapper extends DatabaseMapper
 
     /**
      * Classname to represent entity.
-     *
-     * @param array $data
-     * @return string
      */
     protected function resolveClass(array $data): string
     {

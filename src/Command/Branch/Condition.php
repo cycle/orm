@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Branch;
@@ -18,42 +11,30 @@ use Cycle\ORM\Command\CommandInterface;
  */
 final class Condition implements CommandInterface, \IteratorAggregate
 {
-    /** @var CommandInterface */
-    private $command;
+    private CommandInterface $command;
 
     /** @var callable */
     private $condition;
 
-    /**
-     * @param CommandInterface $parent
-     * @param callable         $condition
-     */
     public function __construct(CommandInterface $parent, callable $condition)
     {
         $this->command = $parent;
         $this->condition = $condition;
     }
 
-    /**
-     * @return \Generator
-     */
-    public function getIterator()
+    public function getIterator(): \Generator
     {
         if (call_user_func($this->condition)) {
             yield $this->command;
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isExecuted(): bool
     {
         return $this->command->isExecuted();
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function isReady(): bool
@@ -63,7 +44,6 @@ final class Condition implements CommandInterface, \IteratorAggregate
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function execute(): void
@@ -72,7 +52,6 @@ final class Condition implements CommandInterface, \IteratorAggregate
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function complete(): void
@@ -81,7 +60,6 @@ final class Condition implements CommandInterface, \IteratorAggregate
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function rollBack(): void

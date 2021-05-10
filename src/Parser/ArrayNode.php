@@ -20,7 +20,7 @@ use Cycle\ORM\Exception\ParserException;
 final class ArrayNode extends AbstractNode
 {
     /** @var string[] */
-    protected $innerKeys;
+    protected array $innerKeys;
 
     /**
      * @param array      $columns

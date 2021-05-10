@@ -18,15 +18,15 @@ use Cycle\ORM\PromiseFactoryInterface;
 
 class PromiseFactory implements PromiseFactoryInterface
 {
-    public function promise(ORMInterface $orm, string $target, array $scope): PromiseInterface
+    public function promise(ORMInterface $orm, string $role, array $scope): PromiseInterface
     {
-        switch ($target) {
+        switch ($role) {
             case 'user':
                 return new UserPromise($orm, 'user', $scope);
             case 'profile':
                 return new ProfilePromise($orm, 'profile', $scope);
         }
 
-        return new PromiseOne($orm, $target, $scope);
+        return new PromiseOne($orm, $role, $scope);
     }
 }

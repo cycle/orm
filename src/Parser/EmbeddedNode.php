@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
@@ -18,9 +11,6 @@ use Cycle\ORM\Exception\ParserException;
  */
 final class EmbeddedNode extends AbstractNode
 {
-    /**
-     * @param array $data
-     */
     protected function push(array &$data): void
     {
         if ($this->parent === null) {

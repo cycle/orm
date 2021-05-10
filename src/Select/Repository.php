@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -19,13 +12,10 @@ use Cycle\ORM\Select;
  */
 class Repository implements RepositoryInterface
 {
-    /** @var Select */
-    protected $select;
+    protected Select $select;
 
     /**
      * Create repository linked to one specific selector.
-     *
-     * @param Select $select
      */
     public function __construct(Select $select)
     {
@@ -40,25 +30,16 @@ class Repository implements RepositoryInterface
         $this->select = clone $this->select;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function findByPK($id)
+    public function findByPK($id): ?object
     {
         return $this->select()->wherePK($id)->fetchOne();
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function findOne(array $scope = [])
+    public function findOne(array $scope = []): ?object
     {
         return $this->select()->fetchOne($scope);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function findAll(array $scope = [], array $orderBy = []): iterable
     {
         return $this->select()->where($scope)->orderBy($orderBy)->fetchAll();
@@ -66,8 +47,6 @@ class Repository implements RepositoryInterface
 
     /**
      * Get selector associated with the repository.
-     *
-     * @return Select
      */
     public function select(): Select
     {

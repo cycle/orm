@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
@@ -33,18 +26,10 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     use ErrorTrait;
     use WaitCommandTrait;
 
-    /** @var array */
-    protected $data = [];
+    protected array $data = [];
 
-    /** @var array */
-    protected $appendix = [];
+    protected array $appendix = [];
 
-    /**
-     * @param DatabaseInterface $db
-     * @param string            $table
-     * @param array             $data
-     * @param array             $where
-     */
     public function __construct(DatabaseInterface $db, string $table, array $data = [], array $where = [])
     {
         parent::__construct($db, $table);
@@ -54,9 +39,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
 
     /**
      * Wait for the context value.
-     *
-     * @param string $key
-     * @param bool   $required
      */
     public function waitContext(string $key, bool $required = true): void
     {
@@ -66,8 +48,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
 
     /**
      * Avoid opening transaction when no changes are expected.
-     *
-     * @return null|DatabaseInterface
      */
     public function getDatabase(): ?DatabaseInterface
     {
@@ -78,9 +58,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
         return parent::getDatabase();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isReady(): bool
     {
         return $this->waitContext === [] && $this->waitScope === [] && $this->isCommandsExecuted();
@@ -88,8 +65,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
 
     /**
      * Update values, context not included.
-     *
-     * @return array
      */
     public function getData(): array
     {
@@ -147,7 +122,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      *
      * Example: $update->registerAppendix("updated_at", new DateTime());
      *
-     * @param string $key
      * @param mixed  $value
      */
     public function registerAppendix(string $key, $value): void

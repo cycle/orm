@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -27,9 +20,6 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 {
     use PromiseOneTrait;
 
-    /**
-     * @inheritdoc
-     */
     public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
         if ($related === null) {

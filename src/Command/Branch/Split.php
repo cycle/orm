@@ -1,17 +1,12 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Branch;
 
 use Cycle\ORM\Command\ContextCarrierInterface;
+use Generator;
+use IteratorAggregate;
 
 /**
  * Splits input context command into 2 destinations:
@@ -21,54 +16,36 @@ use Cycle\ORM\Command\ContextCarrierInterface;
  *
  * Handlers are attached to the head command since we can guarantee that head would always be executed.
  */
-final class Split implements ContextCarrierInterface, \IteratorAggregate
+final class Split implements ContextCarrierInterface, IteratorAggregate
 {
-    /** @var ContextCarrierInterface */
-    private $head;
+    private ContextCarrierInterface $head;
 
-    /** @var ContextCarrierInterface */
-    private $tail;
+    private ContextCarrierInterface $tail;
 
     /** @var ContextCarrierInterface[] */
-    private $contextPath = [];
+    private array $contextPath = [];
 
-    /**
-     * @param ContextCarrierInterface $head
-     * @param ContextCarrierInterface $tail
-     */
     public function __construct(ContextCarrierInterface $head, ContextCarrierInterface $tail)
     {
         $this->head = $head;
         $this->tail = $tail;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isExecuted(): bool
     {
         return $this->getTarget()->isExecuted();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isReady(): bool
     {
         return $this->getTarget()->isReady();
     }
 
-    /**
-     * @return \Generator
-     */
-    public function getIterator(): \Generator
+    public function getIterator(): Generator
     {
         yield $this->getTarget();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function waitContext(string $key, bool $required = true): void
     {
         if ($required) {
@@ -81,7 +58,6 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function getContext(): array
@@ -90,9 +66,6 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
         return [];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(
         string $key,
         $value,
@@ -105,7 +78,6 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function execute(): void
@@ -114,7 +86,6 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function complete(): void
@@ -123,7 +94,6 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
     }
 
     /**
-     * @inheritdoc
      * @codeCoverageIgnore
      */
     public function rollBack(): void
@@ -131,10 +101,7 @@ final class Split implements ContextCarrierInterface, \IteratorAggregate
         // delegated
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function getTarget(): ContextCarrierInterface
+    private function getTarget(): ContextCarrierInterface
     {
         if (!$this->head->isExecuted()) {
             return $this->head;

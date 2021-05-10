@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -23,7 +16,6 @@ use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * Embeds one object to another.
@@ -32,39 +24,25 @@ final class Embedded implements RelationInterface
 {
     use Relation\Traits\NodeTrait;
 
-    /** @var ORMInterface|SourceProviderInterface @internal */
-    protected $orm;
+    /** @internal */
+    private ORMInterface $orm;
 
-    /** @var string */
-    protected $name;
+    private string $name;
 
-    /** @var string */
-    protected $target;
+    private string $target;
 
-    /** @var array */
-    protected $schema;
-
-    /** @var MapperInterface */
-    protected $mapper;
+    private MapperInterface $mapper;
 
     /** @var string[] */
-    protected $primaryKeys;
+    private array $primaryKeys;
 
-    /** @var array */
-    protected $columns = [];
+    private array $columns;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $name
-     * @param string       $target
-     * @param array        $schema
-     */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         $this->orm = $orm;
         $this->name = $name;
         $this->target = $target;
-        $this->schema = $schema;
         $this->mapper = $this->orm->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
@@ -72,34 +50,22 @@ final class Embedded implements RelationInterface
         $this->columns = $this->orm->getSchema()->define($target, Schema::COLUMNS);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
     public function getTarget(): string
     {
         return $this->target;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function isCascade(): bool
     {
         // always cascade
         return true;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function init(Node $node, array $data): array
     {
         foreach ($this->primaryKeys as $key) {
@@ -112,9 +78,6 @@ final class Embedded implements RelationInterface
         return [$item, $item];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function initPromise(Node $parentNode): array
     {
         $values = [];
@@ -139,18 +102,12 @@ final class Embedded implements RelationInterface
         return [$r, $pk];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function extract($data)
     {
         return $data;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
     {
         if ($related instanceof ReferenceInterface) {
             if ($related->__scope() === $original) {
@@ -192,12 +149,7 @@ final class Embedded implements RelationInterface
         return new Nil();
     }
 
-    /**
-     * @param mixed $related
-     * @param State $state
-     * @return array
-     */
-    protected function getChanges(object $related, State $state): array
+    private function getChanges(object $related, State $state): array
     {
         $data = array_intersect_key($this->mapper->extract($related), $this->columns);
         // Embedded entity does not override PK values of the parent
@@ -210,11 +162,8 @@ final class Embedded implements RelationInterface
 
     /**
      * Map internal field names to database specific column names.
-     *
-     * @param array $columns
-     * @return array
      */
-    protected function mapColumns(array $columns): array
+    private function mapColumns(array $columns): array
     {
         $result = [];
         foreach ($columns as $column => $value) {
@@ -231,9 +180,8 @@ final class Embedded implements RelationInterface
     /**
      * @param mixed $a
      * @param mixed $b
-     * @return int
      */
-    protected static function compare($a, $b): int
+    private static function compare($a, $b): int
     {
         if ($a == $b) {
             return 0;
@@ -245,10 +193,9 @@ final class Embedded implements RelationInterface
     /**
      * Resolve the reference to the object.
      *
-     * @param ReferenceInterface $reference
      * @return mixed|null
      */
-    protected function resolve(ReferenceInterface $reference)
+    private function resolve(ReferenceInterface $reference)
     {
         if ($reference instanceof PromiseInterface) {
             return $reference->__resolve();
@@ -260,11 +207,9 @@ final class Embedded implements RelationInterface
     /**
      * Fetch key from the state.
      *
-     * @param Node   $state
-     * @param string $key
      * @return mixed|null
      */
-    protected function fetchKey(?Node $state, string $key)
+    private function fetchKey(?Node $state, string $key)
     {
         if ($state === null) {
             return null;

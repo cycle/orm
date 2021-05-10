@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
@@ -16,9 +9,6 @@ namespace Cycle\ORM\Mapper;
  */
 final class StdMapper extends DatabaseMapper
 {
-    /**
-     * @inheritdoc
-     */
     public function init(array $data): array
     {
         return [new \stdClass(), $data];
@@ -40,9 +30,6 @@ final class StdMapper extends DatabaseMapper
 
     /**
      * Get entity columns.
-     *
-     * @param object $entity
-     * @return array
      */
     protected function fetchFields(object $entity): array
     {

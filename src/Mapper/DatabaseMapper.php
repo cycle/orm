@@ -17,32 +17,29 @@ use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
+use Cycle\ORM\Select\SourceInterface;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
  */
 abstract class DatabaseMapper implements MapperInterface
 {
-    /** @var Select\SourceInterface */
-    protected $source;
+    protected SourceInterface $source;
 
-    /** @var ORMInterface */
-    protected $orm;
+    protected ORMInterface $orm;
 
-    /** @var string */
-    protected $role;
+    protected string $role;
 
-    /** @var array */
-    protected $columns;
+    protected array $columns;
 
     /** @var array */
     protected $fields;
 
     /** @var string[] */
-    protected $primaryColumns = [];
+    protected array $primaryColumns = [];
 
     /** @var string[] */
-    protected $primaryKeys;
+    protected array $primaryKeys;
 
     public function __construct(ORMInterface $orm, string $role)
     {
@@ -168,17 +165,11 @@ abstract class DatabaseMapper implements MapperInterface
 
     /**
      * Get entity columns.
-     *
-     * @param object $entity
-     * @return array
      */
     abstract protected function fetchFields(object $entity): array;
 
     /**
      * Map internal field names to database specific column names.
-     *
-     * @param array $columns
-     * @return array
      */
     protected function mapColumns(array $columns): array
     {

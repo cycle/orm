@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -18,26 +11,17 @@ use Cycle\ORM\Exception\SchemaException;
  */
 final class Schema implements SchemaInterface
 {
-    /** @var array */
-    private $aliases;
+    private array $aliases;
 
-    /** @var array */
-    private $schema = [];
+    private array $schema = [];
 
-    /**
-     * @param array $schema
-     */
     public function __construct(array $schema)
     {
         // split into two?
         [$this->schema, $this->aliases] = $this->normalize($schema);
     }
 
-    /**
-     * @param array $an_array
-     * @return Schema
-     */
-    public static function __set_state($an_array): Schema
+    public static function __set_state(array $an_array): Schema
     {
         $schema = new self([]);
         $schema->schema = $an_array['schema'];
@@ -46,33 +30,21 @@ final class Schema implements SchemaInterface
         return $schema;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getRoles(): array
     {
         return array_keys($this->schema);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getRelations(string $role): array
     {
         return array_keys($this->define($role, self::RELATIONS));
     }
 
-    /**
-     * @inheritdoc
-     */
     public function defines(string $role): bool
     {
         return isset($this->schema[$role]) || isset($this->aliases[$role]);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function define(string $role, int $property)
     {
         $role = $this->resolveAlias($role) ?? $role;
@@ -84,9 +56,6 @@ final class Schema implements SchemaInterface
         return $this->schema[$role][$property] ?? null;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function defineRelation(string $role, string $relation): array
     {
         $relations = $this->define($role, self::RELATIONS);
@@ -98,24 +67,19 @@ final class Schema implements SchemaInterface
         return $relations[$relation];
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function resolveAlias(string $entity): ?string
+    public function resolveAlias(string $role): ?string
     {
         // walk throught all children until parent entity found
-        while (isset($this->aliases[$entity])) {
-            $entity = $this->aliases[$entity];
+        while (isset($this->aliases[$role])) {
+            $role = $this->aliases[$role];
         }
 
-        return $entity;
+        return $role;
     }
-
 
     /**
      * Automatically replace class names with their aliases.
      *
-     * @param array $schema
      * @return array Pair of [schema, aliases]
      */
     protected function normalize(array $schema): array
@@ -159,11 +123,6 @@ final class Schema implements SchemaInterface
         return [$result, $aliases];
     }
 
-    /**
-     * @param array $relations
-     * @param array $aliases
-     * @return \Generator
-     */
     private function normalizeRelations(array $relations, array $aliases): \Generator
     {
         foreach ($relations as $name => &$rel) {

@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Spiral, Core Components
- *
- * @author Wolfy-J
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command;
@@ -19,16 +13,11 @@ interface ContextCarrierInterface extends CommandInterface, ConsumerInterface
 {
     /**
      * Wait for the context value. Command must not be ready until the value come if value is required.
-     *
-     * @param string $key
-     * @param bool   $required
      */
-    public function waitContext(string $key, bool $required = true);
+    public function waitContext(string $key, bool $required = true): void;
 
     /**
      * Get current command context.
-     *
-     * @return array
      */
     public function getContext(): array;
 }

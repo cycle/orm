@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Pivoted;
@@ -27,27 +20,18 @@ use Cycle\ORM\Select\Loader\ManyToManyLoader;
  */
 final class PivotedPromise implements PromiseInterface
 {
-    /** @var ORMInterface @internal */
-    private $orm;
+    /** @internal */
+    private ?ORMInterface $orm;
 
-    /** @var string */
-    private $target;
+    private string $target;
 
-    /** @var array @internal */
-    private $relationSchema = [];
+    /** @internal */
+    private array $relationSchema;
 
-    /** @var array */
-    private $innerKeys;
+    private array $innerKeys;
 
-    /** @var null|PivotedStorage */
-    private $resolved;
+    private ?PivotedStorage $resolved = null;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $target
-     * @param array        $relationSchema
-     * @param array        $innerKeys
-     */
     public function __construct(ORMInterface $orm, string $target, array $relationSchema, array $innerKeys)
     {
         $this->orm = $orm;
@@ -56,36 +40,22 @@ final class PivotedPromise implements PromiseInterface
         $this->innerKeys = $innerKeys;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function __loaded(): bool
     {
         return $this->orm === null;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function __role(): string
     {
         return $this->target;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function __scope(): array
     {
-        return [
-            $this->relationSchema[Relation::INNER_KEY] => $this->innerKeys
-        ];
+        return array_combine($this->relationSchema[Relation::INNER_KEY], $this->innerKeys);
     }
 
-    /**
-     * @return PivotedStorage
-     */
-    public function __resolve()
+    public function __resolve(): PivotedStorage
     {
         /*
          * This method emulates the selection of MtM nodes by skipping parent relation (as it usually done

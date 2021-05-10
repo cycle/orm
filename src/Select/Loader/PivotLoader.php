@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -29,10 +22,8 @@ class PivotLoader extends JoinableLoader
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
-     *
-     * @var array
      */
-    protected $options = [
+    protected array $options = [
         'load'      => false,
         'constrain' => true,
         'method'    => self::JOIN,
@@ -41,17 +32,11 @@ class PivotLoader extends JoinableLoader
         'using'     => null
     ];
 
-    /**
-     * @return string
-     */
     public function getTable(): string
     {
         return $this->define(Schema::TABLE);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         // user specified WHERE conditions
@@ -65,9 +50,6 @@ class PivotLoader extends JoinableLoader
         return parent::configureQuery($query, $outerKeys);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function initNode(): AbstractNode
     {
         $node = new ArrayNode(

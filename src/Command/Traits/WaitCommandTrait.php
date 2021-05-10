@@ -12,7 +12,7 @@ use Cycle\ORM\Command\CommandInterface;
 trait WaitCommandTrait
 {
     /** @var CommandInterface[] */
-    protected $waitCommand = [];
+    protected array $waitCommand = [];
 
     public function waitCommand(CommandInterface $command): void
     {

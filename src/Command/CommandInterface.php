@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command;
@@ -22,31 +15,27 @@ interface CommandInterface
     /**
      * Must return true when command is ready for the execution. UnitOfWork will throw
      * an exception if any of the command will stuck in non ready state.
-     *
-     * @return bool
      */
     public function isReady(): bool;
 
     /**
      * Indicates that command has been executed.
-     *
-     * @return bool
      */
     public function isExecuted(): bool;
 
     /**
      * Executes command.
      */
-    public function execute();
+    public function execute(): void;
 
     /**
      * Complete command, method to be called when all other commands are already executed and
      * transaction is closed.
      */
-    public function complete();
+    public function complete(): void;
 
     /**
      * Rollback command or declare that command been rolled back.
      */
-    public function rollBack();
+    public function rollBack(): void;
 }

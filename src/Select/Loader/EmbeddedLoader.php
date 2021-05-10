@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -28,23 +21,18 @@ final class EmbeddedLoader implements JoinableInterface
 {
     use ColumnsTrait;
 
-    /** @var ORMInterface @internal */
-    private $orm;
+    private ORMInterface $orm;
 
-    /** @var string */
-    private $target;
+    private string $target;
 
-    /** @var LoaderInterface */
-    private $parent;
+    private ?LoaderInterface $parent = null;
 
-    /** @var array */
-    private $options = [
+    private array $options = [
         'load'   => false,
-        'minify' => true
+        'minify' => true,
     ];
 
-    /** @var array */
-    private $columns = [];
+    private array $columns = [];
 
     /**
      * @param ORMInterface $orm
@@ -80,26 +68,17 @@ final class EmbeddedLoader implements JoinableInterface
         $this->parent = null;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getAlias(): string
     {
         // always fallback to parent table name
         return $this->parent->getAlias();
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getTarget(): string
     {
         return $this->target;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
         $loader = clone $this;
@@ -109,9 +88,6 @@ final class EmbeddedLoader implements JoinableInterface
         return $loader;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function isJoined(): bool
     {
         return true;
@@ -119,17 +95,12 @@ final class EmbeddedLoader implements JoinableInterface
 
     /**
      * Indication that loader want to load data.
-     *
-     * @return bool
      */
     public function isLoaded(): bool
     {
         return $this->options['load'] ?? false;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded() && $this->parent->isLoaded()) {
@@ -139,9 +110,6 @@ final class EmbeddedLoader implements JoinableInterface
         return $query;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function createNode(): AbstractNode
     {
         $node = new EmbeddedNode(
@@ -162,9 +130,6 @@ final class EmbeddedLoader implements JoinableInterface
         return $node;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function loadData(AbstractNode $node): void
     {
         // embedded entities does not support inner loaders... for now! :)
@@ -181,7 +146,6 @@ final class EmbeddedLoader implements JoinableInterface
     /**
      * Define schema option associated with the entity.
      *
-     * @param int $property
      * @return mixed
      */
     protected function define(int $property)

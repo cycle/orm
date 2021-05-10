@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -25,22 +18,14 @@ use Cycle\ORM\Relation\RelationInterface;
  */
 final class RelationMap
 {
-    /** @var ORMInterface @internal */
-    private $orm;
-
     /** @var RelationInterface[] */
-    private $relations = [];
+    private array $relations;
 
     /** @var DependencyInterface[] */
-    private $dependencies = [];
+    private array $dependencies = [];
 
-    /**
-     * @param ORMInterface $orm
-     * @param array        $relations
-     */
-    public function __construct(ORMInterface $orm, array $relations)
+    public function __construct(array $relations)
     {
-        $this->orm = $orm;
         $this->relations = $relations;
 
         foreach ($this->relations as $name => $relation) {
@@ -52,10 +37,6 @@ final class RelationMap
 
     /**
      * Init relation data in entity data and entity state.
-     *
-     * @param Node  $node
-     * @param array $data
-     * @return array
      */
     public function init(Node $node, array $data): array
     {
@@ -85,16 +66,7 @@ final class RelationMap
         return $data;
     }
 
-    /**
-     * Queue entity relations.
-     *
-     * @param CC     $parentStore
-     * @param object $parentEntity
-     * @param Node   $parentNode
-     * @param array  $parentData
-     * @return CC
-     */
-    public function queueRelations(CC $parentStore, $parentEntity, Node $parentNode, array $parentData): CC
+    public function queueRelations(CC $parentStore, object $parentEntity, Node $parentNode, array $parentData): CC
     {
         $state = $parentNode->getState();
         $sequence = new ContextSequence();
@@ -154,17 +126,12 @@ final class RelationMap
     /**
      * Queue the relation.
      *
-     * @param CC                $parentStore
-     * @param object            $parentEntity
-     * @param Node              $parentNode
-     * @param RelationInterface $relation
-     * @param mixed             $related
-     * @param mixed             $original
-     * @return CommandInterface|null
+     * @param object|array|null $related
+     * @param object|array|null $original
      */
     private function queueRelation(
         CC $parentStore,
-        $parentEntity,
+        object $parentEntity,
         Node $parentNode,
         RelationInterface $relation,
         $related,
@@ -198,7 +165,6 @@ final class RelationMap
      *
      * @param mixed $a
      * @param mixed $b
-     * @return bool
      */
     private function sameReference($a, $b): bool
     {

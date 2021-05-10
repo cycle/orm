@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -52,40 +45,29 @@ abstract class AbstractLoader implements LoaderInterface
     public const JOIN      = 3;
     public const LEFT_JOIN = 4;
 
-    /** @var ORMInterface|SourceProviderInterface @internal */
-    protected $orm;
+    protected ORMInterface $orm;
 
-    /** @var string */
-    protected $target;
+    protected string $target;
 
-    /** @var array */
-    protected $options = [
+    protected array $options = [
         'load'      => false,
         'constrain' => true,
     ];
 
     /** @var LoaderInterface[] */
-    protected $load = [];
+    protected array $load = [];
 
     /** @var AbstractLoader[] */
-    protected $join = [];
+    protected array $join = [];
 
-    /** @var LoaderInterface @internal */
-    protected $parent;
+    protected ?LoaderInterface $parent = null;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $target
-     */
     public function __construct(ORMInterface $orm, string $target)
     {
         $this->orm = $orm;
         $this->target = $target;
     }
 
-    /**
-     * Destruct loader.
-     */
     final public function __destruct()
     {
         $this->parent = null;
@@ -109,9 +91,6 @@ abstract class AbstractLoader implements LoaderInterface
         }
     }
 
-    /**
-     * @return string
-     */
     public function getTarget(): string
     {
         return $this->target;
@@ -119,17 +98,12 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * Data source associated with the loader.
-     *
-     * @return SourceInterface
      */
     public function getSource(): SourceInterface
     {
         return $this->orm->getSource($this->target);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
         // check that given options are known
@@ -188,7 +162,7 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         if ($load) {
-            $options['load'] = $options['load'] ?? true;
+            $options['load'] ??= true;
         }
 
         if (isset($loaders[$relation])) {
@@ -222,9 +196,6 @@ abstract class AbstractLoader implements LoaderInterface
         return $loaders[$relation] = $loader->withContext($this, $options);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function createNode(): AbstractNode
     {
         $node = $this->initNode();
@@ -241,9 +212,6 @@ abstract class AbstractLoader implements LoaderInterface
         return $node;
     }
 
-    /**
-     * @param AbstractNode $node
-     */
     public function loadData(AbstractNode $node): void
     {
         $this->loadChild($node);
@@ -251,14 +219,9 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * Indicates that loader loads data.
-     *
-     * @return bool
      */
     abstract public function isLoaded(): bool;
 
-    /**
-     * @param AbstractNode $node
-     */
     protected function loadChild(AbstractNode $node): void
     {
         foreach ($this->load as $relation => $loader) {
@@ -268,15 +231,9 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * Create input node for the loader.
-     *
-     * @return AbstractNode
      */
     abstract protected function initNode(): AbstractNode;
 
-    /**
-     * @param SelectQuery $query
-     * @return SelectQuery
-     */
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         $query = $this->applyConstrain($query);
@@ -294,16 +251,11 @@ abstract class AbstractLoader implements LoaderInterface
         return $query;
     }
 
-    /**
-     * @param SelectQuery $query
-     * @return SelectQuery
-     */
     abstract protected function applyConstrain(SelectQuery $query): SelectQuery;
 
     /**
      * Define schema option associated with the entity.
      *
-     * @param int $property
      * @return mixed
      */
     protected function define(int $property)
@@ -313,8 +265,6 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * Returns list of relations to be automatically joined with parent object.
-     *
-     * @return \Generator
      */
     protected function getEagerRelations(): \Generator
     {

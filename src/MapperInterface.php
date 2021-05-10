@@ -17,26 +17,17 @@ interface MapperInterface
 {
     /**
      * Get role name mapper is responsible for.
-     *
-     * @return string
      */
     public function getRole(): string;
 
     /**
      * Init empty entity object an return pre-filtered data (hydration will happen on a later stage). Must
      * return tuple [entity, entityData].
-     *
-     * @param array $data
-     * @return array
      */
     public function init(array $data): array;
 
     /**
      * Hydrate entity with dataset.
-     *
-     * @param object $entity
-     * @param array  $data
-     * @return object
      *
      * @throws MapperException
      */
@@ -44,9 +35,6 @@ interface MapperInterface
 
     /**
      * Extract all values from the entity.
-     *
-     * @param object $entity
-     * @return array
      */
     public function extract(object $entity): array;
 

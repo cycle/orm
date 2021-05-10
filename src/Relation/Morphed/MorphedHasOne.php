@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Morphed;
@@ -24,24 +17,14 @@ use Cycle\ORM\Relation\HasOne;
  */
 class MorphedHasOne extends HasOne
 {
-    /** @var string */
-    private $morphKey;
+    private string $morphKey;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $target
-     * @param string       $name
-     * @param array        $schema
-     */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function initPromise(Node $node): array
     {
         $innerValues = [];
@@ -59,10 +42,7 @@ class MorphedHasOne extends HasOne
         return [$r, $r];
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
     {
         $rStore = parent::queue($store, $entity, $node, $related, $original);
 
@@ -80,8 +60,6 @@ class MorphedHasOne extends HasOne
 
     /**
      * Assert that given entity is allowed for the relation.
-     *
-     * @param Node $related
      *
      * @throws RelationException
      */

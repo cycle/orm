@@ -13,11 +13,9 @@ use Spiral\Database\Query\SelectQuery;
 trait OrderByTrait
 {
     /**
-     * @param SelectQuery   $query
      * @param string        $table  Table name to be automatically inserted into where conditions at place of {@}.
      * @param array         $order  Associative array where the keys are field names
      *                              and the values are ASC or DESC strings
-     * @return SelectQuery
      */
     private function setOrderBy(SelectQuery $query, string $table, array $order = []): SelectQuery
     {

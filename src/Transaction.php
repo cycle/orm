@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -16,6 +9,7 @@ use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\RunnerInterface;
+use SplObjectStorage;
 
 /**
  * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
@@ -26,39 +20,26 @@ use Cycle\ORM\Transaction\RunnerInterface;
  */
 final class Transaction implements TransactionInterface
 {
-    /** @var ORMInterface */
-    private $orm;
+    private ORMInterface $orm;
 
-    /** @var \SplObjectStorage */
-    private $known;
+    private SplObjectStorage $known;
 
-    /** @var array */
-    private $persist = [];
+    private array $persist = [];
 
-    /** @var array */
-    private $delete = [];
+    private array $delete = [];
 
-    /** @var RunnerInterface */
-    private $runner;
+    private RunnerInterface $runner;
 
-    /** @var array */
-    private $indexes = [];
+    private array $indexes = [];
 
-    /**
-     * @param ORMInterface         $orm
-     * @param RunnerInterface|null $runner
-     */
     public function __construct(ORMInterface $orm, RunnerInterface $runner = null)
     {
         $this->orm = $orm;
-        $this->known = new \SplObjectStorage();
+        $this->known = new SplObjectStorage();
         $this->runner = $runner ?? new Runner();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function persist($entity, int $mode = self::MODE_CASCADE): self
+    public function persist(object $entity, int $mode = self::MODE_CASCADE): self
     {
         if ($this->known->offsetExists($entity)) {
             return $this;
@@ -70,9 +51,6 @@ final class Transaction implements TransactionInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function delete($entity, int $mode = self::MODE_CASCADE): self
     {
         if ($this->known->offsetExists($entity)) {
@@ -85,9 +63,6 @@ final class Transaction implements TransactionInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function run(): void
     {
         try {
@@ -131,7 +106,7 @@ final class Transaction implements TransactionInterface
 
             // resetting the scope
             $this->persist = $this->delete = [];
-            $this->known = new \SplObjectStorage();
+            $this->known = new SplObjectStorage();
         }
 
         $this->runner->complete();
@@ -178,8 +153,6 @@ final class Transaction implements TransactionInterface
 
     /**
      * Return flattened list of commands required to store and delete associated entities.
-     *
-     * @return array
      */
     protected function initCommands(): array
     {
@@ -200,9 +173,6 @@ final class Transaction implements TransactionInterface
     /**
      * Fetch commands which are ready for the execution. Provide ready commands
      * as generated value and delayed commands as the key.
-     *
-     * @param iterable $commands
-     * @return \Generator
      */
     protected function sort(iterable $commands): \Generator
     {
@@ -224,10 +194,6 @@ final class Transaction implements TransactionInterface
         }
     }
 
-    /**
-     * @param array $commands
-     * @return string
-     */
     private function listCommands(array $commands): string
     {
         $errors = [];
@@ -245,9 +211,6 @@ final class Transaction implements TransactionInterface
 
     /**
      * Indexable node fields.
-     *
-     * @param string $role
-     * @return array
      */
     private function getIndexes(string $role): array
     {

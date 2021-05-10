@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -22,11 +15,6 @@ interface PromiseFactoryInterface
     /**
      * Create proxy using object reference. Implementation must not resolve reference if it's provided in a form
      * of PromiseInterface!
-     *
-     * @param ORMInterface $orm
-     * @param string       $role
-     * @param array        $scope
-     * @return PromiseInterface
      */
     public function promise(
         ORMInterface $orm,

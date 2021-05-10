@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -36,24 +29,16 @@ interface SchemaInterface
 
     /**
      * Return all roles defined within the schema.
-     *
-     * @return array
      */
     public function getRoles(): array;
 
     /**
      * Get name of relations associated with given entity role.
-     *
-     * @param string $role
-     * @return array
      */
     public function getRelations(string $role): array;
 
     /**
      * Check if the given role has a definition within the schema.
-     *
-     * @param string $role
-     * @return bool
      */
     public function defines(string $role): bool;
 
@@ -62,8 +47,7 @@ interface SchemaInterface
      *
      * Example: $schema->define(User::class, SchemaInterface::DATABASE);
      *
-     * @param string $role
-     * @param int    $property See ORM constants.
+     * @param int $property See ORM constants.
      * @return mixed
      *
      * @throws SchemaException
@@ -73,19 +57,12 @@ interface SchemaInterface
     /**
      * Define options associated with specific entity relation.
      *
-     * @param string $role
-     * @param string $relation
-     * @return array
-     *
      * @throws SchemaException
      */
     public function defineRelation(string $role, string $relation): array;
 
     /**
      * Resolve the role name using entity class name.
-     *
-     * @param string $role
-     * @return null|string
      */
     public function resolveAlias(string $role): ?string;
 }

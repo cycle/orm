@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -31,10 +24,6 @@ class HasMany extends AbstractRelation
 {
     /**
      * Init relation state and entity collection.
-     *
-     * @param Node  $node
-     * @param array $data
-     * @return array
      */
     public function init(Node $node, array $data): array
     {
@@ -65,9 +54,6 @@ class HasMany extends AbstractRelation
         return is_array($data) ? $data : [];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function initPromise(Node $node): array
     {
         $innerValues = [];
@@ -89,10 +75,7 @@ class HasMany extends AbstractRelation
         return [new CollectionPromise($p), $p];
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
     {
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
@@ -117,26 +100,16 @@ class HasMany extends AbstractRelation
 
     /**
      * Return objects which are subject of removal.
-     *
-     * @param array $related
-     * @param array $original
-     * @return array
      */
-    protected function calcDeleted(array $related, array $original)
+    protected function calcDeleted(array $related, array $original): array
     {
-        return array_udiff($original ?? [], $related, function ($a, $b) {
-            return strcmp(spl_object_hash($a), spl_object_hash($b));
-        });
+        return array_udiff($original ?? [], $related, fn($a, $b) => strcmp(spl_object_hash($a), spl_object_hash($b)));
     }
 
     /**
      * Persist related object.
-     *
-     * @param Node   $node
-     * @param object $related
-     * @return CC
      */
-    protected function queueStore(Node $node, $related): CC
+    protected function queueStore(Node $node, object $related): CC
     {
         $relStore = $this->orm->queueStore($related);
         $relNode = $this->getNode($related, +1);
@@ -155,11 +128,8 @@ class HasMany extends AbstractRelation
 
     /**
      * Remove one of related objects.
-     *
-     * @param object $related
-     * @return CommandInterface
      */
-    protected function queueDelete($related): CommandInterface
+    protected function queueDelete(object $related): CommandInterface
     {
         $rNode = $this->getNode($related);
 
@@ -170,13 +140,9 @@ class HasMany extends AbstractRelation
             }
             $rNode->getState()->decClaim();
 
-            return new Condition($store, function () use ($rNode) {
-                return !$rNode->getState()->hasClaims();
-            });
+            return new Condition($store, fn() => !$rNode->getState()->hasClaims());
         }
 
-        return new Condition($this->orm->queueDelete($related), function () use ($rNode) {
-            return !$rNode->getState()->hasClaims();
-        });
+        return new Condition($this->orm->queueDelete($related), fn() => !$rNode->getState()->hasClaims());
     }
 }

@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
@@ -21,13 +14,11 @@ use Spiral\Database\Query\SelectQuery;
  */
 trait ConstrainTrait
 {
-    /** @var null|ConstrainInterface */
-    protected $constrain;
+    protected ?ConstrainInterface $constrain = null;
 
     /**
      * Associate scope with the selector.
      *
-     * @param ConstrainInterface $constrain
      * @return AbstractLoader|$this
      */
     public function setConstrain(ConstrainInterface $constrain = null): self
@@ -37,15 +28,8 @@ trait ConstrainTrait
         return $this;
     }
 
-    /**
-     * @return string
-     */
     abstract public function getAlias(): string;
 
-    /**
-     * @param SelectQuery $query
-     * @return SelectQuery
-     */
     protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if ($this->constrain !== null) {

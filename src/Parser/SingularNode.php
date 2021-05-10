@@ -14,7 +14,7 @@ use Cycle\ORM\Exception\ParserException;
 final class SingularNode extends AbstractNode
 {
     /** @var string[] */
-    protected $innerKeys;
+    protected array $innerKeys;
 
     /**
      * @param array      $columns

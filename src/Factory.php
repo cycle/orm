@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -27,28 +20,18 @@ use Spiral\Database\DatabaseProviderInterface;
 
 final class Factory implements FactoryInterface
 {
-    /** @var RelationConfig */
-    private $config;
-
-    /** @var CoreFactory */
-    private $factory;
-
-    /** @var DatabaseProviderInterface */
-    private $dbal;
+    private RelationConfig $config;
+    private CoreFactory $factory;
+    private DatabaseProviderInterface $dbal;
 
     /** @var array<string, string> */
-    private $defaults = [
+    private array $defaults = [
         Schema::REPOSITORY => Repository::class,
         Schema::SOURCE     => Source::class,
         Schema::MAPPER     => Mapper::class,
         Schema::CONSTRAIN  => null,
     ];
 
-    /**
-     * @param DatabaseProviderInterface $dbal
-     * @param RelationConfig|null $config
-     * @param CoreFactory|null $factory
-     */
     public function __construct(
         DatabaseProviderInterface $dbal,
         RelationConfig $config = null,
@@ -59,9 +42,6 @@ final class Factory implements FactoryInterface
         $this->factory = $factory ?? new Container();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function make(
         string $alias,
         array $parameters = []
@@ -69,9 +49,6 @@ final class Factory implements FactoryInterface
         return $this->factory->make($alias, $parameters);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function mapper(
         ORMInterface $orm,
         SchemaInterface $schema,
@@ -93,31 +70,25 @@ final class Factory implements FactoryInterface
         );
     }
 
-    /**
-     * @inheritdoc
-     */
     public function loader(
         ORMInterface $orm,
         SchemaInterface $schema,
         string $role,
         string $relation
     ): LoaderInterface {
-        $schema = $schema->defineRelation($role, $relation);
+        $definition = $schema->defineRelation($role, $relation);
 
-        return $this->config->getLoader($schema[Relation::TYPE])->resolve(
+        return $this->config->getLoader($definition[Relation::TYPE])->resolve(
             $this->factory,
             [
                 'orm'    => $orm,
                 'name'   => $relation,
-                'target' => $schema[Relation::TARGET],
-                'schema' => $schema[Relation::SCHEMA]
+                'target' => $definition[Relation::TARGET],
+                'schema' => $definition[Relation::SCHEMA]
             ]
         );
     }
 
-    /**
-     * @inheritdoc
-     */
     public function relation(
         ORMInterface $orm,
         SchemaInterface $schema,
@@ -138,17 +109,11 @@ final class Factory implements FactoryInterface
         );
     }
 
-    /**
-     * @inheritdoc
-     */
     public function database(string $database = null): DatabaseInterface
     {
         return $this->dbal->database($database);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function repository(
         ORMInterface $orm,
         SchemaInterface $schema,
@@ -171,9 +136,6 @@ final class Factory implements FactoryInterface
         );
     }
 
-    /**
-     * @inheritDoc
-     */
     public function source(
         ORMInterface $orm,
         SchemaInterface $schema,
@@ -209,9 +171,6 @@ final class Factory implements FactoryInterface
 
     /**
      * Add default classes for resolve
-     *
-     * @param array $defaults
-     * @return FactoryInterface
      */
     public function withDefaultSchemaClasses(array $defaults): FactoryInterface
     {

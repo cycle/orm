@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -24,61 +17,44 @@ use Cycle\ORM\Select\SourceProviderInterface;
 interface ORMInterface extends SourceProviderInterface
 {
     /**
-     * Automatically resolve role based on object name.
+     * Automatically resolve role based on object name or instance.
      *
      * @param string|object $entity
-     * @return string
      */
     public function resolveRole($entity): string;
 
     /**
      * Get/load entity by unique key/value pair.
      *
-     * @param string $role
      * @param array  $scope KV pair to locate the model, currently only support one pair.
-     * @param bool   $load
-     * @return object|null
      */
-    public function get(string $role, array $scope, bool $load = true);
+    public function get(string $role, array $scope, bool $load = true): ?object;
 
     /**
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
-     *
-     * @param string $role
-     * @param array  $data
-     * @param int    $node
-     * @return object|null
      */
-    public function make(string $role, array $data = [], int $node = Node::NEW);
+    public function make(string $role, array $data = [], int $node = Node::NEW): ?object;
 
     /**
      * Promise object reference, proxy or object from memory heap.
      *
-     * @param string $role
-     * @param array  $scope
      * @return ReferenceInterface|mixed|null
      */
     public function promise(string $role, array $scope);
 
     /**
      * Get factory for relations, mappers and etc.
-     *
-     * @return FactoryInterface
      */
     public function getFactory(): FactoryInterface;
 
     /**
      * Get ORM relation and entity schema provider.
-     *
-     * @return SchemaInterface
      */
     public function getSchema(): SchemaInterface;
 
     /**
      * Get current Heap (entity map).
-     *
-     * @return HeapInterface
      */
     public function getHeap(): HeapInterface;
 
@@ -86,7 +62,6 @@ interface ORMInterface extends SourceProviderInterface
      * Get mapper associated with given entity class, role or instance.
      *
      * @param string|object $entity
-     * @return MapperInterface
      */
     public function getMapper($entity): MapperInterface;
 
@@ -94,25 +69,16 @@ interface ORMInterface extends SourceProviderInterface
      * Get repository associated with given entity.
      *
      * @param string|object $entity
-     * @return RepositoryInterface
      */
     public function getRepository($entity): RepositoryInterface;
 
     /**
      * Generate chain of commands required to store given entity and it's relations.
-     *
-     * @param object $entity
-     * @param int    $mode
-     * @return ContextCarrierInterface
      */
     public function queueStore(object $entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface;
 
     /**
      * Generate commands required to delete the entity.
-     *
-     * @param object $entity
-     * @param int    $mode
-     * @return CommandInterface
      */
-    public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface;
+    public function queueDelete(object $entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface;
 }

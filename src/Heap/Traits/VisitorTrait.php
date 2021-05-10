@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap\Traits;
@@ -16,14 +9,11 @@ namespace Cycle\ORM\Heap\Traits;
  */
 trait VisitorTrait
 {
-    /** @var array @internal */
-    private $visited = [];
+    /** @internal */
+    private array $visited = [];
 
     /**
      * Return true if relation branch was already visited.
-     *
-     * @param string $branch
-     * @return bool
      */
     public function visited(string $branch): bool
     {
@@ -32,8 +22,6 @@ trait VisitorTrait
 
     /**
      * Indicate that relation branch has been visited.
-     *
-     * @param string $branch
      */
     public function markVisited(string $branch): void
     {

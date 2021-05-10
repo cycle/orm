@@ -246,11 +246,9 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
 
         $fav = [
-            $u1->favorites[0]->favoredBy[0]->id,
-            $u1->favorites[0]->favoredBy[1]->id
+            (string)$u1->favorites[0]->favoredBy[0]->id,
+            (string)$u1->favorites[0]->favoredBy[1]->id
         ];
-
-        var_dump($fav);
 
         $this->assertContains((string)$u->id, $fav);
         $this->assertContains((string)$u2->id, $fav);
@@ -264,8 +262,8 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
 
         $u1 = $selector->wherePK(2)->fetchOne();
 
-        $this->assertEquals($u1->id, $u2->id);
-        $this->assertEquals($u1->favorites[0]->id, $u2->favorites[0]->id);
+        $this->assertEquals((string)$u1->id, $u2->id);
+        $this->assertEquals((string)$u1->favorites[0]->id, $u2->favorites[0]->id);
     }
 
     public function testCreateMultipleLinkedTreesExchange(): void

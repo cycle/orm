@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -30,10 +23,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
-     *
-     * @var array
      */
-    protected $options = [
+    protected array $options = [
         // load relation data
         'load'      => false,
 
@@ -58,18 +49,10 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         // where conditions (if any)
     ];
 
-    /** @var string */
-    protected $name;
+    protected string $name;
 
-    /** @var array */
-    protected $schema;
+    protected array $schema;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $name
-     * @param string       $target
-     * @param array        $schema
-     */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $target);
@@ -80,8 +63,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Relation table alias.
-     *
-     * @return string
      */
     public function getAlias(): string
     {
@@ -97,14 +78,11 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         throw new LoaderException('Unable to resolve loader alias');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
         /**
-         * @var AbstractLoader $parent
-         * @var self           $loader
+         * @var AbstractLoader $parent todo: should move withContext into LoaderInterface?
+         * @var self $loader
          */
         $loader = parent::withContext($parent, $options);
 
@@ -141,9 +119,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         return $loader;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadData(AbstractNode $node): void
     {
         if ($this->isJoined() || !$this->isLoaded()) {
@@ -179,8 +154,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Indicated that loaded must generate JOIN statement.
-     *
-     * @return bool
      */
     public function isJoined(): bool
     {
@@ -193,8 +166,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Indication that loader want to load data.
-     *
-     * @return bool
      */
     public function isLoaded(): bool
     {
@@ -204,9 +175,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     /**
      * Configure query with conditions, joins and columns.
      *
-     * @param SelectQuery $query
-     * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
-     * @return SelectQuery
+     * @param array $outerKeys Set of OUTER_KEY values collected by parent loader.
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
@@ -231,10 +200,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         return parent::configureQuery($query);
     }
 
-    /**
-     * @param SelectQuery $query
-     * @return SelectQuery
-     */
     protected function applyConstrain(SelectQuery $query): SelectQuery
     {
         if ($this->constrain !== null) {
@@ -246,8 +211,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Get load method.
-     *
-     * @return int
      */
     protected function getMethod(): int
     {
@@ -256,8 +219,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Create relation specific select query.
-     *
-     * @return SelectQuery
      */
     protected function initQuery(): SelectQuery
     {
@@ -266,9 +227,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Calculate table alias.
-     *
-     * @param AbstractLoader $parent
-     * @return string
      */
     protected function calculateAlias(AbstractLoader $parent): string
     {
@@ -293,8 +251,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * Example:
      * $this->getKey(Relation::OUTER_KEY);
      *
-     * @param mixed $key
-     * @return string|null
+     * @param string|int $key
      */
     protected function localKey($key): ?string
     {
@@ -308,17 +265,13 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     /**
      * Get parent identifier based on relation configuration key.
      *
-     * @param mixed $key
-     * @return string
+     * @param string|int $key
      */
     protected function parentKey($key): string
     {
         return $this->parent->getAlias() . '.' . $this->parent->fieldAlias($this->schema[$key]);
     }
 
-    /**
-     * @return string
-     */
     protected function getJoinMethod(): string
     {
         return $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT';
@@ -326,8 +279,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Joined table name and alias.
-     *
-     * @return string
      */
     protected function getJoinTable(): string
     {
@@ -336,18 +287,12 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Relation columns.
-     *
-     * @return array
      */
     protected function getColumns(): array
     {
         return $this->define(Schema::COLUMNS);
     }
 
-    /**
-     * @param SelectQuery $query
-     * @return QueryBuilder
-     */
     private function makeQueryBuilder(SelectQuery $query): QueryBuilder
     {
         $builder = new QueryBuilder($query, $this);

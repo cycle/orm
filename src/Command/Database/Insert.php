@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
@@ -29,17 +22,18 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     use ContextTrait;
     use ErrorTrait;
 
-    // Special identifier to forward insert key into
+    /**
+     * Special identifier to forward insert key into
+     */
     public const INSERT_ID = '@lastInsertID';
 
-    /** @var array */
-    protected $data;
+    protected array $data;
 
     /** @var string[] */
-    protected $primaryKeys;
+    protected array $primaryKeys;
 
     /** @var ConsumerInterface[][] */
-    protected $consumers = [];
+    protected array $consumers = [];
 
     public function __construct(
         DatabaseInterface $db,
@@ -52,9 +46,6 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         $this->primaryKeys = $primaryKeys;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isReady(): bool
     {
         return $this->waitContext === [];
@@ -79,9 +70,6 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         $this->consumers[$key][] = [$consumer, $target, $stream];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         if ($fresh || $value !== null) {
@@ -93,8 +81,6 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
 
     /**
      * Insert values, context not included.
-     *
-     * @return array
      */
     public function getData(): array
     {

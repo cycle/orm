@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Parser\Traits;
@@ -17,11 +10,14 @@ namespace Cycle\ORM\Parser\Traits;
  */
 trait DuplicateTrait
 {
-    /** @var string[] @internal */
-    protected $duplicateCriteria = [];
+    /**
+     * @var string[]
+     * @internal
+     */
+    protected array $duplicateCriteria = [];
 
-    /** @var array @internal */
-    protected $duplicates = [];
+    /** @internal */
+    protected array $duplicates = [];
 
     protected function setDuplicateCriteria(array $columns): void
     {

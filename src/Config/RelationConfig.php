@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Config;
@@ -23,14 +16,11 @@ final class RelationConfig extends InjectableConfig
     public const RELATION = 'relation';
     public const SCHEMA   = 'schema';
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $config = [];
 
     /**
      * @param int|string $type
-     * @return Autowire
      */
     public function getLoader($type): Autowire
     {
@@ -43,7 +33,6 @@ final class RelationConfig extends InjectableConfig
 
     /**
      * @param int|string $type
-     * @return Autowire
      */
     public function getRelation($type): Autowire
     {
@@ -54,10 +43,7 @@ final class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::RELATION]);
     }
 
-    /**
-     * @return RelationConfig
-     */
-    public static function getDefault()
+    public static function getDefault(): self
     {
         return new static([
             Relation::EMBEDDED           => [

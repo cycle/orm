@@ -257,11 +257,10 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
 
         $fav = [
-            $u1->favorites[0]->favoredBy[0]->id,
-            $u1->favorites[0]->favoredBy[1]->id
+            (string)$u1->favorites[0]->favoredBy[0]->id,
+            (string)$u1->favorites[0]->favoredBy[1]->id
         ];
 
-        $this->assertCount(2, $fav);
         $this->assertContains((string)$u->id, $fav);
         $this->assertContains((string)$u2->id, $fav);
 

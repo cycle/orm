@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 use Spiral\Tokenizer;
@@ -57,14 +50,7 @@ foreach ($classes as $class) {
         file_put_contents(
             $filename,
             sprintf(
-                '<?php
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-declare(strict_types=1);
+                '<?phpdeclare(strict_types=1);
 
 namespace %s;
 

@@ -220,20 +220,12 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $u2->favorites->add($c);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($u2);
-        $tr->run();
-
+        $this->save($u, $u2);
         $this->assertNumWrites(6);
 
         // no changes!
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($u2);
-        $tr->run();
+        $this->save($u, $u2);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -258,9 +250,10 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
             $u1->favorites[0]->favoredBy[1]->id
         ];
 
-        $this->assertCount(2, $fav);
-        $this->assertContains($u->id, $fav);
-        $this->assertContains($u2->id, $fav);
+        var_dump($fav);
+
+        $this->assertContains((string)$u->id, $fav);
+        $this->assertContains((string)$u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');

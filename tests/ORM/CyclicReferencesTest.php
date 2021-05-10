@@ -262,8 +262,8 @@ abstract class CyclicReferencesTest extends BaseTest
         ];
 
         $this->assertCount(2, $fav);
-        $this->assertContains($u->id, $fav);
-        $this->assertContains($u2->id, $fav);
+        $this->assertContains((string)$u->id, $fav);
+        $this->assertContains((string)$u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);

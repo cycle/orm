@@ -69,7 +69,10 @@ class HasManyLoader extends JoinableLoader
             )->on($on);
         } else {
             // relation is loaded using external query
-            $fields = array_map(fn(string $key) => $localPrefix . $this->fieldAlias($key), (array)$this->schema[Relation::OUTER_KEY]);
+            $fields = array_map(
+                fn (string $key) => $localPrefix . $this->fieldAlias($key),
+                (array)$this->schema[Relation::OUTER_KEY]
+            );
 
             if (count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));

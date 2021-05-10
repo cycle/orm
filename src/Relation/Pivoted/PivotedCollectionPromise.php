@@ -41,7 +41,7 @@ final class PivotedCollectionPromise extends AbstractLazyCollection implements
         return $this->collection->hasPivot($element);
     }
 
-    public function getPivot(object$element)
+    public function getPivot(object $element)
     {
         $this->initialize();
         return $this->collection->getPivot($element);

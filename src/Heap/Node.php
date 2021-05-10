@@ -18,14 +18,13 @@ final class Node implements ProducerInterface, ConsumerInterface
     use RelationTrait;
 
     // Different entity states in a pool
-    public const
-        PROMISED         = 0,
-        NEW              = 1,
-        MANAGED          = 2,
-        SCHEDULED_INSERT = 3,
-        SCHEDULED_UPDATE = 4,
-        SCHEDULED_DELETE = 5,
-        DELETED          = 6;
+    public const PROMISED         = 0;
+    public const NEW              = 1;
+    public const MANAGED          = 2;
+    public const SCHEDULED_INSERT = 3;
+    public const SCHEDULED_UPDATE = 4;
+    public const SCHEDULED_DELETE = 5;
+    public const DELETED          = 6;
 
     private string $role;
 

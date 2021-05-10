@@ -150,7 +150,10 @@ class ManyToManyLoader extends JoinableLoader
                 $this->pivot->getJoinTable()
             )->on($on);
 
-            $fields = array_map(fn(string $key) => $pivotPrefix . $this->pivot->fieldAlias($key), (array)$this->pivot->schema[Relation::THROUGH_INNER_KEY]);
+            $fields = array_map(
+                fn (string $key) => $pivotPrefix . $this->pivot->fieldAlias($key),
+                (array)$this->pivot->schema[Relation::THROUGH_INNER_KEY]
+            );
             if (count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
             } else {

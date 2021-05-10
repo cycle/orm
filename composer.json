@@ -14,7 +14,6 @@
   },
   "require-dev": {
     "spiral/tokenizer": "^2.7",
-    "rector/rector": "^0.10",
     "phpunit/phpunit": "^9.5",
     "mockery/mockery": "^1.1",
     "spiral/dumper": "^2.7",

@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
@@ -17,6 +10,7 @@ use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\ClaimTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Heap\Traits\VisitorTrait;
+use SplObjectStorage;
 
 /**
  * Current node state.
@@ -27,28 +21,20 @@ final class State implements ConsumerInterface, ProducerInterface
     use ClaimTrait;
     use VisitorTrait;
 
-    /** @var int */
-    private $state;
+    private int $state;
 
-    /** @var array */
-    private $data;
+    private array $data;
 
-    /** @var array */
-    private $transactionData = [];
+    private array $transactionData;
 
-    /** @var null|ContextCarrierInterface */
-    private $command;
+    private ?ContextCarrierInterface $command = null;
 
     /** @var ContextCarrierInterface[] */
-    private $consumers;
+    private array $consumers;
 
-    /** @var \SplObjectStorage[] */
-    private $storage = [];
+    /** @var SplObjectStorage[] */
+    private array $storage = [];
 
-    /**
-     * @param int   $state
-     * @param array $data
-     */
     public function __construct(int $state, array $data)
     {
         $this->state = $state;
@@ -58,8 +44,6 @@ final class State implements ConsumerInterface, ProducerInterface
 
     /**
      * Set new state value.
-     *
-     * @param int $state
      */
     public function setStatus(int $state): void
     {
@@ -68,8 +52,6 @@ final class State implements ConsumerInterface, ProducerInterface
 
     /**
      * Get current state.
-     *
-     * @return int
      */
     public function getStatus(): int
     {
@@ -78,8 +60,6 @@ final class State implements ConsumerInterface, ProducerInterface
 
     /**
      * Set new state data (will trigger state handlers).
-     *
-     * @param array $data
      */
     public function setData(array $data): void
     {
@@ -94,8 +74,6 @@ final class State implements ConsumerInterface, ProducerInterface
 
     /**
      * Get current state data.
-     *
-     * @return array
      */
     public function getData(): array
     {
@@ -104,8 +82,6 @@ final class State implements ConsumerInterface, ProducerInterface
 
     /**
      * Get current state data.
-     *
-     * @return array
      */
     public function getTransactionData(): array
     {
@@ -115,7 +91,6 @@ final class State implements ConsumerInterface, ProducerInterface
     /**
      * Set the reference to the object creation command (non executed).
      *
-     * @param ContextCarrierInterface|null $cmd
      * @internal
      */
     public function setCommand(ContextCarrierInterface $cmd = null): void
@@ -124,7 +99,6 @@ final class State implements ConsumerInterface, ProducerInterface
     }
 
     /**
-     * @return null|ContextCarrierInterface
      * @internal
      */
     public function getCommand(): ?ContextCarrierInterface
@@ -135,22 +109,17 @@ final class State implements ConsumerInterface, ProducerInterface
     /**
      * Storage to store temporary cross entity links.
      *
-     * @param string $type
-     * @return \SplObjectStorage
      * @internal
      */
-    public function getStorage(string $type): \SplObjectStorage
+    public function getStorage(string $type): SplObjectStorage
     {
         if (!isset($this->storage[$type])) {
-            $this->storage[$type] = new \SplObjectStorage();
+            $this->storage[$type] = new SplObjectStorage();
         }
 
         return $this->storage[$type];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function forward(
         string $key,
         ConsumerInterface $consumer,
@@ -165,9 +134,6 @@ final class State implements ConsumerInterface, ProducerInterface
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(
         string $key,
         $value,
@@ -187,7 +153,7 @@ final class State implements ConsumerInterface, ProducerInterface
 
         // cascade
         if (!empty($this->consumers[$key])) {
-            foreach ($this->consumers[$key] as $id => $consumer) {
+            foreach ($this->consumers[$key] as $consumer) {
                 /** @var ConsumerInterface $acc */
                 $acc = $consumer[0];
                 $acc->register($consumer[1], $value, $fresh, $consumer[2]);

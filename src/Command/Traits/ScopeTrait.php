@@ -6,11 +6,10 @@ namespace Cycle\ORM\Command\Traits;
 
 trait ScopeTrait
 {
-    /** @var array */
-    protected $scope = [];
+    protected array $scope = [];
 
     /** @var string[] */
-    protected $waitScope = [];
+    protected array $waitScope = [];
 
     /**
      * Wait for the context value.

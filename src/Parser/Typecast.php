@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
@@ -18,25 +11,16 @@ use Throwable;
 
 final class Typecast implements TypecastInterface
 {
-    /** @var array */
-    private $rules;
+    private array $rules;
 
-    /** @var DatabaseInterface */
-    private $database;
+    private DatabaseInterface $database;
 
-    /**
-     * @param array             $rules
-     * @param DatabaseInterface $database
-     */
     public function __construct(array $rules, DatabaseInterface $database)
     {
         $this->rules = $rules;
         $this->database = $database;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function cast(array $values): array
     {
         try {

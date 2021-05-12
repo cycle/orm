@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Branch;
@@ -19,28 +12,19 @@ use Cycle\ORM\Command\CommandInterface;
 final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 {
     /** @var CommandInterface[] */
-    protected $commands = [];
+    private array $commands = [];
 
-    /**
-     * @inheritdoc
-     */
     public function isExecuted(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isReady(): bool
     {
         // always ready since check will be delegated to underlying nodes
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function addCommand(CommandInterface $command): void
     {
         if ($command instanceof Nil) {
@@ -60,9 +44,6 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
         return $this->commands;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getIterator(): \Generator
     {
         foreach ($this->commands as $command) {
@@ -75,33 +56,21 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
         }
     }
 
-    /**
-     * @return int
-     */
     public function count(): int
     {
         return count($this->commands);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute(): void
     {
         // nothing
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function complete(): void
     {
         // nothing
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rollBack(): void
     {
         // nothing

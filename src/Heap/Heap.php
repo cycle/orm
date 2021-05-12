@@ -12,11 +12,9 @@ final class Heap implements HeapInterface, IteratorAggregate
 {
     private const INDEX_KEY_SEPARATOR = ':';
 
-    /** @var SplObjectStorage|null */
-    private $storage;
+    private ?SplObjectStorage $storage = null;
 
-    /** @var array */
-    private $paths = [];
+    private array $paths = [];
 
     public function __construct()
     {
@@ -89,7 +87,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         } else {
             $result = &$this->paths[$role][$indexName];
         }
-        $indexKeys = $indexKeys ?? explode(self::INDEX_KEY_SEPARATOR, $indexName);
+        $indexKeys ??= explode(self::INDEX_KEY_SEPARATOR, $indexName);
         foreach ($indexKeys as $key) {
             $value = (string) $scope[$key];
             if (!isset($result[$value])) {
@@ -170,7 +168,7 @@ final class Heap implements HeapInterface, IteratorAggregate
     public function clean(): void
     {
         $this->paths = [];
-        $this->storage = new \SplObjectStorage();
+        $this->storage = new SplObjectStorage();
     }
 
     private function eraseIndexes(string $role, array $data, object $entity): void
@@ -192,7 +190,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                 if ($value === null || !isset($next[$value])) {
                     continue 2;
                 }
-                $removeKey = $removeKey ?? $value;
+                $removeKey ??= $value;
                 // If last key
                 if ($i === $j) {
                     if ($next[$value] === $entity) {

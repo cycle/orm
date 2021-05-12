@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -23,45 +16,37 @@ use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\SourceInterface;
 
+use function count;
+
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  */
 final class ORM implements ORMInterface
 {
-    /** @var CommandGenerator */
-    private $generator;
+    private CommandGenerator $generator;
 
-    /** @var FactoryInterface */
-    private $factory;
+    private FactoryInterface $factory;
 
-    /** @var PromiseFactoryInterface|null */
-    private $promiseFactory;
+    private ?PromiseFactoryInterface $promiseFactory = null;
 
-    /** @var HeapInterface */
-    private $heap;
+    private HeapInterface $heap;
 
-    /** @var SchemaInterface|null */
-    private $schema;
+    private SchemaInterface $schema;
 
     /** @var MapperInterface[] */
-    private $mappers = [];
+    private array $mappers = [];
 
     /** @var RepositoryInterface[] */
-    private $repositories = [];
+    private array $repositories = [];
 
     /** @var RelationMap[] */
-    private $relmaps = [];
+    private array $relMaps = [];
 
-    /** @var array */
-    private $indexes = [];
+    private array $indexes = [];
 
     /** @var SourceInterface[] */
-    private $sources = [];
+    private array $sources = [];
 
-    /**
-     * @param FactoryInterface     $factory
-     * @param SchemaInterface|null $schema
-     */
     public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
     {
         $this->factory = $factory;
@@ -78,28 +63,19 @@ final class ORM implements ORMInterface
     {
         $this->heap = new Heap();
         $this->mappers = [];
-        $this->relmaps = [];
+        $this->relMaps = [];
         $this->indexes = [];
         $this->sources = [];
         $this->repositories = [];
     }
 
-    /**
-     * @return array
-     */
-    public function __debugInfo()
+    public function __debugInfo(): array
     {
         return [
             'schema' => $this->schema
         ];
     }
 
-    /**
-     * Automatically resolve role based on object name or instance.
-     *
-     * @param string|object $entity
-     * @return string
-     */
     public function resolveRole($entity): string
     {
         if (is_object($entity)) {
@@ -119,7 +95,7 @@ final class ORM implements ORMInterface
         return $this->schema->resolveAlias($entity);
     }
 
-    public function get(string $role, array $scope, bool $load = true)
+    public function get(string $role, array $scope, bool $load = true): ?object
     {
         $role = $this->resolveRole($role);
         $e = $this->heap->find($role, $scope);
@@ -135,10 +111,7 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function make(string $role, array $data = [], int $node = Node::NEW)
+    public function make(string $role, array $data = [], int $node = Node::NEW): ?object
     {
         $m = $this->getMapper($role);
 
@@ -193,17 +166,11 @@ final class ORM implements ORMInterface
         return $orm;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getFactory(): FactoryInterface
     {
         return $this->factory;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
         $orm = clone $this;
@@ -212,9 +179,6 @@ final class ORM implements ORMInterface
         return $orm;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getSchema(): SchemaInterface
     {
         if ($this->schema === null) {
@@ -224,9 +188,6 @@ final class ORM implements ORMInterface
         return $this->schema;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
         $orm = clone $this;
@@ -235,17 +196,11 @@ final class ORM implements ORMInterface
         return $orm;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getHeap(): HeapInterface
     {
         return $this->heap;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getMapper($entity): MapperInterface
     {
         $role = $this->resolveRole($entity);
@@ -256,9 +211,6 @@ final class ORM implements ORMInterface
         return $this->mappers[$role] = $this->factory->mapper($this, $this->schema, $role);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getRepository($entity): RepositoryInterface
     {
         $role = $this->resolveRole($entity);
@@ -276,9 +228,6 @@ final class ORM implements ORMInterface
         return $this->repositories[$role] = $this->factory->repository($this, $this->schema, $role, $select);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getSource(string $role): SourceInterface
     {
         if (isset($this->sources[$role])) {
@@ -290,9 +239,6 @@ final class ORM implements ORMInterface
 
     /**
      * Overlay existing promise factory.
-     *
-     * @param PromiseFactoryInterface $promiseFactory
-     * @return ORM
      */
     public function withPromiseFactory(PromiseFactoryInterface $promiseFactory = null): self
     {
@@ -303,13 +249,11 @@ final class ORM implements ORMInterface
     }
 
     /**
-     * @inheritdoc
-     *
      * Returns references by default.
      */
-    public function promise(string $role, array $scope)
+    public function promise(string $role, array $scope): object
     {
-        if (\count($scope) === 1) {
+        if (count($scope) === 1) {
             $e = $this->heap->find($role, $scope);
             if ($e !== null) {
                 return $e;
@@ -323,9 +267,6 @@ final class ORM implements ORMInterface
         return new Reference($role, $scope);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function queueStore(object $entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
     {
         if ($entity instanceof PromiseInterface && $entity->__loaded()) {
@@ -365,10 +306,7 @@ final class ORM implements ORMInterface
         );
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
+    public function queueDelete(object $entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
     {
         if ($entity instanceof PromiseInterface && $entity->__loaded()) {
             $entity = $entity->__resolve();
@@ -386,11 +324,8 @@ final class ORM implements ORMInterface
 
     /**
      * Get list of keys entity must be indexed in a Heap by.
-     *
-     * @param string $role
-     * @return array
      */
-    protected function getIndexes(string $role): array
+    private function getIndexes(string $role): array
     {
         if (isset($this->indexes[$role])) {
             return $this->indexes[$role];
@@ -404,15 +339,12 @@ final class ORM implements ORMInterface
 
     /**
      * Get relation map associated with the given class.
-     *
-     * @param string $entity
-     * @return RelationMap
      */
-    protected function getRelationMap($entity): RelationMap
+    private function getRelationMap(string $entity): RelationMap
     {
         $role = $this->resolveRole($entity);
-        if (isset($this->relmaps[$role])) {
-            return $this->relmaps[$role];
+        if (isset($this->relMaps[$role])) {
+            return $this->relMaps[$role];
         }
 
         $relations = [];
@@ -422,6 +354,6 @@ final class ORM implements ORMInterface
             $relations[$relation] = $this->factory->relation($this, $this->schema, $role, $relation);
         }
 
-        return $this->relmaps[$role] = new RelationMap($this, $relations);
+        return $this->relMaps[$role] = new RelationMap($relations);
     }
 }

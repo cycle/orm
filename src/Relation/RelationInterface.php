@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -23,22 +16,16 @@ interface RelationInterface
 {
     /**
      * Relation name.
-     *
-     * @return string
      */
     public function getName(): string;
 
     /**
      * Target entity role.
-     *
-     * @return string
      */
     public function getTarget(): string;
 
     /**
      * Must return true to trigger queue.
-     *
-     * @return bool
      */
     public function isCascade(): bool;
 
@@ -46,9 +33,7 @@ interface RelationInterface
      * Init related entity value(s). Returns tuple [value, value to store as relation context]. If data null
      * relation must initiate empty relation state (when lazy loading is off).
      *
-     * @param Node       $node Parent node.
-     * @param array|null $data
-     * @return array
+     * @param Node $node Parent node.
      *
      * @throws RelationException
      */
@@ -67,9 +52,6 @@ interface RelationInterface
     /**
      * Returns tuple of [promise to insert into entity, promise to store as relation context].
      *
-     * @param Node $node
-     * @return array
-     *
      * @throws RelationException
      */
     public function initPromise(Node $node): array;
@@ -77,14 +59,11 @@ interface RelationInterface
     /**
      * Create branch of operations required to store the relation.
      *
-     * @param CC     $store
-     * @param object $entity
-     * @param Node   $node
-     * @param object|null $related
-     * @param object $original
-     * @return CommandInterface
+
+     * @param object|array|null $related
+     * @param object|array|null $original
      *
      * @throws RelationException
      */
-    public function queue(CC $store, object $entity, Node $node, ?object $related, ?object $original): CommandInterface;
+    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface;
 }

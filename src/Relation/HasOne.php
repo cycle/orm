@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -27,10 +20,7 @@ class HasOne extends AbstractRelation
 {
     use PromiseOneTrait;
 
-    /**
-     * @inheritdoc
-     */
-    public function queue(CC $store, $entity, Node $node, ?object $related, ?object $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
     {
         if ($original instanceof ReferenceInterface) {
             $original = $this->resolve($original);
@@ -77,11 +67,8 @@ class HasOne extends AbstractRelation
 
     /**
      * Delete original related entity of no other objects reference to it.
-     *
-     * @param object $original
-     * @return CommandInterface
      */
-    protected function deleteOriginal($original): CommandInterface
+    protected function deleteOriginal(object $original): CommandInterface
     {
         $rNode = $this->getNode($original);
 
@@ -92,14 +79,10 @@ class HasOne extends AbstractRelation
             }
             $rNode->getState()->decClaim();
 
-            return new Condition($store, function () use ($rNode) {
-                return !$rNode->getState()->hasClaims();
-            });
+            return new Condition($store, fn() => !$rNode->getState()->hasClaims());
         }
 
         // only delete original child when no other objects claim it
-        return new Condition($this->orm->queueDelete($original), function () use ($rNode) {
-            return !$rNode->getState()->hasClaims();
-        });
+        return new Condition($this->orm->queueDelete($original), fn() => !$rNode->getState()->hasClaims());
     }
 }

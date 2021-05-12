@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -18,20 +11,12 @@ use Cycle\ORM\Heap\Node;
  */
 final class Iterator implements \IteratorAggregate
 {
-    /** @var ORMInterface */
-    private $orm;
+    private \Cycle\ORM\ORMInterface $orm;
 
-    /** @var string */
-    private $class;
+    private string $class;
 
-    /** @var iterable */
-    private $source;
+    private iterable $source;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $class
-     * @param iterable     $source
-     */
     public function __construct(ORMInterface $orm, string $class, iterable $source)
     {
         $this->orm = $orm;
@@ -42,8 +27,6 @@ final class Iterator implements \IteratorAggregate
     /**
      * Generate entities using incoming data stream. Pivoted data would be
      * returned as key value if set.
-     *
-     * @return \Generator
      */
     public function getIterator(): \Generator
     {

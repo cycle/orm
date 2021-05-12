@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -22,19 +15,13 @@ interface TransactionInterface
 
     /**
      * Persist the entity.
-     *
-     * @param object $entity
-     * @param int    $mode
      */
-    public function persist($entity, int $mode = self::MODE_CASCADE);
+    public function persist(object $entity, int $mode = self::MODE_CASCADE): self;
 
     /**
      * Delete entity from the database.
-     *
-     * @param object $entity
-     * @param int    $mode
      */
-    public function delete($entity, int $mode = self::MODE_CASCADE);
+    public function delete(object $entity, int $mode = self::MODE_CASCADE): self;
 
     /**
      * Execute all nested commands in transaction, if failed - transaction MUST automatically
@@ -44,5 +31,5 @@ interface TransactionInterface
      *
      * @throws \Throwable
      */
-    public function run();
+    public function run(): void;
 }

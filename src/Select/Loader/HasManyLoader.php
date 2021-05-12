@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -31,10 +24,8 @@ class HasManyLoader extends JoinableLoader
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
-     *
-     * @var array
      */
-    protected $options = [
+    protected array $options = [
         'load'      => false,
         'constrain' => true,
         'method'    => self::POSTLOAD,
@@ -45,9 +36,6 @@ class HasManyLoader extends JoinableLoader
         'orderBy'   => null,
     ];
 
-    /**
-     * {@inheritdoc}
-     */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
@@ -55,9 +43,6 @@ class HasManyLoader extends JoinableLoader
         $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded() && $this->isJoined() && (int) $query->getLimit() !== 0) {
@@ -84,9 +69,10 @@ class HasManyLoader extends JoinableLoader
             )->on($on);
         } else {
             // relation is loaded using external query
-            $fields = array_map(function (string $key) use ($localPrefix) {
-                return $localPrefix . $this->fieldAlias($key);
-            }, (array)$this->schema[Relation::OUTER_KEY]);
+            $fields = array_map(
+                fn (string $key) => $localPrefix . $this->fieldAlias($key),
+                (array)$this->schema[Relation::OUTER_KEY]
+            );
 
             if (count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
@@ -119,9 +105,6 @@ class HasManyLoader extends JoinableLoader
         return parent::configureQuery($query);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function initNode(): AbstractNode
     {
         $node = new ArrayNode(

@@ -21,10 +21,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 {
     use PromiseOneTrait;
 
-    /**
-     * @inheritdoc
-     */
-    public function queue(CC $store, object $entity, Node $node, ?object $related, $original): CommandInterface
+    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
     {
         // refers-to relation is always nullable (as opposite to belongs-to)
         if ($related === null) {

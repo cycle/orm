@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Traits;
@@ -25,20 +18,11 @@ trait ContextTrait
 
     /**
      * True if given relation is not required for the object to be saved (i.e. NULL).
-     *
-     * @return bool
      */
     abstract public function isNullable(): bool;
 
     /**
      * Configure context parameter using value from parent entity. Created promise.
-     *
-     * @param Node         $from
-     * @param array $fromKey
-     * @param CC           $carrier
-     * @param null|Node    $to
-     * @param array $toKey
-     * @return CC
      */
     protected function forwardContext(Node $from, array $fromKeys, CC $carrier, Node $to, array $toKeys): CC
     {
@@ -68,12 +52,6 @@ trait ContextTrait
     /**
      * Configure where parameter in scoped command based on key provided by the
      * parent entity. Creates promise.
-     *
-     * @param Node   $from
-     * @param string[] $fromKeys
-     * @param CS     $carrier
-     * @param string[] $toKeys
-     * @return CS
      */
     protected function forwardScope(Node $from, array $fromKeys, CS $carrier, array $toKeys): CS
     {
@@ -89,12 +67,8 @@ trait ContextTrait
 
     /**
      * Fetch key from the state.
-     *
-     * @param Node   $node
-     * @param string $key
-     * @return mixed|null
      */
-    protected function fetchKey(?Node $node, string $key)
+    protected function fetchKey(Node $node, string $key)
     {
         if ($node === null) {
             return null;
@@ -105,10 +79,6 @@ trait ContextTrait
 
     /**
      * Return column name in database.
-     *
-     * @param Node   $node
-     * @param string $field
-     * @return string
      */
     abstract protected function columnName(Node $node, string $field): string;
 }

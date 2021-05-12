@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
@@ -257,13 +250,12 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
 
         $fav = [
-            $u1->favorites[0]->favoredBy[0]->id,
-            $u1->favorites[0]->favoredBy[1]->id
+            (string)$u1->favorites[0]->favoredBy[0]->id,
+            (string)$u1->favorites[0]->favoredBy[1]->id
         ];
 
-        $this->assertCount(2, $fav);
-        $this->assertContains($u->id, $fav);
-        $this->assertContains($u2->id, $fav);
+        $this->assertContains((string)$u->id, $fav);
+        $this->assertContains((string)$u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);

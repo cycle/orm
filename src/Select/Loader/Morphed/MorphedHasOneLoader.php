@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader\Morphed;
@@ -23,9 +16,6 @@ class MorphedHasOneLoader extends HasOneLoader
 {
     use WhereTrait;
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         return $this->setWhere(

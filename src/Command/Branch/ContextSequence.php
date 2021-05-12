@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Branch;
@@ -21,11 +14,10 @@ use Cycle\ORM\Exception\CommandException;
  */
 final class ContextSequence implements ContextCarrierInterface, \IteratorAggregate, \Countable
 {
-    /** @var ContextCarrierInterface */
-    protected $primary;
+    private ?ContextCarrierInterface $primary = null;
 
     /** @var CommandInterface[] */
-    protected $commands = [];
+    private array $commands = [];
 
     /**
      * Add primary command to the sequence.
@@ -38,9 +30,6 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
         $this->primary = $command;
     }
 
-    /**
-     * @return ContextCarrierInterface
-     */
     public function getPrimary(): ContextCarrierInterface
     {
         if (empty($this->primary)) {
@@ -50,25 +39,16 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
         return $this->primary;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function waitContext(string $key, bool $required = true)
+    public function waitContext(string $key, bool $required = true): void
     {
-        return $this->getPrimary()->waitContext($key, $required);
+        $this->getPrimary()->waitContext($key, $required);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getContext(): array
     {
         return $this->getPrimary()->getContext();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(
         string $key,
         $value,
@@ -78,26 +58,17 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
         $this->getPrimary()->register($key, $value, $fresh, $stream);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isExecuted(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isReady(): bool
     {
         // always ready since check will be delegated to underlying nodes
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function addCommand(CommandInterface $command): void
     {
         if ($command instanceof Nil) {
@@ -117,9 +88,6 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
         return $this->commands;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getIterator(): \Generator
     {
         foreach ($this->commands as $command) {
@@ -132,33 +100,21 @@ final class ContextSequence implements ContextCarrierInterface, \IteratorAggrega
         }
     }
 
-    /**
-     * @return int
-     */
     public function count(): int
     {
         return count($this->commands);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute(): void
     {
         // nothing
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function complete(): void
     {
         // nothing
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rollBack(): void
     {
         // nothing

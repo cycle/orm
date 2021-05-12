@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Promise;
@@ -18,23 +11,15 @@ use Cycle\ORM\ORMInterface;
  */
 final class PromiseOne implements PromiseInterface
 {
-    /** @var ORMInterface|null @internal */
-    private $orm;
+    /** @internal */
+    private ?ORMInterface $orm;
 
-    /** @var string|null */
-    private $target;
+    private string $target;
 
-    /** @var array */
-    private $scope;
+    private array $scope;
 
-    /** @var mixed */
-    private $resolved;
+    private ?object $resolved = null;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $target
-     * @param array        $scope
-     */
     public function __construct(ORMInterface $orm, string $target, array $scope)
     {
         $this->orm = $orm;
@@ -42,33 +27,21 @@ final class PromiseOne implements PromiseInterface
         $this->scope = $scope;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function __loaded(): bool
     {
         return $this->orm === null;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function __role(): string
     {
         return $this->target;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function __scope(): array
     {
         return $this->scope;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function __resolve()
     {
         if ($this->orm === null) {

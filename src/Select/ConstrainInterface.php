@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -18,8 +11,6 @@ interface ConstrainInterface
 {
     /**
      * Configure query and loader pair using proxy strategy.
-     *
-     * @param QueryBuilder $query
      */
-    public function apply(QueryBuilder $query);
+    public function apply(QueryBuilder $query): void;
 }

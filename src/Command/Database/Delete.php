@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
@@ -23,20 +16,12 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
     use ScopeTrait;
     use ErrorTrait;
 
-    /**
-     * @param DatabaseInterface $db
-     * @param string            $table
-     * @param array             $where
-     */
     public function __construct(DatabaseInterface $db, string $table, array $where = [])
     {
         parent::__construct($db, $table);
         $this->scope = $where;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isReady(): bool
     {
         return $this->waitScope === [];
@@ -55,9 +40,6 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         parent::execute();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(
         string $key,
         $value,

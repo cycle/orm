@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
@@ -33,23 +26,14 @@ final class Node implements ProducerInterface, ConsumerInterface
     public const SCHEDULED_DELETE = 5;
     public const DELETED          = 6;
 
-    /** @var string */
-    private $role;
+    private string $role;
 
-    /** @var int */
-    private $status;
+    private int $status;
 
-    /** @var array */
-    private $data;
+    private array $data;
 
-    /** @var null|State */
-    private $state;
+    private ?State $state = null;
 
-    /**
-     * @param int    $status
-     * @param array  $data
-     * @param string $role
-     */
     public function __construct(
         #[ExpectedValues(valuesFromClass: self::class)]
         int $status,
@@ -71,9 +55,6 @@ final class Node implements ProducerInterface, ConsumerInterface
         $this->relations = [];
     }
 
-    /**
-     * @return string
-     */
     public function getRole(): string
     {
         return $this->role;
@@ -81,8 +62,6 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     /**
      * Current point state (set of changes).
-     *
-     * @return State
      */
     public function getState(): State
     {
@@ -100,8 +79,6 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     /**
      * Set new state value.
-     *
-     * @param int $state
      */
     public function setStatus(int $state): void
     {
@@ -110,8 +87,6 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     /**
      * Get current state.
-     *
-     * @return int
      */
     public function getStatus(): int
     {
@@ -124,8 +99,6 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     /**
      * Set new state data (will trigger state handlers).
-     *
-     * @param array $data
      */
     public function setData(array $data): void
     {
@@ -134,8 +107,6 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     /**
      * Get current state data. Mutalbe inside the transaction.
-     *
-     * @return array
      */
     public function getData(): array
     {
@@ -148,17 +119,12 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     /**
      * The intial (post-load) node date. Does not change during the transaction.
-     *
-     * @return array
      */
     public function getInitialData(): array
     {
         return $this->data;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function forward(
         string $key,
         ConsumerInterface $consumer,
@@ -169,9 +135,6 @@ final class Node implements ProducerInterface, ConsumerInterface
         $this->getState()->forward($key, $consumer, $target, $trigger, $stream);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         $this->getState()->register($key, $value, $fresh, $stream);
@@ -179,8 +142,6 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     /**
      * Sync the point state and return data diff.
-     *
-     * @return array
      */
     public function syncState(): array
     {
@@ -212,10 +173,10 @@ final class Node implements ProducerInterface, ConsumerInterface
     /**
      * @param mixed $a
      * @param mixed $b
-     * @return int
      */
     public static function compare($a, $b): int
     {
+        // todo refactor and test this
         if ($a == $b) {
             if (($a === null) !== ($b === null)) {
                 return 1;

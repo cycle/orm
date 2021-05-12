@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Traits;
@@ -16,17 +9,12 @@ namespace Cycle\ORM\Command\Traits;
  */
 trait ContextTrait
 {
-    /** @var array */
-    protected $context = [];
+    protected array $context = [];
 
-    /** @var array */
-    protected $waitContext = [];
+    protected array $waitContext = [];
 
     /**
      * Wait for the context value.
-     *
-     * @param string $key
-     * @param bool   $required
      */
     public function waitContext(string $key, bool $required = true): void
     {
@@ -35,16 +23,12 @@ trait ContextTrait
         }
     }
 
-    /**
-     * @return array
-     */
     public function getContext(): array
     {
         return $this->context;
     }
 
     /**
-     * @param string $name
      * @param mixed  $value
      */
     protected function setContext(string $name, $value): void
@@ -54,8 +38,6 @@ trait ContextTrait
 
     /**
      * Indicate that context value is not required anymore.
-     *
-     * @param string $key
      */
     protected function freeContext(string $key): void
     {

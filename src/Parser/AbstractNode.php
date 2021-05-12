@@ -29,58 +29,45 @@ abstract class AbstractNode
      * Indicates that node data is joined to parent row and must receive part of incoming row
      * subset.
      *
-     * @var bool
      */
-    protected $joined = false;
+    protected bool $joined = false;
 
     /**
      * List of columns node must fetch from the row.
      *
-     * @var array
      */
-    protected $columns = [];
+    protected array $columns = [];
 
     /**
      * Declared column list which must be aggregated in a parent node. i.e. Parent Key
      * @var string[]
      */
-    protected $outerKeys;
+    protected array $outerKeys;
 
     /**
      * Node location in a tree. Set when node is registered.
      *
      * @internal
-     * @var string
      */
-    protected $container;
+    protected ?string $container = null;
 
-    /**
-     * @internal
-     * @var AbstractNode
-     */
-    protected $parent;
+    /** @internal */
+    protected ?self $parent = null;
 
-    /**
-     * @internal
-     * @var TypecastInterface|null
-     */
-    protected $typecast;
+    /** @internal */
+    protected ?TypecastInterface $typecast = null;
 
     /** @var AbstractNode[] */
-    protected $nodes = [];
+    protected array $nodes = [];
 
-    /**
-     * @var null|string
-     */
-    protected $indexName;
+    protected ?string $indexName = null;
 
     /**
      * Indexed keys and values associated with references
      *
      * @internal
-     * @var MultiKeyCollection
      */
-    protected $indexedData;
+    protected ?MultiKeyCollection $indexedData = null;
 
     /**
      * @param array $columns  When columns are empty original line will be returned as result.
@@ -125,7 +112,7 @@ abstract class AbstractNode
             foreach ($this->indexedData->getIndexes() as $index) {
                 try {
                     $this->indexedData->addItem($index, $data);
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                 }
             }
 

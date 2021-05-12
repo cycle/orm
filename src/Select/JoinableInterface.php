@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -20,17 +13,13 @@ interface JoinableInterface extends LoaderInterface
 {
     /**
      * Indicates that relation is joined and must configure parent query.
-     *
-     * @return bool
      */
     public function isJoined(): bool;
 
     /**
      * Configure query with conditions, joins and columns.
      *
-     * @param SelectQuery $query
-     * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
-     * @return SelectQuery
+     * @param array $outerKeys Set of OUTER_KEY values collected by parent loader.
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery;
 }

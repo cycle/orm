@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
@@ -20,40 +13,27 @@ use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceInterface;
-use Cycle\ORM\Select\SourceProviderInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
     use Traits\ContextTrait;
     use Relation\Traits\NodeTrait;
 
-    /** @var ORMInterface|SourceProviderInterface @internal */
-    protected $orm;
+    /** @internal */
+    protected ORMInterface $orm;
 
-    /** @var string */
-    protected $name;
+    protected string $name;
 
-    /** @var string */
-    protected $target;
+    protected string $target;
 
-    /** @var array */
-    protected $schema;
-
-    /** @var string */
-    protected $outerKey;
+    protected array $schema;
 
     /** @var string[] */
-    protected $innerKeys;
+    protected array $innerKeys;
 
     /** @var string[] */
-    protected $outerKeys;
+    protected array $outerKeys;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $name
-     * @param string       $target
-     * @param array        $schema
-     */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         $this->orm = $orm;
@@ -62,45 +42,29 @@ abstract class AbstractRelation implements RelationInterface
         $this->schema = $schema;
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
-        $this->outerKey = $this->packKeys($this->outerKeys);
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         // this is incorrect class
         return sprintf('%s(%s)->%s', $this->name, get_class($this), $this->target);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
     public function getTarget(): string
     {
         return $this->target;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isCascade(): bool
     {
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function init(Node $node, array $data): array
     {
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
@@ -108,17 +72,11 @@ abstract class AbstractRelation implements RelationInterface
         return [$item, $item];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function extract($data)
     {
         return $data;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function isNullable(): bool
     {
         return !empty($this->schema[Relation::NULLABLE]);
@@ -126,9 +84,6 @@ abstract class AbstractRelation implements RelationInterface
 
     /**
      * Get the source associated with the role.
-     *
-     * @param string|null $role
-     * @return SourceInterface
      */
     protected function getSource(string $role = null): SourceInterface
     {
@@ -137,20 +92,12 @@ abstract class AbstractRelation implements RelationInterface
 
     /**
      * Get the mapper associated with a role.
-     *
-     * @param string|null $role
-     * @return MapperInterface
      */
     protected function getMapper(string $role = null): MapperInterface
     {
         return $this->orm->getMapper($role ?? $this->target);
     }
 
-    /**
-     * @param Node   $node
-     * @param string $field
-     * @return string
-     */
     protected function columnName(Node $node, string $field): string
     {
         return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
@@ -158,8 +105,6 @@ abstract class AbstractRelation implements RelationInterface
 
     /**
      * Assert that given entity is allowed for the relation.
-     *
-     * @param Node $related
      *
      * @throws RelationException
      */
@@ -173,7 +118,6 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * Resolve the reference to the object.
      *
-     * @param ReferenceInterface $reference
      * @return mixed|null
      */
     protected function resolve(ReferenceInterface $reference)
@@ -183,10 +127,5 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return $this->orm->get($reference->__role(), $reference->__scope(), true);
-    }
-
-    protected function packKeys(array $keys): string
-    {
-        return implode(":", $keys);
     }
 }

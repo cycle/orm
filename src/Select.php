@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -17,6 +10,7 @@ use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
+use InvalidArgumentException;
 use IteratorAggregate;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
@@ -49,19 +43,13 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     // load related data after the query
     public const OUTER_QUERY = JoinableLoader::POSTLOAD;
 
-    /** @var ORMInterface @internal */
-    private $orm;
+    /** @internal */
+    private ?ORMInterface $orm;
 
-    /** @var RootLoader */
-    private $loader;
+    private ?RootLoader $loader;
 
-    /** @var QueryBuilder */
-    private $builder;
+    private ?QueryBuilder $builder;
 
-    /**
-     * @param ORMInterface $orm
-     * @param string       $role
-     */
     public function __construct(ORMInterface $orm, string $role)
     {
         $this->orm = $orm;
@@ -82,8 +70,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Bypassing call to primary select query.
      *
-     * @param string $name
-     * @param array  $arguments
      * @return Select|mixed
      */
     public function __call(string $name, array $arguments)
@@ -116,9 +102,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Create new Selector with applied scope. By default no constrain used.
-     *
-     * @param ConstrainInterface|null $constrain
-     * @return Select
      */
     public function constrain(ConstrainInterface $constrain = null): self
     {
@@ -129,8 +112,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Get Query proxy.
-     *
-     * @return QueryBuilder
      */
     public function getBuilder(): QueryBuilder
     {
@@ -139,8 +120,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Compiled SQL query, changes in this query would not affect Selector state (but binded parameters will).
-     *
-     * @return SelectQuery
      */
     public function buildQuery(): SelectQuery
     {
@@ -150,7 +129,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
-     * @param string|int|string[]|int[] $id
+     * @param string|int|string[]|int[]|Parameter ...$ids
      * @return $this|Select
      */
     public function wherePK(...$ids): self
@@ -163,10 +142,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             foreach ($ids as $id) {
                 $id = $id instanceof Parameter ? $id->getValue() : $id;
                 if (!is_array($id)) {
-                    throw new \InvalidArgumentException('Composite primary key must be defined using an array.');
+                    throw new InvalidArgumentException('Composite primary key must be defined using an array.');
                 }
                 if (count($pk) !== count($id)) {
-                    throw new \InvalidArgumentException(sprintf('Primary key should contain %d values.', count($pk)));
+                    throw new InvalidArgumentException(sprintf('Primary key should contain %d values.', count($pk)));
                 }
 
                 $values = array_values($id);
@@ -194,7 +173,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * Attention, column will be quoted by driver!
      *
      * @param string|null $column When column is null DISTINCT(PK) will be generated.
-     * @return int
      */
     public function count(string $column = null): int
     {
@@ -209,9 +187,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return (int) $this->__call('count', [$column]);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function limit(int $limit): self
     {
         $this->loader->getQuery()->limit($limit);
@@ -219,9 +194,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return $this;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function offset(int $offset): self
     {
         $this->loader->getQuery()->offset($offset);
@@ -281,7 +253,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
      * @param string|array $relation
-     * @param array        $options
      * @return $this|self
      * @see with()
      */
@@ -372,7 +343,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *             ->load('comments', ['using' => 'commentsR']);
      *
      * @param string|array $relation
-     * @param array        $options
      * @return $this|Select
      * @see load()
      */
@@ -401,11 +371,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * Find one entity or return null. Method provides the ability to configure custom query
      * parameters. Attention, method does not set a limit on selection (to avoid underselection of
      * joined tables), make sure to set the constrain in the query.
-     *
-     * @param array|null $query
-     * @return object|null
      */
-    public function fetchOne(array $query = null)
+    public function fetchOne(array $query = null): ?object
     {
         $data = (clone $this)->where($query)->limit(1)->fetchData();
 
@@ -413,11 +380,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             return null;
         }
 
-        return $this->orm->make(
-            $this->loader->getTarget(),
-            $data[0],
-            Node::MANAGED
-        );
+        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED);
     }
 
     /**
@@ -430,9 +393,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return iterator_to_array($this->getIterator());
     }
 
-    /**
-     * @return Iterator
-     */
     public function getIterator(): Iterator
     {
         return new Iterator(
@@ -444,8 +404,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Load data tree from database and linked loaders in a form of array.
-     *
-     * @return array
      */
     public function fetchData(): array
     {
@@ -457,8 +415,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Compiled SQL statement.
-     *
-     * @return string
      */
     public function sqlStatement(): string
     {
@@ -467,8 +423,6 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Return base loader associated with the selector.
-     *
-     * @return RootLoader
      */
     private function getLoader(): RootLoader
     {

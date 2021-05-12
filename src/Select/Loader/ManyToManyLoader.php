@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -33,10 +26,8 @@ class ManyToManyLoader extends JoinableLoader
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
-     *
-     * @var array
      */
-    protected $options = [
+    protected array $options = [
         'load'      => false,
         'constrain' => true,
         'method'    => self::POSTLOAD,
@@ -48,12 +39,8 @@ class ManyToManyLoader extends JoinableLoader
         'pivot'     => null,
     ];
 
-    /** @var PivotLoader */
-    protected $pivot;
+    protected PivotLoader $pivot;
 
-    /**
-     * {@inheritdoc}
-     */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $name, $target, $schema);
@@ -71,11 +58,6 @@ class ManyToManyLoader extends JoinableLoader
         $this->pivot = clone $this->pivot;
     }
 
-    /**
-     * @param LoaderInterface $parent
-     * @param array           $options
-     * @return LoaderInterface
-     */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
         /** @var ManyToManyLoader $loader */
@@ -91,13 +73,6 @@ class ManyToManyLoader extends JoinableLoader
         return $loader;
     }
 
-    /**
-     * @param string $relation
-     * @param array  $options
-     * @param bool   $join
-     * @param bool   $load
-     * @return LoaderInterface
-     */
     public function loadRelation(
         string $relation,
         array $options,
@@ -117,9 +92,6 @@ class ManyToManyLoader extends JoinableLoader
         return parent::loadRelation($relation, $options, $join, $load);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded() && $this->isJoined() && (int) $query->getLimit() !== 0) {
@@ -178,9 +150,10 @@ class ManyToManyLoader extends JoinableLoader
                 $this->pivot->getJoinTable()
             )->on($on);
 
-            $fields = array_map(function (string $key) use ($pivotPrefix) {
-                return $pivotPrefix . $this->pivot->fieldAlias($key);
-            }, (array)$this->pivot->schema[Relation::THROUGH_INNER_KEY]);
+            $fields = array_map(
+                fn (string $key) => $pivotPrefix . $this->pivot->fieldAlias($key),
+                (array)$this->pivot->schema[Relation::THROUGH_INNER_KEY]
+            );
             if (count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
             } else {
@@ -212,9 +185,6 @@ class ManyToManyLoader extends JoinableLoader
         return parent::configureQuery($this->pivot->configureQuery($query));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function createNode(): AbstractNode
     {
         $node = $this->pivot->createNode();
@@ -223,9 +193,6 @@ class ManyToManyLoader extends JoinableLoader
         return $node;
     }
 
-    /**
-     * @param AbstractNode $node
-     */
     protected function loadChild(AbstractNode $node): void
     {
         $rootNode = $node->getNode('@');
@@ -236,9 +203,6 @@ class ManyToManyLoader extends JoinableLoader
         $this->pivot->loadChild($node);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mountColumns(
         SelectQuery $query,
         bool $minify = false,
@@ -249,9 +213,6 @@ class ManyToManyLoader extends JoinableLoader
         return parent::mountColumns($query, $minify, $prefix, false);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function initNode(): AbstractNode
     {
         $node = new SingularNode(

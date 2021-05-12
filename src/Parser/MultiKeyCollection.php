@@ -16,18 +16,18 @@ final class MultiKeyCollection
      * [Index] = [key1, key2, ...]
      * @var string[][]
      */
-    private $indexes = [];
+    private array $indexes = [];
 
     /**
      * [Index][key1-value][key2-value][...] = [ITEM1, ITEM2, ...].
      */
-    private $data = [];
+    private array $data = [];
 
     /**
      * Contains key values of last added item for each Index
      * [index] = [key1-value, key2-value, ...]
      */
-    private $lastItemKeys = [];
+    private array $lastItemKeys = [];
 
     public function createIndex(string $name, array $keys): void
     {

@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap\Traits;
@@ -16,8 +9,7 @@ namespace Cycle\ORM\Heap\Traits;
  */
 trait ClaimTrait
 {
-    /** @var int */
-    private $numClaims = 1;
+    private int $numClaims = 1;
 
     /**
      * Add reference to the related entity.
@@ -37,8 +29,6 @@ trait ClaimTrait
 
     /**
      * Check if related entity has any references.
-     *
-     * @return bool
      */
     public function hasClaims(): bool
     {

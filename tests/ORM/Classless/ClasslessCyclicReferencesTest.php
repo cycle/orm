@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Classless;
@@ -220,20 +213,12 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $u2->favorites->add($c);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($u2);
-        $tr->run();
-
+        $this->save($u, $u2);
         $this->assertNumWrites(6);
 
         // no changes!
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($u2);
-        $tr->run();
+        $this->save($u, $u2);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -254,13 +239,12 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
 
         $fav = [
-            $u1->favorites[0]->favoredBy[0]->id,
-            $u1->favorites[0]->favoredBy[1]->id
+            (string)$u1->favorites[0]->favoredBy[0]->id,
+            (string)$u1->favorites[0]->favoredBy[1]->id
         ];
 
-        $this->assertCount(2, $fav);
-        $this->assertContains($u->id, $fav);
-        $this->assertContains($u2->id, $fav);
+        $this->assertContains((string)$u->id, $fav);
+        $this->assertContains((string)$u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
@@ -271,8 +255,8 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
 
         $u1 = $selector->wherePK(2)->fetchOne();
 
-        $this->assertEquals($u1->id, $u2->id);
-        $this->assertEquals($u1->favorites[0]->id, $u2->favorites[0]->id);
+        $this->assertEquals((string)$u1->id, $u2->id);
+        $this->assertEquals((string)$u1->favorites[0]->id, $u2->favorites[0]->id);
     }
 
     public function testCreateMultipleLinkedTreesExchange(): void

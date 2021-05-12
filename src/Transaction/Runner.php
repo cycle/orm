@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Transaction;
@@ -18,17 +11,13 @@ use Spiral\Database\Driver\DriverInterface;
 final class Runner implements RunnerInterface
 {
     /** @var DriverInterface[] */
-    private $drivers = [];
+    private array $drivers = [];
 
     /** @var CommandInterface[] */
-    private $executed = [];
+    private array $executed = [];
 
-    /** @var int */
-    private $countExecuted = 0;
+    private int $countExecuted = 0;
 
-    /**
-     * @inheritdoc
-     */
     public function run(CommandInterface $command): void
     {
         // found the same link from multiple branches
@@ -51,17 +40,11 @@ final class Runner implements RunnerInterface
         $this->executed[] = $command;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function count(): int
     {
         return $this->countExecuted;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function complete(): void
     {
         // commit all of the open and normalized database transactions
@@ -79,9 +62,6 @@ final class Runner implements RunnerInterface
         $this->drivers = $this->executed = [];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rollback(): void
     {
         // close all open and normalized database transactions

@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -34,10 +27,8 @@ class HasOneLoader extends JoinableLoader
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
-     *
-     * @var array
      */
-    protected $options = [
+    protected array $options = [
         'load'      => false,
         'constrain' => true,
         'method'    => self::INLOAD,
@@ -47,9 +38,6 @@ class HasOneLoader extends JoinableLoader
         'where'     => null
     ];
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->options['using'] !== null) {
@@ -72,9 +60,10 @@ class HasOneLoader extends JoinableLoader
             )->on($on);
         } else {
             // relation is loaded using external query
-            $fields = array_map(function (string $key) use ($localPrefix) {
-                return $localPrefix . $this->fieldAlias($key);
-            }, (array)$this->schema[Relation::OUTER_KEY]);
+            $fields = array_map(
+                fn (string $key) => $localPrefix . $this->fieldAlias($key),
+                (array)$this->schema[Relation::OUTER_KEY]
+            );
 
             if (count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
@@ -100,9 +89,6 @@ class HasOneLoader extends JoinableLoader
         return parent::configureQuery($query);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function initNode(): AbstractNode
     {
         $node = new SingularNode(

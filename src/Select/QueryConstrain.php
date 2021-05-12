@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -16,25 +9,15 @@ namespace Cycle\ORM\Select;
  */
 final class QueryConstrain implements ConstrainInterface
 {
-    /** @var array */
-    private $where = [];
+    private array $where;
+    private array $orderBy;
 
-    /** @var array */
-    private $orderBy = [];
-
-    /**
-     * @param array $where
-     * @param array $orderBy
-     */
     public function __construct(array $where, array $orderBy = [])
     {
         $this->where = $where;
         $this->orderBy = $orderBy;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function apply(QueryBuilder $query): void
     {
         $query->where($this->where)->orderBy($this->orderBy);

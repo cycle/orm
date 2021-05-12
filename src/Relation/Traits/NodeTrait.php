@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Traits;
@@ -20,12 +13,8 @@ trait NodeTrait
     /**
      * Get Node for the given entity. Null if entity does not exists. Automatically
      * register entity claims.
-     *
-     * @param object $entity
-     * @param int    $claim
-     * @return Node|null
      */
-    protected function getNode($entity, int $claim = 0): ?Node
+    protected function getNode(?object $entity, int $claim = 0): ?Node
     {
         if ($entity === null) {
             return null;

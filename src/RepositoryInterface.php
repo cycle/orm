@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -20,23 +13,16 @@ interface RepositoryInterface
      * Find entity by the primary key value or return null.
      *
      * @param mixed $id
-     * @return null|object
      */
-    public function findByPK($id);
+    public function findByPK($id): ?object;
 
     /**
      * Find entity using given scope (where).
-     *
-     * @param array $scope
-     * @return null|object
      */
-    public function findOne(array $scope = []);
+    public function findOne(array $scope = []): ?object;
 
     /**
      * Find multiple entities using given scope and sort options.
-     *
-     * @param array $scope
-     * @return iterable
      */
     public function findAll(array $scope = []): iterable;
 }

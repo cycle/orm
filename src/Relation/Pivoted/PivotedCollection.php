@@ -1,17 +1,11 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Pivoted;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use SplObjectStorage;
 
 /**
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
@@ -19,56 +13,35 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 final class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
-    /** @var \SplObjectStorage */
-    protected $pivotContext;
+    protected SplObjectStorage $pivotContext;
 
-    /**
-     * @param array                  $elements
-     * @param \SplObjectStorage|null $pivotData
-     */
-    public function __construct(array $elements = [], \SplObjectStorage $pivotData = null)
+    public function __construct(array $elements = [], SplObjectStorage $pivotData = null)
     {
         parent::__construct($elements);
-        $this->pivotContext = $pivotData ?? new \SplObjectStorage();
+        $this->pivotContext = $pivotData ?? new SplObjectStorage();
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function hasPivot($element): bool
+    public function hasPivot(object $element): bool
     {
         return $this->pivotContext->offsetExists($element);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getPivot($element)
     {
         return $this->pivotContext[$element] ?? null;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function setPivot($element, $pivot): void
+    public function setPivot(object $element, $pivot): void
     {
         $this->pivotContext[$element] = $pivot;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getPivotContext(): \SplObjectStorage
+    public function getPivotContext(): SplObjectStorage
     {
         return $this->pivotContext;
     }
 
-    /**
-     * @param array $elements
-     * @return PivotedCollection
-     */
-    protected function createFrom(array $elements)
+    protected function createFrom(array $elements): self
     {
         $new = parent::createFrom($elements);
         $new->pivotContext = $this->pivotContext;

@@ -1,60 +1,40 @@
 <?php
 
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Pivoted;
+
+use SplObjectStorage;
 
 /**
  * Carry information about ordered list of entities and associated pivot context.
  */
 final class PivotedStorage
 {
-    /** @var array */
-    private $elements;
+    private array $elements;
 
-    /** @var \SplObjectStorage */
-    private $context;
+    private SplObjectStorage $context;
 
-    /**
-     * @param array             $elements
-     * @param \SplObjectStorage $context
-     */
-    public function __construct(array $elements = [], \SplObjectStorage $context = null)
+    public function __construct(array $elements = [], SplObjectStorage $context = null)
     {
         $this->elements = $elements;
-        $this->context = $context ?? new \SplObjectStorage();
+        $this->context = $context ?? new SplObjectStorage();
     }
 
-    /**
-     * @return array
-     */
     public function getElements(): array
     {
         return $this->elements;
     }
 
-    /**
-     * @return \SplObjectStorage
-     */
-    public function getContext(): \SplObjectStorage
+    public function getContext(): SplObjectStorage
     {
         return $this->context;
     }
 
     /**
      * Check if entity belongs to the storage.
-     *
-     * @param object $entity
-     * @return bool
      */
-    public function has($entity)
+    public function has(object $entity): bool
     {
         return in_array($entity, $this->elements, true);
     }
@@ -62,10 +42,9 @@ final class PivotedStorage
     /**
      * Get entity context.
      *
-     * @param object $entity
-     * @return mixed|null
+     * @return object|array
      */
-    public function get($entity)
+    public function get(object $entity)
     {
         try {
             return $this->context->offsetGet($entity);
@@ -77,10 +56,9 @@ final class PivotedStorage
     /**
      * Get entity context.
      *
-     * @param object $entity
-     * @param mixed  $pivot
+     * @param  object|array $pivot
      */
-    public function set($entity, $pivot): void
+    public function set(object $entity, $pivot): void
     {
         $this->context->offsetSet($entity, $pivot);
     }

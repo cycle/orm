@@ -7,6 +7,8 @@ namespace Cycle\ORM;
 use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Command\Database\Insert;
+use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
@@ -86,11 +88,7 @@ final class Transaction implements TransactionInterface
     public function run(): void
     {
         try {
-            $commands = $this->generateCommands();
-
-            foreach ($commands as $do) {
-                $this->runner->run($do);
-            }
+            $this->walkPool();
             //
             // while ($commands !== []) {
             //     $pending = [];
@@ -178,7 +176,7 @@ final class Transaction implements TransactionInterface
     /**
      * Return flattened list of commands required to store and delete associated entities.
      */
-    protected function generateCommands(): \Generator
+    protected function walkPool(): void
     {
         $heap = $this->orm->getHeap();
         $pool = $this->pool;
@@ -186,7 +184,6 @@ final class Transaction implements TransactionInterface
          * @var object $entity
          * @var Tuple $tuple
          */
-        ob_implicit_flush(true);
         foreach ($pool as $entity => $tuple) {
             flush();
             ob_flush();
@@ -219,7 +216,7 @@ final class Transaction implements TransactionInterface
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
                 // todo delete cascaded
-                yield $this->generateDeleteCommand($tuple);
+                $this->generateDeleteCommand($tuple);
                 continue;
             }
 
@@ -232,22 +229,22 @@ final class Transaction implements TransactionInterface
             }
 
             if (!$tuple->cascade) {
-                yield $this->generateStoreCommand($tuple);
+                $this->generateStoreCommand($tuple);
                 continue;
             }
 
             // Walk relations
             $this->resolveRelations($tuple);
             if ($tuple->task === Tuple::TASK_STORE && in_array($tuple->status, [Tuple::STATUS_PREPROCESSED, Tuple::STATUS_DEFERRED], true)) {
-                if ($tuple->node->hasChanges()) {
-                    yield $this->generateStoreCommand($tuple);
-                } else {
-                    echo "No changes \n";
-                }
+                // if ($tuple->node->hasChanges()) {
+                //     $this->generateStoreCommand($tuple);
+                // } else {
+                //     echo "No changes \n";
+                // }
                 continue;
             }
             if (in_array($tuple->task, [Tuple::TASK_DELETE, Tuple::TASK_FORCE_DELETE], true) && $tuple->status === Tuple::STATUS_PREPROCESSED) {
-                yield $this->generateDeleteCommand($tuple);
+                // $this->generateDeleteCommand($tuple);
                 continue;
             }
 
@@ -317,12 +314,27 @@ final class Transaction implements TransactionInterface
         $deferred = (bool)($result & self::RELATIONS_DEFERRED);
 
         // Self
+        $needCheckDepends = !$deferred;
+        if ($isDependenciesResolved) {
+            $tuple->status = Tuple::STATUS_PREPROCESSED;
+            if ($tuple->task === Tuple::TASK_STORE) {
+                if ($tuple->node->hasChanges()) {
+                    $needCheckDepends = $needCheckDepends || $tuple->node->getStatus() === Node::NEW;
+                    $this->generateStoreCommand($tuple);
+                } else {
+                    echo "No changes \n";
+                }
+            } else {
+                $this->generateDeleteCommand($tuple);
+            }
+        }
         if ($deferred && $tuple->status !== Tuple::STATUS_PROPOSED) {
             $tuple->status = Tuple::STATUS_DEFERRED;
             $this->pool->attachTuple($tuple);
-        } elseif ($isDependenciesResolved) {
-            $tuple->status = Tuple::STATUS_PREPROCESSED;
         }
+        // if (!$needCheckDepends) {
+        //     return;
+        // }
 
         // Slave relations relations
         $tuple->task === Tuple::TASK_STORE
@@ -330,27 +342,40 @@ final class Transaction implements TransactionInterface
             : $this->resolveMasterRelations($tuple, $map);
     }
 
-    public function generateStoreCommand(Tuple $tuple): CommandInterface
+    public function generateStoreCommand(Tuple $tuple): void
     {
         $tuple->state = $tuple->state ?? $tuple->node->getState();
 
-        if ($tuple->node->getStatus() === Node::NEW) {
-            echo "Its a CREATE command;\n";
-            return $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
-        }
         echo sprintf("Store with status %s\n", $tuple->status);
-        $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
+        if ($tuple->node->getStatus() === Node::NEW) {
+            $tuple->state->setStatus(Node::SCHEDULED_INSERT);
+            echo "Its a CREATE command;\n";
+            /** @var Insert $command */
+            $command = $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
+
+            $this->runner->run($command);
+
+            $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
+            return;
+        }
+        $tuple->state->setStatus(Node::SCHEDULED_UPDATE);
+
         echo "Its a UPDATE command;\n";
-        return $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+
+        /** @var Update $command */
+        $command = $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+
+        $this->runner->run($command);
+        $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
     }
-    public function generateDeleteCommand(Tuple $tuple): CommandInterface
+    public function generateDeleteCommand(Tuple $tuple): void
     {
         // currently we rely on db to delete all nested records (or soft deletes)
         $command = $tuple->mapper->queueDelete($tuple->entity, $tuple->node, $tuple->node->getState());
 
         $tuple->status = Tuple::STATUS_PROCESSED;
+        $this->runner->run($command);
         $tuple->node->setStatus(Node::DELETED);
-        return $command;
     }
 
     /**
@@ -389,7 +414,7 @@ final class Transaction implements TransactionInterface
             }
         }
 
-        return join(', ', $errors);
+        return implode(', ', $errors);
     }
 
     /**

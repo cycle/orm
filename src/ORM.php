@@ -298,12 +298,8 @@ final class ORM implements ORMInterface
         }
 
         // generate set of commands required to store entity relations
-        return $this->getRelationMap($node->getRole())->queueRelations(
-            $cmd,
-            $entity,
-            $node,
-            $mapper->extract($entity)
-        );
+        return $this->getRelationMap($node->getRole())
+            ->queueRelations($cmd, $entity, $node, $mapper->extract($entity));
     }
 
     public function queueDelete(object $entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
@@ -340,20 +336,28 @@ final class ORM implements ORMInterface
     /**
      * Get relation map associated with the given class.
      */
-    private function getRelationMap(string $entity): RelationMap
+    public function getRelationMap(string $entity): RelationMap
     {
         $role = $this->resolveRole($entity);
         if (isset($this->relMaps[$role])) {
             return $this->relMaps[$role];
         }
 
+        $outerRelations = $this->schema->getOuterRelations($role);
+        $innerRelations = $this->schema->getInnerRelations($role);
         $relations = [];
 
-        $names = array_keys($this->schema->define($role, Schema::RELATIONS));
-        foreach ($names as $relation) {
-            $relations[$relation] = $this->factory->relation($this, $this->schema, $role, $relation);
+        foreach ($innerRelations as $relName => $relSchema) {
+            $relations[$relName] = $this->factory->relation($this, $this->schema, $role, $relName);
+        }
+        $map =  new RelationMap($relations);
+
+        foreach ($outerRelations as $outerRole => $relations) {
+            foreach ($relations as $container => $relationSchema) {
+                $map->registerOuterRelation($outerRole, $container, $relationSchema);
+            }
         }
 
-        return $this->relMaps[$role] = new RelationMap($relations);
+        return $this->relMaps[$role] = $map;
     }
 }

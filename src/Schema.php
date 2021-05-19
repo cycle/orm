@@ -40,6 +40,33 @@ final class Schema implements SchemaInterface
         return array_keys($this->define($role, self::RELATIONS));
     }
 
+    /**
+     * @return array [role => [relation name => relation schema]]
+     */
+    public function getOuterRelations(string $role): array
+    {
+        // return null;
+        $result = [];
+        foreach ($this->schema as $roleName => $entitySchema) {
+            if ($roleName === $role) {
+                continue;
+            }
+            foreach ($entitySchema[SchemaInterface::RELATIONS] ?? [] as $relName => $item) {
+                if ($item[Relation::TARGET] === $role) {
+                    $result[$roleName][$relName] = $item;
+                }
+            }
+        }
+        return $result;
+    }
+    /**
+     * @return array [relation name => relation schema]
+     */
+    public function getInnerRelations(string $role): array
+    {
+        return $this->schema[$role][SchemaInterface::RELATIONS] ?? [];
+    }
+
     public function defines(string $role): bool
     {
         return isset($this->schema[$role]) || isset($this->aliases[$role]);

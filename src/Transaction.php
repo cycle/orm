@@ -209,7 +209,7 @@ final class Transaction implements TransactionInterface
                 $tuple->status,
                 $node === null ? get_class($entity) : $node->getRole(),
                 $tuple->task,
-                $node === null ? '' : implode('|', $node->getState()->getData())
+                $node === null || !$node->hasState() ? '(has no State)' : implode('|', $node->getState()->getData())
             );
 
             $tuple->mapper = $tuple->mapper ?? $this->orm->getMapper($entity);
@@ -225,7 +225,10 @@ final class Transaction implements TransactionInterface
                 // automatic entity registration
                 $node = $tuple->node = new Node(Node::NEW, [], $tuple->mapper->getRole());
                 $heap->attach($entity, $node);
-                $node->getState()->setData($tuple->mapper->fetchFields($entity));
+            }
+            if (!$node->hasState()) {
+                $tuple->state = $node->getState();
+                $tuple->state->setData($tuple->mapper->fetchFields($entity));
             }
 
             if (!$tuple->cascade) {
@@ -262,7 +265,7 @@ final class Transaction implements TransactionInterface
         if (!$map->hasDependencies()) {
             return self::RELATIONS_RESOLVED;
         }
-        return self::RELATIONS_RESOLVED;
+        return self::RELATIONS_DEFERRED ^ self::RELATIONS_RESOLVED;
     }
     private function resolveSlaveRelations(Tuple $tuple, RelationMap $map): int
     {
@@ -315,8 +318,12 @@ final class Transaction implements TransactionInterface
 
         // Self
         $needCheckDepends = !$deferred;
+        if ($deferred && $tuple->status !== Tuple::STATUS_PROPOSED) {
+            $tuple->status = Tuple::STATUS_DEFERRED;
+            $this->pool->attachTuple($tuple);
+        }
         if ($isDependenciesResolved) {
-            $tuple->status = Tuple::STATUS_PREPROCESSED;
+            $tuple->status === Tuple::STATUS_DEFERRED or $tuple->status = Tuple::STATUS_PREPROCESSED;
             if ($tuple->task === Tuple::TASK_STORE) {
                 if ($tuple->node->hasChanges()) {
                     $needCheckDepends = $needCheckDepends || $tuple->node->getStatus() === Node::NEW;
@@ -327,10 +334,6 @@ final class Transaction implements TransactionInterface
             } else {
                 $this->generateDeleteCommand($tuple);
             }
-        }
-        if ($deferred && $tuple->status !== Tuple::STATUS_PROPOSED) {
-            $tuple->status = Tuple::STATUS_DEFERRED;
-            $this->pool->attachTuple($tuple);
         }
         // if (!$needCheckDepends) {
         //     return;

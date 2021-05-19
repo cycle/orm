@@ -199,7 +199,7 @@ abstract class BaseTest extends TestCase
             $this->assertSame(
                 $numReads,
                 $queries,
-                "Number of write SQL queries do not match, expected {$numReads} got {$queries}."
+                "Number of read SQL queries do not match, expected {$numReads} got {$queries}."
             );
         }
     }

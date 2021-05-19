@@ -8,10 +8,11 @@ use Cycle\ORM\Command\Branch\Condition;
 use Cycle\ORM\Command\Branch\ContextSequence;
 use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Provides the ability to own and forward context values to child entity.
@@ -20,7 +21,36 @@ class HasOne extends AbstractRelation
 {
     use PromiseOneTrait;
 
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
+    public function newQueue(Pool $pool, Tuple $tuple, $related, ?Node $relatedNode)
+    {
+        if ($tuple->task === Tuple::TASK_STORE) {
+            $this->queueStore($pool, $tuple, $related, $relatedNode);
+        } else {
+            $this->queueDelete($pool, $tuple, $related, $relatedNode);
+        }
+    }
+
+    /**
+     * Delete original related entity of no other objects reference to it.
+     */
+    protected function deleteChild(Pool $pool, object $child, ?Node $relatedNode = null): ?Tuple
+    {
+        $relatedNode = $relatedNode ?? $this->getNode($child);
+        if ($relatedNode->getStatus() !== Node::MANAGED) {
+            return null;
+        }
+
+        if ($this->isNullable()) {
+            foreach ($this->outerKeys as $outerKey) {
+                $relatedNode->getState()->register($outerKey, null, true);
+            }
+            return $pool->attachStore($child, false, $relatedNode, $relatedNode->getState());
+        }
+
+        return $pool->attachDelete($child, $this->isCascade(), $relatedNode);
+    }
+
+    public function queue(object $entity, Node $node, $related, $original): CommandInterface
     {
         if ($original instanceof ReferenceInterface) {
             $original = $this->resolve($original);
@@ -75,7 +105,8 @@ class HasOne extends AbstractRelation
         if ($this->isNullable()) {
             $store = $this->orm->queueStore($original);
             foreach ($this->outerKeys as $oKey) {
-                $store->register($this->columnName($rNode, $oKey), null, true);
+                // $store->register($oKey, null, true);
+                $rNode->getState()->register($oKey, null, true);
             }
             $rNode->getState()->decClaim();
 
@@ -84,5 +115,89 @@ class HasOne extends AbstractRelation
 
         // only delete original child when no other objects claim it
         return new Condition($this->orm->queueDelete($original), fn() => !$rNode->getState()->hasClaims());
+    }
+
+    private function queueStore(Pool $pool, Tuple $tuple, $related, ?Node $relatedNode): void
+    {
+        $node = $tuple->node;
+        $original = $node->getRelation($this->getName());
+
+        if ($original instanceof ReferenceInterface) {
+            $original = $this->resolve($original);
+            $node->setRelation($this->getName(), $original);
+        }
+
+        if ($related instanceof ReferenceInterface) {
+            $related = $this->resolve($related);
+        }
+
+        if ($related === null) {
+            if ($original === null) {
+                $this->setStatus(RelationInterface::STATUS_RESOLVED);
+                return;
+            }
+            // todo: on transaction rollback?
+            $node->getState()->setRelation($this->getName(), $related);
+            $this->setStatus(RelationInterface::STATUS_RESOLVED);
+            $this->deleteChild($pool, $original);
+            return;
+        }
+        $node->getState()->setRelation($this->getName(), $related);
+
+        $rNode = $relatedNode ?? $this->getNode($related, +1);
+        $this->assertValid($rNode);
+
+        $changes = $node->getData();
+
+        if (!in_array($tuple->status, [
+            Tuple::STATUS_WAITED,
+            Tuple::STATUS_PREPARING,
+        ], true)) {
+            foreach ($this->innerKeys as $i => $innerKey) {
+                if (isset($changes[$innerKey])) {
+                    $rNode->register($this->outerKeys[$i], $changes[$innerKey]);
+                }
+            }
+        }
+        $this->setStatus(RelationInterface::STATUS_RESOLVED);
+        if ($original !== null && $original !== $related) {
+            $this->deleteChild($pool, $original);
+        }
+        $pool->attachStore($related, true, $rNode);
+    }
+    private function queueDelete(Pool $pool, Tuple $tuple, $related, ?Node $relatedNode): void
+    {
+        $node = $tuple->node;
+        $original = $node->getRelation($this->getName());
+
+        if ($original instanceof ReferenceInterface) {
+            $original = $this->resolve($original);
+        }
+
+        if ($related instanceof ReferenceInterface) {
+            $related = $this->resolve($related);
+        }
+        $resolved = false;
+        if ($original !== null) {
+            $originNode = $this->getNode($original);
+            if ($originNode !== null && $originNode->getStatus() === Node::MANAGED) {
+                $this->setStatus(RelationInterface::STATUS_DEFERRED);
+                $this->deleteChild($pool, $original);
+            } else {
+                $resolved = true;
+            }
+        } else {
+            $resolved = true;
+        }
+        $resolved and $this->setStatus(RelationInterface::STATUS_RESOLVED);
+        if ($related === $original) {
+            return;
+        }
+        $relatedNode = $relatedNode ?? $this->getNode($related);
+        if ($relatedNode === null || $relatedNode->getStatus() !== Node::MANAGED) {
+            return;
+        }
+        $this->setStatus(RelationInterface::STATUS_DEFERRED);
+        $this->deleteChild($pool, $related, $relatedNode);
     }
 }

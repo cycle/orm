@@ -4,11 +4,20 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Relation\RelationInterface;
+use Cycle\ORM\Relation\ReversedRelationInterface;
+use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\RunnerInterface;
+use Cycle\ORM\Transaction\Tuple;
 use SplObjectStorage;
 
 /**
@@ -20,6 +29,12 @@ use SplObjectStorage;
  */
 final class Transaction implements TransactionInterface
 {
+    public const ACTION_STORE = 0;
+    public const ACTION_DELETE = 1;
+    private const RELATIONS_NOT_RESOLVED = 0;
+    private const RELATIONS_RESOLVED = 1;
+    private const RELATIONS_DEFERRED = 2;
+
     private ORMInterface $orm;
 
     private SplObjectStorage $known;
@@ -27,6 +42,8 @@ final class Transaction implements TransactionInterface
     private array $persist = [];
 
     private array $delete = [];
+
+    private Pool $pool;
 
     private RunnerInterface $runner;
 
@@ -37,6 +54,7 @@ final class Transaction implements TransactionInterface
         $this->orm = $orm;
         $this->known = new SplObjectStorage();
         $this->runner = $runner ?? new Runner();
+        $this->pool = new Pool();
     }
 
     public function persist(object $entity, int $mode = self::MODE_CASCADE): self
@@ -45,6 +63,7 @@ final class Transaction implements TransactionInterface
             return $this;
         }
 
+        $this->pool->attachStore($entity, $mode === self::MODE_CASCADE);
         $this->known->offsetSet($entity, true);
         $this->persist[] = [$entity, $mode];
 
@@ -57,6 +76,7 @@ final class Transaction implements TransactionInterface
             return $this;
         }
 
+        $this->pool->attach($entity, Tuple::TASK_FORCE_DELETE, $mode === self::MODE_CASCADE);
         $this->known->offsetSet($entity, true);
         $this->delete[] = [$entity, $mode];
 
@@ -66,30 +86,34 @@ final class Transaction implements TransactionInterface
     public function run(): void
     {
         try {
-            $commands = $this->initCommands();
+            $commands = $this->generateCommands();
 
-            while ($commands !== []) {
-                $pending = [];
-                $lastExecuted = count($this->runner);
-
-                foreach ($this->sort($commands) as $wait => $do) {
-                    if ($wait !== null) {
-                        if (!in_array($wait, $pending, true)) {
-                            $pending[] = $wait;
-                        }
-
-                        continue;
-                    }
-
-                    $this->runner->run($do);
-                }
-
-                if (count($this->runner) === $lastExecuted && $pending !== []) {
-                    throw new TransactionException('Unable to complete: ' . $this->listCommands($pending));
-                }
-
-                $commands = $pending;
+            foreach ($commands as $do) {
+                $this->runner->run($do);
             }
+            //
+            // while ($commands !== []) {
+            //     $pending = [];
+            //     $lastExecuted = count($this->runner);
+            //
+            //     foreach ($this->sort($commands) as $wait => $do) {
+            //         if ($wait !== null) {
+            //             if (!in_array($wait, $pending, true)) {
+            //                 $pending[] = $wait;
+            //             }
+            //
+            //             continue;
+            //         }
+            //
+            //         $this->runner->run($do);
+            //     }
+            //
+            //     if (count($this->runner) === $lastExecuted && $pending !== []) {
+            //         throw new TransactionException('Unable to complete: ' . $this->listCommands($pending));
+            //     }
+            //
+            //     $commands = $pending;
+            // }
         } catch (\Throwable $e) {
             $this->runner->rollback();
 
@@ -127,7 +151,7 @@ final class Transaction implements TransactionInterface
             }
 
             // marked as being deleted and has no external claims (GC like approach)
-            if ($node->getStatus() === Node::SCHEDULED_DELETE && !$node->getState()->hasClaims()) {
+            if (in_array($node->getStatus(), [Node::DELETED, Node::SCHEDULED_DELETE], true) && !$node->getState()->hasClaims()) {
                 $heap->detach($e);
                 continue;
             }
@@ -154,20 +178,179 @@ final class Transaction implements TransactionInterface
     /**
      * Return flattened list of commands required to store and delete associated entities.
      */
-    protected function initCommands(): array
+    protected function generateCommands(): \Generator
     {
-        $commands = [];
-        foreach ($this->persist as $pair) {
-            $commands[] = $this->orm->queueStore($pair[0], $pair[1]);
+        $heap = $this->orm->getHeap();
+        $pool = $this->pool;
+        /**
+         * @var object $entity
+         * @var Tuple $tuple
+         */
+        ob_implicit_flush(true);
+        foreach ($pool as $entity => $tuple) {
+            flush();
+            ob_flush();
+            if ($entity instanceof PromiseInterface && $entity->__loaded()) {
+                $entity = $entity->__resolve();
+            }
+            if ($entity === null) {
+                echo "pool: skip unresolved promise\n";
+                continue;
+            }
+
+            $node = $tuple->node = $tuple->node ?? $heap->get($entity);
+            // if ($node !== null && $node->getReadyState() === Node::RESOLVED) {
+            //     continue;
+            // }
+            // we do not expect to store promises
+            if ($entity instanceof ReferenceInterface
+                || ($tuple->task === Tuple::TASK_FORCE_DELETE && $node === null)) {
+                continue;
+            }
+            echo sprintf(
+                "\npool: status: %s, \033[90m%s\033[0m, task: %s data: %s\n",
+                $tuple->status,
+                $node === null ? get_class($entity) : $node->getRole(),
+                $tuple->task,
+                $node === null ? '' : implode('|', $node->getState()->getData())
+            );
+
+            $tuple->mapper = $tuple->mapper ?? $this->orm->getMapper($entity);
+            if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
+                // currently we rely on db to delete all nested records (or soft deletes)
+                // todo delete cascaded
+                yield $this->generateDeleteCommand($tuple);
+                continue;
+            }
+
+            // Create new Node
+            if ($node === null) {
+                // automatic entity registration
+                $node = $tuple->node = new Node(Node::NEW, [], $tuple->mapper->getRole());
+                $heap->attach($entity, $node);
+                $node->getState()->setData($tuple->mapper->fetchFields($entity));
+            }
+
+            if (!$tuple->cascade) {
+                yield $this->generateStoreCommand($tuple);
+                continue;
+            }
+
+            // Walk relations
+            $this->resolveRelations($tuple);
+            if ($tuple->task === Tuple::TASK_STORE && in_array($tuple->status, [Tuple::STATUS_PREPROCESSED, Tuple::STATUS_DEFERRED], true)) {
+                if ($tuple->node->hasChanges()) {
+                    yield $this->generateStoreCommand($tuple);
+                } else {
+                    echo "No changes \n";
+                }
+                continue;
+            }
+            if (in_array($tuple->task, [Tuple::TASK_DELETE, Tuple::TASK_FORCE_DELETE], true) && $tuple->status === Tuple::STATUS_PREPROCESSED) {
+                yield $this->generateDeleteCommand($tuple);
+                continue;
+            }
+
+            // if ($node->getReadyState() === Node::READY) {
+            //     yield $this->generateStoreCommand($tuple);
+            // } elseif ($node->getReadyState() === Node::WAITING_DEFERRED && $node->hasChanges()) {
+            //     yield $this->generateStoreCommand($tuple);
+            // }
+            $pool->attachTuple($tuple);
+        }
+    }
+
+    private function resolveMasterRelations(Tuple $tuple, RelationMap $map): int
+    {
+        if (!$map->hasDependencies()) {
+            return self::RELATIONS_RESOLVED;
+        }
+        return self::RELATIONS_RESOLVED;
+    }
+    private function resolveSlaveRelations(Tuple $tuple, RelationMap $map): int
+    {
+        if (!$map->hasSlaves()) {
+            return self::RELATIONS_RESOLVED;
         }
 
-        // other commands?
+        // Attach children to pool
+        $entityData = $tuple->mapper->extract($tuple->entity);
+        $deferred = false;
+        $resolved = true;
+        foreach ($map->getSlaves() as $name => $relation) {
+            echo "Slave relation: {$name}";
+            if (!$relation->isCascade() || $relation->getStatus() === RelationInterface::STATUS_RESOLVED) {
+                // todo check changes for not cascaded relations?
+                echo " [skip] \n";
+                continue;
+            }
+            echo " [process] \n";
+            $tuple->state === null or $tuple->state->markVisited($name); // ?
 
-        foreach ($this->delete as $pair) {
-            $commands[] = $this->orm->queueDelete($pair[0], $pair[1]);
+            if ($relation instanceof ReversedRelationInterface) {
+                // $tuple->node->setReadyState(Node::WAITING_DEFERRED);
+                $deferred = true;
+                $tuple->status = Tuple::STATUS_DEFERRED;
+            } else {
+                $child = $entityData[$name] ?? null;
+                $relation->newQueue($this->pool, $tuple, $child, null);
+                $resolved = $resolved && $relation->getStatus() === RelationInterface::STATUS_RESOLVED;
+                $deferred = $deferred || $relation->getStatus() === RelationInterface::STATUS_DEFERRED;
+            }
         }
 
-        return $commands;
+        return ($deferred ? self::RELATIONS_DEFERRED : 0) | ($resolved ? self::RELATIONS_RESOLVED : 0);
+    }
+    private function resolveRelations(Tuple $tuple): void
+    {
+        $map = $this->orm->getRelationMap(get_class($tuple->entity));
+        // Init relations status
+        if ($tuple->status === Tuple::STATUS_PREPARING) {
+            $map->setRelationsStatus(RelationInterface::STATUS_PROCESSING);
+        }
+
+        // Dependency relations
+        $result = $tuple->task === Tuple::TASK_STORE
+            ? $this->resolveMasterRelations($tuple, $map)
+            : $this->resolveSlaveRelations($tuple, $map);
+        $isDependenciesResolved = (bool)($result & self::RELATIONS_RESOLVED);
+        $deferred = (bool)($result & self::RELATIONS_DEFERRED);
+
+        // Self
+        if ($deferred && $tuple->status !== Tuple::STATUS_PROPOSED) {
+            $tuple->status = Tuple::STATUS_DEFERRED;
+            $this->pool->attachTuple($tuple);
+        } elseif ($isDependenciesResolved) {
+            $tuple->status = Tuple::STATUS_PREPROCESSED;
+        }
+
+        // Slave relations relations
+        $tuple->task === Tuple::TASK_STORE
+            ? $this->resolveSlaveRelations($tuple, $map)
+            : $this->resolveMasterRelations($tuple, $map);
+    }
+
+    public function generateStoreCommand(Tuple $tuple): CommandInterface
+    {
+        $tuple->state = $tuple->state ?? $tuple->node->getState();
+
+        if ($tuple->node->getStatus() === Node::NEW) {
+            echo "Its a CREATE command;\n";
+            return $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
+        }
+        echo sprintf("Store with status %s\n", $tuple->status);
+        $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
+        echo "Its a UPDATE command;\n";
+        return $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+    }
+    public function generateDeleteCommand(Tuple $tuple): CommandInterface
+    {
+        // currently we rely on db to delete all nested records (or soft deletes)
+        $command = $tuple->mapper->queueDelete($tuple->entity, $tuple->node, $tuple->node->getState());
+
+        $tuple->status = Tuple::STATUS_PROCESSED;
+        $tuple->node->setStatus(Node::DELETED);
+        return $command;
     }
 
     /**

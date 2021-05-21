@@ -48,9 +48,6 @@ final class Schema implements SchemaInterface
         // return null;
         $result = [];
         foreach ($this->schema as $roleName => $entitySchema) {
-            if ($roleName === $role) {
-                continue;
-            }
             foreach ($entitySchema[SchemaInterface::RELATIONS] ?? [] as $relName => $item) {
                 if ($item[Relation::TARGET] === $role) {
                     $result[$roleName][$relName] = $item;

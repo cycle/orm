@@ -353,6 +353,9 @@ abstract class BaseTest extends TestCase
                     $rValue = [];
                 }
             }
+            if ($rValue instanceof Collection) {
+                $rValue = $rValue->toArray();
+            }
 
             $this->assertEquals(
                 $rValue,

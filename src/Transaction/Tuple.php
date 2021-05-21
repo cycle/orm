@@ -26,6 +26,9 @@ final class Tuple
     #[ExpectedValues(values: [self::TASK_STORE, self::TASK_DELETE, self::TASK_FORCE_DELETE])]
     public int $task;
 
+    #[ExpectedValues(values: [self::STATUS_PREPARING, self::STATUS_WAITING, self::STATUS_DEFERRED, self::STATUS_PROCESSED])]
+    public int $status;
+
     public object $entity;
 
     public bool $cascade;
@@ -33,9 +36,6 @@ final class Tuple
     public ?Node $node;
 
     public ?State $state;
-
-    #[ExpectedValues(values: [self::STATUS_PREPARING, self::STATUS_WAITING, self::STATUS_DEFERRED, self::STATUS_PROCESSED])]
-    public int $status;
 
     public ?MapperInterface $mapper;
 

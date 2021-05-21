@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
-use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Heap\State;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
@@ -89,29 +85,6 @@ final class Transaction implements TransactionInterface
     {
         try {
             $this->walkPool();
-            //
-            // while ($commands !== []) {
-            //     $pending = [];
-            //     $lastExecuted = count($this->runner);
-            //
-            //     foreach ($this->sort($commands) as $wait => $do) {
-            //         if ($wait !== null) {
-            //             if (!in_array($wait, $pending, true)) {
-            //                 $pending[] = $wait;
-            //             }
-            //
-            //             continue;
-            //         }
-            //
-            //         $this->runner->run($do);
-            //     }
-            //
-            //     if (count($this->runner) === $lastExecuted && $pending !== []) {
-            //         throw new TransactionException('Unable to complete: ' . $this->listCommands($pending));
-            //     }
-            //
-            //     $commands = $pending;
-            // }
         } catch (\Throwable $e) {
             $this->runner->rollback();
 
@@ -158,7 +131,8 @@ final class Transaction implements TransactionInterface
             $heap->attach($e, $node, $this->getIndexes($node->getRole()));
 
             // sync the current entity data with newly generated data
-            $this->orm->getMapper($node->getRole())->hydrate($e, $node->syncState());
+            $syncData = $node->syncState();
+            $this->orm->getMapper($node->getRole())->hydrate($e, $node->getRelations() + $syncData);
         }
     }
 
@@ -189,10 +163,11 @@ final class Transaction implements TransactionInterface
             ob_flush();
             if ($entity instanceof PromiseInterface && $entity->__loaded()) {
                 $entity = $entity->__resolve();
-            }
-            if ($entity === null) {
-                echo "pool: skip unresolved promise\n";
-                continue;
+                if ($entity === null) {
+                    echo "pool: skip unresolved promise\n";
+                    continue;
+                }
+                $tuple->entity = $entity;
             }
 
             $node = $tuple->node = $tuple->node ?? $heap->get($entity);

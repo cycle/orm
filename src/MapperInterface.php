@@ -39,6 +39,16 @@ interface MapperInterface
     public function extract(object $entity): array;
 
     /**
+     * Get entity columns.
+     */
+    public function fetchFields(object $entity): array;
+
+    /**
+     * Map entity key->value to database specific column->value.
+     */
+    public function mapColumns(array $values): array;
+
+    /**
      * Initiate chain of commands require to store object and it's data into persistent storage.
      *
      * @throws MapperException

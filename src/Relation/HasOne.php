@@ -45,13 +45,11 @@ class HasOne extends AbstractRelation
         }
 
         if ($related === null) {
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             if ($original === null) {
-                $this->setStatus(RelationInterface::STATUS_RESOLVED);
                 return;
             }
-            // todo: on transaction rollback?
             $node->getState()->setRelation($this->getName(), $related);
-            $this->setStatus(RelationInterface::STATUS_RESOLVED);
             $this->deleteChild($pool, $original);
             return;
         }
@@ -72,7 +70,7 @@ class HasOne extends AbstractRelation
                 }
             }
         }
-        $this->setStatus(RelationInterface::STATUS_RESOLVED);
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         if ($original !== null && $original !== $related) {
             $this->deleteChild($pool, $original);
         }
@@ -90,19 +88,14 @@ class HasOne extends AbstractRelation
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
         }
-        $resolved = false;
         if ($original !== null) {
             $originNode = $this->getNode($original);
             if ($originNode !== null && $originNode->getStatus() === Node::MANAGED) {
-                $this->setStatus(RelationInterface::STATUS_DEFERRED);
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
                 $this->deleteChild($pool, $original);
-            } else {
-                $resolved = true;
             }
-        } else {
-            $resolved = true;
         }
-        $resolved and $this->setStatus(RelationInterface::STATUS_RESOLVED);
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         if ($related === $original) {
             return;
         }
@@ -110,7 +103,7 @@ class HasOne extends AbstractRelation
         if ($relatedNode === null || $relatedNode->getStatus() !== Node::MANAGED) {
             return;
         }
-        $this->setStatus(RelationInterface::STATUS_DEFERRED);
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
         $this->deleteChild($pool, $related, $relatedNode);
     }
 

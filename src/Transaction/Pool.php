@@ -31,7 +31,8 @@ final class Pool implements IteratorAggregate, \Countable
         bool $cascade,
         Node $node = null,
         State $state = null,
-        int $status = null
+        int $status = null,
+        bool $highPriority = false
     ): Tuple {
         # Find existing
         $tuple = $this->findTuple($entity);
@@ -41,7 +42,7 @@ final class Pool implements IteratorAggregate, \Countable
         }
 
         $tuple = new Tuple($task, $entity, $cascade, $node, $state, $status ?? Tuple::STATUS_PREPARING);
-        $this->smartAttachTuple($tuple);
+        $this->smartAttachTuple($tuple, $highPriority);
         return $tuple;
     }
 
@@ -56,7 +57,7 @@ final class Pool implements IteratorAggregate, \Countable
         $this->smartAttachTuple($tuple);
     }
 
-    private function smartAttachTuple(Tuple $tuple): void
+    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false): void
     {
         if ($tuple->status === Tuple::STATUS_PROCESSED) {
             return;
@@ -76,7 +77,7 @@ final class Pool implements IteratorAggregate, \Countable
             $tuple->task,
             $tuple->status
         );
-        if ($this->priorityAutoAttach && $tuple->status === Tuple::STATUS_PREPARING) {
+        if (($this->priorityAutoAttach || $highPriority) && $tuple->status === Tuple::STATUS_PREPARING) {
             echo "\033[90mWith priority $string\033[0m";
             $this->priorityStorage->attach($tuple->entity, $tuple);
         } else {
@@ -89,9 +90,10 @@ final class Pool implements IteratorAggregate, \Countable
         object $entity,
         bool $cascade,
         ?Node $node = null,
-        ?State $state = null
+        ?State $state = null,
+        bool $highPriority = false
     ): Tuple {
-        return $this->attach($entity, Tuple::TASK_STORE, $cascade, $node, $state);
+        return $this->attach($entity, Tuple::TASK_STORE, $cascade, $node, $state, null, $highPriority);
     }
 
     public function attachDelete(
@@ -102,9 +104,17 @@ final class Pool implements IteratorAggregate, \Countable
     ): Tuple {
         return $this->attach($entity, Tuple::TASK_DELETE, $cascade, $node, $state);
     }
-    public function offsetGet(object $entity): array
+    public function offsetGet(object $entity): ?Tuple
     {
-        return $this->storage->offsetGet($entity);
+        switch (true) {
+            case $this->storage->contains($entity):
+                return $this->storage->offsetGet($entity);
+            case $this->priorityEnabled && $this->priorityStorage->contains($entity):
+                return $this->priorityStorage->offsetGet($entity);
+            case $this->trash !== null && $this->trash->contains($entity):
+                return $this->trash->offsetGet($entity);
+        }
+        return null;
     }
 
     /**
@@ -120,13 +130,14 @@ final class Pool implements IteratorAggregate, \Countable
         do {
             // High priority first
             if ($this->priorityStorage->count() > 0) {
+                // todo: use this feature manually
                 $priorityStorage = $this->priorityStorage;
                 // $this->priorityStorage = new SplObjectStorage();
                 foreach ($priorityStorage as $entity) {
                     // yield $entity => $priorityStorage->offsetGet($entity);
                     $tuple = $priorityStorage->offsetGet($entity);
                     yield $entity => $tuple;
-                    $this->trashIt($tuple, $this->priorityStorage);
+                    $this->trashIt($entity, $tuple, $priorityStorage);
                 }
                 continue;
             }
@@ -146,8 +157,8 @@ final class Pool implements IteratorAggregate, \Countable
                     if ($tuple->status !== Tuple::STATUS_PREPARING) {
                         continue;
                     }
-                    $this->trashIt($tuple, $this->storage);
                     yield $entity => $tuple;
+                    $this->trashIt($entity, $tuple, $this->storage);
                     // Check priority
                     if ($this->priorityStorage->count() > 0) {
                         continue 2;
@@ -170,7 +181,7 @@ final class Pool implements IteratorAggregate, \Countable
                     }
                     $tuple->status = Tuple::STATUS_WAITED;
                     yield $entity => $tuple;
-                    $this->trashIt($tuple, $this->storage);
+                    $this->trashIt($entity, $tuple, $this->storage);
                     // Check priority
                     if ($this->priorityStorage->count() > 0) {
                         continue 2;
@@ -195,7 +206,7 @@ final class Pool implements IteratorAggregate, \Countable
                     }
                     $pool->next();
                     yield $entity => $tuple;
-                    $this->trashIt($tuple, $this->storage);
+                    $this->trashIt($entity, $tuple, $this->storage);
                     // Check priority
                     if ($this->priorityStorage->count() > 0) {
                         continue 2;
@@ -213,12 +224,14 @@ final class Pool implements IteratorAggregate, \Countable
         return count($this->storage) + ($this->priorityEnabled ? $this->priorityStorage->count() : 0);
     }
 
-    private function trashIt(Tuple $tuple, SplObjectStorage $storage): void
+    private function trashIt(object $entity, Tuple $tuple, SplObjectStorage $storage): void
     {
+        $storage->detach($entity);
         if ($tuple->status === Tuple::STATUS_PROCESSED) {
-            $this->trash->attach($tuple->entity);
+            $this->trash->attach($tuple->entity, $tuple);
+        } else {
+            $this->storage->attach($tuple->entity, $tuple);
         }
-        $storage->detach($tuple->entity);
     }
     private function activatePriorityStorage(): void
     {

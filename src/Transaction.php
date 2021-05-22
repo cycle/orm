@@ -12,6 +12,7 @@ use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ReversedRelationInterface;
+use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\RunnerInterface;
@@ -158,6 +159,7 @@ final class Transaction implements TransactionInterface
          * @var object $entity
          * @var Tuple $tuple
          */
+        ob_implicit_flush(true);
         foreach ($pool as $entity => $tuple) {
             flush();
             ob_flush();
@@ -177,6 +179,8 @@ final class Transaction implements TransactionInterface
             // we do not expect to store promises
             if ($entity instanceof ReferenceInterface
                 || ($tuple->task === Tuple::TASK_FORCE_DELETE && $node === null)) {
+                $tuple->status = Tuple::STATUS_PROCESSED;
+                // $pool->detach($entity);
                 continue;
             }
             echo sprintf(
@@ -231,7 +235,7 @@ final class Transaction implements TransactionInterface
             // } elseif ($node->getReadyState() === Node::WAITING_DEFERRED && $node->hasChanges()) {
             //     yield $this->generateStoreCommand($tuple);
             // }
-            $pool->attachTuple($tuple);
+            // $pool->attachTuple($tuple);
         }
     }
 
@@ -240,7 +244,31 @@ final class Transaction implements TransactionInterface
         if (!$map->hasDependencies()) {
             return self::RELATIONS_RESOLVED;
         }
-        return self::RELATIONS_DEFERRED ^ self::RELATIONS_RESOLVED;
+
+        $entityData = $tuple->mapper->extract($tuple->entity);
+        $deferred = false;
+        $resolved = true;
+        foreach ($map->getMasters() as $name => $relation) {
+            echo "Master relation: {$name} " . get_class($relation);
+            if (/*!$relation->isCascade() || */$tuple->node->getRelationStatus($relation->getName()) === RelationInterface::STATUS_RESOLVED) {
+                echo " [skip] \n";
+                continue;
+            }
+            echo " [process] \n";
+
+            if ($relation instanceof ShadowBelongsTo) {
+                $deferred = true;
+                // $tuple->status = Tuple::STATUS_DEFERRED;
+            } else {
+                $master = $relation->extract($entityData[$name] ?? null);
+                $relation->newQueue($this->pool, $tuple, $master);
+                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
+                $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
+            }
+        }
+
+        return ($deferred ? self::RELATIONS_DEFERRED : 0) | ($resolved ? self::RELATIONS_RESOLVED : 0);
     }
     private function resolveSlaveRelations(Tuple $tuple, RelationMap $map): int
     {
@@ -254,7 +282,7 @@ final class Transaction implements TransactionInterface
         $resolved = true;
         foreach ($map->getSlaves() as $name => $relation) {
             echo "Slave relation: {$name}";
-            if (!$relation->isCascade() || $relation->getStatus() === RelationInterface::STATUS_RESOLVED) {
+            if (!$relation->isCascade() || $tuple->node->getRelationStatus($relation->getName()) === RelationInterface::STATUS_RESOLVED) {
                 // todo check changes for not cascaded relations?
                 echo " [skip] \n";
                 continue;
@@ -265,12 +293,13 @@ final class Transaction implements TransactionInterface
             if ($relation instanceof ReversedRelationInterface) {
                 // $tuple->node->setReadyState(Node::WAITING_DEFERRED);
                 $deferred = true;
-                $tuple->status = Tuple::STATUS_DEFERRED;
+                // $tuple->status = Tuple::STATUS_DEFERRED;
             } else {
-                $child = $entityData[$name] ?? null;
-                $relation->newQueue($this->pool, $tuple, $child, null);
-                $resolved = $resolved && $relation->getStatus() === RelationInterface::STATUS_RESOLVED;
-                $deferred = $deferred || $relation->getStatus() === RelationInterface::STATUS_DEFERRED;
+                $child = $relation->extract($entityData[$name] ?? null);
+                $relation->newQueue($this->pool, $tuple, $child);
+                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
+                $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
             }
         }
 
@@ -281,7 +310,7 @@ final class Transaction implements TransactionInterface
         $map = $this->orm->getRelationMap(get_class($tuple->entity));
         // Init relations status
         if ($tuple->status === Tuple::STATUS_PREPARING) {
-            $map->setRelationsStatus(RelationInterface::STATUS_PROCESSING);
+            $map->setRelationsStatus($tuple->node, RelationInterface::STATUS_PROCESSING);
         }
 
         // Dependency relations
@@ -295,7 +324,7 @@ final class Transaction implements TransactionInterface
         $needCheckDepends = !$deferred;
         if ($deferred && $tuple->status !== Tuple::STATUS_PROPOSED) {
             $tuple->status = Tuple::STATUS_DEFERRED;
-            $this->pool->attachTuple($tuple);
+            // $this->pool->attachTuple($tuple);
         }
         if ($isDependenciesResolved) {
             $tuple->status === Tuple::STATUS_DEFERRED or $tuple->status = Tuple::STATUS_PREPROCESSED;
@@ -305,6 +334,7 @@ final class Transaction implements TransactionInterface
                     $this->generateStoreCommand($tuple);
                 } else {
                     echo "No changes \n";
+                    $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED ? Tuple::STATUS_PROCESSED : $tuple->status;
                 }
             } else {
                 $this->generateDeleteCommand($tuple);

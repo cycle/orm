@@ -11,6 +11,8 @@ use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Exception\CommandException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Driver\Postgres\Query\PostgresInsertQuery;
 
@@ -32,28 +34,30 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
     /** @var string[] */
     protected array $primaryKeys;
 
-    /** @var ConsumerInterface[][] */
-    protected array $consumers = [];
+    private State $state;
+
+    /** @var null|callable */
+    private $mapper;
 
     public function __construct(
         DatabaseInterface $db,
         string $table,
-        array $data = [],
-        array $primaryKeys = []
+        State $state,
+        array $primaryKeys = [],
+        callable $mapper = null
     ) {
         parent::__construct($db, $table);
-        $this->data = $data;
         $this->primaryKeys = $primaryKeys;
+        $this->state = $state;
+        $this->mapper = $mapper;
     }
 
     public function isReady(): bool
     {
-        return $this->waitContext === [];
+        return $this->isContextReady();
     }
 
     /**
-     * @inheritdoc
-     *
      * Triggers only after command execution!
      */
     public function forward(
@@ -67,24 +71,16 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
             throw new CommandException('Insert command can only forward keys after the execution.');
         }
 
-        $this->consumers[$key][] = [$consumer, $target, $stream];
+        $this->state->forward($key, $consumer, $target, $trigger, $stream);
     }
 
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         if ($fresh || $value !== null) {
-            $this->freeContext($key);
+            $this->state->freeContext($key);
         }
 
-        $this->setContext($key, $value);
-    }
-
-    /**
-     * Insert values, context not included.
-     */
-    public function getData(): array
-    {
-        return array_merge($this->data, $this->context);
+        $this->state->setContext($key, $value);
     }
 
     /**
@@ -92,34 +88,53 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      */
     public function execute(): void
     {
-        $data = $this->getData();
+        $data = $this->state->getData();
 
-        $insert = $this->db->insert($this->table)->values($data);
+        $insert = $this->db
+            ->insert($this->table)
+            ->values($this->mapper === null ? $data : ($this->mapper)($data));
         if (count($this->primaryKeys) === 1 && $insert instanceof PostgresInsertQuery) {
-            $insert->returning(current($this->primaryKeys));
+            $insert->returning($this->primaryKeys[0]);
         }
 
         $insertID = $insert->run();
 
-        foreach ($this->consumers as $key => $consumers) {
-            $fresh = true;
-            if ($key === self::INSERT_ID) {
-                $value = $insertID;
-            } else {
-                $value = $data[$key] ?? null;
-            }
+        // foreach ($this->consumers as $key => $consumers) {
+        //     $fresh = true;
+        //     if ($key === self::INSERT_ID) {
+        //         $value = $insertID;
+        //     } else {
+        //         $value = $data[$key] ?? null;
+        //     }
+        //
+        // foreach ($this->consumers as $key => $consumers) {
+        //     $fresh = true;
+        //     if ($key === self::INSERT_ID) {
+        //         $value = $insertID;
+        //     } else {
+        //         $value = $data[$key] ?? null;
+        //     }
+        //
+        //     foreach ($consumers as $id => $consumer) {
+        //         /** @var ConsumerInterface $cn */
+        //         $cn = $consumer[0];
+        //
+        //         $cn->register($consumer[1], $value, $fresh, $consumer[2]);
+        //
+        //         if ($key !== self::INSERT_ID) {
+        //             // primary key is always delivered as fresh
+        //             $fresh = false;
+        //         }
+        //     }
+        // }
 
-            foreach ($consumers as $id => $consumer) {
-                /** @var ConsumerInterface $cn */
-                $cn = $consumer[0];
-
-                $cn->register($consumer[1], $value, $fresh, $consumer[2]);
-
-                if ($key !== self::INSERT_ID) {
-                    // primary key is always delivered as fresh
-                    $fresh = false;
-                }
-            }
+        $this->state->setStatus(Node::MANAGED);
+        $this->state->setTransactionData($data);
+        if ($insertID !== null && count($this->primaryKeys) === 1) {
+            $this->state->setData([$this->primaryKeys[0] => $insertID]);
+            $this->state->setTransactionData([$this->primaryKeys[0] => $insertID]);
+            // $this->transactionData[$this->primaryKeys[0]] = $insertID;
+            // $this->state->register($this->primaryKeys[0], $insertID);
         }
 
         parent::execute();

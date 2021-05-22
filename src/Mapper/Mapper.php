@@ -61,12 +61,12 @@ class Mapper extends DatabaseMapper
     /**
      * Get entity columns.
      */
-    protected function fetchFields(object $entity): array
+    public function fetchFields(object $entity): array
     {
         $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
 
         $class = get_class($entity);
-        if ($class != $this->entity) {
+        if ($class !== $this->entity) {
             // inheritance
             foreach ($this->children as $alias => $childClass) {
                 if ($childClass == $class) {

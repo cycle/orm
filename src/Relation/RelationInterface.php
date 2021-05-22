@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
+use JetBrains\PhpStorm\ExpectedValues;
 
 /**
  * Manages single branch type between parent entity and other objects.
  */
 interface RelationInterface
 {
+    public const STATUS_PROCESSING = 0;
+    public const STATUS_DEFERRED = 1;
+    public const STATUS_RESOLVED = 2;
+
     /**
      * Relation name.
      */
@@ -65,5 +69,5 @@ interface RelationInterface
      *
      * @throws RelationException
      */
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface;
+    public function queue(object $entity, Node $node, $related, $original): CommandInterface;
 }

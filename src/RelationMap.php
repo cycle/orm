@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Command\Branch\ContextSequence;
+use Cycle\ORM\Command\Branch\Sequence;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Promise\PromiseInterface;
@@ -16,6 +18,8 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ReversedRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use JetBrains\PhpStorm\ExpectedValues;
+
+use function count;
 
 /**
  * Manages the position of node in the relation graph and provide access to neighbours.
@@ -49,6 +53,11 @@ final class RelationMap
 
     public function registerOuterRelation(string $role, string $container, array $relationSchema): void
     {
+        // todo: it better to check instanceOf \Cycle\ORM\Relation\DependencyInterface instead of int
+        // skip dependencies
+        if (in_array($relationSchema[Relation::TYPE], [Relation::BELONGS_TO, Relation::REFERS_TO], true)) {
+            return;
+        }
         $relation = new ShadowBelongsTo($role, $container, $relationSchema);
         $this->dependencies[$relation->getName()] = $relation;
     }
@@ -155,7 +164,7 @@ final class RelationMap
         }
 
         self::$level--;
-        if (\count($sequence) === 1) {
+        if (count($sequence) === 1) {
             return current($sequence->getCommands());
         }
 
@@ -169,16 +178,24 @@ final class RelationMap
     {
         return $this->slaves;
     }
+    /**
+     * @return RelationInterface[]
+     */
+    public function getMasters(): array
+    {
+        return $this->dependencies;
+    }
 
     public function setRelationsStatus(
+        Node $node,
         #[ExpectedValues(values: [RelationInterface::STATUS_PROCESSING, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
         int $status
     ): void {
         foreach ($this->dependencies  as $dependency) {
-            $dependency->setStatus($status);
+            $node->setRelationStatus($dependency->getName(), $status);
         }
         foreach ($this->slaves  as $slave) {
-            $slave->setStatus($status);
+            $node->setRelationStatus($slave->getName(), $status);
         }
     }
 
@@ -236,7 +253,7 @@ final class RelationMap
     private function printCommand(?CommandInterface $command): void
     {
         $pad = str_repeat('    ', self::$level);
-        if ($command instanceof \Cycle\ORM\Command\Branch\Sequence) {
+        if ($command instanceof Sequence) {
             echo "{$pad}> Added COMMAND SEQUENCE\n";
             ++self::$level;
             foreach ($command->getCommands() as $cmd) {
@@ -245,7 +262,7 @@ final class RelationMap
             --self::$level;
             return;
         }
-        if ($command instanceof \Cycle\ORM\Command\Branch\ContextSequence) {
+        if ($command instanceof ContextSequence) {
             echo "{$pad}> Added CONTEXT COMMAND SEQUENCE\n";
             ++self::$level;
             foreach ($command->getCommands() as $cmd) {
@@ -254,7 +271,7 @@ final class RelationMap
             --self::$level;
             return;
         }
-        if ($command instanceof \Cycle\ORM\Command\Database\Update) {
+        if ($command instanceof Update) {
             echo sprintf(
                 "{$pad}> Added UPDATE command: where (%s) are (%s) SET keys (%s) data (%s)\n",
                 implode(',', array_keys($command->getScope())),

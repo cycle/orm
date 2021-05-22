@@ -31,7 +31,7 @@ final class StdMapper extends DatabaseMapper
     /**
      * Get entity columns.
      */
-    protected function fetchFields(object $entity): array
+    public function fetchFields(object $entity): array
     {
         return array_intersect_key(
             $this->extract($entity),

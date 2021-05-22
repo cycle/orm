@@ -70,7 +70,7 @@ class HasMany extends AbstractRelation
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
             $this->deleteChild($pool, $item);
         }
-        $this->setStatus(RelationInterface::STATUS_RESOLVED);
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         $node->getState()->setRelation($this->getName(), $related);
 
     }

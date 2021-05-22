@@ -20,18 +20,23 @@ final class Node implements ProducerInterface, ConsumerInterface
     // Different entity states in a pool
     public const PROMISED         = 0;
     public const NEW              = 1;
-    public const MANAGED          = 2;
     public const SCHEDULED_INSERT = 3;
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
-    public const DELETED          = 6;
+    // public const DELETED          = 6;
+    public const MANAGED          = 2;
+
+    public const DELETED        = 9;
+    public const WAITING_OTHERS   = 10; // Ожидается обработка всех персистов -- вдруг попадётся зависимость
+    public const READY            = 11; // Готово для генерации команды, но также ожидает отсроченные зависимости
+    public const WAITING_DEFERRED = 12; // Готово для генерации команды, но также ожидает отсроченные зависимости
+    public const RESOLVED         = 13; // Надёжный стейт, синхронизированный с БД
 
     private string $role;
 
     private int $status;
 
     private array $data;
-
     private ?State $state = null;
 
     public function __construct(
@@ -149,17 +154,34 @@ final class Node implements ProducerInterface, ConsumerInterface
             return [];
         }
 
-        $changes = array_udiff_assoc($this->state->getData(), $this->data, [static::class, 'compare']);
+        $changes = array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']);
         foreach ($this->state->getRelations() as $name => $relation) {
             $this->setRelation($name, $relation);
         }
 
         // DELETE handled separately
         $this->status = self::MANAGED;
-        $this->data = $this->state->getData();
+        $this->data = $this->state->getTransactionData();
         $this->state = null;
 
         return $changes;
+    }
+
+    public function hasChanges(): bool
+    {
+        return $this->status === self::NEW
+            || $this->state === null
+            || array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']) !== [];
+            // || array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']) !== [];
+    }
+
+    public function getChanges(): array
+    {
+        if ($this->state === null) {
+            return $this->status === self::NEW ? ($this->data ?? []) : [];
+        }
+        return array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']);
+        // return array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']);
     }
 
     /**
@@ -176,6 +198,7 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public static function compare($a, $b): int
     {
+        // return $a <=> $b;
         // todo refactor and test this
         if ($a == $b) {
             if (($a === null) !== ($b === null)) {

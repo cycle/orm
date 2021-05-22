@@ -88,6 +88,11 @@ final class State implements ConsumerInterface, ProducerInterface
         return $this->transactionData;
     }
 
+    public function setTransactionData(array $data): array
+    {
+        return $this->transactionData = $data + $this->transactionData;
+    }
+
     /**
      * Set the reference to the object creation command (non executed).
      *

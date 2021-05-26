@@ -37,7 +37,7 @@ class HasOne extends AbstractRelation
 
         if ($original instanceof ReferenceInterface) {
             $original = $this->resolve($original);
-            $node->setRelation($this->getName(), $original);
+            // $node->setRelation($this->getName(), $original);
         }
 
         if ($related instanceof ReferenceInterface) {
@@ -49,11 +49,11 @@ class HasOne extends AbstractRelation
             if ($original === null) {
                 return;
             }
-            $node->getState()->setRelation($this->getName(), $related);
+            // $node->getState()->setRelation($this->getName(), $related);
             $this->deleteChild($pool, $original);
             return;
         }
-        $node->getState()->setRelation($this->getName(), $related);
+        // $node->getState()->setRelation($this->getName(), $related);
 
         $rNode = $this->getNode($related, +1);
         $this->assertValid($rNode);
@@ -69,8 +69,9 @@ class HasOne extends AbstractRelation
                     $rNode->register($this->outerKeys[$i], $changes[$innerKey]);
                 }
             }
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $rNode->setRelationStatus($node->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
         }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         if ($original !== null && $original !== $related) {
             $this->deleteChild($pool, $original);
         }

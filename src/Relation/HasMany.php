@@ -35,25 +35,45 @@ class HasMany extends AbstractRelation
         }
     }
 
+    private function shouldResolveOrigin(ReferenceInterface $original, Tuple $tuple): bool
+    {
+        if ($this->isResolved($original)) {
+            return true;
+        }
+        if (count(array_intersect(array_keys($tuple->node->getChanges()), $this->innerKeys)) > 0) {
+            return true;
+        }
+        return false;
+    }
+
     private function queueStoreAll(Pool $pool, Tuple $tuple, $related): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
 
         if ($original instanceof ReferenceInterface) {
+            if (!$this->shouldResolveOrigin($original, $tuple)) {
+                return;
+            }
             $original = $this->resolve($original);
-            $node->setRelation($this->getName(), $original);
+            // $node->setRelation($this->getName(), $original);
         }
+        $changes = $node->getData();
 
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
         }
 
-        $changes = $node->getData();
-        $isApplyChanges = !in_array($tuple->status, [Tuple::STATUS_WAITED, Tuple::STATUS_PREPARING], true);
+        // $isApplyChanges = !in_array($tuple->status, [Tuple::STATUS_WAITED, Tuple::STATUS_PREPARING], true);
+        $isApplyChanges = $tuple->status >= Tuple::STATUS_DEFERRED;
+        // if (!$isApplyChanges && $tuple->status !== Tuple::STATUS_PREPARING) {
+        //     return;
+        // }
         // Store $related collection
+        $relationName = $node->getRole() . ':' . $this->getName();
         foreach ($related as $item) {
             $rNode = $this->getNode($item, +1);
+            $rNode->setRelationStatus($relationName, $isApplyChanges ? RelationInterface::STATUS_RESOLVED : RelationInterface::STATUS_DEFERRED);
             $this->assertValid($rNode);
 
             if ($isApplyChanges) {
@@ -70,9 +90,8 @@ class HasMany extends AbstractRelation
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
             $this->deleteChild($pool, $item);
         }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        $node->getState()->setRelation($this->getName(), $related);
-
+        $node->setRelationStatus($this->getName(), $isApplyChanges ? RelationInterface::STATUS_RESOLVED : RelationInterface::STATUS_DEFERRED);
+        // $node->getState()->setRelation($this->getName(), $related);
     }
     /**
      * Delete original related entity of no other objects reference to it.

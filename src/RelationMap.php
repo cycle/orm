@@ -38,7 +38,7 @@ final class RelationMap
 
     private static int $level = -1;
 
-    public function __construct(array $innerRelations)
+    public function __construct(array $innerRelations, array $outerRelations)
     {
         $this->innerRelations = $innerRelations;
 
@@ -49,9 +49,15 @@ final class RelationMap
                 $this->slaves[$name] = $relation;
             }
         }
+
+        foreach ($outerRelations as $outerRole => $relations) {
+            foreach ($relations as $container => $relationSchema) {
+                $this->registerOuterRelation($outerRole, $container, $relationSchema);
+            }
+        }
     }
 
-    public function registerOuterRelation(string $role, string $container, array $relationSchema): void
+    private function registerOuterRelation(string $role, string $container, array $relationSchema): void
     {
         // todo: it better to check instanceOf \Cycle\ORM\Relation\DependencyInterface instead of int
         // skip dependencies

@@ -13,6 +13,13 @@ trait RelationTrait
     /** @var array<string, int> */
     private array $relationStatus = [];
 
+    // private array $resolvedRelations = [];
+    //
+    // public function isRelationResolved(string $name): bool
+    // {
+    //     return $this->resolvedRelations[$name] ?? false;
+    // }
+
     public function setRelationStatus(
         string $name,
         #[ExpectedValues(values: [RelationInterface::STATUS_PROCESSING, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]

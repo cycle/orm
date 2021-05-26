@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Command\Traits;
+namespace Cycle\ORM\Heap\Traits;
 
 /**
  * Provides ability to carry context.
@@ -12,12 +12,6 @@ trait ContextTrait
     protected array $context = [];
 
     protected array $waitContext = [];
-
-    public function isContextReady(): bool
-    {
-        // var_dump($this->waitContext, $this->state->isReady());
-        return $this->waitContext === [] && $this->state->isReady();
-    }
 
     /**
      * Wait for the context value.
@@ -35,9 +29,9 @@ trait ContextTrait
     }
 
     /**
-     * @param mixed  $value
+     * @param mixed $value
      */
-    protected function setContext(string $name, $value): void
+    public function setContext(string $name, $value): void
     {
         $this->context[$name] = $value;
     }
@@ -45,7 +39,7 @@ trait ContextTrait
     /**
      * Indicate that context value is not required anymore.
      */
-    protected function freeContext(string $key): void
+    public function freeContext(string $key): void
     {
         unset($this->waitContext[$key]);
     }

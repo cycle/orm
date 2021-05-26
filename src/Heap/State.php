@@ -8,8 +8,10 @@ use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\ClaimTrait;
+use Cycle\ORM\Heap\Traits\ContextTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Heap\Traits\VisitorTrait;
+use JetBrains\PhpStorm\ExpectedValues;
 use SplObjectStorage;
 
 /**
@@ -20,6 +22,7 @@ final class State implements ConsumerInterface, ProducerInterface
     use RelationTrait;
     use ClaimTrait;
     use VisitorTrait;
+    use ContextTrait;
 
     private int $state;
 
@@ -35,8 +38,11 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var SplObjectStorage[] */
     private array $storage = [];
 
-    public function __construct(int $state, array $data)
-    {
+    public function __construct(
+        #[ExpectedValues(valuesFromClass: Node::class)]
+        int $state,
+        array $data
+    ) {
         $this->state = $state;
         $this->data = $data;
         $this->transactionData = $data;
@@ -134,6 +140,12 @@ final class State implements ConsumerInterface, ProducerInterface
     ): void {
         $this->consumers[$key][] = [$consumer, $target, $stream];
 
+        echo sprintf(
+            "Forward to State! [%s]  target: $target, key: $key, value: %s Stream: %s\n",
+            $consumer instanceof Node ? 'Node ' . $consumer->getRole() : get_class($consumer),
+            (string)($this->data[$key] ?? 'NULL'),
+            [ConsumerInterface::DATA => 'DATA', ConsumerInterface::SCOPE => 'SCOPE'][$stream]
+        );
         if ($trigger || !empty($this->data[$key])) {
             $this->register($key, $this->data[$key] ?? null, false, $stream);
         }
@@ -150,10 +162,15 @@ final class State implements ConsumerInterface, ProducerInterface
             $fresh = ($this->data[$key] ?? null) != $value;
         }
 
-        if (!array_key_exists($key, $this->transactionData)) {
-            $this->transactionData[$key] = $value;
-        }
+        // if (!array_key_exists($key, $this->transactionData)) {
+        //     $this->transactionData[$key] = $value;
+        // }
 
+        #
+        echo sprintf("State(%s):Register %s {$key} => %s\n", spl_object_id($this), $fresh ? 'fresh' : '', var_export($value, true));
+        // if ($key === 'user_id' && $value === '1') {
+        //     throw new \Exception();
+        // }
         $this->data[$key] = $value;
 
         // cascade
@@ -165,5 +182,10 @@ final class State implements ConsumerInterface, ProducerInterface
                 $fresh = false;
             }
         }
+    }
+
+    public function isReady(): bool
+    {
+        return $this->waitContext === [];
     }
 }

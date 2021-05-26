@@ -350,14 +350,8 @@ final class ORM implements ORMInterface
         foreach ($innerRelations as $relName => $relSchema) {
             $relations[$relName] = $this->factory->relation($this, $this->schema, $role, $relName);
         }
-        $map =  new RelationMap($relations);
-
-        foreach ($outerRelations as $outerRole => $relations) {
-            foreach ($relations as $container => $relationSchema) {
-                $map->registerOuterRelation($outerRole, $container, $relationSchema);
-            }
-        }
-
-        return $this->relMaps[$role] = $map;
+        $map = new RelationMap($relations, $outerRelations);
+        $this->relMaps[$role] = $map;
+        return $map;
     }
 }

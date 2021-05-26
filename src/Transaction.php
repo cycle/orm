@@ -133,7 +133,10 @@ final class Transaction implements TransactionInterface
 
             // sync the current entity data with newly generated data
             $syncData = $node->syncState();
-            $this->orm->getMapper($node->getRole())->hydrate($e, $node->getRelations() + $syncData);
+            $this->orm->getMapper($node->getRole())->hydrate(
+                $e,
+                $node->getRelations()
+                + $syncData);
         }
     }
 
@@ -250,21 +253,37 @@ final class Transaction implements TransactionInterface
         $resolved = true;
         foreach ($map->getMasters() as $name => $relation) {
             echo "Master relation: {$name} " . get_class($relation);
-            if (/*!$relation->isCascade() || */$tuple->node->getRelationStatus($relation->getName()) === RelationInterface::STATUS_RESOLVED) {
+            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            if (/*!$relation->isCascade() || */$relationStatus === RelationInterface::STATUS_RESOLVED) {
                 echo " [skip] \n";
                 continue;
             }
             echo " [process] \n";
 
             if ($relation instanceof ShadowBelongsTo) {
-                $deferred = true;
-                // $tuple->status = Tuple::STATUS_DEFERRED;
+                # Check relation is connected
+                # Connected -> $parentNode->getRelationStatus()
+                # Disconnected -> WAIT if Tuple::STATUS_PREPARING
+                $relation->newQueue($this->pool, $tuple, null);
+                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+
+                if ($tuple->status < Tuple::STATUS_PROPOSED) {
+                    $resolved = $resolved && ($relationStatus !== RelationInterface::STATUS_PROCESSING || !$relation->isCascade());
+                    $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
+                }
             } else {
                 $master = $relation->extract($entityData[$name] ?? null);
                 $relation->newQueue($this->pool, $tuple, $master);
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-                $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
+                $resolved = $resolved && $relationStatus !== RelationInterface::STATUS_PROCESSING;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
+
+                if ($resolved) {
+                    $tuple->node->setRelation($name, $entityData[$name] ?? null);
+                    if ($tuple->node->hasState()) {
+                        $tuple->node->getState()->setRelation($name, $master);
+                    }
+                }
             }
         }
 
@@ -300,6 +319,12 @@ final class Transaction implements TransactionInterface
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
                 $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
+                if ($resolved) {
+                    $tuple->node->setRelation($name, $entityData[$name] ?? null);
+                    if ($tuple->node->hasState()) {
+                        $tuple->node->getState()->setRelation($name, $child);
+                    }
+                }
             }
         }
 
@@ -307,7 +332,7 @@ final class Transaction implements TransactionInterface
     }
     private function resolveRelations(Tuple $tuple): void
     {
-        $map = $this->orm->getRelationMap(get_class($tuple->entity));
+        $map = $this->orm->getRelationMap(isset($tuple->node) ? $tuple->node->getRole() : get_class($tuple->entity));
         // Init relations status
         if ($tuple->status === Tuple::STATUS_PREPARING) {
             $map->setRelationsStatus($tuple->node, RelationInterface::STATUS_PROCESSING);
@@ -321,33 +346,35 @@ final class Transaction implements TransactionInterface
         $deferred = (bool)($result & self::RELATIONS_DEFERRED);
 
         // Self
-        $needCheckDepends = !$deferred;
         if ($deferred && $tuple->status !== Tuple::STATUS_PROPOSED) {
             $tuple->status = Tuple::STATUS_DEFERRED;
             // $this->pool->attachTuple($tuple);
         }
         if ($isDependenciesResolved) {
-            $tuple->status === Tuple::STATUS_DEFERRED or $tuple->status = Tuple::STATUS_PREPROCESSED;
             if ($tuple->task === Tuple::TASK_STORE) {
+                $tuple->status === Tuple::STATUS_DEFERRED or $tuple->status = Tuple::STATUS_PREPROCESSED;
                 if ($tuple->node->hasChanges()) {
-                    $needCheckDepends = $needCheckDepends || $tuple->node->getStatus() === Node::NEW;
                     $this->generateStoreCommand($tuple);
                 } else {
                     echo "No changes \n";
                     $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED ? Tuple::STATUS_PROCESSED : $tuple->status;
                 }
+            } elseif ($tuple->status === Tuple::STATUS_PREPARING) {
+                $tuple->status = Tuple::STATUS_WAITING;
             } else {
+                $tuple->status = Tuple::STATUS_PREPROCESSED;
                 $this->generateDeleteCommand($tuple);
             }
         }
-        // if (!$needCheckDepends) {
-        //     return;
-        // }
 
         // Slave relations relations
         $tuple->task === Tuple::TASK_STORE
             ? $this->resolveSlaveRelations($tuple, $map)
             : $this->resolveMasterRelations($tuple, $map);
+
+        if (!$isDependenciesResolved) {
+            ++$tuple->status;
+        }
     }
 
     public function generateStoreCommand(Tuple $tuple): void

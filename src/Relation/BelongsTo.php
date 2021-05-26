@@ -63,25 +63,24 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 return;
             }
         }
-        $rTuple = $pool->offsetGet($related);
-        if ($rTuple === null) {
-            $pool->attachStore($related, true, null, null, true);
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
+        $rTuple = $pool->offsetGet($related) ?? $pool->attachStore($related, true, null, null, true);
+
+        if ($rTuple->status === Tuple::STATUS_PROCESSED) {
+            $this->pullValues($node, $rTuple->node);
+            $node->getState()->setRelation($this->getName(), $related);
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
 
-        // todo: test cyclic pool
-        if ($rTuple->status !== Tuple::STATUS_PROCESSED /*&& $tuple->status !== Tuple::STATUS_PROPOSED*/) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
-            return;
+        if ($rTuple->node === null && $tuple->status > Tuple::STATUS_DEFERRED) {
+            $node->getState()->setRelation($this->getName(), $related);
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         }
-        $rNode = $rTuple->node;
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        $rNode = $rNode ?? $this->getNode($related);
-        $this->assertValid($rNode);
-        $node->getState()->setRelation($this->getName(), $related);
+    }
 
-        $changes = $rNode->getState()->getTransactionData();
+    private function pullValues(Node $node, Node $related): void
+    {
+        $changes = $related->getState()->getTransactionData();
         foreach ($this->outerKeys as $i => $outerKey) {
             if (isset($changes[$outerKey])) {
                 $node->register($this->innerKeys[$i], $changes[$outerKey]);

@@ -28,8 +28,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     use ErrorTrait;
     use WaitCommandTrait;
 
-    protected array $data = [];
-
     protected array $appendix = [];
 
     private State $state;
@@ -77,12 +75,9 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
         return $this->isContextReady() && $this->isScopeReady() && $this->isCommandsExecuted();
     }
 
-    /**
-     * Update values, context not included.
-     */
-    public function getData(): array
+    public function hasData(): bool
     {
-        return array_merge($this->node->getChanges(), $this->appendix);
+        return count($this->appendix) > 0 || $this->node->hasChanges();
     }
 
     /**
@@ -95,11 +90,11 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
         }
 
         $data = $this->node->getChanges();
-        if ($data !== []) {
+        if ($data !== [] || $this->appendix !== []) {
             $this->db
                 ->update(
                     $this->table,
-                    $this->mapper === null ? $data : ($this->mapper)($data),
+                    ($this->mapper === null ? $data : ($this->mapper)($data)) + $this->appendix,
                     $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
                 )
                 ->run();

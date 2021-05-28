@@ -214,7 +214,8 @@ final class Transaction implements TransactionInterface
             }
 
             if (!$tuple->cascade) {
-                $this->generateStoreCommand($tuple);
+                $this->runner->run($this->generateStoreCommand($tuple));
+                $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
                 continue;
             }
 
@@ -330,6 +331,44 @@ final class Transaction implements TransactionInterface
 
         return ($deferred ? self::RELATIONS_DEFERRED : 0) | ($resolved ? self::RELATIONS_RESOLVED : 0);
     }
+
+    private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map): void
+    {
+        if (!$map->hasEmbedded() && !$tuple->node->hasChanges()) {
+            echo "No changes \n";
+            $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED ? Tuple::STATUS_PROCESSED : $tuple->status;
+            return;
+        }
+        $command = $this->generateStoreCommand($tuple);
+
+        if (!$map->hasEmbedded()) {
+            $this->runner->run($command);
+            $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
+            return;
+        }
+
+        $entityData = $tuple->mapper->extract($tuple->entity);
+        foreach ($map->getEmbedded() as $name => $relation) {
+            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
+                continue;
+            }
+            $embedded = $relation->extract($entityData[$name] ?? null);
+            $relation->newQueue($this->pool, $tuple, $embedded, $command);
+            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+
+            if ($relationStatus !== RelationInterface::STATUS_PROCESSING) {
+                $tuple->node->setRelation($name, $entityData[$name] ?? null);
+                if ($tuple->node->hasState()) {
+                    $tuple->node->getState()->setRelation($name, $embedded);
+                }
+            }
+        }
+        if ($command->hasData()) {
+            $this->runner->run($command);
+        }
+        $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
+    }
     private function resolveRelations(Tuple $tuple): void
     {
         $map = $this->orm->getRelationMap(isset($tuple->node) ? $tuple->node->getRole() : get_class($tuple->entity));
@@ -353,12 +392,7 @@ final class Transaction implements TransactionInterface
         if ($isDependenciesResolved) {
             if ($tuple->task === Tuple::TASK_STORE) {
                 $tuple->status === Tuple::STATUS_DEFERRED or $tuple->status = Tuple::STATUS_PREPROCESSED;
-                if ($tuple->node->hasChanges()) {
-                    $this->generateStoreCommand($tuple);
-                } else {
-                    echo "No changes \n";
-                    $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED ? Tuple::STATUS_PROCESSED : $tuple->status;
-                }
+                $this->resolveSelfWithEmbedded($tuple, $map);
             } elseif ($tuple->status === Tuple::STATUS_PREPARING) {
                 $tuple->status = Tuple::STATUS_WAITING;
             } else {
@@ -377,7 +411,7 @@ final class Transaction implements TransactionInterface
         }
     }
 
-    public function generateStoreCommand(Tuple $tuple): void
+    public function generateStoreCommand(Tuple $tuple): ?CommandInterface
     {
         $tuple->state = $tuple->state ?? $tuple->node->getState();
 
@@ -387,11 +421,12 @@ final class Transaction implements TransactionInterface
             echo "Its a CREATE command;\n";
             /** @var Insert $command */
             $command = $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
+            return $command;
 
-            $this->runner->run($command);
-
-            $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
-            return;
+            // $this->runner->run($command);
+            //
+            // $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
+            // return;
         }
         $tuple->state->setStatus(Node::SCHEDULED_UPDATE);
 
@@ -399,9 +434,10 @@ final class Transaction implements TransactionInterface
 
         /** @var Update $command */
         $command = $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+        return $command;
 
-        $this->runner->run($command);
-        $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
+        // $this->runner->run($command);
+        // $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
     }
     public function generateDeleteCommand(Tuple $tuple): void
     {

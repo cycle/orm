@@ -6,13 +6,12 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceInterface;
+use JetBrains\PhpStorm\ExpectedValues;
 
 abstract class AbstractRelation implements RelationInterface
 {
@@ -90,18 +89,18 @@ abstract class AbstractRelation implements RelationInterface
         return $this->orm->getSource($role ?? $this->target);
     }
 
-    /**
-     * Get the mapper associated with a role.
-     */
-    protected function getMapper(string $role = null): MapperInterface
-    {
-        return $this->orm->getMapper($role ?? $this->target);
-    }
+    // /**
+    //  * Get the mapper associated with a role.
+    //  */
+    // protected function getMapper(string $role = null): MapperInterface
+    // {
+    //     return $this->orm->getMapper($role ?? $this->target);
+    // }
 
-    protected function columnName(Node $node, string $field): string
-    {
-        return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
-    }
+    // protected function columnName(Node $node, string $field): string
+    // {
+    //     return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
+    // }
 
     /**
      * Assert that given entity is allowed for the relation.
@@ -127,5 +126,13 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return $this->orm->get($reference->__role(), $reference->__scope(), true);
+    }
+
+    protected function isResolved(ReferenceInterface $reference): bool
+    {
+        if ($reference instanceof PromiseInterface) {
+            return $reference->__loaded();
+        }
+        return false;
     }
 }

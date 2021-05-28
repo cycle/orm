@@ -16,11 +16,13 @@ use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Embeds one object to another.
  */
-final class Embedded implements RelationInterface
+final class Embedded implements SameRowRelationInterface
 {
     use Relation\Traits\NodeTrait;
 
@@ -107,7 +109,58 @@ final class Embedded implements RelationInterface
         return $data;
     }
 
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
+    public function newQueue(Pool $pool, Tuple $tuple, $related, CommandInterface $command = null): void
+    {
+        if ($tuple->task !== Tuple::TASK_STORE) {
+            return;
+        }
+
+        // Master Node
+        $node = $tuple->node;
+        $original = $node->getRelation($this->getName());
+
+        if ($related instanceof ReferenceInterface) {
+            if ($related->__scope() === $original) {
+                if (!($related instanceof PromiseInterface && $related->__loaded())) {
+                    // do not update non resolved and non changed promises
+                    return;
+                }
+
+                $related = $this->resolve($related);
+            } else {
+                // do not affect parent embeddings
+                $related = clone $this->resolve($related);
+            }
+        }
+
+        if ($related === null) {
+            throw new NullException("Embedded relation `{$this->name}` can't be null.");
+        }
+
+        $rNode = $this->getNode($related);
+        // calculate embedded node changes
+        $changes = $this->getChanges($related, $rNode->getState());
+        foreach ($this->primaryKeys as $key) {
+            if (isset($changes[$key])) {
+                $rNode->register($key, $changes[$key]);
+            }
+        }
+
+        $mapper = $this->orm->getMapper($this->getTarget());
+        $rNode = $this->getNode($related);
+        $changes = $this->getChanges($related, $rNode->getState());
+        foreach ($mapper->mapColumns($changes) as $field => $value) {
+            $command->registerAppendix($field, $value);
+        }
+        $rNode->getState()->setStatus(Node::MANAGED);
+        $rNode->getState()->setTransactionData($changes);
+
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $node->setRelationStatus($rNode->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
+    }
+
+
+    public function queue(object $entity, Node $node, $related, $original): CommandInterface
     {
         if ($related instanceof ReferenceInterface) {
             if ($related->__scope() === $original) {
@@ -157,7 +210,7 @@ final class Embedded implements RelationInterface
             unset($data[$key]);
         }
 
-        return array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
+        return array_udiff_assoc($data, $state->getTransactionData(), [static::class, 'compare']);
     }
 
     /**
@@ -183,10 +236,6 @@ final class Embedded implements RelationInterface
      */
     private static function compare($a, $b): int
     {
-        if ($a == $b) {
-            return 0;
-        }
-
         return $a <=> $b;
     }
 

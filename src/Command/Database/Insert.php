@@ -29,7 +29,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
      */
     public const INSERT_ID = '@lastInsertID';
 
-    protected array $data;
+    protected array $appendix = [];
 
     /** @var string[] */
     protected array $primaryKeys;
@@ -74,6 +74,11 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         $this->state->forward($key, $consumer, $target, $trigger, $stream);
     }
 
+    public function hasData(): bool
+    {
+        return count($this->appendix) > 0 || count($this->state->getData()) > 0;
+    }
+
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
         if ($fresh || $value !== null) {
@@ -92,7 +97,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
 
         $insert = $this->db
             ->insert($this->table)
-            ->values($this->mapper === null ? $data : ($this->mapper)($data));
+            ->values(($this->mapper === null ? $data : ($this->mapper)($data)) + $this->appendix);
         if (count($this->primaryKeys) === 1 && $insert instanceof PostgresInsertQuery) {
             $insert->returning($this->primaryKeys[0]);
         }
@@ -138,5 +143,18 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         }
 
         parent::execute();
+    }
+
+    /**
+     * Register optional value to store in database. Having this value would not cause command to be executed
+     * if data or context is empty.
+     *
+     * Example: $update->registerAppendix("updated_at", new DateTime());
+     *
+     * @param mixed  $value
+     */
+    public function registerAppendix(string $key, $value): void
+    {
+        $this->appendix[$key] = $value;
     }
 }

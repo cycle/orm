@@ -7,6 +7,8 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
@@ -70,4 +72,10 @@ interface RelationInterface
      * @throws RelationException
      */
     public function queue(object $entity, Node $node, $related, $original): CommandInterface;
+
+    /**
+     * todo
+     * @param mixed $related
+     */
+    public function newQueue(Pool $pool, Tuple $tuple, $related): void;
 }

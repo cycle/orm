@@ -25,7 +25,7 @@ class UpdateCommandTest extends TestCase
         $this->assertTrue($cmd->isReady());
     }
 
-    public function testIsEmptyData(): void
+    public function testHasData(): void
     {
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
@@ -34,7 +34,7 @@ class UpdateCommandTest extends TestCase
             ['where' => 'value']
         );
 
-        $this->assertSame(['name' => 'value'], $cmd->getData());
+        $this->assertTrue($cmd->hasData());
     }
 
     public function testIsEmptyContext(): void

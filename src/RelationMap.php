@@ -14,8 +14,9 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\DependencyInterface;
+use Cycle\ORM\Relation\Embedded;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Relation\ReversedRelationInterface;
+use Cycle\ORM\Relation\SameRowRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use JetBrains\PhpStorm\ExpectedValues;
 
@@ -33,8 +34,8 @@ final class RelationMap
     private array $dependencies = [];
     /** @var RelationInterface[] */
     private array $slaves = [];
-    /** @var RelationInterface[] */
-    private array $outerDependencies = [];
+    /** @var SameRowRelationInterface[] */
+    private array $embedded = [];
 
     private static int $level = -1;
 
@@ -45,6 +46,8 @@ final class RelationMap
         foreach ($this->innerRelations as $name => $relation) {
             if ($relation instanceof DependencyInterface) {
                 $this->dependencies[$name] = $relation;
+            } elseif ($relation instanceof SameRowRelationInterface) {
+                $this->embedded[$name] = $relation;
             } else {
                 $this->slaves[$name] = $relation;
             }
@@ -64,6 +67,13 @@ final class RelationMap
         if (in_array($relationSchema[Relation::TYPE], [Relation::BELONGS_TO, Relation::REFERS_TO], true)) {
             return;
         }
+        // $schema = $relationSchema[Relation::SCHEMA];
+        // // $cascade = $schema[Relation::CASCADE];
+        // $outerKeys = (array)$schema[Relation::OUTER_KEY];
+        // $innerKeys = (array)$schema[Relation::INNER_KEY];
+        // foreach ($this->innerRelations as $relation) {
+        //
+        // }
         $relation = new ShadowBelongsTo($role, $container, $relationSchema);
         $this->dependencies[$relation->getName()] = $relation;
     }
@@ -76,6 +86,11 @@ final class RelationMap
     public function hasSlaves(): bool
     {
         return count($this->slaves) > 0;
+    }
+
+    public function hasEmbedded(): bool
+    {
+        return count($this->embedded) > 0;
     }
 
     /**
@@ -185,11 +200,18 @@ final class RelationMap
         return $this->slaves;
     }
     /**
-     * @return RelationInterface[]
+     * @return DependencyInterface[]
      */
     public function getMasters(): array
     {
         return $this->dependencies;
+    }
+    /**
+     * @return SameRowRelationInterface[]
+     */
+    public function getEmbedded(): array
+    {
+        return $this->embedded;
     }
 
     public function setRelationsStatus(
@@ -279,11 +301,9 @@ final class RelationMap
         }
         if ($command instanceof Update) {
             echo sprintf(
-                "{$pad}> Added UPDATE command: where (%s) are (%s) SET keys (%s) data (%s)\n",
+                "{$pad}> Added UPDATE command: where (%s) are (%s) SET ...?\n",
                 implode(',', array_keys($command->getScope())),
-                implode(',', $command->getScope()),
-                implode(',', array_keys($command->getData())),
-                implode(',', $command->getData())
+                implode(',', $command->getScope())
             );
         } else {
             echo sprintf("{$pad}> Command %s\n", $command === null ? 'none' : get_class($command));

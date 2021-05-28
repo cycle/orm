@@ -33,8 +33,8 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         $this->name = $role . ':' . $target;
         $this->target = $role;
         $this->schema = $schema;
-        $this->innerKeys = (array)$schema[Relation::SCHEMA][Relation::OUTER_KEY];
-        $this->outerKeys = (array)$schema[Relation::SCHEMA][Relation::INNER_KEY];
+        $this->innerKeys = (array)($schema[Relation::SCHEMA][Relation::OUTER_KEY] ?? []);
+        $this->outerKeys = (array)($schema[Relation::SCHEMA][Relation::INNER_KEY] ?? []);
         $this->cascade = (bool)($schema[Relation::SCHEMA][Relation::CASCADE] ?? false);
     }
 

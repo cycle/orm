@@ -17,7 +17,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
-use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
+use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
@@ -81,7 +81,7 @@ abstract class InverseRelationTest extends BaseTest
                         ],
                     ]
                 ],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
+                Schema::SCOPE   => SortByIDScope::class
             ],
             Profile::class => [
                 Schema::ROLE        => 'profile',
@@ -102,7 +102,7 @@ abstract class InverseRelationTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
+                Schema::SCOPE   => SortByIDScope::class
             ],
         ]));
     }

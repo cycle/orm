@@ -19,7 +19,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
+use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Spiral\Database\Exception\StatementException;
@@ -95,7 +95,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -116,7 +116,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -137,7 +137,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedPosts(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
@@ -158,7 +158,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedPostsASC(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
@@ -179,7 +179,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
@@ -202,7 +202,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedASCInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
@@ -225,7 +225,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedPostsInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments', [
@@ -248,7 +248,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedPostsASCInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments', [
@@ -271,7 +271,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedPromisedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
@@ -292,7 +292,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -311,7 +311,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -330,7 +330,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testPostOrderedPromisedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
@@ -351,7 +351,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testPostOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -370,7 +370,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testPostOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -391,7 +391,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedAndWhereReversed(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -410,7 +410,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedAndWhereReversedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -432,7 +432,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -451,7 +451,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -470,7 +470,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testCustomWhereInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::WHERE   => ['@.level' => ['>=' => 2]]
         ]);
 
@@ -547,7 +547,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE   => ['@.level' => ['>=' => 3]],
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
@@ -573,7 +573,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
 
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE   => ['@.level' => ['>=' => 3]],
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.column' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
@@ -587,8 +587,8 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         $eSchema = [];
         $rSchema = [];
 
-        if (isset($relationSchema[Schema::CONSTRAIN])) {
-            $eSchema[Schema::CONSTRAIN] = $relationSchema[Schema::CONSTRAIN];
+        if (isset($relationSchema[Schema::SCOPE])) {
+            $eSchema[Schema::SCOPE] = $relationSchema[Schema::SCOPE];
         }
 
         if (isset($relationSchema[Relation::WHERE])) {
@@ -617,7 +617,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
                             ] + $rSchema,
                     ]
                 ],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
+                Schema::SCOPE   => SortByIDScope::class
             ],
             Post::class    => [
                 Schema::ROLE        => 'post',

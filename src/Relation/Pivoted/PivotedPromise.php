@@ -44,9 +44,9 @@ final class PivotedPromise implements PromiseInterface
 
     /**
      * @param ORMInterface $orm
-     * @param string       $target
-     * @param array        $relationSchema
-     * @param mixed        $innerKey
+     * @param string $target
+     * @param array $relationSchema
+     * @param mixed $innerKey
      */
     public function __construct(ORMInterface $orm, string $target, array $relationSchema, $innerKey)
     {
@@ -113,9 +113,9 @@ final class PivotedPromise implements PromiseInterface
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'constrain' => $this->orm->getSource($this->target)->getConstrain(),
-            'as'        => $this->target,
-            'method'    => JoinableLoader::POSTLOAD
+            'scope' => $this->orm->getSource($this->target)->getScope(),
+            'as' => $this->target,
+            'method' => JoinableLoader::POSTLOAD
         ]);
 
         $query = $loader->configureQuery($query, [$this->innerKey]);

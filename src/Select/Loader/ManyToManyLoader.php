@@ -24,7 +24,6 @@ use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
-use Spiral\Database\StatementInterface;
 
 class ManyToManyLoader extends JoinableLoader
 {
@@ -37,15 +36,15 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'load'      => false,
-        'constrain' => true,
-        'method'    => self::POSTLOAD,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null,
-        'where'     => null,
-        'orderBy'   => null,
-        'pivot'     => null,
+        'load' => false,
+        'scope' => true,
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
+        'where' => null,
+        'orderBy' => null,
+        'pivot' => null,
     ];
 
     /** @var PivotLoader */
@@ -73,17 +72,19 @@ class ManyToManyLoader extends JoinableLoader
 
     /**
      * @param LoaderInterface $parent
-     * @param array           $options
+     * @param array $options
      * @return LoaderInterface
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
+        $options = $this->prepareOptions($options);
+
         /** @var ManyToManyLoader $loader */
         $loader = parent::withContext($parent, $options);
         $loader->pivot = $loader->pivot->withContext(
             $loader,
             [
-                'load'   => $loader->isLoaded(),
+                'load' => $loader->isLoaded(),
                 'method' => $options['method'] ?? self::JOIN,
             ] + ($options['pivot'] ?? [])
         );
@@ -93,9 +94,9 @@ class ManyToManyLoader extends JoinableLoader
 
     /**
      * @param string $relation
-     * @param array  $options
-     * @param bool   $join
-     * @param bool   $load
+     * @param array $options
+     * @param bool $join
+     * @param bool $load
      * @return LoaderInterface
      */
     public function loadRelation(
@@ -122,7 +123,7 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        if ($this->isLoaded() && $this->isJoined() && (int) $query->getLimit() !== 0) {
+        if ($this->isLoaded() && $this->isJoined() && (int)$query->getLimit() !== 0) {
             throw new LoaderException('Unable to load data using join with limit on parent query');
         }
 

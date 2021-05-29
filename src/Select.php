@@ -17,6 +17,7 @@ use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
+use Cycle\ORM\Select\ScopeInterface;
 use IteratorAggregate;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Pagination\PaginableInterface;
@@ -114,16 +115,26 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
-     * Create new Selector with applied scope. By default no constrain used.
+     * Create new Selector with applied scope. By default no scope used.
      *
+     * @param ScopeInterface|null $scope
+     * @return Select
+     */
+    public function scope(?ScopeInterface $scope): self
+    {
+        $this->loader->setScope($scope);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Will be dropped in next major release. Use {@see scope()} instead.
      * @param ConstrainInterface|null $constrain
      * @return Select
      */
-    public function constrain(ConstrainInterface $constrain = null): self
+    public function constrain(?ConstrainInterface $constrain = null): self
     {
-        $this->loader->setConstrain($constrain);
-
-        return $this;
+        return $this->scope($constrain);
     }
 
     /**

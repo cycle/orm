@@ -21,12 +21,12 @@ final class Source implements SourceInterface
     /** @var string */
     private $table;
 
-    /** @var ConstrainInterface|null */
-    private $constrain = null;
+    /** @var ScopeInterface|null */
+    private $scope = null;
 
     /**
      * @param DatabaseInterface $database
-     * @param string            $table
+     * @param string $table
      */
     public function __construct(DatabaseInterface $database, string $table)
     {
@@ -53,10 +53,10 @@ final class Source implements SourceInterface
     /**
      * @inheritdoc
      */
-    public function withConstrain(?ConstrainInterface $constrain): SourceInterface
+    public function withScope(?ScopeInterface $scope): SourceInterface
     {
         $source = clone $this;
-        $source->constrain = $constrain;
+        $source->scope = $scope;
 
         return $source;
     }
@@ -64,8 +64,26 @@ final class Source implements SourceInterface
     /**
      * @inheritdoc
      */
+    public function getScope(): ?ScopeInterface
+    {
+        return $this->scope;
+    }
+
+    /**
+     * @inheritdoc
+     * @deprecated Use {@see withScope()} instead.
+     */
+    public function withConstrain(?ConstrainInterface $constrain): SourceInterface
+    {
+        return $this->withScope($constrain);
+    }
+
+    /**
+     * @inheritdoc
+     * @deprecated Use {@see getScope()} instead.
+     */
     public function getConstrain(): ?ConstrainInterface
     {
-        return $this->constrain;
+        return $this->getScope();
     }
 }

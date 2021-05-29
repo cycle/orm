@@ -15,8 +15,8 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Fixtures\SortByLevelConstrain;
-use Cycle\ORM\Tests\Fixtures\SortByLevelDESCConstrain;
+use Cycle\ORM\Tests\Fixtures\SortByLevelDESCScope;
+use Cycle\ORM\Tests\Fixtures\SortByLevelScope;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -91,7 +91,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
     public function testOrderedByScope(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC'])
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC'])
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -126,7 +126,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC'])
+            'constrain' => new Select\Scope\QueryScope([], ['@.level' => 'DESC'])
         ])->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -154,7 +154,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags', [
             'method'    => Select\JoinableLoader::INLOAD,
-            'constrain' => new Select\QueryConstrain([], ['@.level' => 'ASC'])
+            'constrain' => new Select\Scope\QueryScope([], ['@.level' => 'ASC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -182,7 +182,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags', [
             'method'    => Select\JoinableLoader::INLOAD,
-            'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC'])
+            'constrain' => new Select\Scope\QueryScope([], ['@.level' => 'DESC'])
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -233,7 +233,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByLevelConstrain::class
+                Schema::SCOPE   => SortByLevelScope::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -306,7 +306,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByLevelDESCConstrain::class
+                Schema::SCOPE   => SortByLevelDESCScope::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -379,7 +379,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByLevelDESCConstrain::class
+                Schema::SCOPE   => SortByLevelDESCScope::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -401,7 +401,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'constrain' => new SortByLevelConstrain()
+            'constrain' => new SortByLevelScope()
         ])->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
@@ -455,7 +455,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByLevelConstrain::class
+                Schema::SCOPE   => SortByLevelScope::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',
@@ -529,7 +529,7 @@ abstract class ManyToManyConstrainedTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'name', 'level'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByLevelDESCConstrain::class
+                Schema::SCOPE   => SortByLevelDESCScope::class
             ],
             TagContext::class => [
                 Schema::ROLE        => 'tag_context',

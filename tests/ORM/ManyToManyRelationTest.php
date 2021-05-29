@@ -13,7 +13,6 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -202,7 +201,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('tags', [
             'method'    => Select\JoinableLoader::INLOAD,
-            'constrain' => new Select\QueryConstrain([], ['id' => 'ASC'])
+            'constrain' => new Select\Scope\QueryScope([], ['id' => 'ASC'])
         ])->orderBy(['id' => 'ASC']);
 
         $this->assertSame([

@@ -91,7 +91,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrdered(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -118,7 +118,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedDesc(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -145,7 +145,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -174,7 +174,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testWithOrderByAndConstrainOrdered(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
         ]);
 
@@ -341,7 +341,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -370,7 +370,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -399,7 +399,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedPromisedDESC(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -428,7 +428,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -482,7 +482,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedDESCAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -508,7 +508,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -536,7 +536,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedDESCAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -564,7 +564,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testConstrainOrderedAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'ASC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -592,7 +592,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testOrderedDESCAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -620,7 +620,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testCustomWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -643,7 +643,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
     public function testCustomWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.level' => 'DESC']),
             Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -731,7 +731,7 @@ abstract class ManyToManyConstrainTest extends BaseTest
         $this->expectException(StatementException::class);
 
         $this->orm = $this->withTagSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'ASC']),
+            Schema::SCOPE => new Select\Scope\QueryScope([], ['@.column' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -742,8 +742,8 @@ abstract class ManyToManyConstrainTest extends BaseTest
     protected function withTagSchema(array $relationSchema)
     {
         $eSchema = [];
-        if (isset($relationSchema[Schema::CONSTRAIN])) {
-            $eSchema[Schema::CONSTRAIN] = $relationSchema[Schema::CONSTRAIN];
+        if (isset($relationSchema[Schema::SCOPE])) {
+            $eSchema[Schema::SCOPE] = $relationSchema[Schema::SCOPE];
         }
 
         $rSchema = $relationSchema[Relation::SCHEMA] ?? [];

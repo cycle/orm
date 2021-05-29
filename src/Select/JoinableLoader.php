@@ -16,7 +16,6 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
-use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Database\StatementInterface;
 
@@ -26,7 +25,6 @@ use Spiral\Database\StatementInterface;
 abstract class JoinableLoader extends AbstractLoader implements JoinableInterface
 {
     use ColumnsTrait;
-    use ConstrainTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -35,25 +33,25 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     protected $options = [
         // load relation data
-        'load'      => false,
+        'load' => false,
 
         // true or instance to enable, false or null to disable
-        'constrain' => true,
+        'scope' => true,
 
         // scope to be used for the relation
-        'method'    => null,
+        'method' => null,
 
         // load method, see AbstractLoader constants
-        'minify'    => true,
+        'minify' => true,
 
         // when true all loader columns will be minified (only for loading)
-        'as'        => null,
+        'as' => null,
 
         // table alias
-        'using'     => null,
+        'using' => null,
 
         // alias used by another relation
-        'where'     => null,
+        'where' => null,
 
         // where conditions (if any)
     ];
@@ -66,9 +64,9 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * @param ORMInterface $orm
-     * @param string       $name
-     * @param string       $target
-     * @param array        $schema
+     * @param string $name
+     * @param string $target
+     * @param array $schema
      */
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
@@ -102,9 +100,11 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
+        $options = $this->prepareOptions($options);
+
         /**
          * @var AbstractLoader $parent
-         * @var self           $loader
+         * @var self $loader
          */
         $loader = parent::withContext($parent, $options);
 
@@ -122,14 +122,12 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         //Calculate table alias
         $loader->options['as'] = $loader->calculateAlias($parent);
 
-        if (array_key_exists('constrain', $options)) {
-            if ($loader->options['constrain'] instanceof ConstrainInterface) {
-                $loader->setConstrain($loader->options['constrain']);
-            } elseif (is_string($loader->options['constrain'])) {
-                $loader->setConstrain($this->orm->getFactory()->make($loader->options['constrain']));
+        if (array_key_exists('scope', $options)) {
+            if ($loader->options['scope'] instanceof ScopeInterface) {
+                $loader->setScope($loader->options['scope']);
+            } elseif (is_string($loader->options['scope'])) {
+                $loader->setScope($this->orm->getFactory()->make($loader->options['scope']));
             }
-        } else {
-            $loader->setConstrain($this->getSource()->getConstrain());
         }
 
         if ($loader->isLoaded()) {
@@ -204,7 +202,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * Configure query with conditions, joins and columns.
      *
      * @param SelectQuery $query
-     * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
+     * @param array $outerKeys Set of OUTER_KEY values collected by parent loader.
      * @return SelectQuery
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
@@ -218,7 +216,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 $this->mountColumns($query, $this->options['minify'], '', true);
             }
 
-            if ($this->options['load'] instanceof ConstrainInterface) {
+            if ($this->options['load'] instanceof ScopeInterface) {
                 $this->options['load']->apply($this->makeQueryBuilder($query));
             }
 
@@ -234,10 +232,10 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * @param SelectQuery $query
      * @return SelectQuery
      */
-    protected function applyConstrain(SelectQuery $query): SelectQuery
+    protected function applyScope(SelectQuery $query): SelectQuery
     {
-        if ($this->constrain !== null) {
-            $this->constrain->apply($this->makeQueryBuilder($query));
+        if ($this->scope !== null) {
+            $this->scope->apply($this->makeQueryBuilder($query));
         }
 
         return $query;

@@ -35,14 +35,14 @@ class HasManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'load'      => false,
-        'constrain' => true,
-        'method'    => self::POSTLOAD,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null,
-        'where'     => null,
-        'orderBy'   => null,
+        'load' => false,
+        'scope' => true,
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
+        'where' => null,
+        'orderBy' => null,
     ];
 
     /**
@@ -60,7 +60,7 @@ class HasManyLoader extends JoinableLoader
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        if ($this->isLoaded() && $this->isJoined() && (int) $query->getLimit() !== 0) {
+        if ($this->isLoaded() && $this->isJoined() && (int)$query->getLimit() !== 0) {
             throw new LoaderException('Unable to load data using join with limit on parent query');
         }
 

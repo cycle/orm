@@ -15,7 +15,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Fixtures\SortByLevelDESCConstrain;
+use Cycle\ORM\Tests\Fixtures\SortByLevelDESCScope;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -207,7 +207,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
     public function testLoadRelationOrderByPivotColumn(): void
     {
         $this->orm = $this->withPivotSchema([
-            Schema::CONSTRAIN => SortByLevelDESCConstrain::class,
+            Schema::SCOPE => SortByLevelDESCScope::class,
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -319,7 +319,7 @@ abstract class ManyToManyConstrainedPivotTest extends BaseTest
     public function testLoaderRelationWithConstrain(): void
     {
         $this->orm = $this->withPivotSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain(
+            Schema::SCOPE => new Select\Scope\QueryScope(
                 ['@.level' => ['>' => 3]],
                 ['@.level' => 'DESC']
             ),

@@ -17,7 +17,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByMsgConstrain;
+use Cycle\ORM\Tests\Fixtures\SortByMsgScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UUIDMapper;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -107,7 +107,7 @@ abstract class UUIDTest extends BaseTest
                 Schema::COLUMNS     => ['id', 'user_id', 'message'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByMsgConstrain::class
+                Schema::SCOPE   => SortByMsgScope::class
             ]
         ]));
     }

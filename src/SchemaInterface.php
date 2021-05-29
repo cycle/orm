@@ -18,21 +18,26 @@ interface SchemaInterface
     /*
      * Various segments of schema.
      */
-    public const ROLE         = 0;
-    public const ENTITY       = 1;
-    public const MAPPER       = 2;
-    public const SOURCE       = 3;
-    public const REPOSITORY   = 4;
-    public const DATABASE     = 5;
-    public const TABLE        = 6;
-    public const PRIMARY_KEY  = 7;
+    public const ROLE = 0;
+    public const ENTITY = 1;
+    public const MAPPER = 2;
+    public const SOURCE = 3;
+    public const REPOSITORY = 4;
+    public const DATABASE = 5;
+    public const TABLE = 6;
+    public const PRIMARY_KEY = 7;
     public const FIND_BY_KEYS = 8;
-    public const COLUMNS      = 9;
-    public const RELATIONS    = 10;
-    public const CHILDREN     = 11;
-    public const CONSTRAIN    = 12;
-    public const TYPECAST     = 13;
-    public const SCHEMA       = 14;
+    public const COLUMNS = 9;
+    public const RELATIONS = 10;
+    public const CHILDREN = 11;
+    public const SCOPE = 12;
+    public const TYPECAST = 13;
+    public const SCHEMA = 14;
+
+    /**
+     * @deprecated use {@see SchemaInterface::SCOPE} instead
+     */
+    public const CONSTRAIN = self::SCOPE;
 
     /**
      * Return all roles defined within the schema.
@@ -63,7 +68,7 @@ interface SchemaInterface
      * Example: $schema->define(User::class, SchemaInterface::DATABASE);
      *
      * @param string $role
-     * @param int    $property See ORM constants.
+     * @param int $property See ORM constants.
      * @return mixed
      *
      * @throws SchemaException

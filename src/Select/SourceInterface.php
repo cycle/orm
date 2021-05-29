@@ -35,14 +35,27 @@ interface SourceInterface
     /**
      * Associate query constrain (or remove association).
      *
+     * @param ScopeInterface|null $scope
+     * @return SourceInterface
+     */
+    public function withScope(?ScopeInterface $scope): SourceInterface;
+
+    /**
+     * Return associated query constrain.
+     *
+     * @return ScopeInterface|null
+     */
+    public function getScope(): ?ScopeInterface;
+
+    /**
+     * @deprecated Use {@see withScope()} instead.
      * @param ConstrainInterface|null $constrain
      * @return SourceInterface
      */
     public function withConstrain(?ConstrainInterface $constrain): SourceInterface;
 
     /**
-     * Return associated query constrain.
-     *
+     * @deprecated Use {@see getScope()} instead.
      * @return ConstrainInterface|null
      */
     public function getConstrain(): ?ConstrainInterface;

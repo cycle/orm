@@ -138,7 +138,7 @@ abstract class AbstractNode
         if ($this->deduplicate($data)) {
             foreach ($this->trackReferences as $key) {
                 if (!empty($data[$key])) {
-                    $this->references[$key][$data[$key]][] = &$data;
+                    $this->references[$key][(string)$data[$key]][] = &$data;
                 }
             }
 
@@ -294,6 +294,8 @@ abstract class AbstractNode
             end($this->references[$key]);
             $criteria = key($this->references[$key]);
         }
+
+        $criteria = (string)$criteria;
 
         if (!array_key_exists($criteria, $this->references[$key])) {
             throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");

@@ -17,7 +17,10 @@ use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\RunnerInterface;
 use Cycle\ORM\Transaction\Tuple;
+use Generator;
 use SplObjectStorage;
+use Throwable;
+use Traversable;
 
 /**
  * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
@@ -86,7 +89,7 @@ final class Transaction implements TransactionInterface
     {
         try {
             $this->walkPool();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->runner->rollback();
 
             // no calculations must be kept in node states, resetting
@@ -169,7 +172,7 @@ final class Transaction implements TransactionInterface
             if ($entity instanceof PromiseInterface && $entity->__loaded()) {
                 $entity = $entity->__resolve();
                 if ($entity === null) {
-                    echo "pool: skip unresolved promise\n";
+                    Pool::DEBUG AND print "pool: skip unresolved promise\n";
                     continue;
                 }
                 $tuple->entity = $entity;
@@ -186,7 +189,7 @@ final class Transaction implements TransactionInterface
                 // $pool->detach($entity);
                 continue;
             }
-            echo sprintf(
+            Pool::DEBUG AND print sprintf(
                 "\npool: status: %s, \033[90m%s\033[0m, task: %s data: %s\n",
                 $tuple->status,
                 $node === null ? get_class($entity) : $node->getRole(),
@@ -253,19 +256,19 @@ final class Transaction implements TransactionInterface
         $deferred = false;
         $resolved = true;
         foreach ($map->getMasters() as $name => $relation) {
-            echo "Master relation: {$name} " . get_class($relation);
+            Pool::DEBUG AND print "Master relation: {$name} " . get_class($relation);
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             if (/*!$relation->isCascade() || */$relationStatus === RelationInterface::STATUS_RESOLVED) {
-                echo " [skip] \n";
+                Pool::DEBUG AND print " [skip] \n";
                 continue;
             }
-            echo " [process] \n";
+            Pool::DEBUG AND print " [process] \n";
 
             if ($relation instanceof ShadowBelongsTo) {
                 # Check relation is connected
                 # Connected -> $parentNode->getRelationStatus()
                 # Disconnected -> WAIT if Tuple::STATUS_PREPARING
-                $relation->newQueue($this->pool, $tuple, null);
+                $relation->newQueue($this->pool, $tuple, $tuple->node->getRelation($relation->getName()));
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
 
                 if ($tuple->status < Tuple::STATUS_PROPOSED) {
@@ -301,13 +304,13 @@ final class Transaction implements TransactionInterface
         $deferred = false;
         $resolved = true;
         foreach ($map->getSlaves() as $name => $relation) {
-            echo "Slave relation: {$name}";
+            Pool::DEBUG AND print "Slave relation: {$name}";
             if (!$relation->isCascade() || $tuple->node->getRelationStatus($relation->getName()) === RelationInterface::STATUS_RESOLVED) {
                 // todo check changes for not cascaded relations?
-                echo " [skip] \n";
+                Pool::DEBUG AND print " [skip] \n";
                 continue;
             }
-            echo " [process] \n";
+            Pool::DEBUG AND print " [process] \n";
             $tuple->state === null or $tuple->state->markVisited($name); // ?
 
             if ($relation instanceof ReversedRelationInterface) {
@@ -321,7 +324,7 @@ final class Transaction implements TransactionInterface
                 $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
                 if ($resolved) {
-                    $tuple->node->setRelation($name, $entityData[$name] ?? null);
+                    // $tuple->node->setRelation($name, $entityData[$name] ?? null);
                     if ($tuple->node->hasState()) {
                         $tuple->node->getState()->setRelation($name, $child);
                     }
@@ -335,7 +338,7 @@ final class Transaction implements TransactionInterface
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map): void
     {
         if (!$map->hasEmbedded() && !$tuple->node->hasChanges()) {
-            echo "No changes \n";
+            Pool::DEBUG AND print "No changes \n";
             $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED ? Tuple::STATUS_PROCESSED : $tuple->status;
             return;
         }
@@ -415,10 +418,10 @@ final class Transaction implements TransactionInterface
     {
         $tuple->state = $tuple->state ?? $tuple->node->getState();
 
-        echo sprintf("Store with status %s\n", $tuple->status);
+        Pool::DEBUG AND print sprintf("Store with status %s\n", $tuple->status);
         if ($tuple->node->getStatus() === Node::NEW) {
             $tuple->state->setStatus(Node::SCHEDULED_INSERT);
-            echo "Its a CREATE command;\n";
+            Pool::DEBUG AND print "Its a CREATE command;\n";
             /** @var Insert $command */
             $command = $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
             return $command;
@@ -430,7 +433,7 @@ final class Transaction implements TransactionInterface
         }
         $tuple->state->setStatus(Node::SCHEDULED_UPDATE);
 
-        echo "Its a UPDATE command;\n";
+        Pool::DEBUG AND print "Its a UPDATE command;\n";
 
         /** @var Update $command */
         $command = $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
@@ -453,7 +456,7 @@ final class Transaction implements TransactionInterface
      * Fetch commands which are ready for the execution. Provide ready commands
      * as generated value and delayed commands as the key.
      */
-    protected function sort(iterable $commands): \Generator
+    protected function sort(iterable $commands): Generator
     {
         /** @var CommandInterface $command */
         foreach ($commands as $command) {
@@ -463,7 +466,7 @@ final class Transaction implements TransactionInterface
                 continue;
             }
 
-            if ($command instanceof \Traversable) {
+            if ($command instanceof Traversable) {
                 // deepening (cut-off on first not-ready level)
                 yield from $this->sort($command);
                 continue;

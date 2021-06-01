@@ -8,6 +8,7 @@ use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\InitCarrierInterface;
 use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
+use Cycle\ORM\Command\Traits\WaitCommandTrait;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Exception\CommandException;
@@ -23,6 +24,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
 {
     use ContextTrait;
     use ErrorTrait;
+    // use WaitCommandTrait;
 
     /**
      * Special identifier to forward insert key into
@@ -112,14 +114,6 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
         //         $value = $data[$key] ?? null;
         //     }
         //
-        // foreach ($this->consumers as $key => $consumers) {
-        //     $fresh = true;
-        //     if ($key === self::INSERT_ID) {
-        //         $value = $insertID;
-        //     } else {
-        //         $value = $data[$key] ?? null;
-        //     }
-        //
         //     foreach ($consumers as $id => $consumer) {
         //         /** @var ConsumerInterface $cn */
         //         $cn = $consumer[0];
@@ -135,11 +129,14 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
 
         $this->state->setStatus(Node::MANAGED);
         $this->state->setTransactionData($data);
-        if ($insertID !== null && count($this->primaryKeys) === 1) {
-            $this->state->setData([$this->primaryKeys[0] => $insertID]);
-            $this->state->setTransactionData([$this->primaryKeys[0] => $insertID]);
-            // $this->transactionData[$this->primaryKeys[0]] = $insertID;
-            // $this->state->register($this->primaryKeys[0], $insertID);
+        if (count($this->primaryKeys) > 0) {
+            $fpk = $this->primaryKeys[0]; // first PK
+            if ($insertID !== null && count($this->primaryKeys) === 1 && !isset($data[$fpk])) {
+                $this->state->setData([$fpk => $insertID]);
+                $this->state->setTransactionData([$fpk => $insertID]);
+                // $this->transactionData[$this->primaryKeys[0]] = $insertID;
+                // $this->state->register($fpk, $insertID);
+            }
         }
 
         parent::execute();

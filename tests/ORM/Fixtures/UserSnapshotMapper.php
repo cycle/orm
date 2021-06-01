@@ -46,21 +46,22 @@ class UserSnapshotMapper extends Mapper
     {
         $data = $node->getData();
         unset($data['id']);
+        $state = new State(Node::SCHEDULED_INSERT, $data + [
+            'at'     => new \DateTimeImmutable(),
+            'action' => $action
+        ]);
 
         $snap = new Insert(
             $this->source->getDatabase(),
             'user_snapshots',
-            $data + [
-                'at'     => new \DateTimeImmutable(),
-                'action' => $action
-            ]
+            $state
         );
 
         if ($cc instanceof Insert) {
-            $snap->waitContext('user_id', true);
-            $cc->forward(Insert::INSERT_ID, $snap, 'user_id');
+            $state->waitContext('user_id', true);
+            $node->forward('id', $state, 'user_id');
         } else {
-            $snap->register('user_id', $node->getData()['id'], true);
+            $state->register('user_id', $node->getData()['id'], true);
         }
 
         return $snap;

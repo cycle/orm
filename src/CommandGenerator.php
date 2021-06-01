@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Split;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface;
-use Cycle\ORM\Command\InitCarrierInterface;
 use Cycle\ORM\Heap\Node;
 
 /**
@@ -19,28 +17,22 @@ final class CommandGenerator
     {
         $state = $node->getState();
 
-        if ($node->getStatus() == Node::NEW) {
-            $cmd = $mapper->queueCreate($entity, $node, $state);
-            $state->setCommand($cmd);
-
-            return $cmd;
+        if ($node->getStatus() === Node::NEW) {
+            return $mapper->queueCreate($entity, $node, $state);
         }
 
-        $head = $state->getCommand();
-        if ($head === null) {
-            return $mapper->queueUpdate($entity, $node, $state);
-        }
+        return $mapper->queueUpdate($entity, $node, $state);
 
-        // we can not use current command as [head, tail] update tuple
-        if (!$head instanceof InitCarrierInterface) {
-            return $head;
-        }
-
-        // in cases where we have to update new entity we can merge two commands into one
-        $split = new Split($head, $mapper->queueUpdate($entity, $node, $state));
-        $state->setCommand($split);
-
-        return $split;
+        // // we can not use current command as [head, tail] update tuple
+        // if (!$head instanceof InitCarrierInterface) {
+        //     return $head;
+        // }
+        //
+        // // in cases where we have to update new entity we can merge two commands into one
+        // $split = new Split($head, $mapper->queueUpdate($entity, $node, $state));
+        // $state->setCommand($split);
+        //
+        // return $split;
     }
 
     public function generateDelete(MapperInterface $mapper, object $entity, Node $node): CommandInterface

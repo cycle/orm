@@ -14,11 +14,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
+use IteratorAggregate;
 
 /**
  * Promise use loader to configure query and it's scope.
  */
-final class PivotedPromise implements PromiseInterface
+final class PivotedPromise implements PromiseInterface, IteratorAggregate
 {
     /** @internal */
     private ?ORMInterface $orm;
@@ -127,5 +128,10 @@ final class PivotedPromise implements PromiseInterface
         $this->orm = null;
 
         return $this->resolved;
+    }
+
+    public function getIterator()
+    {
+        return $this->__resolve();
     }
 }

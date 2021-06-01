@@ -13,6 +13,8 @@ use Traversable;
 
 final class Pool implements IteratorAggregate, \Countable
 {
+    public const DEBUG = false;
+
     /** @var SplObjectStorage<object, Tuple> */
     private SplObjectStorage $storage;
     private bool $priorityEnabled = false;
@@ -24,6 +26,44 @@ final class Pool implements IteratorAggregate, \Countable
     {
         $this->storage = new SplObjectStorage();
     }
+
+    /*
+     * todo
+     * задания:
+     * Store - добавить/обновить
+     * Delete - автоудаление (с ожиданием обработки всех необработанных сущностей - вдруг найдётся новый родитель).
+     *          Если встретится в стейте, то обновить родителя, задание поменять на STORE
+     * ForceDelete - 100% удалить. В стейтах если встретится - тоже удалить
+     *
+     * добавить статусы для заданий:
+     * - PREPARING не обработанное
+     * - PROCESSED обработанное? (удаляется из пула)
+     * - WAITING ожидает обработки всех необработанных сущностей
+     * - DEFERRED ожидает разрешения DEFERRED связи
+     *
+     *
+     * добавить зависимости Node от Node на выполнение заданий:
+     * - при добавлении и изменении зависимость от родителей
+     * - при удалении зависимость от потомков
+     *
+     *
+     * добавить статус для связей стейтов:
+     * - processing в процессе
+     * - deferred для BelongsTo, если родитель на том конце не зарезолвен
+     * - resolved если все ноды на том конце RESOLVED
+     *
+     * Статусы ноды:
+     * - PROMISED обещанная
+     * - NEW на добавление (добавлена в кучу, не сохранена в бд)
+     * - на обновление
+     * - на удаление
+     * - RESOLVED (статус ноды синхронизирован с БД в транзакции)
+     * - синхронизировано (нода синхронизирована после транзакции)
+     *
+     * Оптимизации:
+     * при обработке сущности если она ожидает какие-то родительские или deferred связи, можно выяснить по каким полям.
+     * Эти поля считать блокирующими, а связи по неблокирующим полям можно отметить resolved
+     */
     public function attach(
         object $entity,
         #[ExpectedValues(valuesFromClass: Tuple::class)]
@@ -78,10 +118,10 @@ final class Pool implements IteratorAggregate, \Countable
             $tuple->status
         );
         if (($this->priorityAutoAttach || $highPriority) && $tuple->status === Tuple::STATUS_PREPARING) {
-            echo "\033[90mWith priority $string\033[0m";
+            \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mWith priority $string\033[0m";
             $this->priorityStorage->attach($tuple->entity, $tuple);
         } else {
-            echo "\033[90m$string\033[0m";
+            \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90m$string\033[0m";
             $this->storage->attach($tuple->entity, $tuple);
         }
     }
@@ -104,6 +144,11 @@ final class Pool implements IteratorAggregate, \Countable
     ): Tuple {
         return $this->attach($entity, Tuple::TASK_DELETE, $cascade, $node, $state);
     }
+    // public function detach(object $entity): void
+    // {
+    //     $this->storage->detach($entity);
+    //     $this->storage->offsetUnset($entity);
+    // }
     public function offsetGet(object $entity): ?Tuple
     {
         switch (true) {
@@ -119,6 +164,14 @@ final class Pool implements IteratorAggregate, \Countable
 
     /**
      * Smart iterator
+     *
+     * Правила обхода пула:
+     * 0 - все STATUS_PREPARING
+     * 1 - все STATUS_WAITING, игнорируя TASK_DELETE
+     *     * могут быть приаттачены новые STATUS_PREPARING, тогда их пропускать вперёд
+     * 2 - STATUS_DEFERRED и STATUS_WAITING+TASK_DELETE
+     *     * могут быть приаттачены новые STATUS_PREPARING, тогда их пропускать вперёд
+     *
      *
      * @return Traversable<object, Tuple>
      */
@@ -146,6 +199,9 @@ final class Pool implements IteratorAggregate, \Countable
                 break;
             }
             $pool = $this->storage;
+            if (!$pool->valid() && $pool->count() > 0) {
+                $pool->rewind();
+            }
             // $this->storage = new SplObjectStorage();
             if ($stage === 0) {
                 // foreach ($pool as $entity) {
@@ -166,8 +222,8 @@ final class Pool implements IteratorAggregate, \Countable
                 }
                 $this->priorityAutoAttach = true;
                 $stage = 1;
-                echo "\033[90mPOOL_STAGE $stage\033[0m\n";
-                $this->storage->rewind();
+                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mPOOL_STAGE $stage\033[0m\n";
+                // $this->storage->rewind();
             }
             if ($stage === 1) {
                 // foreach ($pool as $entity) {
@@ -188,8 +244,8 @@ final class Pool implements IteratorAggregate, \Countable
                     }
                 }
                 $stage = 2;
-                echo "\033[90mPOOL_STAGE $stage\033[0m\n";
-                $this->storage->rewind();
+                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mPOOL_STAGE $stage\033[0m\n";
+                // $this->storage->rewind();
             }
             if ($stage === 2) {
                 while ($pool->valid()) {

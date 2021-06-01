@@ -94,6 +94,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
+        $this->logger->display();
     }
 
     public function testStore(): void
@@ -105,15 +106,14 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $role->children->add($permission);
         $permission->parents->add($role);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($role);
-        $tr->run();
+        $this->save($role);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), 'rbac_item');
         /** @var RbacRole $fetchedRole */
-        $fetchedRole = $selector->wherePK('superAdmin')->fetchOne();
+        $fetchedRole = (new Select($this->orm->withHeap(new Heap()), 'rbac_item'))
+            ->wherePK('superAdmin')->fetchOne();
 
         self::assertInstanceOf(RbacRole::class, $fetchedRole);
+        $x = $fetchedRole->children->toArray();
         self::assertCount(1, $fetchedRole->children);
         self::assertInstanceOf(RbacPermission::class, $fetchedRole->children->first());
         self::assertSame('writeUser', $fetchedRole->children->first()->name);
@@ -128,32 +128,28 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $role->children->add($permission);
         $permission->parents->add($role);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($role);
-        $tr->run();
+        $this->save($role);
 
         unset($role, $permission);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
         /** @var RbacRole $fetchedRole */
-        $fetchedRole = (new Select($this->orm, 'rbac_item'))->wherePK('superAdmin')->fetchOne();
+        $fetchedRole = (new Select($this->orm, 'rbac_item'))
+            ->wherePK('superAdmin')->fetchOne();
         /** @var RbacPermission $fetchedPermission */
-        $fetchedPermission = (new Select($this->orm, 'rbac_item'))->wherePK('writeUser')->fetchOne();
+        $fetchedPermission = (new Select($this->orm, 'rbac_item'))
+            ->wherePK('writeUser')->fetchOne();
 
         $fetchedRole->children->removeElement($fetchedPermission);
         $fetchedPermission->parents->removeElement($fetchedRole);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($fetchedRole);
-        $tr->run();
+        $this->save($fetchedRole);
 
         $fetchedRole->children->add($fetchedPermission);
         $fetchedPermission->parents->add($fetchedRole);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($fetchedRole);
-        $tr->run();
+        $this->save($fetchedRole);
 
         self::assertTrue(true);
     }

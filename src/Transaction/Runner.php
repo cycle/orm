@@ -7,6 +7,7 @@ namespace Cycle\ORM\Transaction;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\DatabaseCommand;
 use Spiral\Database\Driver\DriverInterface;
+use Traversable;
 
 final class Runner implements RunnerInterface
 {
@@ -20,22 +21,24 @@ final class Runner implements RunnerInterface
 
     public function run(CommandInterface $command): void
     {
-        // found the same link from multiple branches
-        if ($command->isExecuted()) {
-            $this->countExecuted++;
-            return;
-        }
-
-        if ($command instanceof DatabaseCommand && $command->getDatabase() !== null) {
-            $driver = $command->getDatabase()->getDriver();
-
-            if ($driver !== null && !in_array($driver, $this->drivers, true)) {
-                $driver->beginTransaction();
-                $this->drivers[] = $driver;
+        foreach ($command instanceof Traversable ? $command : [$command] as $cmd) {
+            // found the same link from multiple branches
+            if ($cmd->isExecuted()) {
+                $this->countExecuted++;
+                return;
             }
-        }
 
-        $command->execute();
+            if ($cmd instanceof DatabaseCommand && $cmd->getDatabase() !== null) {
+                $driver = $cmd->getDatabase()->getDriver();
+
+                if ($driver !== null && !in_array($driver, $this->drivers, true)) {
+                    $driver->beginTransaction();
+                    $this->drivers[] = $driver;
+                }
+            }
+
+            $cmd->execute();
+        }
         $this->countExecuted++;
         $this->executed[] = $command;
     }

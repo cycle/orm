@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Pivoted;
 
+use Exception;
+use IteratorAggregate;
 use SplObjectStorage;
+use Traversable;
 
 /**
  * Carry information about ordered list of entities and associated pivot context.
  */
-final class PivotedStorage
+final class PivotedStorage implements IteratorAggregate
 {
     private array $elements;
 
@@ -24,6 +27,12 @@ final class PivotedStorage
     public function getElements(): array
     {
         return $this->elements;
+    }
+
+    public function getIterator()
+    {
+        return $this->context;
+        // yield from $this->getElements();
     }
 
     public function getContext(): SplObjectStorage

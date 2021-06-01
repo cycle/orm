@@ -43,7 +43,7 @@ final class RelationMap
     {
         $this->innerRelations = $innerRelations;
 
-        foreach ($this->innerRelations as $name => $relation) {
+        foreach ($innerRelations as $name => $relation) {
             if ($relation instanceof DependencyInterface) {
                 $this->dependencies[$name] = $relation;
             } elseif ($relation instanceof SameRowRelationInterface) {
@@ -64,7 +64,10 @@ final class RelationMap
     {
         // todo: it better to check instanceOf \Cycle\ORM\Relation\DependencyInterface instead of int
         // skip dependencies
-        if (in_array($relationSchema[Relation::TYPE], [Relation::BELONGS_TO, Relation::REFERS_TO], true)) {
+        if ($relationSchema[Relation::TYPE] === Relation::BELONGS_TO || $relationSchema[Relation::TYPE] === Relation::REFERS_TO) {
+            return;
+        }
+        if ($relationSchema[Relation::TYPE] === Relation::MANY_TO_MANY) {
             return;
         }
         // $schema = $relationSchema[Relation::SCHEMA];

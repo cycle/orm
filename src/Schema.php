@@ -51,6 +51,29 @@ final class Schema implements SchemaInterface
             foreach ($entitySchema[SchemaInterface::RELATIONS] ?? [] as $relName => $item) {
                 if ($item[Relation::TARGET] === $role) {
                     $result[$roleName][$relName] = $item;
+                } elseif ($item[Relation::TYPE] === Relation::MANY_TO_MANY) {
+                    $through = $this->resolveAlias($item[Relation::SCHEMA][Relation::THROUGH_ENTITY]);
+                    if ($through !== $role) {
+                        continue;
+                    }
+                    $result[$roleName][$relName] = [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => $role,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => $item[Relation::SCHEMA][Relation::CASCADE] ?? null,
+                            Relation::INNER_KEY => $item[Relation::SCHEMA][Relation::INNER_KEY],
+                            Relation::OUTER_KEY => $item[Relation::SCHEMA][Relation::THROUGH_INNER_KEY],
+                        ],
+                    ];
+                    $result[$item[Relation::TARGET]]["$roleName:$relName"] = [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => $role,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => $item[Relation::SCHEMA][Relation::CASCADE] ?? null,
+                            Relation::INNER_KEY => $item[Relation::SCHEMA][Relation::OUTER_KEY],
+                            Relation::OUTER_KEY => $item[Relation::SCHEMA][Relation::THROUGH_OUTER_KEY],
+                        ],
+                    ];
                 }
             }
         }

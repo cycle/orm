@@ -143,6 +143,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
                 Schema::RELATIONS   => []
             ]
         ]));
+        $this->logger->display();
     }
 
     public function testCreate(): void
@@ -160,28 +161,22 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $u->favorites->add($c);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
+        $this->save($u);
         $this->assertNumWrites(4);
 
         // no changes!
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, 'user');
-        $selector->load('lastComment.user')
-                 ->load('comments.user')
-                 ->load('comments.favoredBy')
-                 ->load('favorites');
-
-        $u1 = $selector->wherePK(1)->fetchOne();
+        $u1 = (new Select($this->orm, 'user'))
+            ->load('lastComment.user')
+            ->load('comments.user')
+            ->load('comments.favoredBy')
+            ->load('favorites')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertEquals($u->id, $u1->id);
         $this->assertEquals($u->lastComment->id, $u1->lastComment->id);

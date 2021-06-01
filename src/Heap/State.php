@@ -140,7 +140,7 @@ final class State implements ConsumerInterface, ProducerInterface
     ): void {
         $this->consumers[$key][] = [$consumer, $target, $stream];
 
-        echo sprintf(
+        \Cycle\ORM\Transaction\Pool::DEBUG AND print sprintf(
             "Forward to State! [%s]  target: $target, key: $key, value: %s Stream: %s\n",
             $consumer instanceof Node ? 'Node ' . $consumer->getRole() : get_class($consumer),
             (string)($this->data[$key] ?? 'NULL'),
@@ -157,9 +157,10 @@ final class State implements ConsumerInterface, ProducerInterface
         bool $fresh = false,
         int $stream = self::DATA
     ): void {
-        if (!$fresh) {
+        $oldValue = $this->data[$key] ?? null;
+        if (!$fresh && !is_object($oldValue)) {
             // custom, non value objects can be supported here
-            $fresh = ($this->data[$key] ?? null) != $value;
+            $fresh = $oldValue != $value;
         }
 
         // if (!array_key_exists($key, $this->transactionData)) {
@@ -167,7 +168,7 @@ final class State implements ConsumerInterface, ProducerInterface
         // }
 
         #
-        echo sprintf("State(%s):Register %s {$key} => %s\n", spl_object_id($this), $fresh ? 'fresh' : '', var_export($value, true));
+        // echo sprintf("State(%s):Register %s {$key} => %s\n", spl_object_id($this), $fresh ? 'fresh' : '', var_export($value, true));
         // if ($key === 'user_id' && $value === '1') {
         //     throw new \Exception();
         // }

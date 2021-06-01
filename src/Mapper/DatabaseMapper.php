@@ -71,20 +71,19 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface
     {
-        // $values = $node->getData() + $this->fetchFields($entity);
-        $values = $node->getChanges();
+        $values = $node->getData();
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);
 
         foreach ($this->primaryKeys as $key) {
             if (!isset($values[$key])) {
-                $values = array_merge($values, $this->nextPrimaryKey() ?? []);
+                foreach ($this->nextPrimaryKey() ?? [] as $pk => $value) {
+                    $state->register($pk, $value);
+                }
                 break;
             }
         }
-        // $state->setTransactionData($values);
-        // $state->setData($values);
 
         $insert = new Insert(
             $this->source->getDatabase(),
@@ -115,8 +114,8 @@ abstract class DatabaseMapper implements MapperInterface
         //
         // // in a future mapper must support solid states
         // $changes = array_udiff_assoc($data, $fromData, [Node::class, 'compare']);
-        $changes = $node->getChanges();
-        echo "changes count: " . count($changes) . "\n";
+        // $changes = $node->getChanges();
+        \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . count($node->getChanges()) . "\n";
         // $state->setTransactionData($changes);
         // $state->setData($changes);
         // Calc scope

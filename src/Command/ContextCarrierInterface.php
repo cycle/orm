@@ -8,6 +8,7 @@ use Cycle\ORM\Context\ConsumerInterface;
 
 /**
  * Command provide the ability to accept and carry the context to the persistence layer.
+ * todo may be rename to StoreCommandInterface
  */
 interface ContextCarrierInterface extends CommandInterface, ConsumerInterface
 {

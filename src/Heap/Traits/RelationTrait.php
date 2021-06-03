@@ -22,13 +22,16 @@ trait RelationTrait
 
     public function setRelationStatus(
         string $name,
-        #[ExpectedValues(values: [RelationInterface::STATUS_PROCESSING, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
+        #[ExpectedValues(values: [RelationInterface::STATUS_PREPARE, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
         int $status
     ): void {
         $this->relationStatus[$name] = $status;
+        if ($status === RelationInterface::STATUS_RESOLVED) {
+            \Cycle\ORM\Transaction\Pool::DEBUG AND print "[RESOLVED] Relation {$this->getRole()}.$name\n";
+        }
     }
 
-    #[ExpectedValues(values: [RelationInterface::STATUS_PROCESSING, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
+    #[ExpectedValues(values: [RelationInterface::STATUS_PREPARE, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
     public function getRelationStatus(string $name): ?int
     {
         return $this->relationStatus[$name] ?? null;

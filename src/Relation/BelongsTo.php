@@ -6,7 +6,6 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\PromiseOne;
@@ -65,17 +64,46 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
         $rTuple = $pool->offsetGet($related) ?? $pool->attachStore($related, true, null, null, true);
 
-        if ($rTuple->status === Tuple::STATUS_PROCESSED) {
+        if ($this->shouldPull($tuple, $rTuple)) {
             $this->pullValues($node, $rTuple->node);
             $node->getState()->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-            return;
         }
+    }
 
-        if ($rTuple->node === null && $tuple->status > Tuple::STATUS_DEFERRED) {
-            $node->getState()->setRelation($this->getName(), $related);
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+    private function shouldPull(Tuple $tuple, Tuple $rTuple): bool
+    {
+        if ($rTuple->status <= Tuple::STATUS_PROPOSED || count(array_intersect($this->outerKeys, $rTuple->waitKeys)) > 0) {
+            return false;
         }
+        // Check bidirected relation: when related entity has been removed from HasSome relation
+        $oldData = $tuple->node->getInitialData();
+        $newData = $rTuple->state->getTransactionData();
+        $current = $tuple->state->getData();
+        $noChanges = true;
+        foreach ($this->outerKeys as $i => $outerKey) {
+            $innerKey = $this->innerKeys[$i];
+            if (!array_key_exists($innerKey, $oldData) || $oldData[$innerKey] !== $newData[$outerKey]) {
+                return true;
+            }
+            $noChanges = $noChanges && $current[$innerKey] === $oldData[$innerKey];
+        }
+        // If no changes
+        if ($noChanges) {
+            $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return false;
+        }
+        // Nullable relation and null values
+        if ($this->isNullable()) {
+            foreach ($this->innerKeys as $innerKey) {
+                if (!array_key_exists($innerKey, $current) || $current[$innerKey] !== null) {
+                    return false;
+                }
+            }
+            $tuple->node->getState()->setRelation($this->getName(), null);
+            $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        }
+        return false;
     }
 
     private function pullValues(Node $node, Node $related): void

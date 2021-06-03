@@ -188,11 +188,11 @@ final class Transaction implements TransactionInterface
                 continue;
             }
             \Cycle\ORM\Transaction\Pool::DEBUG AND print sprintf(
-                "\npool: status: %s, \033[90m%s(%s)\033[0m, task: %s data: %s\n",
-                $tuple->status,
+                "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
+                ['preparing','waiting','waited','deferred','proposed','preprocessed','processed'][$tuple->status],
+                ['store', 'delete', 'force delete'][$tuple->task],
                 $node === null ? get_class($entity) : $node->getRole(),
                 spl_object_id($tuple),
-                $tuple->task,
                 $node === null || !$node->hasState()
                     ? '(has no State)'
                     : implode('|', array_map(static fn($x) => is_object($x) ? get_class($x) : (string)$x,$node->getState()->getData()))
@@ -265,13 +265,13 @@ final class Transaction implements TransactionInterface
         $resolved = true;
         $waitKeys = [];
         foreach ($map->getMasters() as $name => $relation) {
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print "Master relation: {$name} " . get_class($relation);
+            $className = "\033[33m" . substr(get_class($relation), strrpos(get_class($relation), '\\') + 1) . "\033[0m";
+            $role = $tuple->node->getRole();
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             if (/*!$relation->isCascade() || */$relationStatus === RelationInterface::STATUS_RESOLVED) {
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print " [skip] \n";
+                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Master {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
             }
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print " [process] \n";
 
             if ($relation instanceof ShadowBelongsTo) {
                 # Check relation is connected
@@ -299,7 +299,10 @@ final class Transaction implements TransactionInterface
                 }
             }
             if (!$resolved) {
+                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[34m  Master {$role}.{$name}\033[0m not resolved {$relationStatus} {$className}\n";
                 $waitKeys[] = $relation->getInnerKeys();
+            } else {
+                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }
             ob_flush();
         }
@@ -320,14 +323,14 @@ final class Transaction implements TransactionInterface
         $deferred = false;
         $resolved = true;
         foreach ($map->getSlaves() as $name => $relation) {
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print "Slave relation: {$name}";
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            $className = "\033[33m" . substr(get_class($relation), strrpos(get_class($relation), '\\') + 1) . "\033[0m";
+            $role = $tuple->node->getRole();
             if (!$relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 // todo check changes for not cascaded relations?
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print " [skip] \n";
+                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
             }
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print " [process] \n";
 
             $child = $relation->extract($entityData[$name] ?? null);
             $isWaitingKeys = count(array_intersect($relation->getInnerKeys(), $tuple->waitKeys)) > 0;
@@ -340,15 +343,18 @@ final class Transaction implements TransactionInterface
                     $isWaitingKeys || $hasChangedKeys
                 );
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print " [queuePool] => $relationStatus \n";
             }
 
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
                 && count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === count($relation->getInnerKeys())
             ) {
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print " [resolve] \n";
+                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
                 $relation->newQueue($this->pool, $tuple, $child);
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            } elseif ($relationStatus === RelationInterface::STATUS_RESOLVED) {
+                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m resolved {$className}\n";
+            } else {
+                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[34m  Slave {$role}.{$name}\033[0m process {$relationStatus} {$className}\n";
             }
             $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
             $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
@@ -367,7 +373,7 @@ final class Transaction implements TransactionInterface
     {
         if (!$map->hasEmbedded() && !$tuple->node->hasChanges()) {
             \Cycle\ORM\Transaction\Pool::DEBUG AND print "No changes \n";
-            $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED || !$hasDeferredRelations
+            $tuple->status = !$hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED
                 : max(Tuple::STATUS_DEFERRED, $tuple->status);
             return;
@@ -461,7 +467,7 @@ final class Transaction implements TransactionInterface
                         echo " - \033[31m $name [$relationStatus] " . get_class($relation) . "\033[0m\n";
                     }
                 }
-                // throw new TransactionException('Relation can not be resolved.');
+                throw new TransactionException('Relation can not be resolved.');
             }
             // ++$tuple->status;
         }

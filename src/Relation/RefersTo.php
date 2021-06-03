@@ -80,23 +80,21 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         //     return;
         // }
 
-        if ($rTuple->status === Tuple::STATUS_PROCESSED) {
+        if ($rTuple->status === Tuple::STATUS_PROCESSED
+            || $rTuple->status > Tuple::STATUS_PROPOSED && array_intersect($this->outerKeys, $rTuple->waitKeys) === []
+        ) {
             $this->pullValues($node, $rTuple->node);
-            // $node->getState()->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
 
-        // if ($rTuple->node === null) {
-            if ($tuple->status !== Tuple::STATUS_PREPARING) {
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
-            }
-            return;
-        // }
+        if ($tuple->status !== Tuple::STATUS_PREPARING) {
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
+        }
+        return;
 
-        $rNode = $rTuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        $rNode = $rNode ?? $this->getNode($related);
+        $rNode = $rTuple->node ?? $this->getNode($related);
         $this->assertValid($rNode);
         $node->getState()->setRelation($this->getName(), $related);
 

@@ -43,6 +43,11 @@ abstract class AbstractRelation implements RelationInterface
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
     }
 
+    public function getInnerKeys(): array
+    {
+        return $this->innerKeys;
+    }
+
     public function __toString(): string
     {
         // this is incorrect class

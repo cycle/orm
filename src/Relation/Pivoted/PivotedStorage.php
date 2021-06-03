@@ -12,7 +12,7 @@ use Traversable;
 /**
  * Carry information about ordered list of entities and associated pivot context.
  */
-final class PivotedStorage implements IteratorAggregate
+final class PivotedStorage implements IteratorAggregate, \Countable
 {
     private array $elements;
 
@@ -31,8 +31,7 @@ final class PivotedStorage implements IteratorAggregate
 
     public function getIterator()
     {
-        return $this->context;
-        // yield from $this->getElements();
+        yield from $this->getElements();
     }
 
     public function getContext(): SplObjectStorage
@@ -70,5 +69,9 @@ final class PivotedStorage implements IteratorAggregate
     public function set(object $entity, $pivot): void
     {
         $this->context->offsetSet($entity, $pivot);
+    }
+    public function count(): int
+    {
+        return count($this->elements);
     }
 }

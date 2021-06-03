@@ -13,7 +13,7 @@ use Traversable;
 
 final class Pool implements IteratorAggregate, \Countable
 {
-    public const DEBUG = false;
+    public const DEBUG = true;
 
     /** @var SplObjectStorage<object, Tuple> */
     private SplObjectStorage $storage;
@@ -21,10 +21,16 @@ final class Pool implements IteratorAggregate, \Countable
     private bool $priorityAutoAttach = false;
     private SplObjectStorage $priorityStorage;
     private ?SplObjectStorage $trash = null;
+    private int $happens = 0;
 
     public function __construct()
     {
         $this->storage = new SplObjectStorage();
+    }
+
+    public function someHappens(): void
+    {
+        ++$this->happens;
     }
 
     /*
@@ -223,7 +229,7 @@ final class Pool implements IteratorAggregate, \Countable
                 $this->priorityAutoAttach = true;
                 $stage = 1;
                 \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mPOOL_STAGE $stage\033[0m\n";
-                // $this->storage->rewind();
+                $this->storage->rewind();
             }
             if ($stage === 1) {
                 // foreach ($pool as $entity) {
@@ -245,9 +251,10 @@ final class Pool implements IteratorAggregate, \Countable
                 }
                 $stage = 2;
                 \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mPOOL_STAGE $stage\033[0m\n";
-                // $this->storage->rewind();
+                $this->storage->rewind();
             }
             if ($stage === 2) {
+                $this->happens = 0;
                 while ($pool->valid()) {
                     /** @var Tuple $tuple */
                     $entity = $pool->current();
@@ -268,6 +275,10 @@ final class Pool implements IteratorAggregate, \Countable
                         continue 2;
                     }
                 }
+                if ($this->happens === 0 && count($pool) > 0) {
+                    ob_flush();
+                    throw new \Exception('Transaction can not be resolved.');
+                }
             }
         } while (true);
         $this->priorityEnabled = false;
@@ -283,11 +294,17 @@ final class Pool implements IteratorAggregate, \Countable
     private function trashIt(object $entity, Tuple $tuple, SplObjectStorage $storage): void
     {
         $storage->detach($entity);
-        if ($tuple->status === Tuple::STATUS_PROCESSED) {
+        if ($tuple->status >= Tuple::STATUS_PREPROCESSED) {
             $this->trash->attach($tuple->entity, $tuple);
-        } else {
-            $this->storage->attach($tuple->entity, $tuple);
+            ++$this->happens;
+            return;
         }
+
+        if ($tuple->status % 2 === 0) {
+            ++$tuple->status;
+            ++$this->happens;
+        }
+        $this->storage->attach($tuple->entity, $tuple);
     }
     private function activatePriorityStorage(): void
     {

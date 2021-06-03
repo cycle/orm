@@ -63,11 +63,19 @@ final class RelationMap
     private function registerOuterRelation(string $role, string $container, array $relationSchema): void
     {
         // todo: it better to check instanceOf \Cycle\ORM\Relation\DependencyInterface instead of int
+        $relationType = $relationSchema[Relation::TYPE];
         // skip dependencies
-        if ($relationSchema[Relation::TYPE] === Relation::BELONGS_TO || $relationSchema[Relation::TYPE] === Relation::REFERS_TO) {
+        if ($relationType === Relation::BELONGS_TO || $relationType === Relation::REFERS_TO) {
             return;
         }
-        if ($relationSchema[Relation::TYPE] === Relation::MANY_TO_MANY) {
+        if ($relationType === Relation::MANY_TO_MANY) {
+            // $schema = $relationSchema[Relation::SCHEMA];
+            // $through = $this->schema->resolveAlias($schema[Relation::THROUGH_ENTITY]);
+            # todo: SHADOW_HAS_MANY
+            return;
+        }
+        // skip Morphed
+        if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {
             return;
         }
         // $schema = $relationSchema[Relation::SCHEMA];
@@ -219,7 +227,7 @@ final class RelationMap
 
     public function setRelationsStatus(
         Node $node,
-        #[ExpectedValues(values: [RelationInterface::STATUS_PROCESSING, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
+        #[ExpectedValues(values: [RelationInterface::STATUS_PREPARE, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
         int $status
     ): void {
         foreach ($this->dependencies  as $dependency) {

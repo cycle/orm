@@ -10,6 +10,7 @@ use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseOne;
 use Cycle\ORM\Promise\ReferenceInterface;
@@ -38,13 +39,23 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         $this->cascade = (bool)($schema[Relation::SCHEMA][Relation::CASCADE] ?? false);
     }
 
+    public function getInnerKeys(): array
+    {
+        return $this->innerKeys;
+    }
 
     public function newQueue(Pool $pool, Tuple $tuple, $related): void
     {
         ob_flush();
         $status = $tuple->node->getRelationStatus($this->getName());
-        if ($status === RelationInterface::STATUS_PROCESSING && $this->isNullable()) {
+        if ($status === RelationInterface::STATUS_PREPARE && $this->isNullable()) {
             $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
+        }
+        if ($tuple->status >= Tuple::STATUS_WAITED) {
+            // Check fields
+            if ($this->isNullable() || $this->checkFieldsExists($tuple->state)) {
+                $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            }
         }
     }
 
@@ -98,8 +109,18 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         return [$r, $r];
     }
 
-    private function isNullable(): bool
+    public function isNullable(): bool
     {
         return (bool)($this->schema[Relation::SCHEMA][Relation::NULLABLE] ?? false);
+    }
+    private function checkFieldsExists(State $state): bool
+    {
+        $data = $state->getData();
+        foreach ($this->innerKeys as $key) {
+            if (!isset($data[$key])) {
+                return false;
+            }
+        }
+        return true;
     }
 }

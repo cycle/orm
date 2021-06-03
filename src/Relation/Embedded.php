@@ -57,6 +57,11 @@ final class Embedded implements SameRowRelationInterface
         return $this->name;
     }
 
+    public function getInnerKeys(): array
+    {
+        return $this->primaryKeys;
+    }
+
     public function getTarget(): string
     {
         return $this->target;

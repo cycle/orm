@@ -168,7 +168,12 @@ final class State implements ConsumerInterface, ProducerInterface
         // }
 
         #
-        // echo sprintf("State(%s):Register %s {$key} => %s\n", spl_object_id($this), $fresh ? 'fresh' : '', var_export($value, true));
+        \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(
+            "State(%s):Register %s {$key} => %s\n",
+            spl_object_id($this),
+            $fresh ? 'fresh' : '',
+            var_export($value, true)
+        );
         // if ($key === 'user_id' && $value === '1') {
         //     throw new \Exception();
         // }

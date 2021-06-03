@@ -169,7 +169,7 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     public function hasChanges(): bool
     {
-        return $this->status === self::NEW
+        return ($this->state !== null && $this->state->getStatus() === self::NEW)
             || $this->state === null
             || array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']) !== [];
             // || array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']) !== [];

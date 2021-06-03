@@ -16,9 +16,12 @@ use JetBrains\PhpStorm\ExpectedValues;
  */
 interface RelationInterface
 {
-    public const STATUS_PROCESSING = 0;
-    public const STATUS_DEFERRED = 1;
-    public const STATUS_RESOLVED = 2;
+    public const STATUS_PREPARE = 0;
+    public const STATUS_PROCESS = 1;
+    public const STATUS_DEFERRED = 2;
+    public const STATUS_RESOLVED = 3;
+
+    public function getInnerKeys(): array;
 
     /**
      * Relation name.

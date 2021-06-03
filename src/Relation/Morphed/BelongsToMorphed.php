@@ -11,6 +11,8 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\BelongsTo;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 
 class BelongsToMorphed extends BelongsTo
 {
@@ -50,7 +52,23 @@ class BelongsToMorphed extends BelongsTo
         return [$e, $e];
     }
 
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    {
+        $status = $tuple->node->getRelationStatus($this->getName());
+        parent::newQueue($pool, $tuple, $related);
+
+        if ($status !== Relation\RelationInterface::STATUS_PREPARE) {
+            return;
+        }
+        $tuple->node->register(
+            $this->morphKey,
+            $related === null
+                ? null
+                : $this->getNode($related)->getRole(),
+            true
+        );
+    }
+    public function queue($entity, Node $node, $related, $original): CommandInterface
     {
         $wrappedStore = parent::queue($store, $entity, $node, $related, $original);
 

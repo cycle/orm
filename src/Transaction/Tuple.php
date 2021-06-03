@@ -39,6 +39,8 @@ final class Tuple
 
     public ?MapperInterface $mapper;
 
+    public array $waitKeys = [];
+
     public function __construct(
         #[ExpectedValues(values: [self::TASK_STORE, self::TASK_DELETE, self::TASK_FORCE_DELETE])]
         int $task,

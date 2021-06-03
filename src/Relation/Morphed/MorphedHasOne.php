@@ -11,6 +11,8 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasOne;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Inverted version of belongs to morphed.
@@ -42,7 +44,22 @@ class MorphedHasOne extends HasOne
         return [$r, $r];
     }
 
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
+    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    {
+        parent::newQueue($pool, $tuple, $related);
+        $node = $tuple->node;
+        if ($related !== null) {
+            $rNode = $this->getNode($related);
+
+            if ($this->fetchKey($rNode, $this->morphKey) !== $node->getRole()) {
+                // $rStore->register($this->morphKey, $node->getRole(), true);
+                $rNode->register($this->morphKey, $node->getRole(), true);
+            }
+        }
+
+    }
+
+    public function queue(object $entity, Node $node, $related, $original): CommandInterface
     {
         $rStore = parent::queue($store, $entity, $node, $related, $original);
 

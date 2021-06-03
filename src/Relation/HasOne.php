@@ -21,23 +21,16 @@ class HasOne extends AbstractRelation
 {
     use PromiseOneTrait;
 
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
-    {
-        if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStore($pool, $tuple, $related);
-        } else {
-            $this->queueDelete($pool, $tuple, $related);
-        }
-    }
-
-    private function queueStore(Pool $pool, Tuple $tuple, $related): void
+    public function queuePool(Pool $pool, Tuple $tuple, $related, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
 
         if ($original instanceof ReferenceInterface) {
+            if (!$load && $related === $original && !$this->isResolved($original)) {
+                return;
+            }
             $original = $this->resolve($original);
-            // $node->setRelation($this->getName(), $original);
         }
 
         if ($related instanceof ReferenceInterface) {
@@ -49,33 +42,54 @@ class HasOne extends AbstractRelation
             if ($original === null) {
                 return;
             }
-            // $node->getState()->setRelation($this->getName(), $related);
             $this->deleteChild($pool, $original);
             return;
         }
-        // $node->getState()->setRelation($this->getName(), $related);
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
         $rNode = $this->getNode($related, +1);
         $this->assertValid($rNode);
 
-        $changes = $node->getData();
-
-        if (!in_array($tuple->status, [
-            Tuple::STATUS_WAITED,
-            Tuple::STATUS_PREPARING,
-        ], true)) {
-            foreach ($this->innerKeys as $i => $innerKey) {
-                if (isset($changes[$innerKey])) {
-                    $rNode->register($this->outerKeys[$i], $changes[$innerKey]);
-                }
-            }
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-            $rNode->setRelationStatus($node->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
-        }
         if ($original !== null && $original !== $related) {
             $this->deleteChild($pool, $original);
         }
         $pool->attachStore($related, true, $rNode);
+    }
+
+    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    {
+        if ($tuple->task === Tuple::TASK_STORE) {
+            $this->queueStore($pool, $tuple, $related);
+        } else {
+            // todo ?
+            $this->queueDelete($pool, $tuple, $related);
+        }
+    }
+
+    private function queueStore(Pool $pool, Tuple $tuple, $related): void
+    {
+        $node = $tuple->node;
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+
+        if ($related instanceof ReferenceInterface) {
+            if (!$this->isResolved($related)) {
+                return;
+            }
+            $related = $this->resolve($related);
+        }
+
+        $rTuple = $pool->offsetGet($related);
+        $rNode = $rTuple->node;
+
+        $this->applyChanges($tuple, $rTuple);
+        $rNode->setRelationStatus($node->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
+    }
+    protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
+    {
+        $data = $parentTuple->node->getData();
+        foreach ($this->innerKeys as $i => $innerKey) {
+            $tuple->node->register($this->outerKeys[$i], $data[$innerKey]);
+        }
     }
     private function queueDelete(Pool $pool, Tuple $tuple, $related): void
     {

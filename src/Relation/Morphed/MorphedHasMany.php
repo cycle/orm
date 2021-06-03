@@ -12,6 +12,8 @@ use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseMany;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasMany;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 use Doctrine\Common\Collections\ArrayCollection;
 
 class MorphedHasMany extends HasMany
@@ -43,6 +45,17 @@ class MorphedHasMany extends HasMany
         );
 
         return [new CollectionPromise($p), $p];
+    }
+
+    protected function applyChanges(Tuple $parentTuple, Tuple $rTuple): void
+    {
+        parent::applyChanges($parentTuple, $rTuple);
+
+        $rNode = $rTuple->node;
+        $node = $parentTuple->node;
+        if ($this->fetchKey($rNode, $this->morphKey) !== $node->getRole()) {
+            $rNode->register($this->morphKey, $node->getRole(), true);
+        }
     }
 
     /**

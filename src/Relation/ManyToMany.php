@@ -56,7 +56,7 @@ class ManyToMany extends Relation\AbstractRelation
         $elements = [];
         $pivotData = new \SplObjectStorage();
 
-        $iterator = new Iterator($this->orm, $this->target, $data);
+        $iterator = new Iterator($this->orm, $this->target, $data, true);
         foreach ($iterator as $pivot => $entity) {
             if (!is_array($pivot)) {
                 // skip partially selected entities (DB level filter)

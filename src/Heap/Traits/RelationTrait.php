@@ -22,7 +22,7 @@ trait RelationTrait
 
     public function setRelationStatus(
         string $name,
-        #[ExpectedValues(values: [RelationInterface::STATUS_PREPARE, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
+        #[ExpectedValues(valuesFromClass: RelationInterface::class)]
         int $status
     ): void {
         $this->relationStatus[$name] = $status;
@@ -31,10 +31,10 @@ trait RelationTrait
         }
     }
 
-    #[ExpectedValues(values: [RelationInterface::STATUS_PREPARE, RelationInterface::STATUS_DEFERRED, RelationInterface::STATUS_RESOLVED])]
-    public function getRelationStatus(string $name): ?int
+    #[ExpectedValues(valuesFromClass: RelationInterface::class)]
+    public function getRelationStatus(string $name): int
     {
-        return $this->relationStatus[$name] ?? null;
+        return $this->relationStatus[$name] ?? RelationInterface::STATUS_PREPARE;
     }
 
     /**

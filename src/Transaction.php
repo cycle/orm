@@ -346,6 +346,7 @@ final class Transaction implements TransactionInterface
             }
 
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
+                && !$hasChangedKeys
                 && count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === count($relation->getInnerKeys())
             ) {
                 \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
@@ -423,9 +424,9 @@ final class Transaction implements TransactionInterface
     {
         $map = $this->orm->getRelationMap(isset($tuple->node) ? $tuple->node->getRole() : get_class($tuple->entity));
         // Init relations status
-        if ($tuple->status === Tuple::STATUS_PREPARING) {
-            $map->setRelationsStatus($tuple->node, RelationInterface::STATUS_PREPARE);
-        }
+        // if ($tuple->status === Tuple::STATUS_PREPARING) {
+        //     $map->setRelationsStatus($tuple->node, RelationInterface::STATUS_PREPARE);
+        // }
 
         // Dependency relations
         $result = $tuple->task === Tuple::TASK_STORE

@@ -163,6 +163,7 @@ final class Node implements ProducerInterface, ConsumerInterface
         $this->status = self::MANAGED;
         $this->data = $this->state->getTransactionData();
         $this->state = null;
+        $this->relationStatus = [];
 
         return $changes;
     }

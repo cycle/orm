@@ -28,7 +28,6 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 
     public function newQueue(Pool $pool, Tuple $tuple, $related): void
     {
-        ob_flush();
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
 

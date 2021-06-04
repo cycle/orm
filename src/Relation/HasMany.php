@@ -66,14 +66,12 @@ class HasMany extends AbstractRelation
 
     public function newQueue(Pool $pool, Tuple $tuple, $related): void
     {
-        ob_flush();
         if ($tuple->task === Tuple::TASK_STORE) {
             $this->queueStoreAll($pool, $tuple, $related);
         } else {
             // todo
             // $this->queueDelete($pool, $tuple, $related);
         }
-        ob_flush();
     }
 
     private function shouldResolveOrigin(ReferenceInterface $original, Tuple $tuple): bool

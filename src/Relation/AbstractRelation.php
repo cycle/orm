@@ -51,7 +51,7 @@ abstract class AbstractRelation implements RelationInterface
     public function __toString(): string
     {
         // this is incorrect class
-        return sprintf('%s(%s)->%s', $this->name, get_class($this), $this->target);
+        return sprintf('`%s` (%s)->%s', $this->name, get_class($this), $this->target);
     }
 
     public function getName(): string

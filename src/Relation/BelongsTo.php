@@ -23,14 +23,41 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 {
     use PromiseOneTrait;
 
+    private function checkNullValuePossibility(Tuple $tuple): bool
+    {
+        if ($tuple->status < Tuple::STATUS_WAITED) {
+            return true;
+        }
+        // todo $tuple->waitKeys ?
+
+        if (array_intersect($this->innerKeys, $tuple->state->getWaitContext()) !== []) {
+            return true;
+        }
+        // Check
+        $values = [];
+        $data = $tuple->node->getChanges();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($data[$innerKey])) {
+                return false;
+            }
+            $values[$innerKey] = $data[$innerKey];
+        }
+
+        $tuple->node->setRelation($this->getName(), $this->init($tuple->node, $values));
+        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        return true;
+    }
+
     public function newQueue(Pool $pool, Tuple $tuple, $related): void
     {
-        ob_flush();
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
 
         if ($related === null) {
             if (!$this->isNullable()) {
+                if ($this->checkNullValuePossibility($tuple)) {
+                    return;
+                }
                 throw new NullException("Relation {$this} can not be null.");
             }
 

@@ -23,6 +23,11 @@ trait ContextTrait
         }
     }
 
+    public function getWaitContext(): array
+    {
+         return $this->waitContext;
+    }
+
     public function getContext(): array
     {
         return $this->context;

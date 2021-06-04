@@ -13,7 +13,7 @@ use Traversable;
 
 final class Pool implements IteratorAggregate, \Countable
 {
-    public const DEBUG = true;
+    public const DEBUG = false;
 
     /** @var SplObjectStorage<object, Tuple> */
     private SplObjectStorage $storage;
@@ -276,7 +276,6 @@ final class Pool implements IteratorAggregate, \Countable
                     }
                 }
                 if ($this->happens === 0 && count($pool) > 0) {
-                    ob_flush();
                     throw new \Exception('Transaction can not be resolved.');
                 }
             }

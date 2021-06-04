@@ -163,10 +163,7 @@ final class Transaction implements TransactionInterface
          * @var object $entity
          * @var Tuple $tuple
          */
-        ob_implicit_flush(true);
         foreach ($pool as $entity => $tuple) {
-            flush();
-            ob_flush();
             if ($entity instanceof PromiseInterface && $entity->__loaded()) {
                 $entity = $entity->__resolve();
                 if ($entity === null) {
@@ -197,7 +194,6 @@ final class Transaction implements TransactionInterface
                     ? '(has no State)'
                     : implode('|', array_map(static fn($x) => is_object($x) ? get_class($x) : (string)$x,$node->getState()->getData()))
             );
-            ob_flush();
 
             $tuple->mapper = $tuple->mapper ?? $this->orm->getMapper($entity);
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
@@ -304,7 +300,6 @@ final class Transaction implements TransactionInterface
             } else {
                 \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }
-            ob_flush();
         }
 
         $tuple->waitKeys = array_unique(array_merge(...$waitKeys));
@@ -441,7 +436,6 @@ final class Transaction implements TransactionInterface
             // $this->pool->attachTuple($tuple);
         }
         if ($isDependenciesResolved) {
-            ob_flush();
             if ($tuple->task === Tuple::TASK_STORE) {
                 $this->resolveSelfWithEmbedded($tuple, $map, $deferred);
             } elseif ($tuple->status === Tuple::STATUS_PREPARING) {

@@ -149,14 +149,12 @@ class ManyToMany extends Relation\AbstractRelation
         $original = $node->getRelation($this->getName()) ?? new PivotedStorage();
         // $original ??= new Pivoted\PivotedStorage();
 
-        ob_flush();
         if ($related instanceof ReferenceInterface) {
             if (!$this->isResolved($related)) {
                 return;
             }
             $related = $this->resolve($related);
         }
-        ob_flush();
 
         // if ($original instanceof ReferenceInterface) {
         //     $original = $this->resolve($original);
@@ -165,7 +163,6 @@ class ManyToMany extends Relation\AbstractRelation
             $original = $this->extract($original);
             // $node->setRelation($this->getName(), $original);
         }
-        ob_flush();
 
         $relationName = $node->getRole() . ':' . $this->getName();
         foreach ($related as $item) {

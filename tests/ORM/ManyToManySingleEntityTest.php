@@ -186,6 +186,6 @@ abstract class ManyToManySingleEntityTest extends BaseTest
 
         self::assertSame('updated description', $fetchedRole->description);
 
-        $this->save($fetchedRole);
+        $this->orm = $this->orm->withHeap(new Heap());
     }
 }

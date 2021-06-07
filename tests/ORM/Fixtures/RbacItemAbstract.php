@@ -14,9 +14,7 @@ class RbacItemAbstract
      */
     public $name;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     public $description;
 
     /**
@@ -31,7 +29,7 @@ class RbacItemAbstract
      */
     public $children;
 
-    public function __construct(string $name, ?string $description = null)
+    public function __construct(string $name, string $description = null)
     {
         $this->name = $name;
         $this->description = $description;

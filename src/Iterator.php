@@ -18,24 +18,16 @@ use Cycle\ORM\Heap\Node;
  */
 final class Iterator implements \IteratorAggregate
 {
-    /**
-     * @var ORMInterface
-     */
+    /** @var ORMInterface */
     private $orm;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $role;
 
-    /**
-     * @var iterable
-     */
+    /** @var iterable */
     private $source;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $tryToFindInHeap;
 
     /**

@@ -167,9 +167,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $role->children->add($permission);
         $permission->parents->add($role);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($role);
-        $tr->run();
+        $this->save($role);
 
         unset($role, $permission);
 
@@ -188,8 +186,6 @@ abstract class ManyToManySingleEntityTest extends BaseTest
 
         self::assertSame('updated description', $fetchedRole->description);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($fetchedRole);
-        $tr->run();
+        $this->save($fetchedRole);
     }
 }

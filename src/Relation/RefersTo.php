@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Nil;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
-use Cycle\ORM\Command\Database\Update;
-use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\PromiseOne;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
-use Cycle\ORM\Schema;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -26,7 +20,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 {
     use PromiseOneTrait;
 
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple, $related): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
@@ -72,15 +66,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 return;
             }
         }
-        // $rTuple = $pool->offsetGet($related);
-        // if ($rTuple === null) {
-        //     $pool->attachStore($related, true, null, null, false);
-        //     $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
-        //     return;
-        // }
 
         if ($rTuple->status === Tuple::STATUS_PROCESSED
-            || $rTuple->status > Tuple::STATUS_PROPOSED && array_intersect($this->outerKeys, $rTuple->waitKeys) === []
+            || ($rTuple->status > Tuple::STATUS_PROPOSED && array_intersect($this->outerKeys, $rTuple->waitKeys) === [])
         ) {
             $this->pullValues($node, $rTuple->node);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
@@ -108,61 +96,5 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 $node->register($this->innerKeys[$i], $changes[$outerKey]);
             }
         }
-    }
-
-    public function queue(object $entity, Node $node, $related, $original): CommandInterface
-    {
-        // refers-to relation is always nullable (as opposite to belongs-to)
-        if ($related === null) {
-            if ($original !== null) {
-                foreach ($this->innerKeys as $innerKey) {
-                    $node->getState()->register($innerKey, null, true);
-                }
-            }
-
-            return new Nil();
-        }
-
-        $rNode = $this->getNode($related);
-        $this->assertValid($rNode);
-
-        $returnNil = true;
-        // related object exists, we can update key immediately
-        foreach ($this->outerKeys as $i => $outerKey) {
-            $outerValue = $this->fetchKey($rNode, $outerKey);
-            $innerKey = $this->innerKeys[$i];
-
-            if ($outerValue === null) {
-                $returnNil = false;
-                continue;
-            }
-            if ($outerValue != $this->fetchKey($node, $innerKey)) {
-                $node->getState()->register($innerKey, $outerValue, true);
-            }
-        }
-        if ($returnNil) {
-            $this->forwardContext($rNode, $this->outerKeys, $store, $node, $this->innerKeys);
-            return new Nil();
-        }
-
-        // update parent entity once related instance is able to provide us context key
-        $update = new Update(
-            $this->getSource($node->getRole())->getDatabase(),
-            $this->getSource($node->getRole())->getTable(),
-            $node
-        );
-
-        $this->forwardContext($rNode, $this->outerKeys, $update, $node, $this->innerKeys);
-        if ($store instanceof DatabaseCommand) {
-            $update->waitCommand($store);
-        }
-
-        // fastest way to identify the entity
-        $pk = (array)$this->orm->getSchema()->define($node->getRole(), Schema::PRIMARY_KEY);
-
-        // set where condition for update query
-        $this->forwardScope($node, $pk, $update, $pk);
-
-        return $update;
     }
 }

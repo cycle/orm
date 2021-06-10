@@ -9,6 +9,7 @@ use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
+use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
 
@@ -51,6 +52,8 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
             $this->table,
             $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
         )->run();
+        $this->state->setStatus(Node::DELETED);
+
         parent::execute();
     }
 
@@ -60,21 +63,14 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         bool $fresh = false,
         int $stream = self::DATA
     ): void {
-        if ($stream === self::SCOPE) {
-            if (empty($value)) {
-                return;
-            }
-
-            $this->freeScope($key);
-            $this->setScope($key, $value);
-
+        if ($stream !== self::SCOPE) {
+            return;
+        }
+        if (empty($value)) {
             return;
         }
 
-        if ($fresh || $value !== null) {
-            $this->state->freeContext($key);
-        }
-
-        $this->state->setContext($key, $value);
+        $this->freeScope($key);
+        $this->setScope($key, $value);
     }
 }

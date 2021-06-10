@@ -94,19 +94,6 @@ abstract class AbstractRelation implements RelationInterface
         return $this->orm->getSource($role ?? $this->target);
     }
 
-    // /**
-    //  * Get the mapper associated with a role.
-    //  */
-    // protected function getMapper(string $role = null): MapperInterface
-    // {
-    //     return $this->orm->getMapper($role ?? $this->target);
-    // }
-
-    // protected function columnName(Node $node, string $field): string
-    // {
-    //     return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
-    // }
-
     /**
      * Assert that given entity is allowed for the relation.
      *

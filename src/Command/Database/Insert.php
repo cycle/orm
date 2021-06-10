@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Command\Database;
 
 use Cycle\ORM\Command\DatabaseCommand;
-use Cycle\ORM\Command\InitCarrierInterface;
-use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
-use Cycle\ORM\Command\Traits\WaitCommandTrait;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Context\ConsumerInterface;
-use Cycle\ORM\Context\ProducerInterface;
-use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
@@ -20,11 +16,9 @@ use Spiral\Database\Driver\Postgres\Query\PostgresInsertQuery;
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-final class Insert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
+final class Insert extends DatabaseCommand implements StoreCommandInterface, ConsumerInterface
 {
-    use ContextTrait;
     use ErrorTrait;
-    // use WaitCommandTrait;
 
     /**
      * Special identifier to forward insert key into
@@ -56,24 +50,7 @@ final class Insert extends DatabaseCommand implements InitCarrierInterface, Prod
 
     public function isReady(): bool
     {
-        return $this->isContextReady();
-    }
-
-    /**
-     * Triggers only after command execution!
-     */
-    public function forward(
-        string $key,
-        ConsumerInterface $consumer,
-        string $target,
-        bool $trigger = false,
-        int $stream = ConsumerInterface::DATA
-    ): void {
-        if ($trigger) {
-            throw new CommandException('Insert command can only forward keys after the execution.');
-        }
-
-        $this->state->forward($key, $consumer, $target, $trigger, $stream);
+        return true;
     }
 
     public function hasData(): bool

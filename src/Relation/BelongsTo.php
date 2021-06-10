@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Nil;
-use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\PromiseOne;
@@ -43,12 +41,12 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $values[$innerKey] = $data[$innerKey];
         }
 
-        $tuple->node->setRelation($this->getName(), $this->init($tuple->node, $values));
+        $tuple->node->setRelation($this->getName(), $this->init($tuple->node, $values)[0]);
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         return true;
     }
 
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple, $related): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
@@ -141,32 +139,5 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 $node->register($this->innerKeys[$i], $changes[$outerKey]);
             }
         }
-    }
-
-    public function queue($entity, Node $node, $related, $original): CommandInterface
-    {
-        if ($related === null) {
-            if (!$this->isNullable()) {
-                throw new NullException("Relation {$this} can not be null.");
-            }
-
-            if ($original !== null) {
-                // reset keys
-                foreach ($this->innerKeys as $innerKey) {
-                    $node->getState()->register($innerKey, null, true);
-                }
-            }
-
-            // nothing to do
-            return new Nil();
-        }
-
-        $rStore = $this->orm->queueStore($related);
-        $rNode = $this->getNode($related);
-        $this->assertValid($rNode);
-
-        $this->forwardContext($rNode, $this->outerKeys, $store, $node, $this->innerKeys);
-
-        return $rStore;
     }
 }

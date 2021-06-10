@@ -20,17 +20,11 @@ final class Node implements ProducerInterface, ConsumerInterface
     // Different entity states in a pool
     public const PROMISED         = 0;
     public const NEW              = 1;
+    public const MANAGED          = 2;
     public const SCHEDULED_INSERT = 3;
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
-    // public const DELETED          = 6;
-    public const MANAGED          = 2;
-
-    public const DELETED        = 9;
-    public const WAITING_OTHERS   = 10; // Ожидается обработка всех персистов -- вдруг попадётся зависимость
-    public const READY            = 11; // Готово для генерации команды, но также ожидает отсроченные зависимости
-    public const WAITING_DEFERRED = 12; // Готово для генерации команды, но также ожидает отсроченные зависимости
-    public const RESOLVED         = 13; // Надёжный стейт, синхронизированный с БД
+    public const DELETED          = 6;
 
     private string $role;
 
@@ -171,7 +165,6 @@ final class Node implements ProducerInterface, ConsumerInterface
     public function hasChanges(): bool
     {
         return ($this->state !== null && $this->state->getStatus() === self::NEW)
-            || $this->state === null
             || array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']) !== [];
             // || array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']) !== [];
     }

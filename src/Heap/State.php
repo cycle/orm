@@ -30,10 +30,8 @@ final class State implements ConsumerInterface, ProducerInterface
 
     private array $transactionData;
 
-    private ?ContextCarrierInterface $command = null;
-
     /** @var ContextCarrierInterface[] */
-    private array $consumers;
+    private array $consumers = [];
 
     /** @var SplObjectStorage[] */
     private array $storage = [];
@@ -97,24 +95,6 @@ final class State implements ConsumerInterface, ProducerInterface
     public function setTransactionData(array $data): array
     {
         return $this->transactionData = $data + $this->transactionData;
-    }
-
-    /**
-     * Set the reference to the object creation command (non executed).
-     *
-     * @internal
-     */
-    public function setCommand(ContextCarrierInterface $cmd = null): void
-    {
-        $this->command = $cmd;
-    }
-
-    /**
-     * @internal
-     */
-    public function getCommand(): ?ContextCarrierInterface
-    {
-        return $this->command;
     }
 
     /**

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
@@ -53,14 +52,14 @@ interface MapperInterface
      *
      * @throws MapperException
      */
-    public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface;
+    public function queueCreate(object $entity, Node $node, State $state): CommandInterface;
 
     /**
      * Initiate chain of commands required to update object in the persistent storage.
      *
      * @throws MapperException
      */
-    public function queueUpdate(object $entity, Node $node, State $state): ContextCarrierInterface;
+    public function queueUpdate(object $entity, Node $node, State $state): CommandInterface;
 
     /**
      * Initiate sequence of of commands required to delete object from the persistent storage.

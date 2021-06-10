@@ -4,16 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Nil;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
-use Cycle\ORM\Exception\Relation\NullException;
-use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
-use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
@@ -21,7 +13,6 @@ use JetBrains\PhpStorm\ExpectedValues;
 
 class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
 {
-
     private string $name;
     private string $target;
     private array $schema;
@@ -44,7 +35,7 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         return $this->innerKeys;
     }
 
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple, $related): void
     {
         $status = $tuple->node->getRelationStatus($this->getName());
         if ($status === RelationInterface::STATUS_PREPARE && $this->isNullable()) {
@@ -58,20 +49,6 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         }
     }
 
-    private function pullValues(Node $node, Node $related): void
-    {
-        $changes = $related->getState()->getTransactionData();
-        foreach ($this->outerKeys as $i => $outerKey) {
-            if (isset($changes[$outerKey])) {
-                $node->register($this->innerKeys[$i], $changes[$outerKey]);
-            }
-        }
-    }
-
-    public function queue($entity, Node $node, $related, $original): CommandInterface
-    {
-        throw new \Exception();
-    }
     public function getName(): string
     {
         return $this->name;

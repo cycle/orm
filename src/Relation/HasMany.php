@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Condition;
-use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseInterface;
@@ -24,7 +20,6 @@ use Doctrine\Common\Collections\Collection;
  */
 class HasMany extends AbstractRelation
 {
-
     public function queuePool(Pool $pool, Tuple $tuple, $related, bool $load = true): void
     {
         $node = $tuple->node;
@@ -64,7 +59,7 @@ class HasMany extends AbstractRelation
 
     }
 
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple, $related): void
     {
         if ($tuple->task === Tuple::TASK_STORE) {
             $this->queueStoreAll($pool, $tuple, $related);
@@ -72,17 +67,6 @@ class HasMany extends AbstractRelation
             // todo
             // $this->queueDelete($pool, $tuple, $related);
         }
-    }
-
-    private function shouldResolveOrigin(ReferenceInterface $original, Tuple $tuple): bool
-    {
-        if ($this->isResolved($original)) {
-            return true;
-        }
-        if (count(array_intersect(array_keys($tuple->node->getChanges()), $this->innerKeys)) > 0) {
-            return true;
-        }
-        return false;
     }
 
     private function queueStoreAll(Pool $pool, Tuple $tuple, $related): void
@@ -133,44 +117,6 @@ class HasMany extends AbstractRelation
 
         return $pool->attachDelete($child, $this->isCascade(), $relatedNode);
     }
-
-    // private function queueDelete(Pool $pool, Tuple $tuple, $related, ?Node $relatedNode): void
-    // {
-    //     $node = $tuple->node;
-    //     $original = $node->getRelation($this->getName());
-    //
-    //     if ($original instanceof ReferenceInterface) {
-    //         $original = $this->resolve($original);
-    //     }
-    //
-    //     if ($related instanceof ReferenceInterface) {
-    //         $related = $this->resolve($related);
-    //     }
-    //     $resolved = false;
-    //     if ($original !== null) {
-    //         $originNode = $this->getNode($original);
-    //         if ($originNode !== null && $originNode->getStatus() === Node::MANAGED) {
-    //             $this->setStatus(RelationInterface::STATUS_DEFERRED);
-    //             $this->deleteChild($pool, $original);
-    //         } else {
-    //             $resolved = true;
-    //         }
-    //     } else {
-    //         $resolved = true;
-    //     }
-    //     $resolved and $this->setStatus(RelationInterface::STATUS_RESOLVED);
-    //     if ($related === $original) {
-    //         return;
-    //     }
-    //     $relatedNode = $relatedNode ?? $this->getNode($related);
-    //     if ($relatedNode === null || $relatedNode->getStatus() !== Node::MANAGED) {
-    //         return;
-    //     }
-    //     $this->setStatus(RelationInterface::STATUS_DEFERRED);
-    //     $this->deleteChild($pool, $related, $relatedNode);
-    // }
-    //
-
 
     /**
      * Init relation state and entity collection.
@@ -225,29 +171,6 @@ class HasMany extends AbstractRelation
         return [new CollectionPromise($p), $p];
     }
 
-    public function queue(/*CC $store, */object $entity, Node $node, $related, $original): CommandInterface
-    {
-        if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
-        }
-
-        if ($original instanceof ReferenceInterface) {
-            $original = $this->resolve($original);
-        }
-
-        $sequence = new Sequence();
-
-        foreach ($related as $item) {
-            $sequence->addCommand($this->queueStore($node, $item));
-        }
-
-        foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $sequence->addCommand($this->queueDelete($item));
-        }
-
-        return $sequence;
-    }
-
     /**
      * Return objects which are subject of removal.
      */
@@ -263,45 +186,5 @@ class HasMany extends AbstractRelation
             $related,
             static fn(object $a, object $b): int => strcmp(spl_object_hash($a), spl_object_hash($b))
         );
-    }
-
-    /**
-     * Persist related object.
-     */
-    protected function queueStore(Node $node, object $related): CC
-    {
-        $relStore = $this->orm->queueStore($related);
-        $relNode = $this->getNode($related, +1);
-        $this->assertValid($relNode);
-
-        $this->forwardContext(
-            $node,
-            $this->innerKeys,
-            $relStore,
-            $relNode,
-            $this->outerKeys
-        );
-
-        return $relStore;
-    }
-
-    /**
-     * Remove one of related objects.
-     */
-    protected function queueDelete(object $related): CommandInterface
-    {
-        $rNode = $this->getNode($related);
-
-        if ($this->isNullable()) {
-            $store = $this->orm->queueStore($related);
-            foreach ($this->outerKeys as $key) {
-                $rNode->getState()->register($key, null, true);
-            }
-            $rNode->getState()->decClaim();
-
-            return new Condition($store, fn() => !$rNode->getState()->hasClaims());
-        }
-
-        return new Condition($this->orm->queueDelete($related), static fn() => !$rNode->getState()->hasClaims());
     }
 }

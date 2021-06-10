@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
@@ -142,7 +139,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
     }
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple, $related): void
     {
         $node = $tuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
@@ -217,91 +214,6 @@ class ManyToMany extends Relation\AbstractRelation
         $pool->attachStore($related, $this->isCascade(), $rNode, $rState);
         // defer the insert until pivot keys are resolved
         $pool->attachStore($pivot, $this->isCascade(), $pNode, $pState);
-    }
-
-    /**
-     * @inheritdoc
-     *
-     * @param PivotedStorage $related
-     * @param PivotedStorage $original
-     */
-    public function queue(object $entity, Node $node, $related, $original): CommandInterface
-    {
-        $original ??= new PivotedStorage();
-
-        if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
-        }
-
-        if ($original instanceof ReferenceInterface) {
-            $original = $this->resolve($original);
-        }
-
-        $sequence = new Sequence();
-
-        // link/sync new and existed elements
-        foreach ($related->getElements() as $item) {
-            $sequence->addCommand($this->link($node, $item, $related->get($item), $related));
-        }
-
-        // un-link old elements
-        foreach ($original->getElements() as $item) {
-            if (!$related->has($item)) {
-                // todo: add support for nullable pivot entities
-                $sequence->addCommand($this->orm->queueDelete($original->get($item)));
-                $sequence->addCommand($this->orm->queueStore($item));
-                $original->getContext()->offsetUnset($item);
-            }
-        }
-
-        return $sequence;
-    }
-
-    /**
-     * Link two entities together and create/update pivot context.
-     *
-     * @param object|array|null $pivot
-     */
-    protected function link(Node $node, object $related, $pivot, PivotedStorage $storage): CommandInterface
-    {
-        $rStore = $this->orm->queueStore($related);
-        $rNode = $this->getNode($related, +1);
-        $this->assertValid($rNode);
-
-        if (!is_object($pivot)) {
-            // first time initialization
-            $pivot = $this->initPivot($node, $related, $pivot);
-        }
-
-        $pNode = $this->getNode($pivot);
-
-        // defer the insert until pivot keys are resolved
-        $pStore = $this->orm->queueStore($pivot);
-
-        $this->forwardContext(
-            $node,
-            $this->innerKeys,
-            $pStore,
-            $pNode,
-            $this->throughInnerKeys
-        );
-
-        $this->forwardContext(
-            $rNode,
-            $this->outerKeys,
-            $pStore,
-            $pNode,
-            $this->throughOuterKeys
-        );
-
-        $sequence = new Sequence();
-        $sequence->addCommand($rStore);
-        $sequence->addCommand($pStore);
-
-        // update the link
-        $storage->set($related, $pivot);
-
-        return $sequence;
     }
 
     /**

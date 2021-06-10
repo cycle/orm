@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper;
 
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
@@ -69,7 +68,7 @@ abstract class DatabaseMapper implements MapperInterface
         return $this->role;
     }
 
-    public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface
+    public function queueCreate(object $entity, Node $node, State $state): CommandInterface
     {
         $values = $node->getData();
 
@@ -93,32 +92,13 @@ abstract class DatabaseMapper implements MapperInterface
             [$this, 'mapColumns']
         );
 
-        // if (count($this->primaryKeys) === 1) {
-        //     $key = $this->primaryKeys[0];
-        //     $column = isset($values[$key]) ? $key : Insert::INSERT_ID;
-            // $insert->forward($column, $state, $key);
-        // } else {
-            // foreach ($this->primaryKeys as $num => $pk) {
-            //     $insert->forward($this->primaryColumns[$num], $state, $pk);
-            // }
-        // }
-
         return $insert;
     }
 
-    public function queueUpdate(object $entity, Node $node, State $state): ContextCarrierInterface
+    public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
         $fromData = $node->getState()->getTransactionData();
-        // $fromData = $node->getInitialData();
-        // $data = $this->fetchFields($entity);
-        //
-        // // in a future mapper must support solid states
-        // $changes = array_udiff_assoc($data, $fromData, [Node::class, 'compare']);
-        // $changes = $node->getChanges();
         \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . count($node->getChanges()) . "\n";
-        // $state->setTransactionData($changes);
-        // $state->setData($changes);
-        // Calc scope
 
         $update = new Update(
             $this->source->getDatabase(),

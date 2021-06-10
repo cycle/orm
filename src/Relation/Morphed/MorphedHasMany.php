@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Morphed;
 
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
@@ -12,7 +11,6 @@ use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseMany;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasMany;
-use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -56,22 +54,6 @@ class MorphedHasMany extends HasMany
         if ($this->fetchKey($rNode, $this->morphKey) !== $node->getRole()) {
             $rNode->register($this->morphKey, $node->getRole(), true);
         }
-    }
-
-    /**
-     * Persist related object.
-     */
-    protected function queueStore(Node $node, object $related): ContextCarrierInterface
-    {
-        $rStore = parent::queueStore($node, $related);
-
-        $rNode = $this->getNode($related);
-        if ($this->fetchKey($rNode, $this->morphKey) != $node->getRole()) {
-            $rStore->register($this->morphKey, $node->getRole(), true);
-            $rNode->register($this->morphKey, $node->getRole(), true);
-        }
-
-        return $rStore;
     }
 
     /**

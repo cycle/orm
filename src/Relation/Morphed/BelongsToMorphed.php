@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Morphed;
 
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
@@ -52,10 +50,10 @@ class BelongsToMorphed extends BelongsTo
         return [$e, $e];
     }
 
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple, $related): void
     {
         $status = $tuple->node->getRelationStatus($this->getName());
-        parent::newQueue($pool, $tuple, $related);
+        parent::queue($pool, $tuple, $related);
 
         if ($status !== Relation\RelationInterface::STATUS_PREPARE) {
             return;
@@ -67,25 +65,6 @@ class BelongsToMorphed extends BelongsTo
                 : $this->getNode($related)->getRole(),
             true
         );
-    }
-    public function queue($entity, Node $node, $related, $original): CommandInterface
-    {
-        $wrappedStore = parent::queue($store, $entity, $node, $related, $original);
-
-        if ($related === null) {
-            if ($this->fetchKey($node, $this->morphKey) !== null) {
-                $store->register($this->morphKey, null, true);
-                $node->register($this->morphKey, null, true);
-            }
-        } else {
-            $rNode = $this->getNode($related);
-            if ($this->fetchKey($node, $this->morphKey) != $rNode->getRole()) {
-                $store->register($this->morphKey, $rNode->getRole(), true);
-                $node->register($this->morphKey, $rNode->getRole(), true);
-            }
-        }
-
-        return $wrappedStore;
     }
 
     /**

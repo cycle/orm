@@ -8,6 +8,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
 use Doctrine\Instantiator;
 use Laminas\Hydrator;
+use Laminas\Hydrator\HydratorInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 
 /**
@@ -23,7 +24,7 @@ class Mapper extends DatabaseMapper
 
     protected array $children = [];
 
-    protected ReflectionHydrator $hydrator;
+    protected HydratorInterface $hydrator;
 
     protected Instantiator\Instantiator $instantiator;
 

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Morphed;
 
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
@@ -44,9 +42,9 @@ class MorphedHasOne extends HasOne
         return [$r, $r];
     }
 
-    public function newQueue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple, $related): void
     {
-        parent::newQueue($pool, $tuple, $related);
+        parent::queue($pool, $tuple, $related);
         $node = $tuple->node;
         if ($related !== null) {
             $rNode = $this->getNode($related);
@@ -57,22 +55,6 @@ class MorphedHasOne extends HasOne
             }
         }
 
-    }
-
-    public function queue(object $entity, Node $node, $related, $original): CommandInterface
-    {
-        $rStore = parent::queue($store, $entity, $node, $related, $original);
-
-        if ($rStore instanceof CC && $related !== null) {
-            $rNode = $this->getNode($related);
-
-            if ($this->fetchKey($rNode, $this->morphKey) != $node->getRole()) {
-                $rStore->register($this->morphKey, $node->getRole(), true);
-                $rNode->register($this->morphKey, $node->getRole(), true);
-            }
-        }
-
-        return $rStore;
     }
 
     /**

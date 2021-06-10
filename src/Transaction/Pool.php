@@ -33,43 +33,6 @@ final class Pool implements IteratorAggregate, \Countable
         ++$this->happens;
     }
 
-    /*
-     * todo
-     * задания:
-     * Store - добавить/обновить
-     * Delete - автоудаление (с ожиданием обработки всех необработанных сущностей - вдруг найдётся новый родитель).
-     *          Если встретится в стейте, то обновить родителя, задание поменять на STORE
-     * ForceDelete - 100% удалить. В стейтах если встретится - тоже удалить
-     *
-     * добавить статусы для заданий:
-     * - PREPARING не обработанное
-     * - PROCESSED обработанное? (удаляется из пула)
-     * - WAITING ожидает обработки всех необработанных сущностей
-     * - DEFERRED ожидает разрешения DEFERRED связи
-     *
-     *
-     * добавить зависимости Node от Node на выполнение заданий:
-     * - при добавлении и изменении зависимость от родителей
-     * - при удалении зависимость от потомков
-     *
-     *
-     * добавить статус для связей стейтов:
-     * - processing в процессе
-     * - deferred для BelongsTo, если родитель на том конце не зарезолвен
-     * - resolved если все ноды на том конце RESOLVED
-     *
-     * Статусы ноды:
-     * - PROMISED обещанная
-     * - NEW на добавление (добавлена в кучу, не сохранена в бд)
-     * - на обновление
-     * - на удаление
-     * - RESOLVED (статус ноды синхронизирован с БД в транзакции)
-     * - синхронизировано (нода синхронизирована после транзакции)
-     *
-     * Оптимизации:
-     * при обработке сущности если она ожидает какие-то родительские или deferred связи, можно выяснить по каким полям.
-     * Эти поля считать блокирующими, а связи по неблокирующим полям можно отметить resolved
-     */
     public function attach(
         object $entity,
         #[ExpectedValues(valuesFromClass: Tuple::class)]
@@ -171,15 +134,7 @@ final class Pool implements IteratorAggregate, \Countable
     /**
      * Smart iterator
      *
-     * Правила обхода пула:
-     * 0 - все STATUS_PREPARING
-     * 1 - все STATUS_WAITING, игнорируя TASK_DELETE
-     *     * могут быть приаттачены новые STATUS_PREPARING, тогда их пропускать вперёд
-     * 2 - STATUS_DEFERRED и STATUS_WAITING+TASK_DELETE
-     *     * могут быть приаттачены новые STATUS_PREPARING, тогда их пропускать вперёд
-     *
-     *
-     * @return Traversable<object, Tuple>
+     * @return Traversable<mixed, Tuple>
      */
     public function getIterator(): Traversable
     {

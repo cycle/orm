@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
 
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
-use Cycle\ORM\Command\Traits\WaitCommandTrait;
-use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
@@ -21,12 +19,10 @@ use Spiral\Database\DatabaseInterface;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-final class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
+final class Update extends DatabaseCommand implements StoreCommandInterface, ScopeCarrierInterface
 {
-    use ContextTrait;
     use ScopeTrait;
     use ErrorTrait;
-    use WaitCommandTrait;
 
     protected array $appendix = [];
 
@@ -50,15 +46,6 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     }
 
     /**
-     * Wait for the context value.
-     */
-    public function waitContext(string $key, bool $required = true): void
-    {
-        // update command are always "soft" and must wait for all incoming keys
-        $this->state->waitContext($key, true);
-    }
-
-    /**
      * Avoid opening transaction when no changes are expected.
      */
     public function getDatabase(): ?DatabaseInterface
@@ -72,7 +59,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
 
     public function isReady(): bool
     {
-        return $this->isContextReady() && $this->isScopeReady() && $this->isCommandsExecuted();
+        return $this->isScopeReady();
     }
 
     public function hasData(): bool

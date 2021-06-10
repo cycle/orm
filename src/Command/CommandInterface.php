@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command;
 
+use Spiral\Database\DatabaseInterface;
+
 /**
  * Represent one or multiple operations in transaction.
  *
@@ -28,14 +30,5 @@ interface CommandInterface
      */
     public function execute(): void;
 
-    /**
-     * Complete command, method to be called when all other commands are already executed and
-     * transaction is closed.
-     */
-    public function complete(): void;
-
-    /**
-     * Rollback command or declare that command been rolled back.
-     */
-    public function rollBack(): void;
+    public function getDatabase(): ?DatabaseInterface;
 }

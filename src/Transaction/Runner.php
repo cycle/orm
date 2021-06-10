@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Transaction;
 
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\DatabaseCommand;
+use Cycle\ORM\Command\CompleteMethodInterface;
+use Cycle\ORM\Command\RollbackMethodInterface;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Spiral\Database\Driver\DriverInterface;
 use Traversable;
 
@@ -21,26 +23,36 @@ final class Runner implements RunnerInterface
 
     public function run(CommandInterface $command): void
     {
-        foreach ($command instanceof Traversable ? $command : [$command] as $cmd) {
-            // found the same link from multiple branches
-            if ($cmd->isExecuted()) {
-                $this->countExecuted++;
-                return;
+        if ($command instanceof Traversable) {
+            foreach ($command as $cmd) {
+                $this->run($cmd);
             }
-
-            if ($cmd instanceof DatabaseCommand && $cmd->getDatabase() !== null) {
-                $driver = $cmd->getDatabase()->getDriver();
-
-                if ($driver !== null && !in_array($driver, $this->drivers, true)) {
-                    $driver->beginTransaction();
-                    $this->drivers[] = $driver;
-                }
-            }
-
-            $cmd->execute();
+            return;
         }
+        // found the same link from multiple branches
+        if ($command->isExecuted()) {
+            $this->countExecuted++;
+            return;
+        }
+        if ($command instanceof StoreCommandInterface && !$command->hasData()) {
+            return;
+        }
+
+        if ($command->getDatabase() !== null) {
+            $driver = $command->getDatabase()->getDriver();
+
+            if ($driver !== null && !in_array($driver, $this->drivers, true)) {
+                $driver->beginTransaction();
+                $this->drivers[] = $driver;
+            }
+        }
+
+        $command->execute();
         $this->countExecuted++;
-        $this->executed[] = $command;
+
+        if ($command instanceof CompleteMethodInterface || $command instanceof RollbackMethodInterface) {
+            $this->executed[] = $command;
+        }
     }
 
     public function count(): int
@@ -58,7 +70,9 @@ final class Runner implements RunnerInterface
 
         // other type of transaction to close
         foreach ($this->executed as $command) {
-            $command->complete();
+            if ($command instanceof CompleteMethodInterface) {
+                $command->complete();
+            }
         }
 
         $this->countExecuted = 0;
@@ -75,8 +89,9 @@ final class Runner implements RunnerInterface
 
         // close all of external types of transactions (revert changes)
         foreach (array_reverse($this->executed) as $command) {
-            /** @var CommandInterface $command */
-            $command->rollBack();
+            if ($command instanceof RollbackMethodInterface) {
+                $command->rollBack();
+            }
         }
 
         $this->countExecuted = 0;

@@ -7,19 +7,16 @@ namespace Cycle\ORM;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
-use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Relation\ReversedRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\RunnerInterface;
 use Cycle\ORM\Transaction\Tuple;
-use SplObjectStorage;
 
 /**
  * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
@@ -30,19 +27,11 @@ use SplObjectStorage;
  */
 final class Transaction implements TransactionInterface
 {
-    public const ACTION_STORE = 0;
-    public const ACTION_DELETE = 1;
     private const RELATIONS_NOT_RESOLVED = 0;
     private const RELATIONS_RESOLVED = 1;
     private const RELATIONS_DEFERRED = 2;
 
     private ORMInterface $orm;
-
-    private SplObjectStorage $known;
-
-    private array $persist = [];
-
-    private array $delete = [];
 
     private Pool $pool;
 
@@ -53,33 +42,19 @@ final class Transaction implements TransactionInterface
     public function __construct(ORMInterface $orm, RunnerInterface $runner = null)
     {
         $this->orm = $orm;
-        $this->known = new SplObjectStorage();
         $this->runner = $runner ?? new Runner();
         $this->pool = new Pool();
     }
 
     public function persist(object $entity, int $mode = self::MODE_CASCADE): self
     {
-        if ($this->known->offsetExists($entity)) {
-            return $this;
-        }
-
         $this->pool->attachStore($entity, $mode === self::MODE_CASCADE);
-        $this->known->offsetSet($entity, true);
-        $this->persist[] = [$entity, $mode];
-
         return $this;
     }
 
     public function delete(object $entity, int $mode = self::MODE_CASCADE): self
     {
-        if ($this->known->offsetExists($entity)) {
-            return $this;
-        }
-
         $this->pool->attach($entity, Tuple::TASK_FORCE_DELETE, $mode === self::MODE_CASCADE);
-        $this->known->offsetSet($entity, true);
-        $this->delete[] = [$entity, $mode];
 
         return $this;
     }
@@ -101,10 +76,6 @@ final class Transaction implements TransactionInterface
                 // we are ready to commit all changes to our representation layer
                 $this->syncHeap();
             }
-
-            // resetting the scope
-            $this->persist = $this->delete = [];
-            $this->known = new SplObjectStorage();
         }
 
         $this->runner->complete();
@@ -113,9 +84,6 @@ final class Transaction implements TransactionInterface
     private function runCommand(?CommandInterface $command): void
     {
         if ($command === null) {
-            return;
-        }
-        if ($command instanceof StoreCommandInterface && !$command->hasData()) {
             return;
         }
         $this->runner->run($command);

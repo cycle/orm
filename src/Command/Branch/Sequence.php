@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Command\Branch;
 
 use Cycle\ORM\Command\CommandInterface;
+use Spiral\Database\DatabaseInterface;
 
 /**
  * Wraps multiple commands into one sequence.
@@ -74,5 +75,10 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     public function rollBack(): void
     {
         // nothing
+    }
+
+    public function getDatabase(): ?DatabaseInterface
+    {
+        return null;
     }
 }

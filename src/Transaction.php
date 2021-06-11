@@ -171,9 +171,9 @@ final class Transaction implements TransactionInterface
                 ['store', 'delete', 'force delete'][$tuple->task],
                 $node === null ? get_class($entity) : $node->getRole(),
                 spl_object_id($tuple),
-                $node === null || !$node->hasState()
-                    ? '(has no State)'
-                    : implode('|', array_map(static fn($x) => is_object($x) ? get_class($x) : (string)$x,$node->getState()->getData()))
+                $node === null
+                    ? '(has no Node)'
+                    : implode('|', array_map(static fn($x) => is_object($x) ? get_class($x) : (string)$x,$node->getData()))
             );
 
             $tuple->mapper = $tuple->mapper ?? $this->orm->getMapper($entity);
@@ -290,10 +290,9 @@ final class Transaction implements TransactionInterface
         if (!$map->hasSlaves()) {
             return self::RELATIONS_RESOLVED;
         }
-        $changedFields = array_keys($tuple->node->getChanges());
+        $changedFields = array_keys($tuple->state->getChanges());
 
         // Attach children to pool
-        $entityData = $tuple->mapper->extract($tuple->entity);
         $transactData = $tuple->state->getTransactionData();
         $deferred = false;
         $resolved = true;
@@ -310,6 +309,7 @@ final class Transaction implements TransactionInterface
             $isWaitingKeys = count(array_intersect($relation->getInnerKeys(), $tuple->waitKeys)) > 0;
             $hasChangedKeys = count(array_intersect($relation->getInnerKeys(), $changedFields)) > 0;
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
+                $entityData = $tuple->mapper->extract($tuple->entity);
                 $child = $relation->extract($entityData[$name] ?? null);
                 $tuple->state->setRelation($name, $child);
                 $relation->queuePool(
@@ -337,6 +337,7 @@ final class Transaction implements TransactionInterface
             $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
             $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
             if ($resolved) {
+                $entityData ??= $tuple->mapper->extract($tuple->entity);
                 $tuple->node->setRelation($name, $entityData[$name] ?? null);
             }
         }
@@ -397,7 +398,7 @@ final class Transaction implements TransactionInterface
         // if ($tuple->status === Tuple::STATUS_PREPARING) {
         //     $map->setRelationsStatus($tuple->node, RelationInterface::STATUS_PREPARE);
         // }
-
+        // ob_flush();
         // Dependency relations
         $result = $tuple->task === Tuple::TASK_STORE
             ? $this->resolveMasterRelations($tuple, $map)

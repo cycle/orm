@@ -84,15 +84,13 @@ abstract class DatabaseMapper implements MapperInterface
             }
         }
 
-        $insert = new Insert(
+        return new Insert(
             $this->source->getDatabase(),
             $this->source->getTable(),
             $state,
             $this->primaryKeys,
             [$this, 'mapColumns']
         );
-
-        return $insert;
     }
 
     public function queueUpdate(object $entity, Node $node, State $state): CommandInterface

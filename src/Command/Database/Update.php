@@ -87,7 +87,7 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
                 ->run();
         }
         $this->state->setStatus(Node::MANAGED);
-        $this->state->setTransactionData($data);
+        $this->state->updateTransactionData();
 
         parent::execute();
     }

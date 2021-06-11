@@ -27,12 +27,12 @@ class MorphedHasMany extends HasMany
     public function initPromise(Node $node): array
     {
         $innerValues = [];
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $innerValue = $this->fetchKey($node, $innerKey);
-            if ($innerValue === null) {
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($nodeData[$innerKey])) {
                 return [new ArrayCollection(), null];
             }
-            $innerValues[] = $innerValue;
+            $innerValues[] = $nodeData[$innerKey];
         }
 
         $p = new PromiseMany(
@@ -51,7 +51,7 @@ class MorphedHasMany extends HasMany
 
         $rNode = $rTuple->node;
         $node = $parentTuple->node;
-        if ($this->fetchKey($rNode, $this->morphKey) !== $node->getRole()) {
+        if (($rNode->getData()[$this->morphKey] ?? null) !== $node->getRole()) {
             $rNode->register($this->morphKey, $node->getRole(), true);
         }
     }

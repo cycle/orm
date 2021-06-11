@@ -148,7 +148,7 @@ final class Node implements ProducerInterface, ConsumerInterface
             return [];
         }
 
-        $changes = array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']);
+        $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
         foreach ($this->state->getRelations() as $name => $relation) {
             $this->hasRelation($name) || $this->setRelation($name, $relation);
         }
@@ -165,8 +165,8 @@ final class Node implements ProducerInterface, ConsumerInterface
     public function hasChanges(): bool
     {
         return ($this->state !== null && $this->state->getStatus() === self::NEW)
-            || array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']) !== [];
-            // || array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']) !== [];
+            // || array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']) !== [];
+            || $this->state->getChanges() !== [];
     }
 
     public function getChanges(): array
@@ -174,8 +174,8 @@ final class Node implements ProducerInterface, ConsumerInterface
         if ($this->state === null) {
             return $this->status === self::NEW ? ($this->data ?? []) : [];
         }
-        return array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']);
-        // return array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']);
+        // return array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']);
+        return $this->state->getChanges();
     }
 
     /**

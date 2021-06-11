@@ -82,9 +82,8 @@ class HasOne extends AbstractRelation
     }
     protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {
-        $data = $parentTuple->node->getData();
         foreach ($this->innerKeys as $i => $innerKey) {
-            $tuple->node->register($this->outerKeys[$i], $data[$innerKey]);
+            $tuple->node->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
         }
     }
     private function queueDelete(Pool $pool, Tuple $tuple, $related): void

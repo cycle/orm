@@ -25,20 +25,20 @@ class BelongsToMorphed extends BelongsTo
     public function initPromise(Node $node): array
     {
         $innerValues = [];
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $innerValue = $this->fetchKey($node, $innerKey);
-            if ($innerValue === null) {
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($nodeData[$innerKey])) {
                 return [null, null];
             }
-            $innerValues[] = $innerValue;
+            $innerValues[] = $nodeData[$innerKey];
         }
 
 
-        /** @var string $target */
-        $target = $this->fetchKey($node, $this->morphKey);
-        if ($target === null) {
+        if (!isset($nodeData[$this->morphKey])) {
             return [null, null];
         }
+        /** @var string $target */
+        $target = $nodeData[$this->morphKey];
 
         $e = $this->orm->getHeap()->find($target, array_combine($this->outerKeys, $innerValues));
         if ($e !== null) {

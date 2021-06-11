@@ -28,12 +28,12 @@ class MorphedHasOne extends HasOne
     public function initPromise(Node $node): array
     {
         $innerValues = [];
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $innerValue = $this->fetchKey($node, $innerKey);
-            if ($innerValue === null) {
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($nodeData[$innerKey])) {
                 return [null, null];
             }
-            $innerValues[] = $innerValue;
+            $innerValues[] = $nodeData[$innerKey];
         }
 
         $scope = array_combine($this->outerKeys, $innerValues) + [$this->morphKey => $node->getRole()];
@@ -48,8 +48,9 @@ class MorphedHasOne extends HasOne
         $node = $tuple->node;
         if ($related !== null) {
             $rNode = $this->getNode($related);
+            $nodeData = $rNode->getData();
 
-            if ($this->fetchKey($rNode, $this->morphKey) !== $node->getRole()) {
+            if (($nodeData[$this->morphKey] ?? null) !== $node->getRole()) {
                 // $rStore->register($this->morphKey, $node->getRole(), true);
                 $rNode->register($this->morphKey, $node->getRole(), true);
             }

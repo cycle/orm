@@ -15,7 +15,6 @@ use JetBrains\PhpStorm\ExpectedValues;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    use Traits\ContextTrait;
     use Relation\Traits\NodeTrait;
 
     /** @internal */

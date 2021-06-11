@@ -156,7 +156,7 @@ final class Embedded implements SameRowRelationInterface
             $command->registerAppendix($field, $value);
         }
         $rNode->getState()->setStatus(Node::MANAGED);
-        $rNode->getState()->setTransactionData($changes);
+        $rNode->getState()->updateTransactionData();
 
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         $node->setRelationStatus($rNode->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);

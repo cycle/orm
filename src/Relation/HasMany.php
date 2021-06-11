@@ -91,9 +91,8 @@ class HasMany extends AbstractRelation
 
     protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {
-        $data = $parentTuple->node->getData();
         foreach ($this->innerKeys as $i => $innerKey) {
-            $tuple->node->register($this->outerKeys[$i], $data[$innerKey]);
+            $tuple->node->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
         }
     }
 
@@ -153,12 +152,12 @@ class HasMany extends AbstractRelation
     public function initPromise(Node $node): array
     {
         $innerValues = [];
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $innerValue = $this->fetchKey($node, $innerKey);
-            if ($innerValue === null) {
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($nodeData[$innerKey])) {
                 return [new ArrayCollection(), null];
             }
-            $innerValues[] = $innerValue;
+            $innerValues[] = $nodeData[$innerKey];
         }
 
         $p = new PromiseMany(

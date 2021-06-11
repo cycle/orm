@@ -26,6 +26,9 @@ final class State implements ConsumerInterface, ProducerInterface
 
     private int $state;
 
+    /**
+     * @var array<string, mixed> $data Changes only
+     */
     private array $data;
 
     private array $transactionData;
@@ -42,8 +45,13 @@ final class State implements ConsumerInterface, ProducerInterface
         array $data
     ) {
         $this->state = $state;
-        $this->data = $data;
-        $this->transactionData = $data;
+        if ($state === Node::NEW) {
+            $this->data = $data;
+            $this->transactionData = [];
+        } else {
+            $this->data = [];
+            $this->transactionData = $data;
+        }
     }
 
     /**
@@ -67,10 +75,6 @@ final class State implements ConsumerInterface, ProducerInterface
      */
     public function setData(array $data): void
     {
-        if ($data === []) {
-            return;
-        }
-
         foreach ($data as $column => $value) {
             $this->register($column, $value);
         }
@@ -81,7 +85,7 @@ final class State implements ConsumerInterface, ProducerInterface
      */
     public function getData(): array
     {
-        return $this->data;
+        return array_merge($this->transactionData, $this->data);
     }
 
     /**
@@ -92,9 +96,15 @@ final class State implements ConsumerInterface, ProducerInterface
         return $this->transactionData;
     }
 
-    public function setTransactionData(array $data): array
+    public function updateTransactionData(): void
     {
-        return $this->transactionData = $data + $this->transactionData;
+        $this->transactionData = array_merge($this->transactionData, $this->data);
+        $this->data = [];
+    }
+
+    public function getChanges(): array
+    {
+        return $this->data;
     }
 
     /**
@@ -123,12 +133,28 @@ final class State implements ConsumerInterface, ProducerInterface
         \Cycle\ORM\Transaction\Pool::DEBUG AND print sprintf(
             "Forward to State! [%s]  target: $target, key: $key, value: %s Stream: %s\n",
             $consumer instanceof Node ? 'Node ' . $consumer->getRole() : get_class($consumer),
-            (string)($this->data[$key] ?? 'NULL'),
+            (string)($this->getValue($key) ?? 'NULL'),
             [ConsumerInterface::DATA => 'DATA', ConsumerInterface::SCOPE => 'SCOPE'][$stream]
         );
-        if ($trigger || !empty($this->data[$key])) {
-            $this->register($key, $this->data[$key] ?? null, false, $stream);
+        if ($trigger || !empty($this->getValue($key))) {
+            $this->register($key, $this->getValue($key), false, $stream);
         }
+    }
+
+    /**
+     * @return null|mixed
+     */
+    public function getValue(string $key)
+    {
+        return array_key_exists($key, $this->data) ? $this->data[$key] : ($this->transactionData[$key] ?? null);
+    }
+
+    public function hasValue(string $key, bool $allowNull = true): bool
+    {
+        if (!$allowNull) {
+            return isset($this->data[$key]) || isset($this->transactionData[$key]);
+        }
+        return array_key_exists($key, $this->data) || array_key_exists($key, $this->transactionData);
     }
 
     public function register(
@@ -137,27 +163,23 @@ final class State implements ConsumerInterface, ProducerInterface
         bool $fresh = false,
         int $stream = self::DATA
     ): void {
-        $oldValue = $this->data[$key] ?? null;
+        $oldValue = $this->getValue($key);
+
         if (!$fresh && !is_object($oldValue)) {
             // custom, non value objects can be supported here
             $fresh = $oldValue != $value;
         }
 
-        // if (!array_key_exists($key, $this->transactionData)) {
-        //     $this->transactionData[$key] = $value;
-        // }
-
-        #
         \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(
             "State(%s):Register %s {$key} => %s\n",
             spl_object_id($this),
             $fresh ? 'fresh' : '',
             var_export($value, true)
         );
-        // if ($key === 'user_id' && $value === '1') {
-        //     throw new \Exception();
-        // }
-        $this->data[$key] = $value;
+
+        if (!$this->hasValue($key) || $oldValue !== $value) {
+            $this->data[$key] = $value;
+        }
 
         // cascade
         if (!empty($this->consumers[$key])) {

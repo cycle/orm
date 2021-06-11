@@ -78,12 +78,12 @@ class ManyToMany extends Relation\AbstractRelation
     public function initPromise(Node $node): array
     {
         $innerKeys = [];
+        $nodeData = $node->getData();
         foreach ($this->innerKeys as $key) {
-            $innerKey = $this->fetchKey($node, $key);
-            if ($innerKey === null) {
+            if (!isset($nodeData[$key])) {
                 return [new Pivoted\PivotedCollection(), null];
             }
-            $innerKeys[$key] = $innerKey;
+            $innerKeys[$key] = $nodeData[$key];
         }
 
         // will take care of all the loading and scoping
@@ -171,9 +171,8 @@ class ManyToMany extends Relation\AbstractRelation
     }
     protected function applyPivotChanges(Tuple $parentTuple, Tuple $tuple): void
     {
-        $data = $parentTuple->node->getData();
         foreach ($this->innerKeys as $i => $innerKey) {
-            $tuple->node->register($this->throughInnerKeys[$i], $data[$innerKey]);
+            $tuple->node->register($this->throughInnerKeys[$i], $parentTuple->state->getValue($innerKey));
         }
     }
     private function deleteChild(Pool $pool, ?object $pivot, object $child, ?Node $relatedNode = null): void

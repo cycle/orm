@@ -105,12 +105,12 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
         // }
 
         $this->state->setStatus(Node::MANAGED);
-        $this->state->setTransactionData($data);
+        $this->state->updateTransactionData();
         if (count($this->primaryKeys) > 0) {
             $fpk = $this->primaryKeys[0]; // first PK
             if ($insertID !== null && count($this->primaryKeys) === 1 && !isset($data[$fpk])) {
-                $this->state->setData([$fpk => $insertID]);
-                $this->state->setTransactionData([$fpk => $insertID]);
+                $this->state->register($fpk, $insertID);
+                $this->state->updateTransactionData();
                 // $this->transactionData[$this->primaryKeys[0]] = $insertID;
                 // $this->state->register($fpk, $insertID);
             }

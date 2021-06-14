@@ -35,7 +35,12 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         return $this->innerKeys;
     }
 
-    public function queue(Pool $pool, Tuple $tuple, $related): void
+
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    {
+    }
+
+    public function queue(Pool $pool, Tuple $tuple): void
     {
         $status = $tuple->node->getRelationStatus($this->getName());
         if ($status === RelationInterface::STATUS_PREPARE && $this->isNullable()) {

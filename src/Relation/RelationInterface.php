@@ -64,8 +64,7 @@ interface RelationInterface
      */
     public function extract($value);
 
-    /**
-     * @param mixed $related
-     */
-    public function queue(Pool $pool, Tuple $tuple, $related): void;
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void;
+
+    public function queue(Pool $pool, Tuple $tuple): void;
 }

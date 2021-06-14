@@ -20,20 +20,24 @@ use Doctrine\Common\Collections\Collection;
  */
 class HasMany extends AbstractRelation
 {
-    public function queuePool(Pool $pool, Tuple $tuple, $related, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
+        $related = $tuple->state->getRelation($this->getName());
+        $related = $this->extract($related);
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$this->isResolved($original)) {
                 return;
             }
             $original = $this->resolve($original);
+            $node->setRelation($this->getName(), $original);
         }
 
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
+            $tuple->state->setRelation($this->getName(), $related);
         }
 
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
@@ -53,16 +57,18 @@ class HasMany extends AbstractRelation
             $this->assertValid($rNode);
             $pool->attachStore($item, true, $rNode);
             if ($this->isNullable()) {
+                // todo?
                 // $rNode->setRelationStatus($relationName, RelationInterface::STATUS_DEFERRED);
             }
         }
 
     }
 
-    public function queue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple): void
     {
+        $related = $tuple->state->getRelation($this->getName());
         if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStoreAll($pool, $tuple, $related);
+            $this->queueStoreAll($pool, $tuple, $this->extract($related));
         } else {
             // todo
             // $this->queueDelete($pool, $tuple, $related);
@@ -74,11 +80,8 @@ class HasMany extends AbstractRelation
         $node = $tuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
-        if ($related instanceof ReferenceInterface) {
-            if (!$this->isResolved($related)) {
-                return;
-            }
-            $related = $this->resolve($related);
+        if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
+            return;
         }
 
         $relationName = $node->getRole() . ':' . $this->getName();

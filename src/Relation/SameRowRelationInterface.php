@@ -10,5 +10,5 @@ use Cycle\ORM\Transaction\Tuple;
 
 interface SameRowRelationInterface extends RelationInterface
 {
-    public function queue(Pool $pool, Tuple $tuple, $related, StoreCommandInterface $command = null): void;
+    public function queue(Pool $pool, Tuple $tuple, StoreCommandInterface $command = null): void;
 }

@@ -111,13 +111,18 @@ final class State implements ConsumerInterface, ProducerInterface
      *
      * @internal
      */
-    public function getStorage(string $type): SplObjectStorage
+    public function getStorage(string $type): iterable
     {
         if (!isset($this->storage[$type])) {
             $this->storage[$type] = new SplObjectStorage();
         }
 
         return $this->storage[$type];
+    }
+
+    public function setStorage(string $type, iterable $storage): void
+    {
+        $this->storage[$type] = $storage;
     }
 
     public function forward(

@@ -42,9 +42,10 @@ class MorphedHasOne extends HasOne
         return [$r, $r];
     }
 
-    public function queue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple): void
     {
-        parent::queue($pool, $tuple, $related);
+        parent::queue($pool, $tuple);
+        $related = $tuple->state->getRelation($this->getName());
         $node = $tuple->node;
         if ($related !== null) {
             $rNode = $this->getNode($related);

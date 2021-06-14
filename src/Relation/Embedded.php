@@ -112,11 +112,16 @@ final class Embedded implements SameRowRelationInterface
         return $data;
     }
 
-    public function queue(Pool $pool, Tuple $tuple, $related, StoreCommandInterface $command = null): void
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    {
+    }
+
+    public function queue(Pool $pool, Tuple $tuple, StoreCommandInterface $command = null): void
     {
         if ($tuple->task !== Tuple::TASK_STORE) {
             return;
         }
+        $related = $tuple->state->getRelation($this->getName());
 
         // Master Node
         $node = $tuple->node;

@@ -17,20 +17,23 @@ class HasOne extends AbstractRelation
 {
     use PromiseOneTrait;
 
-    public function queuePool(Pool $pool, Tuple $tuple, $related, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
+        $related = $tuple->state->getRelation($this->getName());
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$this->isResolved($original)) {
                 return;
             }
             $original = $this->resolve($original);
+            $node->setRelation($this->getName(), $original);
         }
 
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
+            $tuple->state->setRelation($this->getName(), $related);
         }
 
         if ($related === null) {
@@ -52,10 +55,11 @@ class HasOne extends AbstractRelation
         $pool->attachStore($related, true, $rNode);
     }
 
-    public function queue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple): void
     {
+        $related = $tuple->state->getRelation($this->getName());
         if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStore($pool, $tuple, $related);
+            $this->queueStore($pool, $tuple, $this->extract($related));
         } else {
             // todo ?
             $this->queueDelete($pool, $tuple, $related);
@@ -67,11 +71,8 @@ class HasOne extends AbstractRelation
         $node = $tuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
-        if ($related instanceof ReferenceInterface) {
-            if (!$this->isResolved($related)) {
-                return;
-            }
-            $related = $this->resolve($related);
+        if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
+            return;
         }
 
         $rTuple = $pool->offsetGet($related);

@@ -20,10 +20,15 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 {
     use PromiseOneTrait;
 
-    public function queue(Pool $pool, Tuple $tuple, $related): void
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    {
+    }
+
+    public function queue(Pool $pool, Tuple $tuple): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
+        $related = $tuple->state->getRelation($this->getName());
 
         if ($related === null) {
             if ($original !== null) {

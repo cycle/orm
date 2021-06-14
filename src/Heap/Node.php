@@ -150,7 +150,7 @@ final class Node implements ProducerInterface, ConsumerInterface
 
         $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
         foreach ($this->state->getRelations() as $name => $relation) {
-            $this->hasRelation($name) || $this->setRelation($name, $relation);
+            $this->setRelation($name, $relation);
         }
 
         // DELETE handled separately

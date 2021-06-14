@@ -50,10 +50,11 @@ class BelongsToMorphed extends BelongsTo
         return [$e, $e];
     }
 
-    public function queue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple): void
     {
         $status = $tuple->node->getRelationStatus($this->getName());
-        parent::queue($pool, $tuple, $related);
+        parent::queue($pool, $tuple);
+        $related = $tuple->state->getRelation($this->getName());
 
         if ($status !== Relation\RelationInterface::STATUS_PREPARE) {
             return;

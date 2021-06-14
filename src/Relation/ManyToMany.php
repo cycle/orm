@@ -97,16 +97,21 @@ class ManyToMany extends Relation\AbstractRelation
         return [new Pivoted\PivotedCollectionPromise($p), $p];
     }
 
-    public function queuePool(Pool $pool, Tuple $tuple, $related, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
+        $related = $tuple->state->getRelation($this->getName());
+        $related = $this->extract($related);
+        // todo refactor
+        $tuple->state->setStorage($this->pivotEntity . '?', $related);
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$this->isResolved($original)) {
                 return;
             }
             $original = $this->resolve($original);
+            $node->setRelation($this->getName(), $original);
         }
         if (!$original instanceof PivotedStorage) {
             $original = $this->extract($original);
@@ -114,6 +119,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
+            $tuple->state->setRelation($this->getName(), $related);
         }
 
         // un-link old elements
@@ -139,27 +145,30 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
     }
-    public function queue(Pool $pool, Tuple $tuple, $related): void
+    public function queue(Pool $pool, Tuple $tuple): void
     {
+        $related = $tuple->state->getStorage($this->pivotEntity . '?');
+        // $related = $tuple->state->getRelation($this->getName());
+        // $related = $this->extract($relatedSource);
+
         $node = $tuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        $original = $node->getRelation($this->getName()) ?? new PivotedStorage();
+        // $original = $node->getRelation($this->getName()) ?? new PivotedStorage();
         // $original ??= new Pivoted\PivotedStorage();
 
         if ($related instanceof ReferenceInterface) {
             if (!$this->isResolved($related)) {
                 return;
             }
-            $related = $this->resolve($related);
         }
 
         // if ($original instanceof ReferenceInterface) {
         //     $original = $this->resolve($original);
         // }
-        if (!$original instanceof PivotedStorage) {
-            $original = $this->extract($original);
-            // $node->setRelation($this->getName(), $original);
-        }
+        // if (!$original instanceof PivotedStorage) {
+        //     $original = $this->extract($original);
+        //     // $node->setRelation($this->getName(), $original);
+        // }
 
         $relationName = $node->getRole() . ':' . $this->getName();
         foreach ($related as $item) {

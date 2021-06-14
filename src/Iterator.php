@@ -22,21 +22,26 @@ final class Iterator implements \IteratorAggregate
     private $orm;
 
     /** @var string */
-    private $class;
+    private $role;
 
     /** @var iterable */
     private $source;
 
+    /** @var bool */
+    private $tryToFindInHeap;
+
     /**
      * @param ORMInterface $orm
-     * @param string       $class
-     * @param iterable     $source
+     * @param string $class
+     * @param iterable $source
+     * @param bool $tryToFindInHeap
      */
-    public function __construct(ORMInterface $orm, string $class, iterable $source)
+    public function __construct(ORMInterface $orm, string $class, iterable $source, bool $tryToFindInHeap = false)
     {
         $this->orm = $orm;
-        $this->class = $class;
+        $this->role = $this->orm->resolveRole($class);
         $this->source = $source;
+        $this->tryToFindInHeap = $tryToFindInHeap;
     }
 
     /**
@@ -57,7 +62,23 @@ final class Iterator implements \IteratorAggregate
 
             // add pipeline filter support?
 
-            yield $index => $this->orm->make($this->class, $data, Node::MANAGED);
+            yield $index => $this->getEntity($data);
         }
+    }
+
+    private function getEntity(array $data)
+    {
+        if ($this->tryToFindInHeap) {
+            $pk = $this->orm->getSchema()->define($this->role, SchemaInterface::PRIMARY_KEY);
+            $id = $data[$pk] ?? null;
+
+            if (null !== $id) {
+                $e = $this->orm->getHeap()->find($this->role, [
+                    $pk => $id,
+                ]);
+            }
+        }
+
+        return $e ?? $this->orm->make($this->role, $data, Node::MANAGED);
     }
 }

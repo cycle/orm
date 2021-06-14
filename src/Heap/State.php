@@ -26,8 +26,11 @@ final class State implements ConsumerInterface, ProducerInterface
 
     private int $state;
 
-    /** @var array<string, mixed> $data */
+    /** @var array<string, mixed> */
     private array $data;
+
+    /** @var array<string, mixed> */
+    private ?array $changes = [];
 
     private array $transactionData;
 
@@ -92,11 +95,15 @@ final class State implements ConsumerInterface, ProducerInterface
     public function updateTransactionData(): void
     {
         $this->transactionData = array_merge($this->transactionData, $this->data);
+        $this->changes = [];
     }
 
     public function getChanges(): array
     {
-        return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
+        if ($this->changes === null) {
+            $this->changes = array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
+        }
+        return $this->changes;
     }
 
     /**
@@ -170,6 +177,7 @@ final class State implements ConsumerInterface, ProducerInterface
         );
 
         $this->data[$key] = $value;
+        $this->changes = null;
 
         // cascade
         if (!empty($this->consumers[$key])) {

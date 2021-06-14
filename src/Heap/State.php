@@ -26,9 +26,7 @@ final class State implements ConsumerInterface, ProducerInterface
 
     private int $state;
 
-    /**
-     * @var array<string, mixed> $data Changes only
-     */
+    /** @var array<string, mixed> $data */
     private array $data;
 
     private array $transactionData;
@@ -45,13 +43,8 @@ final class State implements ConsumerInterface, ProducerInterface
         array $data
     ) {
         $this->state = $state;
-        if ($state === Node::NEW) {
-            $this->data = $data;
-            $this->transactionData = [];
-        } else {
-            $this->data = [];
-            $this->transactionData = $data;
-        }
+        $this->data = $data;
+        $this->transactionData = $state === Node::NEW ? [] : $data;
     }
 
     /**
@@ -85,7 +78,7 @@ final class State implements ConsumerInterface, ProducerInterface
      */
     public function getData(): array
     {
-        return array_merge($this->transactionData, $this->data);
+        return $this->data;
     }
 
     /**
@@ -99,12 +92,11 @@ final class State implements ConsumerInterface, ProducerInterface
     public function updateTransactionData(): void
     {
         $this->transactionData = array_merge($this->transactionData, $this->data);
-        $this->data = [];
     }
 
     public function getChanges(): array
     {
-        return $this->data;
+        return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
     }
 
     /**
@@ -177,9 +169,7 @@ final class State implements ConsumerInterface, ProducerInterface
             var_export($value, true)
         );
 
-        if (!$this->hasValue($key) || $oldValue !== $value) {
-            $this->data[$key] = $value;
-        }
+        $this->data[$key] = $value;
 
         // cascade
         if (!empty($this->consumers[$key])) {

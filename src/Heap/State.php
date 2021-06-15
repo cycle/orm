@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\ClaimTrait;
@@ -34,7 +33,7 @@ final class State implements ConsumerInterface, ProducerInterface
 
     private array $transactionData;
 
-    /** @var ContextCarrierInterface[] */
+    /** @var ConsumerInterface[] */
     private array $consumers = [];
 
     /** @var SplObjectStorage[] */

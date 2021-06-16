@@ -63,9 +63,10 @@ final class RelationMap
             # todo: SHADOW_HAS_MANY
             return;
         }
-        // todo: need create specific (plural) ShadowBelongsTo relation only for MORPHED relations
         if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {
-            // skip Morphed
+            // todo: find morphed collisions, decide handshake
+            $relation = new ShadowBelongsTo('~morphed~', $container, $relationSchema);
+            $this->dependencies[$relation->getName()] ??= $relation;
             return;
         }
         // $schema = $relationSchema[Relation::SCHEMA];

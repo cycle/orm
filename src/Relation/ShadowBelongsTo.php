@@ -17,7 +17,6 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
     private string $target;
     private array $schema;
 
-    private array $outerKeys;
     private array $innerKeys;
     private bool $cascade;
     public function __construct(string $role, string $target, array $schema)
@@ -26,7 +25,6 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         $this->target = $role;
         $this->schema = $schema;
         $this->innerKeys = (array)($schema[Relation::SCHEMA][Relation::OUTER_KEY] ?? []);
-        $this->outerKeys = (array)($schema[Relation::SCHEMA][Relation::INNER_KEY] ?? []);
         $this->cascade = (bool)($schema[Relation::SCHEMA][Relation::CASCADE] ?? false);
     }
 
@@ -34,7 +32,6 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
     {
         return $this->innerKeys;
     }
-
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
@@ -59,36 +56,30 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
     {
         return $this->name;
     }
+
     public function getTarget(): string
     {
         return $this->target;
     }
+
     public function isCascade(): bool
     {
         return $this->cascade;
     }
+
     public function init(Node $node, array $data): array
     {
         return [];
     }
+
     public function extract($data)
     {
         return is_array($data) ? $data : [];
     }
+
     public function initPromise(Node $node): array
     {
-        $scope = [];
-        foreach ($this->innerKeys as $i => $key) {
-            $innerValue = $this->fetchKey($parentNode, $key);
-            if (empty($innerValue)) {
-                return [null, null];
-            }
-            $scope[$this->outerKeys[$i]] = $innerValue;
-        }
-
-        $r = $this->orm->promise($this->target, $scope);
-
-        return [$r, $r];
+        return [null, null];
     }
 
     public function isNullable(): bool

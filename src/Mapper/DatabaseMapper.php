@@ -89,6 +89,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getTable(),
             $state,
             $this->primaryKeys,
+            count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
             [$this, 'mapColumns']
         );
     }
@@ -101,7 +102,7 @@ abstract class DatabaseMapper implements MapperInterface
         $update = new Update(
             $this->source->getDatabase(),
             $this->source->getTable(),
-            $node,
+            $state,
             $this->primaryKeys,
             [$this, 'mapColumns']
         );

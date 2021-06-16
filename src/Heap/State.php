@@ -99,6 +99,9 @@ final class State implements ConsumerInterface, ProducerInterface
 
     public function getChanges(): array
     {
+        if ($this->state === Node::NEW) {
+            return $this->data;
+        }
         if ($this->changes === null) {
             $this->changes = array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
         }

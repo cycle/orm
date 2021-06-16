@@ -32,9 +32,12 @@ abstract class AbstractRelation implements RelationInterface
     /** @var string[] */
     protected array $outerKeys;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    private string $role;
+
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         $this->orm = $orm;
+        $this->role = $role;
         $this->name = $name;
         $this->target = $target;
         $this->schema = $schema;
@@ -83,6 +86,11 @@ abstract class AbstractRelation implements RelationInterface
     protected function isNullable(): bool
     {
         return !empty($this->schema[Relation::NULLABLE]);
+    }
+
+    protected function getTargetRelationName(): string
+    {
+        return $this->role . ':' . $this->name;
     }
 
     /**

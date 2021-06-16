@@ -79,7 +79,7 @@ class HasOne extends AbstractRelation
         $rNode = $rTuple->node;
 
         $this->applyChanges($tuple, $rTuple);
-        $rNode->setRelationStatus($node->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
+        $rNode->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
     }
     protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {

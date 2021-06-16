@@ -395,6 +395,50 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $this->assertSame('new-post.png', $p->image->url);
     }
 
+    public function testCreateWithRelatedAndBelongsToUser(): void
+    {
+        $schemaArray = $this->getSchemaArray();
+        $schemaArray[Post::class][Schema::RELATIONS]['user'] = [
+            Relation::TYPE   => Relation::BELONGS_TO,
+            Relation::TARGET => User::class,
+            Relation::SCHEMA => [
+                Relation::CASCADE   => true,
+                Relation::INNER_KEY => 'user_id',
+                Relation::OUTER_KEY => 'id',
+            ],
+        ];
+        $this->orm = $this->withSchema(new Schema($schemaArray));
+
+        $p = new Post();
+        $p->title = 'post title';
+        $p->content = 'post content';
+
+        $p->user = new User();
+        $p->user->balance = 100;
+        $p->user->email = 'email';
+
+        $p->image = new Image();
+        $p->image->url = 'new-post.png';
+
+        $this->logger->display();
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(3);
+
+        // consecutive
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(0);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $p = (new Select($this->orm, Post::class))
+            ->load('image')
+            ->wherePK(5)->fetchOne();
+
+        $this->assertSame('post title', $p->title);
+        $this->assertSame('new-post.png', $p->image->url);
+    }
+
     public function testMoveToAnotherParent(): void
     {
         $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);

@@ -46,11 +46,10 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         return true;
     }
 
+    /**
+     * todo: deduplicate with {@see \Cycle\ORM\Relation\RefersTo::prepare()}
+     */
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
-    {
-    }
-
-    public function queue(Pool $pool, Tuple $tuple): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
@@ -72,16 +71,38 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                     $state->register($innerKey, null, true);
                 }
             }
-            $node->getState()->setRelation($this->getName(), $related);
-
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-            // nothing to do
             return;
         }
-        if ($related instanceof PromiseOne) {
-            if ($related->__loaded()) {
-                $related = $related->__resolve();
+        if ($related instanceof PromiseOne && $related->__loaded()) {
+            $related = $related->__resolve();
+            $tuple->state->setRelation($this->getName(), $related);
+        }
+        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        if ($related instanceof ReferenceInterface) {
+            return;
+        }
+        $rTuple = $pool->offsetGet($related);
+        if ($rTuple === null && $this->isCascade()) {
+            $pool->attachStore($related, false, null, null, false);
+        }
+    }
+
+    public function queue(Pool $pool, Tuple $tuple): void
+    {
+        $node = $tuple->node;
+        $related = $tuple->state->getRelation($this->getName());
+        $related = $this->extract($related);
+
+        if ($related === null && !$this->isNullable()) {
+            if ($this->checkNullValuePossibility($tuple)) {
+                return;
             }
+            throw new NullException("Relation {$this} can not be null.");
+        }
+        if ($related instanceof PromiseOne && $related->__loaded()) {
+            $related = $related->__resolve();
+            $tuple->state->setRelation($this->getName(), $related);
         }
         if ($related instanceof ReferenceInterface) {
             $scope = $related->__scope();

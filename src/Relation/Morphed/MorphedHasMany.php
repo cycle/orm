@@ -18,9 +18,9 @@ class MorphedHasMany extends HasMany
 {
     private string $morphKey;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $name, $target, $schema);
+        parent::__construct($orm, $role, $name, $target, $schema);
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
@@ -43,6 +43,11 @@ class MorphedHasMany extends HasMany
         );
 
         return [new CollectionPromise($p), $p];
+    }
+
+    protected function getTargetRelationName(): string
+    {
+        return '~morphed~:' . $this->name;
     }
 
     protected function applyChanges(Tuple $parentTuple, Tuple $rTuple): void

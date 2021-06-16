@@ -16,9 +16,9 @@ class BelongsToMorphed extends BelongsTo
 {
     private string $morphKey;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $name, $target, $schema);
+        parent::__construct($orm, $role, $name, $target, $schema);
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
@@ -50,15 +50,11 @@ class BelongsToMorphed extends BelongsTo
         return [$e, $e];
     }
 
-    public function queue(Pool $pool, Tuple $tuple): void
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
-        $status = $tuple->node->getRelationStatus($this->getName());
-        parent::queue($pool, $tuple);
+        parent::prepare($pool, $tuple, $load);
         $related = $tuple->state->getRelation($this->getName());
 
-        if ($status !== Relation\RelationInterface::STATUS_PREPARE) {
-            return;
-        }
         $tuple->node->register(
             $this->morphKey,
             $related === null

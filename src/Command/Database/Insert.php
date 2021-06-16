@@ -34,18 +34,21 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
 
     /** @var null|callable */
     private $mapper;
+    private ?string $pkColumn;
 
     public function __construct(
         DatabaseInterface $db,
         string $table,
         State $state,
         array $primaryKeys = [],
+        string $pkColumn = null,
         callable $mapper = null
     ) {
         parent::__construct($db, $table);
         $this->primaryKeys = $primaryKeys;
         $this->state = $state;
         $this->mapper = $mapper;
+        $this->pkColumn = $pkColumn;
     }
 
     public function isReady(): bool
@@ -84,8 +87,8 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
         $insert = $this->db
             ->insert($this->table)
             ->values(($this->mapper === null ? $data : ($this->mapper)($data)) + $this->appendix);
-        if (count($this->primaryKeys) === 1 && $insert instanceof PostgresInsertQuery) {
-            $insert->returning($this->primaryKeys[0]);
+        if ($this->pkColumn !== null && $insert instanceof PostgresInsertQuery) {
+            $insert->returning($this->pkColumn);
         }
 
         $insertID = $insert->run();

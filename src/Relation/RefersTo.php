@@ -60,11 +60,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $node = $tuple->node;
         $related = $tuple->state->getRelation($this->getName());
 
-        if ($related instanceof PromiseOne) {
-            if ($related->__loaded()) {
-                $related = $related->__resolve();
-                $tuple->state->setRelation($this->getName(), $related);
-            }
+        if ($related instanceof PromiseOne && $related->__loaded()) {
+            $related = $related->__resolve();
+            $tuple->state->setRelation($this->getName(), $related);
         }
         if ($related instanceof ReferenceInterface) {
             $scope = $related->__scope();

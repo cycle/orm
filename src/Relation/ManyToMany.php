@@ -27,9 +27,9 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected ?string $pivotEntity = null;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $name, $target, $schema);
+        parent::__construct($orm, $role, $name, $target, $schema);
         $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY] ?? null;
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
@@ -162,15 +162,7 @@ class ManyToMany extends Relation\AbstractRelation
             }
         }
 
-        // if ($original instanceof ReferenceInterface) {
-        //     $original = $this->resolve($original);
-        // }
-        // if (!$original instanceof PivotedStorage) {
-        //     $original = $this->extract($original);
-        //     // $node->setRelation($this->getName(), $original);
-        // }
-
-        $relationName = $node->getRole() . ':' . $this->getName();
+        $relationName = $this->getTargetRelationName();
         foreach ($related as $item) {
             $pivot = $related->get($item);
             $pTuple = $pool->offsetGet($pivot);

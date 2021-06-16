@@ -50,7 +50,7 @@ class HasMany extends AbstractRelation
         }
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
-        // $relationName = $node->getRole() . ':' . $this->getName();
+        // $relationName = $this->getTargetRelationName()
         // Store new and existing items
         foreach ($related as $item) {
             $rNode = $this->getNode($item, +1);
@@ -84,7 +84,7 @@ class HasMany extends AbstractRelation
             return;
         }
 
-        $relationName = $node->getRole() . ':' . $this->getName();
+        $relationName = $this->getTargetRelationName();
         foreach ($related as $item) {
             $rTuple = $pool->offsetGet($item);
             $this->applyChanges($tuple, $rTuple);

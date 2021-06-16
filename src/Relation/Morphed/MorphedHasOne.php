@@ -19,9 +19,9 @@ class MorphedHasOne extends HasOne
 {
     private string $morphKey;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $name, $target, $schema);
+        parent::__construct($orm, $role, $name, $target, $schema);
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
@@ -57,6 +57,11 @@ class MorphedHasOne extends HasOne
             }
         }
 
+    }
+
+    protected function getTargetRelationName(): string
+    {
+        return '~morphed~:' . $this->name;
     }
 
     /**

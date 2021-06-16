@@ -29,19 +29,17 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
     private State $state;
     /** @var null|callable */
     private $mapper;
-    private Node $node;
 
     public function __construct(
         DatabaseInterface $db,
         string $table,
-        Node $node,
+        State $state,
         array $primaryKeys = [],
         callable $mapper = null
     ) {
         parent::__construct($db, $table);
         $this->waitScope(...$primaryKeys);
-        $this->node = $node;
-        $this->state = $node->getState();
+        $this->state = $state;
         $this->mapper = $mapper;
     }
 
@@ -50,7 +48,7 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
      */
     public function getDatabase(): ?DatabaseInterface
     {
-        if ($this->scope === [] || !$this->node->hasChanges()) {
+        if ($this->scope === [] || $this->state->getChanges() === []) {
             return null;
         }
 
@@ -64,7 +62,7 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
 
     public function hasData(): bool
     {
-        return count($this->appendix) > 0 || $this->node->hasChanges();
+        return count($this->appendix) > 0 || $this->state->getChanges() !== [];
     }
 
     /**
@@ -76,7 +74,7 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
             throw new CommandException('Unable to execute update command without a scope.');
         }
 
-        $data = $this->node->getChanges();
+        $data = $this->state->getChanges();
         if ($data !== [] || $this->appendix !== []) {
             $this->db
                 ->update(

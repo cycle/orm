@@ -22,31 +22,48 @@ class RefersTo extends AbstractRelation implements DependencyInterface
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
-    }
-
-    public function queue(Pool $pool, Tuple $tuple): void
-    {
         $node = $tuple->node;
-        $original = $node->getRelation($this->getName());
         $related = $tuple->state->getRelation($this->getName());
+        $original = $node->getRelation($this->getName());
 
         if ($related === null) {
+            // Original is not null
             if ($original !== null) {
-                // reset keys
+                // Reset keys
                 $state = $node->getState();
                 foreach ($this->innerKeys as $innerKey) {
                     $state->register($innerKey, null, true);
                 }
             }
-            // $node->getState()->setRelation($this->getName(), $related);
 
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-            // nothing to do
             return;
         }
         if ($related instanceof PromiseOne) {
             if ($related->__loaded()) {
                 $related = $related->__resolve();
+                $tuple->state->setRelation($this->getName(), $related);
+            }
+        }
+        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        if ($related instanceof ReferenceInterface) {
+            return;
+        }
+        $rTuple = $pool->offsetGet($related);
+        if ($rTuple === null && $this->isCascade()) {
+            $pool->attachStore($related, false, null, null, false);
+        }
+    }
+
+    public function queue(Pool $pool, Tuple $tuple): void
+    {
+        $node = $tuple->node;
+        $related = $tuple->state->getRelation($this->getName());
+
+        if ($related instanceof PromiseOne) {
+            if ($related->__loaded()) {
+                $related = $related->__resolve();
+                $tuple->state->setRelation($this->getName(), $related);
             }
         }
         if ($related instanceof ReferenceInterface) {
@@ -72,8 +89,12 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             }
         }
 
+        /**
+         * todo refactor
+         * {@see \Cycle\ORM\Relation\BelongsTo::checkNullValuePossibility()}
+         */
         if ($rTuple->status === Tuple::STATUS_PROCESSED
-            || ($rTuple->status > Tuple::STATUS_PROPOSED && array_intersect($this->outerKeys, $rTuple->waitKeys) === [])
+            || ($rTuple->status > Tuple::STATUS_PREPARING && $rTuple->state->getStatus() !== node::NEW && array_intersect($this->outerKeys, $rTuple->waitKeys) === [])
         ) {
             $this->pullValues($node, $rTuple->node);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);

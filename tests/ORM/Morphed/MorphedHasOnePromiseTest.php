@@ -140,6 +140,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
                 Schema::RELATIONS   => []
             ],
         ]));
+        $this->logger->display();
     }
 
     public function testAccessEntity(): void
@@ -204,28 +205,20 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 
     public function testExchangeParentsSameType(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $selector->orderBy('user.id');
-        [$a, $b] = $selector->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
         [$a->image, $b->image] = [$b->image, $a->image];
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($a, $b);
         $this->assertNumReads(2);
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($a, $b);
         $this->assertNumReads(0);
         $this->assertNumWrites(0);
 
@@ -279,21 +272,17 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $p->image->url = 'new-post.png';
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, Post::class);
-        $p = $selector->wherePK(5)->fetchOne();
+        $p = (new Select($this->orm, Post::class))
+            ->wherePK(5)->fetchOne();
 
         $this->assertSame('post title', $p->title);
         $this->assertSame('new-post.png', $p->image->__resolve()->url);
@@ -301,7 +290,9 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 
     public function testMoveToAnotherParent(): void
     {
+        /** @var User $u */
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
+        /** @var Post $p */
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
 
         $u->image = $p->image;
@@ -309,10 +300,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($u, $p);
         $this->assertNumWrites(2);
         $this->assertNumReads(2);
 

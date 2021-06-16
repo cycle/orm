@@ -236,7 +236,6 @@ final class Transaction implements TransactionInterface
             return self::RELATIONS_RESOLVED;
         }
 
-        $entityData = $tuple->mapper->extract($tuple->entity);
         $deferred = false;
         $resolved = true;
         $waitKeys = [];
@@ -261,24 +260,23 @@ final class Transaction implements TransactionInterface
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
                 // }
             } else {
-                if ($relationStatus === RelationInterface::STATUS_PREPARE) {
-                    $entityData = $tuple->mapper->extract($tuple->entity);
-                    $child = $entityData[$name] ?? null;
-                    $tuple->state->setRelation($name, $child);
-                    // $relation->prepare(
-                    //     $this->pool,
-                    //     $tuple,
-                    //     $isWaitingKeys || $hasChangedKeys
-                    // );
-                    // $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                if ($tuple->status === Tuple::STATUS_PREPARING) {
+                    if ($relationStatus === RelationInterface::STATUS_PREPARE) {
+                        $entityData = $tuple->mapper->extract($tuple->entity);
+                        $tuple->state->setRelation($name, $entityData[$name] ?? null);
+                        $relation->prepare($this->pool, $tuple);
+                        $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                    }
+                } else {
+                    $relation->queue($this->pool, $tuple);
+                    $relationStatus = $tuple->node->getRelationStatus($relation->getName());
                 }
-                $relation->queue($this->pool, $tuple);
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
             }
-            if (!$resolved) {
-                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[34m  Master {$role}.{$name}\033[0m not resolved {$relationStatus} {$className}\n";
+            if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
+                $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
+                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
                 $waitKeys[] = $relation->getInnerKeys();
             } else {
                 \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
@@ -425,7 +423,6 @@ final class Transaction implements TransactionInterface
                 }
                 throw new TransactionException('Relation can not be resolved.');
             }
-            // ++$tuple->status;
         }
     }
 

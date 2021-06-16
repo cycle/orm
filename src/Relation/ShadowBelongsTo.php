@@ -38,6 +38,7 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
+        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
     }
 
     public function queue(Pool $pool, Tuple $tuple): void

@@ -436,22 +436,18 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $p->image->url = 'new-post.png';
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, Post::class);
-        $selector->load('image');
-        $p = $selector->wherePK(5)->fetchOne();
+        $p = (new Select($this->orm, Post::class))
+            ->load('image')
+            ->wherePK(5)->fetchOne();
 
         $this->assertSame('post title', $p->title);
         $this->assertSame('new-post.png', $p->image->url);

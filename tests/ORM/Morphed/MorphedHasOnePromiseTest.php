@@ -74,73 +74,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema([
-            User::class  => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
-                    'image' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
-                        Relation::TARGET => Image::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
-                        ],
-                    ],
-                    'posts' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
-                        Relation::TARGET => Post::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id'
-                        ]
-                    ]
-                ]
-            ],
-            Post::class  => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
-                    'image' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
-                        Relation::TARGET => Image::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
-                        ],
-                    ]
-                ]
-            ],
-            Image::class => [
-                Schema::ROLE        => 'image',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'image',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'url'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ],
-        ]));
-        $this->logger->display();
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     public function testAccessEntity(): void
@@ -264,6 +198,10 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 
     public function testCreateWithRelated(): void
     {
+        $schemaArray = $this->getSchemaArray();
+        $schemaArray[User::class][Schema::RELATIONS]['posts'][Relation::SCHEMA][Relation::NULLABLE] = true;
+        $this->orm = $this->withSchema(new Schema($schemaArray));
+
         $p = new Post();
         $p->title = 'post title';
         $p->content = 'post content';
@@ -346,5 +284,75 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 
         $this->assertSame('post-2-image.png', $u->image->__resolve()->url);
         $this->assertSame('user-image.png', $p->image->__resolve()->url);
+    }
+
+    private function getSchemaArray(): array
+    {
+        return [
+            User::class  => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'image' => [
+                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
+                        Relation::TARGET => Image::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type'
+                        ],
+                    ],
+                    'posts' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => Post::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id'
+                        ]
+                    ]
+                ]
+            ],
+            Post::class  => [
+                Schema::ROLE        => 'post',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'post',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'image' => [
+                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
+                        Relation::TARGET => Image::class,
+                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type'
+                        ],
+                    ]
+                ]
+            ],
+            Image::class => [
+                Schema::ROLE        => 'image',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'image',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'url'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ],
+        ];
     }
 }

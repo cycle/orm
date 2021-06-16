@@ -63,8 +63,9 @@ final class RelationMap
             # todo: SHADOW_HAS_MANY
             return;
         }
-        // skip Morphed
+        // todo: need create specific (plural) ShadowBelongsTo relation only for MORPHED relations
         if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {
+            // skip Morphed
             return;
         }
         // $schema = $relationSchema[Relation::SCHEMA];

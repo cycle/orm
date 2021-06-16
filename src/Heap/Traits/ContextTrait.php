@@ -28,6 +28,7 @@ trait ContextTrait
          return $this->waitContext;
     }
 
+    // todo decide: should the context be deleted?
     public function getContext(): array
     {
         return $this->context;

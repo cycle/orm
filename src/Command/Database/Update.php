@@ -62,7 +62,7 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
 
     public function hasData(): bool
     {
-        return count($this->appendix) > 0 || $this->state->getChanges() !== [];
+        return count($this->appendix) > 0 || $this->state->getChanges() !== [] || count($this->state->getContext()) > 0;
     }
 
     /**
@@ -74,7 +74,7 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
             throw new CommandException('Unable to execute update command without a scope.');
         }
 
-        $data = $this->state->getChanges();
+        $data = array_merge($this->state->getChanges(), $this->state->getContext());
         if ($data !== [] || $this->appendix !== []) {
             $this->db
                 ->update(

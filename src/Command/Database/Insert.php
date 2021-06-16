@@ -58,7 +58,7 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
 
     public function hasData(): bool
     {
-        return count($this->appendix) > 0 || count($this->state->getData()) > 0;
+        return count($this->appendix) > 0 || count($this->state->getData()) > 0 || count($this->state->getContext()) > 0;
     }
 
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
@@ -75,7 +75,7 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
      */
     public function execute(): void
     {
-        $data = $this->state->getData();
+        $data = array_merge($this->state->getData(), $this->state->getContext());
 
         // filter PK null values
         foreach ($this->primaryKeys as $key) {

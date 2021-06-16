@@ -74,6 +74,13 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
     {
         $data = $this->state->getData();
 
+        // filter PK null values
+        foreach ($this->primaryKeys as $key) {
+            if (!isset($data[$key])) {
+                unset($data[$key]);
+            }
+        }
+
         $insert = $this->db
             ->insert($this->table)
             ->values(($this->mapper === null ? $data : ($this->mapper)($data)) + $this->appendix);

@@ -90,6 +90,9 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
+        if ($tuple->task !== $tuple::TASK_STORE) {
+            return;
+        }
         $node = $tuple->node;
         $related = $tuple->state->getRelation($this->getName());
         $related = $this->extract($related);

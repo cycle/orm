@@ -96,17 +96,17 @@ abstract class AutoTimestampsTest extends BaseTest
         $u->email = 'test@email.com';
         $u->balance = 199;
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
-        $orm = $this->orm->withHeap(new Heap());
-        $s = new Select($orm, User::class);
+        $this->orm = $this->orm->withHeap(new Heap());
+        $s = new Select($this->orm, User::class);
 
         $u = $s->fetchOne();
 
         $u->balance = 200;
 
         $this->captureWriteQueries();
-        (new Transaction($orm))->persist($u)->run();
+        $this->save($u);
         $this->assertNumWrites(1);
     }
 }

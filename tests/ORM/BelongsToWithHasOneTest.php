@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\Relation\NullException;
+use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -18,7 +19,7 @@ use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Spiral\Database\Injection\Parameter;
 
-abstract class BelongsToRelationTest extends BaseTest
+abstract class BelongsToWithHasOneTest extends BaseTest
 {
     use TableTrait;
 
@@ -80,7 +81,17 @@ abstract class BelongsToRelationTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'email', 'balance'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::RELATIONS   => [
+                    'profile' => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
             ],
             Profile::class => [
                 Schema::ROLE        => 'profile',
@@ -98,6 +109,16 @@ abstract class BelongsToRelationTest extends BaseTest
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                    'nested' => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Nested::class,
+                        Relation::SCHEMA => [
+                            Relation::NULLABLE  => true, // todo set false and connect with nested:profile
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
                         ],
                     ]
                 ]
@@ -258,7 +279,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSame($result[1]->user, $result[2]->user);
     }
 
-    public function testCreateWithRelations(): void
+    public function testCreateWithOnlyBelongsToRelation(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
@@ -296,6 +317,94 @@ abstract class BelongsToRelationTest extends BaseTest
                 ],
             ]
         ], $selector->wherePK(4)->fetchData());
+    }
+
+    public function testCreateWithOnlyHasOneRelation(): void
+    {
+        $p = new Profile();
+        $p->image = 'magic.gif';
+
+        $u = new User();
+        $u->email = 'test@email.com';
+        $u->balance = 300;
+        $u->profile =$p;
+
+        $this->save($u);
+
+        $this->assertEquals(3, $u->id);
+        $this->assertEquals(4, $p->id);
+        // todo
+        // $this->assertNotNull($p->user);
+
+        $this->assertTrue($this->orm->getHeap()->has($u));
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($u)->getStatus());
+
+        $this->assertTrue($this->orm->getHeap()->has($p));
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($p)->getStatus());
+
+        $this->assertSame($u->id, $this->orm->getHeap()->get($p)->getData()['user_id']);
+
+        $selector = new Select($this->orm, Profile::class);
+        $selector->load('user');
+
+        $this->assertEquals([
+            [
+                'id'      => 4,
+                'user_id' => 3,
+                'image'   => 'magic.gif',
+                'user'    => [
+                    'id'      => 3,
+                    'email'   => 'test@email.com',
+                    'balance' => 300.0,
+                ],
+            ]
+        ], $selector->wherePK(4)->fetchData());
+    }
+
+    public function testDeleteFromOnlyBelongsToRelation(): void
+    {
+        $p = new Profile();
+        $p->image = 'magic.gif';
+
+        $u = new User();
+        $u->email = 'test@email.com';
+        $u->balance = 300;
+        $u->profile =$p;
+        $p->user = $u;
+
+        $this->save($u);
+
+        $p->user = null;
+
+        $this->expectException(NullException::class);
+        try {
+            $this->save($p);
+        } catch (\Throwable $e) {
+            throw $e;
+        } finally {
+            // we do not expect state to be consistent as transaction failed, see rollback tests
+            $this->orm = $this->orm->withHeap(new Heap());
+        }
+    }
+
+    public function testDeleteFromOnlyHasOneRelation(): void
+    {
+        $p = new Profile();
+        $p->image = 'magic.gif';
+
+        $u = new User();
+        $u->email = 'test@email.com';
+        $u->balance = 300;
+        $u->profile = $p;
+        $p->user = $u;
+
+        $this->save($u);
+
+        $u->profile = null;
+        $this->save($u);
+
+        $this->assertNull($u->profile);
+        $this->assertFalse($this->orm->getHeap()->has($p));
     }
 
     public function testNoWriteQueries(): void

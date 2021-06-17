@@ -94,7 +94,6 @@ abstract class ManyToManySingleEntityTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
-        $this->logger->display();
     }
 
     public function testStore(): void
@@ -147,6 +146,8 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $this->save($fetchedRole);
 
         $fetchedRole->children->add($fetchedPermission);
+        // todo Failed with error `Call to undefined method Cycle\ORM\Relation\Pivoted\PivotedPromise::add()`
+        // Should be solved with proxy task
         $fetchedPermission->parents->add($fetchedRole);
 
         $this->save($fetchedRole);

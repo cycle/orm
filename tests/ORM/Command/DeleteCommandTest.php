@@ -18,7 +18,7 @@ class DeleteCommandTest extends TestCase
     {
         $this->expectException(CommandException::class);
 
-        $state = new State(Node::SCHEDULED_INSERT, []);
+        $state = new State(Node::SCHEDULED_DELETE, []);
         $cmd = new Delete(
             m::mock(DatabaseInterface::class),
             'table',

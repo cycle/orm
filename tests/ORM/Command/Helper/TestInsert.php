@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Command\Helper;
 
 use Cycle\ORM\Command\DatabaseCommand;
-use Cycle\ORM\Command\InitCarrierInterface;
-use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Exception\CommandException;
 use Spiral\Database\DatabaseInterface;
 
-class TestInsert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
+class TestInsert extends DatabaseCommand implements ProducerInterface, ConsumerInterface
 {
-    use ContextTrait;
     use ErrorTrait;
 
     // Special identifier to forward insert key into
@@ -43,7 +40,7 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
      */
     public function isReady(): bool
     {
-        return $this->waitContext === [];
+        return true;
     }
 
     /**
@@ -65,16 +62,8 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
         $this->consumers[$key][] = [$consumer, $target, $stream];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
-        if ($fresh || !is_null($value)) {
-            $this->freeContext($key);
-        }
-
-        $this->setContext($key, $value);
     }
 
     /**
@@ -84,7 +73,7 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
      */
     public function getData(): array
     {
-        return array_merge($this->data, $this->context);
+        return $this->data;
     }
 
     /**

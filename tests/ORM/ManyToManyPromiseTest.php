@@ -123,7 +123,6 @@ abstract class ManyToManyPromiseTest extends BaseTest
                 Schema::RELATIONS   => []
             ]
         ]));
-        $this->logger->display();
     }
 
     public function testLoadRelation(): void
@@ -226,7 +225,6 @@ abstract class ManyToManyPromiseTest extends BaseTest
         [$a, $b] = (new Select($this->orm, User::class))
             ->fetchAll();
 
-        $this->logger->display();
         $this->captureReadQueries();
         $this->save($a, $b);
         $this->assertNumReads(0);

@@ -90,9 +90,7 @@ abstract class UUIDTypehintTest extends BaseTest
         $uuid = Uuid::uuid4()->toString();
         $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey($uuid), 'hello@world.com', 500);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
 
         $this->assertEquals($uuid, (string)$e->getID());
 

@@ -76,10 +76,9 @@ class SequenceDefaultValueTest extends BaseTest
         $u->email = 'test@email.com';
         $u->balance = 199;
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
-        $s = new Select($this->orm->withHeap(new Heap()), User::class);
-        $data = $s->fetchData();
+        $data = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
 
         $this->assertIsInt($data[0]['user_code']);
     }

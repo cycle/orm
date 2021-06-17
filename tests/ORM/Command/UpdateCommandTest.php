@@ -7,6 +7,8 @@ namespace Cycle\ORM\Tests\Command;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Exception\CommandException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Spiral\Database\DatabaseInterface;
@@ -15,11 +17,11 @@ class UpdateCommandTest extends TestCase
 {
     public function testIsEmpty(): void
     {
+        $state = new State(Node::SCHEDULED_UPDATE, []);
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            [],
-            []
+            $state
         );
 
         $this->assertTrue($cmd->isReady());
@@ -27,39 +29,53 @@ class UpdateCommandTest extends TestCase
 
     public function testHasData(): void
     {
+        $state = new State(Node::SCHEDULED_UPDATE, ['name' => 'value']);
+        $state->register('name', 'new value');
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            ['name' => 'value'],
-            ['where' => 'value']
+            $state,
         );
 
         $this->assertTrue($cmd->hasData());
     }
 
-    public function testIsEmptyContext(): void
+    public function testHasDataAppendix(): void
     {
+        $state = new State(Node::SCHEDULED_UPDATE, ['name' => 'value']);
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            ['name' => 'value'],
-            ['where' => 'value']
+            $state,
         );
+        $cmd->registerAppendix('name', 'new value');
 
-        $cmd->register('key', 'value', true);
-        $this->assertSame(['key' => 'value'], $cmd->getContext());
+        $this->assertTrue($cmd->hasData());
     }
 
-    public function testWhere(): void
+    public function testScopeRegister(): void
     {
+        $state = new State(Node::SCHEDULED_UPDATE, []);
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            ['name' => 'value'],
-            []
+            $state
         );
 
         $cmd->register('key', 'value', false, ConsumerInterface::SCOPE);
+        $this->assertSame(['key' => 'value'], $cmd->getScope());
+    }
+
+    public function testScopeSetter(): void
+    {
+        $state = new State(Node::SCHEDULED_UPDATE, []);
+        $cmd = new Update(
+            m::mock(DatabaseInterface::class),
+            'table',
+            $state
+        );
+
+        $cmd->setScope('key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getScope());
     }
 
@@ -67,11 +83,11 @@ class UpdateCommandTest extends TestCase
     {
         $this->expectException(CommandException::class);
 
+        $state = new State(Node::SCHEDULED_UPDATE, []);
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            ['name' => 'value'],
-            []
+            $state
         );
 
         $cmd->execute();

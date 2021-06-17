@@ -91,6 +91,7 @@ abstract class HasManyRelationTest extends BaseTest
                 Schema::CONSTRAIN   => SortByIDConstrain::class
             ]
         ]));
+
     }
 
     public function testInitRelation(): void

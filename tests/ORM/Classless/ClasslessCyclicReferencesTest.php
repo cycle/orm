@@ -143,7 +143,6 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
                 Schema::RELATIONS   => []
             ]
         ]));
-        $this->logger->display();
     }
 
     public function testCreate(): void
@@ -166,7 +165,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
 
         // no changes!
         $this->captureWriteQueries();
-        $this->save($u);
+        $this->save($u, $c);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -217,13 +216,13 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, 'user');
-        $selector->load('lastComment.user')
-                 ->load('comments.user')
-                 ->load('comments.favoredBy')
-                 ->load('favorites');
 
-        $u1 = $selector->wherePK($u->id)->fetchOne();
+        $u1 = (new Select($this->orm, 'user'))
+            ->load('lastComment.user')
+            ->load('comments.user')
+            ->load('comments.favoredBy')
+            ->load('favorites')
+            ->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u1->id);
         $this->assertEquals($u->lastComment->id, $u1->lastComment->id);
@@ -242,13 +241,13 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->assertContains((string)$u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, 'user');
-        $selector->load('lastComment.user')
-                 ->load('comments.user')
-                 ->load('comments.favoredBy')
-                 ->load('favorites');
 
-        $u1 = $selector->wherePK(2)->fetchOne();
+        $u1 = (new Select($this->orm, 'user'))
+            ->load('lastComment.user')
+            ->load('comments.user')
+            ->load('comments.favoredBy')
+            ->load('favorites')
+            ->wherePK($u2->id)->fetchOne();
 
         $this->assertEquals((string)$u1->id, $u2->id);
         $this->assertEquals((string)$u1->favorites[0]->id, $u2->favorites[0]->id);

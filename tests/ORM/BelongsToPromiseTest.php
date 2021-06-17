@@ -218,23 +218,20 @@ abstract class BelongsToPromiseTest extends BaseTest
 
     public function testEditPromised(): void
     {
-        $selector = new Select($this->orm, Profile::class);
-        $p = $selector->wherePK(1)->fetchOne();
-
+        $p = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->fetchOne();
         $p->user->__resolve()->balance = 400;
 
         $this->captureWriteQueries();
         $this->captureReadQueries();
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
 
         $this->assertNumWrites(1);
         $this->assertNumReads(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), Profile::class);
-        $p = $selector->wherePK(1)->fetchOne();
+        $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
+            ->wherePK(1)->fetchOne();
 
         $this->assertSame(400, (int)$p->user->__resolve()->balance);
     }

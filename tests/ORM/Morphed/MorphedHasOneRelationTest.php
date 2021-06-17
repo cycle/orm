@@ -420,7 +420,6 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $p->image = new Image();
         $p->image->url = 'new-post.png';
 
-        $this->logger->display();
         $this->captureWriteQueries();
         $this->save($p);
         $this->assertNumWrites(3);

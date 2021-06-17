@@ -77,7 +77,6 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-        $this->logger->display();
     }
 
     public function testGetParent(): void

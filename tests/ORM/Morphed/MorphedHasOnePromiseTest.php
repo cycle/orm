@@ -260,20 +260,14 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($u, $p);
         $this->assertNumWrites(2);
         $this->assertNumReads(2);
 
         // no changes expected
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($u, $p);
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
 

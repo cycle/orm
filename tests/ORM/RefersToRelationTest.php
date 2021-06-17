@@ -94,11 +94,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->addComment($c);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
+        $this->save($u);
         $this->assertNumWrites(3);
 
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
@@ -120,11 +116,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->addComment($c);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
+        $this->save($u);
         $this->assertNumWrites(3);
 
         $u2 = new User();
@@ -133,13 +125,16 @@ abstract class RefersToRelationTest extends BaseTest
         $u2->lastComment = $c;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u2);
-        $tr->run();
+        $this->save($u2);
         $this->assertNumWrites(1);
+        $this->logger->hide();
 
-        $s = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u3 = $s->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
+        $this->captureWriteQueries();
+        $this->save($u2);
+        $this->assertNumWrites(0);
+
+        $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
 
         $this->assertNotNull($u3->lastComment);
         $this->assertEquals($u3->lastComment->id, $u->comments[0]->id);
@@ -151,9 +146,7 @@ abstract class RefersToRelationTest extends BaseTest
         $u->email = 'email@email.com';
         $u->balance = 100;
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
 
         $c = new Comment();
         $c->message = 'last comment';

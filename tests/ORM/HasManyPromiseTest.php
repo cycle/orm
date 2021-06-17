@@ -201,14 +201,12 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testNoChanges(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $u = $selector->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
 
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
@@ -216,14 +214,12 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testNoChangesWithNoChildren(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $u = $selector->wherePK(2)->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
 
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
@@ -238,9 +234,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
         $e->comments->remove(1);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
@@ -255,10 +249,9 @@ abstract class HasManyPromiseTest extends BaseTest
 
     public function testAddAndRemoveChildren(): void
     {
-        $selector = new Select($this->orm, User::class);
-
         /** @var User $e */
-        $e = $selector->wherePK(1)->fetchOne();
+        $e = (new Select($this->orm, User::class))
+            ->wherePK(1)->fetchOne();
 
         $e->comments->remove(1);
 
@@ -266,9 +259,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $c->message = 'msg 4';
         $e->comments->add($c);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 

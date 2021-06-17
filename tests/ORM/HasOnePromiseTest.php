@@ -285,7 +285,6 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->captureWriteQueries();
         $this->captureReadQueries();
 
-        $this->logger->display();
         $this->save($a, $b);
 
         // load both promises

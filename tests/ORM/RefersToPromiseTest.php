@@ -99,7 +99,6 @@ abstract class RefersToPromiseTest extends BaseTest
                 ]
             ]
         ]));
-        $this->logger->display();
     }
 
     public function testFetchRelation(): void

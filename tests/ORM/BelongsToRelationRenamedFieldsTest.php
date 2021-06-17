@@ -12,7 +12,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Transaction;
 
 abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
 {
@@ -136,23 +135,24 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
             'image'         => 'string'
         ]);
 
-        $s = new Select($this->orm, Profile::class);
-        $p = $s->wherePK(1)->load('user')->fetchOne();
+
+        /** @var Profile $p */
+        $p = (new Select($this->orm, Profile::class))->wherePK(1)->load('user')->fetchOne();
         $p->user = null;
 
+        var_dump('prepare');
         $this->captureWriteQueries();
         $this->save($p);
         $this->assertNumWrites(1);
 
         // consecutive
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(0);
 
-        $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
-        $p = $s->wherePK(1)->load('user')->fetchOne();
+        /** @var Profile $p */
+        $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
+            ->wherePK(1)->load('user')->fetchOne();
 
         $this->assertSame(null, $p->user);
     }

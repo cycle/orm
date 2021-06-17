@@ -77,11 +77,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $c2->cyclic = $c1;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->run();
-
+        $this->save($c1, $c2);
         // 2 inserts + 1 update
         $this->assertNumWrites(3);
 
@@ -95,11 +91,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumReads(0);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
+        $this->save($a, $b);
         $this->assertNumWrites(0);
     }
 
@@ -118,17 +110,16 @@ abstract class DoubleLinkedTest extends BaseTest
         $c2->other = $c1;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->run();
+        $this->save($c1, $c2);
+        // 2 inserts, 1 update
+        $this->assertNumWrites(3);
 
-        // 2 inserts, 2 updates
-        $this->assertNumWrites(4);
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, Cyclic::class);
-        [$a, $b] = $selector->orderBy('id')->fetchAll();
+        [$a, $b] = (new Select($this->orm, Cyclic::class))->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
         $this->assertSame($a, $b->cyclic);

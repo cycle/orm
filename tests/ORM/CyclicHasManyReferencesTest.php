@@ -128,18 +128,12 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         $p->addComment($c);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
-
+        $this->save($p);
         $this->assertNumWrites(4);
 
         // no changes!
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -181,11 +175,7 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         $p->addComment($c2);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
-
+        $this->save($p);
         $this->assertNumWrites(6);
 
         $c3 = new Comment();
@@ -195,24 +185,25 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         $p->addComment($c3);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
-
-        //$this->assertNumWrites(1);
+        $this->save($p);
+        // todo: belongsTo should wait when all entities will be prepared
+        // $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, Post::class);
-        $selector->load('lastComment.user')
-                 ->load('comments.user');
 
-        $p1 = $selector->wherePK(1)->fetchOne();
+        $p1 = (new Select($this->orm, Post::class))
+            ->load('lastComment.user')
+            ->load('comments.user')
+            ->wherePK($p->id)->fetchOne();
+
+        $pCommentIds = array_column($p->comments->toArray(), 'id');
+        $p1CommentIds = array_column($p1->comments->toArray(), 'id');
+        sort($pCommentIds);
+        sort($p1CommentIds);
 
         $this->assertEquals($p1->lastComment->id, $c3->id);
-
         $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
-        $this->assertEquals($p->comments[0]->id, $p1->comments[0]->id);
+        $this->assertEquals($pCommentIds, $p1CommentIds);
         $this->assertEquals($p1->id, $p1->comments[0]->post_id);
     }
 }

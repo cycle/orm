@@ -140,9 +140,7 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
         $c->cyclic = $c;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
+        $this->save($c);
         $this->assertNumWrites(2);
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');

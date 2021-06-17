@@ -141,16 +141,15 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
 
     public function testNoWriteOperations(): void
     {
-        $selector = new Select($this->orm, Profile::class);
-        $p = $selector->wherePK(1)->fetchOne();
+        /** @var Profile $p */
+        $p = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->fetchOne();
 
         $this->assertInstanceOf(ReferenceInterface::class, $p->user);
         $this->assertInstanceOf(Reference::class, $p->user);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(0);
     }
 

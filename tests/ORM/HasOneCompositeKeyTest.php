@@ -131,6 +131,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+
     }
 
     public function testHasInSchema(): void
@@ -187,9 +188,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $e->child_entity->key1 = 15;
         $e->child_entity->key2 = 25;
 
-        (new Transaction($this->orm))
-            ->persist($e)
-            ->run();
+        $this->save($e);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
@@ -211,9 +210,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $e->child_entity->key2 = 99;
         $e->child_entity->key3 = 'foo';
 
-        (new Transaction($this->orm))
-            ->persist($e)
-            ->run();
+        $this->save($e);
 
         $selector = (new Select($this->orm, CompositePK::class))->where(['key1' => 2, 'key2' => 2]);
         $selector->load('child_entity');
@@ -236,44 +233,40 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
     public function testCreateAndUpdateRelatedData(): void
     {
-        $selector = new Select($this->orm, CompositePK::class);
-        $e = $selector->where(['key1' => 2, 'key2' => 2])->fetchOne();
+        $e = (new Select($this->orm, CompositePK::class))
+            ->where(['key1' => 2, 'key2' => 2])->fetchOne();
 
         $e->child_entity = new CompositePKChild();
         $e->child_entity->key1 = 88;
         $e->child_entity->key2 = 99;
         $e->child_entity->key3 = 'foo';
 
-        (new Transaction($this->orm))
-            ->persist($e)
-            ->run();
+        $this->save($e);
 
         // Re-select
-        $orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
-        $selector = new Select($orm, CompositePK::class);
-        $e = $selector->wherePK([2, 2])->load('child_entity')->fetchOne();
+        $e = (new Select($this->orm, CompositePK::class))
+            ->wherePK([2, 2])
+            ->load('child_entity')
+            ->fetchOne();
 
         $this->assertSame('foo', $e->child_entity->key3);
 
         $e->child_entity->key3 = 'bar';
 
         $this->captureWriteQueries();
-        (new Transaction($orm))
-            ->persist($e)
-            ->run();
+        $this->save($e);
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
-        (new Transaction($orm))
-            ->persist($e)
-            ->run();
+        $this->save($e);
         $this->assertNumWrites(0);
 
         // Re-select
-        $orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
-        $selector = new Select($orm, CompositePK::class);
+        $selector = new Select($this->orm, CompositePK::class);
         $e = $selector->wherePK([2, 2])->load('child_entity')->fetchOne();
 
         $this->assertSame('bar', $e->child_entity->key3);
@@ -293,6 +286,10 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
         $this->captureWriteQueries();
         $this->save($e);
+        // Update Child PK and Nested related keys
+        // todo: test same without foreign keys: nested should be updated
+        // todo: optimize if foreign keys are exists
+        // todo: 2 or 1 queries? (should update nested entity?)
         $this->assertNumWrites(1);
 
         // Re-select
@@ -310,26 +307,32 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
     public function testDeleteChildrenByAssigningNull(): void
     {
-        $selector = new Select($this->orm, CompositePK::class);
-        $e = $selector->wherePK([1, 1])->load('child_entity')->fetchOne();
+        /** @var CompositePK $e */
+        $e = (new Select($this->orm, CompositePK::class))
+            ->wherePK([1, 1])
+            ->load('child_entity')
+            ->fetchOne();
         $e->child_entity = null;
         $this->assertSame(3, (new Select($this->orm, CompositePKChild::class))->count());
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        // $this->captureWriteQueries();
+        $this->save($e);
+        // $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-        $e = $selector->wherePK([1, 1])->load('child_entity')->fetchOne();
+        /** @var CompositePK $e */
+        $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->wherePK([1, 1])
+            ->load('child_entity')
+            ->fetchOne();
 
-        $this->assertSame(null, $e->child_entity);
+        $this->assertNull($e->child_entity);
         $this->assertSame(2, (new Select($this->orm, CompositePKChild::class))->count());
     }
 
     public function testAssignNewChild(): void
     {
-        $selector = new Select($this->orm, CompositePK::class);
-        $e = $selector->wherePK([1, 1])->load('child_entity')->fetchOne();
+        $e = (new Select($this->orm, CompositePK::class))
+            ->wherePK([1, 1])->load('child_entity')->fetchOne();
 
         $oP = $e->child_entity;
         $e->child_entity = new CompositePKChild();
@@ -337,9 +340,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $e->child_entity->key2 = 200;
         $e->child_entity->key3 = 'foo';
 
-        (new Transaction($this->orm))
-            ->persist($e)
-            ->run();
+        $this->save($e);
 
         $this->assertFalse($this->orm->getHeap()->has($oP));
         $this->assertTrue($this->orm->getHeap()->has($e->child_entity));
@@ -365,7 +366,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->fetchOne();
         $e->child_entity = null;
 
-        (new Transaction($this->orm))->persist($e)->run();
+        $this->save($e);
 
         $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->wherePK([1, 1])
@@ -379,6 +380,10 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     public function testMoveToAnotherEntity(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
+        /**
+         * @var $a CompositePK
+         * @var $b CompositePK
+         */
         [$a, $b] = $selector->load('child_entity')
             ->where('parent_entity.key3', '>', 200)
             ->orderBy('parent_entity.key3')
@@ -390,10 +395,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $compareChild = $a->child_entity;
         [$b->child_entity, $a->child_entity] = [$a->child_entity, null];
 
-        (new Transaction($this->orm))
-            ->persist($a)
-            ->persist($b)
-            ->run();
+        $this->save($a, $b);
 
         $this->assertTrue($this->orm->getHeap()->has($b->child_entity));
 
@@ -459,7 +461,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
         $e->child_entity->nested->key3 = 'new-label';
 
-        (new Transaction($this->orm))->persist($e)->run();
+        $this->save($e);
 
         $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
         $e = $selector->wherePK([1, 1])->load('child_entity.nested')->fetchOne();
@@ -469,13 +471,13 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
     public function testChangeNestedChild(): void
     {
-        $selector = new Select($this->orm, CompositePK::class);
-        $e = $selector->wherePK([1, 1])->load('child_entity.nested')->fetchOne();
+        $e = (new Select($this->orm, CompositePK::class))
+            ->wherePK([1, 1])->load('child_entity.nested')->fetchOne();
 
         $e->child_entity->nested = new CompositePKNested();
         $e->child_entity->nested->key3 = 'another';
 
-        (new Transaction($this->orm))->persist($e)->run();
+        $this->save($e);
 
         $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->wherePK([1, 1])
@@ -572,8 +574,8 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->fetchOne();
 
         $newCompositePKChild = new CompositePKChild();
-        $newCompositePKChild->key1 = 1;
-        $newCompositePKChild->key2 = 1;
+        $newCompositePKChild->key1 = 1000;
+        $newCompositePKChild->key2 = 1001;
         $newCompositePKChild->key3 = 'new';
         $u->child_entity = $newCompositePKChild;
 
@@ -592,7 +594,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
         $this->assertSame(self::CHILD_1['key3'], $u3->child_entity->key3);
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(CompositePK::class)
                         ->select()->load('child_entity')->wherePK([1, 1])->fetchOne();
@@ -605,8 +607,8 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $u = (new Select($this->orm, CompositePK::class))->wherePK([1, 1])->fetchOne();
 
         $newCompositePKChild = new CompositePKChild();
-        $newCompositePKChild->key1 = 8;
-        $newCompositePKChild->key2 = 8;
+        $newCompositePKChild->key1 = 81;
+        $newCompositePKChild->key2 = 82;
         $newCompositePKChild->key3 = 'new';
         $u->child_entity = $newCompositePKChild;
 

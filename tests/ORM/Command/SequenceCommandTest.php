@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Command;
 
-use Cycle\ORM\Command\Branch\ContextSequence;
-use Cycle\ORM\Command\Branch\Nil;
 use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Tests\Command\Helper\TestInsert;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
@@ -18,8 +15,6 @@ class SequenceCommandTest extends TestCase
     {
         $command = new Sequence();
 
-        $command->addCommand(new Nil());
-        $command->addCommand(new Nil());
         $command->addCommand(m::mock(TestInsert::class));
         $command->addCommand(m::mock(TestInsert::class));
 
@@ -44,23 +39,5 @@ class SequenceCommandTest extends TestCase
         $command = new Sequence();
         $this->assertTrue($command->isReady());
         $this->assertFalse($command->isExecuted());
-    }
-
-    public function testGetLeadingBad(): void
-    {
-        $this->expectException(CommandException::class);
-
-        $command = new ContextSequence();
-        $command->getContext();
-    }
-
-    public function testGetContext(): void
-    {
-        $command = new ContextSequence();
-        $command->addPrimary($lead = m::mock(TestInsert::class));
-
-        $lead->shouldReceive('getContext')->andReturn(['hi']);
-
-        $this->assertSame(['hi'], $command->getContext());
     }
 }

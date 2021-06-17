@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\ContextSequence;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\DependencyInterface;
 use Cycle\ORM\Relation\RelationInterface;
+use Cycle\ORM\Relation\SameRowRelationInterface;
+use Cycle\ORM\Relation\ShadowBelongsTo;
+use JetBrains\PhpStorm\ExpectedValues;
+
+use function count;
 
 /**
  * Manages the position of node in the relation graph and provide access to neighbours.
@@ -19,20 +19,80 @@ use Cycle\ORM\Relation\RelationInterface;
 final class RelationMap
 {
     /** @var RelationInterface[] */
-    private array $relations;
+    private array $innerRelations;
 
     /** @var DependencyInterface[] */
     private array $dependencies = [];
+    /** @var RelationInterface[] */
+    private array $slaves = [];
+    /** @var SameRowRelationInterface[] */
+    private array $embedded = [];
 
-    public function __construct(array $relations)
+    public function __construct(array $innerRelations, array $outerRelations)
     {
-        $this->relations = $relations;
+        $this->innerRelations = $innerRelations;
 
-        foreach ($this->relations as $name => $relation) {
+        foreach ($innerRelations as $name => $relation) {
             if ($relation instanceof DependencyInterface) {
                 $this->dependencies[$name] = $relation;
+            } elseif ($relation instanceof SameRowRelationInterface) {
+                $this->embedded[$name] = $relation;
+            } else {
+                $this->slaves[$name] = $relation;
             }
         }
+
+        foreach ($outerRelations as $outerRole => $relations) {
+            foreach ($relations as $container => $relationSchema) {
+                $this->registerOuterRelation($outerRole, $container, $relationSchema);
+            }
+        }
+    }
+
+    private function registerOuterRelation(string $role, string $container, array $relationSchema): void
+    {
+        // todo: it better to check instanceOf \Cycle\ORM\Relation\DependencyInterface instead of int
+        $relationType = $relationSchema[Relation::TYPE];
+        // skip dependencies
+        if ($relationType === Relation::BELONGS_TO || $relationType === Relation::REFERS_TO) {
+            return;
+        }
+        if ($relationType === Relation::MANY_TO_MANY) {
+            // $schema = $relationSchema[Relation::SCHEMA];
+            // $through = $this->schema->resolveAlias($schema[Relation::THROUGH_ENTITY]);
+            # todo: SHADOW_HAS_MANY
+            return;
+        }
+        if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {
+            // todo: find morphed collisions, decide handshake
+            $relation = new ShadowBelongsTo('~morphed~', $container, $relationSchema);
+            $this->dependencies[$relation->getName()] ??= $relation;
+            return;
+        }
+        // $schema = $relationSchema[Relation::SCHEMA];
+        // // $cascade = $schema[Relation::CASCADE];
+        // $outerKeys = (array)$schema[Relation::OUTER_KEY];
+        // $innerKeys = (array)$schema[Relation::INNER_KEY];
+        // foreach ($this->innerRelations as $relation) {
+        //
+        // }
+        $relation = new ShadowBelongsTo($role, $container, $relationSchema);
+        $this->dependencies[$relation->getName()] = $relation;
+    }
+
+    public function hasDependencies(): bool
+    {
+        return count($this->dependencies) > 0;
+    }
+
+    public function hasSlaves(): bool
+    {
+        return count($this->slaves) > 0;
+    }
+
+    public function hasEmbedded(): bool
+    {
+        return count($this->embedded) > 0;
     }
 
     /**
@@ -40,7 +100,7 @@ final class RelationMap
      */
     public function init(Node $node, array $data): array
     {
-        foreach ($this->relations as $name => $relation) {
+        foreach ($this->innerRelations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
                 if ($node->hasRelation($name)) {
                     continue;
@@ -66,112 +126,25 @@ final class RelationMap
         return $data;
     }
 
-    public function queueRelations(CC $parentStore, object $parentEntity, Node $parentNode, array $parentData): CC
-    {
-        $state = $parentNode->getState();
-        $sequence = new ContextSequence();
-
-        // queue all "left" graph branches
-        foreach ($this->dependencies as $name => $relation) {
-            if (!$relation->isCascade() || $parentNode->getState()->visited($name)) {
-                continue;
-            }
-            $state->markVisited($name);
-
-            $command = $this->queueRelation(
-                $parentStore,
-                $parentEntity,
-                $parentNode,
-                $relation,
-                $relation->extract($parentData[$name] ?? null),
-                $parentNode->getRelation($name)
-            );
-
-            if ($command !== null) {
-                $sequence->addCommand($command);
-            }
-        }
-
-        // queue target entity
-        $sequence->addPrimary($parentStore);
-
-        // queue all "right" graph branches
-        foreach ($this->relations as $name => $relation) {
-            if (!$relation->isCascade() || $parentNode->getState()->visited($name)) {
-                continue;
-            }
-            $state->markVisited($name);
-
-            $command = $this->queueRelation(
-                $parentStore,
-                $parentEntity,
-                $parentNode,
-                $relation,
-                $relation->extract($parentData[$name] ?? null),
-                $parentNode->getRelation($name)
-            );
-
-            if ($command !== null) {
-                $sequence->addCommand($command);
-            }
-        }
-
-        if (\count($sequence) === 1) {
-            return current($sequence->getCommands());
-        }
-
-        return $sequence;
-    }
-
     /**
-     * Queue the relation.
-     *
-     * @param object|array|null $related
-     * @param object|array|null $original
+     * @return RelationInterface[]
      */
-    private function queueRelation(
-        CC $parentStore,
-        object $parentEntity,
-        Node $parentNode,
-        RelationInterface $relation,
-        $related,
-        $original
-    ): ?CommandInterface {
-        if (
-            ($related instanceof ReferenceInterface || $related === null)
-            && !($related instanceof PromiseInterface && $related->__loaded())
-            && $related === $original
-        ) {
-            // no changes in non changed promised relation
-            return null;
-        }
-
-        $relStore = $relation->queue(
-            $parentStore,
-            $parentEntity,
-            $parentNode,
-            $related,
-            $original
-        );
-
-        // update current relation state
-        $parentNode->getState()->setRelation($relation->getName(), $related);
-
-        return $relStore;
-    }
-
-    /**
-     * Check if both references are equal.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     */
-    private function sameReference($a, $b): bool
+    public function getSlaves(): array
     {
-        if (!$a instanceof ReferenceInterface || !$b instanceof ReferenceInterface) {
-            return false;
-        }
-
-        return $a->__role() === $b->__role() && $a->__scope() === $b->__scope();
+        return $this->slaves;
+    }
+    /**
+     * @return DependencyInterface[]
+     */
+    public function getMasters(): array
+    {
+        return $this->dependencies;
+    }
+    /**
+     * @return SameRowRelationInterface[]
+     */
+    public function getEmbedded(): array
+    {
+        return $this->embedded;
     }
 }

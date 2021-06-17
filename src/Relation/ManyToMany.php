@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
@@ -14,7 +11,11 @@ use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Pivoted;
+use Cycle\ORM\Relation\Pivoted\PivotedStorage;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 use Doctrine\Common\Collections\Collection;
+use IteratorAggregate;
 
 class ManyToMany extends Relation\AbstractRelation
 {
@@ -26,9 +27,9 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected ?string $pivotEntity = null;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $name, $target, $schema);
+        parent::__construct($orm, $role, $name, $target, $schema);
         $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY] ?? null;
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
@@ -53,36 +54,36 @@ class ManyToMany extends Relation\AbstractRelation
 
         return [
             new Pivoted\PivotedCollection($elements, $pivotData),
-            new Pivoted\PivotedStorage($elements, $pivotData)
+            new PivotedStorage($elements, $pivotData)
         ];
     }
 
-    public function extract($data)
+    public function extract($data): IteratorAggregate
     {
         if ($data instanceof CollectionPromiseInterface && !$data->isInitialized()) {
             return $data->getPromise();
         }
 
         if ($data instanceof Pivoted\PivotedCollectionInterface) {
-            return new Pivoted\PivotedStorage($data->toArray(), $data->getPivotContext());
+            return new PivotedStorage($data->toArray(), $data->getPivotContext());
         }
 
         if ($data instanceof Collection) {
-            return new Pivoted\PivotedStorage($data->toArray());
+            return new PivotedStorage($data->toArray());
         }
 
-        return new Pivoted\PivotedStorage();
+        return new PivotedStorage();
     }
 
     public function initPromise(Node $node): array
     {
         $innerKeys = [];
+        $nodeData = $node->getData();
         foreach ($this->innerKeys as $key) {
-            $innerKey = $this->fetchKey($node, $key);
-            if ($innerKey === null) {
+            if (!isset($nodeData[$key])) {
                 return [new Pivoted\PivotedCollection(), null];
             }
-            $innerKeys[$key] = $innerKey;
+            $innerKeys[$key] = $nodeData[$key];
         }
 
         // will take care of all the loading and scoping
@@ -96,89 +97,123 @@ class ManyToMany extends Relation\AbstractRelation
         return [new Pivoted\PivotedCollectionPromise($p), $p];
     }
 
-    /**
-     * @inheritdoc
-     *
-     * @param Pivoted\PivotedStorage $related
-     * @param Pivoted\PivotedStorage $original
-     */
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
-        $original ??= new Pivoted\PivotedStorage();
+        $node = $tuple->node;
+        $original = $node->getRelation($this->getName());
+        $related = $tuple->state->getRelation($this->getName());
+        $related = $this->extract($related);
+        // todo refactor
+        $tuple->state->setStorage($this->pivotEntity . '?', $related);
+
+        if ($original instanceof ReferenceInterface) {
+            if (!$load && $related === $original && !$this->isResolved($original)) {
+                return;
+            }
+            $original = $this->resolve($original);
+            $node->setRelation($this->getName(), $original);
+        }
+        if (!$original instanceof PivotedStorage) {
+            $original = $this->extract($original);
+        }
 
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related);
-        }
-
-        if ($original instanceof ReferenceInterface) {
-            $original = $this->resolve($original);
-        }
-
-        $sequence = new Sequence();
-
-        // link/sync new and existed elements
-        foreach ($related->getElements() as $item) {
-            $sequence->addCommand($this->link($node, $item, $related->get($item), $related));
+            $tuple->state->setRelation($this->getName(), $related);
         }
 
         // un-link old elements
-        foreach ($original->getElements() as $item) {
+        foreach ($original as $item) {
             if (!$related->has($item)) {
-                // todo: add support for nullable pivot entities
-                $sequence->addCommand($this->orm->queueDelete($original->get($item)));
-                $sequence->addCommand($this->orm->queueStore($item));
+                $pivot = $original->get($item);
+                $this->deleteChild($pool, $pivot, $item);
                 $original->getContext()->offsetUnset($item);
             }
         }
 
-        return $sequence;
-    }
+        if (count($related) === 0) {
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
+        }
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
-    /**
-     * Link two entities together and create/update pivot context.
-     *
-     * @param object|array|null $pivot
-     */
-    protected function link(Node $node, object $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
+        // link/sync new and existed elements
+        foreach ($related->getElements() as $item) {
+            // $sequence->addCommand(
+            $this->newLink($pool, $tuple, $item, $related);
+            // );
+        }
+
+    }
+    public function queue(Pool $pool, Tuple $tuple): void
     {
-        $rStore = $this->orm->queueStore($related);
+        $related = $tuple->state->getStorage($this->pivotEntity . '?');
+        // $related = $tuple->state->getRelation($this->getName());
+        // $related = $this->extract($relatedSource);
+
+        $node = $tuple->node;
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        // $original = $node->getRelation($this->getName()) ?? new PivotedStorage();
+        // $original ??= new Pivoted\PivotedStorage();
+
+        if ($related instanceof ReferenceInterface) {
+            if (!$this->isResolved($related)) {
+                return;
+            }
+        }
+
+        $relationName = $this->getTargetRelationName();
+        foreach ($related as $item) {
+            $pivot = $related->get($item);
+            $pTuple = $pool->offsetGet($pivot);
+            $this->applyPivotChanges($tuple, $pTuple);
+            $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+        }
+    }
+    protected function applyPivotChanges(Tuple $parentTuple, Tuple $tuple): void
+    {
+        foreach ($this->innerKeys as $i => $innerKey) {
+            $tuple->node->register($this->throughInnerKeys[$i], $parentTuple->state->getValue($innerKey));
+        }
+    }
+    private function deleteChild(Pool $pool, ?object $pivot, object $child, ?Node $relatedNode = null): void
+    {
+        // todo: add support for nullable pivot entities?
+        if ($pivot !== null) {
+            $pool->attachDelete($pivot, $this->isCascade());
+        }
+        $pool->attachStore($child, false);
+    }
+    protected function newLink(Pool $pool, Tuple $tuple, object $related, PivotedStorage $storage): void
+    {
+        // $rStore = $this->orm->queueStore($related);
         $rNode = $this->getNode($related, +1);
         $this->assertValid($rNode);
 
+        $pivot = $storage->get($related);
         if (!is_object($pivot)) {
             // first time initialization
-            $pivot = $this->initPivot($node, $related, $pivot);
+            # todo
+            $pivot = $this->initPivot($tuple->node, $related, $pivot);
+            $storage->set($related, $pivot);
         }
 
         $pNode = $this->getNode($pivot);
+        $pRelationName = $tuple->node->getRole() . ':' . $this->getName();
+        // $pNode->setRelation($pRelationName, $tuple->state->getTransactionData());
+        $pNode->setRelationStatus($pRelationName, RelationInterface::STATUS_RESOLVED);
 
+        $pState = $pNode->getState();
+        $rState = $rNode->getState();
+        foreach ($this->throughInnerKeys as $i => $pInnerKey) {
+            $pState->register($pInnerKey, $tuple->node->getState()->getTransactionData()[$this->innerKeys[$i]] ?? null, true);
+
+            $rState->forward($this->outerKeys[$i], $pState, $this->throughOuterKeys[$i]);
+        }
+
+        $pool->attachStore($related, $this->isCascade(), $rNode, $rState);
         // defer the insert until pivot keys are resolved
-        $pStore = $this->orm->queueStore($pivot);
-
-        $this->forwardContext(
-            $node,
-            $this->innerKeys,
-            $pStore,
-            $pNode,
-            $this->throughInnerKeys
-        );
-
-        $this->forwardContext(
-            $rNode,
-            $this->outerKeys,
-            $pStore,
-            $pNode,
-            $this->throughOuterKeys
-        );
-
-        $sequence = new Sequence();
-        $sequence->addCommand($rStore);
-        $sequence->addCommand($pStore);
-
-        // update the link
-        $storage->set($related, $pivot);
-
-        return $sequence;
+        $pool->attachStore($pivot, $this->isCascade(), $pNode, $pState);
     }
 
     /**

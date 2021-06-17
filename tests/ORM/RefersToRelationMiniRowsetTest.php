@@ -126,18 +126,14 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
     public function testCreateUserWithComment(): void
     {
+        $this->logger->display();
         $c = new Comment();
         $u = new User();
         $u->lastComment = $c;
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->persist($u);
-        $tr->run();
-
-        $this->assertNumWrites(3);
+        $this->save($c, $u);
+        $this->assertNumWrites(2);
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
         $commentData = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();

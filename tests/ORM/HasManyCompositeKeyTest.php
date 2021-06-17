@@ -99,6 +99,7 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+
     }
 
     public function testInitRelation(): void
@@ -299,11 +300,10 @@ abstract class HasManyCompositeKeyTest extends BaseTest
 
     public function testAddAndRemoveChildren(): void
     {
-        $selector = (new Select($this->orm, CompositePK::class))
-            ->load(self::CHILD_CONTAINER);
-
         /** @var CompositePK $e */
-        $e = $selector->wherePK([1, 1])->fetchOne();
+        $e = (new Select($this->orm, CompositePK::class))
+            ->load(self::CHILD_CONTAINER)
+            ->wherePK([1, 1])->fetchOne();
 
         $e->children->remove(1);
 
@@ -314,12 +314,12 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         $e->children->add($c);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($e)->run();
+        $this->save($e);
         $this->assertNumWrites(2);
 
         // consecutive test
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($e)->run();
+        $this->save($e);
         $this->assertNumWrites(0);
 
         $selector = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))

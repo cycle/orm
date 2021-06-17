@@ -35,14 +35,4 @@ abstract class DatabaseCommand implements CommandInterface
     {
         $this->executed = true;
     }
-
-    public function complete(): void
-    {
-        // nothing to do
-    }
-
-    public function rollBack(): void
-    {
-        // nothing to do
-    }
 }

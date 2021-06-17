@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Nil;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
@@ -16,11 +14,13 @@ use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Embeds one object to another.
  */
-final class Embedded implements RelationInterface
+final class Embedded implements SameRowRelationInterface
 {
     use Relation\Traits\NodeTrait;
 
@@ -55,6 +55,11 @@ final class Embedded implements RelationInterface
         return $this->name;
     }
 
+    public function getInnerKeys(): array
+    {
+        return $this->primaryKeys;
+    }
+
     public function getTarget(): string
     {
         return $this->target;
@@ -82,7 +87,7 @@ final class Embedded implements RelationInterface
     {
         $values = [];
         foreach ($this->primaryKeys as $key) {
-            $value = $this->fetchKey($parentNode, $key);
+            $value = $parentNode->getData()[$key] ?? null;
             if (empty($value)) {
                 return [null, null];
             }
@@ -107,13 +112,26 @@ final class Embedded implements RelationInterface
         return $data;
     }
 
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
+    }
+
+    public function queue(Pool $pool, Tuple $tuple, StoreCommandInterface $command = null): void
+    {
+        if ($tuple->task !== Tuple::TASK_STORE) {
+            return;
+        }
+        $related = $tuple->state->getRelation($this->getName());
+
+        // Master Node
+        $node = $tuple->node;
+        $original = $node->getRelation($this->getName());
+
         if ($related instanceof ReferenceInterface) {
             if ($related->__scope() === $original) {
                 if (!($related instanceof PromiseInterface && $related->__loaded())) {
                     // do not update non resolved and non changed promises
-                    return new Nil();
+                    return;
                 }
 
                 $related = $this->resolve($related);
@@ -127,26 +145,26 @@ final class Embedded implements RelationInterface
             throw new NullException("Embedded relation `{$this->name}` can't be null.");
         }
 
-        $state = $this->getNode($related)->getState();
-
+        $rNode = $this->getNode($related);
         // calculate embedded node changes
-        $changes = $this->getChanges($related, $state);
-
-        // register node changes
-        $state->setData($changes);
-
-        // store embedded entity changes via parent command
-        foreach ($this->mapColumns($changes) as $key => $value) {
-            $store->register($key, $value, true);
+        $changes = $this->getChanges($related, $rNode->getState());
+        foreach ($this->primaryKeys as $key) {
+            if (isset($changes[$key])) {
+                $rNode->register($key, $changes[$key]);
+            }
         }
 
-        // currently embeddings does not support chain relations, however it is possible by
-        // exposing relationMap inside this method. in theory it is possible to use
-        // parent entity command to carry context for nested relations, however, custom context
-        // propagation chain must be defined (embedded node => parent command)
-        // in short, we need to get access to getRelationMap from orm to support it.
+        $mapper = $this->orm->getMapper($this->getTarget());
+        $rNode = $this->getNode($related);
+        $changes = $this->getChanges($related, $rNode->getState());
+        foreach ($mapper->mapColumns($changes) as $field => $value) {
+            $command->registerAppendix($field, $value);
+        }
+        $rNode->getState()->setStatus(Node::MANAGED);
+        $rNode->getState()->updateTransactionData();
 
-        return new Nil();
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $node->setRelationStatus($rNode->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
     }
 
     private function getChanges(object $related, State $state): array
@@ -157,24 +175,7 @@ final class Embedded implements RelationInterface
             unset($data[$key]);
         }
 
-        return array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
-    }
-
-    /**
-     * Map internal field names to database specific column names.
-     */
-    private function mapColumns(array $columns): array
-    {
-        $result = [];
-        foreach ($columns as $column => $value) {
-            if (array_key_exists($column, $this->columns)) {
-                $result[$this->columns[$column]] = $value;
-            } else {
-                $result[$column] = $value;
-            }
-        }
-
-        return $result;
+        return array_udiff_assoc($data, $state->getTransactionData(), [static::class, 'compare']);
     }
 
     /**
@@ -183,10 +184,6 @@ final class Embedded implements RelationInterface
      */
     private static function compare($a, $b): int
     {
-        if ($a == $b) {
-            return 0;
-        }
-
         return $a <=> $b;
     }
 
@@ -202,19 +199,5 @@ final class Embedded implements RelationInterface
         }
 
         return $this->orm->get($reference->__role(), $reference->__scope(), true);
-    }
-
-    /**
-     * Fetch key from the state.
-     *
-     * @return mixed|null
-     */
-    private function fetchKey(?Node $state, string $key)
-    {
-        if ($state === null) {
-            return null;
-        }
-
-        return $state->getData()[$key] ?? null;
     }
 }

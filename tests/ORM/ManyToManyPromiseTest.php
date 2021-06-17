@@ -218,37 +218,29 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
     public function testNoQueries(): void
     {
-        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = $selector->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->fetchAll();
 
         $this->captureReadQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
+        $this->save($a, $b);
         $this->assertNumReads(0);
     }
 
     public function testUnlinkManyToManyAndReplaceSome(): void
     {
-        $tagSelector = new Select($this->orm, Tag::class);
-
-        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = $selector->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
         $a->tags->remove(0);
 
-        $a->tags->add($tagSelector->wherePK(3)->fetchOne());
+        $a->tags->add((new Select($this->orm, Tag::class))->wherePK(3)->fetchOne());
         $a->tags->getPivot($a->tags[1])->as = 'new';
 
         // remove all
@@ -264,29 +256,19 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $b->tags->setPivot($t, $pc);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
+        $this->save($a, $b);
         $this->assertNumWrites(6);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
+        $this->save($a, $b);
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $this->orm = $this->orm->withHeap(new Heap());
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = $selector->load('tags')->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->load('tags')->fetchAll();
 
         $this->assertSame('tag b', $a->tags[0]->name);
         $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);

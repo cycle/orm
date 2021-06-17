@@ -268,9 +268,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $p->image = 'magic.gif';
         $p->user = $u;
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
 
         $this->assertEquals(3, $u->id);
         $this->assertEquals(4, $p->id);
@@ -310,18 +308,13 @@ abstract class BelongsToRelationTest extends BaseTest
         $p->image = 'magic.gif';
         $p->user = $u;
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, Profile::class);
-        $p = $selector->load('user')->wherePK(4)->fetchOne();
+        $p = (new Select($this->orm, Profile::class))->load('user')->wherePK(4)->fetchOne();
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(0);
     }
 
@@ -395,24 +388,21 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testExchangeParents(): void
     {
-        $s = new Select($this->orm, Profile::class);
-        [$a, $b] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-                     ->load('user')->fetchAll();
+        /**
+         * @var Profile $a
+         * @var Profile $b
+         */
+        [$a, $b] = (new Select($this->orm, Profile::class))
+            ->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
+            ->load('user')->fetchAll();
 
         [$a->user, $b->user] = [$b->user, $a->user];
-
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($a, $b);
         $this->assertNumWrites(2);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($a, $b);
         $this->assertNumWrites(0);
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
@@ -454,19 +444,15 @@ abstract class BelongsToRelationTest extends BaseTest
         $n->profile->user->balance = 999;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($n);
-        $tr->run();
+        $this->save($n);
         $this->assertNumWrites(3);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($n);
-        $tr->run();
+        $this->save($n);
         $this->assertNumWrites(0);
 
-        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
-        $n = $s->wherePK(2)->load('profile.user')->fetchOne();
+        $n = (new Select($this->orm->withHeap(new Heap()), Nested::class))
+            ->wherePK(2)->load('profile.user')->fetchOne();
 
         $this->assertSame('profile', $n->profile->image);
         $this->assertSame('new@email.com', $n->profile->user->email);

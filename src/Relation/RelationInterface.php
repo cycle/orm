@@ -4,16 +4,24 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
+use JetBrains\PhpStorm\ExpectedValues;
 
 /**
  * Manages single branch type between parent entity and other objects.
  */
 interface RelationInterface
 {
+    public const STATUS_PREPARE = 0;
+    public const STATUS_PROCESS = 1;
+    public const STATUS_DEFERRED = 2;
+    public const STATUS_RESOLVED = 3;
+
+    public function getInnerKeys(): array;
+
     /**
      * Relation name.
      */
@@ -40,6 +48,13 @@ interface RelationInterface
     public function init(Node $node, array $data): array;
 
     /**
+     * Returns tuple of [promise to insert into entity, promise to store as relation context].
+     *
+     * @throws RelationException
+     */
+    public function initPromise(Node $node): array;
+
+    /**
      * Extract the related values from the entity field value.
      *
      * @param mixed $value
@@ -49,21 +64,7 @@ interface RelationInterface
      */
     public function extract($value);
 
-    /**
-     * Returns tuple of [promise to insert into entity, promise to store as relation context].
-     *
-     * @throws RelationException
-     */
-    public function initPromise(Node $node): array;
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void;
 
-    /**
-     * Create branch of operations required to store the relation.
-     *
-
-     * @param object|array|null $related
-     * @param object|array|null $original
-     *
-     * @throws RelationException
-     */
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface;
+    public function queue(Pool $pool, Tuple $tuple): void;
 }

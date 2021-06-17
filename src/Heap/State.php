@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\ClaimTrait;
+use Cycle\ORM\Heap\Traits\ContextTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Heap\Traits\VisitorTrait;
+use JetBrains\PhpStorm\ExpectedValues;
 use SplObjectStorage;
 
 /**
@@ -20,26 +21,31 @@ final class State implements ConsumerInterface, ProducerInterface
     use RelationTrait;
     use ClaimTrait;
     use VisitorTrait;
+    use ContextTrait;
 
     private int $state;
 
+    /** @var array<string, mixed> */
     private array $data;
+
+    /** @var array<string, mixed> */
 
     private array $transactionData;
 
-    private ?ContextCarrierInterface $command = null;
-
-    /** @var ContextCarrierInterface[] */
-    private array $consumers;
+    /** @var ConsumerInterface[] */
+    private array $consumers = [];
 
     /** @var SplObjectStorage[] */
     private array $storage = [];
 
-    public function __construct(int $state, array $data)
-    {
+    public function __construct(
+        #[ExpectedValues(valuesFromClass: Node::class)]
+        int $state,
+        array $data
+    ) {
         $this->state = $state;
         $this->data = $data;
-        $this->transactionData = $data;
+        $this->transactionData = $state === Node::NEW ? [] : $data;
     }
 
     /**
@@ -63,10 +69,6 @@ final class State implements ConsumerInterface, ProducerInterface
      */
     public function setData(array $data): void
     {
-        if ($data === []) {
-            return;
-        }
-
         foreach ($data as $column => $value) {
             $this->register($column, $value);
         }
@@ -88,22 +90,18 @@ final class State implements ConsumerInterface, ProducerInterface
         return $this->transactionData;
     }
 
-    /**
-     * Set the reference to the object creation command (non executed).
-     *
-     * @internal
-     */
-    public function setCommand(ContextCarrierInterface $cmd = null): void
+    public function updateTransactionData(): void
     {
-        $this->command = $cmd;
+        $this->transactionData = array_merge($this->transactionData, $this->data);
     }
 
-    /**
-     * @internal
-     */
-    public function getCommand(): ?ContextCarrierInterface
+    public function getChanges(): array
     {
-        return $this->command;
+        if ($this->state === Node::NEW) {
+            return $this->data;
+        }
+
+        return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
     }
 
     /**
@@ -111,13 +109,18 @@ final class State implements ConsumerInterface, ProducerInterface
      *
      * @internal
      */
-    public function getStorage(string $type): SplObjectStorage
+    public function getStorage(string $type): iterable
     {
         if (!isset($this->storage[$type])) {
             $this->storage[$type] = new SplObjectStorage();
         }
 
         return $this->storage[$type];
+    }
+
+    public function setStorage(string $type, iterable $storage): void
+    {
+        $this->storage[$type] = $storage;
     }
 
     public function forward(
@@ -129,9 +132,31 @@ final class State implements ConsumerInterface, ProducerInterface
     ): void {
         $this->consumers[$key][] = [$consumer, $target, $stream];
 
-        if ($trigger || !empty($this->data[$key])) {
-            $this->register($key, $this->data[$key] ?? null, false, $stream);
+        \Cycle\ORM\Transaction\Pool::DEBUG AND print sprintf(
+            "Forward to State! [%s]  target: $target, key: $key, value: %s Stream: %s\n",
+            $consumer instanceof Node ? 'Node ' . $consumer->getRole() : get_class($consumer),
+            (string)($this->getValue($key) ?? 'NULL'),
+            [ConsumerInterface::DATA => 'DATA', ConsumerInterface::SCOPE => 'SCOPE'][$stream]
+        );
+        if ($trigger || !empty($this->getValue($key))) {
+            $this->register($key, $this->getValue($key), false, $stream);
         }
+    }
+
+    /**
+     * @return null|mixed
+     */
+    public function getValue(string $key)
+    {
+        return array_key_exists($key, $this->data) ? $this->data[$key] : ($this->transactionData[$key] ?? null);
+    }
+
+    public function hasValue(string $key, bool $allowNull = true): bool
+    {
+        if (!$allowNull) {
+            return isset($this->data[$key]) || isset($this->transactionData[$key]);
+        }
+        return array_key_exists($key, $this->data) || array_key_exists($key, $this->transactionData);
     }
 
     public function register(
@@ -140,14 +165,19 @@ final class State implements ConsumerInterface, ProducerInterface
         bool $fresh = false,
         int $stream = self::DATA
     ): void {
-        if (!$fresh) {
+        $oldValue = $this->getValue($key);
+
+        if (!$fresh && !is_object($oldValue)) {
             // custom, non value objects can be supported here
-            $fresh = ($this->data[$key] ?? null) != $value;
+            $fresh = $oldValue != $value;
         }
 
-        if (!array_key_exists($key, $this->transactionData)) {
-            $this->transactionData[$key] = $value;
-        }
+        \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(
+            "State(%s):Register %s {$key} => %s\n",
+            spl_object_id($this),
+            $fresh ? 'fresh' : '',
+            var_export($value, true)
+        );
 
         $this->data[$key] = $value;
 
@@ -160,5 +190,10 @@ final class State implements ConsumerInterface, ProducerInterface
                 $fresh = false;
             }
         }
+    }
+
+    public function isReady(): bool
+    {
+        return $this->waitContext === [];
     }
 }

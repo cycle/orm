@@ -76,7 +76,263 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema([
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+    }
+
+    public function testGetParent(): void
+    {
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(User::class, $c->parent->__resolve());
+        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
+        $this->assertNumReads(1);
+    }
+
+    public function testNoWritesNotLoaded(): void
+    {
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c);
+        $tr->run();
+        $this->assertNumWrites(0);
+    }
+
+    public function testGetParentLoaded(): void
+    {
+        $u = $this->orm->getRepository(User::class)->findByPK(1);
+
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+
+        $this->assertInstanceOf(User::class, $c->parent);
+        $this->assertSame('hello@world.com', $c->parent->email);
+    }
+
+    public function testNoWritesLoaded(): void
+    {
+        // $schemaArray = $this->getSchemaArray();
+        // $schemaArray[User::class][Schema::RELATIONS]['posts'][Relation::SCHEMA][Relation::NULLABLE] = true;
+        // $this->orm = $this->withSchema(new Schema($schemaArray));
+
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
+
+        $this->assertInstanceOf(User::class, $c->parent->__resolve());
+
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
+    }
+
+    public function testGetParentPostloaded(): void
+    {
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
+
+        $u = $this->orm->getRepository(User::class)->findByPK(1);
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(User::class, $c->parent->__resolve());
+        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
+        $this->assertNumReads(0);
+    }
+
+    public function testCreateWithMorphedExistedParent(): void
+    {
+        $schemaArray = $this->getNullableMorphedSchemaArray();
+        $this->orm = $this->withSchema(new Schema($schemaArray));
+
+        $c = new Image();
+        $c->url = 'test.png';
+
+        $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
+
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(1);
+
+        // consecutive
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $c = $this->orm->getRepository(Image::class)->findByPK(6);
+        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(User::class, $c->parent->__resolve());
+        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
+        $this->assertNumReads(1);
+    }
+
+    public function testCreateWithNewParent(): void
+    {
+        $schemaArray = $this->getSchemaArray();
+        $schemaArray[User::class][Schema::RELATIONS]['posts'][Relation::SCHEMA][Relation::NULLABLE] = true;
+        $this->orm = $this->withSchema(new Schema($schemaArray));
+
+        $c = new Image();
+        $c->url = 'test.png';
+
+        $c->parent = new Post();
+        $c->parent->title = 'post title';
+        $c->parent->content = 'post content';
+
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(2);
+
+        // consecutive
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $c = $this->orm->getRepository(Image::class)->findByPK(6);
+        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(Post::class, $c->parent->__resolve());
+        $this->assertSame('post title', $c->parent->__resolve()->title);
+        $this->assertNumReads(1);
+    }
+
+    public function testSetParentAndUpdateParent(): void
+    {
+        $c = new Image();
+        $c->url = 'test.png';
+
+        $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
+        $c->parent->balance = 777;
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c);
+        $tr->run();
+        $this->assertNumWrites(2);
+
+        // consecutive
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c);
+        $tr->run();
+        $this->assertNumWrites(0);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $c = $this->orm->getRepository(Image::class)->findByPK(6);
+        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(User::class, $c->parent->__resolve());
+        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
+        $this->assertEquals(777, $c->parent->__resolve()->balance);
+        $this->assertNumReads(1);
+    }
+
+    public function testChangeParentWithLoading(): void
+    {
+        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
+        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
+
+        $this->assertInstanceOf(User::class, $c1->parent->__resolve());
+        $this->assertInstanceOf(Post::class, $c2->parent->__resolve());
+
+        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
+
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(2);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
+        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
+
+        $this->assertInstanceOf(Post::class, $c1->parent->__resolve());
+        $this->assertInstanceOf(User::class, $c2->parent->__resolve());
+    }
+
+    public function testChangeParentWithoutLoading(): void
+    {
+        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
+        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
+
+        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c1);
+        $tr->persist($c2);
+        $tr->run();
+        $this->assertNumWrites(2);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
+        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
+
+        $this->assertInstanceOf(Post::class, $c1->parent->__resolve());
+        $this->assertInstanceOf(User::class, $c2->parent->__resolve());
+    }
+
+    public function testChangeParentLoadedAfter(): void
+    {
+        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
+        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
+
+        $u = $this->orm->getRepository(User::class)->findByPK(1);
+        $u = $this->orm->getRepository(Post::class)->findByPK(1);
+
+        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c1);
+        $tr->persist($c2);
+        $tr->run();
+        $this->assertNumWrites(2);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
+        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
+
+        $this->assertInstanceOf(Post::class, $c1->parent->__resolve());
+        $this->assertInstanceOf(User::class, $c2->parent->__resolve());
+    }
+
+    public function testSetNull(): void
+    {
+        $schemaArray = $this->getNullableMorphedSchemaArray();
+        $this->orm = $this->withSchema(new Schema($schemaArray));
+
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $c->parent = null;
+
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(1);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $this->assertNull($c->parent);
+    }
+
+    private function getNullableMorphedSchemaArray(): array
+    {
+        $schemaArray = $this->getSchemaArray();
+        $schemaArray[User::class][Schema::RELATIONS]['image'][Relation::SCHEMA][Relation::NULLABLE] = true;
+        $schemaArray[Post::class][Schema::RELATIONS]['image'][Relation::SCHEMA][Relation::NULLABLE] = true;
+        return $schemaArray;
+    }
+    private function getSchemaArray(): array
+    {
+        return [
             User::class  => [
                 Schema::ROLE        => 'user',
                 Schema::MAPPER      => Mapper::class,
@@ -152,251 +408,6 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
                     ]
                 ]
             ],
-        ]));
-    }
-
-    public function testGetParent(): void
-    {
-        $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
-
-        $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $c->parent->__resolve());
-        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
-        $this->assertNumReads(1);
-    }
-
-    public function testNoWritesNotLoaded(): void
-    {
-        $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(0);
-    }
-
-    public function testGetParentLoaded(): void
-    {
-        $u = $this->orm->getRepository(User::class)->findByPK(1);
-
-        $c = $this->orm->getRepository(Image::class)->findByPK(1);
-
-        $this->assertInstanceOf(User::class, $c->parent);
-        $this->assertSame('hello@world.com', $c->parent->email);
-    }
-
-    public function testNoWritesLoaded(): void
-    {
-        $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
-
-        $this->assertInstanceOf(User::class, $c->parent->__resolve());
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(0);
-    }
-
-    public function testGetParentPostloaded(): void
-    {
-        $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
-
-        $u = $this->orm->getRepository(User::class)->findByPK(1);
-
-        $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $c->parent->__resolve());
-        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
-        $this->assertNumReads(0);
-    }
-
-    public function testCreateWithMorphedExistedParent(): void
-    {
-        $c = new Image();
-        $c->url = 'test.png';
-
-        $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(1);
-
-        // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(0);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-
-        $c = $this->orm->getRepository(Image::class)->findByPK(6);
-        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
-
-        $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $c->parent->__resolve());
-        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
-        $this->assertNumReads(1);
-    }
-
-    public function testCreateWithNewParent(): void
-    {
-        $c = new Image();
-        $c->url = 'test.png';
-
-        $c->parent = new Post();
-        $c->parent->title = 'post title';
-        $c->parent->content = 'post content';
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(2);
-
-        // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(0);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-
-        $c = $this->orm->getRepository(Image::class)->findByPK(6);
-        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
-
-        $this->captureReadQueries();
-        $this->assertInstanceOf(Post::class, $c->parent->__resolve());
-        $this->assertSame('post title', $c->parent->__resolve()->title);
-        $this->assertNumReads(1);
-    }
-
-    public function testSetParentAndUpdateParent(): void
-    {
-        $c = new Image();
-        $c->url = 'test.png';
-
-        $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
-        $c->parent->balance = 777;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(2);
-
-        // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(0);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-
-        $c = $this->orm->getRepository(Image::class)->findByPK(6);
-        $this->assertInstanceOf(PromiseInterface::class, $c->parent);
-
-        $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $c->parent->__resolve());
-        $this->assertSame('hello@world.com', $c->parent->__resolve()->email);
-        $this->assertEquals(777, $c->parent->__resolve()->balance);
-        $this->assertNumReads(1);
-    }
-
-    public function testChangeParentWithLoading(): void
-    {
-        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
-        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
-
-        $this->assertInstanceOf(User::class, $c1->parent->__resolve());
-        $this->assertInstanceOf(Post::class, $c2->parent->__resolve());
-
-        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->run();
-        $this->assertNumWrites(2);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
-        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
-
-        $this->assertInstanceOf(Post::class, $c1->parent->__resolve());
-        $this->assertInstanceOf(User::class, $c2->parent->__resolve());
-    }
-
-    public function testChangeParentWithoutLoading(): void
-    {
-        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
-        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
-
-        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->run();
-        $this->assertNumWrites(2);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
-        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
-
-        $this->assertInstanceOf(Post::class, $c1->parent->__resolve());
-        $this->assertInstanceOf(User::class, $c2->parent->__resolve());
-    }
-
-    public function testChangeParentLoadedAfter(): void
-    {
-        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
-        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
-
-        $u = $this->orm->getRepository(User::class)->findByPK(1);
-        $u = $this->orm->getRepository(Post::class)->findByPK(1);
-
-        [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->run();
-        $this->assertNumWrites(2);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-        $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
-        $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
-
-        $this->assertInstanceOf(Post::class, $c1->parent->__resolve());
-        $this->assertInstanceOf(User::class, $c2->parent->__resolve());
-    }
-
-    public function testSetNull(): void
-    {
-        $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        $c->parent = null;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-        $this->assertNumWrites(1);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-        $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        $this->assertNull($c->parent);
+        ];
     }
 }

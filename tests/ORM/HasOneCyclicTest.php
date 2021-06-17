@@ -11,7 +11,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
 abstract class HasOneCyclicTest extends BaseTest
 {
@@ -109,18 +108,16 @@ abstract class HasOneCyclicTest extends BaseTest
 
     public function testUpdateCyclic(): void
     {
-        $selector = new Select($this->orm, Cyclic::class);
-        $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
+        $c = (new Select($this->orm, Cyclic::class))
+            ->load('cyclic')->wherePK(3)->fetchOne();
         $this->assertEquals('self-reference', $c->name);
 
         $c->name = 'updated';
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
+        $this->save($c);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
-        $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
+        $c = (new Select($this->orm->withHeap(new Heap()), Cyclic::class))
+            ->load('cyclic')->wherePK(3)->fetchOne();
 
         $this->assertEquals('updated', $c->name);
         $this->assertSame($c, $c->cyclic);
@@ -141,13 +138,12 @@ abstract class HasOneCyclicTest extends BaseTest
         $c->cyclic = $c;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
+        $this->save($c);
         $this->assertNumWrites(2);
 
         $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(4)->fetchOne();
+
         $this->assertEquals('new', $c->name);
         $this->assertSame($c, $c->cyclic);
     }

@@ -28,6 +28,7 @@ trait NodeTrait
             return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
         }
 
+        /** @var Node|null $node */
         $node = $this->orm->getHeap()->get($entity);
 
         if ($node === null) {
@@ -35,14 +36,17 @@ trait NodeTrait
             $node = new Node(Node::NEW, [], $this->orm->getMapper($entity)->getRole());
             $this->orm->getHeap()->attach($entity, $node);
         }
-
-        if ($claim === 1) {
-            $node->getState()->addClaim();
+        if (!$node->hasState()) {
+            $node->setData($this->orm->getMapper($entity)->fetchFields($entity));
         }
 
-        if ($claim === -1) {
-            $node->getState()->decClaim();
-        }
+        // if ($claim === 1) {
+        //     $node->getState()->addClaim();
+        // }
+        //
+        // if ($claim === -1) {
+        //     $node->getState()->decClaim();
+        // }
 
         return $node;
     }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Morphed;
 
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasOne;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Inverted version of belongs to morphed.
@@ -19,21 +19,21 @@ class MorphedHasOne extends HasOne
 {
     private string $morphKey;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $name, $target, $schema);
+        parent::__construct($orm, $role, $name, $target, $schema);
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
     public function initPromise(Node $node): array
     {
         $innerValues = [];
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $innerValue = $this->fetchKey($node, $innerKey);
-            if ($innerValue === null) {
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($nodeData[$innerKey])) {
                 return [null, null];
             }
-            $innerValues[] = $innerValue;
+            $innerValues[] = $nodeData[$innerKey];
         }
 
         $scope = array_combine($this->outerKeys, $innerValues) + [$this->morphKey => $node->getRole()];
@@ -42,20 +42,26 @@ class MorphedHasOne extends HasOne
         return [$r, $r];
     }
 
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
+    public function queue(Pool $pool, Tuple $tuple): void
     {
-        $rStore = parent::queue($store, $entity, $node, $related, $original);
-
-        if ($rStore instanceof CC && $related !== null) {
+        parent::queue($pool, $tuple);
+        $related = $tuple->state->getRelation($this->getName());
+        $node = $tuple->node;
+        if ($related !== null) {
             $rNode = $this->getNode($related);
+            $nodeData = $rNode->getData();
 
-            if ($this->fetchKey($rNode, $this->morphKey) != $node->getRole()) {
-                $rStore->register($this->morphKey, $node->getRole(), true);
+            if (($nodeData[$this->morphKey] ?? null) !== $node->getRole()) {
+                // $rStore->register($this->morphKey, $node->getRole(), true);
                 $rNode->register($this->morphKey, $node->getRole(), true);
             }
         }
 
-        return $rStore;
+    }
+
+    protected function getTargetRelationName(): string
+    {
+        return '~morphed~:' . $this->name;
     }
 
     /**

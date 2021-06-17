@@ -74,15 +74,12 @@ abstract class UUIDTypehintTest extends BaseTest
         $uuid = Uuid::uuid4()->toString();
         $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey($uuid), 'hello@world.com', 500);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
 
         $this->assertEquals($uuid, (string)$e->getID());
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, UserWithUUIDPrimaryKey::class);
-        $result = $selector->fetchData();
+        $result = (new Select($this->orm, UserWithUUIDPrimaryKey::class))->fetchData();
 
         $this->assertInstanceOf(UuidPrimaryKey::class, $result[0]['uuid']);
         $this->assertEquals((string)$e->getID(), (string)$result[0]['uuid']);
@@ -93,9 +90,7 @@ abstract class UUIDTypehintTest extends BaseTest
         $uuid = Uuid::uuid4()->toString();
         $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey($uuid), 'hello@world.com', 500);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
 
         $this->assertEquals($uuid, (string)$e->getID());
 

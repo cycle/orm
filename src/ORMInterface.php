@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\ReferenceInterface;
@@ -72,13 +70,7 @@ interface ORMInterface extends SourceProviderInterface
      */
     public function getRepository($entity): RepositoryInterface;
 
-    /**
-     * Generate chain of commands required to store given entity and it's relations.
-     */
-    public function queueStore(object $entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface;
+    public function withSchema(SchemaInterface $schema): ORMInterface;
 
-    /**
-     * Generate commands required to delete the entity.
-     */
-    public function queueDelete(object $entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface;
+    public function withHeap(HeapInterface $heap): ORMInterface;
 }

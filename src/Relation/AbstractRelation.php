@@ -6,17 +6,15 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceInterface;
+use JetBrains\PhpStorm\ExpectedValues;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    use Traits\ContextTrait;
     use Relation\Traits\NodeTrait;
 
     /** @internal */
@@ -34,9 +32,12 @@ abstract class AbstractRelation implements RelationInterface
     /** @var string[] */
     protected array $outerKeys;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    private string $role;
+
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         $this->orm = $orm;
+        $this->role = $role;
         $this->name = $name;
         $this->target = $target;
         $this->schema = $schema;
@@ -44,10 +45,15 @@ abstract class AbstractRelation implements RelationInterface
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
     }
 
+    public function getInnerKeys(): array
+    {
+        return $this->innerKeys;
+    }
+
     public function __toString(): string
     {
         // this is incorrect class
-        return sprintf('%s(%s)->%s', $this->name, get_class($this), $this->target);
+        return sprintf('`%s` (%s)->%s', $this->name, get_class($this), $this->target);
     }
 
     public function getName(): string
@@ -82,25 +88,17 @@ abstract class AbstractRelation implements RelationInterface
         return !empty($this->schema[Relation::NULLABLE]);
     }
 
+    protected function getTargetRelationName(): string
+    {
+        return $this->role . ':' . $this->name;
+    }
+
     /**
      * Get the source associated with the role.
      */
     protected function getSource(string $role = null): SourceInterface
     {
         return $this->orm->getSource($role ?? $this->target);
-    }
-
-    /**
-     * Get the mapper associated with a role.
-     */
-    protected function getMapper(string $role = null): MapperInterface
-    {
-        return $this->orm->getMapper($role ?? $this->target);
-    }
-
-    protected function columnName(Node $node, string $field): string
-    {
-        return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
     }
 
     /**
@@ -127,5 +125,13 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         return $this->orm->get($reference->__role(), $reference->__scope(), true);
+    }
+
+    protected function isResolved(ReferenceInterface $reference): bool
+    {
+        if ($reference instanceof PromiseInterface) {
+            return $reference->__loaded();
+        }
+        return false;
     }
 }

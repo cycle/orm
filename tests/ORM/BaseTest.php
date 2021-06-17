@@ -199,7 +199,7 @@ abstract class BaseTest extends TestCase
             $this->assertSame(
                 $numReads,
                 $queries,
-                "Number of write SQL queries do not match, expected {$numReads} got {$queries}."
+                "Number of read SQL queries do not match, expected {$numReads} got {$queries}."
             );
         }
     }
@@ -336,6 +336,10 @@ abstract class BaseTest extends TestCase
                 continue;
             }
 
+            if ($rValue === $eValue) {
+                return;
+            }
+
             if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionPromise) {
                 if (!$eValue->isInitialized()) {
                     $eValue = $eValue->getPromise();
@@ -347,8 +351,24 @@ abstract class BaseTest extends TestCase
                 }
             }
 
-            if ($eValue instanceof Collection) {
-                $eValue = $eValue->toArray();
+            // extract Node collection
+            if ($rValue instanceof Collection) {
+                $rValue = $rValue->toArray();
+
+                // $this->assertInstanceOf(
+                //     Collection::class,
+                //     $eValue,
+                //     "Node and Entity are not in sync `{$eName}`.`{$name}` (Collection type)"
+                // );
+            }
+
+            // extract Entity collection
+            if ($eValue instanceof \Traversable) {
+                $eArray = [];
+                foreach ($eValue as $key => $value) {
+                    $eArray[$key] = $value;
+                }
+                $eValue = $eArray;
                 if ($rValue === null) {
                     $rValue = [];
                 }

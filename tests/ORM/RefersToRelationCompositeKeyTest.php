@@ -75,9 +75,8 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
         $u->children->add($c);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
         $this->assertNumWrites(3);
-        $this->logger->hide();
 
         $u = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -114,14 +113,19 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
 
         $this->captureWriteQueries();
         $this->save($u);
+        // Update PK + Insert Child + Link
+        // OR Insert Child + Update Parent (PK & Link)
+        $this->assertNumWrites(3);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
             ->load(self::CHILDREN_CONTAINER)
             ->fetchAll();
 
-        // Update PK + Insert Child + Link
-        $this->assertNumWrites(3);
         $this->assertCount(1, $data);
         $this->assertSame($data[0]->child_key1, $c->key1);
         $this->assertSame($data[0]->child_key2, $c->key2);
@@ -145,8 +149,12 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
         $u->children->add($c);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
         $this->assertNumWrites(3);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $u2 = new CompositePK();
         $u2->key1 = 300;
@@ -155,8 +163,12 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
         $u2->child_entity = $c;
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u2)->run();
+        $this->save($u2);
         $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $this->save($u2);
+        $this->assertNumWrites(0);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)

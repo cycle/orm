@@ -61,6 +61,7 @@ abstract class DeepCyclicTest extends BaseTest
                 ]
             ],
         ]));
+
     }
 
     public function testCreateDeepCyclic(): void
@@ -81,13 +82,7 @@ abstract class DeepCyclicTest extends BaseTest
         $c4->other = $c2;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->persist($c3);
-        $tr->persist($c4);
-        $tr->persist($c5);
-        $tr->run();
+        $this->save($c1, $c2, $c3, $c4, $c5);
 
         // 5 inserts and 2 loops
         $this->assertNumWrites(7);

@@ -193,7 +193,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
         $p->key3 = 'magic.gif';
         $p->parent = $u;
 
-        (new Transaction($this->orm))->persist($p)->run();
+        $this->save($p);
 
         $this->assertTrue($this->orm->getHeap()->has($u));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($u)->getStatus());
@@ -311,12 +311,13 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
 
         [$a->parent, $b->parent] = [$b->parent, $a->parent];
 
+
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($b)->run();
+        $this->save($a, $b);
         $this->assertNumWrites(2);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($b)->run();
+        $this->save($a, $b);
         $this->assertNumWrites(0);
 
         $s = new Select($this->orm->withHeap(new Heap()), CompositePKChild::class);
@@ -364,11 +365,11 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
         $n->parent->parent->key3 = 999;
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($n)->run();
+        $this->save($n);
         $this->assertNumWrites(3);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($n)->run();
+        $this->save($n);
         $this->assertNumWrites(0);
 
         $n = (new Select($this->orm->withHeap(new Heap()), CompositePKNested::class))

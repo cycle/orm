@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper;
 
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
@@ -69,66 +68,52 @@ abstract class DatabaseMapper implements MapperInterface
         return $this->role;
     }
 
-    public function queueCreate(object $entity, Node $node, State $state): ContextCarrierInterface
+    public function queueCreate(object $entity, Node $node, State $state): CommandInterface
     {
-        $values = $this->fetchFields($entity);
+        $values = $node->getData();
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);
-        $state->setData($values);
 
         foreach ($this->primaryKeys as $key) {
             if (!isset($values[$key])) {
-                $values = array_merge($values, $this->nextPrimaryKey() ?? []);
+                foreach ($this->nextPrimaryKey() ?? [] as $pk => $value) {
+                    $state->register($pk, $value);
+                }
                 break;
             }
         }
 
-        // clear PK
-        foreach ($this->primaryKeys as $key) {
-            if (array_key_exists($key, $values) && $values[$key] === null) {
-                unset($values[$key]);
-            }
-        }
-
-        $insert = new Insert(
+        return new Insert(
             $this->source->getDatabase(),
             $this->source->getTable(),
-            $this->mapColumns($values),
-            $this->primaryColumns
+            $state,
+            $this->primaryKeys,
+            count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
+            [$this, 'mapColumns']
         );
-
-        if (count($this->primaryKeys) === 1) {
-            $key = $this->primaryKeys[0];
-            $column = isset($values[$key]) ? $this->primaryColumns[0] : Insert::INSERT_ID;
-            $insert->forward($column, $state, $key);
-        } else {
-            foreach ($this->primaryKeys as $num => $pk) {
-                $insert->forward($this->primaryColumns[$num], $state, $pk);
-            }
-        }
-
-        return $insert;
     }
 
-    public function queueUpdate(object $entity, Node $node, State $state): ContextCarrierInterface
+    public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
-        $fromData = $state->getTransactionData();
-        $data = $this->fetchFields($entity);
+        $fromData = $node->getState()->getTransactionData();
+        \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . count($node->getChanges()) . "\n";
 
-        // in a future mapper must support solid states
-        $changes = array_udiff_assoc($data, $fromData, [Node::class, 'compare']);
-        $state->setStatus(Node::SCHEDULED_UPDATE);
-        $state->setData($changes);
-        $update = new Update($this->source->getDatabase(), $this->source->getTable(), $this->mapColumns($changes));
+        $update = new Update(
+            $this->source->getDatabase(),
+            $this->source->getTable(),
+            $state,
+            $this->primaryKeys,
+            [$this, 'mapColumns']
+        );
 
-        foreach ($this->primaryKeys as $i => $pk) {
+        foreach ($this->primaryKeys as $pk) {
             if (isset($fromData[$pk])) {
                 // set update criteria right now
-                $update->register($this->primaryColumns[$i], $fromData[$pk], false, ConsumerInterface::SCOPE);
+                $update->register($pk, $fromData[$pk], false, ConsumerInterface::SCOPE);
             } else {
                 // subscribe to PK update
-                $state->forward($pk, $update, $this->primaryColumns[$i], true, ConsumerInterface::SCOPE);
+                $state->forward($pk, $update, $pk, true, ConsumerInterface::SCOPE);
             }
         }
 
@@ -137,19 +122,20 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueDelete(object $entity, Node $node, State $state): CommandInterface
     {
-        $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
+        $delete = new Delete($this->source->getDatabase(), $this->source->getTable(), $state, [$this, 'mapColumns']);
         $state->setStatus(Node::SCHEDULED_DELETE);
         $state->decClaim();
 
-        $delete->waitScope(...$this->primaryColumns);
-        foreach ($this->primaryKeys as $i => $key) {
-            $state->forward(
-                $key,
-                $delete,
-                $this->primaryColumns[$i],
-                true,
-                ConsumerInterface::SCOPE
-            );
+        $delete->waitScope(...$this->primaryKeys);
+        $fromData = $node->getInitialData();
+        foreach ($this->primaryKeys as $pk) {
+            if (isset($fromData[$pk])) {
+                // set update criteria right now
+                $delete->register($pk, $fromData[$pk], false, ConsumerInterface::SCOPE);
+            } else {
+                // subscribe to PK update
+                $state->forward($pk, $delete, $pk, true, ConsumerInterface::SCOPE);
+            }
         }
 
         return $delete;
@@ -163,18 +149,10 @@ abstract class DatabaseMapper implements MapperInterface
         return null;
     }
 
-    /**
-     * Get entity columns.
-     */
-    abstract protected function fetchFields(object $entity): array;
-
-    /**
-     * Map internal field names to database specific column names.
-     */
-    protected function mapColumns(array $columns): array
+    public function mapColumns(array $values): array
     {
         $result = [];
-        foreach ($columns as $column => $value) {
+        foreach ($values as $column => $value) {
             $result[$this->columns[$column] ?? $column] = $value;
         }
 

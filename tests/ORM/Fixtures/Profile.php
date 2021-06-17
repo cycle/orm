@@ -12,7 +12,7 @@ class Profile
     /** @var Nested */
     public $nested;
 
-    /** @var User */
+    /** @var User|null */
     public $user;
 
     public function getID()

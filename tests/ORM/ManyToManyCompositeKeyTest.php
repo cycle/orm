@@ -257,7 +257,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
 
         $u->pivoted->add($t);
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
         $u = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILDREN_CONTAINER)

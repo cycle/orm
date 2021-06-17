@@ -21,6 +21,11 @@ trait ScopeTrait
         }
     }
 
+    public function isScopeReady(): bool
+    {
+        return $this->waitScope === [];
+    }
+
     public function getScope(): array
     {
         return $this->scope;
@@ -31,7 +36,7 @@ trait ScopeTrait
      *
      * @param mixed  $value
      */
-    protected function setScope(string $key, $value): void
+    public function setScope(string $key, $value): void
     {
         $this->scope[$key] = $value;
     }

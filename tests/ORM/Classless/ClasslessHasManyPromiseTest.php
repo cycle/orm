@@ -220,10 +220,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
+        $this->save($u);
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
     }
@@ -236,9 +233,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         $e->comments->remove(1);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'user');
 

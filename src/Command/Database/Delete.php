@@ -9,6 +9,8 @@ use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface
@@ -16,15 +18,25 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
     use ScopeTrait;
     use ErrorTrait;
 
-    public function __construct(DatabaseInterface $db, string $table, array $where = [])
-    {
+    private State $state;
+
+    /** @var null|callable */
+    private $mapper;
+
+    public function __construct(
+        DatabaseInterface $db,
+        string $table,
+        State $state,
+        callable $mapper = null
+    ) {
         parent::__construct($db, $table);
-        $this->scope = $where;
+        $this->state = $state;
+        $this->mapper = $mapper;
     }
 
     public function isReady(): bool
     {
-        return $this->waitScope === [];
+        return $this->isScopeReady();
     }
 
     /**
@@ -33,10 +45,15 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
     public function execute(): void
     {
         if ($this->scope === []) {
-            throw new CommandException('Unable to execute delete command without a scope');
+            throw new CommandException('Unable to execute delete command without a scope.');
         }
 
-        $this->db->delete($this->table, $this->scope)->run();
+        $this->db->delete(
+            $this->table,
+            $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
+        )->run();
+        $this->state->setStatus(Node::DELETED);
+
         parent::execute();
     }
 
@@ -46,10 +63,14 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         bool $fresh = false,
         int $stream = self::DATA
     ): void {
-        if ($fresh || $value !== null) {
-            $this->freeScope($key);
+        if ($stream !== self::SCOPE) {
+            return;
+        }
+        if (empty($value)) {
+            return;
         }
 
+        $this->freeScope($key);
         $this->setScope($key, $value);
     }
 }

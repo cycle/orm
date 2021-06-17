@@ -71,8 +71,7 @@ abstract class SoftDeletesTest extends BaseTest
         (new Transaction($this->orm))->persist($u)->run();
 
         $orm = $this->orm->withHeap(new Heap());
-        $s = new Select($orm, User::class);
-        $u = $s->fetchOne();
+        $u = (new Select($orm, User::class))->fetchOne();
 
         (new Transaction($orm))->delete($u)->run();
 

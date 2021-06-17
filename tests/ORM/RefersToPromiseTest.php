@@ -186,8 +186,8 @@ abstract class RefersToPromiseTest extends BaseTest
 
     public function testAssignPromiseAsRelation(): void
     {
-        $selector = new Select($this->orm, Profile::class);
-        $p = $selector->wherePK(1)->fetchOne();
+        $p = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->fetchOne();
         $this->assertInstanceOf(PromiseInterface::class, $p->user);
 
         $np = new Profile();

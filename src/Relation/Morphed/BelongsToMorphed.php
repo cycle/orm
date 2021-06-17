@@ -4,41 +4,41 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Morphed;
 
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\BelongsTo;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 
 class BelongsToMorphed extends BelongsTo
 {
     private string $morphKey;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        parent::__construct($orm, $name, $target, $schema);
+        parent::__construct($orm, $role, $name, $target, $schema);
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
     public function initPromise(Node $node): array
     {
         $innerValues = [];
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $innerValue = $this->fetchKey($node, $innerKey);
-            if ($innerValue === null) {
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($nodeData[$innerKey])) {
                 return [null, null];
             }
-            $innerValues[] = $innerValue;
+            $innerValues[] = $nodeData[$innerKey];
         }
 
 
-        /** @var string $target */
-        $target = $this->fetchKey($node, $this->morphKey);
-        if ($target === null) {
+        if (!isset($nodeData[$this->morphKey])) {
             return [null, null];
         }
+        /** @var string $target */
+        $target = $nodeData[$this->morphKey];
 
         $e = $this->orm->getHeap()->find($target, array_combine($this->outerKeys, $innerValues));
         if ($e !== null) {
@@ -50,24 +50,18 @@ class BelongsToMorphed extends BelongsTo
         return [$e, $e];
     }
 
-    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
-        $wrappedStore = parent::queue($store, $entity, $node, $related, $original);
+        parent::prepare($pool, $tuple, $load);
+        $related = $tuple->state->getRelation($this->getName());
 
-        if ($related === null) {
-            if ($this->fetchKey($node, $this->morphKey) !== null) {
-                $store->register($this->morphKey, null, true);
-                $node->register($this->morphKey, null, true);
-            }
-        } else {
-            $rNode = $this->getNode($related);
-            if ($this->fetchKey($node, $this->morphKey) != $rNode->getRole()) {
-                $store->register($this->morphKey, $rNode->getRole(), true);
-                $node->register($this->morphKey, $rNode->getRole(), true);
-            }
-        }
-
-        return $wrappedStore;
+        $tuple->node->register(
+            $this->morphKey,
+            $related === null
+                ? null
+                : $this->getNode($related)->getRole(),
+            true
+        );
     }
 
     /**

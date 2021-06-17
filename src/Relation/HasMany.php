@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Command\Branch\Condition;
-use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\PromiseMany;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Transaction\Pool;
+use Cycle\ORM\Transaction\Tuple;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -22,6 +20,106 @@ use Doctrine\Common\Collections\Collection;
  */
 class HasMany extends AbstractRelation
 {
+    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    {
+        $node = $tuple->node;
+        $original = $node->getRelation($this->getName());
+        $related = $tuple->state->getRelation($this->getName());
+        $related = $this->extract($related);
+
+        if ($original instanceof ReferenceInterface) {
+            if (!$load && $related === $original && !$this->isResolved($original)) {
+                return;
+            }
+            $original = $this->resolve($original);
+            $node->setRelation($this->getName(), $original);
+        }
+
+        if ($related instanceof ReferenceInterface) {
+            $related = $this->resolve($related);
+            $tuple->state->setRelation($this->getName(), $related);
+        }
+
+        foreach ($this->calcDeleted($related, $original ?? []) as $item) {
+            $this->deleteChild($pool, $item);
+        }
+
+        if (count($related) === 0) {
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
+        }
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+
+        // $relationName = $this->getTargetRelationName()
+        // Store new and existing items
+        foreach ($related as $item) {
+            $rNode = $this->getNode($item, +1);
+            $this->assertValid($rNode);
+            $pool->attachStore($item, true, $rNode);
+            if ($this->isNullable()) {
+                // todo?
+                // $rNode->setRelationStatus($relationName, RelationInterface::STATUS_DEFERRED);
+            }
+        }
+
+    }
+
+    public function queue(Pool $pool, Tuple $tuple): void
+    {
+        $related = $tuple->state->getRelation($this->getName());
+        if ($tuple->task === Tuple::TASK_STORE) {
+            $this->queueStoreAll($pool, $tuple, $this->extract($related));
+        } else {
+            // todo
+            // $this->queueDelete($pool, $tuple, $related);
+        }
+    }
+
+    private function queueStoreAll(Pool $pool, Tuple $tuple, $related): void
+    {
+        $node = $tuple->node;
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+
+        if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
+            return;
+        }
+
+        $relationName = $this->getTargetRelationName();
+        foreach ($related as $item) {
+            $rTuple = $pool->offsetGet($item);
+            $this->applyChanges($tuple, $rTuple);
+            $rTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+        }
+    }
+
+    protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
+    {
+        foreach ($this->innerKeys as $i => $innerKey) {
+            $tuple->node->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
+        }
+    }
+
+    /**
+     * Delete original related entity of no other objects reference to it.
+     */
+    private function deleteChild(Pool $pool, object $child, ?Node $relatedNode = null): ?Tuple
+    {
+        $relatedNode = $relatedNode ?? $this->getNode($child);
+        if ($relatedNode->getStatus() !== Node::MANAGED) {
+            return null;
+        }
+
+        if ($this->isNullable()) {
+            foreach ($this->outerKeys as $outerKey) {
+                $relatedNode->getState()->register($outerKey, null, true);
+            }
+            // todo relation status
+            return $pool->attachStore($child, false, $relatedNode, $relatedNode->getState());
+        }
+
+        return $pool->attachDelete($child, $this->isCascade(), $relatedNode);
+    }
+
     /**
      * Init relation state and entity collection.
      */
@@ -57,12 +155,12 @@ class HasMany extends AbstractRelation
     public function initPromise(Node $node): array
     {
         $innerValues = [];
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $innerValue = $this->fetchKey($node, $innerKey);
-            if ($innerValue === null) {
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $innerKey) {
+            if (!isset($nodeData[$innerKey])) {
                 return [new ArrayCollection(), null];
             }
-            $innerValues[] = $innerValue;
+            $innerValues[] = $nodeData[$innerKey];
         }
 
         $p = new PromiseMany(
@@ -75,74 +173,20 @@ class HasMany extends AbstractRelation
         return [new CollectionPromise($p), $p];
     }
 
-    public function queue(CC $store, object $entity, Node $node, $related, $original): CommandInterface
-    {
-        if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
-        }
-
-        if ($original instanceof ReferenceInterface) {
-            $original = $this->resolve($original);
-        }
-
-        $sequence = new Sequence();
-
-        foreach ($related as $item) {
-            $sequence->addCommand($this->queueStore($node, $item));
-        }
-
-        foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $sequence->addCommand($this->queueDelete($item));
-        }
-
-        return $sequence;
-    }
-
     /**
      * Return objects which are subject of removal.
      */
-    protected function calcDeleted(array $related, array $original): array
+    protected function calcDeleted(iterable $related, iterable $original): array
     {
-        return array_udiff($original ?? [], $related, fn($a, $b) => strcmp(spl_object_hash($a), spl_object_hash($b)));
-    }
-
-    /**
-     * Persist related object.
-     */
-    protected function queueStore(Node $node, object $related): CC
-    {
-        $relStore = $this->orm->queueStore($related);
-        $relNode = $this->getNode($related, +1);
-        $this->assertValid($relNode);
-
-        $this->forwardContext(
-            $node,
-            $this->innerKeys,
-            $relStore,
-            $relNode,
-            $this->outerKeys
-        );
-
-        return $relStore;
-    }
-
-    /**
-     * Remove one of related objects.
-     */
-    protected function queueDelete(object $related): CommandInterface
-    {
-        $rNode = $this->getNode($related);
-
-        if ($this->isNullable()) {
-            $store = $this->orm->queueStore($related);
-            foreach ($this->outerKeys as $key) {
-                $store->register($this->columnName($rNode, $key), null, true);
-            }
-            $rNode->getState()->decClaim();
-
-            return new Condition($store, fn() => !$rNode->getState()->hasClaims());
+        // $related = $this->extract($related);
+        $original = $this->extract($original);
+        if ($original instanceof PromiseInterface) {
+            $original = $original->__resolve();
         }
-
-        return new Condition($this->orm->queueDelete($related), fn() => !$rNode->getState()->hasClaims());
+        return array_udiff(
+            $original ?? [],
+            $related,
+            static fn(object $a, object $b): int => strcmp(spl_object_hash($a), spl_object_hash($b))
+        );
     }
 }

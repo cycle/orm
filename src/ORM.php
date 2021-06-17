@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Nil;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\SourceInterface;
 
 use function count;
@@ -23,8 +18,6 @@ use function count;
  */
 final class ORM implements ORMInterface
 {
-    private CommandGenerator $generator;
-
     private FactoryInterface $factory;
 
     private ?PromiseFactoryInterface $promiseFactory = null;
@@ -53,7 +46,6 @@ final class ORM implements ORMInterface
         $this->schema = $schema ?? new Schema([]);
 
         $this->heap = new Heap();
-        $this->generator = new CommandGenerator();
     }
 
     /**
@@ -267,61 +259,6 @@ final class ORM implements ORMInterface
         return new Reference($role, $scope);
     }
 
-    public function queueStore(object $entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
-    {
-        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
-            $entity = $entity->__resolve();
-        }
-
-        if ($entity instanceof ReferenceInterface) {
-            // we do not expect to store promises
-            return new Nil();
-        }
-
-        $mapper = $this->getMapper($entity);
-
-        $node = $this->heap->get($entity);
-        if ($node === null) {
-            // automatic entity registration
-            $node = new Node(Node::NEW, [], $mapper->getRole());
-            $this->heap->attach($entity, $node);
-            // $this->heap->attach($entity, $node, $this->getIndexes($mapper->getRole()));
-        }
-
-        $cmd = $this->generator->generateStore($mapper, $entity, $node);
-        if ($mode !== TransactionInterface::MODE_CASCADE) {
-            return $cmd;
-        }
-
-        if ($this->schema->define($node->getRole(), Schema::RELATIONS) === []) {
-            return $cmd;
-        }
-
-        // generate set of commands required to store entity relations
-        return $this->getRelationMap($node->getRole())->queueRelations(
-            $cmd,
-            $entity,
-            $node,
-            $mapper->extract($entity)
-        );
-    }
-
-    public function queueDelete(object $entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
-    {
-        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
-            $entity = $entity->__resolve();
-        }
-
-        $node = $this->heap->get($entity);
-        if ($entity instanceof ReferenceInterface || $node === null) {
-            // nothing to do, what about promises?
-            return new Nil();
-        }
-
-        // currently we rely on db to delete all nested records (or soft deletes)
-        return $this->generator->generateDelete($this->getMapper($node->getRole()), $entity, $node);
-    }
-
     /**
      * Get list of keys entity must be indexed in a Heap by.
      */
@@ -340,20 +277,22 @@ final class ORM implements ORMInterface
     /**
      * Get relation map associated with the given class.
      */
-    private function getRelationMap(string $entity): RelationMap
+    public function getRelationMap(string $entity): RelationMap
     {
         $role = $this->resolveRole($entity);
         if (isset($this->relMaps[$role])) {
             return $this->relMaps[$role];
         }
 
+        $outerRelations = $this->schema->getOuterRelations($role);
+        $innerRelations = $this->schema->getInnerRelations($role);
         $relations = [];
 
-        $names = array_keys($this->schema->define($role, Schema::RELATIONS));
-        foreach ($names as $relation) {
-            $relations[$relation] = $this->factory->relation($this, $this->schema, $role, $relation);
+        foreach ($innerRelations as $relName => $relSchema) {
+            $relations[$relName] = $this->factory->relation($this, $this->schema, $role, $relName);
         }
-
-        return $this->relMaps[$role] = new RelationMap($relations);
+        $map = new RelationMap($relations, $outerRelations);
+        $this->relMaps[$role] = $map;
+        return $map;
     }
 }

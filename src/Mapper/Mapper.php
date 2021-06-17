@@ -8,6 +8,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
 use Doctrine\Instantiator;
 use Laminas\Hydrator;
+use Laminas\Hydrator\HydratorInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 
 /**
@@ -23,7 +24,7 @@ class Mapper extends DatabaseMapper
 
     protected array $children = [];
 
-    protected ReflectionHydrator $hydrator;
+    protected HydratorInterface $hydrator;
 
     protected Instantiator\Instantiator $instantiator;
 
@@ -61,12 +62,12 @@ class Mapper extends DatabaseMapper
     /**
      * Get entity columns.
      */
-    protected function fetchFields(object $entity): array
+    public function fetchFields(object $entity): array
     {
         $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
 
         $class = get_class($entity);
-        if ($class != $this->entity) {
+        if ($class !== $this->entity) {
             // inheritance
             foreach ($this->children as $alias => $childClass) {
                 if ($childClass == $class) {

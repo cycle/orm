@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
 
-use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
-use Cycle\ORM\Command\Traits\WaitCommandTrait;
-use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\CommandException;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
 
 /**
@@ -19,31 +19,28 @@ use Spiral\Database\DatabaseInterface;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-final class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
+final class Update extends DatabaseCommand implements StoreCommandInterface, ScopeCarrierInterface
 {
-    use ContextTrait;
     use ScopeTrait;
     use ErrorTrait;
-    use WaitCommandTrait;
-
-    protected array $data = [];
 
     protected array $appendix = [];
 
-    public function __construct(DatabaseInterface $db, string $table, array $data = [], array $where = [])
-    {
-        parent::__construct($db, $table);
-        $this->data = $data;
-        $this->scope = $where;
-    }
+    private State $state;
+    /** @var null|callable */
+    private $mapper;
 
-    /**
-     * Wait for the context value.
-     */
-    public function waitContext(string $key, bool $required = true): void
-    {
-        // update command are always "soft" and must wait for all incoming keys
-        $this->waitContext[$key] = null;
+    public function __construct(
+        DatabaseInterface $db,
+        string $table,
+        State $state,
+        array $primaryKeys = [],
+        callable $mapper = null
+    ) {
+        parent::__construct($db, $table);
+        $this->waitScope(...$primaryKeys);
+        $this->state = $state;
+        $this->mapper = $mapper;
     }
 
     /**
@@ -51,7 +48,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
      */
     public function getDatabase(): ?DatabaseInterface
     {
-        if ($this->isEmpty()) {
+        if ($this->scope === [] || $this->state->getChanges() === []) {
             return null;
         }
 
@@ -60,15 +57,12 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
 
     public function isReady(): bool
     {
-        return $this->waitContext === [] && $this->waitScope === [] && $this->isCommandsExecuted();
+        return $this->isScopeReady();
     }
 
-    /**
-     * Update values, context not included.
-     */
-    public function getData(): array
+    public function hasData(): bool
     {
-        return array_merge($this->data, $this->context, $this->appendix);
+        return count($this->appendix) > 0 || $this->state->getChanges() !== [] || count($this->state->getContext()) > 0;
     }
 
     /**
@@ -77,19 +71,23 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     public function execute(): void
     {
         if ($this->scope === []) {
-            throw new CommandException('Unable to execute update command without a scope');
+            throw new CommandException('Unable to execute update command without a scope.');
         }
 
-        if (!$this->isEmpty()) {
-            $this->db->update($this->table, $this->getData(), $this->scope)->run();
+        $data = array_merge($this->state->getChanges(), $this->state->getContext());
+        if ($data !== [] || $this->appendix !== []) {
+            $this->db
+                ->update(
+                    $this->table,
+                    ($this->mapper === null ? $data : ($this->mapper)($data)) + $this->appendix,
+                    $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
+                )
+                ->run();
         }
+        $this->state->setStatus(Node::MANAGED);
+        $this->state->updateTransactionData();
 
         parent::execute();
-    }
-
-    public function isEmpty(): bool
-    {
-        return ($this->data === [] && $this->context === []) || $this->scope === [];
     }
 
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
@@ -106,13 +104,13 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
         }
 
         if ($fresh || $value !== null) {
-            $this->freeContext($key);
+            $this->state->freeContext($key);
         }
 
         if ($fresh) {
             // we only accept context when context has changed to avoid un-necessary
             // update commands
-            $this->setContext($key, $value);
+            $this->state->setContext($key, $value);
         }
     }
 

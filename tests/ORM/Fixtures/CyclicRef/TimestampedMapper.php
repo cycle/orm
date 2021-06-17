@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures\CyclicRef;
 
-use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Heap\Node;
@@ -14,7 +14,7 @@ use DateTimeImmutable;
 
 class TimestampedMapper extends Mapper
 {
-    public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface
+    public function queueCreate($entity, Node $node, State $state): CommandInterface
     {
         /** @var Insert $cmd */
         $cmd = parent::queueCreate($entity, $node, $state);
@@ -30,7 +30,7 @@ class TimestampedMapper extends Mapper
         return $cmd;
     }
 
-    public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface
+    public function queueUpdate($entity, Node $node, State $state): CommandInterface
     {
         /** @var Update $cmd */
         $cmd = parent::queueUpdate($entity, $node, $state);

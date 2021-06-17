@@ -4,9 +4,38 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap\Traits;
 
+use Cycle\ORM\Relation\RelationInterface;
+use JetBrains\PhpStorm\ExpectedValues;
+
 trait RelationTrait
 {
     private array $relations = [];
+    /** @var array<string, int> */
+    private array $relationStatus = [];
+
+    // private array $resolvedRelations = [];
+    //
+    // public function isRelationResolved(string $name): bool
+    // {
+    //     return $this->resolvedRelations[$name] ?? false;
+    // }
+
+    public function setRelationStatus(
+        string $name,
+        #[ExpectedValues(valuesFromClass: RelationInterface::class)]
+        int $status
+    ): void {
+        $this->relationStatus[$name] = $status;
+        if ($status === RelationInterface::STATUS_RESOLVED) {
+            \Cycle\ORM\Transaction\Pool::DEBUG AND print "[RESOLVED] Relation {$this->getRole()}.$name\n";
+        }
+    }
+
+    #[ExpectedValues(valuesFromClass: RelationInterface::class)]
+    public function getRelationStatus(string $name): int
+    {
+        return $this->relationStatus[$name] ?? RelationInterface::STATUS_PREPARE;
+    }
 
     /**
      * @param mixed  $context

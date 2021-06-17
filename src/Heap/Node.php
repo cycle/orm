@@ -31,7 +31,6 @@ final class Node implements ProducerInterface, ConsumerInterface
     private int $status;
 
     private array $data;
-
     private ?State $state = null;
 
     public function __construct(
@@ -149,17 +148,34 @@ final class Node implements ProducerInterface, ConsumerInterface
             return [];
         }
 
-        $changes = array_udiff_assoc($this->state->getData(), $this->data, [static::class, 'compare']);
+        $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
         foreach ($this->state->getRelations() as $name => $relation) {
             $this->setRelation($name, $relation);
         }
 
         // DELETE handled separately
         $this->status = self::MANAGED;
-        $this->data = $this->state->getData();
+        $this->data = $this->state->getTransactionData();
         $this->state = null;
+        $this->relationStatus = [];
 
         return $changes;
+    }
+
+    public function hasChanges(): bool
+    {
+        return ($this->state !== null && $this->state->getStatus() === self::NEW)
+            // || array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']) !== [];
+            || $this->state->getChanges() !== [];
+    }
+
+    public function getChanges(): array
+    {
+        if ($this->state === null) {
+            return $this->status === self::NEW ? ($this->data ?? []) : [];
+        }
+        // return array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']);
+        return $this->state->getChanges();
     }
 
     /**
@@ -176,6 +192,7 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public static function compare($a, $b): int
     {
+        // return $a <=> $b;
         // todo refactor and test this
         if ($a == $b) {
             if (($a === null) !== ($b === null)) {

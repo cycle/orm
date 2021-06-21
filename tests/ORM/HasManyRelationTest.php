@@ -20,6 +20,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
+use Cycle\ORM\Tests\Fixtures\SortByIdDescConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
@@ -143,6 +144,77 @@ abstract class HasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testFetchRelationWithScopeAppliedByDefault(): void
+    {
+        $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ],
+                Schema::CONSTRAIN => SortByIdDescConstrain::class,
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::CONSTRAIN => SortByIdDescConstrain::class,
+            ]
+        ]));
+
+        $selector = new Select($this->orm, User::class);
+        $selector->load('comments');
+
+        $this->assertEquals([
+            [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'comments' => [],
+            ],
+            [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'comments' => [
+                    [
+                        'id' => 3,
+                        'user_id' => 1,
+                        'message' => 'msg 3',
+                    ],
+                    [
+                        'id' => 2,
+                        'user_id' => 1,
+                        'message' => 'msg 2',
+                    ],
+                    [
+                        'id' => 1,
+                        'user_id' => 1,
+                        'message' => 'msg 1',
+                    ],
+                ],
+            ],
+        ], $selector->fetchData());
+    }
 
     public function testFetchRelationInload(): void
     {

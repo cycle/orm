@@ -26,7 +26,6 @@ use Spiral\Database\StatementInterface;
 abstract class JoinableLoader extends AbstractLoader implements JoinableInterface
 {
     use ColumnsTrait;
-    use ConstrainTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -128,8 +127,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             } elseif (is_string($loader->options['constrain'])) {
                 $loader->setConstrain($this->orm->getFactory()->make($loader->options['constrain']));
             }
-        } else {
-            $loader->setConstrain($this->getSource()->getConstrain());
         }
 
         if ($loader->isLoaded()) {

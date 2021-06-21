@@ -30,7 +30,6 @@ use Spiral\Database\StatementInterface;
 final class RootLoader extends AbstractLoader
 {
     use ColumnsTrait;
-    use ConstrainTrait;
 
     /** @var array */
     protected $options = [

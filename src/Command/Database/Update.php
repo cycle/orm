@@ -6,11 +6,11 @@ namespace Cycle\ORM\Command\Database;
 
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
+use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\CommandException;
-use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
 
@@ -19,14 +19,11 @@ use Spiral\Database\DatabaseInterface;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-final class Update extends DatabaseCommand implements StoreCommandInterface, ScopeCarrierInterface
+final class Update extends StoreCommand implements ScopeCarrierInterface
 {
     use ScopeTrait;
     use ErrorTrait;
 
-    protected array $appendix = [];
-
-    private State $state;
     /** @var null|callable */
     private $mapper;
 
@@ -37,9 +34,8 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
         array $primaryKeys = [],
         callable $mapper = null
     ) {
-        parent::__construct($db, $table);
+        parent::__construct($db, $table, $state);
         $this->waitScope(...$primaryKeys);
-        $this->state = $state;
         $this->mapper = $mapper;
     }
 
@@ -62,7 +58,16 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
 
     public function hasData(): bool
     {
-        return count($this->appendix) > 0 || $this->state->getChanges() !== [] || count($this->state->getContext()) > 0;
+        return $this->columns !== [] || $this->state->getChanges() !== [];
+    }
+
+    public function getStoreData(): array
+    {
+        if ($this->appendix !== []) {
+            $this->state->setData($this->appendix);
+        }
+        $data = $this->state->getChanges();
+        return array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data));
     }
 
     /**
@@ -74,17 +79,23 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
             throw new CommandException('Unable to execute update command without a scope.');
         }
 
-        $data = array_merge($this->state->getChanges(), $this->state->getContext());
-        if ($data !== [] || $this->appendix !== []) {
+        if ($this->appendix !== []) {
+            $this->state->setData($this->appendix);
+        }
+        if ($this->db === null) {
+            $this->state->updateTransactionData();
+            return;
+        }
+        $data = $this->state->getChanges();
+        if ($data !== [] || $this->columns !== []) {
             $this->db
                 ->update(
                     $this->table,
-                    ($this->mapper === null ? $data : ($this->mapper)($data)) + $this->appendix,
+                    array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data)),
                     $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
                 )
                 ->run();
         }
-        $this->state->setStatus(Node::MANAGED);
         $this->state->updateTransactionData();
 
         parent::execute();
@@ -102,28 +113,6 @@ final class Update extends DatabaseCommand implements StoreCommandInterface, Sco
 
             return;
         }
-
-        if ($fresh || $value !== null) {
-            $this->state->freeContext($key);
-        }
-
-        if ($fresh) {
-            // we only accept context when context has changed to avoid un-necessary
-            // update commands
-            $this->state->setContext($key, $value);
-        }
-    }
-
-    /**
-     * Register optional value to store in database. Having this value would not cause command to be executed
-     * if data or context is empty.
-     *
-     * Example: $update->registerAppendix("updated_at", new DateTime());
-     *
-     * @param mixed  $value
-     */
-    public function registerAppendix(string $key, $value): void
-    {
-        $this->appendix[$key] = $value;
+        $this->state->register($key, $value, $fresh);
     }
 }

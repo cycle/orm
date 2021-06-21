@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
 
-use Cycle\ORM\Command\DatabaseCommand;
+use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
-use Cycle\ORM\Command\StoreCommandInterface;
-use Cycle\ORM\Context\ConsumerInterface;
-use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Driver\Postgres\Query\PostgresInsertQuery;
@@ -16,7 +13,7 @@ use Spiral\Database\Driver\Postgres\Query\PostgresInsertQuery;
 /**
  * Insert data into associated table and provide lastInsertID promise.
  */
-final class Insert extends DatabaseCommand implements StoreCommandInterface, ConsumerInterface
+final class Insert extends StoreCommand
 {
     use ErrorTrait;
 
@@ -25,15 +22,12 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
      */
     public const INSERT_ID = '@lastInsertID';
 
-    protected array $appendix = [];
-
     /** @var string[] */
     protected array $primaryKeys;
 
-    private State $state;
-
     /** @var null|callable */
     private $mapper;
+
     private ?string $pkColumn;
 
     public function __construct(
@@ -44,9 +38,8 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
         string $pkColumn = null,
         callable $mapper = null
     ) {
-        parent::__construct($db, $table);
+        parent::__construct($db, $table, $state);
         $this->primaryKeys = $primaryKeys;
-        $this->state = $state;
         $this->mapper = $mapper;
         $this->pkColumn = $pkColumn;
     }
@@ -58,16 +51,17 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
 
     public function hasData(): bool
     {
-        return count($this->appendix) > 0 || count($this->state->getData()) > 0 || count($this->state->getContext()) > 0;
+        return $this->columns !== [] || $this->state->getData() !== [];
     }
 
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
+    public function getStoreData(): array
     {
-        if ($fresh || $value !== null) {
-            $this->state->freeContext($key);
+        if ($this->appendix !== []) {
+            $this->state->setData($this->appendix);
+            $this->appendix = [];
         }
-
-        $this->state->setContext($key, $value);
+        $data = $this->state->getData();
+        return array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data));
     }
 
     /**
@@ -75,7 +69,17 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
      */
     public function execute(): void
     {
-        $data = array_merge($this->state->getData(), $this->state->getContext());
+        $state = $this->state;
+
+        if ($this->appendix !== []) {
+            $state->setData($this->appendix);
+        }
+        if ($this->db === null) {
+            $state->updateTransactionData();
+            return;
+        }
+
+        $data = $state->getData();
 
         // filter PK null values
         foreach ($this->primaryKeys as $key) {
@@ -86,59 +90,24 @@ final class Insert extends DatabaseCommand implements StoreCommandInterface, Con
 
         $insert = $this->db
             ->insert($this->table)
-            ->values(($this->mapper === null ? $data : ($this->mapper)($data)) + $this->appendix);
+            ->values(array_merge(
+                $this->columns,
+                $this->mapper === null ? $data : ($this->mapper)($data)
+            ));
         if ($this->pkColumn !== null && $insert instanceof PostgresInsertQuery) {
             $insert->returning($this->pkColumn);
         }
-
         $insertID = $insert->run();
 
-        // foreach ($this->consumers as $key => $consumers) {
-        //     $fresh = true;
-        //     if ($key === self::INSERT_ID) {
-        //         $value = $insertID;
-        //     } else {
-        //         $value = $data[$key] ?? null;
-        //     }
-        //
-        //     foreach ($consumers as $id => $consumer) {
-        //         /** @var ConsumerInterface $cn */
-        //         $cn = $consumer[0];
-        //
-        //         $cn->register($consumer[1], $value, $fresh, $consumer[2]);
-        //
-        //         if ($key !== self::INSERT_ID) {
-        //             // primary key is always delivered as fresh
-        //             $fresh = false;
-        //         }
-        //     }
-        // }
-
-        $this->state->setStatus(Node::MANAGED);
-        $this->state->updateTransactionData();
+        $state->updateTransactionData();
         if (count($this->primaryKeys) > 0) {
             $fpk = $this->primaryKeys[0]; // first PK
             if ($insertID !== null && count($this->primaryKeys) === 1 && !isset($data[$fpk])) {
-                $this->state->register($fpk, $insertID);
-                $this->state->updateTransactionData();
-                // $this->transactionData[$this->primaryKeys[0]] = $insertID;
-                // $this->state->register($fpk, $insertID);
+                $state->register($fpk, $insertID);
+                $state->updateTransactionData();
             }
         }
 
         parent::execute();
-    }
-
-    /**
-     * Register optional value to store in database. Having this value would not cause command to be executed
-     * if data or context is empty.
-     *
-     * Example: $update->registerAppendix("updated_at", new DateTime());
-     *
-     * @param mixed  $value
-     */
-    public function registerAppendix(string $key, $value): void
-    {
-        $this->appendix[$key] = $value;
     }
 }

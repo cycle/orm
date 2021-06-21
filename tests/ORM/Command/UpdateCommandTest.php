@@ -50,6 +50,19 @@ class UpdateCommandTest extends TestCase
         );
         $cmd->registerAppendix('name', 'new value');
 
+        $this->assertFalse($cmd->hasData());
+    }
+
+    public function testHasDataColumn(): void
+    {
+        $state = new State(Node::SCHEDULED_UPDATE, ['name' => 'value']);
+        $cmd = new Update(
+            m::mock(DatabaseInterface::class),
+            'table',
+            $state,
+        );
+        $cmd->registerColumn('name', 'new value');
+
         $this->assertTrue($cmd->hasData());
     }
 

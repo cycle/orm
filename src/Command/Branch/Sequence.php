@@ -12,12 +12,32 @@ use Spiral\Database\DatabaseInterface;
  */
 final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 {
+    private ?CommandInterface $primary;
+
     /** @var CommandInterface[] */
     private array $commands = [];
 
+    public function __construct(CommandInterface $primary = null)
+    {
+        $this->primary = $primary;
+        if ($primary !== null) {
+            $this->commands[] = $primary;
+        }
+    }
+
+    public function getPrimaryCommand(): ?CommandInterface
+    {
+        return $this->primary;
+    }
+
     public function isExecuted(): bool
     {
-        return false;
+        foreach ($this->commands as $command) {
+            if (!$command->isExecuted()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function isReady(): bool
@@ -28,10 +48,6 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 
     public function addCommand(CommandInterface $command): void
     {
-        if ($command instanceof Nil) {
-            return;
-        }
-
         $this->commands[] = $command;
     }
 
@@ -63,16 +79,6 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     }
 
     public function execute(): void
-    {
-        // nothing
-    }
-
-    public function complete(): void
-    {
-        // nothing
-    }
-
-    public function rollBack(): void
     {
         // nothing
     }

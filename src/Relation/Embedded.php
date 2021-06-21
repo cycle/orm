@@ -154,11 +154,11 @@ final class Embedded implements SameRowRelationInterface
             }
         }
 
-        $mapper = $this->orm->getMapper($this->getTarget());
         $rNode = $this->getNode($related);
+        $mapper = $this->orm->getMapper($this->getTarget());
         $changes = $this->getChanges($related, $rNode->getState());
         foreach ($mapper->mapColumns($changes) as $field => $value) {
-            $command->registerAppendix($field, $value);
+            $command->registerColumn($field, $value);
         }
         $rNode->getState()->setStatus(Node::MANAGED);
         $rNode->getState()->updateTransactionData();

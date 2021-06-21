@@ -9,6 +9,7 @@ use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;
+use DateTimeImmutable;
 
 class TimestampedMapper extends Mapper
 {
@@ -16,11 +17,9 @@ class TimestampedMapper extends Mapper
     {
         $cmd = parent::queueCreate($entity, $node, $state);
 
-        $state->register('created_at', new \DateTimeImmutable(), true);
-        $cmd->register('created_at', new \DateTimeImmutable(), true);
-
-        $state->register('updated_at', new \DateTimeImmutable(), true);
-        $cmd->register('updated_at', new \DateTimeImmutable(), true);
+        $dt = new DateTimeImmutable();
+        $state->register('created_at', $dt, true);
+        $state->register('updated_at', $dt, true);
 
         return $cmd;
     }
@@ -29,7 +28,8 @@ class TimestampedMapper extends Mapper
     {
         /** @var Update $cmd */
         $cmd = parent::queueUpdate($entity, $node, $state);
-        $cmd->registerAppendix('updated_at', new \DateTimeImmutable());
+
+        $cmd->registerAppendix('updated_at', new DateTimeImmutable());
 
         return $cmd;
     }

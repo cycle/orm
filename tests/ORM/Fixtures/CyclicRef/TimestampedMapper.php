@@ -20,12 +20,8 @@ class TimestampedMapper extends Mapper
         $cmd = parent::queueCreate($entity, $node, $state);
 
         $dt = new DateTimeImmutable();
-
         $state->register('created_at', $dt, true);
-        $cmd->register('created_at', $dt, true);
-
         $state->register('updated_at', $dt, true);
-        $cmd->register('updated_at', $dt, true);
 
         return $cmd;
     }
@@ -35,10 +31,7 @@ class TimestampedMapper extends Mapper
         /** @var Update $cmd */
         $cmd = parent::queueUpdate($entity, $node, $state);
 
-        $dt = new DateTimeImmutable();
-
-        $state->register('updated_at', $dt, true);
-        $cmd->registerAppendix('updated_at', $dt);
+        $cmd->registerAppendix('updated_at', new DateTimeImmutable());
 
         return $cmd;
     }

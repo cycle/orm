@@ -16,7 +16,7 @@ class SequenceDefaultValueMapper extends Mapper
     {
         $command = parent::queueCreate($entity, $node, $state);
 
-        $command->register('user_code', new Fragment('nextval(\'user_code_seq\')'), true);
+        $state->register('user_code', new Fragment('nextval(\'user_code_seq\')'), true);
 
         return $command;
     }

@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\CyclicRef\Post;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
 abstract class CyclicHasManyReferencesTest extends BaseTest
 {

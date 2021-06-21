@@ -13,6 +13,7 @@ class SequenceCommandTest extends TestCase
 {
     public function testNestedCommands(): void
     {
+        // todo test with embedded
         $command = new Sequence();
 
         $command->addCommand(m::mock(TestInsert::class));
@@ -30,14 +31,12 @@ class SequenceCommandTest extends TestCase
 
         //Nothing
         $command->execute();
-        $command->complete();
-        $command->rollBack();
     }
 
     public function testNeverExecuted(): void
     {
         $command = new Sequence();
         $this->assertTrue($command->isReady());
-        $this->assertFalse($command->isExecuted());
+        $this->assertTrue($command->isExecuted());
     }
 }

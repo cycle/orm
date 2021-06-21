@@ -93,6 +93,7 @@ final class State implements ConsumerInterface, ProducerInterface
     public function updateTransactionData(): void
     {
         $this->transactionData = array_merge($this->transactionData, $this->data);
+        $this->state = Node::MANAGED;
     }
 
     public function getChanges(): array
@@ -170,6 +171,9 @@ final class State implements ConsumerInterface, ProducerInterface
         if (!$fresh && !is_object($oldValue)) {
             // custom, non value objects can be supported here
             $fresh = $oldValue != $value;
+        }
+        if ($fresh || $value !== null) {
+            $this->freeContext($key);
         }
 
         \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(

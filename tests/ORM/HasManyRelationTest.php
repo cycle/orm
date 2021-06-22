@@ -66,39 +66,7 @@ abstract class HasManyRelationTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
-                    'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ]
-                ]
-            ],
-            Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-            ]
-        ]));
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     public function testInitRelation(): void
@@ -146,40 +114,10 @@ abstract class HasManyRelationTest extends BaseTest
 
     public function testFetchRelationWithScopeAppliedByDefault(): void
     {
-        $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ]
-                ],
-                Schema::CONSTRAIN => SortByIdDescConstrain::class,
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::CONSTRAIN => SortByIdDescConstrain::class,
-            ]
-        ]));
+        $schemaArray = $this->getSchemaArray();
+        $schemaArray[User::class][Schema::CONSTRAIN] = SortByIdDescConstrain::class;
+        $schemaArray[Comment::class][Schema::CONSTRAIN] = SortByIdDescConstrain::class;
+        $this->withSchema(new Schema($schemaArray));
 
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
@@ -543,5 +481,42 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals(2, $b->comments[1]->id);
 
         $this->assertEquals('new b', $b->comments[0]->message);
+    }
+
+    private function getSchemaArray(): array
+    {
+        return [
+            User::class    => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'comments' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ]
+                ]
+            ],
+            Comment::class => [
+                Schema::ROLE        => 'comment',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'message'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAIN   => SortByIDConstrain::class
+            ]
+        ];
     }
 }

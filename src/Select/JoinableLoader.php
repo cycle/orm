@@ -16,7 +16,6 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
-use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Database\StatementInterface;
 

@@ -9,6 +9,9 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Reference;
+use Cycle\ORM\Proxy\EntityProxyFactory;
+use Cycle\ORM\Relation\CollectionFactoryInterface;
+use Cycle\ORM\Relation\DefaultCollectionFactory;
 use Cycle\ORM\Select\SourceInterface;
 
 use function count;
@@ -21,6 +24,8 @@ final class ORM implements ORMInterface
     private FactoryInterface $factory;
 
     private ?PromiseFactoryInterface $promiseFactory = null;
+
+    private EntityFactoryInterface $entityFactory;
 
     private HeapInterface $heap;
 
@@ -40,12 +45,20 @@ final class ORM implements ORMInterface
     /** @var SourceInterface[] */
     private array $sources = [];
 
-    public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
-    {
+    private CollectionFactoryInterface $collectionFactory;
+
+    public function __construct(
+        FactoryInterface $factory,
+        SchemaInterface $schema = null,
+        CollectionFactoryInterface $collectionFactory = null
+    ) {
         $this->factory = $factory;
         $this->schema = $schema ?? new Schema([]);
 
         $this->heap = new Heap();
+
+        $this->entityFactory = new EntityProxyFactory();
+        $this->collectionFactory = $collectionFactory ?? new DefaultCollectionFactory();
     }
 
     /**
@@ -103,51 +116,50 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    public function make(string $role, array $data = [], int $node = Node::NEW): ?object
+    public function make(string $role, array $data = [], int $status = Node::NEW): ?object
     {
-        $m = $this->getMapper($role);
-
-        // unique entity identifier
-        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-        if (is_array($pk)) {
-            $ids = [];
-            foreach ($pk as $key) {
-                if (!isset($data[$key])) {
-                    $ids = null;
-                    break;
+        $relMap = $this->getRelationMap($role);
+        if ($status !== Node::NEW) {
+            // unique entity identifier
+            $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+            if (is_array($pk)) {
+                $ids = [];
+                foreach ($pk as $key) {
+                    if (!isset($data[$key])) {
+                        $ids = null;
+                        break;
+                    }
+                    $ids[$key] = $data[$key];
                 }
-                $ids[$key] = $data[$key];
+            } else {
+                $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
             }
-        } else {
-            $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
-        }
 
-        if ($node !== Node::NEW && $ids !== null) {
-            $e = $this->heap->find($role, $ids);
+            if ($ids !== null) {
+                $e = $this->heap->find($role, $ids);
 
-            if ($e !== null) {
-                $node = $this->heap->get($e);
+                if ($e !== null) {
+                    $node = $this->heap->get($e);
+                    $data = $relMap->init($this->heap, $node, $data);
 
-                // new set of data and relations always overwrite entity state
-                return $m->hydrate(
-                    $e,
-                    $this->getRelationMap($role)->init($node, $data)
-                );
+                    $this->entityFactory->upgrade($this, $role, $e, $data);
+                    return $e;
+                }
             }
         }
 
-        // init entity class and prepared (typecasted) data
-        [$e, $prepared] = $m->init($data);
+        $node = new Node($status, $data, $role);
+        $e = $this->entityFactory->create($this, $role, $relMap, $data);
 
-        $nodeObject = new Node($node, $prepared, $m->getRole());
+        /** Entity should be attached before {@see RelationMap::init()} running */
+        $this->heap->attach($e, $node, $this->getIndexes($role));
 
-        $this->heap->attach($e, $nodeObject, $this->getIndexes($m->getRole()));
+        $data = $relMap->init($this->heap, $node, $data);
+        // [$e, $prepared] = $m->init($data);
 
-        // hydrate entity with it's data, relations and proxies
-        return $m->hydrate(
-            $e,
-            $this->getRelationMap($role)->init($nodeObject, $prepared)
-        );
+
+        $this->entityFactory->upgrade($this, $role, $e, $data);
+        return $e;
     }
 
     public function withFactory(FactoryInterface $factory): ORMInterface
@@ -261,6 +273,8 @@ final class ORM implements ORMInterface
 
     /**
      * Get list of keys entity must be indexed in a Heap by.
+     *
+     * todo: deduplicate with {@see \Cycle\ORM\Transaction::getIndexes}
      */
     private function getIndexes(string $role): array
     {
@@ -294,5 +308,10 @@ final class ORM implements ORMInterface
         $map = new RelationMap($relations, $outerRelations);
         $this->relMaps[$role] = $map;
         return $map;
+    }
+
+    public function getCollectionFactory(): CollectionFactoryInterface
+    {
+        return $this->collectionFactory;
     }
 }

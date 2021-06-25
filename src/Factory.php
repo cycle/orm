@@ -29,7 +29,7 @@ final class Factory implements FactoryInterface
         Schema::REPOSITORY => Repository::class,
         Schema::SOURCE     => Source::class,
         Schema::MAPPER     => Mapper::class,
-        Schema::CONSTRAIN  => null,
+        Schema::SCOPE      => null,
     ];
 
     public function __construct(
@@ -82,6 +82,7 @@ final class Factory implements FactoryInterface
             $this->factory,
             [
                 'orm'    => $orm,
+                'role'   => $role,
                 'name'   => $relation,
                 'target' => $definition[Relation::TARGET],
                 'schema' => $definition[Relation::SCHEMA]
@@ -98,14 +99,21 @@ final class Factory implements FactoryInterface
         $relSchema = $schema->defineRelation($role, $relation);
         $type = $relSchema[Relation::TYPE];
 
+        // Todo use container instead factory
+        $factory = $relSchema[Relation::FACTORY] ?? $orm->getCollectionFactory();
+        if (is_string($factory)) {
+            $factory = $this->make($factory);
+        }
+
         return $this->config->getRelation($type)->resolve(
             $this->factory,
             [
-                'orm'    => $orm,
-                'role'   => $role,
-                'name'   => $relation,
-                'target' => $relSchema[Relation::TARGET],
-                'schema' => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
+                'orm'     => $orm,
+                'role'    => $role,
+                'name'    => $relation,
+                'target'  => $relSchema[Relation::TARGET],
+                'schema'  => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
+                'collectionFactory' => $factory,
             ]
         );
     }

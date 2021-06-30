@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
@@ -20,7 +21,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      */
     public function mapper(
         ORMInterface $orm,
-        SchemaInterface $schema,
         string $role
     ): MapperInterface;
 
@@ -53,6 +53,12 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         SchemaInterface $schema,
         string $role
     ): SourceInterface;
+
+    public function collection(
+        ORMInterface $orm,
+        string $definition = null,
+        array $options = null
+    ): CollectionFactoryInterface;
 
     /**
      * Create relation associated with specific entity and relation.

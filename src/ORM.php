@@ -9,9 +9,9 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Proxy\EntityProxyFactory;
-use Cycle\ORM\Relation\CollectionFactoryInterface;
-use Cycle\ORM\Relation\DefaultCollectionFactory;
+use Cycle\ORM\Proxy\ProxyEntityFactory;
+use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Select\SourceInterface;
 
 use function count;
@@ -24,8 +24,6 @@ final class ORM implements ORMInterface
     private FactoryInterface $factory;
 
     private ?PromiseFactoryInterface $promiseFactory = null;
-
-    private EntityFactoryInterface $entityFactory;
 
     private HeapInterface $heap;
 
@@ -57,8 +55,7 @@ final class ORM implements ORMInterface
 
         $this->heap = new Heap();
 
-        $this->entityFactory = new EntityProxyFactory();
-        $this->collectionFactory = $collectionFactory ?? new DefaultCollectionFactory();
+        $this->collectionFactory = $collectionFactory ?? new DoctrineCollectionFactory();
     }
 
     /**
@@ -119,6 +116,7 @@ final class ORM implements ORMInterface
     public function make(string $role, array $data = [], int $status = Node::NEW): ?object
     {
         $relMap = $this->getRelationMap($role);
+        $mapper = $this->getMapper($role);
         if ($status !== Node::NEW) {
             // unique entity identifier
             $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
@@ -142,24 +140,20 @@ final class ORM implements ORMInterface
                     $node = $this->heap->get($e);
                     $data = $relMap->init($this->heap, $node, $data);
 
-                    $this->entityFactory->upgrade($this, $role, $e, $data);
-                    return $e;
+                    return $mapper->hydrate($e, $data);
                 }
             }
         }
 
         $node = new Node($status, $data, $role);
-        $e = $this->entityFactory->create($this, $role, $relMap, $data);
+        $e = $mapper->init($data);
 
         /** Entity should be attached before {@see RelationMap::init()} running */
         $this->heap->attach($e, $node, $this->getIndexes($role));
 
         $data = $relMap->init($this->heap, $node, $data);
-        // [$e, $prepared] = $m->init($data);
 
-
-        $this->entityFactory->upgrade($this, $role, $e, $data);
-        return $e;
+        return $mapper->hydrate($e, $data);
     }
 
     public function withFactory(FactoryInterface $factory): ORMInterface
@@ -212,7 +206,7 @@ final class ORM implements ORMInterface
             return $this->mappers[$role];
         }
 
-        return $this->mappers[$role] = $this->factory->mapper($this, $this->schema, $role);
+        return $this->mappers[$role] = $this->factory->mapper($this, $role);
     }
 
     public function getRepository($entity): RepositoryInterface

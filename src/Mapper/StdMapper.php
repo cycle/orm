@@ -9,9 +9,9 @@ namespace Cycle\ORM\Mapper;
  */
 final class StdMapper extends DatabaseMapper
 {
-    public function init(array $data): array
+    public function init(array $data): object
     {
-        return [new \stdClass(), $data];
+        return new \stdClass();
     }
 
     public function hydrate($entity, array $data): object
@@ -36,6 +36,14 @@ final class StdMapper extends DatabaseMapper
         return array_intersect_key(
             $this->extract($entity),
             array_flip($this->columns)
+        );
+    }
+
+    public function fetchRelations(object $entity): array
+    {
+        return array_intersect_key(
+            $this->extract($entity),
+            $this->orm->getRelationMap($this->role)->getRelations()
         );
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Relation;
+namespace Cycle\ORM\Collection;
 
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 

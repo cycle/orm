@@ -7,6 +7,7 @@ namespace Cycle\ORM;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\LoaderInterface;
@@ -49,15 +50,13 @@ final class Factory implements FactoryInterface
         return $this->factory->make($alias, $parameters);
     }
 
-    public function mapper(
-        ORMInterface $orm,
-        SchemaInterface $schema,
-        string $role
-    ): MapperInterface {
+    public function mapper(ORMInterface $orm, string $role): MapperInterface
+    {
+        $schema = $orm->getSchema();
         $class = $schema->define($role, Schema::MAPPER) ?? $this->defaults[Schema::MAPPER];
 
         if (!is_subclass_of($class, MapperInterface::class)) {
-            throw new TypecastException($class . ' does not implement ' . MapperInterface::class);
+            throw new TypecastException(sprintf('%s does not implement %s.', $class, MapperInterface::class));
         }
 
         return $this->factory->make(
@@ -90,6 +89,18 @@ final class Factory implements FactoryInterface
         );
     }
 
+    public function collection(
+        ORMInterface $orm,
+        string $definition = null,
+        array $options = null
+    ): CollectionFactoryInterface {
+        if ($definition === null) {
+            return $orm->getCollectionFactory();
+        }
+        // todo Cache factory
+        return $this->make($definition);
+    }
+
     public function relation(
         ORMInterface $orm,
         SchemaInterface $schema,
@@ -99,12 +110,6 @@ final class Factory implements FactoryInterface
         $relSchema = $schema->defineRelation($role, $relation);
         $type = $relSchema[Relation::TYPE];
 
-        // Todo use container instead factory
-        $factory = $relSchema[Relation::FACTORY] ?? $orm->getCollectionFactory();
-        if (is_string($factory)) {
-            $factory = $this->make($factory);
-        }
-
         return $this->config->getRelation($type)->resolve(
             $this->factory,
             [
@@ -113,7 +118,6 @@ final class Factory implements FactoryInterface
                 'name'    => $relation,
                 'target'  => $relSchema[Relation::TARGET],
                 'schema'  => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
-                'collectionFactory' => $factory,
             ]
         );
     }

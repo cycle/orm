@@ -97,7 +97,10 @@ final class Transaction implements TransactionInterface
     protected function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
-        foreach ($heap as $e) {
+        $iterator = $heap->getIterator();
+        while ($iterator->valid()) {
+            $e = $iterator->current();
+            $iterator->next();
             // optimize to only scan over affected entities
             $node = $heap->get($e);
 
@@ -265,7 +268,7 @@ final class Transaction implements TransactionInterface
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
-                        $entityData = $tuple->mapper->extract($tuple->entity);
+                        $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
                         $tuple->state->setRelation($name, $entityData[$name] ?? null);
                         $relation->prepare($this->pool, $tuple);
                         $relationStatus = $tuple->node->getRelationStatus($relation->getName());
@@ -301,6 +304,11 @@ final class Transaction implements TransactionInterface
         $transactData = $tuple->state->getTransactionData();
         $deferred = false;
         $resolved = true;
+        if ($tuple->status === Tuple::STATUS_PREPARING) {
+            // $entityData = $tuple->mapper->extract($tuple->entity);
+            // $relData = $tuple->mapper->extract($tuple->entity);
+            $relData = $tuple->mapper->fetchRelations($tuple->entity);
+        }
         foreach ($map->getSlaves() as $name => $relation) {
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             $className = "\033[33m" . substr(get_class($relation), strrpos(get_class($relation), '\\') + 1) . "\033[0m";
@@ -314,8 +322,9 @@ final class Transaction implements TransactionInterface
             $isWaitingKeys = count(array_intersect($relation->getInnerKeys(), $tuple->waitKeys)) > 0;
             $hasChangedKeys = count(array_intersect($relation->getInnerKeys(), $changedFields)) > 0;
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
-                $entityData = $tuple->mapper->extract($tuple->entity);
-                $tuple->state->setRelation($name, $entityData[$name] ?? null);
+                // $relData ??= $tuple->mapper->extract($tuple->entity);
+                $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
+                $tuple->state->setRelation($name, $relData[$name] ?? null);
                 $relation->prepare(
                     $this->pool,
                     $tuple,
@@ -324,7 +333,7 @@ final class Transaction implements TransactionInterface
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             }
 
-            if ($relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
+            if ($relationStatus !== RelationInterface::STATUS_PREPARE && $relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
                 && !$hasChangedKeys
                 && count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === count($relation->getInnerKeys())
             ) {
@@ -460,6 +469,8 @@ final class Transaction implements TransactionInterface
 
     /**
      * Indexable node fields.
+     *
+     * todo: deduplicate with {@see \Cycle\ORM\ORM::getIndexes}
      */
     private function getIndexes(string $role): array
     {

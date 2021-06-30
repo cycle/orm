@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\Deferred;
 use Cycle\ORM\Relation\DependencyInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\SameRowRelationInterface;
@@ -98,7 +100,7 @@ final class RelationMap
     /**
      * Init relation data in entity data and entity state.
      */
-    public function init(Node $node, array $data): array
+    public function init(HeapInterface $heap, Node $node, array $data): array
     {
         foreach ($this->innerRelations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
@@ -106,8 +108,10 @@ final class RelationMap
                     continue;
                 }
 
-                [$data[$name], $orig] = $relation->initPromise($node);
-                $node->setRelation($name, $orig);
+                // [$data[$name], $orig] = $relation->initPromise($node);
+                # todo: find in heap
+                $data[$name] = $relation->initDeferred($node);
+                $node->setRelation($name, $data[$name]);
                 continue;
             }
 
@@ -120,7 +124,13 @@ final class RelationMap
 
             // init relation for the entity and for state and the same time
             [$data[$name], $orig] = $relation->init($node, $item);
-            $node->setRelation($name, $orig);
+
+            if ($data[$name] instanceof Deferred && $data[$name]->isLoaded()) {
+                $node->setRelation($name, $data[$name]->getOrigin());
+                $data[$name] = $data[$name]->getData();
+            } else {
+                $node->setRelation($name, $data[$name]);
+            }
         }
 
         return $data;
@@ -133,6 +143,7 @@ final class RelationMap
     {
         return $this->slaves;
     }
+
     /**
      * @return DependencyInterface[]
      */
@@ -140,11 +151,20 @@ final class RelationMap
     {
         return $this->dependencies;
     }
+
     /**
      * @return SameRowRelationInterface[]
      */
     public function getEmbedded(): array
     {
         return $this->embedded;
+    }
+
+    /**
+     * @return RelationInterface[]
+     */
+    public function getRelations(): array
+    {
+        return $this->innerRelations;
     }
 }

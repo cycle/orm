@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Proxy;
 
 use Cycle\ORM\Promise\Deferred;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 
 trait EntityProxyTrait
@@ -19,20 +20,26 @@ trait EntityProxyTrait
         }
         $value = $this->__cycle_orm_rel_data[$name] ?? null;
         if ($value instanceof Deferred) {
-            return $this->$name = $value->getData();
+            $this->$name = $value->getData();
+            unset($this->__cycle_orm_rel_data[$name]);
+            return $this->$name;
         }
-        throw new \RuntimeException(sprintf('Property %s.%s is not initialized.', parent::class, $name));
+        if ($value instanceof ReferenceInterface) {
+            return $value;
+        }
+        throw new \RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, $value)
     {
         if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
             throw new \RuntimeException("Property {$name} is protected.");
         }
-        if ($value instanceof Deferred) {
+        if ($value instanceof Deferred || $value instanceof ReferenceInterface) {
             $this->__cycle_orm_rel_data[$name] = $value;
             return;
         }
+        unset($this->__cycle_orm_rel_data[$name]);
         $this->$name = $value;
     }
 }

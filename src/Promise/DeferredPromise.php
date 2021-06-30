@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Promise;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Relation\CollectionFactoryInterface;
+use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Relation\RelationInterface;
 
 /**

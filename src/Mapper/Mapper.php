@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
+use Cycle\ORM\EntityFactoryInterface;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Proxy\ProxyEntityFactory;
+use Cycle\ORM\RelationMap;
 use Cycle\ORM\Schema;
-use Doctrine\Instantiator;
-use Laminas\Hydrator;
-use Laminas\Hydrator\HydratorInterface;
-use Laminas\Hydrator\ReflectionHydrator;
 
 /**
  * Provide the ability to carry data over the specific class instances. Supports table inheritance using
@@ -24,44 +23,37 @@ class Mapper extends DatabaseMapper
 
     protected array $children = [];
 
-    protected HydratorInterface $hydrator;
+    protected EntityFactoryInterface $entityFactory;
 
-    protected Instantiator\Instantiator $instantiator;
+    private RelationMap $relationMap;
 
-    public function __construct(ORMInterface $orm, string $role)
+    public function __construct(ORMInterface $orm, string $role, ProxyEntityFactory $entityFactory = null)
     {
         parent::__construct($orm, $role);
 
         $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
-
-        $this->hydrator = class_exists('Laminas\Hydrator\ReflectionHydrator')
-            ? new ReflectionHydrator()
-            : new Hydrator\Reflection();
-
-        $this->instantiator = new Instantiator\Instantiator();
+        $this->entityFactory = $entityFactory ?? new ProxyEntityFactory();
+        $this->relationMap = $orm->getRelationMap($role);
     }
 
-    public function init(array $data): array
+    public function init(array $data): object
     {
         $class = $this->resolveClass($data);
-
-        return [$this->instantiator->instantiate($class), $data];
+        return $this->entityFactory->create($this->orm, $class, $data);
     }
 
     public function hydrate(object $entity, array $data): object
     {
-        return $this->hydrator->hydrate($data, $entity);
+        $this->entityFactory->upgrade($this->orm, $this->role, $entity, $data);
+        return $entity;
     }
 
     public function extract(object $entity): array
     {
-        return $this->hydrator->extract($entity);
+        return $this->entityFactory->extractData($this->relationMap, $entity);
     }
 
-    /**
-     * Get entity columns.
-     */
     public function fetchFields(object $entity): array
     {
         $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
@@ -78,6 +70,11 @@ class Mapper extends DatabaseMapper
         }
 
         return $columns;
+    }
+
+    public function fetchRelations(object $entity): array
+    {
+        return $this->entityFactory->extractRelations($this->relationMap, $entity);
     }
 
     /**

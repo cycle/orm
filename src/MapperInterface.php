@@ -20,10 +20,9 @@ interface MapperInterface
     public function getRole(): string;
 
     /**
-     * Init empty entity object an return pre-filtered data (hydration will happen on a later stage). Must
-     * return tuple [entity, entityData].
+     * Init empty entity object. Returns empty entity.
      */
-    public function init(array $data): array;
+    public function init(array $data): object;
 
     /**
      * Hydrate entity with dataset.
@@ -41,6 +40,11 @@ interface MapperInterface
      * Get entity columns.
      */
     public function fetchFields(object $entity): array;
+
+    /**
+     * Get entity relation values.
+     */
+    public function fetchRelations(object $entity): array;
 
     /**
      * Map entity key->value to database specific column->value.

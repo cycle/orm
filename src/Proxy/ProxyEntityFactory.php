@@ -10,13 +10,16 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 use Doctrine\Instantiator\Instantiator;
+use Laminas\Hydrator\HydratorInterface;
+use Laminas\Hydrator\ReflectionHydrator;
 
-class EntityProxyFactory implements EntityFactoryInterface
+class ProxyEntityFactory implements EntityFactoryInterface
 {
     private array $classMap = [];
     private array $classScope = [];
     private Instantiator $instantiator;
     private Closure $initializer;
+    private HydratorInterface $hydrator;
 
     public function __construct()
     {
@@ -26,6 +29,8 @@ class EntityProxyFactory implements EntityFactoryInterface
                 unset($self->$name);
             }
         };
+
+        $this->hydrator = new ReflectionHydrator();
     }
 
     /**
@@ -34,23 +39,21 @@ class EntityProxyFactory implements EntityFactoryInterface
     public function create(
         ORMInterface $orm,
         string $role,
-        RelationMap $relMap,
         array $data
     ): object {
-        $mapper = $orm->getMapper($role);
+        $relMap = $orm->getRelationMap($role);
+        $class = array_key_exists($role, $this->classMap) ? $this->classMap[$role] : $this->defineClass($orm, $relMap, $role);
+        if ($class === null) {
+            return (object)$data;
+        }
 
-        // foreach ($relMap->getRelations() as $relName => $relation) {
-        //     if (array_key_exists($relName, $data)) {
-        //         continue;
-        //     }
-        //     $data[$relName] = $relation->initDeferred();
-        // }
+        $proxy = $this->instantiator->instantiate($class);
+        $proxy->__cycle_orm_rel_map = $relMap;
+        foreach ($this->classScope[$role] as $scope => $properties) {
+            Closure::bind($this->initializer, null, $scope)($proxy, $properties);
+        }
 
-        return $this->makeInstance($orm, $relMap, $role, $data);
-        return $mapper->init($data)[0];
-
-        // hydrate entity with it's data, relations and proxies
-        // return $mapper->hydrate($entity, $data);
+        return $proxy;
     }
 
     public function upgrade(
@@ -59,13 +62,40 @@ class EntityProxyFactory implements EntityFactoryInterface
         object $entity,
         array $data
     ): object {
-        $mapper = $orm->getMapper($role);
-
         // new set of data and relations always overwrite entity state
-        return $mapper->hydrate($entity, $data);
+        return $this->hydrator->hydrate($data, $entity);
     }
 
-    public function defineClass(OrmInterface $orm, RelationMap $relMap, string $role): ?string
+    public function extractRelations(RelationMap $relMap, object $entity): array
+    {
+        if (!property_exists($entity, '__cycle_orm_rel_data')) {
+            return array_intersect_key($this->entityToArray($entity), $relMap->getRelations());
+        }
+        $currentData = $entity->__cycle_orm_rel_data;
+        foreach ($relMap->getRelations() as $key => $relation) {
+            if (!array_key_exists($key, $currentData)) {
+                $arrayData ??= $this->entityToArray($entity);
+                $currentData[$key] = $arrayData[$key];
+            }
+        }
+        return $currentData;
+    }
+
+    public function extractData(RelationMap $relMap, object $entity): array
+    {
+        return array_diff_key($this->entityToArray($entity), $relMap->getRelations());
+    }
+
+    private function entityToArray(object $entity): array
+    {
+        $result = [];
+        foreach ((array)$entity as $key => $value) {
+            $result[$key[0] === "\0" ? substr($key, strrpos($key, "\0", 1) + 1) : $key] = $value;
+        }
+        return $result;
+    }
+
+    private function defineClass(OrmInterface $orm, RelationMap $relMap, string $role): ?string
     {
         // $mapper->geteEntityMap or getClass // todo morphed
         $class = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
@@ -99,6 +129,7 @@ class EntityProxyFactory implements EntityFactoryInterface
                 $classNameStr = $className;
             }
 
+            /** @see \Cycle\ORM\Proxy\EntityProxyTrait */
             $classStr = <<<PHP
                 {$namespaceStr}
                 class {$classNameStr} extends \\{$class} {
@@ -111,22 +142,6 @@ class EntityProxyFactory implements EntityFactoryInterface
         return $className;
     }
 
-    private function makeInstance(ORMInterface $orm,RelationMap $relMap, string $role, array $data): object
-    {
-        $class = array_key_exists($role, $this->classMap) ? $this->classMap[$role] : $this->defineClass($orm, $relMap, $role);
-        if ($class === null) {
-            return (object)$data;
-        }
-
-        $proxy = $this->instantiator->instantiate($class);
-        $proxy->__cycle_orm_rel_map = $relMap;
-        foreach ($this->classScope[$role] as $scope => $properties) {
-            Closure::bind($this->initializer, null, $scope)($proxy, $properties);
-        }
-
-        return $proxy;
-    }
-
     private function getScope(?string $class, RelationMap $relMap): array
     {
         if ($class === null) {
@@ -135,5 +150,4 @@ class EntityProxyFactory implements EntityFactoryInterface
         // todo reflection
         return [$class => array_keys($relMap->getRelations())];
     }
-
 }

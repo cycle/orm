@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Relation;
+namespace Cycle\ORM\Collection;
 
 use Cycle\ORM\Relation\Pivoted\PivotedCollection;
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
-final class DefaultCollectionFactory implements CollectionFactoryInterface
+final class DoctrineCollectionFactory implements CollectionFactoryInterface
 {
     public function collect(iterable $data): iterable
     {

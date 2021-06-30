@@ -71,13 +71,13 @@ class BelongsToMorphed extends BelongsTo
 
         if ($related === null) {
             if ($this->fetchKey($node, $this->morphKey) !== null) {
-                $store->register($this->morphKey, null, true);
+                $store->register($this->columnName($node, $this->morphKey), null, true);
                 $node->register($this->morphKey, null, true);
             }
         } else {
             $rNode = $this->getNode($related);
             if ($this->fetchKey($node, $this->morphKey) != $rNode->getRole()) {
-                $store->register($this->morphKey, $rNode->getRole(), true);
+                $store->register($this->columnName($node, $this->morphKey), $rNode->getRole(), true);
                 $node->register($this->morphKey, $rNode->getRole(), true);
             }
         }

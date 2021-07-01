@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Proxy;
 
-use Cycle\ORM\Promise\Deferred;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 
@@ -15,17 +14,15 @@ trait EntityProxyTrait
 
     public function __get(string $name)
     {
-        if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
+        $relations = $this->__cycle_orm_rel_map->getRelations();
+        if (!array_key_exists($name, $relations)) {
             return $this->$name;
         }
         $value = $this->__cycle_orm_rel_data[$name] ?? null;
-        if ($value instanceof Deferred) {
-            $this->$name = $value->getData();
+        if ($value instanceof ReferenceInterface) {
+            $this->$name = $relations[$name]->resolve($value, true);
             unset($this->__cycle_orm_rel_data[$name]);
             return $this->$name;
-        }
-        if ($value instanceof ReferenceInterface) {
-            return $value;
         }
         throw new \RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));
     }
@@ -35,7 +32,7 @@ trait EntityProxyTrait
         if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
             throw new \RuntimeException("Property {$name} is protected.");
         }
-        if ($value instanceof Deferred || $value instanceof ReferenceInterface) {
+        if ($value instanceof ReferenceInterface) {
             $this->__cycle_orm_rel_data[$name] = $value;
             return;
         }

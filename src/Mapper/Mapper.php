@@ -40,7 +40,7 @@ class Mapper extends DatabaseMapper
     public function init(array $data): object
     {
         $class = $this->resolveClass($data);
-        return $this->entityFactory->create($this->orm, $class, $data);
+        return $this->entityFactory->create($this->orm, $class, $data, $class);
     }
 
     public function hydrate(object $entity, array $data): object
@@ -51,12 +51,16 @@ class Mapper extends DatabaseMapper
 
     public function extract(object $entity): array
     {
-        return $this->entityFactory->extractData($this->relationMap, $entity);
+        return $this->entityFactory->extractData($this->relationMap, $entity)
+            + $this->entityFactory->extractRelations($this->relationMap, $entity);
     }
 
     public function fetchFields(object $entity): array
     {
-        $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
+        $columns = array_intersect_key(
+            $this->entityFactory->extractData($this->relationMap, $entity),
+            array_flip($this->fields)
+        );
 
         $class = get_class($entity);
         if ($class !== $this->entity) {

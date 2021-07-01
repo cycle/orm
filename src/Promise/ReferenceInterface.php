@@ -19,4 +19,16 @@ interface ReferenceInterface
      * it's value.
      */
     public function __scope(): array;
+
+    public function hasValue(): bool;
+
+    /**
+     * @param mixed $value
+     */
+    public function setValue($value): void;
+
+    /**
+     * @return mixed
+     */
+    public function getValue();
 }

@@ -6,13 +6,13 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Collection\CollectionPromise;
+use Cycle\ORM\Promise\DeferredReference;
 use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\PromiseMany;
+use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 /**
@@ -25,18 +25,29 @@ class HasMany extends AbstractRelation
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
         $related = $tuple->state->getRelation($this->getName());
-        $related = $this->extract($related);
 
+        // if ($original instanceof Deferred) {
+        //     if (!$load && $related === $original && !$original->isLoaded()) {
+        //         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        //         return;
+        //     }
+        //     $original = $original->getData(true);
+        //     $node->setRelation($this->getName(), $original);
+        // }
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $related === $original && !$this->isResolved($original)) {
+            if (!$load && $related === $original && !$original->hasValue()) {
                 return;
             }
-            $original = $this->resolve($original);
+            $original = $this->resolve($original, true);
             $node->setRelation($this->getName(), $original);
         }
 
+        // if ($related instanceof Deferred) {
+        //     $related = $related->getData(true);
+        //     $tuple->state->setRelation($this->getName(), $related);
+        // }
         if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
+            $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
         }
 
@@ -80,7 +91,10 @@ class HasMany extends AbstractRelation
         $node = $tuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
-        if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
+        // if ($related instanceof Deferred && !$related->isLoaded()) {
+        //     return;
+        // }
+        if ($related instanceof ReferenceInterface && !$related->hasValue()) {
             return;
         }
 
@@ -123,14 +137,90 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      */
-    public function init(Node $node, array $data): array
+    public function init(Node $node, array $data): iterable
     {
         $elements = [];
         foreach ($data as $item) {
             $elements[] = $this->orm->make($this->target, $item, Node::MANAGED);
         }
 
-        return [new ArrayCollection($elements), $elements];
+        $node->setRelation($this->getName(), $elements);
+        return $this->collect($elements);
+        // return [
+        //     // new \Cycle\ORM\Promise\DeferredStatic($elements, [$this, 'collect']),
+        //     $this->collect($elements),
+        //     $elements
+        // ];
+    }
+
+    public function initReference(Node $node): ReferenceInterface
+    {
+        $scope = $this->getReferenceScope($node);
+        return $scope === null
+            ? new DeferredReference($node->getRole(), [])
+            : new Reference($this->target, $scope);
+    }
+
+    protected function getReferenceScope(Node $node): ?array
+    {
+        $scope = [];
+        $nodeData = $node->getData();
+        foreach ($this->innerKeys as $i => $key) {
+            if (!isset($nodeData[$key])) {
+                return null;
+            }
+            $scope[$this->outerKeys[$i]] = $nodeData[$key];
+        }
+        return $scope;
+    }
+
+    public function resolve(ReferenceInterface $reference, bool $load): iterable
+    {
+        if ($reference->hasValue()) {
+            return $reference->getValue();
+        }
+        if ($reference->__scope() === []) {
+            // nothing to proxy to
+            $reference->setValue([]);
+            return $this->collect([]);
+        }
+
+        $result = [];
+        $query = array_merge($reference->__scope(), $this->schema[Relation::WHERE] ?? []);
+        foreach ($this->orm->getRepository($this->target)->findAll($query) as $item) {
+            $result[] = $item;
+        }
+        $reference->setValue($result);
+
+        return $this->collect($result);
+    }
+
+    // public function initDeferred(Node $node)
+    // {
+    //     $scope = [];
+    //     $parentNodeData = $node->getData();
+    //
+    //     foreach ($this->innerKeys as $i => $key) {
+    //         if (!isset($parentNodeData[$key])) {
+    //             return new DeferredRelation($this, $node, [], [$this, 'collect']);
+    //         }
+    //         $scope[$this->outerKeys[$i]] = $parentNodeData[$key];
+    //     }
+    //
+    //     return new DeferredPromise(new PromiseMany(
+    //         $this->orm,
+    //         $this->target,
+    //         $scope,
+    //         $this->schema[Relation::WHERE] ?? []
+    //     ), [$this, 'collect']);
+    // }
+
+    public function collect(iterable $data): iterable
+    {
+        return $this->orm->getFactory()->collection(
+            $this->orm,
+            $this->schema[Relation::COLLECTION_TYPE] ?? null
+        )->collect($data);
     }
 
     /**
@@ -152,33 +242,12 @@ class HasMany extends AbstractRelation
         return is_array($data) ? $data : [];
     }
 
-    public function initPromise(Node $node): array
-    {
-        $innerValues = [];
-        $nodeData = $node->getData();
-        foreach ($this->innerKeys as $innerKey) {
-            if (!isset($nodeData[$innerKey])) {
-                return [new ArrayCollection(), null];
-            }
-            $innerValues[] = $nodeData[$innerKey];
-        }
-
-        $p = new PromiseMany(
-            $this->orm,
-            $this->target,
-            array_combine($this->outerKeys, $innerValues),
-            $this->schema[Relation::WHERE] ?? []
-        );
-
-        return [new CollectionPromise($p), $p];
-    }
-
     /**
      * Return objects which are subject of removal.
      */
     protected function calcDeleted(iterable $related, iterable $original): array
     {
-        // $related = $this->extract($related);
+        $related = $this->extract($related);
         $original = $this->extract($original);
         if ($original instanceof PromiseInterface) {
             $original = $original->__resolve();

@@ -71,11 +71,12 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
-    public function init(Node $node, array $data): array
+    // todo move to OneToOne trait
+    public function init(Node $node, array $data)
     {
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
-
-        return [$item, $item];
+        $node->setRelation($this->getName(), $item);
+        return $item;
     }
 
     public function extract($data)
@@ -118,20 +119,23 @@ abstract class AbstractRelation implements RelationInterface
      *
      * @return mixed|null
      */
-    protected function resolve(ReferenceInterface $reference)
+    public function resolve(ReferenceInterface $reference, bool $load)
     {
-        if ($reference instanceof PromiseInterface) {
-            return $reference->__resolve();
+        if ($reference->hasValue()) {
+            return $reference->getValue();
         }
 
-        return $this->orm->get($reference->__role(), $reference->__scope(), true);
+        $result = $this->orm->get($reference->__role(), $reference->__scope(), $load);
+        $reference->setValue($result);
+        return $result;
     }
 
     protected function isResolved(ReferenceInterface $reference): bool
     {
-        if ($reference instanceof PromiseInterface) {
-            return $reference->__loaded();
-        }
-        return false;
+        // if ($reference instanceof PromiseInterface) {
+            return $reference->hasValue();
+        // }
+
+        // return false;
     }
 }

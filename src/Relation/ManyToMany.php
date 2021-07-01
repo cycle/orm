@@ -8,6 +8,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
+use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Pivoted;
@@ -36,7 +37,7 @@ class ManyToMany extends Relation\AbstractRelation
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
     }
 
-    public function init(Node $node, array $data): array
+    public function init(Node $node, array $data): iterable
     {
         $elements = [];
         $pivotData = new \SplObjectStorage();
@@ -52,10 +53,19 @@ class ManyToMany extends Relation\AbstractRelation
             $elements[] = $entity;
         }
 
+
         return [
-            new Pivoted\PivotedCollection($elements, $pivotData),
-            new PivotedStorage($elements, $pivotData)
+            new \Cycle\ORM\Promise\DeferredStatic($elements, [$this, 'collect']),
+            $elements
         ];
+    }
+
+    public function collect(iterable $data): iterable
+    {
+        return $this->orm->getFactory()->collection(
+            $this->orm,
+            $this->schema[Relation::COLLECTION_TYPE] ?? null
+        )->collectPivoted($data);
     }
 
     public function extract($data): IteratorAggregate
@@ -75,27 +85,38 @@ class ManyToMany extends Relation\AbstractRelation
         return new PivotedStorage();
     }
 
-    public function initPromise(Node $node): array
+    public function initReference(Node $node): ReferenceInterface
     {
-        $innerKeys = [];
+        $scope = [];
         $nodeData = $node->getData();
         foreach ($this->innerKeys as $key) {
             if (!isset($nodeData[$key])) {
-                return [new Pivoted\PivotedCollection(), null];
+                return new \Cycle\ORM\Promise\DeferredReference($node->getRole(), []);
             }
-            $innerKeys[$key] = $nodeData[$key];
+            $scope[$key] = $nodeData[$key];
         }
 
-        // will take care of all the loading and scoping
-        $p = new Pivoted\PivotedPromise(
-            $this->orm,
-            $this->target,
-            $this->schema,
-            $innerKeys
-        );
-
-        return [new Pivoted\PivotedCollectionPromise($p), $p];
+        return new Reference($this->target, $scope);
     }
+
+    // public function initDeferred(Node $node)
+    // {
+    //     $scope = [];
+    //     $parentNodeData = $node->getData();
+    //     foreach ($this->innerKeys as $key) {
+    //         if (!isset($parentNodeData[$key])) {
+    //             return new DeferredRelation($this, $node, [], [$this, 'collect']);
+    //         }
+    //         $scope[$key] = $parentNodeData[$key];
+    //     }
+    //
+    //     return new DeferredPromise(new Pivoted\PivotedPromise(
+    //         $this->orm,
+    //         $this->target,
+    //         $this->schema,
+    //         $scope
+    //     ), [$this, 'collect']);
+    // }
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
@@ -145,6 +166,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
     }
+
     public function queue(Pool $pool, Tuple $tuple): void
     {
         $related = $tuple->state->getStorage($this->pivotEntity . '?');

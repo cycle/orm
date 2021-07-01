@@ -39,17 +39,20 @@ class ProxyEntityFactory implements EntityFactoryInterface
     public function create(
         ORMInterface $orm,
         string $role,
-        array $data
+        array $data,
+        string $sourceClass
     ): object {
         $relMap = $orm->getRelationMap($role);
-        $class = array_key_exists($role, $this->classMap) ? $this->classMap[$role] : $this->defineClass($orm, $relMap, $role);
+        $class = array_key_exists($sourceClass, $this->classMap)
+            ? $this->classMap[$sourceClass]
+            : $this->defineClass($relMap, $sourceClass);
         if ($class === null) {
             return (object)$data;
         }
 
         $proxy = $this->instantiator->instantiate($class);
         $proxy->__cycle_orm_rel_map = $relMap;
-        foreach ($this->classScope[$role] as $scope => $properties) {
+        foreach ($this->classScope[$sourceClass] as $scope => $properties) {
             Closure::bind($this->initializer, null, $scope)($proxy, $properties);
         }
 
@@ -95,29 +98,24 @@ class ProxyEntityFactory implements EntityFactoryInterface
         return $result;
     }
 
-    private function defineClass(OrmInterface $orm, RelationMap $relMap, string $role): ?string
+    private function defineClass(RelationMap $relMap, string $class): ?string
     {
-        // $mapper->geteEntityMap or getClass // todo morphed
-        $class = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
         if (!class_exists($class, true)) {
-            $this->classMap[$role] = null;
-            $this->classScope[$role] = $this->getScope(null, $relMap);
+            $this->classMap[$class] = null;
+            $this->classScope[$class] = $this->getScope(null, $relMap);
             return null;
         }
         if (array_key_exists($class, $this->classMap)) {
-            $this->classMap[$role] = $this->classMap[$class];
-            $this->classScope[$role] = $this->classScope[$class];
             return $this->classMap[$class];
         }
         $reflection = new \ReflectionClass($class);
         if ($reflection->isFinal()) {
-            throw new \RuntimeException('Entity class can\'t be extended.');
+            throw new \RuntimeException(sprintf('The entity `%s` class is final and can\'t be extended.', $class));
         }
         $className = "{$class} Cycle ORM Proxy";
         // $className = "PROXY_" . md5($class);
-        $this->classMap[$role] = $className;
         $this->classMap[$class] = $className;
-        $this->classScope[$role] = $this->getScope($class, $relMap);
+        $this->classScope[$class] = $this->getScope($class, $relMap);
         // Todo Interface
         if (!class_exists($className, false)) {
             if (strpos($className, '\\') !== false) {

@@ -6,7 +6,6 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseOne;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Transaction\Pool;
@@ -74,8 +73,8 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
-        if ($related instanceof PromiseOne && $related->__loaded()) {
-            $related = $related->__resolve();
+        if ($related instanceof ReferenceInterface && $related->hasValue()) {
+            $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
@@ -95,7 +94,6 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
         $node = $tuple->node;
         $related = $tuple->state->getRelation($this->getName());
-        $related = $this->extract($related);
 
         if ($related === null && !$this->isNullable()) {
             if ($this->checkNullValuePossibility($tuple)) {
@@ -103,8 +101,8 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             }
             throw new NullException("Relation {$this} can not be null.");
         }
-        if ($related instanceof PromiseOne && $related->__loaded()) {
-            $related = $related->__resolve();
+        if ($related instanceof ReferenceInterface && $related->hasValue()) {
+            $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }
         if ($related instanceof ReferenceInterface) {

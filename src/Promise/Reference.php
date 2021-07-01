@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Promise;
 
-final class Reference implements ReferenceInterface
+class Reference implements ReferenceInterface
 {
-    private string $role;
+    protected string $role;
 
-    private array $scope;
+    protected array $scope;
+
+    private bool $loaded = false;
+
+    /** @var mixed */
+    private $value;
 
     public function __construct(string $role, array $scope)
     {
@@ -16,13 +21,29 @@ final class Reference implements ReferenceInterface
         $this->scope = $scope;
     }
 
-    public function __role(): string
+    final public function __role(): string
     {
         return $this->role;
     }
 
-    public function __scope(): array
+    final public function __scope(): array
     {
         return $this->scope;
+    }
+
+    final public function hasValue(): bool
+    {
+        return $this->loaded;
+    }
+
+    final public function setValue($value): void
+    {
+        $this->loaded = true;
+        $this->value = $value;
+    }
+
+    final public function getValue()
+    {
+        return $this->value;
     }
 }

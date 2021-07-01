@@ -71,7 +71,7 @@ final class Embedded implements SameRowRelationInterface
         return true;
     }
 
-    public function init(Node $node, array $data): array
+    public function init(Node $node, array $data): ?object
     {
         foreach ($this->primaryKeys as $key) {
             // ensure proper object reference
@@ -79,8 +79,9 @@ final class Embedded implements SameRowRelationInterface
         }
 
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
+        $node->setRelation($this->getName(), $item);
 
-        return [$item, $item];
+        return $item;
     }
 
     public function initPromise(Node $parentNode): array
@@ -94,11 +95,8 @@ final class Embedded implements SameRowRelationInterface
             $values[] = $value;
         }
 
-        /** @var ORMInterface $orm */
-        $orm = $this->orm;
-
         $pk = array_combine($this->primaryKeys, $values);
-        $e = $orm->getHeap()->find($this->target, $pk);
+        $e = $this->orm->getHeap()->find($this->target, $pk);
         if ($e !== null) {
             return [$e, $e];
         }

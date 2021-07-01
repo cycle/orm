@@ -9,7 +9,6 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Proxy\ProxyEntityFactory;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Select\SourceInterface;
@@ -138,7 +137,7 @@ final class ORM implements ORMInterface
 
                 if ($e !== null) {
                     $node = $this->heap->get($e);
-                    $data = $relMap->init($this->heap, $node, $data);
+                    $data = $relMap->init($node, $data);
 
                     return $mapper->hydrate($e, $data);
                 }
@@ -151,8 +150,7 @@ final class ORM implements ORMInterface
         /** Entity should be attached before {@see RelationMap::init()} running */
         $this->heap->attach($e, $node, $this->getIndexes($role));
 
-        $data = $relMap->init($this->heap, $node, $data);
-
+        $data = $relMap->init($node, $data);
         return $mapper->hydrate($e, $data);
     }
 

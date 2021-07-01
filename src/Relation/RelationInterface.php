@@ -42,17 +42,19 @@ interface RelationInterface
      * relation must initiate empty relation state (when lazy loading is off).
      *
      * @param Node $node Parent node.
-     *
+     * @return mixed
      * @throws RelationException
      */
-    public function init(Node $node, array $data): array;
+    public function init(Node $node, array $data);
 
-    /**
-     * Returns tuple of [promise to insert into entity, promise to store as relation context].
-     *
-     * @throws RelationException
-     */
-    public function initPromise(Node $node): array;
+    // /**
+    //  * Returns tuple of [promise to insert into entity, promise to store as relation context].
+    //  *
+    //  * @throws RelationException
+    //  *
+    //  * @deprecated use {@see \Cycle\ORM\Relation\RelationInterface::initDeferred} instead
+    //  */
+    // public function initPromise(Node $node): array;
 
     /**
      * Extract the related values from the entity field value.
@@ -66,5 +68,5 @@ interface RelationInterface
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void;
 
-    public function queue(Pool $pool, Tuple $tuple): void;
+    // public function resolve(ReferenceInterface $reference, bool $load);
 }

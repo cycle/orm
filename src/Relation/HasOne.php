@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\DeferredReference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Transaction\Pool;
@@ -23,16 +24,35 @@ class HasOne extends AbstractRelation
         $original = $node->getRelation($this->getName());
         $related = $tuple->state->getRelation($this->getName());
 
+        // if ($original instanceof Deferred) {
+        //     if (!$load && $related === $original && !$original->isLoaded()) {
+        //         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        //         return;
+        //     }
+        //     $original = $original->getData(true);
+        //     $node->setRelation($this->getName(), $original);
+        // }
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $related === $original && !$this->isResolved($original)) {
-                return;
+            if (!$load && $this->compareReference($original, $related)) {
+                $original = $related instanceof ReferenceInterface ? $this->resolve($related, false) : $related;
+                if ($original === null) {
+                    // not found in heap
+                    $node->setRelation($this->getName(), $related);
+                    $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                    return;
+                }
+            } else {
+                $original = $this->resolve($original, true);
             }
-            $original = $this->resolve($original);
             $node->setRelation($this->getName(), $original);
         }
 
+        // if ($related instanceof Deferred) {
+        //     $related = $related->getData(true);
+        //     $tuple->state->setRelation($this->getName(), $related);
+        // }
         if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
+            $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
         }
 
@@ -55,6 +75,17 @@ class HasOne extends AbstractRelation
         $pool->attachStore($related, true, $rNode);
     }
 
+    private function compareReference(ReferenceInterface $original, $related): bool
+    {
+        if ($original instanceof DeferredReference || $original === $related) {
+            return true;
+        }
+        if ($related instanceof ReferenceInterface) {
+            return $related->__scope() === $original->__scope();
+        }
+        return false;
+    }
+
     public function queue(Pool $pool, Tuple $tuple): void
     {
         $related = $tuple->state->getRelation($this->getName());
@@ -71,6 +102,9 @@ class HasOne extends AbstractRelation
         $node = $tuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
+        // if ($related instanceof Deferred && !$related->isLoaded()) {
+        //     return;
+        // }
         if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
             return;
         }
@@ -81,23 +115,25 @@ class HasOne extends AbstractRelation
         $this->applyChanges($tuple, $rTuple);
         $rNode->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
     }
+
     protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {
         foreach ($this->innerKeys as $i => $innerKey) {
             $tuple->node->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
         }
     }
+
     private function queueDelete(Pool $pool, Tuple $tuple, $related): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
 
         if ($original instanceof ReferenceInterface) {
-            $original = $this->resolve($original);
+            $original = $this->resolve($original, true);
         }
 
         if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
+            $related = $this->resolve($related, true);
         }
         if ($original !== null) {
             $originNode = $this->getNode($original);

@@ -12,7 +12,8 @@ interface EntityFactoryInterface
     public function create(
         ORMInterface $orm,
         string $role,
-        array $data
+        array $data,
+        string $sourceClass
     ): object;
 
     public function upgrade(

@@ -7,12 +7,9 @@ namespace Cycle\ORM\Relation\Morphed;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\Collection\CollectionPromise;
-use Cycle\ORM\Promise\PromiseMany;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasMany;
 use Cycle\ORM\Transaction\Tuple;
-use Doctrine\Common\Collections\ArrayCollection;
 
 class MorphedHasMany extends HasMany
 {
@@ -24,25 +21,10 @@ class MorphedHasMany extends HasMany
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
-    public function initPromise(Node $node): array
+    protected function getReferenceScope(Node $node): ?array
     {
-        $innerValues = [];
-        $nodeData = $node->getData();
-        foreach ($this->innerKeys as $innerKey) {
-            if (!isset($nodeData[$innerKey])) {
-                return [new ArrayCollection(), null];
-            }
-            $innerValues[] = $nodeData[$innerKey];
-        }
-
-        $p = new PromiseMany(
-            $this->orm,
-            $this->target,
-            array_combine($this->outerKeys, $innerValues) + [$this->morphKey => $node->getRole()],
-            $this->schema[Relation::WHERE] ?? []
-        );
-
-        return [new CollectionPromise($p), $p];
+        $scope = parent::getReferenceScope($node);
+        return $scope === null ? null : $scope + [$this->morphKey => $node->getRole()];
     }
 
     protected function getTargetRelationName(): string

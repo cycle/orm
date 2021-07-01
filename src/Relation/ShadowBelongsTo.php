@@ -67,9 +67,8 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         return $this->cascade;
     }
 
-    public function init(Node $node, array $data): array
+    public function init(Node $node, array $data): void
     {
-        return [];
     }
 
     public function extract($data)

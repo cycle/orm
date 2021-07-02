@@ -7,7 +7,6 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\SourceInterface;
@@ -126,7 +125,9 @@ abstract class AbstractRelation implements RelationInterface
         }
 
         $result = $this->orm->get($reference->__role(), $reference->__scope(), $load);
-        $reference->setValue($result);
+        if ($load === true || $result !== null) {
+            $reference->setValue($result);
+        }
         return $result;
     }
 

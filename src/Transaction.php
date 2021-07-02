@@ -97,7 +97,10 @@ final class Transaction implements TransactionInterface
     protected function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
+        // $iterator = (clone $heap)->getIterator();
+        // foreach ($iterator as $e) {
         $iterator = $heap->getIterator();
+        $iterator->rewind();
         while ($iterator->valid()) {
             $e = $iterator->current();
             $iterator->next();

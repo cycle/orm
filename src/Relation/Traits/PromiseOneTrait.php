@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\DeferredReference;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 
@@ -30,20 +31,29 @@ trait PromiseOneTrait
 
     public function initReference(Node $node): ReferenceInterface
     {
+        $scope = $this->getReferenceScope($node);
+        if ($scope === null) {
+            $result = new Reference($this->target, []);
+            $result->setValue(null);
+            return $result;
+        }
+        return $scope === [] ? new DeferredReference($this->target, []) :  new Reference($this->target, $scope);
+    }
+
+    protected function getReferenceScope(Node $node): ?array
+    {
         $scope = [];
         $nodeData = $node->getData();
         foreach ($this->innerKeys as $i => $key) {
             if (!array_key_exists($key, $nodeData)) {
-                return new \Cycle\ORM\Promise\DeferredReference($node->getRole(), []);
+                return [];
             }
             if ($nodeData[$key] === null) {
-                $result = new \Cycle\ORM\Promise\Reference($node->getRole(), [$this->outerKeys[$i] => null]);
-                $result->setValue(null);
+                return null;
             }
             $scope[$this->outerKeys[$i]] = $nodeData[$key];
         }
-
-        return new Reference($this->target, $scope);
+        return $scope;
     }
 
     // public function initDeferred(Node $node)

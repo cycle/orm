@@ -6,6 +6,7 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use JetBrains\PhpStorm\ExpectedValues;
@@ -68,5 +69,8 @@ interface RelationInterface
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void;
 
+    /**
+     * @return mixed
+     */
     // public function resolve(ReferenceInterface $reference, bool $load);
 }

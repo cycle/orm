@@ -26,14 +26,6 @@ class HasMany extends AbstractRelation
         $original = $node->getRelation($this->getName());
         $related = $tuple->state->getRelation($this->getName());
 
-        // if ($original instanceof Deferred) {
-        //     if (!$load && $related === $original && !$original->isLoaded()) {
-        //         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        //         return;
-        //     }
-        //     $original = $original->getData(true);
-        //     $node->setRelation($this->getName(), $original);
-        // }
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$original->hasValue()) {
                 return;
@@ -42,10 +34,6 @@ class HasMany extends AbstractRelation
             $node->setRelation($this->getName(), $original);
         }
 
-        // if ($related instanceof Deferred) {
-        //     $related = $related->getData(true);
-        //     $tuple->state->setRelation($this->getName(), $related);
-        // }
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
@@ -77,23 +65,22 @@ class HasMany extends AbstractRelation
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
-        $related = $tuple->state->getRelation($this->getName());
         if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStoreAll($pool, $tuple, $this->extract($related));
+            $this->queueStoreAll($pool, $tuple);
         } else {
             // todo
             // $this->queueDelete($pool, $tuple, $related);
         }
     }
 
-    private function queueStoreAll(Pool $pool, Tuple $tuple, $related): void
+    private function queueStoreAll(Pool $pool, Tuple $tuple): void
     {
         $node = $tuple->node;
+        $related = $tuple->state->getRelation($this->getName());
+        $related = $this->extract($related);
+
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
-        // if ($related instanceof Deferred && !$related->isLoaded()) {
-        //     return;
-        // }
         if ($related instanceof ReferenceInterface && !$related->hasValue()) {
             return;
         }
@@ -182,7 +169,7 @@ class HasMany extends AbstractRelation
         if ($reference->__scope() === []) {
             // nothing to proxy to
             $reference->setValue([]);
-            return $this->collect([]);
+            return [];
         }
 
         $result = [];
@@ -192,7 +179,7 @@ class HasMany extends AbstractRelation
         }
         $reference->setValue($result);
 
-        return $this->collect($result);
+        return $result;
     }
 
     // public function initDeferred(Node $node)
@@ -215,8 +202,11 @@ class HasMany extends AbstractRelation
     //     ), [$this, 'collect']);
     // }
 
-    public function collect(iterable $data): iterable
+    public function collect($data): iterable
     {
+        if (!is_iterable($data)) {
+            throw new \InvalidArgumentException('Collected data in the HasMany relation should be iterable.');
+        }
         return $this->orm->getFactory()->collection(
             $this->orm,
             $this->schema[Relation::COLLECTION_TYPE] ?? null

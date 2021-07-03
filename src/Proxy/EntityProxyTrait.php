@@ -14,13 +14,13 @@ trait EntityProxyTrait
 
     public function __get(string $name)
     {
-        $relations = $this->__cycle_orm_rel_map->getRelations();
-        if (!array_key_exists($name, $relations)) {
+        $relation = $this->__cycle_orm_rel_map->getRelations()[$name] ?? null;
+        if ($relation === null) {
             return $this->$name;
         }
         $value = $this->__cycle_orm_rel_data[$name] ?? null;
         if ($value instanceof ReferenceInterface) {
-            $this->$name = $relations[$name]->resolve($value, true);
+            $this->$name = $relation->collect($relation->resolve($value, true));
             unset($this->__cycle_orm_rel_data[$name]);
             return $this->$name;
         }
@@ -38,5 +38,12 @@ trait EntityProxyTrait
         }
         unset($this->__cycle_orm_rel_data[$name]);
         $this->$name = $value;
+    }
+
+    public function __debugInfo(): array
+    {
+        $result = (array)$this;
+        unset($result['__cycle_orm_rel_map'], $result['__cycle_orm_rel_data']);
+        return $result;
     }
 }

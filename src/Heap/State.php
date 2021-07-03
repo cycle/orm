@@ -10,8 +10,8 @@ use Cycle\ORM\Heap\Traits\ClaimTrait;
 use Cycle\ORM\Heap\Traits\ContextTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Heap\Traits\VisitorTrait;
+use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use JetBrains\PhpStorm\ExpectedValues;
-use SplObjectStorage;
 
 /**
  * Current node state.
@@ -35,7 +35,7 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var ConsumerInterface[] */
     private array $consumers = [];
 
-    /** @var SplObjectStorage[] */
+    /** @var PivotedStorage[] */
     private array $storage = [];
 
     public function __construct(
@@ -110,16 +110,12 @@ final class State implements ConsumerInterface, ProducerInterface
      *
      * @internal
      */
-    public function getStorage(string $type): iterable
+    public function getStorage(string $type): ?PivotedStorage
     {
-        if (!isset($this->storage[$type])) {
-            $this->storage[$type] = new SplObjectStorage();
-        }
-
-        return $this->storage[$type];
+        return $this->storage[$type] ?? null;
     }
 
-    public function setStorage(string $type, iterable $storage): void
+    public function setStorage(string $type, PivotedStorage $storage): void
     {
         $this->storage[$type] = $storage;
     }

@@ -47,6 +47,11 @@ final class PivotedStorage implements IteratorAggregate, \Countable
         return in_array($entity, $this->elements, true);
     }
 
+    public function hasContext(object $entity): bool
+    {
+        return $this->context->offsetExists($entity);
+    }
+
     /**
      * Get entity context.
      *
@@ -66,7 +71,7 @@ final class PivotedStorage implements IteratorAggregate, \Countable
      *
      * @param  object|array $pivot
      */
-    public function set(object $entity, $pivot): void
+    public function set(object $entity, object $pivot): void
     {
         $this->context->offsetSet($entity, $pivot);
     }

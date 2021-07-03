@@ -40,6 +40,12 @@ trait PromiseOneTrait
         return $scope === [] ? new DeferredReference($this->target, []) :  new Reference($this->target, $scope);
     }
 
+
+    public function collect($source): ?object
+    {
+        return $source;
+    }
+
     protected function getReferenceScope(Node $node): ?array
     {
         $scope = [];

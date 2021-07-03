@@ -4,19 +4,26 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
+use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\Pivoted;
+use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Relation\Pivoted\PivotedStorage;
+use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\Loader\ManyToManyLoader;
+use Cycle\ORM\Select\RootLoader;
+use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use Doctrine\Common\Collections\Collection;
 use IteratorAggregate;
+use SplObjectStorage;
 
 class ManyToMany extends Relation\AbstractRelation
 {
@@ -40,7 +47,7 @@ class ManyToMany extends Relation\AbstractRelation
     public function init(Node $node, array $data): iterable
     {
         $elements = [];
-        $pivotData = new \SplObjectStorage();
+        $pivotData = new SplObjectStorage();
 
         $iterator = new Iterator($this->orm, $this->target, $data);
         foreach ($iterator as $pivot => $entity) {
@@ -52,20 +59,25 @@ class ManyToMany extends Relation\AbstractRelation
             $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
             $elements[] = $entity;
         }
+        $collection = new PivotedStorage($elements, $pivotData);
+        $node->setRelation($this->name, $collection);
 
-
-        return [
-            new \Cycle\ORM\Promise\DeferredStatic($elements, [$this, 'collect']),
-            $elements
-        ];
+        return $this->collect($collection);
     }
 
-    public function collect(iterable $data): iterable
+    public function collect($data): iterable
     {
-        return $this->orm->getFactory()->collection(
+        $collection = $this->orm->getFactory()->collection(
             $this->orm,
             $this->schema[Relation::COLLECTION_TYPE] ?? null
         )->collectPivoted($data);
+
+        if ($collection instanceof PivotedCollectionInterface && $data instanceof PivotedStorage) {
+            foreach ($data as $entity) {
+                $collection->setPivot($entity, $data->get($entity));
+            }
+        }
+        return $collection;
     }
 
     public function extract($data): IteratorAggregate
@@ -74,12 +86,16 @@ class ManyToMany extends Relation\AbstractRelation
             return $data->getPromise();
         }
 
-        if ($data instanceof Pivoted\PivotedCollectionInterface) {
+        if ($data instanceof PivotedCollectionInterface) {
             return new PivotedStorage($data->toArray(), $data->getPivotContext());
         }
 
         if ($data instanceof Collection) {
             return new PivotedStorage($data->toArray());
+        }
+
+        if ($data instanceof PivotedStorage) {
+            return $data;
         }
 
         return new PivotedStorage();
@@ -91,7 +107,9 @@ class ManyToMany extends Relation\AbstractRelation
         $nodeData = $node->getData();
         foreach ($this->innerKeys as $key) {
             if (!isset($nodeData[$key])) {
-                return new \Cycle\ORM\Promise\DeferredReference($node->getRole(), []);
+                $result = new \Cycle\ORM\Promise\DeferredReference($node->getRole(), []);
+                $result->setValue([]);
+                return $result;
             }
             $scope[$key] = $nodeData[$key];
         }
@@ -99,49 +117,110 @@ class ManyToMany extends Relation\AbstractRelation
         return new Reference($this->target, $scope);
     }
 
-    // public function initDeferred(Node $node)
-    // {
-    //     $scope = [];
-    //     $parentNodeData = $node->getData();
-    //     foreach ($this->innerKeys as $key) {
-    //         if (!isset($parentNodeData[$key])) {
-    //             return new DeferredRelation($this, $node, [], [$this, 'collect']);
-    //         }
-    //         $scope[$key] = $parentNodeData[$key];
-    //     }
-    //
-    //     return new DeferredPromise(new Pivoted\PivotedPromise(
-    //         $this->orm,
-    //         $this->target,
-    //         $this->schema,
-    //         $scope
-    //     ), [$this, 'collect']);
-    // }
+    public function resolve(ReferenceInterface $reference, bool $load)
+    {
+        if ($reference->hasValue()) {
+            return $reference->getValue();
+        }
+        if ($load === false) {
+            return null;
+        }
+        if (!$this->orm instanceof SourceProviderInterface) {
+            throw new ORMException('PivotedPromise require ORM to implement SourceFactoryInterface');
+        }
+        $scope = $reference->__scope();
+        if ($scope === []) {
+            return [];
+        }
+
+        // getting scoped query
+        $query = (new RootLoader($this->orm, $this->target))->buildQuery();
+
+        // responsible for all the scoping
+        $loader = new ManyToManyLoader(
+            $this->orm,
+            $this->orm->getSource($this->target)->getTable(),
+            $this->target,
+            $this->schema
+        );
+
+        /** @var ManyToManyLoader $loader */
+        $loader = $loader->withContext($loader, [
+            'constrain' => $this->orm->getSource($this->target)->getConstrain(),
+            'as'        => $this->target,
+            'method'    => JoinableLoader::POSTLOAD
+        ]);
+
+        $query = $loader->configureQuery($query, [$scope]);
+
+        // we are going to add pivot node into virtual root node (only ID) to aggregate the results
+        $root = new RootNode(
+            (array)$this->schema[Relation::INNER_KEY],
+            (array)$this->schema[Relation::INNER_KEY]
+        );
+
+        $node = $loader->createNode();
+        $root->linkNode('output', $node);
+
+        // emulate presence of parent entity
+        $root->parseRow(0, $scope);
+
+        $iterator = $query->getIterator();
+        foreach ($iterator as $row) {
+            $node->parseRow(0, $row);
+        }
+        $iterator->close();
+
+        // load all eager relations, forbid loader to re-fetch data (make it think it was joined)
+        $loader->withContext($loader, ['method' => JoinableLoader::INLOAD])->loadData($node);
+
+        $elements = [];
+        $pivotData = new SplObjectStorage();
+        foreach (new Iterator($this->orm, $this->target, $root->getResult()[0]['output']) as $pivot => $entity) {
+            $pivotData[$entity] = $this->orm->make(
+                $this->schema[Relation::THROUGH_ENTITY],
+                $pivot,
+                Node::MANAGED
+            );
+
+            $elements[] = $entity;
+        }
+        $result = new PivotedStorage($elements, $pivotData);
+        $reference->setValue($result);
+        // $reference->setValue($elements);
+        return $result;
+    }
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
         $node = $tuple->node;
+
+        /** @var PivotedStorage|ReferenceInterface|null $original */
         $original = $node->getRelation($this->getName());
+
+        /** @var iterable|ReferenceInterface|PivotedCollectionInterface $related */
         $related = $tuple->state->getRelation($this->getName());
-        $related = $this->extract($related);
-        // todo refactor
-        $tuple->state->setStorage($this->pivotEntity . '?', $related);
 
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $related === $original && !$this->isResolved($original)) {
+            if (!$load && $related === $original && !$original->hasValue()) {
+                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
-            $original = $this->resolve($original);
+            $this->resolve($original, true);
+            $original = $original->getValue();
             $node->setRelation($this->getName(), $original);
         }
         if (!$original instanceof PivotedStorage) {
             $original = $this->extract($original);
         }
 
-        if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related);
+        if ($related instanceof ReferenceInterface && $this->resolve($related, true) !== null) {
+            $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }
+        $related = $this->extract($related);
+        $tuple->state->setStorage($this->pivotEntity, $related);
+        // $tuple->state->setRelation($this->getName(), $related);
 
         // un-link old elements
         foreach ($original as $item) {
@@ -153,6 +232,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
         if (count($related) === 0) {
+            // $node->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
@@ -169,7 +249,7 @@ class ManyToMany extends Relation\AbstractRelation
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
-        $related = $tuple->state->getStorage($this->pivotEntity . '?');
+        $related = $tuple->state->getStorage($this->pivotEntity);
         // $related = $tuple->state->getRelation($this->getName());
         // $related = $this->extract($relatedSource);
 
@@ -178,26 +258,29 @@ class ManyToMany extends Relation\AbstractRelation
         // $original = $node->getRelation($this->getName()) ?? new PivotedStorage();
         // $original ??= new Pivoted\PivotedStorage();
 
-        if ($related instanceof ReferenceInterface) {
-            if (!$this->isResolved($related)) {
-                return;
-            }
+        if ($related instanceof ReferenceInterface && !$related->hasValue()) {
+            return;
         }
+        $related = $this->extract($related);
 
         $relationName = $this->getTargetRelationName();
         foreach ($related as $item) {
             $pivot = $related->get($item);
-            $pTuple = $pool->offsetGet($pivot);
-            $this->applyPivotChanges($tuple, $pTuple);
-            $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+            if ($pivot !== null) {
+                $pTuple = $pool->offsetGet($pivot);
+                $this->applyPivotChanges($tuple, $pTuple);
+                $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+            }
         }
     }
+
     protected function applyPivotChanges(Tuple $parentTuple, Tuple $tuple): void
     {
         foreach ($this->innerKeys as $i => $innerKey) {
             $tuple->node->register($this->throughInnerKeys[$i], $parentTuple->state->getValue($innerKey));
         }
     }
+
     private function deleteChild(Pool $pool, ?object $pivot, object $child, ?Node $relatedNode = null): void
     {
         // todo: add support for nullable pivot entities?
@@ -206,6 +289,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
         $pool->attachStore($child, false);
     }
+
     protected function newLink(Pool $pool, Tuple $tuple, object $related, PivotedStorage $storage): void
     {
         // $rStore = $this->orm->queueStore($related);
@@ -246,13 +330,16 @@ class ManyToMany extends Relation\AbstractRelation
     {
         [$source, $target] = $this->sortRelation($node, $this->getNode($related));
 
-        if ($source->getState()->getStorage($this->pivotEntity)->contains($target)) {
-            return $source->getState()->getStorage($this->pivotEntity)->offsetGet($target);
+        $storage = $source->getState()->getStorage($this->pivotEntity);
+        if ($storage === null) {
+            $source->getState()->setStorage($this->pivotEntity, new PivotedStorage([$target]));
+        } elseif ($storage->hasContext($target)) {
+            return $storage->get($target);
         }
 
         $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
 
-        $source->getState()->getStorage($this->pivotEntity)->offsetSet($target, $entity);
+        $storage->set($target, $entity);
 
         return $entity;
     }
@@ -264,8 +351,9 @@ class ManyToMany extends Relation\AbstractRelation
      */
     protected function sortRelation(Node $node, Node $related): array
     {
+        $storage = $related->getState()->getStorage($this->pivotEntity);
         // always use single storage
-        if ($related->getState()->getStorage($this->pivotEntity)->contains($node)) {
+        if ($storage !== null && $storage->hasContext($node)) {
             return [$related, $node];
         }
 

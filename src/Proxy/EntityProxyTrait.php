@@ -12,6 +12,11 @@ trait EntityProxyTrait
     public RelationMap $__cycle_orm_rel_map;
     public array $__cycle_orm_rel_data = [];
 
+    public function __clone()
+    {
+        throw new \Exception('You should not clone the Proxy.');
+    }
+
     public function __get(string $name)
     {
         $relation = $this->__cycle_orm_rel_map->getRelations()[$name] ?? null;

@@ -40,7 +40,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $values[$innerKey] = $data[$innerKey];
         }
 
-        $tuple->node->setRelation($this->getName(), $this->init($tuple->node, $values)[0]);
+        $tuple->node->setRelation($this->getName(), $this->init($tuple->node, $values));
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         return true;
     }
@@ -73,7 +73,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
-        if ($related instanceof ReferenceInterface && $related->hasValue()) {
+        if ($related instanceof ReferenceInterface && $this->resolve($related, false) !== null) {
             $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }

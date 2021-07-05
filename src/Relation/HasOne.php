@@ -24,14 +24,6 @@ class HasOne extends AbstractRelation
         $original = $node->getRelation($this->getName());
         $related = $tuple->state->getRelation($this->getName());
 
-        // if ($original instanceof Deferred) {
-        //     if (!$load && $related === $original && !$original->isLoaded()) {
-        //         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        //         return;
-        //     }
-        //     $original = $original->getData(true);
-        //     $node->setRelation($this->getName(), $original);
-        // }
         if ($original instanceof ReferenceInterface) {
             if (!$load && $this->compareReference($original, $related)) {
                 $original = $related instanceof ReferenceInterface ? $this->resolve($related, false) : $related;
@@ -47,10 +39,6 @@ class HasOne extends AbstractRelation
             $node->setRelation($this->getName(), $original);
         }
 
-        // if ($related instanceof Deferred) {
-        //     $related = $related->getData(true);
-        //     $tuple->state->setRelation($this->getName(), $related);
-        // }
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
@@ -102,9 +90,6 @@ class HasOne extends AbstractRelation
         $node = $tuple->node;
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
-        // if ($related instanceof Deferred && !$related->isLoaded()) {
-        //     return;
-        // }
         if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
             return;
         }

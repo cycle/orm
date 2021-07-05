@@ -95,6 +95,8 @@ class ProxyEntityFactory implements EntityFactoryInterface
         foreach ((array)$entity as $key => $value) {
             $result[$key[0] === "\0" ? substr($key, strrpos($key, "\0", 1) + 1) : $key] = $value;
         }
+        unset($result['__cycle_orm_rel_map']);
+        unset($result['__cycle_orm_rel_data']);
         return $result;
     }
 

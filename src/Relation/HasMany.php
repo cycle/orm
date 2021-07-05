@@ -28,6 +28,7 @@ class HasMany extends AbstractRelation
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$original->hasValue()) {
+                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
             $original = $this->resolve($original, true);
@@ -38,7 +39,6 @@ class HasMany extends AbstractRelation
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
         }
-
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
             $this->deleteChild($pool, $item);
         }
@@ -182,26 +182,6 @@ class HasMany extends AbstractRelation
         return $result;
     }
 
-    // public function initDeferred(Node $node)
-    // {
-    //     $scope = [];
-    //     $parentNodeData = $node->getData();
-    //
-    //     foreach ($this->innerKeys as $i => $key) {
-    //         if (!isset($parentNodeData[$key])) {
-    //             return new DeferredRelation($this, $node, [], [$this, 'collect']);
-    //         }
-    //         $scope[$this->outerKeys[$i]] = $parentNodeData[$key];
-    //     }
-    //
-    //     return new DeferredPromise(new PromiseMany(
-    //         $this->orm,
-    //         $this->target,
-    //         $scope,
-    //         $this->schema[Relation::WHERE] ?? []
-    //     ), [$this, 'collect']);
-    // }
-
     public function collect($data): iterable
     {
         if (!is_iterable($data)) {
@@ -239,13 +219,11 @@ class HasMany extends AbstractRelation
     {
         $related = $this->extract($related);
         $original = $this->extract($original);
-        if ($original instanceof PromiseInterface) {
-            $original = $original->__resolve();
-        }
         return array_udiff(
             $original ?? [],
             $related,
-            static fn(object $a, object $b): int => strcmp(spl_object_hash($a), spl_object_hash($b))
+            // static fn(object $a, object $b): int => strcmp(spl_object_hash($a), spl_object_hash($b))
+            static fn(object $a, object $b): int => (int)($a === $b) - 1
         );
     }
 }

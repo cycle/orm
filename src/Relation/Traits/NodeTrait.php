@@ -20,12 +20,12 @@ trait NodeTrait
             return null;
         }
 
-        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
-            $entity = $entity->__resolve();
-        }
-
         if ($entity instanceof ReferenceInterface) {
-            return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
+            if ($entity->hasValue()) {
+                $entity = $entity->getValue();
+            } else {
+                return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
+            }
         }
 
         /** @var Node|null $node */

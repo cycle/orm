@@ -10,7 +10,8 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\DeferredReference;
+use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -84,25 +85,34 @@ final class Embedded implements SameRowRelationInterface
         return $item;
     }
 
-    public function initPromise(Node $parentNode): array
+    public function collect($source): ?object
     {
-        $values = [];
+        return $source;
+    }
+
+    public function initReference(Node $node): ReferenceInterface
+    {
+        $scope = $this->getReferenceScope($node);
+        if ($scope === null) {
+            $result = new Reference($this->target, []);
+            $result->setValue(null);
+            return $result;
+        }
+        return $scope === [] ? new DeferredReference($this->target, []) :  new Reference($this->target, $scope);
+    }
+
+    protected function getReferenceScope(Node $node): ?array
+    {
+        $scope = [];
+        $nodeData = $node->getData();
         foreach ($this->primaryKeys as $key) {
-            $value = $parentNode->getData()[$key] ?? null;
+            $value = $nodeData[$key] ?? null;
             if (empty($value)) {
-                return [null, null];
+                return null;
             }
-            $values[] = $value;
+            $scope[$key] = $value;
         }
-
-        $pk = array_combine($this->primaryKeys, $values);
-        $e = $this->orm->getHeap()->find($this->target, $pk);
-        if ($e !== null) {
-            return [$e, $e];
-        }
-
-        $r = $this->orm->promise($this->target, $pk);
-        return [$r, $pk];
+        return $scope;
     }
 
     public function extract($data)
@@ -126,16 +136,15 @@ final class Embedded implements SameRowRelationInterface
         $original = $node->getRelation($this->getName());
 
         if ($related instanceof ReferenceInterface) {
-            if ($related->__scope() === $original) {
-                if (!($related instanceof PromiseInterface && $related->__loaded())) {
+            if ($related === $original) {
+                if (!$related->hasValue() || $this->resolve($related, false) === null) {
                     // do not update non resolved and non changed promises
                     return;
                 }
-
-                $related = $this->resolve($related);
+                $related = $related->getValue();
             } else {
                 // do not affect parent embeddings
-                $related = clone $this->resolve($related);
+                $related = clone $this->resolve($related, true);
             }
         }
 
@@ -190,12 +199,16 @@ final class Embedded implements SameRowRelationInterface
      *
      * @return mixed|null
      */
-    private function resolve(ReferenceInterface $reference)
+    public function resolve(ReferenceInterface $reference, bool $load)
     {
-        if ($reference instanceof PromiseInterface) {
-            return $reference->__resolve();
+        if ($reference->hasValue()) {
+            return $reference->getValue();
         }
 
-        return $this->orm->get($reference->__role(), $reference->__scope(), true);
+        $result = $this->orm->get($reference->__role(), $reference->__scope(), $load);
+        if ($load === true || $result !== null) {
+            $reference->setValue($result);
+        }
+        return $result;
     }
 }

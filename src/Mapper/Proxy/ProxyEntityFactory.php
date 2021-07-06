@@ -2,18 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Proxy;
+namespace Cycle\ORM\Mapper\Proxy;
 
 use Closure;
-use Cycle\ORM\EntityFactoryInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RelationMap;
-use Cycle\ORM\SchemaInterface;
 use Doctrine\Instantiator\Instantiator;
 use Laminas\Hydrator\HydratorInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 
-class ProxyEntityFactory implements EntityFactoryInterface
+class ProxyEntityFactory
 {
     private array $classMap = [];
     private array $classScope = [];
@@ -129,11 +127,11 @@ class ProxyEntityFactory implements EntityFactoryInterface
                 $classNameStr = $className;
             }
 
-            /** @see \Cycle\ORM\Proxy\EntityProxyTrait */
+            /** @see \Cycle\ORM\Mapper\Proxy\EntityProxyTrait */
             $classStr = <<<PHP
                 {$namespaceStr}
                 class {$classNameStr} extends \\{$class} {
-                    use \\Cycle\ORM\\Proxy\\EntityProxyTrait;
+                    use \\Cycle\ORM\\Mapper\\Proxy\\EntityProxyTrait;
                 }
                 PHP;
             eval($classStr);

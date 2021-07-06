@@ -42,19 +42,14 @@ final class ORM implements ORMInterface
     /** @var SourceInterface[] */
     private array $sources = [];
 
-    private CollectionFactoryInterface $collectionFactory;
-
     public function __construct(
         FactoryInterface $factory,
-        SchemaInterface $schema = null,
-        CollectionFactoryInterface $collectionFactory = null
+        SchemaInterface $schema = null
     ) {
         $this->factory = $factory;
         $this->schema = $schema ?? new Schema([]);
 
         $this->heap = new Heap();
-
-        $this->collectionFactory = $collectionFactory ?? new DoctrineCollectionFactory();
     }
 
     /**
@@ -300,10 +295,5 @@ final class ORM implements ORMInterface
         $map = new RelationMap($relations, $outerRelations);
         $this->relMaps[$role] = $map;
         return $map;
-    }
-
-    public function getCollectionFactory(): CollectionFactoryInterface
-    {
-        return $this->collectionFactory;
     }
 }

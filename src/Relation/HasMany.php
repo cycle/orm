@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\Collection\CollectionPromise;
 use Cycle\ORM\Promise\DeferredReference;
-use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\Reference;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
@@ -197,14 +195,9 @@ class HasMany extends AbstractRelation
      * Convert entity data into array.
      *
      * @param mixed $data
-     * @return array|PromiseInterface
      */
-    public function extract($data)
+    public function extract($data): array
     {
-        if ($data instanceof CollectionPromise && !$data->isInitialized()) {
-            return $data->getPromise();
-        }
-
         if ($data instanceof Collection) {
             return $data->toArray();
         }

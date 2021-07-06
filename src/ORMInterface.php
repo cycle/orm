@@ -48,11 +48,6 @@ interface ORMInterface extends SourceProviderInterface
     public function getFactory(): FactoryInterface;
 
     /**
-     * Get factory for collections
-     */
-    public function getCollectionFactory(): CollectionFactoryInterface;
-
-    /**
      * Get ORM relation and entity schema provider.
      */
     public function getSchema(): SchemaInterface;

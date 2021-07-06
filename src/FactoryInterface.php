@@ -56,7 +56,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 
     public function collection(
         ORMInterface $orm,
-        string $definition = null,
+        string $type = null,
         array $options = null
     ): CollectionFactoryInterface;
 

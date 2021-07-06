@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
-use Cycle\ORM\EntityFactoryInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Proxy\ProxyEntityFactory;
+use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
 use Cycle\ORM\RelationMap;
 use Cycle\ORM\Schema;
 
@@ -23,17 +22,17 @@ class Mapper extends DatabaseMapper
 
     protected array $children = [];
 
-    protected EntityFactoryInterface $entityFactory;
+    protected ProxyEntityFactory $entityFactory;
 
     private RelationMap $relationMap;
 
-    public function __construct(ORMInterface $orm, string $role, ProxyEntityFactory $entityFactory = null)
+    public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct($orm, $role);
 
         $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
-        $this->entityFactory = $entityFactory ?? new ProxyEntityFactory();
+        $this->entityFactory = new ProxyEntityFactory();
         $this->relationMap = $orm->getRelationMap($role);
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
@@ -33,14 +34,27 @@ final class Factory implements FactoryInterface
         Schema::SCOPE      => null,
     ];
 
+    /** @var array<string, CollectionFactoryInterface> */
+    private array $collectionFactoryAlias = [];
+
+    /**
+     * @var array<string, CollectionFactoryInterface>
+     * @psalm-var array<class-string, CollectionFactoryInterface>
+     */
+    private array $collectionFactoryInterface = [];
+
+    private CollectionFactoryInterface $defaultCollectionFactory;
+
     public function __construct(
         DatabaseProviderInterface $dbal,
         RelationConfig $config = null,
-        CoreFactory $factory = null
+        CoreFactory $factory = null,
+        CollectionFactoryInterface $defaultCollectionFactory = null
     ) {
         $this->dbal = $dbal;
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
+        $this->defaultCollectionFactory = $defaultCollectionFactory ?? new DoctrineCollectionFactory();
     }
 
     public function make(
@@ -91,14 +105,22 @@ final class Factory implements FactoryInterface
 
     public function collection(
         ORMInterface $orm,
-        string $definition = null,
+        string $type = null,
         array $options = null
     ): CollectionFactoryInterface {
-        if ($definition === null) {
-            return $orm->getCollectionFactory();
+        if ($type === null) {
+            return $this->defaultCollectionFactory;
         }
-        // todo Cache factory
-        return $this->make($definition);
+        if (array_key_exists($type, $this->collectionFactoryAlias)) {
+            return $this->collectionFactoryAlias[$type];
+        }
+        // Find by interface
+        foreach ($this->collectionFactoryInterface as $interface => $factory) {
+            if (is_subclass_of($type, $interface, true)) {
+                return $this->collectionFactoryAlias[$type] = $factory;
+            }
+        }
+        return $this->collectionFactoryAlias[$type] = $this->make($type);
     }
 
     public function relation(
@@ -117,7 +139,9 @@ final class Factory implements FactoryInterface
                 'role'    => $role,
                 'name'    => $relation,
                 'target'  => $relSchema[Relation::TARGET],
-                'schema'  => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
+                'schema'  => $relSchema[Relation::SCHEMA]
+                    + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null]
+                    + [Relation::COLLECTION_TYPE => $relSchema[Relation::COLLECTION_TYPE] ?? null],
             ]
         );
     }
@@ -185,12 +209,25 @@ final class Factory implements FactoryInterface
     /**
      * Add default classes for resolve
      */
-    public function withDefaultSchemaClasses(array $defaults): FactoryInterface
+    public function withDefaultSchemaClasses(array $defaults): self
     {
         $clone = clone $this;
 
         $clone->defaults = $defaults + $this->defaults;
 
+        return $clone;
+    }
+
+    public function withCollectionFactory(
+        string $alias,
+        CollectionFactoryInterface $factory,
+        string $interface = null
+    ): self {
+        $clone = clone $this;
+        $clone->collectionFactoryAlias[$alias] = $factory;
+        if ($interface !== null) {
+            $this->collectionFactoryInterface[$interface] = $factory;
+        }
         return $clone;
     }
 }

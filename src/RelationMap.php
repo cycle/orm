@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Relation\ActiveRelationInterface;
 use Cycle\ORM\Relation\DependencyInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\SameRowRelationInterface;
@@ -18,7 +19,7 @@ use function count;
  */
 final class RelationMap
 {
-    /** @var RelationInterface[] */
+    /** @var ActiveRelationInterface[] */
     private array $innerRelations;
 
     /** @var DependencyInterface[] */
@@ -126,11 +127,6 @@ final class RelationMap
         return $data;
     }
 
-    public function initRelation(Node $node, string $name)
-    {
-
-    }
-
     /**
      * @return RelationInterface[]
      */
@@ -156,7 +152,7 @@ final class RelationMap
     }
 
     /**
-     * @return RelationInterface[]
+     * @return ActiveRelationInterface[]
      */
     public function getRelations(): array
     {

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Exception\RelationException;
-use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use JetBrains\PhpStorm\ExpectedValues;
@@ -38,39 +35,7 @@ interface RelationInterface
      */
     public function isCascade(): bool;
 
-    /**
-     * Init related entity value(s). Returns tuple [value, value to store as relation context]. If data null
-     * relation must initiate empty relation state (when lazy loading is off).
-     *
-     * @param Node $node Parent node.
-     * @return mixed
-     * @throws RelationException
-     */
-    public function init(Node $node, array $data);
-
-    // /**
-    //  * Returns tuple of [promise to insert into entity, promise to store as relation context].
-    //  *
-    //  * @throws RelationException
-    //  *
-    //  * @deprecated use {@see \Cycle\ORM\Relation\RelationInterface::initDeferred} instead
-    //  */
-    // public function initPromise(Node $node): array;
-
-    /**
-     * Extract the related values from the entity field value.
-     *
-     * @param mixed $value
-     * @return mixed
-     *
-     * @throws RelationException
-     */
-    public function extract($value);
-
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void;
 
-    /**
-     * @return mixed
-     */
-    // public function resolve(ReferenceInterface $reference, bool $load);
+    public function queue(Pool $pool, Tuple $tuple): void;
 }

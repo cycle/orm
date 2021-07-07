@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
+use Cycle\ORM\Promise\Promise;
+use Cycle\ORM\Promise\ReferenceInterface;
+
 /**
  * Provide the ability to carry data over the StdClass objects. Does not support single table inheritance.
  */
@@ -16,7 +19,18 @@ final class StdMapper extends DatabaseMapper
 
     public function hydrate($entity, array $data): object
     {
+        $relations = $this->orm->getRelationMap($this->role)->getRelations();
         foreach ($data as $k => $v) {
+            if ($v instanceof ReferenceInterface && array_key_exists($k, $relations)) {
+                $relation = $relations[$k];
+                $relation->resolve($v, false);
+
+                $entity->{$k} = $v->hasValue()
+                    ? $relation->collect($v->getValue())
+                    : new Promise($relation, $v);
+                continue;
+
+            }
             $entity->{$k} = $v;
         }
 

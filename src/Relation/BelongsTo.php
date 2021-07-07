@@ -53,7 +53,6 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
         $related = $tuple->state->getRelation($this->getName());
-        $related = $this->extract($related);
 
         if ($related === null) {
             if (!$this->isNullable()) {

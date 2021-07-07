@@ -12,7 +12,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Select\SourceInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 
-abstract class AbstractRelation implements RelationInterface
+abstract class AbstractRelation implements ActiveRelationInterface
 {
     use Relation\Traits\NodeTrait;
 
@@ -76,11 +76,6 @@ abstract class AbstractRelation implements RelationInterface
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
         $node->setRelation($this->getName(), $item);
         return $item;
-    }
-
-    public function extract($data)
-    {
-        return $data;
     }
 
     protected function isNullable(): bool

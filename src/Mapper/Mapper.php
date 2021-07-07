@@ -10,12 +10,13 @@ use Cycle\ORM\RelationMap;
 use Cycle\ORM\Schema;
 
 /**
- * Provide the ability to carry data over the specific class instances. Supports table inheritance using
- * hidden entity field.
+ * Provide the ability to carry data over the specific class instances using proxy classes.
+ *
+ * Supports table inheritance using hidden entity field.
  */
 class Mapper extends DatabaseMapper
 {
-    // system column to store entity type
+    // system column to store entity type for STI
     public const ENTITY_TYPE = '_type';
 
     protected string $entity;

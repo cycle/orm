@@ -78,7 +78,7 @@ class HasOne extends AbstractRelation
     {
         $related = $tuple->state->getRelation($this->getName());
         if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStore($pool, $tuple, $this->extract($related));
+            $this->queueStore($pool, $tuple, $related);
         } else {
             // todo ?
             $this->queueDelete($pool, $tuple, $related);

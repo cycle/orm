@@ -115,11 +115,6 @@ final class Embedded implements SameRowRelationInterface
         return $scope;
     }
 
-    public function extract($data)
-    {
-        return $data;
-    }
-
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
     }

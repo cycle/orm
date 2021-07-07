@@ -159,7 +159,7 @@ class HasMany extends AbstractRelation
         return $scope;
     }
 
-    public function resolve(ReferenceInterface $reference, bool $load): iterable
+    public function resolve(ReferenceInterface $reference, bool $load): ?iterable
     {
         if ($reference->hasValue()) {
             return $reference->getValue();
@@ -168,6 +168,9 @@ class HasMany extends AbstractRelation
             // nothing to proxy to
             $reference->setValue([]);
             return [];
+        }
+        if ($load === false) {
+            return null;
         }
 
         $result = [];

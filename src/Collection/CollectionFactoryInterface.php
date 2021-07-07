@@ -8,6 +8,8 @@ use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 
 interface CollectionFactoryInterface
 {
+    public function withCollectionClass(string $class): self;
+
     public function collect(iterable $data): iterable;
 
     public function collectPivoted(iterable $data): PivotedCollectionInterface;

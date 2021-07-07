@@ -11,6 +11,8 @@ use Illuminate\Support\Collection;
 
 final class IlluminateCollectionFactory implements CollectionFactoryInterface
 {
+    private string $class = Collection::class;
+
     public function __construct()
     {
         if (!class_exists(Collection::class, true)) {
@@ -19,9 +21,16 @@ final class IlluminateCollectionFactory implements CollectionFactoryInterface
         }
     }
 
+    public function withCollectionClass(string $class): CollectionFactoryInterface
+    {
+        $clone = clone $this;
+        $clone->class = $class;
+        return $clone;
+    }
+
     public function collect(iterable $data): iterable
     {
-        return new Collection($data);
+        return new $this->class($data);
     }
 
     public function collectPivoted(iterable $data): PivotedCollectionInterface

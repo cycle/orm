@@ -117,7 +117,7 @@ final class Factory implements FactoryInterface
         // Find by interface
         foreach ($this->collectionFactoryInterface as $interface => $factory) {
             if (is_subclass_of($type, $interface, true)) {
-                return $this->collectionFactoryAlias[$type] = $factory;
+                return $this->collectionFactoryAlias[$type] = $factory->withCollectionClass($type);
             }
         }
         return $this->collectionFactoryAlias[$type] = $this->make($type);
@@ -226,7 +226,7 @@ final class Factory implements FactoryInterface
         $clone = clone $this;
         $clone->collectionFactoryAlias[$alias] = $factory;
         if ($interface !== null) {
-            $this->collectionFactoryInterface[$interface] = $factory;
+            $clone->collectionFactoryInterface[$interface] = $factory;
         }
         return $clone;
     }

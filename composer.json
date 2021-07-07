@@ -19,7 +19,8 @@
     "ramsey/uuid": "^4.0",
     "spiral/code-style": "^1.0",
     "spiral/dumper": "^2.7",
-    "spiral/tokenizer": "^2.7"
+    "spiral/tokenizer": "^2.7",
+    "vimeo/psalm": "^4.8"
   },
   "autoload": {
     "psr-4": {

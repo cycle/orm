@@ -10,7 +10,8 @@ interface CollectionFactoryInterface
 {
     public function withCollectionClass(string $class): self;
 
+    /**
+     * @return iterable|PivotedCollectionInterface
+     */
     public function collect(iterable $data): iterable;
-
-    public function collectPivoted(iterable $data): PivotedCollectionInterface;
 }

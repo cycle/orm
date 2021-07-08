@@ -39,6 +39,7 @@ final class Relation
     public const NULLABLE  = 31;
     public const OUTER_KEY = 32;
     public const INNER_KEY = 33;
+    public const HANDSHAKE = 34;
 
     // Selections
     public const WHERE = 41;

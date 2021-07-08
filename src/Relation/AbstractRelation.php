@@ -129,9 +129,14 @@ abstract class AbstractRelation implements ActiveRelationInterface
     protected function isResolved(ReferenceInterface $reference): bool
     {
         // if ($reference instanceof PromiseInterface) {
-            return $reference->hasValue();
+        return $reference->hasValue();
         // }
 
         // return false;
+    }
+
+    public function getSchema(): array
+    {
+        return $this->schema;
     }
 }

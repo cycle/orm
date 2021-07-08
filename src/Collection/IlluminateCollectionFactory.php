@@ -32,12 +32,4 @@ final class IlluminateCollectionFactory implements CollectionFactoryInterface
     {
         return new $this->class($data);
     }
-
-    public function collectPivoted(iterable $data): PivotedCollectionInterface
-    {
-        if ($data instanceof PivotedStorage) {
-            return new PivotedCollection($data->getElements(), $data->getContext());
-        }
-        return new PivotedCollection(is_array($data) ? $data : [...$data]);
-    }
 }

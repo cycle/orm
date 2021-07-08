@@ -35,9 +35,6 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var ConsumerInterface[] */
     private array $consumers = [];
 
-    /** @var PivotedStorage[] */
-    private array $storage = [];
-
     public function __construct(
         #[ExpectedValues(valuesFromClass: Node::class)]
         int $state,
@@ -103,21 +100,6 @@ final class State implements ConsumerInterface, ProducerInterface
         }
 
         return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
-    }
-
-    /**
-     * Storage to store temporary cross entity links.
-     *
-     * @internal
-     */
-    public function getStorage(string $type): ?PivotedStorage
-    {
-        return $this->storage[$type] ?? null;
-    }
-
-    public function setStorage(string $type, PivotedStorage $storage): void
-    {
-        $this->storage[$type] = $storage;
     }
 
     public function forward(

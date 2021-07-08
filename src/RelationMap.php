@@ -7,6 +7,7 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation\ActiveRelationInterface;
 use Cycle\ORM\Relation\DependencyInterface;
+use Cycle\ORM\Relation\ManyToMany;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\SameRowRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
@@ -62,6 +63,24 @@ final class RelationMap
             // $schema = $relationSchema[Relation::SCHEMA];
             // $through = $this->schema->resolveAlias($schema[Relation::THROUGH_ENTITY]);
             # todo: SHADOW_HAS_MANY
+            foreach ($this->slaves as $name => $relation) {
+                if (!$relation instanceof ManyToMany || $relation->getTarget() !== $role) {
+                    continue;
+                }
+                $schema = $relation->getSchema();
+                // Pivot entity should be same
+                if ($relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY] !== $schema[Relation::THROUGH_ENTITY]) {
+                    continue;
+                }
+                // Same keys
+                if ((array)$relationSchema[Relation::SCHEMA][Relation::INNER_KEY] !== (array)$schema[Relation::OUTER_KEY]
+                    || (array)$relationSchema[Relation::SCHEMA][Relation::OUTER_KEY] !== (array)$schema[Relation::INNER_KEY]) {
+                    continue;
+                }
+                if ($relation->getHandshake() === null) {
+                    $relation->setHandshake($container);
+                }
+            }
             return;
         }
         if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {

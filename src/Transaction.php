@@ -122,10 +122,8 @@ final class Transaction implements TransactionInterface
 
             // sync the current entity data with newly generated data
             $syncData = $node->syncState();
-            $this->orm->getMapper($node->getRole())->hydrate(
-                $e,
-                $node->getRelations()
-                + $syncData);
+            // $newData = $node->getRelations() + $syncData;
+            $this->orm->getMapper($node->getRole())->hydrate($e, $syncData);
         }
     }
 

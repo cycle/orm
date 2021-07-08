@@ -13,6 +13,10 @@ use Laminas\Hydrator\ReflectionHydrator;
 
 class ProxyEntityFactory
 {
+    /**
+     * @var string[]
+     * @psalm-var class-string
+     */
     private array $classMap = [];
     private array $classScope = [];
     private Instantiator $instantiator;

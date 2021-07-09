@@ -9,8 +9,6 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
-use Cycle\ORM\Collection\CollectionFactoryInterface;
-use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Select\SourceInterface;
 
 use function count;
@@ -21,8 +19,6 @@ use function count;
 final class ORM implements ORMInterface
 {
     private FactoryInterface $factory;
-
-    private ?PromiseFactoryInterface $promiseFactory = null;
 
     private HeapInterface $heap;
 
@@ -228,20 +224,6 @@ final class ORM implements ORMInterface
         return $this->sources[$role] = $this->factory->source($this, $this->schema, $role);
     }
 
-    /**
-     * Overlay existing promise factory.
-     */
-    public function withPromiseFactory(PromiseFactoryInterface $promiseFactory = null): self
-    {
-        $orm = clone $this;
-        $orm->promiseFactory = $promiseFactory;
-
-        return $orm;
-    }
-
-    /**
-     * Returns references by default.
-     */
     public function promise(string $role, array $scope): object
     {
         if (count($scope) === 1) {
@@ -249,10 +231,6 @@ final class ORM implements ORMInterface
             if ($e !== null) {
                 return $e;
             }
-        }
-
-        if ($this->promiseFactory !== null) {
-            return $this->promiseFactory->promise($this, $role, $scope);
         }
 
         return new Reference($role, $scope);

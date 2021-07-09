@@ -38,9 +38,9 @@ interface ORMInterface extends SourceProviderInterface
     /**
      * Promise object reference, proxy or object from memory heap.
      *
-     * @return ReferenceInterface|mixed|null
+     * @return ReferenceInterface|object
      */
-    public function promise(string $role, array $scope);
+    public function promise(string $role, array $scope): object;
 
     /**
      * Get factory for relations, mappers and etc.

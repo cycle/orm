@@ -10,7 +10,6 @@ use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\PromiseInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
@@ -150,8 +149,8 @@ final class Transaction implements TransactionInterface
          * @var Tuple $tuple
          */
         foreach ($pool as $entity => $tuple) {
-            if ($entity instanceof PromiseInterface && $entity->__loaded()) {
-                $entity = $entity->__resolve();
+            if ($entity instanceof ReferenceInterface && $entity->hasValue()) {
+                $entity = $entity->getValue();
                 if ($entity === null) {
                     \Cycle\ORM\Transaction\Pool::DEBUG AND print "pool: skip unresolved promise\n";
                     continue;

@@ -9,12 +9,8 @@ use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Reference\Collection\CollectionPromise;
-use Cycle\ORM\Reference\PromiseFactory;
-use Cycle\ORM\Reference\PromiseInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\Pivoted\PivotedCollectionPromise;
 use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\TestLogger;
@@ -96,9 +92,6 @@ abstract class BaseTest extends TestCase
                 RelationConfig::getDefault()
             )
         );
-
-        // use promises by default
-        $this->orm = $this->orm->withPromiseFactory(new PromiseFactory());
     }
 
     /**
@@ -343,23 +336,8 @@ abstract class BaseTest extends TestCase
 
             $rValue = $relations[$name];
 
-            if ($rValue instanceof PivotedStorage || $rValue instanceof \Cycle\ORM\Relation\Pivoted\PivotedPromise) {
-                continue;
-            }
-
             if ($rValue === $eValue) {
                 return;
-            }
-
-            if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionPromise) {
-                if (!$eValue->isInitialized()) {
-                    $eValue = $eValue->getPromise();
-                } else {
-                    // normalizing
-                    if ($rValue instanceof PromiseInterface && $rValue->__loaded()) {
-                        $rValue = $rValue->__resolve();
-                    }
-                }
             }
 
             if ($rValue instanceof ReferenceInterface && $rValue->hasValue()) {

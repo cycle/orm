@@ -7,7 +7,6 @@ namespace Cycle\ORM\Tests;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\PromiseMapper as Mapper;
 use Cycle\ORM\Reference\Promise;
-use Cycle\ORM\Reference\PromiseInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -172,7 +171,6 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         /** @var Promise $p */
         $p = $u->comments;
 
-        /** @var PromiseInterface $p */
         $this->assertSame('comment', $p->__role());
     }
 
@@ -183,7 +181,6 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         /** @var Promise $p */
         $p = $u->comments;
 
-        /** @var PromiseInterface $p */
         $this->assertEquals([
             'user_id' => 1
         ], $p->__scope());

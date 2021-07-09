@@ -9,8 +9,8 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\RootNode;
-use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Relation\Pivoted\PivotedStorage;
@@ -198,7 +198,7 @@ class ManyToMany extends Relation\AbstractRelation
         $nodeData = $node->getData();
         foreach ($this->innerKeys as $key) {
             if (!isset($nodeData[$key])) {
-                $result = new \Cycle\ORM\Promise\DeferredReference($node->getRole(), []);
+                $result = new \Cycle\ORM\Reference\DeferredReference($node->getRole(), []);
                 $result->setValue(new PivotedStorage());
                 return $result;
             }

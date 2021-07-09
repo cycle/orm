@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy;
 
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 
 trait EntityProxyTrait

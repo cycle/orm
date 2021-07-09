@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Promise;
+namespace Cycle\ORM\Reference;
 
 class Reference implements ReferenceInterface
 {

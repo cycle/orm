@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Pivoted;
 
-use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Reference\Collection\CollectionPromiseInterface;
+use Cycle\ORM\Reference\PromiseInterface;
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;

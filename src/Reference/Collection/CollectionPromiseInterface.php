@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Promise\Collection;
+namespace Cycle\ORM\Reference\Collection;
 
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Reference\PromiseInterface;
 use Doctrine\Common\Collections\Collection;
 
 /**

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\PromiseInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 
 trait NodeTrait
 {

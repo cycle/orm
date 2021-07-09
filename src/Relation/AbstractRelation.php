@@ -7,7 +7,7 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\SourceInterface;
 use JetBrains\PhpStorm\ExpectedValues;

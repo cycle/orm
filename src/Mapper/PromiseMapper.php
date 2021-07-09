@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper;
 
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\Promise;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\Promise;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Schema;
 use Doctrine\Instantiator;
 use Laminas\Hydrator;

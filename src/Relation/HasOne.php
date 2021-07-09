@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\DeferredReference;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;

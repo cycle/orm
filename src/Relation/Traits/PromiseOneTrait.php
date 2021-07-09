@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\DeferredReference;
-use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 
 trait PromiseOneTrait
 {

@@ -8,7 +8,7 @@ use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\Reference;
+use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Select\SourceInterface;

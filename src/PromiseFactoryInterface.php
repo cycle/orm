@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Reference\PromiseInterface;
 
 /**
  * To create proxies, references, custom promises and etc. This class is similar to PromiseFactoryInterface

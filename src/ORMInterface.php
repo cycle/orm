@@ -6,7 +6,7 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 

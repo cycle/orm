@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\DeferredReference;
-use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
@@ -132,7 +132,7 @@ class HasMany extends AbstractRelation
         $node->setRelation($this->getName(), $elements);
         return $this->collect($elements);
         // return [
-        //     // new \Cycle\ORM\Promise\DeferredStatic($elements, [$this, 'collect']),
+        //     // new \Cycle\ORM\Reference\DeferredStatic($elements, [$this, 'collect']),
         //     $this->collect($elements),
         //     $elements
         // ];

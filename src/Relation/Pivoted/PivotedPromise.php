@@ -9,7 +9,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\RootNode;
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Reference\PromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;

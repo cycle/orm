@@ -6,8 +6,8 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 
 /**
  * Manages single branch type between parent entity and other objects.

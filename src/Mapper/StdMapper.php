@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
-use Cycle\ORM\Promise\Promise;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\Promise;
+use Cycle\ORM\Reference\ReferenceInterface;
 
 /**
  * Provide the ability to carry data over the StdClass objects. Does not support single table inheritance.

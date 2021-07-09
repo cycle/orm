@@ -98,7 +98,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             if ($this->checkNullValuePossibility($tuple)) {
                 return;
             }
-            throw new NullException("Relation {$this} can not be null.");
+            throw new NullException(sprintf('Relation `%s`.%s can not be null.', $node->getRole(), (string)$this));
         }
         if ($related instanceof ReferenceInterface && $related->hasValue()) {
             $related = $related->getValue();

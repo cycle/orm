@@ -250,7 +250,7 @@ abstract class HasManyCompositeKeyTest extends BaseTest
 
         $e->children->remove(1);
 
-        (new Transaction($this->orm))->persist($e)->run();
+        $this->save($e);
 
         $selector = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->orderBy('parent_entity.key3')

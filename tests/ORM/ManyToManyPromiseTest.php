@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -335,8 +336,9 @@ abstract class ManyToManyPromiseTest extends BaseTest
     {
         /** @var User $u */
         $u = $this->orm->get('user', ['id' => 1]);
+        $uData = $this->extractEntity($u);
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionPromise::class, $u->tags);
-        $this->assertCount(2, $u->tags->toArray());
+        $this->assertInstanceOf(ReferenceInterface::class, $uData['tags']);
+        $this->assertCount(2, $u->tags);
     }
 }

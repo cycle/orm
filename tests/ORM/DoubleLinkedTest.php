@@ -86,8 +86,7 @@ abstract class DoubleLinkedTest extends BaseTest
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertSame($b, $a->cyclic->__resolve());
-        $this->assertSame($a, $b->cyclic);
+        $this->assertSame($b, $a->cyclic);
         $this->assertNumReads(0);
 
         $this->captureWriteQueries();
@@ -123,7 +122,7 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $this->captureReadQueries();
         $this->assertSame($a, $b->cyclic);
-        $this->assertSame($b, $a->cyclic->__resolve());
+        $this->assertSame($b, $a->cyclic);
         $this->assertNumReads(0);
     }
 

@@ -95,8 +95,7 @@ abstract class UUIDTypehintTest extends BaseTest
         $this->assertEquals($uuid, (string)$e->getID());
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, UserWithUUIDPrimaryKey::class);
-        $result = $selector->fetchOne();
+        $result = (new Select($this->orm, UserWithUUIDPrimaryKey::class))->fetchOne();
 
         $this->assertInstanceOf(UuidPrimaryKey::class, $result->getID());
         $this->assertEquals((string)$e->getID(), (string)$result->getID());

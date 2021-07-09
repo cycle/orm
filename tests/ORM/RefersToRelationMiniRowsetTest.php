@@ -126,7 +126,6 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
     public function testCreateUserWithComment(): void
     {
-        $this->logger->display();
         $c = new Comment();
         $u = new User();
         $u->lastComment = $c;

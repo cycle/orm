@@ -127,8 +127,7 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
 
     public function testCyclicWithoutLoad(): void
     {
-        $selector = new Select($this->orm, 'cyclic');
-        $c = $selector->wherePK(3)->fetchOne();
+        $c = (new Select($this->orm, 'cyclic'))->wherePK(3)->fetchOne();
         $this->assertEquals('self-reference', $c->name);
         $this->assertSame($c, $c->cyclic);
     }
@@ -144,7 +143,7 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
         $this->assertNumWrites(2);
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');
-        $c = $selector->load('cyclic')->wherePK(4)->fetchOne();
+        $c = $selector->load('cyclic')->wherePK($c->id)->fetchOne();
         $this->assertEquals('new', $c->name);
         $this->assertSame($c, $c->cyclic);
     }

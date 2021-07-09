@@ -6,7 +6,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserID;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
 abstract class BelongsToReferenceTest extends BaseTest
 {
@@ -134,8 +133,11 @@ abstract class BelongsToReferenceTest extends BaseTest
         $selector->orderBy('profile.id');
         [$a, $b, $c] = $selector->fetchAll();
 
-        $this->assertInstanceOf(ReferenceInterface::class, $a->user);
-        $this->assertInstanceOf(ReferenceInterface::class, $b->user);
+        $aData = $this->extractEntity($a);
+        $bData = $this->extractEntity($b);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $aData['user']);
+        $this->assertInstanceOf(ReferenceInterface::class, $bData['user']);
         $this->assertSame(null, $c->user);
     }
 
@@ -144,13 +146,13 @@ abstract class BelongsToReferenceTest extends BaseTest
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
 
-        $this->assertInstanceOf(ReferenceInterface::class, $p->user);
-        $this->assertEquals((new UserID(1))->__scope(), $p->user->__scope());
+        $pData = $this->extractEntity($p);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $pData['user']);
+        $this->assertEquals((new UserID(1))->__scope(), $pData['user']->__scope());
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
         $this->assertNumWrites(0);
     }
 
@@ -163,9 +165,7 @@ abstract class BelongsToReferenceTest extends BaseTest
         $this->captureReadQueries();
         $this->captureWriteQueries();
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
 
         $this->assertNumWrites(1);
         $this->assertNumReads(0);

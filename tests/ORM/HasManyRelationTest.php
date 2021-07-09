@@ -137,7 +137,6 @@ abstract class HasManyRelationTest extends BaseTest
         ], $selector->fetchData());
     }
 
-
     public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);

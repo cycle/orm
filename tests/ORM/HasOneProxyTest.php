@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
-use Cycle\ORM\Tests\Fixtures\ProfileMapperWithProxy;
-use Cycle\ORM\Tests\Fixtures\ProfilePromise;
 use Cycle\ORM\Tests\Fixtures\PromiseFactory;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -150,21 +148,17 @@ abstract class HasOneProxyTest extends BaseTest
         ], $selector->fetchData());
     }
 
-
     public function testFetchPromises(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $selector->orderBy('user.id');
-        [$a, $b] = $selector->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
-        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
-        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
+        $relationsA = $this->extractEntity($a);
+        $relationsB = $this->extractEntity($b);
+        $this->assertInstanceOf(ReferenceInterface::class, $relationsA['profile']);
+        $this->assertInstanceOf(ReferenceInterface::class, $relationsB['profile']);
 
         $this->assertInstanceOf(Profile::class, $a->profile);
-        $this->assertInstanceOf(Profile::class, $b->profile);
-
-        $this->assertInstanceOf(ProfilePromise::class, $a->profile);
-        $this->assertInstanceOf(ProfilePromise::class, $b->profile);
+        $this->assertNull($b->profile);
 
         $this->assertEquals('image.png', $a->profile->getImage());
     }

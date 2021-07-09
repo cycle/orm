@@ -6,15 +6,14 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Promise\Reference;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
 abstract class BelongsToNativeReferenceTest extends BaseTest
 {
@@ -134,8 +133,13 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
         $selector->orderBy('profile.id');
         [$a, $b, $c] = $selector->fetchAll();
 
-        $this->assertInstanceOf(ReferenceInterface::class, $a->user);
-        $this->assertInstanceOf(ReferenceInterface::class, $b->user);
+        $aData = $this->extractEntity($a);
+        $bData = $this->extractEntity($b);
+        $cData = $this->extractEntity($c);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $aData['user']);
+        $this->assertInstanceOf(ReferenceInterface::class, $bData['user']);
+        $this->assertInstanceOf(ReferenceInterface::class, $cData['user']);
         $this->assertSame(null, $c->user);
     }
 
@@ -145,8 +149,9 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
         $p = (new Select($this->orm, Profile::class))
             ->wherePK(1)->fetchOne();
 
-        $this->assertInstanceOf(ReferenceInterface::class, $p->user);
-        $this->assertInstanceOf(Reference::class, $p->user);
+        $pData = $this->extractEntity($p);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $pData['user']);
 
         $this->captureWriteQueries();
         $this->save($p);
@@ -155,16 +160,14 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
 
     public function testCreateWithoutObject(): void
     {
-        $p = new Profile();
+        $p = $this->orm->make(Profile::class);
         $p->user = new Reference('user', ['id' => 1]);
         $p->image = 'test.png';
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
+        $this->save($p);
 
         $this->assertNumWrites(1);
         $this->assertNumReads(0);
@@ -172,8 +175,7 @@ abstract class BelongsToNativeReferenceTest extends BaseTest
         // new orm isolated part of memory
         $orm = $this->orm->withHeap(new Heap());
 
-        $select = new Select($orm, Profile::class);
-        $pp = $select->wherePK($p->id)->load('user')->fetchOne();
+        $pp = (new Select($orm, Profile::class))->wherePK($p->id)->load('user')->fetchOne();
 
         $this->assertEquals('test.png', $pp->image);
         $this->assertEquals(1, $pp->user->id);

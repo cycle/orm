@@ -127,7 +127,6 @@ abstract class RefersToRelationTest extends BaseTest
         $this->captureWriteQueries();
         $this->save($u2);
         $this->assertNumWrites(1);
-        $this->logger->hide();
 
         $this->captureWriteQueries();
         $this->save($u2);
@@ -154,15 +153,13 @@ abstract class RefersToRelationTest extends BaseTest
         $u->addComment($c);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
+        $this->save($u);
         $this->assertNumWrites(2);
 
-        $s = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('lastComment')
+            ->load('comments')
+            ->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
         $this->assertSame($u->lastComment, $u->comments[0]);

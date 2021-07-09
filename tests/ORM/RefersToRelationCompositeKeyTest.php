@@ -93,32 +93,32 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
 
     public function testUpdateParentPKWithDoubleReference(): void
     {
-        $u = new CompositePK();
-        $u->key1 = 900;
-        $u->key2 = 901;
-        $u->key3 = 909;
-        $this->save($u);
+        $p = new CompositePK();
+        $p->key1 = 900;
+        $p->key2 = 901;
+        $p->key3 = 909;
+        $this->save($p);
 
         // Change PK
-        $u->key1 = 300;
-        $u->key2 = 400;
+        $p->key1 = 300;
+        $p->key2 = 400;
         // Create Child
         $c = new CompositePKChild();
         $c->key1 = 500;
         $c->key2 = 501;
         $c->key3 = 'last comment';
         // Link Child with Parent
-        $u->child_entity = $c;
-        $u->children->add($c);
+        $p->child_entity = $c;
+        $p->children->add($c);
 
         $this->captureWriteQueries();
-        $this->save($u);
+        $this->save($p);
         // Update PK + Insert Child + Link
         // OR Insert Child + Update Parent (PK & Link)
         $this->assertNumWrites(3);
 
         $this->captureWriteQueries();
-        $this->save($u);
+        $this->save($p);
         $this->assertNumWrites(0);
 
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))

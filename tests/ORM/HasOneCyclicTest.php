@@ -102,7 +102,7 @@ abstract class HasOneCyclicTest extends BaseTest
         [$a, $b, $c] = $selector->load('cyclic')->orderBy('cyclic.id')->fetchAll();
 
         $this->assertSame($b, $a->cyclic);
-        $this->assertSame(null, $b->cyclic);
+        $this->assertNull($b->cyclic);
         $this->assertSame($c, $c->cyclic);
     }
 
@@ -125,8 +125,7 @@ abstract class HasOneCyclicTest extends BaseTest
 
     public function testCyclicWithoutLoad(): void
     {
-        $selector = new Select($this->orm, Cyclic::class);
-        $c = $selector->wherePK(3)->fetchOne();
+        $c = (new Select($this->orm, Cyclic::class))->wherePK(3)->fetchOne();
         $this->assertEquals('self-reference', $c->name);
         $this->assertSame($c, $c->cyclic);
     }

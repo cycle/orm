@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -12,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\PromiseFactory;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Fixtures\UserPromise;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class BelongsToProxyTest extends BaseTest
@@ -118,11 +118,14 @@ abstract class BelongsToProxyTest extends BaseTest
          */
         [$a, $b] = $selector->fetchAll();
 
+        $aData = $this->extractEntity($a);
+        $bData = $this->extractEntity($b);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $aData['user']);
+        $this->assertInstanceOf(ReferenceInterface::class, $bData['user']);
+
         $this->assertInstanceOf(User::class, $a->user);
         $this->assertInstanceOf(User::class, $b->user);
-
-        $this->assertInstanceOf(UserPromise::class, $a->user);
-        $this->assertInstanceOf(UserPromise::class, $b->user);
 
         $this->assertEquals(1, $a->user->getID());
         $this->assertEquals(2, $b->user->getID());
@@ -130,51 +133,41 @@ abstract class BelongsToProxyTest extends BaseTest
 
     public function testLoaded(): void
     {
-        $selector = new Select($this->orm, Profile::class);
-        $selector->orderBy('profile.id');
-
         /**
          * @var Post $a
          * @var Post $b
          */
-        [$a, $b] = $selector->fetchAll();
+        [$a, $b] = (new Select($this->orm, Profile::class))->orderBy('profile.id')->fetchAll();
 
-        $this->assertFalse($a->user->__loaded());
+        $aData = $this->extractEntity($a);
+
+        $this->assertFalse($aData['user']->hasValue());
         $this->assertEquals(1, $a->user->getID());
-        $this->assertTrue($a->user->__loaded());
+        $this->assertTrue($aData['user']->hasValue());
     }
 
     public function testRole(): void
     {
-        $selector = new Select($this->orm, Profile::class);
-        $selector->orderBy('profile.id');
-
         /**
          * @var Post $a
          * @var Post $b
          */
-        [$a, $b] = $selector->fetchAll();
+        [$a, $b] = (new Select($this->orm, Profile::class))->orderBy('profile.id')->fetchAll();
+        $aData = $this->extractEntity($a);
 
-        $this->assertEquals('user', $a->user->__role());
-
-        $this->assertEquals([
-            'id' => 1
-        ], $a->user->__scope());
+        $this->assertEquals('user', $aData['user']->__role());
     }
 
     public function testScope(): void
     {
-        $selector = new Select($this->orm, Profile::class);
-        $selector->orderBy('profile.id');
-
         /**
          * @var Post $a
          * @var Post $b
          */
-        [$a, $b] = $selector->fetchAll();
+        [$a, $b] = (new Select($this->orm, Profile::class))->orderBy('profile.id')->fetchAll();
+        $aData = $this->extractEntity($a);
 
-        $this->assertEquals([
-            'id' => 1
-        ], $a->user->__scope());
+
+        $this->assertEquals(['id' => 1], $aData['user']->__scope());
     }
 }

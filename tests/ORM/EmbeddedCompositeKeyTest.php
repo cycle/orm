@@ -233,7 +233,8 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
 
     public function testInitRelationReferenceNothing(): void
     {
-        $u = (new Select($this->orm, CompositePK::class))->orderBy('key3', 'ASC')->fetchOne();
+        $u = (new Select($this->orm, CompositePK::class))
+            ->orderBy('key3', 'ASC')->fetchOne();
 
         $this->captureWriteQueries();
         $this->save($u);
@@ -268,20 +269,22 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
 
     public function testResolvePromise(): void
     {
+        /** @var CompositePK $u */
         $u = (new Select($this->orm, CompositePK::class))
             ->orderBy('key3', 'ASC')
             ->fetchOne();
 
-        $this->assertSame('foo', $u->child_entity->__resolve()->key3);
+        $this->assertSame('foo', $u->child_entity->key3);
     }
 
     public function testChangePromise(): void
     {
+        /** @var CompositePK $u */
         $u = (new Select($this->orm, CompositePK::class))
             ->orderBy('key3', 'ASC')
             ->fetchOne();
 
-        $u->child_entity->__resolve()->key3 = 'user3';
+        $u->child_entity->key3 = 'user3';
 
         $this->captureWriteQueries();
         $this->save($u);
@@ -320,7 +323,9 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
             ->wherePK(array_values(self::KEY_2))
             ->fetchOne();
 
-        $u->child_entity = $u2->child_entity;
+        $u2Data = $this->extractEntity($u2);
+
+        $u->child_entity = $u2Data['child_entity'];
 
         $this->captureWriteQueries();
         $this->captureReadQueries();
@@ -425,8 +430,8 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
     {
         $this->expectException(NullException::class);
 
-        $selector = new Select($this->orm, CompositePK::class);
-        $u = $selector->orderBy('key3', 'ASC')->fetchOne();
+        $u = (new Select($this->orm, CompositePK::class))
+            ->orderBy('key3', 'ASC')->fetchOne();
 
         $u->child_entity = null;
 
@@ -434,8 +439,8 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         $this->save($u);
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-        $u2 = $selector->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();
+        $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();
 
         $this->assertSame($u->key1, $u2->key1);
         $this->assertSame($u->key2, $u2->key2);

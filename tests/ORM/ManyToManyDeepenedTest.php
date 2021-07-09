@@ -91,76 +91,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema([
-            User::class       => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
-                    'tags' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY,
-                        Relation::TARGET => Tag::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE           => true,
-                            Relation::THROUGH_ENTITY    => TagContext::class,
-                            Relation::INNER_KEY         => 'id',
-                            Relation::OUTER_KEY         => 'id',
-                            Relation::THROUGH_INNER_KEY => 'user_id',
-                            Relation::THROUGH_OUTER_KEY => 'tag_id',
-                        ],
-                    ]
-                ]
-            ],
-            Tag::class        => [
-                Schema::ROLE        => 'tag',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-            ],
-            TagContext::class => [
-                Schema::ROLE        => 'tag_context',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag_user_map',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
-                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
-                    'image' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
-                        Relation::TARGET => Image::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                        ],
-                    ]
-                ]
-            ],
-            Image::class      => [
-                Schema::ROLE        => 'image',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'images',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'url', 'parent_id'],
-                Schema::TYPECAST    => ['id' => 'int', 'parent_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
-        ]));
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     public function testLoadRelation(): void
@@ -467,5 +398,79 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 ],
             ],
         ], $selector->fetchData());
+    }
+
+    private function getSchemaArray(): array
+    {
+        return [
+            User::class       => [
+                Schema::ROLE        => 'user',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'email', 'balance'],
+                Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'tags' => [
+                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TARGET => Tag::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE           => true,
+                            Relation::THROUGH_ENTITY    => TagContext::class,
+                            Relation::INNER_KEY         => 'id',
+                            Relation::OUTER_KEY         => 'id',
+                            Relation::THROUGH_INNER_KEY => 'user_id',
+                            Relation::THROUGH_OUTER_KEY => 'tag_id',
+                        ],
+                    ]
+                ]
+            ],
+            Tag::class        => [
+                Schema::ROLE        => 'tag',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'name'],
+                Schema::TYPECAST    => ['id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+                Schema::CONSTRAIN   => SortByIDConstrain::class
+            ],
+            TagContext::class => [
+                Schema::ROLE        => 'tag_context',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [
+                    'image' => [
+                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TARGET => Image::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                        ],
+                    ]
+                ]
+            ],
+            Image::class      => [
+                Schema::ROLE        => 'image',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'images',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'url', 'parent_id'],
+                Schema::TYPECAST    => ['id' => 'int', 'parent_id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => []
+            ]
+        ];
     }
 }

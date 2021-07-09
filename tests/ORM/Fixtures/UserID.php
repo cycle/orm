@@ -4,24 +4,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\Reference;
 
-class UserID implements ReferenceInterface
+class UserID extends Reference
 {
-    private $id;
-
     public function __construct($id)
     {
-        $this->id = $id;
-    }
-
-    public function __role(): string
-    {
-        return 'user';
-    }
-
-    public function __scope(): array
-    {
-        return ['id' => $this->id];
+        $this->role = 'user';
+        $this->scope = ['id' => $id];
     }
 }

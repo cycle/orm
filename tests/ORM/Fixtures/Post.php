@@ -8,6 +8,7 @@ use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
 
 class Post implements ImagedInterface
 {
+    public $id;
     public $user;
     public $title;
     public $content;

@@ -316,7 +316,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $u->pivoted->add($t);
         $u->pivoted->setPivot($t, ['as' => 'super']);
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = (new Select($this->orm, CompositePK::class))
@@ -325,7 +325,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->fetchOne();
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
         $this->assertNumWrites(0);
     }
 
@@ -399,14 +399,14 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $b->pivoted->setPivot($t, $pc);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($b)->run();
+        $this->save($a, $b);
         // 3 Inserts (2 pivots, 1 child)
         // 3 Deletes (1 from $a, 2 from $b)
         // 1 Update
         $this->assertNumWrites(7);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($b)->run();
+        $this->save($a, $b);
         $this->assertNumWrites(0);
 
         /**

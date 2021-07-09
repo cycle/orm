@@ -141,6 +141,7 @@ abstract class BidirectionTest extends BaseTest
 
     public function testRemoveCommentFromUser(): void
     {
+        /** @var User $u */
         $u = (new Select($this->orm, User::class))
             ->load('comments')->wherePK(1)->fetchOne();
 
@@ -150,16 +151,16 @@ abstract class BidirectionTest extends BaseTest
 
         $this->save($u);
 
-        $u = (new Select($this->orm->withHeap(new Heap()), User::class))
+        /** @var User $u2 */
+        $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertCount(1, $u->comments);
+        $this->assertCount(1, $u2->comments);
     }
 
     public function testRemoveFromCommentEnd(): void
     {
-        $select = new Select($this->orm, User::class);
-        $u = $select->load('comments')->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm, User::class))->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertCount(2, $u->comments);
 

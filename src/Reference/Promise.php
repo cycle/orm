@@ -33,14 +33,14 @@ final class Promise implements ReferenceInterface
         $this->relation->resolve($this->origin, true);
     }
 
-    public function __role(): string
+    public function getRole(): string
     {
-        return $this->origin->__role();
+        return $this->origin->getRole();
     }
 
-    public function __scope(): array
+    public function getScope(): array
     {
-        return $this->origin->__scope();
+        return $this->origin->getScope();
     }
 
     public function hasValue(): bool

@@ -371,13 +371,13 @@ abstract class BaseTest extends TestCase
 
             if ($rValue instanceof ReferenceInterface && $eValue instanceof ReferenceInterface) {
                 $this->assertEquals(
-                    $rValue->__scope(),
-                    $eValue->__scope(),
+                    $rValue->getScope(),
+                    $eValue->getScope(),
                     "Entity and State are not in sync `{$eName}`.`{$name}` (Reference scope)"
                 );
                 $this->assertEquals(
-                    $rValue->__role(),
-                    $eValue->__role(),
+                    $rValue->getRole(),
+                    $eValue->getRole(),
                     "Entity and State are not in sync `{$eName}`.`{$name}` (Reference role)"
                 );
             } else {

@@ -200,7 +200,7 @@ final class Embedded implements SameRowRelationInterface
             return $reference->getValue();
         }
 
-        $result = $this->orm->get($reference->__role(), $reference->__scope(), $load);
+        $result = $this->orm->get($reference->getRole(), $reference->getScope(), $load);
         if ($load === true || $result !== null) {
             $reference->setValue($result);
         }

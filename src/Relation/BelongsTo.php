@@ -116,7 +116,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $tuple->state->setRelation($this->getName(), $related);
         }
         if ($related instanceof ReferenceInterface) {
-            $scope = $related->__scope();
+            $scope = $related->getScope();
             if (array_intersect($this->outerKeys, array_keys($scope))) {
                 foreach ($this->outerKeys as $i => $outerKey) {
                     $node->register($this->innerKeys[$i], $scope[$outerKey]);

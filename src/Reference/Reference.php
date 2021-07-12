@@ -21,12 +21,12 @@ class Reference implements ReferenceInterface
         $this->scope = $scope;
     }
 
-    final public function __role(): string
+    final public function getRole(): string
     {
         return $this->role;
     }
 
-    final public function __scope(): array
+    final public function getScope(): array
     {
         return $this->scope;
     }

@@ -69,7 +69,7 @@ class HasOne extends AbstractRelation
             return true;
         }
         if ($related instanceof ReferenceInterface) {
-            return $related->__scope() === $original->__scope();
+            return $related->getScope() === $original->getScope();
         }
         return false;
     }

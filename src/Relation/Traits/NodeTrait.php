@@ -23,7 +23,7 @@ trait NodeTrait
             if ($entity->hasValue()) {
                 $entity = $entity->getValue();
             } else {
-                return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
+                return new Node(Node::PROMISED, $entity->getScope(), $entity->getRole());
             }
         }
 

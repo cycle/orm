@@ -164,7 +164,7 @@ class HasMany extends AbstractRelation
         if ($reference->hasValue()) {
             return $reference->getValue();
         }
-        if ($reference->__scope() === []) {
+        if ($reference->getScope() === []) {
             // nothing to proxy to
             $reference->setValue([]);
             return [];
@@ -174,7 +174,7 @@ class HasMany extends AbstractRelation
         }
 
         $result = [];
-        $query = array_merge($reference->__scope(), $this->schema[Relation::WHERE] ?? []);
+        $query = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
         foreach ($this->orm->getRepository($this->target)->findAll($query) as $item) {
             $result[] = $item;
         }

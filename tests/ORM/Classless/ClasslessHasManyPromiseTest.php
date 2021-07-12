@@ -175,7 +175,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertNumReads(0);
 
         /** @var Promise $p */
-        $this->assertSame('comment', $p->__role());
+        $this->assertSame('comment', $p->getRole());
     }
 
     public function testHasManyPromiseScope(): void
@@ -190,7 +190,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         /** @var ReferenceInterface $r */
         $this->assertEquals([
             'user_id' => 1
-        ], $r->__scope());
+        ], $r->getScope());
     }
 
     public function testPromisedEmpty(): void

@@ -171,7 +171,7 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         /** @var Promise $p */
         $p = $u->comments;
 
-        $this->assertSame('comment', $p->__role());
+        $this->assertSame('comment', $p->getRole());
     }
 
     public function testHasManyPromiseScope(): void
@@ -183,7 +183,7 @@ abstract class HasManyPromiseMapperTest extends BaseTest
 
         $this->assertEquals([
             'user_id' => 1
-        ], $p->__scope());
+        ], $p->getScope());
     }
 
     public function testPromisedEmpty(): void

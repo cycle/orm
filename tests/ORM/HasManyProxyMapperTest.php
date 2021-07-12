@@ -170,7 +170,7 @@ abstract class HasManyProxyMapperTest extends BaseTest
         $this->assertInstanceOf(ReferenceInterface::class, $r);
         $this->assertNumReads(0);
 
-        $this->assertSame('comment', $r->__role());
+        $this->assertSame('comment', $r->getRole());
     }
 
     public function testHasManyPromiseScope(): void
@@ -186,7 +186,7 @@ abstract class HasManyProxyMapperTest extends BaseTest
 
         $this->assertEquals([
             'user_id' => 1
-        ], $r->__scope());
+        ], $r->getScope());
     }
 
     public function testPromisedEmpty(): void

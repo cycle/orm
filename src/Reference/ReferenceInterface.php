@@ -12,13 +12,13 @@ interface ReferenceInterface
     /**
      * Entity role associated with the promise.
      */
-    public function __role(): string;
+    public function getRole(): string;
 
     /**
      * Data to unique identify the entity. In most of cases simply contain outer key name (primary key) and
      * it's value.
      */
-    public function __scope(): array;
+    public function getScope(): array;
 
     public function hasValue(): bool;
 

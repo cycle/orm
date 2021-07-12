@@ -219,7 +219,7 @@ class ManyToMany extends Relation\AbstractRelation
         if (!$this->orm instanceof SourceProviderInterface) {
             throw new ORMException('PivotedPromise require ORM to implement SourceFactoryInterface');
         }
-        $scope = $reference->__scope();
+        $scope = $reference->getScope();
         if ($scope === []) {
             $result = new PivotedStorage();
             $reference->setValue($result);

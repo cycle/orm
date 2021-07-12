@@ -197,7 +197,7 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
         $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
 
-        $this->assertSame('profile', $aData['profile']->__role());
+        $this->assertSame('profile', $aData['profile']->getRole());
     }
 
     public function testOnePromiseScope(): void
@@ -210,7 +210,7 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
         $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
 
-        $this->assertEquals(['user_id' => 1], $aData['profile']->__scope());
+        $this->assertEquals(['user_id' => 1], $aData['profile']->getScope());
     }
 
     public function testFetchPromisesFromHeap(): void

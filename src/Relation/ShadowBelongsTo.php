@@ -35,6 +35,7 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
 
     public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
     {
+        $this->registerWaitingFields($tuple->state, !$this->isNullable());
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
     }
 
@@ -94,5 +95,12 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
             }
         }
         return true;
+    }
+
+    private function registerWaitingFields(State $state, bool $required = true): void
+    {
+        foreach ($this->innerKeys as $key) {
+            $state->waitField($key, $required);
+        }
     }
 }

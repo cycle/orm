@@ -19,6 +19,11 @@ trait PromiseOneTrait
             $result->setValue(null);
             return $result;
         }
+        if ($scope === [] && $this->isNullable()) {
+            $result = new DeferredReference($this->target, []);
+            $result->setValue(null);
+            return $result;
+        }
         return $scope === [] ? new DeferredReference($this->target, []) :  new Reference($this->target, $scope);
     }
 

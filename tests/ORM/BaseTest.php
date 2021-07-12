@@ -350,7 +350,7 @@ abstract class BaseTest extends TestCase
 
             // extract Node collection
             if ($rValue instanceof Collection) {
-                $rValue = $rValue->toArray();
+                $rValue = array_values($rValue->toArray());
             }
 
             if ($eValue instanceof ReferenceInterface && $eValue->hasValue()) {

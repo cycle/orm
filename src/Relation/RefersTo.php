@@ -45,6 +45,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
+        $this->registerWaitingFields($tuple->state, false);
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
         if ($related instanceof ReferenceInterface) {
             return;
@@ -93,7 +94,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
          * {@see \Cycle\ORM\Relation\BelongsTo::checkNullValuePossibility()}
          */
         if ($rTuple->status === Tuple::STATUS_PROCESSED
-            || ($rTuple->status > Tuple::STATUS_PREPARING && $rTuple->state->getStatus() !== node::NEW && array_intersect($this->outerKeys, $rTuple->waitKeys) === [])
+            || ($rTuple->status > Tuple::STATUS_PREPARING
+                && $rTuple->state->getStatus() !== node::NEW
+                && array_intersect($this->outerKeys, $rTuple->state->getWaitingFields()) === [])
         ) {
             $this->pullValues($node, $rTuple->node);
             $node->setRelation($this->getName(), $related);

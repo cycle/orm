@@ -6,6 +6,7 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
@@ -138,5 +139,12 @@ abstract class AbstractRelation implements ActiveRelationInterface
     public function getSchema(): array
     {
         return $this->schema;
+    }
+
+    protected function registerWaitingFields(State $state, bool $required = true): void
+    {
+        foreach ($this->innerKeys as $key) {
+            $state->waitField($key, $required);
+        }
     }
 }

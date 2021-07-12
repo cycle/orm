@@ -85,13 +85,13 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
                     ],
                 ]
             ],
-            Preference::class => [
+            Preference::class => [Schema::PRIMARY_KEY => ['tenant_id', 'id'],
                 Schema::ROLE        => 'preference',
                 Schema::MAPPER      => TimestampedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'preferences',
 //                Schema::PRIMARY_KEY => 'id',
-                Schema::PRIMARY_KEY => ['tenant_id', 'id'],
+                Schema::PRIMARY_KEY => ['id'],
                 Schema::COLUMNS     => ['tenant_id', 'id', 'flag', 'option', 'created_at', 'updated_at'],
                 Schema::SCHEMA      => [],
                 Schema::TYPECAST    => [
@@ -168,10 +168,10 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
         $this->save($t);
         $this->assertNumWrites(3);
 
-//        // no changes!
-//        $this->captureWriteQueries();
-//        $this->save($u);
-//        $this->assertNumWrites(0);
+       // no changes!
+       $this->captureWriteQueries();
+       $this->save($t);
+       $this->assertNumWrites(0);
 //
 //        $this->orm = $this->orm->withHeap(new Heap());
 //        $selector = new Select($this->orm, Post::class);

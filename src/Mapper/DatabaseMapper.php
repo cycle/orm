@@ -125,7 +125,6 @@ abstract class DatabaseMapper implements MapperInterface
     {
         $delete = new Delete($this->source->getDatabase(), $this->source->getTable(), $state, [$this, 'mapColumns']);
         $state->setStatus(Node::SCHEDULED_DELETE);
-        $state->decClaim();
 
         $delete->waitScope(...$this->primaryKeys);
         $fromData = $node->getInitialData();

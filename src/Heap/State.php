@@ -6,11 +6,8 @@ namespace Cycle\ORM\Heap;
 
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
-use Cycle\ORM\Heap\Traits\ClaimTrait;
-use Cycle\ORM\Heap\Traits\ContextTrait;
+use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
-use Cycle\ORM\Heap\Traits\VisitorTrait;
-use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
@@ -19,9 +16,7 @@ use JetBrains\PhpStorm\ExpectedValues;
 final class State implements ConsumerInterface, ProducerInterface
 {
     use RelationTrait;
-    use ClaimTrait;
-    use VisitorTrait;
-    use ContextTrait;
+    use WaitFieldTrait;
 
     private int $state;
 
@@ -151,7 +146,7 @@ final class State implements ConsumerInterface, ProducerInterface
             $fresh = $oldValue != $value;
         }
         if ($fresh || $value !== null) {
-            $this->freeContext($key);
+            $this->freeWaitingField($key);
         }
 
         \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(
@@ -176,6 +171,11 @@ final class State implements ConsumerInterface, ProducerInterface
 
     public function isReady(): bool
     {
-        return $this->waitContext === [];
+        return $this->waitingFields === [];
+    }
+
+    public function __destruct()
+    {
+        unset($this->consumers, $this->relations);
     }
 }

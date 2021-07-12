@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
@@ -306,8 +307,8 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
 
         $this->assertTrue($a->tags->hasPivot($a->tags[0]));
         $this->assertTrue($a->tags->hasPivot($a->tags[1]));
@@ -344,8 +345,8 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
 
         $b->tags->getPivot($b->tags[0])->image->url = 'new.gif';
 

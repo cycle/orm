@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Collection;
 
-use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
+use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 
 interface CollectionFactoryInterface
 {

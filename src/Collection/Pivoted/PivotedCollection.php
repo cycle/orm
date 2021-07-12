@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Relation\Pivoted;
+namespace Cycle\ORM\Collection\Pivoted;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use SplObjectStorage;

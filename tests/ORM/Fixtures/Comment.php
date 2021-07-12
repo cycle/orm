@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-use Cycle\ORM\Relation\Pivoted\PivotedCollection;
-use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
+use Cycle\ORM\Collection\Pivoted\PivotedCollection;
+use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 
 class Comment
 {

@@ -196,8 +196,8 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
         $this->captureReadQueries();
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
+        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $b->tags);
 
         $this->assertTrue($a->tags->hasPivot($a->tags[0]));
         $this->assertTrue($a->tags->hasPivot($a->tags[1]));

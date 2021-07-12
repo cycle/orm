@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
@@ -173,7 +174,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
     public function testInitRelation(): void
     {
         $u = $this->orm->make(CompositePK::class);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $u->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $u->pivoted);
     }
 
     public function testLoadParentRelation(): void
@@ -220,10 +221,10 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $this->assertCount(1, $c->pivoted);
         $this->assertCount(0, $d->pivoted);
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->pivoted);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->pivoted);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $c->pivoted);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $d->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $c->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $d->pivoted);
 
         $this->assertTrue($a->pivoted->hasPivot($a->pivoted[0]));
         $this->assertTrue($a->pivoted->hasPivot($a->pivoted[1]));

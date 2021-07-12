@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Node;
@@ -11,7 +12,6 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\TestLogger;
 use Cycle\ORM\Transaction;

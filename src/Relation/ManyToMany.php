@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
+use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
+use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
@@ -12,8 +14,6 @@ use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
-use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
 use Cycle\ORM\Select\RootLoader;

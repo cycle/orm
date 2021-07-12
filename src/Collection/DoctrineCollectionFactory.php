@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Collection;
 
-use Cycle\ORM\Relation\Pivoted\PivotedCollection;
-use Cycle\ORM\Relation\Pivoted\PivotedStorage;
+use Cycle\ORM\Collection\Pivoted\PivotedCollection;
+use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 

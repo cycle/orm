@@ -78,7 +78,7 @@ abstract class ManyToManyRelationTest extends BaseTest
     public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $u->tags);
+        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $u->tags);
     }
 
     public function testLoadRelation(): void
@@ -211,8 +211,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
+        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $b->tags);
 
         $this->assertTrue($a->tags->hasPivot($a->tags[0]));
         $this->assertTrue($a->tags->hasPivot($a->tags[1]));
@@ -277,8 +277,8 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $this->save($u);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u = $selector->load('tags')->wherePK(3)->fetchOne();
+        $u = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame('many@email.com', $u->email);
         $this->assertCount(2, $u->tags);
@@ -300,9 +300,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
         $u->tags->setPivot($t, ['as' => 'super']);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
@@ -327,18 +325,14 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
         $u->tags->setPivot($t, ['as' => 'super']);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
         $this->assertNumWrites(0);
     }
 
@@ -403,21 +397,11 @@ abstract class ManyToManyRelationTest extends BaseTest
         $b->tags->setPivot($t, $pc);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
+        $this->save($a, $b);
         $this->assertNumWrites(6);
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-
+        $this->save($a, $b);
         $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);

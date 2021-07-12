@@ -169,8 +169,8 @@ abstract class HasManyConstrainTest extends BaseTest
     public function testConstrainOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
+            Schema::SCOPE => new Select\QueryConstrain([], ['@.level' => 'ASC']),
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]]
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();

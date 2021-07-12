@@ -14,6 +14,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\SourceInterface;
@@ -124,7 +125,6 @@ abstract class DatabaseMapper implements MapperInterface
     {
         $delete = new Delete($this->source->getDatabase(), $this->source->getTable(), $state, [$this, 'mapColumns']);
         $state->setStatus(Node::SCHEDULED_DELETE);
-        $state->decClaim();
 
         $delete->waitScope(...$this->primaryKeys);
         $fromData = $node->getInitialData();

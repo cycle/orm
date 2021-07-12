@@ -6,8 +6,8 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
@@ -26,14 +26,14 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         if ($tuple->status < Tuple::STATUS_WAITED) {
             return true;
         }
-        // todo $tuple->waitKeys ?
 
-        if (array_intersect($this->innerKeys, $tuple->state->getWaitContext()) !== []) {
+        if ($tuple->status < Tuple::STATUS_PREPROCESSED && array_intersect($this->innerKeys, $tuple->state->getWaitingFields(false)) !== []) {
             return true;
         }
         // Check
         $values = [];
-        $data = $tuple->node->getChanges();
+        // $data = $tuple->node->getChanges();
+        $data = $tuple->node->getData();
         foreach ($this->innerKeys as $innerKey) {
             if (!isset($data[$innerKey])) {
                 return false;
@@ -41,7 +41,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $values[$innerKey] = $data[$innerKey];
         }
 
-        $tuple->node->setRelation($this->getName(), $this->init($tuple->node, $values)[0]);
+        $tuple->state->setRelation($this->getName(), new Reference($this->target, $values));
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         return true;
     }
@@ -54,14 +54,22 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
         $related = $tuple->state->getRelation($this->getName());
-        $related = $this->extract($related);
 
         if ($related === null) {
             if (!$this->isNullable()) {
-                if ($this->checkNullValuePossibility($tuple)) {
-                    return;
+                // set null unchanged fields
+                $changes = $tuple->state->getChanges();
+                foreach ($this->innerKeys as $innerKey) {
+                    if (!isset($changes[$innerKey])) {
+                        $tuple->state->register($innerKey, null);
+                    }
                 }
-                throw new NullException("Relation {$this} can not be null.");
+                $this->registerWaitingFields($tuple->state);
+
+                // if ($this->checkNullValuePossibility($tuple)) {
+                    return;
+                // }
+                // throw new NullException("Relation {$this} can not be null.");
             }
 
             if ($original !== null) {
@@ -74,8 +82,9 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
-        if ($related instanceof PromiseOne && $related->__loaded()) {
-            $related = $related->__resolve();
+        $this->registerWaitingFields($tuple->state);
+        if ($related instanceof ReferenceInterface && $this->resolve($related, false) !== null) {
+            $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
@@ -95,20 +104,19 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
         $node = $tuple->node;
         $related = $tuple->state->getRelation($this->getName());
-        $related = $this->extract($related);
 
         if ($related === null && !$this->isNullable()) {
             if ($this->checkNullValuePossibility($tuple)) {
                 return;
             }
-            throw new NullException("Relation {$this} can not be null.");
+            throw new NullException(sprintf('Relation `%s`.%s can not be null.', $node->getRole(), (string)$this));
         }
-        if ($related instanceof PromiseOne && $related->__loaded()) {
-            $related = $related->__resolve();
+        if ($related instanceof ReferenceInterface && $related->hasValue()) {
+            $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }
         if ($related instanceof ReferenceInterface) {
-            $scope = $related->__scope();
+            $scope = $related->getScope();
             if (array_intersect($this->outerKeys, array_keys($scope))) {
                 foreach ($this->outerKeys as $i => $outerKey) {
                     $node->register($this->innerKeys[$i], $scope[$outerKey]);
@@ -128,7 +136,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
     private function shouldPull(Tuple $tuple, Tuple $rTuple): bool
     {
-        if ($rTuple->status <= Tuple::STATUS_PROPOSED || count(array_intersect($this->outerKeys, $rTuple->waitKeys)) > 0) {
+        if ($rTuple->status <= Tuple::STATUS_PROPOSED || count(array_intersect($this->outerKeys, $rTuple->state->getWaitingFields())) > 0) {
             return false;
         }
         // Check bidirected relation: when related entity has been removed from HasSome relation

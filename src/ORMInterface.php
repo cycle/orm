@@ -6,7 +6,8 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
@@ -32,14 +33,14 @@ interface ORMInterface extends SourceProviderInterface
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      */
-    public function make(string $role, array $data = [], int $node = Node::NEW): ?object;
+    public function make(string $role, array $data = [], int $status = Node::NEW): ?object;
 
     /**
      * Promise object reference, proxy or object from memory heap.
      *
-     * @return ReferenceInterface|mixed|null
+     * @return ReferenceInterface|object
      */
-    public function promise(string $role, array $scope);
+    public function promise(string $role, array $scope): object;
 
     /**
      * Get factory for relations, mappers and etc.

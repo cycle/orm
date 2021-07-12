@@ -198,9 +198,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
         $u->tags->add($tag);
 
         $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($tag);
-        $t->run();
+        $this->save($tag);
         $this->assertNumWrites(3);
     }
 }

@@ -8,14 +8,12 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\Pivoted\PivotedCollection;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\RbacItemAbstract;
 use Cycle\ORM\Tests\Fixtures\RbacPermission;
 use Cycle\ORM\Tests\Fixtures\RbacRole;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
 abstract class ManyToManySingleEntityTest extends BaseTest
 {
@@ -62,6 +60,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
                             Relation::OUTER_KEY => 'name',
                             Relation::THROUGH_INNER_KEY => 'child',
                             Relation::THROUGH_OUTER_KEY => 'parent',
+                            Relation::HANDSHAKE => 'children',
                         ],
                     ],
                     'children' => [
@@ -74,6 +73,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
                             Relation::OUTER_KEY => 'name',
                             Relation::THROUGH_INNER_KEY => 'parent',
                             Relation::THROUGH_OUTER_KEY => 'child',
+                            Relation::HANDSHAKE => 'parents',
                         ],
                     ],
                 ],
@@ -112,7 +112,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
             ->wherePK('superAdmin')->fetchOne();
 
         self::assertInstanceOf(RbacRole::class, $fetchedRole);
-        $x = $fetchedRole->children->toArray();
+        $fetchedRole->children;
         self::assertCount(1, $fetchedRole->children);
         self::assertInstanceOf(RbacPermission::class, $fetchedRole->children->first());
         self::assertSame('writeUser', $fetchedRole->children->first()->name);
@@ -146,7 +146,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $this->save($fetchedRole);
 
         $fetchedRole->children->add($fetchedPermission);
-        // todo Failed with error `Call to undefined method Cycle\ORM\Relation\Pivoted\PivotedPromise::add()`
+        // todo Failed with error `Call to undefined method Cycle\ORM\Reference\Reference::add()`
         // Should be solved with proxy task
         $fetchedPermission->parents->add($fetchedRole);
 

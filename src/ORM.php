@@ -8,7 +8,7 @@ use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\Reference;
+use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Select\SourceInterface;
 
 use function count;
@@ -19,8 +19,6 @@ use function count;
 final class ORM implements ORMInterface
 {
     private FactoryInterface $factory;
-
-    private ?PromiseFactoryInterface $promiseFactory = null;
 
     private HeapInterface $heap;
 
@@ -40,8 +38,10 @@ final class ORM implements ORMInterface
     /** @var SourceInterface[] */
     private array $sources = [];
 
-    public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
-    {
+    public function __construct(
+        FactoryInterface $factory,
+        SchemaInterface $schema = null
+    ) {
         $this->factory = $factory;
         $this->schema = $schema ?? new Schema([]);
 
@@ -78,7 +78,13 @@ final class ORM implements ORMInterface
 
             $class = get_class($entity);
             if (!$this->schema->defines($class)) {
-                throw new ORMException("Unable to resolve role of `$class`");
+                // todo: redesign
+                // temporary solution for proxy objects
+                $parentClass = get_parent_class($entity);
+                if (substr($parentClass, -6) === ' Proxy' && !$this->schema->defines($parentClass)) {
+                    throw new ORMException("Unable to resolve role of `$class`.");
+                }
+                $class = $parentClass;
             }
 
             $entity = $class;
@@ -103,51 +109,46 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    public function make(string $role, array $data = [], int $node = Node::NEW): ?object
+    public function make(string $role, array $data = [], int $status = Node::NEW): ?object
     {
-        $m = $this->getMapper($role);
-
-        // unique entity identifier
-        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-        if (is_array($pk)) {
-            $ids = [];
-            foreach ($pk as $key) {
-                if (!isset($data[$key])) {
-                    $ids = null;
-                    break;
+        $relMap = $this->getRelationMap($role);
+        $mapper = $this->getMapper($role);
+        if ($status !== Node::NEW) {
+            // unique entity identifier
+            $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+            if (is_array($pk)) {
+                $ids = [];
+                foreach ($pk as $key) {
+                    if (!isset($data[$key])) {
+                        $ids = null;
+                        break;
+                    }
+                    $ids[$key] = $data[$key];
                 }
-                $ids[$key] = $data[$key];
+            } else {
+                $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
             }
-        } else {
-            $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
-        }
 
-        if ($node !== Node::NEW && $ids !== null) {
-            $e = $this->heap->find($role, $ids);
+            if ($ids !== null) {
+                $e = $this->heap->find($role, $ids);
 
-            if ($e !== null) {
-                $node = $this->heap->get($e);
+                if ($e !== null) {
+                    $node = $this->heap->get($e);
+                    $data = $relMap->init($node, $data);
 
-                // new set of data and relations always overwrite entity state
-                return $m->hydrate(
-                    $e,
-                    $this->getRelationMap($role)->init($node, $data)
-                );
+                    return $mapper->hydrate($e, $data);
+                }
             }
         }
 
-        // init entity class and prepared (typecasted) data
-        [$e, $prepared] = $m->init($data);
+        $node = new Node($status, $data, $role);
+        $e = $mapper->init($data);
 
-        $nodeObject = new Node($node, $prepared, $m->getRole());
+        /** Entity should be attached before {@see RelationMap::init()} running */
+        $this->heap->attach($e, $node, $this->getIndexes($role));
 
-        $this->heap->attach($e, $nodeObject, $this->getIndexes($m->getRole()));
-
-        // hydrate entity with it's data, relations and proxies
-        return $m->hydrate(
-            $e,
-            $this->getRelationMap($role)->init($nodeObject, $prepared)
-        );
+        $data = $relMap->init($node, $data);
+        return $mapper->hydrate($e, $data);
     }
 
     public function withFactory(FactoryInterface $factory): ORMInterface
@@ -200,7 +201,7 @@ final class ORM implements ORMInterface
             return $this->mappers[$role];
         }
 
-        return $this->mappers[$role] = $this->factory->mapper($this, $this->schema, $role);
+        return $this->mappers[$role] = $this->factory->mapper($this, $role);
     }
 
     public function getRepository($entity): RepositoryInterface
@@ -229,20 +230,6 @@ final class ORM implements ORMInterface
         return $this->sources[$role] = $this->factory->source($this, $this->schema, $role);
     }
 
-    /**
-     * Overlay existing promise factory.
-     */
-    public function withPromiseFactory(PromiseFactoryInterface $promiseFactory = null): self
-    {
-        $orm = clone $this;
-        $orm->promiseFactory = $promiseFactory;
-
-        return $orm;
-    }
-
-    /**
-     * Returns references by default.
-     */
     public function promise(string $role, array $scope): object
     {
         if (count($scope) === 1) {
@@ -252,15 +239,13 @@ final class ORM implements ORMInterface
             }
         }
 
-        if ($this->promiseFactory !== null) {
-            return $this->promiseFactory->promise($this, $role, $scope);
-        }
-
         return new Reference($role, $scope);
     }
 
     /**
      * Get list of keys entity must be indexed in a Heap by.
+     *
+     * todo: deduplicate with {@see \Cycle\ORM\Transaction::getIndexes}
      */
     private function getIndexes(string $role): array
     {

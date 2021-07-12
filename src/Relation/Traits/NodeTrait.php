@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 
 trait NodeTrait
 {
@@ -20,12 +19,12 @@ trait NodeTrait
             return null;
         }
 
-        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
-            $entity = $entity->__resolve();
-        }
-
         if ($entity instanceof ReferenceInterface) {
-            return new Node(Node::PROMISED, $entity->__scope(), $entity->__role());
+            if ($entity->hasValue()) {
+                $entity = $entity->getValue();
+            } else {
+                return new Node(Node::PROMISED, $entity->getScope(), $entity->getRole());
+            }
         }
 
         /** @var Node|null $node */

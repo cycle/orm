@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\LoaderInterface;
@@ -29,17 +31,30 @@ final class Factory implements FactoryInterface
         Schema::REPOSITORY => Repository::class,
         Schema::SOURCE     => Source::class,
         Schema::MAPPER     => Mapper::class,
-        Schema::CONSTRAIN  => null,
+        Schema::SCOPE      => null,
     ];
+
+    /** @var array<string, CollectionFactoryInterface> */
+    private array $collectionFactoryAlias = [];
+
+    /**
+     * @var array<string, CollectionFactoryInterface>
+     * @psalm-var array<class-string, CollectionFactoryInterface>
+     */
+    private array $collectionFactoryInterface = [];
+
+    private CollectionFactoryInterface $defaultCollectionFactory;
 
     public function __construct(
         DatabaseProviderInterface $dbal,
         RelationConfig $config = null,
-        CoreFactory $factory = null
+        CoreFactory $factory = null,
+        CollectionFactoryInterface $defaultCollectionFactory = null
     ) {
         $this->dbal = $dbal;
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
+        $this->defaultCollectionFactory = $defaultCollectionFactory ?? new DoctrineCollectionFactory();
     }
 
     public function make(
@@ -49,15 +64,13 @@ final class Factory implements FactoryInterface
         return $this->factory->make($alias, $parameters);
     }
 
-    public function mapper(
-        ORMInterface $orm,
-        SchemaInterface $schema,
-        string $role
-    ): MapperInterface {
+    public function mapper(ORMInterface $orm, string $role): MapperInterface
+    {
+        $schema = $orm->getSchema();
         $class = $schema->define($role, Schema::MAPPER) ?? $this->defaults[Schema::MAPPER];
 
         if (!is_subclass_of($class, MapperInterface::class)) {
-            throw new TypecastException($class . ' does not implement ' . MapperInterface::class);
+            throw new TypecastException(sprintf('%s does not implement %s.', $class, MapperInterface::class));
         }
 
         return $this->factory->make(
@@ -82,11 +95,32 @@ final class Factory implements FactoryInterface
             $this->factory,
             [
                 'orm'    => $orm,
+                'role'   => $role,
                 'name'   => $relation,
                 'target' => $definition[Relation::TARGET],
                 'schema' => $definition[Relation::SCHEMA]
             ]
         );
+    }
+
+    public function collection(
+        ORMInterface $orm,
+        string $type = null,
+        array $options = null
+    ): CollectionFactoryInterface {
+        if ($type === null) {
+            return $this->defaultCollectionFactory;
+        }
+        if (array_key_exists($type, $this->collectionFactoryAlias)) {
+            return $this->collectionFactoryAlias[$type];
+        }
+        // Find by interface
+        foreach ($this->collectionFactoryInterface as $interface => $factory) {
+            if (is_subclass_of($type, $interface, true)) {
+                return $this->collectionFactoryAlias[$type] = $factory->withCollectionClass($type);
+            }
+        }
+        return $this->collectionFactoryAlias[$type] = $this->make($type);
     }
 
     public function relation(
@@ -101,11 +135,13 @@ final class Factory implements FactoryInterface
         return $this->config->getRelation($type)->resolve(
             $this->factory,
             [
-                'orm'    => $orm,
-                'role'   => $role,
-                'name'   => $relation,
-                'target' => $relSchema[Relation::TARGET],
-                'schema' => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
+                'orm'     => $orm,
+                'role'    => $role,
+                'name'    => $relation,
+                'target'  => $relSchema[Relation::TARGET],
+                'schema'  => $relSchema[Relation::SCHEMA]
+                    + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null]
+                    + [Relation::COLLECTION_TYPE => $relSchema[Relation::COLLECTION_TYPE] ?? null],
             ]
         );
     }
@@ -173,12 +209,25 @@ final class Factory implements FactoryInterface
     /**
      * Add default classes for resolve
      */
-    public function withDefaultSchemaClasses(array $defaults): FactoryInterface
+    public function withDefaultSchemaClasses(array $defaults): self
     {
         $clone = clone $this;
 
         $clone->defaults = $defaults + $this->defaults;
 
+        return $clone;
+    }
+
+    public function withCollectionFactory(
+        string $alias,
+        CollectionFactoryInterface $factory,
+        string $interface = null
+    ): self {
+        $clone = clone $this;
+        $clone->collectionFactoryAlias[$alias] = $factory;
+        if ($interface !== null) {
+            $clone->collectionFactoryInterface[$interface] = $factory;
+        }
         return $clone;
     }
 }

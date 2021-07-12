@@ -6,8 +6,7 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseOne;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
@@ -26,6 +25,12 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $related = $tuple->state->getRelation($this->getName());
         $original = $node->getRelation($this->getName());
 
+        if ($related instanceof ReferenceInterface) {
+            if ($related->hasValue() || $this->resolve($related, false) !== null) {
+                $related = $related->getValue();
+                $tuple->state->setRelation($this->getName(), $related);
+            }
+        }
         if ($related === null) {
             // Original is not null
             if ($original !== null) {
@@ -36,15 +41,11 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 }
             }
 
+            $node->setRelation($this->getName(), null);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
-        if ($related instanceof PromiseOne) {
-            if ($related->__loaded()) {
-                $related = $related->__resolve();
-                $tuple->state->setRelation($this->getName(), $related);
-            }
-        }
+        $this->registerWaitingFields($tuple->state, false);
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
         if ($related instanceof ReferenceInterface) {
             return;
@@ -60,16 +61,17 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $node = $tuple->node;
         $related = $tuple->state->getRelation($this->getName());
 
-        if ($related instanceof PromiseOne && $related->__loaded()) {
-            $related = $related->__resolve();
+        if ($related instanceof ReferenceInterface && ($related->hasValue() || $this->resolve($related, false) !== null)) {
+            $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }
         if ($related instanceof ReferenceInterface) {
-            $scope = $related->__scope();
+            $scope = $related->getScope();
             if (array_intersect($this->outerKeys, array_keys($scope))) {
                 foreach ($this->outerKeys as $i => $outerKey) {
                     $node->register($this->innerKeys[$i], $scope[$outerKey]);
                 }
+                $node->setRelation($this->getName(), $related);
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
@@ -92,9 +94,12 @@ class RefersTo extends AbstractRelation implements DependencyInterface
          * {@see \Cycle\ORM\Relation\BelongsTo::checkNullValuePossibility()}
          */
         if ($rTuple->status === Tuple::STATUS_PROCESSED
-            || ($rTuple->status > Tuple::STATUS_PREPARING && $rTuple->state->getStatus() !== node::NEW && array_intersect($this->outerKeys, $rTuple->waitKeys) === [])
+            || ($rTuple->status > Tuple::STATUS_PREPARING
+                && $rTuple->state->getStatus() !== node::NEW
+                && array_intersect($this->outerKeys, $rTuple->state->getWaitingFields()) === [])
         ) {
             $this->pullValues($node, $rTuple->node);
+            $node->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }

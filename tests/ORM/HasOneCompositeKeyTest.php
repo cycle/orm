@@ -165,9 +165,10 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
     public function testAccessEntities(): void
     {
-        $selector = new Select($this->orm, CompositePK::class);
-        $selector->load('child_entity');
-        $result = $selector->fetchAll();
+
+        $result = (new Select($this->orm, CompositePK::class))
+            ->load('child_entity')
+            ->fetchAll();
 
         $this->assertInstanceOf(CompositePK::class, $result[0]);
         $this->assertInstanceOf(CompositePKChild::class, $result[0]->child_entity);
@@ -202,8 +203,9 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
     public function testMountRelation(): void
     {
-        $selector = new Select($this->orm, CompositePK::class);
-        $e = $selector->where(['key1' => 2, 'key2' => 2])->fetchOne();
+        $e = (new Select($this->orm, CompositePK::class))
+            ->where(['key1' => 2, 'key2' => 2])
+            ->fetchOne();
 
         $e->child_entity = new CompositePKChild();
         $e->child_entity->key1 = 88;
@@ -212,8 +214,9 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
         $this->save($e);
 
-        $selector = (new Select($this->orm, CompositePK::class))->where(['key1' => 2, 'key2' => 2]);
-        $selector->load('child_entity');
+        $selector = (new Select($this->orm, CompositePK::class))
+            ->where(['key1' => 2, 'key2' => 2])
+            ->load('child_entity');
 
         $this->assertEquals([
             [
@@ -315,9 +318,9 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $e->child_entity = null;
         $this->assertSame(3, (new Select($this->orm, CompositePKChild::class))->count());
 
-        // $this->captureWriteQueries();
+        $this->captureWriteQueries();
         $this->save($e);
-        // $this->assertNumWrites(1);
+        $this->assertNumWrites(1);
 
         /** @var CompositePK $e */
         $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-use Cycle\ORM\Relation\Pivoted\PivotedCollectionInterface;
+use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 
 class Post implements ImagedInterface
 {
+    public $id;
     public $user;
     public $title;
     public $content;

@@ -8,7 +8,7 @@ use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
-interface SameRowRelationInterface extends RelationInterface
+interface SameRowRelationInterface extends ActiveRelationInterface
 {
     public function queue(Pool $pool, Tuple $tuple, StoreCommandInterface $command = null): void;
 }

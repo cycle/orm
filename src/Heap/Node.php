@@ -7,6 +7,8 @@ namespace Cycle\ORM\Heap;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
+use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\RelationMap;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
@@ -142,20 +144,27 @@ final class Node implements ProducerInterface, ConsumerInterface
     /**
      * Sync the point state and return data diff.
      */
-    public function syncState(): array
+    public function syncState(RelationMap $relMap): array
     {
         if ($this->state === null) {
             return [];
         }
 
         $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
+
         foreach ($this->state->getRelations() as $name => $relation) {
+            if (isset($this->relations[$name]) XOR $this->state->getRelation($name) !== null) {
+                $changes[$name] = $relation instanceof ReferenceInterface
+                    ? $relation
+                    : $relMap->getRelations()[$name]->collect($relation);
+            }
             $this->setRelation($name, $relation);
         }
 
         // DELETE handled separately
         $this->status = self::MANAGED;
         $this->data = $this->state->getTransactionData();
+        $this->state->__destruct();
         $this->state = null;
         $this->relationStatus = [];
 
@@ -183,7 +192,11 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public function resetState(): void
     {
+        if (isset($this->state)) {
+            $this->state->__destruct();
+        }
         $this->state = null;
+        $this->relationStatus = [];
     }
 
     /**

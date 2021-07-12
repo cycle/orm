@@ -249,7 +249,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        $this->assertSame('user1', $u->credentials->__resolve()->username);
+        $this->assertSame('user1', $u->credentials->username);
     }
 
     public function testChangePromise(): void
@@ -257,7 +257,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        $u->credentials->__resolve()->username = 'user3';
+        $u->credentials->username = 'user3';
 
         $this->captureWriteQueries();
         $t = new Transaction($this->orm);
@@ -294,7 +294,8 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $u2 = $selector->orderBy('id', 'ASC')->wherePK(2)->fetchOne();
 
-        $u->credentials = $u2->credentials;
+        $u2Data = $this->extractEntity($u2);
+        $u->credentials = $u2Data['credentials'];
 
         $this->captureWriteQueries();
         $this->captureReadQueries();
@@ -302,14 +303,14 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(1);
         $this->assertNumReads(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+        $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u3->id);
         $this->assertSame('user2', $u3->credentials->username);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u4 = $selector->load('credentials')->wherePK($u2->id)->fetchOne();
+        $u4 = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
         $this->assertEquals($u2->id, $u4->id);

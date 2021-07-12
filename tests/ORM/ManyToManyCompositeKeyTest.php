@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
@@ -173,7 +174,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
     public function testInitRelation(): void
     {
         $u = $this->orm->make(CompositePK::class);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $u->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $u->pivoted);
     }
 
     public function testLoadParentRelation(): void
@@ -220,10 +221,10 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $this->assertCount(1, $c->pivoted);
         $this->assertCount(0, $d->pivoted);
 
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->pivoted);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->pivoted);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $c->pivoted);
-        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $d->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $c->pivoted);
+        $this->assertInstanceOf(PivotedCollectionInterface::class, $d->pivoted);
 
         $this->assertTrue($a->pivoted->hasPivot($a->pivoted[0]));
         $this->assertTrue($a->pivoted->hasPivot($a->pivoted[1]));
@@ -316,7 +317,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $u->pivoted->add($t);
         $u->pivoted->setPivot($t, ['as' => 'super']);
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = (new Select($this->orm, CompositePK::class))
@@ -325,7 +326,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->fetchOne();
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
         $this->assertNumWrites(0);
     }
 
@@ -399,14 +400,14 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $b->pivoted->setPivot($t, $pc);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($b)->run();
+        $this->save($a, $b);
         // 3 Inserts (2 pivots, 1 child)
         // 3 Deletes (1 from $a, 2 from $b)
         // 1 Update
         $this->assertNumWrites(7);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($b)->run();
+        $this->save($a, $b);
         $this->assertNumWrites(0);
 
         /**

@@ -6,14 +6,14 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\SourceInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 
-abstract class AbstractRelation implements RelationInterface
+abstract class AbstractRelation implements ActiveRelationInterface
 {
     use Relation\Traits\NodeTrait;
 
@@ -71,16 +71,12 @@ abstract class AbstractRelation implements RelationInterface
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
-    public function init(Node $node, array $data): array
+    // todo move to OneToOne trait
+    public function init(Node $node, array $data)
     {
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
-
-        return [$item, $item];
-    }
-
-    public function extract($data)
-    {
-        return $data;
+        $node->setRelation($this->getName(), $item);
+        return $item;
     }
 
     protected function isNullable(): bool
@@ -118,20 +114,37 @@ abstract class AbstractRelation implements RelationInterface
      *
      * @return mixed|null
      */
-    protected function resolve(ReferenceInterface $reference)
+    public function resolve(ReferenceInterface $reference, bool $load)
     {
-        if ($reference instanceof PromiseInterface) {
-            return $reference->__resolve();
+        if ($reference->hasValue()) {
+            return $reference->getValue();
         }
 
-        return $this->orm->get($reference->__role(), $reference->__scope(), true);
+        $result = $this->orm->get($reference->getRole(), $reference->getScope(), $load);
+        if ($load === true || $result !== null) {
+            $reference->setValue($result);
+        }
+        return $result;
     }
 
     protected function isResolved(ReferenceInterface $reference): bool
     {
-        if ($reference instanceof PromiseInterface) {
-            return $reference->__loaded();
+        // if ($reference instanceof PromiseInterface) {
+        return $reference->hasValue();
+        // }
+
+        // return false;
+    }
+
+    public function getSchema(): array
+    {
+        return $this->schema;
+    }
+
+    protected function registerWaitingFields(State $state, bool $required = true): void
+    {
+        foreach ($this->innerKeys as $key) {
+            $state->waitField($key, $required);
         }
-        return false;
     }
 }

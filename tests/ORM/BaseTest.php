@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Promise\Collection\CollectionPromise;
-use Cycle\ORM\Promise\PromiseFactory;
-use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\Pivoted\PivotedCollectionPromise;
-use Cycle\ORM\Relation\Pivoted\PivotedStorage;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\TestLogger;
 use Cycle\ORM\Transaction;
@@ -95,9 +92,6 @@ abstract class BaseTest extends TestCase
                 RelationConfig::getDefault()
             )
         );
-
-        // use promises by default
-        $this->orm = $this->orm->withPromiseFactory(new PromiseFactory());
     }
 
     /**
@@ -267,6 +261,16 @@ abstract class BaseTest extends TestCase
         $tr->run();
     }
 
+    /**
+     * Extract all data from Entity using mapper
+     *
+     * @return array<string, ReferenceInterface|mixed>
+     */
+    protected function extractEntity(object $entity): array
+    {
+        return $this->orm->getMapper($entity)->extract($entity);
+    }
+
     protected function assertSQL($expected, $given): void
     {
         $expected = preg_replace("/[ \s\'\[\]\"]+/", ' ', $expected);
@@ -332,34 +336,25 @@ abstract class BaseTest extends TestCase
 
             $rValue = $relations[$name];
 
-            if ($rValue instanceof PivotedStorage || $rValue instanceof \Cycle\ORM\Relation\Pivoted\PivotedPromise) {
-                continue;
-            }
-
             if ($rValue === $eValue) {
                 return;
             }
 
-            if ($eValue instanceof CollectionPromise || $eValue instanceof PivotedCollectionPromise) {
-                if (!$eValue->isInitialized()) {
-                    $eValue = $eValue->getPromise();
-                } else {
-                    // normalizing
-                    if ($rValue instanceof PromiseInterface && $rValue->__loaded()) {
-                        $rValue = $rValue->__resolve();
-                    }
-                }
+            if ($rValue instanceof ReferenceInterface && $rValue->hasValue()) {
+                $rValue = $rValue->getValue();
+            }
+
+            if ($rValue instanceof PivotedStorage) {
+                $rValue = $rValue->getElements();
             }
 
             // extract Node collection
             if ($rValue instanceof Collection) {
-                $rValue = $rValue->toArray();
+                $rValue = array_values($rValue->toArray());
+            }
 
-                // $this->assertInstanceOf(
-                //     Collection::class,
-                //     $eValue,
-                //     "Node and Entity are not in sync `{$eName}`.`{$name}` (Collection type)"
-                // );
+            if ($eValue instanceof ReferenceInterface && $eValue->hasValue()) {
+                $eValue = $eValue->getValue();
             }
 
             // extract Entity collection
@@ -374,11 +369,24 @@ abstract class BaseTest extends TestCase
                 }
             }
 
-            $this->assertEquals(
-                $rValue,
-                $eValue,
-                "Entity and State are not in sync `{$eName}`.`{$name}`"
-            );
+            if ($rValue instanceof ReferenceInterface && $eValue instanceof ReferenceInterface) {
+                $this->assertEquals(
+                    $rValue->getScope(),
+                    $eValue->getScope(),
+                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference scope)"
+                );
+                $this->assertEquals(
+                    $rValue->getRole(),
+                    $eValue->getRole(),
+                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference role)"
+                );
+            } else {
+                $this->assertEquals(
+                    $rValue,
+                    $eValue,
+                    "Entity and State are not in sync `{$eName}`.`{$name}`"
+                );
+            }
         }
     }
 }

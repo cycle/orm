@@ -18,7 +18,6 @@ class SoftDeletedMapper extends Mapper
         $cmd = $this->queueUpdate($entity, $node, $state);
 
         $state->setStatus(Node::SCHEDULED_DELETE);
-        $state->decClaim();
 
         return $cmd;
     }

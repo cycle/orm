@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Relation\ActiveRelationInterface;
 use Cycle\ORM\Relation\DependencyInterface;
+use Cycle\ORM\Relation\ManyToMany;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\SameRowRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
@@ -18,7 +20,7 @@ use function count;
  */
 final class RelationMap
 {
-    /** @var RelationInterface[] */
+    /** @var ActiveRelationInterface[] */
     private array $innerRelations;
 
     /** @var DependencyInterface[] */
@@ -61,6 +63,24 @@ final class RelationMap
             // $schema = $relationSchema[Relation::SCHEMA];
             // $through = $this->schema->resolveAlias($schema[Relation::THROUGH_ENTITY]);
             # todo: SHADOW_HAS_MANY
+            foreach ($this->slaves as $name => $relation) {
+                if (!$relation instanceof ManyToMany || $relation->getTarget() !== $role) {
+                    continue;
+                }
+                $schema = $relation->getSchema();
+                // Pivot entity should be same
+                if ($relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY] !== $schema[Relation::THROUGH_ENTITY]) {
+                    continue;
+                }
+                // Same keys
+                if ((array)$relationSchema[Relation::SCHEMA][Relation::INNER_KEY] !== (array)$schema[Relation::OUTER_KEY]
+                    || (array)$relationSchema[Relation::SCHEMA][Relation::OUTER_KEY] !== (array)$schema[Relation::INNER_KEY]) {
+                    continue;
+                }
+                if ($relation->getHandshake() === null) {
+                    $relation->setHandshake($container);
+                }
+            }
             return;
         }
         if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {
@@ -106,8 +126,9 @@ final class RelationMap
                     continue;
                 }
 
-                [$data[$name], $orig] = $relation->initPromise($node);
-                $node->setRelation($name, $orig);
+                // $data[$name] = $relation->initDeferred($node);
+                $data[$name] = $relation->initReference($node);
+                $node->setRelation($name, $data[$name]);
                 continue;
             }
 
@@ -119,8 +140,7 @@ final class RelationMap
             }
 
             // init relation for the entity and for state and the same time
-            [$data[$name], $orig] = $relation->init($node, $item);
-            $node->setRelation($name, $orig);
+            $data[$name] = $relation->init($node, $item);
         }
 
         return $data;
@@ -133,6 +153,7 @@ final class RelationMap
     {
         return $this->slaves;
     }
+
     /**
      * @return DependencyInterface[]
      */
@@ -140,11 +161,20 @@ final class RelationMap
     {
         return $this->dependencies;
     }
+
     /**
      * @return SameRowRelationInterface[]
      */
     public function getEmbedded(): array
     {
         return $this->embedded;
+    }
+
+    /**
+     * @return ActiveRelationInterface[]
+     */
+    public function getRelations(): array
+    {
+        return $this->innerRelations;
     }
 }

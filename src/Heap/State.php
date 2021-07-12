@@ -6,12 +6,9 @@ namespace Cycle\ORM\Heap;
 
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
-use Cycle\ORM\Heap\Traits\ClaimTrait;
-use Cycle\ORM\Heap\Traits\ContextTrait;
+use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
-use Cycle\ORM\Heap\Traits\VisitorTrait;
 use JetBrains\PhpStorm\ExpectedValues;
-use SplObjectStorage;
 
 /**
  * Current node state.
@@ -19,9 +16,7 @@ use SplObjectStorage;
 final class State implements ConsumerInterface, ProducerInterface
 {
     use RelationTrait;
-    use ClaimTrait;
-    use VisitorTrait;
-    use ContextTrait;
+    use WaitFieldTrait;
 
     private int $state;
 
@@ -34,9 +29,6 @@ final class State implements ConsumerInterface, ProducerInterface
 
     /** @var ConsumerInterface[] */
     private array $consumers = [];
-
-    /** @var SplObjectStorage[] */
-    private array $storage = [];
 
     public function __construct(
         #[ExpectedValues(valuesFromClass: Node::class)]
@@ -105,25 +97,6 @@ final class State implements ConsumerInterface, ProducerInterface
         return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
     }
 
-    /**
-     * Storage to store temporary cross entity links.
-     *
-     * @internal
-     */
-    public function getStorage(string $type): iterable
-    {
-        if (!isset($this->storage[$type])) {
-            $this->storage[$type] = new SplObjectStorage();
-        }
-
-        return $this->storage[$type];
-    }
-
-    public function setStorage(string $type, iterable $storage): void
-    {
-        $this->storage[$type] = $storage;
-    }
-
     public function forward(
         string $key,
         ConsumerInterface $consumer,
@@ -173,7 +146,7 @@ final class State implements ConsumerInterface, ProducerInterface
             $fresh = $oldValue != $value;
         }
         if ($fresh || $value !== null) {
-            $this->freeContext($key);
+            $this->freeWaitingField($key);
         }
 
         \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(
@@ -198,6 +171,11 @@ final class State implements ConsumerInterface, ProducerInterface
 
     public function isReady(): bool
     {
-        return $this->waitContext === [];
+        return $this->waitingFields === [];
+    }
+
+    public function __destruct()
+    {
+        unset($this->consumers, $this->relations);
     }
 }

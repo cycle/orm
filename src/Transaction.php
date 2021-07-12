@@ -10,8 +10,7 @@ use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Transaction\Pool;
@@ -97,8 +96,15 @@ final class Transaction implements TransactionInterface
     protected function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
-        foreach ($heap as $e) {
+        // $iterator = (clone $heap)->getIterator();
+        // foreach ($iterator as $e) {
+        $iterator = $heap->getIterator();
+        $iterator->rewind();
+        while ($iterator->valid()) {
+            $e = $iterator->current();
+            $iterator->next();
             // optimize to only scan over affected entities
+            /** @var Node $node */
             $node = $heap->get($e);
 
             if (!$node->hasState()) {
@@ -106,7 +112,7 @@ final class Transaction implements TransactionInterface
             }
 
             // marked as being deleted and has no external claims (GC like approach)
-            if (in_array($node->getStatus(), [Node::DELETED, Node::SCHEDULED_DELETE], true) && !$node->getState()->hasClaims()) {
+            if (in_array($node->getStatus(), [Node::DELETED, Node::SCHEDULED_DELETE], true)) {
                 $heap->detach($e);
                 continue;
             }
@@ -115,11 +121,10 @@ final class Transaction implements TransactionInterface
             $heap->attach($e, $node, $this->getIndexes($node->getRole()));
 
             // sync the current entity data with newly generated data
-            $syncData = $node->syncState();
-            $this->orm->getMapper($node->getRole())->hydrate(
-                $e,
-                $node->getRelations()
-                + $syncData);
+            $mapper = $this->orm->getMapper($node->getRole());
+            // $entityRelations = $mapper->fetchRelations($e);
+            $syncData = $node->syncState($this->orm->getRelationMap($node->getRole()));
+            $mapper->hydrate($e, $syncData);
         }
     }
 
@@ -146,8 +151,8 @@ final class Transaction implements TransactionInterface
          * @var Tuple $tuple
          */
         foreach ($pool as $entity => $tuple) {
-            if ($entity instanceof PromiseInterface && $entity->__loaded()) {
-                $entity = $entity->__resolve();
+            if ($entity instanceof ReferenceInterface && $entity->hasValue()) {
+                $entity = $entity->getValue();
                 if ($entity === null) {
                     \Cycle\ORM\Transaction\Pool::DEBUG AND print "pool: skip unresolved promise\n";
                     continue;
@@ -265,7 +270,7 @@ final class Transaction implements TransactionInterface
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
-                        $entityData = $tuple->mapper->extract($tuple->entity);
+                        $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
                         $tuple->state->setRelation($name, $entityData[$name] ?? null);
                         $relation->prepare($this->pool, $tuple);
                         $relationStatus = $tuple->node->getRelationStatus($relation->getName());
@@ -280,13 +285,13 @@ final class Transaction implements TransactionInterface
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
                 $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
                 \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
-                $waitKeys[] = $relation->getInnerKeys();
+                // $waitKeys[] = $relation->getInnerKeys();
             } else {
                 \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }
         }
 
-        $tuple->waitKeys = array_unique(array_merge(...$waitKeys));
+        // $tuple->waitKeys = array_unique(array_merge(...$waitKeys));
         return ($deferred ? self::RELATIONS_DEFERRED : 0) | ($resolved ? self::RELATIONS_RESOLVED : 0);
     }
 
@@ -301,6 +306,11 @@ final class Transaction implements TransactionInterface
         $transactData = $tuple->state->getTransactionData();
         $deferred = false;
         $resolved = true;
+        if ($tuple->status === Tuple::STATUS_PREPARING) {
+            // $entityData = $tuple->mapper->extract($tuple->entity);
+            // $relData = $tuple->mapper->extract($tuple->entity);
+            $relData = $tuple->mapper->fetchRelations($tuple->entity);
+        }
         foreach ($map->getSlaves() as $name => $relation) {
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             $className = "\033[33m" . substr(get_class($relation), strrpos(get_class($relation), '\\') + 1) . "\033[0m";
@@ -311,11 +321,12 @@ final class Transaction implements TransactionInterface
                 continue;
             }
 
-            $isWaitingKeys = count(array_intersect($relation->getInnerKeys(), $tuple->waitKeys)) > 0;
+            $isWaitingKeys = count(array_intersect($relation->getInnerKeys(), $tuple->state->getWaitingFields(true))) > 0;
             $hasChangedKeys = count(array_intersect($relation->getInnerKeys(), $changedFields)) > 0;
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
-                $entityData = $tuple->mapper->extract($tuple->entity);
-                $tuple->state->setRelation($name, $entityData[$name] ?? null);
+                // $relData ??= $tuple->mapper->extract($tuple->entity);
+                $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
+                $tuple->state->setRelation($name, $relData[$name] ?? null);
                 $relation->prepare(
                     $this->pool,
                     $tuple,
@@ -324,7 +335,7 @@ final class Transaction implements TransactionInterface
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             }
 
-            if ($relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
+            if ($relationStatus !== RelationInterface::STATUS_PREPARE && $relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
                 && !$hasChangedKeys
                 && count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === count($relation->getInnerKeys())
             ) {
@@ -460,6 +471,8 @@ final class Transaction implements TransactionInterface
 
     /**
      * Indexable node fields.
+     *
+     * todo: deduplicate with {@see \Cycle\ORM\ORM::getIndexes}
      */
     private function getIndexes(string $role): array
     {

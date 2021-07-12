@@ -337,8 +337,8 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
     {
         $this->expectException(NullException::class);
 
-        $s = new Select($this->orm, CompositePKChild::class);
-        $p = $s->wherePK([1, 1])->load(self::PARENT_CONTAINER)->fetchOne();
+        $p = (new Select($this->orm, CompositePKChild::class))
+            ->wherePK([1, 1])->load(self::PARENT_CONTAINER)->fetchOne();
         $p->parent = null;
 
         try {
@@ -450,6 +450,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
                         Relation::TYPE   => Relation::BELONGS_TO,
                         Relation::TARGET => CompositePK::class,
                         Relation::SCHEMA => [
+                            Relation::NULLABLE  => false,
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => ['parent_key1', 'parent_key2'],
                             Relation::OUTER_KEY => ['key1', 'key2'],

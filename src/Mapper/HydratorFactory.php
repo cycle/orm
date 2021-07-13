@@ -15,13 +15,15 @@ use ReflectionClass;
 
 class HydratorFactory
 {
-    private \GeneratedHydrator\Configuration $config;
+    private Configuration $config;
 
     public function __construct(Configuration $config)
     {
         $this->config = $config;
 
-        $this->includeGeneratedHydrators();
+        if ($config->isUsedFileWriteStrategy()) {
+            $this->includeGeneratedHydrators();
+        }
     }
 
     /**
@@ -78,7 +80,7 @@ class HydratorFactory
                 continue;
             }
 
-            include_once $this->config->getGeneratedClassesTargetDir() . DIRECTORY_SEPARATOR . $file;
+            require_once $this->config->getGeneratedClassesTargetDir() . DIRECTORY_SEPARATOR . $file;
         }
     }
 }

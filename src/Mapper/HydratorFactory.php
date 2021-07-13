@@ -22,7 +22,8 @@ class HydratorFactory
         $this->config = $config;
 
         if ($config->isUsedFileWriteStrategy()) {
-            $this->includeGeneratedHydrators();
+            // Autoload generated hydrators inside target dir
+            spl_autoload_register($this->config->getGeneratedClassAutoloader());
         }
     }
 
@@ -65,22 +66,5 @@ class HydratorFactory
         }
 
         return $hydratorClassName;
-    }
-
-    /**
-     * Scan generated hydrators inside target dir specified in the configuration
-     * and include them
-     */
-    private function includeGeneratedHydrators(): void
-    {
-        $dir = scandir($this->config->getGeneratedClassesTargetDir());
-
-        foreach ($dir as $file) {
-            if ($file === '.' || $file === '..' || $file === '.gitignore') {
-                continue;
-            }
-
-            require_once $this->config->getGeneratedClassesTargetDir() . DIRECTORY_SEPARATOR . $file;
-        }
     }
 }

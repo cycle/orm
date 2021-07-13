@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use CodeGenerationUtils\FileLocator\FileLocator;
+use CodeGenerationUtils\GeneratorStrategy\FileWriterGeneratorStrategy;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
@@ -208,6 +210,9 @@ abstract class BaseTest extends TestCase
         $container->bindSingleton(Configuration::class, function () {
             $config = new Configuration();
             $config->setGeneratedClassesTargetDir(__DIR__ . '/../../runtime');
+            $config->setGeneratorStrategy(new FileWriterGeneratorStrategy(
+                new FileLocator($config->getGeneratedClassesTargetDir())
+            ));
 
             return $config;
         });

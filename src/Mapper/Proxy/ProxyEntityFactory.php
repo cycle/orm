@@ -21,6 +21,7 @@ class ProxyEntityFactory
     private Instantiator $instantiator;
     private Closure $initializer;
     private HydratorFactory $hydratorFactory;
+    private array $hydratorCache = [];
 
     public function __construct(HydratorFactory $hydratorFactory, Instantiator $instantiator)
     {
@@ -42,7 +43,8 @@ class ProxyEntityFactory
         string $role,
         array $data,
         string $sourceClass
-    ): object {
+    ): object
+    {
         $relMap = $orm->getRelationMap($role);
         $class = array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
@@ -65,8 +67,11 @@ class ProxyEntityFactory
         string $role,
         object $entity,
         array $data
-    ): object {
-        $hydrator = $this->hydratorFactory->create(get_class($entity));
+    ): object
+    {
+        $class = get_class($entity);
+
+        $hydrator = $this->hydratorCache[$class] ??= $this->hydratorFactory->create($class);
 
         // new set of data and relations always overwrite entity state
         return $hydrator->hydrate($data, $entity);

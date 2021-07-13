@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper;
 
 use CodeGenerationUtils\Exception\InvalidGeneratedClassesDirectoryException;
-use CodeGenerationUtils\FileLocator\FileLocator;
-use CodeGenerationUtils\GeneratorStrategy\FileWriterGeneratorStrategy;
-use CodeGenerationUtils\GeneratorStrategy\GeneratorStrategyInterface;
 use CodeGenerationUtils\Visitor\ClassRenamerVisitor;
 use Cycle\ORM\Mapper\Hydrator\Configuration;
 use GeneratedHydrator\GeneratedHydrator;
@@ -20,16 +17,11 @@ class HydratorFactory
 {
     private \GeneratedHydrator\Configuration $config;
 
-    public function __construct(?GeneratorStrategyInterface $strategy = null)
+    public function __construct(Configuration $config)
     {
-        $strategy = $strategy ?? new FileWriterGeneratorStrategy(
-            new FileLocator(
-                sys_get_temp_dir()
-            )
-        );
+        $this->config = $config;
 
-        $this->config = new Configuration();
-        $this->config->setGeneratorStrategy($strategy);
+        $this->includeGeneratedHydrators();
     }
 
     /**
@@ -38,7 +30,6 @@ class HydratorFactory
     public function create(string $class): HydratorInterface
     {
         $this->config->setHydratedClassName($class);
-
         $hydratorClass = $this->getHydratorClass();
 
         return new $hydratorClass();
@@ -72,5 +63,22 @@ class HydratorFactory
         }
 
         return $hydratorClassName;
+    }
+
+    /**
+     * Scan generated hydrators inside target dir specified in the configuration
+     * and include them
+     */
+    private function includeGeneratedHydrators(): void
+    {
+        $dir = scandir($this->config->getGeneratedClassesTargetDir());
+
+        foreach ($dir as $file) {
+            if ($file === '.' || $file === '..' || $file === '.gitignore') {
+                continue;
+            }
+
+            include_once $this->config->getGeneratedClassesTargetDir() . DIRECTORY_SEPARATOR . $file;
+        }
     }
 }

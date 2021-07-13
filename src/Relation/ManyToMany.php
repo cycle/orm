@@ -131,7 +131,7 @@ class ManyToMany extends Relation\AbstractRelation
         $elements = [];
         $pivotData = new SplObjectStorage();
 
-        $iterator = new Iterator($this->orm, $this->target, $data);
+        $iterator = new Iterator($this->orm, $this->target, $data, true);
         foreach ($iterator as $pivot => $entity) {
             if (!is_array($pivot)) {
                 // skip partially selected entities (DB level filter)
@@ -269,7 +269,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         $elements = [];
         $pivotData = new SplObjectStorage();
-        foreach (new Iterator($this->orm, $this->target, $root->getResult()[0]['output']) as $pivot => $entity) {
+        foreach (new Iterator($this->orm, $this->target, $root->getResult()[0]['output'], true) as $pivot => $entity) {
             $pivotData[$entity] = $this->orm->make(
                 $this->schema[Relation::THROUGH_ENTITY],
                 $pivot,

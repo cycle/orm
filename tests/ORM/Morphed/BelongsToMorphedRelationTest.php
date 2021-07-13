@@ -336,6 +336,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $schemaArray[Post::class][Schema::RELATIONS]['image'][Relation::SCHEMA][Relation::NULLABLE] = true;
         return $schemaArray;
     }
+
     private function getSchemaArray(): array
     {
         return [
@@ -354,8 +355,8 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::OUTER_KEY => 'parentId',
+                            Relation::MORPH_KEY => 'parentType'
                         ],
                     ],
                     'posts' => [
@@ -384,8 +385,8 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::OUTER_KEY => 'parentId',
+                            Relation::MORPH_KEY => 'parentType'
                         ],
                     ]
                 ]
@@ -396,7 +397,12 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'image',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'url'],
+                Schema::COLUMNS     => [
+                    'id' => 'id',
+                    'parentId' => 'parent_id',
+                    'parentType' => 'parent_type',
+                    'url' => 'url',
+                ],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [
                     'parent' => [
@@ -408,8 +414,8 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
                             Relation::NULLABLE  => true,
                             Relation::CASCADE   => true,
                             Relation::OUTER_KEY => 'id',
-                            Relation::INNER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::INNER_KEY => 'parentId',
+                            Relation::MORPH_KEY => 'parentType'
                         ],
                     ]
                 ]

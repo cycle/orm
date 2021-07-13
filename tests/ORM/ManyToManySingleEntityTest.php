@@ -25,6 +25,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
 
         $this->makeTable('rbac_item', [
             'name' => 'string,primary',
+            'description' => 'string,nullable',
             '_type' => 'string,nullable',
         ]);
 
@@ -48,7 +49,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
                 Schema::DATABASE => 'default',
                 Schema::TABLE => 'rbac_item',
                 Schema::PRIMARY_KEY => 'name',
-                Schema::COLUMNS => ['name', '_type'],
+                Schema::COLUMNS => ['name', 'description', '_type'],
                 Schema::RELATIONS => [
                     'parents' => [
                         Relation::TYPE => Relation::MANY_TO_MANY,
@@ -146,12 +147,42 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $this->save($fetchedRole);
 
         $fetchedRole->children->add($fetchedPermission);
-        // todo Failed with error `Call to undefined method Cycle\ORM\Reference\Reference::add()`
         // Should be solved with proxy task
         $fetchedPermission->parents->add($fetchedRole);
 
         $this->save($fetchedRole);
 
         self::assertTrue(true);
+    }
+
+    public function testNotTriggersRehydrate(): void
+    {
+        $role = new RbacRole('superAdmin', 'description');
+
+        $permission = new RbacPermission('writeUser');
+
+        $role->children->add($permission);
+        $permission->parents->add($role);
+
+        $this->save($role);
+
+        unset($role, $permission);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        /** @var RbacRole $fetchedRole */
+        $fetchedRole = (new Select($this->orm, 'rbac_item'))->wherePK('superAdmin')->fetchOne();
+        /** @var RbacPermission $fetchedPermission */
+        $fetchedPermission = (new Select($this->orm, 'rbac_item'))->wherePK('writeUser')->fetchOne();
+
+        $fetchedRole->description = 'updated description';
+
+        // unlink
+        $fetchedRole->children->removeElement($fetchedPermission);
+        $fetchedPermission->parents->removeElement($fetchedRole);
+
+        self::assertSame('updated description', $fetchedRole->description);
+
+        $this->orm = $this->orm->withHeap(new Heap());
     }
 }

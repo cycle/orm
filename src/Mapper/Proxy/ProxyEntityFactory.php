@@ -49,6 +49,7 @@ class ProxyEntityFactory
     ): object
     {
         $relMap = $orm->getRelationMap($role);
+
         $class = array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
             : $this->defineClass($relMap, $sourceClass);
@@ -58,6 +59,8 @@ class ProxyEntityFactory
 
         $proxy = $this->instantiator->instantiate($class);
         $proxy->__cycle_orm_rel_map = $relMap;
+        $proxy->__cycle_orm_relation_props = $this->getEntityProperties($proxy, $relMap)['relations'];
+
         foreach ($this->classScope[$sourceClass] as $scope => $properties) {
             Closure::bind($this->initializer, null, $scope)($proxy, $properties);
         }
@@ -67,12 +70,13 @@ class ProxyEntityFactory
 
     public function upgrade(
         ORMInterface $orm,
+        RelationMap $relMap,
         string $role,
         object $entity,
         array $data
     ): object
     {
-        $properties = $this->classProperties[get_class($entity)] ??= $this->propertiesExtractor->extract($entity);
+        $properties = $this->getEntityProperties($entity, $relMap);
 
         // new set of data and relations always overwrite entity state
         return $this->hydrator->hydrate(
@@ -149,6 +153,7 @@ class ProxyEntityFactory
                     use \\Cycle\ORM\\Mapper\\Proxy\\EntityProxyTrait;
                 }
                 PHP;
+
             eval($classStr);
         }
 
@@ -162,5 +167,11 @@ class ProxyEntityFactory
         }
         // todo reflection
         return [$class => array_keys($relMap->getRelations())];
+    }
+
+    private function getEntityProperties(object $entity, RelationMap $relMap): array
+    {
+        return $this->classProperties[get_class($entity)]
+            ??= $this->propertiesExtractor->extract($entity, array_keys($relMap->getRelations()));
     }
 }

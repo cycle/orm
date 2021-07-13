@@ -11,28 +11,40 @@ class ClassPropertiesExtractor
 {
     /**
      * Extract all properties from given class
+     * @param string|object $class
+     * @param string[] $relations
+     * @return array<string, ReflectionClass>
+     * @throws \ReflectionException
      */
-    public function extract(object $class): array
+    public function extract($class, array $relations): array
     {
-        $hiddenProperties = [];
-        $visibleProperties = [];
+        $classProperties = [];
+        $relationProperties = [];
 
         $originalClass = new ReflectionClass($class);
 
         $properties = $this->findAllInstanceProperties($originalClass);
         foreach ($properties as $property) {
             $className = $property->getDeclaringClass()->getName();
+            $propertyName = $property->getName();
 
-            if ($property->isPrivate() || $property->isProtected()) {
-                $hiddenProperties[$className][$property->getName()] = $property->getName();
+            if (in_array($propertyName, $relations)) {
+
+                if ($property->isPrivate() || $property->isProtected()) {
+                    $relationProperties[$className][$propertyName] = $propertyName;
+                } else {
+                    $relationProperties[''][$propertyName] = $propertyName;
+                }
+            } else if ($property->isPrivate() || $property->isProtected()) {
+                $classProperties[$className][$propertyName] = $propertyName;
             } else {
-                $visibleProperties[$property->getName()] = $property->getName();
+                $classProperties[''][$propertyName] = $propertyName;
             }
         }
 
         return [
-            'hidden' => $hiddenProperties,
-            'visible' => $visibleProperties
+            'class' => new PropertiesMap($originalClass->getName(), $classProperties),
+            'relations' => new PropertiesMap($originalClass->getName(), $relationProperties),
         ];
     }
 

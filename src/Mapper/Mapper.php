@@ -45,7 +45,7 @@ class Mapper extends DatabaseMapper
 
     public function hydrate(object $entity, array $data): object
     {
-        $this->entityFactory->upgrade($this->orm, $this->role, $entity, $data);
+        $this->entityFactory->upgrade($this->orm, $this->relationMap, $this->role, $entity, $data);
         return $entity;
     }
 

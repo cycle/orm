@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Mapper\ProxyEntityMapper;
 
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Mapper\BaseMapperTest;
 
@@ -95,6 +96,7 @@ class EntityHydrationTest extends BaseMapperTest
         $mapper = $this->orm->getMapper(ExtendedUser::class);
 
         $emptyObject = $mapper->init([]);
+
         $this->assertInstanceOf(ExtendedUser::class, $emptyObject);
 
         $user = $mapper->hydrate($emptyObject, [
@@ -102,7 +104,7 @@ class EntityHydrationTest extends BaseMapperTest
             'username' => 'guest',
             'email' => 'guest@site.com',
             'isVerified' => true,
-            'profileId' => 234
+            'profileId' => 234,
         ]);
 
         $this->assertSame(123, $user->getId());
@@ -141,6 +143,7 @@ class User
         return $this->email;
     }
 }
+
 
 class ExtendedUser extends User
 {

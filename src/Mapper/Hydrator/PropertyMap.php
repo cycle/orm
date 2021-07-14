@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Hydrator;
 
-class PropertiesMap
+class PropertyMap
 {
     public const PUBLIC_CLASS = '';
 

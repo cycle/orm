@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper\Proxy;
 
 use Closure;
-use Cycle\ORM\Mapper\Hydrator\PropertiesMap;
+use Cycle\ORM\Mapper\Hydrator\PropertyMap;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 
 trait EntityProxyTrait
 {
     public RelationMap $__cycle_orm_rel_map;
-    public PropertiesMap $__cycle_orm_relation_props;
+    public PropertyMap $__cycle_orm_relation_props;
     public array $__cycle_orm_rel_data = [];
 
     public function __get(string $name)
@@ -49,7 +49,7 @@ trait EntityProxyTrait
         unset($this->__cycle_orm_rel_data[$name]);
 
         $propertyClass = $this->__cycle_orm_relation_props->getPropertyClass($name);
-        if ($propertyClass === PropertiesMap::PUBLIC_CLASS) {
+        if ($propertyClass === PropertyMap::PUBLIC_CLASS) {
             $this->$name = $value;
         } else {
             Closure::bind(static function (object $object, $property, $value) {

@@ -3,18 +3,18 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Mapper\Hydrator;
 
-use Cycle\ORM\Mapper\Hydrator\PropertiesMap;
+use Cycle\ORM\Mapper\Hydrator\PropertyMap;
 use PHPUnit\Framework\TestCase;
 
-class PropertiesMapTest extends TestCase
+class PropertyMapTest extends TestCase
 {
-    private PropertiesMap $properties;
+    private PropertyMap $properties;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->properties = new PropertiesMap('User', [
+        $this->properties = new PropertyMap('User', [
             '' => [
                 'id' => 'id',
                 'username' => 'username'

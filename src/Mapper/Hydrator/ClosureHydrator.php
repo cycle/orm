@@ -9,7 +9,7 @@ use Closure;
 class ClosureHydrator
 {
     /**
-     * @param array<string, PropertiesMap> $properties Array of class properties
+     * @param array<string, PropertyMap> $properties Array of class properties
      * @param object $object
      * @param array $data
      * @return object

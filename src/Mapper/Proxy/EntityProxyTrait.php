@@ -8,6 +8,7 @@ use Closure;
 use Cycle\ORM\Mapper\Hydrator\PropertyMap;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
+use RuntimeException;
 
 trait EntityProxyTrait
 {
@@ -19,23 +20,29 @@ trait EntityProxyTrait
     {
         $relation = $this->__cycle_orm_rel_map->getRelations()[$name] ?? null;
         if ($relation === null) {
+            if (method_exists(get_parent_class(static::class), '__get')) {
+                return parent::__get($name);
+            }
+
             return $this->$name;
         }
+
         $value = $this->__cycle_orm_rel_data[$name] ?? null;
         if ($value instanceof ReferenceInterface) {
             $this->$name = $relation->collect($relation->resolve($value, true));
             unset($this->__cycle_orm_rel_data[$name]);
             return $this->$name;
         }
-        throw new \RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));
+
+        throw new RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));
     }
 
     public function __set(string $name, $value): void
     {
         if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
-            // TODO test it
-            if (method_exists(get_parent_class($this), '__set')) {
-                return parent::__set($name, $value);
+            if (method_exists(get_parent_class(static::class), '__set')) {
+                parent::__set($name, $value);
+                return;
             }
 
             // throw new \RuntimeException("Property {$name} is protected.");

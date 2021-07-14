@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Mapper\ProxyEntityMapper;
 
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Mapper\BaseMapperTest;
 
@@ -54,7 +53,8 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertEquals([
             'id' => 123,
             'username' => 'guest',
-            'email' => 'guest@site.com'
+            'email' => 'guest@site.com',
+            'attributes' => []
         ], $mapper->extract($user));
     }
 
@@ -69,7 +69,8 @@ class EntityHydrationTest extends BaseMapperTest
             'username' => 'guest',
             'email' => 'guest@site.com',
             'isVerified' => true,
-            'profileId' => 234
+            'profileId' => 234,
+            'attributes' => []
         ], $mapper->extract($user));
     }
 
@@ -96,7 +97,6 @@ class EntityHydrationTest extends BaseMapperTest
         $mapper = $this->orm->getMapper(ExtendedUser::class);
 
         $emptyObject = $mapper->init([]);
-
         $this->assertInstanceOf(ExtendedUser::class, $emptyObject);
 
         $user = $mapper->hydrate($emptyObject, [
@@ -113,6 +113,38 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertSame(true, $user->isVerified());
         $this->assertSame(234, $user->getProfileId());
     }
+
+    function testUndefinedPropertiesShouldBePassedThroughSetter()
+    {
+        $mapper = $this->orm->getMapper(User::class);
+
+        $emptyObject = $mapper->init([]);
+
+        $user = $mapper->hydrate($emptyObject, [
+            'id' => 123,
+            'tag' => 'test',
+            'username' => 'guest',
+            'email' => 'guest@site.com'
+        ]);
+
+        $this->assertEquals(['tag' => 'test'], $user->getAttributes());
+    }
+
+    function testRequestedUndefinedPropertiesShouldBePassedThroughGetter()
+    {
+        $mapper = $this->orm->getMapper(User::class);
+
+        $emptyObject = $mapper->init([]);
+
+        $user = $mapper->hydrate($emptyObject, [
+            'id' => 123,
+            'tag' => 'test',
+            'username' => 'guest',
+            'email' => 'guest@site.com'
+        ]);
+
+        $this->assertEquals('test', $user->tag);
+    }
 }
 
 class User
@@ -120,6 +152,7 @@ class User
     public int $id;
     protected string $username;
     private string $email;
+    private array $attributes = [];
 
     public function __construct(int $id, string $username, string $email)
     {
@@ -141,6 +174,23 @@ class User
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function __set(string $name, $value)
+    {
+        $this->attributes[$name] = $value;
+    }
+
+    public function __get(string $name)
+    {
+        if (isset($this->attributes[$name])) {
+            return $this->attributes[$name];
+        }
+    }
+
+    public function getAttributes(): array
+    {
+        return $this->attributes;
     }
 }
 

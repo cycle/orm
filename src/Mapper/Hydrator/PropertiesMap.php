@@ -5,6 +5,8 @@ namespace Cycle\ORM\Mapper\Hydrator;
 
 class PropertiesMap
 {
+    public const PUBLIC_CLASS = '';
+
     private array $properties;
     private string $class;
 
@@ -16,7 +18,7 @@ class PropertiesMap
 
     public function isPublicProperty(string $name): bool
     {
-        return $this->getPropertyClass($name) === '';
+        return $this->getPropertyClass($name) === static::PUBLIC_CLASS;
     }
 
     public function getPropertyClass(string $name): ?string

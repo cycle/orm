@@ -33,12 +33,12 @@ class ClassPropertiesExtractor
                 if ($property->isPrivate() || $property->isProtected()) {
                     $relationProperties[$className][$propertyName] = $propertyName;
                 } else {
-                    $relationProperties[''][$propertyName] = $propertyName;
+                    $relationProperties[PropertiesMap::PUBLIC_CLASS][$propertyName] = $propertyName;
                 }
             } else if ($property->isPrivate() || $property->isProtected()) {
                 $classProperties[$className][$propertyName] = $propertyName;
             } else {
-                $classProperties[''][$propertyName] = $propertyName;
+                $classProperties[PropertiesMap::PUBLIC_CLASS][$propertyName] = $propertyName;
             }
         }
 

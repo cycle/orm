@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy;
 
+use Closure;
 use Cycle\ORM\Mapper\Hydrator\PropertiesMap;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
@@ -32,19 +33,29 @@ trait EntityProxyTrait
     public function __set(string $name, $value)
     {
         if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
+            // TODO test it
             if (method_exists(get_parent_class($this), '__set')) {
                 return parent::__set($name, $value);
             }
 
-            //throw new \RuntimeException("Property {$name} is protected.");
+            // throw new \RuntimeException("Property {$name} is protected.");
             return;
         }
+
         if ($value instanceof ReferenceInterface) {
             $this->__cycle_orm_rel_data[$name] = $value;
             return;
         }
         unset($this->__cycle_orm_rel_data[$name]);
-        $this->$name = $value;
+
+        $propertyClass = $this->__cycle_orm_relation_props->getPropertyClass($name);
+        if ($propertyClass === PropertiesMap::PUBLIC_CLASS) {
+            $this->$name = $value;
+        } else {
+            Closure::bind(static function (object $object, $property, $value) {
+                $object->{$property} = $value;
+            }, null, $propertyClass)($this, $name, $value);
+        }
     }
 
     public function __debugInfo(): array

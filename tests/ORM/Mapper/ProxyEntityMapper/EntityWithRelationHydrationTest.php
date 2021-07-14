@@ -34,7 +34,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
+            EntityWithRelationHydrationUser::class => [
                 Schema::ROLE => 'user',
                 Schema::MAPPER => Mapper::class,
                 Schema::DATABASE => 'default',
@@ -45,7 +45,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                 Schema::RELATIONS => [
                     'profile' => [
                         Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => Profile::class,
+                        Relation::TARGET => EntityWithRelationHydrationProfile::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
@@ -54,7 +54,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                     ]
                 ]
             ],
-            Profile::class => [
+            EntityWithRelationHydrationProfile::class => [
                 Schema::ROLE => 'profile',
                 Schema::MAPPER => Mapper::class,
                 Schema::DATABASE => 'default',
@@ -65,7 +65,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                 Schema::RELATIONS => [
                     'user' => [
                         Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => User::class,
+                        Relation::TARGET => EntityWithRelationHydrationUser::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
@@ -79,7 +79,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     function testPrivateRelationPropertyShouldBeFilled()
     {
-        $selector = new Select($this->orm, Profile::class);
+        $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
 
         $profile = $selector
             ->load('user.profile')
@@ -91,28 +91,28 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     }
 }
 
-class User
+class EntityWithRelationHydrationUser
 {
     public $id;
     private $email;
-    protected Profile $profile;
+    protected EntityWithRelationHydrationProfile $profile;
 
     public function getEmail()
     {
         return $this->email;
     }
 
-    public function getProfile(): Profile
+    public function getProfile(): EntityWithRelationHydrationProfile
     {
         return $this->profile;
     }
 }
 
-class Profile
+class EntityWithRelationHydrationProfile
 {
     public $id;
     private $name;
-    private User $user;
+    private EntityWithRelationHydrationUser $user;
 
     public function getUser()
     {

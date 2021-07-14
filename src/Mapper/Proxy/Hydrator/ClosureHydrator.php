@@ -2,21 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Mapper\Hydrator;
+namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
 use Closure;
 
 class ClosureHydrator
 {
     /**
-     * @param array<string, PropertyMap> $properties Array of class properties
+     * @param array<string, PropertyMap> $propertyMaps Array of class properties
      * @param object $object
      * @param array $data
+     *
      * @return object
      */
-    public function hydrate(array $properties, object $object, array $data): object
+    public function hydrate(array $propertyMaps, object $object, array $data): object
     {
-        $classProperties = $properties['class']->getProperties();
+        $classProperties = $propertyMaps[ClassPropertiesExtractor::KEY_FIELDS]->getProperties();
 
         foreach ($classProperties as $class => $properties) {
             if ($class === '') {
@@ -37,7 +38,7 @@ class ClosureHydrator
 
         foreach ($data as $property => $value) {
             $object->{$property} = $value;
-        };
+        }
 
         return $object;
     }

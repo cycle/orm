@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Mapper\Hydrator;
+namespace Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator;
 
-use Cycle\ORM\Mapper\Hydrator\PropertyMap;
+use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
 use PHPUnit\Framework\TestCase;
 
 class PropertyMapTest extends TestCase

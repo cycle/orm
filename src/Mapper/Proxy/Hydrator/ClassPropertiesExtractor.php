@@ -2,49 +2,49 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Mapper\Hydrator;
+namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
 use ReflectionClass;
 use ReflectionProperty;
 
 class ClassPropertiesExtractor
 {
+    public const KEY_FIELDS = 'class';
+    public const KEY_RELATIONS = 'relations';
+
     /**
      * Extract all properties from given class
-     * @param string|object $class
+     *
+     * @param string|object $objectOrClass
      * @param string[] $relations
+     *
      * @return array<string, ReflectionClass>
+     *
      * @throws \ReflectionException
      */
-    public function extract($class, array $relations): array
+    public function extract($objectOrClass, array $relations): array
     {
         $classProperties = [];
         $relationProperties = [];
 
-        $originalClass = new ReflectionClass($class);
+        $reflection = new ReflectionClass($objectOrClass);
 
-        $properties = $this->findAllInstanceProperties($originalClass);
+        $properties = $this->findAllInstanceProperties($reflection);
         foreach ($properties as $property) {
             $className = $property->getDeclaringClass()->getName();
             $propertyName = $property->getName();
 
             if (in_array($propertyName, $relations)) {
-
-                if ($property->isPrivate() || $property->isProtected()) {
-                    $relationProperties[$className][$propertyName] = $propertyName;
-                } else {
-                    $relationProperties[PropertyMap::PUBLIC_CLASS][$propertyName] = $propertyName;
-                }
-            } else if ($property->isPrivate() || $property->isProtected()) {
-                $classProperties[$className][$propertyName] = $propertyName;
+                // todo check cases for protected relations again
+                $relationProperties[$property->isPrivate() ? $className : PropertyMap::PUBLIC_CLASS][$propertyName] = $propertyName;
             } else {
-                $classProperties[PropertyMap::PUBLIC_CLASS][$propertyName] = $propertyName;
+                $classProperties[$property->isPublic() ? PropertyMap::PUBLIC_CLASS : $className][$propertyName] = $propertyName;
             }
         }
 
         return [
-            'class' => new PropertyMap($originalClass->getName(), $classProperties),
-            'relations' => new PropertyMap($originalClass->getName(), $relationProperties),
+            self::KEY_FIELDS => new PropertyMap($reflection->getName(), $classProperties),
+            self::KEY_RELATIONS => new PropertyMap($reflection->getName(), $relationProperties),
         ];
     }
 
@@ -56,10 +56,11 @@ class ClassPropertiesExtractor
      */
     private function findAllInstanceProperties(?ReflectionClass $class = null): array
     {
-        if (!$class) {
+        if ($class === null) {
             return [];
         }
 
+        // todo check case when parent is internal class
         return array_merge(
             $this->findAllInstanceProperties($class->getParentClass() ?: null), // of course PHP is shit.
             array_filter(

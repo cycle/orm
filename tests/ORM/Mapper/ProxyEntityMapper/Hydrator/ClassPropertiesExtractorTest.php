@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Mapper\Hydrator;
+namespace Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator;
 
-use Cycle\ORM\Mapper\Hydrator\ClassPropertiesExtractor;
+use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
 use PHPUnit\Framework\TestCase;
 
 class ClassPropertiesExtractorTest extends TestCase
@@ -29,14 +29,14 @@ class ClassPropertiesExtractorTest extends TestCase
                 'id' => 'id',
                 'comments' => 'comments'
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\User' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
                 'email' => 'email',
             ]
-        ], $map['class']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
-        ], $map['relations']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
     function testPropertyFromBaseClassWithRelationsShouldBeExtracted()
@@ -49,17 +49,17 @@ class ClassPropertiesExtractorTest extends TestCase
             '' => [
                 'id' => 'id'
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\User' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
                 'email' => 'email',
             ]
-        ], $map['class']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
             '' => [
                 'comments' => 'comments'
             ]
-        ], $map['relations']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
     function testPropertyFromExtendedClassShouldBeExtracted()
@@ -75,23 +75,23 @@ class ClassPropertiesExtractorTest extends TestCase
                 'totalLogin' => 'totalLogin',
                 'comments' => 'comments'
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\User' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
                 'email' => 'email',
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\ExtendedUser' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\ExtendedUser' => [
                 'isVerified' => 'isVerified',
                 'profileId' => 'profileId',
                 'tags' => 'tags',
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\SuperUser' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\SuperUser' => [
                 'isAdmin' => 'isAdmin',
             ]
-        ], $map['class']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
 
-        ], $map['relations']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
     function testPropertyFromExtendedClassWithRelationsShouldBeExtracted()
@@ -106,27 +106,27 @@ class ClassPropertiesExtractorTest extends TestCase
                 'age' => 'age',
                 'totalLogin' => 'totalLogin'
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\User' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
                 'email' => 'email',
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\ExtendedUser' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\ExtendedUser' => [
                 'isVerified' => 'isVerified',
                 'profileId' => 'profileId',
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\SuperUser' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\SuperUser' => [
                 'isAdmin' => 'isAdmin',
             ]
-        ], $map['class']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
             '' => [
                 'comments' => 'comments'
             ],
-            'Cycle\ORM\Tests\Mapper\Hydrator\ExtendedUser' => [
+            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\ExtendedUser' => [
                 'tags' => 'tags',
             ],
-        ], $map['relations']->getProperties());
+        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 }
 

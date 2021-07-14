@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Mapper\Hydrator;
+namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
 class PropertyMap
 {
@@ -25,7 +25,7 @@ class PropertyMap
     public function getPropertyClass(string $name): ?string
     {
         foreach ($this->properties as $class => $properties) {
-            if (in_array($name, $properties)) {
+            if (in_array($name, $properties, true)) {
                 return $class;
             }
         }

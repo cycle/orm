@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper\Proxy;
 
 use Closure;
-use Cycle\ORM\Mapper\Hydrator\PropertyMap;
+use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 use RuntimeException;
@@ -20,11 +20,9 @@ trait EntityProxyTrait
     {
         $relation = $this->__cycle_orm_rel_map->getRelations()[$name] ?? null;
         if ($relation === null) {
-            if (method_exists(get_parent_class(static::class), '__get')) {
-                return parent::__get($name);
-            }
-
-            return $this->$name;
+            return method_exists(parent::class, '__get')
+                ? parent::__get($name)
+                : $this->$name;
         }
 
         $value = $this->__cycle_orm_rel_data[$name] ?? null;
@@ -40,12 +38,9 @@ trait EntityProxyTrait
     public function __set(string $name, $value): void
     {
         if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
-            if (method_exists(get_parent_class(static::class), '__set')) {
+            if (method_exists(parent::class, '__set')) {
                 parent::__set($name, $value);
-                return;
             }
-
-            // throw new \RuntimeException("Property {$name} is protected.");
             return;
         }
 
@@ -67,7 +62,7 @@ trait EntityProxyTrait
 
     public function __debugInfo(): array
     {
-        $result = (array)$this;
+        $result = method_exists(parent::class, '__debugInfo') ? parent::__debugInfo() : (array)$this;
         unset($result['__cycle_orm_rel_map'], $result['__cycle_orm_rel_data'], $result['__cycle_orm_relation_props']);
         return $result;
     }

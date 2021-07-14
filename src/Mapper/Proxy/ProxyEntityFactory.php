@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper\Proxy;
 
 use Closure;
-use Cycle\ORM\Mapper\Hydrator\ClassPropertiesExtractor;
-use Cycle\ORM\Mapper\Hydrator\ClosureHydrator;
+use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
+use Cycle\ORM\Mapper\Proxy\Hydrator\ClosureHydrator;
+use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RelationMap;
 use Doctrine\Instantiator\Instantiator;
@@ -18,8 +19,10 @@ class ProxyEntityFactory
      * @psalm-var class-string
      */
     private array $classMap = [];
-    private array $classScope = [];
+
+    /** @var PropertyMap[] */
     private array $classProperties = [];
+
     private Instantiator $instantiator;
     private Closure $initializer;
     private ClosureHydrator $hydrator;
@@ -46,8 +49,7 @@ class ProxyEntityFactory
         string $role,
         array $data,
         string $sourceClass
-    ): object
-    {
+    ): object {
         $relMap = $orm->getRelationMap($role);
 
         $class = array_key_exists($sourceClass, $this->classMap)
@@ -59,23 +61,22 @@ class ProxyEntityFactory
 
         $proxy = $this->instantiator->instantiate($class);
         $proxy->__cycle_orm_rel_map = $relMap;
-        $proxy->__cycle_orm_relation_props = $this->getEntityProperties($proxy, $relMap)['relations'];
+        $scopes = $this->getEntityProperties($proxy, $relMap);
+        $proxy->__cycle_orm_relation_props = $scopes[ClassPropertiesExtractor::KEY_RELATIONS];
 
-        foreach ($this->classScope[$sourceClass] as $scope => $properties) {
-            Closure::bind($this->initializer, null, $scope)($proxy, $properties);
+        // init
+        foreach ($scopes[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties() as $scope => $properties) {
+            Closure::bind($this->initializer, null, $scope === '' ? $class : $scope)($proxy, $properties);
         }
 
         return $proxy;
     }
 
     public function upgrade(
-        ORMInterface $orm,
         RelationMap $relMap,
-        string $role,
         object $entity,
         array $data
-    ): object
-    {
+    ): object {
         $properties = $this->getEntityProperties($entity, $relMap);
 
         // new set of data and relations always overwrite entity state
@@ -112,8 +113,11 @@ class ProxyEntityFactory
         foreach ((array)$entity as $key => $value) {
             $result[$key[0] === "\0" ? substr($key, strrpos($key, "\0", 1) + 1) : $key] = $value;
         }
-        unset($result['__cycle_orm_rel_map']);
-        unset($result['__cycle_orm_rel_data']);
+        unset(
+            $result['__cycle_orm_rel_map'],
+            $result['__cycle_orm_rel_data'],
+            $result['__cycle_orm_relation_props']
+        );
         return $result;
     }
 
@@ -121,7 +125,6 @@ class ProxyEntityFactory
     {
         if (!class_exists($class, true)) {
             $this->classMap[$class] = null;
-            $this->classScope[$class] = $this->getScope(null, $relMap);
             return null;
         }
         if (array_key_exists($class, $this->classMap)) {
@@ -134,7 +137,6 @@ class ProxyEntityFactory
         $className = "{$class} Cycle ORM Proxy";
         // $className = "PROXY_" . md5($class);
         $this->classMap[$class] = $className;
-        $this->classScope[$class] = $this->getScope($class, $relMap);
         // Todo Interface
         if (!class_exists($className, false)) {
             if (strpos($className, '\\') !== false) {
@@ -160,18 +162,14 @@ class ProxyEntityFactory
         return $className;
     }
 
-    private function getScope(?string $class, RelationMap $relMap): array
-    {
-        if ($class === null) {
-            return array_keys($relMap->getRelations());
-        }
-        // todo reflection
-        return [$class => array_keys($relMap->getRelations())];
-    }
-
+    /**
+     * @return PropertyMap[]
+     *
+     * @throws \ReflectionException
+     */
     private function getEntityProperties(object $entity, RelationMap $relMap): array
     {
-        return $this->classProperties[get_class($entity)]
-            ??= $this->propertiesExtractor->extract($entity, array_keys($relMap->getRelations()));
+        return $this->classProperties[get_class($entity)] ??= $this->propertiesExtractor
+            ->extract($entity, array_keys($relMap->getRelations()));
     }
 }

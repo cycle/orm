@@ -30,7 +30,7 @@ trait EntityProxyTrait
         throw new \RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));
     }
 
-    public function __set(string $name, $value)
+    public function __set(string $name, $value): void
     {
         if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
             // TODO test it
@@ -52,7 +52,7 @@ trait EntityProxyTrait
         if ($propertyClass === PropertyMap::PUBLIC_CLASS) {
             $this->$name = $value;
         } else {
-            Closure::bind(static function (object $object, $property, $value) {
+            Closure::bind(static function (object $object, string $property, $value): void {
                 $object->{$property} = $value;
             }, null, $propertyClass)($this, $name, $value);
         }

@@ -58,7 +58,8 @@ class UserSnapshotMapper extends Mapper
         );
 
         if ($cc instanceof Insert) {
-            $state->waitContext('user_id', true);
+            $state->waitField('user_id', true);
+            // todo remove forwarding
             $node->forward('id', $state, 'user_id');
         } else {
             $state->register('user_id', $node->getData()['id'], true);

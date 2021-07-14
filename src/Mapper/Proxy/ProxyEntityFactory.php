@@ -135,9 +135,8 @@ class ProxyEntityFactory
             throw new \RuntimeException(sprintf('The entity `%s` class is final and can\'t be extended.', $class));
         }
         $className = "{$class} Cycle ORM Proxy";
-        // $className = "PROXY_" . md5($class);
         $this->classMap[$class] = $className;
-        // Todo Interface
+
         if (!class_exists($className, false)) {
             if (strpos($className, '\\') !== false) {
                 $pos = strrpos($className, '\\');

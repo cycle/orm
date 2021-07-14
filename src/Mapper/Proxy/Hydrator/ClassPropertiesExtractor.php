@@ -35,7 +35,6 @@ class ClassPropertiesExtractor
             $propertyName = $property->getName();
 
             if (in_array($propertyName, $relations)) {
-                // todo check cases for protected relations again
                 $relationProperties[$property->isPrivate() ? $className : PropertyMap::PUBLIC_CLASS][$propertyName] = $propertyName;
             } else {
                 $classProperties[$property->isPublic() ? PropertyMap::PUBLIC_CLASS : $className][$propertyName] = $propertyName;
@@ -60,7 +59,6 @@ class ClassPropertiesExtractor
             return [];
         }
 
-        // todo check case when parent is internal class
         return array_merge(
             $this->findAllInstanceProperties($class->getParentClass() ?: null), // of course PHP is shit.
             array_filter(

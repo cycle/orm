@@ -79,6 +79,7 @@ final class Schema implements SchemaInterface
         }
         return $result;
     }
+
     /**
      * @return array [relation name => relation schema]
      */
@@ -179,6 +180,16 @@ final class Schema implements SchemaInterface
             }
 
             $rel[Relation::TARGET] = $target;
+
+            $nullable = $rel[Relation::SCHEMA][Relation::NULLABLE] ?? null;
+            // Transform nullable BelongsTo to RefersTo
+            if ($rel[Relation::TYPE] === Relation::BELONGS_TO && $nullable === true) {
+                $rel[Relation::TYPE] = Relation::REFERS_TO;
+            }
+            // Transform not nullable RefersTo to BelongsTo
+            if ($rel[Relation::TYPE] === Relation::REFERS_TO && $nullable === false) {
+                $rel[Relation::TYPE] = Relation::BELONGS_TO;
+            }
 
             yield $name => $rel;
         }

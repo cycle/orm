@@ -143,23 +143,13 @@ final class State implements ConsumerInterface
     public function register(
         string $key,
         mixed $value,
-        bool $fresh = false,
         int $stream = self::DATA
     ): void {
-        $oldValue = $this->getValue($key);
-
-        if (!$fresh && !is_object($oldValue)) {
-            // custom, non value objects can be supported here
-            $fresh = $oldValue != $value;
-        }
-        if ($fresh || $value !== null) {
-            $this->freeWaitingField($key);
-        }
+        $this->freeWaitingField($key);
 
         \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(
-            "State(%s):Register %s {$key} => %s\n",
+            "State(%s):Register {$key} => %s\n",
             spl_object_id($this),
-            $fresh ? 'fresh' : '',
             var_export($value, true)
         );
 

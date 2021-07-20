@@ -125,9 +125,9 @@ final class Node implements ConsumerInterface
         return $this->data;
     }
 
-    public function register(string $key, mixed $value, bool $fresh = false, int $stream = self::DATA): void
+    public function register(string $key, mixed $value, int $stream = self::DATA): void
     {
-        $this->getState()->register($key, $value, $fresh, $stream);
+        $this->getState()->register($key, $value, $stream);
     }
 
     /**

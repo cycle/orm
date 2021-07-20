@@ -78,7 +78,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 // reset keys
                 $state = $node->getState();
                 foreach ($this->innerKeys as $innerKey) {
-                    $state->register($innerKey, null, true);
+                    $state->register($innerKey, null);
                 }
             }
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);

@@ -39,7 +39,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 // Reset keys
                 $state = $node->getState();
                 foreach ($this->innerKeys as $innerKey) {
-                    $state->register($innerKey, null, true);
+                    $state->register($innerKey, null);
                 }
             }
 

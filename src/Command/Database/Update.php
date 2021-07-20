@@ -99,7 +99,7 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         parent::execute();
     }
 
-    public function register(string $key, mixed $value, bool $fresh = false, int $stream = self::DATA): void
+    public function register(string $key, mixed $value, int $stream = self::DATA): void
     {
         if ($stream === self::SCOPE) {
             if (empty($value)) {
@@ -111,6 +111,6 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
 
             return;
         }
-        $this->state->register($key, $value, $fresh);
+        $this->state->register($key, $value);
     }
 }

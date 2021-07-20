@@ -153,7 +153,7 @@ class HasOne extends AbstractRelation
 
         if ($this->isNullable()) {
             foreach ($this->outerKeys as $outerKey) {
-                $relatedNode->getState()->register($outerKey, null, true);
+                $relatedNode->getState()->register($outerKey, null);
             }
             return $pool->attachStore($child, false, $relatedNode, $relatedNode->getState());
         }

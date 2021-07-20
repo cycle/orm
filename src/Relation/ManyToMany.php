@@ -313,7 +313,7 @@ class ManyToMany extends Relation\AbstractRelation
         $pState = $pNode->getState();
         $rState = $rNode->getState();
         foreach ($this->throughInnerKeys as $i => $pInnerKey) {
-            $pState->register($pInnerKey, $tuple->node->getState()->getTransactionData()[$this->innerKeys[$i]] ?? null, true);
+            $pState->register($pInnerKey, $tuple->node->getState()->getTransactionData()[$this->innerKeys[$i]] ?? null);
 
             // $rState->forward($this->outerKeys[$i], $pState, $this->throughOuterKeys[$i]);
         }

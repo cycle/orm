@@ -41,7 +41,7 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
         return true;
     }
 
-    public function register(string $key, mixed $value, bool $fresh = false, int $stream = self::DATA): void
+    public function register(string $key, mixed $value, int $stream = self::DATA): void
     {
     }
 
@@ -60,7 +60,6 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
      */
     public function execute(): void
     {
-        $update = true;
         $data = $this->getData();
         $insertID = $this->db->insert($this->table)->values($data)->run();
 
@@ -75,8 +74,7 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
                     $value = $data[$key] ?? null;
                 }
 
-                $cn->register($consumer[1], $value, $update, $consumer[2]);
-                $update = false;
+                $cn->register($consumer[1], $value, $consumer[2]);
             }
         }
 

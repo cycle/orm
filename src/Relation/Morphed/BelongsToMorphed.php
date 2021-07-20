@@ -77,8 +77,7 @@ class BelongsToMorphed extends BelongsTo
             $this->morphKey,
             $related === null
                 ? null
-                : $this->getNode($related)->getRole(),
-            true
+                : $this->getNode($related)->getRole()
         );
     }
 

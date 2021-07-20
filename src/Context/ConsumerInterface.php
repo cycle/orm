@@ -20,13 +20,11 @@ interface ConsumerInterface
      *
      * @param string $key    Key name to accept the value.
      * @param mixed  $value  The key value.
-     * @param bool   $fresh  Indicates that value has not been received by any other acceptor.
      * @param int    $stream One of the context types (data context, scope context).
      */
     public function register(
         string $key,
         mixed $value,
-        bool $fresh = false,
         #[ExpectedValues(valuesFromClass: self::class)]
         int $stream = self::DATA
     ): void;

@@ -110,7 +110,7 @@ abstract class DatabaseMapper implements MapperInterface
 
         foreach ($this->primaryKeys as $pk) {
             // set update criteria right now
-            $update->register($pk, $fromData[$pk], false, ConsumerInterface::SCOPE);
+            $update->register($pk, $fromData[$pk], ConsumerInterface::SCOPE);
         }
 
         return $update;
@@ -125,7 +125,7 @@ abstract class DatabaseMapper implements MapperInterface
         $fromData = $node->getInitialData();
         foreach ($this->primaryKeys as $pk) {
             // set update criteria right now
-            $delete->register($pk, $fromData[$pk], false, ConsumerInterface::SCOPE);
+            $delete->register($pk, $fromData[$pk], ConsumerInterface::SCOPE);
         }
 
         return $delete;

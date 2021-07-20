@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Heap;
 
 use Cycle\ORM\Context\ConsumerInterface;
-use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
@@ -15,7 +14,7 @@ use JetBrains\PhpStorm\ExpectedValues;
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
  * inner states.
  */
-final class Node implements ProducerInterface, ConsumerInterface
+final class Node implements ConsumerInterface
 {
     use RelationTrait;
 
@@ -126,17 +125,7 @@ final class Node implements ProducerInterface, ConsumerInterface
         return $this->data;
     }
 
-    public function forward(
-        string $key,
-        ConsumerInterface $consumer,
-        string $target,
-        bool $trigger = false,
-        int $stream = self::DATA
-    ): void {
-        $this->getState()->forward($key, $consumer, $target, $trigger, $stream);
-    }
-
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
+    public function register(string $key, mixed $value, bool $fresh = false, int $stream = self::DATA): void
     {
         $this->getState()->register($key, $value, $fresh, $stream);
     }

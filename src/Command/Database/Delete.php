@@ -59,7 +59,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 
     public function register(
         string $key,
-        $value,
+        mixed $value,
         bool $fresh = false,
         int $stream = self::DATA
     ): void {

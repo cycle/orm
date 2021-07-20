@@ -30,6 +30,9 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var ConsumerInterface[] */
     private array $consumers = [];
 
+    /** @var array<string, Node[]> */
+    private array $storage = [];
+
     public function __construct(
         #[ExpectedValues(valuesFromClass: Node::class)]
         int $state,
@@ -38,6 +41,36 @@ final class State implements ConsumerInterface, ProducerInterface
         $this->state = $state;
         $this->data = $data;
         $this->transactionData = $state === Node::NEW ? [] : $data;
+    }
+
+    /**
+     * Storage to store temporary cross entity links.
+     *
+     * @return iterable<int, Node>
+     *
+     * @internal
+     */
+    public function getStorage(string $type): iterable
+    {
+        if (!isset($this->storage[$type])) {
+            return $this->storage[$type] = [];
+        }
+
+        return $this->storage[$type];
+    }
+
+    public function addToStorage(string $type, Node $node): void
+    {
+        $this->storage[$type][] = $node;
+    }
+
+    public function clearStorage(string $type = null): void
+    {
+        if ($type === null) {
+            $this->storage = [];
+        } else {
+            unset($this->storage[$type]);
+        }
     }
 
     /**

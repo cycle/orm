@@ -152,11 +152,12 @@ final class Node implements ProducerInterface, ConsumerInterface
 
         $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
 
+        $relations = $relMap->getRelations();
         foreach ($this->state->getRelations() as $name => $relation) {
-            if (isset($this->relations[$name]) XOR $this->state->getRelation($name) !== null) {
+            if (isset($relations[$name]) && (isset($this->relations[$name]) XOR $this->state->getRelation($name) !== null)) {
                 $changes[$name] = $relation instanceof ReferenceInterface
                     ? $relation
-                    : $relMap->getRelations()[$name]->collect($relation);
+                    : $relations[$name]->collect($relation);
             }
             $this->setRelation($name, $relation);
         }

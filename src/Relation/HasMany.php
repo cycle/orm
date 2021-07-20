@@ -18,11 +18,13 @@ use Doctrine\Common\Collections\Collection;
  */
 class HasMany extends AbstractRelation
 {
-    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        $related = $tuple->state->getRelation($this->getName());
+        // $related = $tuple->state->getRelation($this->getName());
+        $related = $entityData;
+        $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$original->hasValue()) {

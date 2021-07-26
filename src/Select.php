@@ -54,7 +54,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     {
         $this->orm = $orm;
         $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
-        $this->builder = new QueryBuilder($this->getLoader()->getQuery(), $this->loader);
+        $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
 
     /**

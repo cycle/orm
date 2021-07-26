@@ -11,6 +11,7 @@ use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
+use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use JetBrains\PhpStorm\ArrayShape;
 
@@ -27,17 +28,24 @@ abstract class SelectTest extends BaseTest
         ENGINEER_2 = ['id' => 2, 'level' => 8],
         ENGINEER_4 = ['id' => 4, 'level' => 10],
 
+        PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'],
+        PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'],
+
         MANAGER_1 = ['id' => 1, 'rank' => 'top'],
         MANAGER_3 = ['id' => 3, 'rank' => 'bottom'],
 
         ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2,
         ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4,
 
+        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED,
+        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED,
+
         MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1,
         MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3,
 
         EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1, self::EMPLOYEE_2, self::EMPLOYEE_3, self::EMPLOYEE_4],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
+        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
         MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
 
     public function setUp(): void
@@ -54,6 +62,12 @@ abstract class SelectTest extends BaseTest
             'level'     => 'integer',
         ], fk: [
             'id' => ['table' => 'employee', 'column' => 'id']
+        ], pk: ['id']);
+        $this->makeTable('programator', [
+            'id'        => 'integer',
+            'language' => 'string',
+        ], fk: [
+            'id' => ['table' => 'engineer', 'column' => 'id']
         ], pk: ['id']);
         $this->makeTable('manager', [
             'id'        => 'integer',
@@ -77,6 +91,14 @@ abstract class SelectTest extends BaseTest
             [
                 self::ENGINEER_2,
                 self::ENGINEER_4,
+            ]
+        );
+
+        $this->getDatabase()->table('programator')->insertMultiple(
+            ['id', 'language'],
+            [
+                self::PROGRAMATOR_2,
+                self::PROGRAMATOR_4,
             ]
         );
 
@@ -115,9 +137,27 @@ abstract class SelectTest extends BaseTest
 
     public function testSelectEngineerDataFirst(): void
     {
+        $this->logger->display();
+
         $selector = (new Select($this->orm, Engineer::class))->limit(1);
 
         $this->assertEquals(self::ENGINEER_2_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectProgramatorAllData(): void
+    {
+        $selector = (new Select($this->orm, Programator::class));
+
+        $this->assertEquals(self::PROGRAMATOR_ALL_LOADED, $selector->fetchData());
+    }
+
+    public function testSelectProgramatorDataFirst(): void
+    {
+        $this->logger->display();
+
+        $selector = (new Select($this->orm, Programator::class))->limit(1);
+
+        $this->assertEquals(self::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
     }
 
     public function testSelectManagerAllData(): void
@@ -145,7 +185,7 @@ abstract class SelectTest extends BaseTest
                 Schema::TABLE       => 'employee',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'name', 'age'],
-                Schema::TYPECAST    => ['id' => 'int'],
+                Schema::TYPECAST    => ['id' => 'int', 'age' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
             ],
@@ -154,9 +194,22 @@ abstract class SelectTest extends BaseTest
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'engineer',
+                Schema::PARENT      => 'employee',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'level'],
                 Schema::TYPECAST    => ['id' => 'int', 'level' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+            ],
+            Programator::class => [
+                Schema::ROLE        => 'programator',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'programator',
+                Schema::PARENT      => 'engineer',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'language'],
+                Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
             ],
@@ -165,6 +218,7 @@ abstract class SelectTest extends BaseTest
                 Schema::MAPPER      => Mapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'manager',
+                Schema::PARENT      => 'employee',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'rank'],
                 Schema::TYPECAST    => ['id' => 'int'],

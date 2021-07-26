@@ -26,6 +26,8 @@ interface SchemaInterface
     public const SCOPE        = 12;
     public const TYPECAST     = 13;
     public const SCHEMA       = 14;
+    public const PARENT       = 15;
+    public const PARENT_KEY   = 16;
 
     /** @deprecated Use {@see SCOPE} instead. */
     public const CONSTRAIN    = 12;

@@ -60,6 +60,9 @@ abstract class AbstractNode
     /** @var AbstractNode[] */
     protected array $nodes = [];
 
+    /** @var AbstractNode[] */
+    protected array $joins = [];
+
     protected ?string $indexName = null;
 
     /**
@@ -108,6 +111,15 @@ abstract class AbstractNode
     {
         $data = $this->fetchData($offset, $row);
 
+        // Merge Joined Data
+        $delta = count($this->columns) + $offset;
+        $joinData = [];
+        foreach ($this->joins as $node) {
+            array_unshift($joinData, $node->fetchData($delta, $row));
+            $delta += count($node->columns);
+        }
+        $data += array_merge(...$joinData);
+
         if ($this->deduplicate($data)) {
             foreach ($this->indexedData->getIndexes() as $index) {
                 try {
@@ -118,6 +130,9 @@ abstract class AbstractNode
 
             //Let's force placeholders for every sub loaded
             foreach ($this->nodes as $name => $node) {
+                if ($node instanceof MergeNode) {
+                    continue;
+                }
                 $data[$name] = $node instanceof ArrayNode ? [] : null;
             }
 
@@ -128,7 +143,7 @@ abstract class AbstractNode
         }
 
         $innerOffset = 0;
-        foreach ($this->nodes as $container => $node) {
+        foreach (($this->joins + $this->nodes) as $container => $node) {
             if (!$node->joined) {
                 continue;
             }
@@ -183,11 +198,20 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    public function linkNode(string $container, AbstractNode $node): void
+    public function linkNode(?string $container, AbstractNode $node): void
     {
-        $this->nodes[$container] = $node;
-        $node->container = $container;
         $node->parent = $this;
+        if ($container !== null) {
+            $this->nodes[$container] = $node;
+            $node->container = $container;
+        } else {
+            $this->joins[] = $node;
+            // $this->joins = [...$this->joins, $node, ...$node->joins];
+            // # todo: change for different inner/outer keys
+            // foreach ($this->joins as $node) {
+            //     $node->parent = $this;
+            // }
+        }
 
         if ($node->indexName !== null) {
             foreach ($node->outerKeys as $key) {
@@ -211,7 +235,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    public function joinNode(string $container, AbstractNode $node): void
+    public function joinNode(?string $container, AbstractNode $node): void
     {
         $node->joined = true;
         $this->linkNode($container, $node);
@@ -298,14 +322,9 @@ abstract class AbstractNode
      *
      * Add added records will be added as array items.
      *
-     * @param string $container
-     * @param string $index
-     * @param mixed  $criteria
-     * @param array  $data
-     *
      * @throws ParserException
      */
-    protected function mountArray(string $container, string $index, $criteria, array &$data): void
+    protected function mountArray(string $container, string $index, mixed $criteria, array &$data): void
     {
         if (!$this->indexedData->hasIndex($index)) {
             throw new ParserException("Undefined index `{$index}`.");
@@ -320,9 +339,29 @@ abstract class AbstractNode
     }
 
     /**
+     * @throws ParserException
+     */
+    protected function mergeData(string $index, array $criteria, array $data, bool $overwrite): void
+    {
+        if ($criteria === self::LAST_REFERENCE) {
+            if (!$this->indexedData->hasIndex($index)) {
+                return;
+            }
+            $criteria = $this->indexedData->getLastItemKeys($index);
+        }
+
+        if ($this->indexedData->getItemsCount($index, $criteria) === 0) {
+            throw new ParserException(sprintf('Undefined reference `%s` "%s".', $index, implode(':', $criteria)));
+        }
+
+        foreach ($this->indexedData->getItemsSubset($index, $criteria) as &$subset) {
+            $subset = $overwrite ? array_merge($subset, $data) : array_merge($data, $subset);
+            unset($subset);
+        }
+    }
+
+    /**
      * Register data result.
-     *
-     * @param array $data
      */
     abstract protected function push(array &$data);
 

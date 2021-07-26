@@ -7,6 +7,7 @@ namespace Cycle\ORM\Select;
 use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Relation;
@@ -136,11 +137,16 @@ abstract class AbstractLoader implements LoaderInterface
      * @throws LoaderException
      */
     public function loadRelation(
-        string $relation,
+        string|LoaderInterface $relation,
         array $options,
         bool $join = false,
         bool $load = false
     ): LoaderInterface {
+        if (is_object($relation)) {
+            $loader = $relation->withContext($this);
+            $this->join[] = $loader;
+            return $loader;
+        }
         $relation = $this->resolvePath($relation);
         if (!empty($options['as'])) {
             $this->registerPath($options['as'], $relation);
@@ -199,6 +205,12 @@ abstract class AbstractLoader implements LoaderInterface
     public function createNode(): AbstractNode
     {
         $node = $this->initNode();
+
+        foreach ($this->join as $relation => $loader) {
+            if ($relation === null) {
+                $node->joinNode(null, $loader->createNode());
+            }
+        }
 
         foreach ($this->load as $relation => $loader) {
             if ($loader instanceof JoinableInterface && $loader->isJoined()) {
@@ -266,9 +278,21 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * Returns list of relations to be automatically joined with parent object.
      */
-    protected function getEagerRelations(): \Generator
+    protected function getEagerRelations(string $role = null): \Generator
     {
-        $relations = $this->orm->getSchema()->define($this->target, Schema::RELATIONS) ?? [];
+        $role ??= $this->target;
+        $schema = $this->orm->getSchema();
+        $parent = $schema->define($role, Schema::PARENT);
+        if ($parent !== null) {
+            yield $this->orm->getFactory()
+                ->loader($this->orm, $schema, $role, FactoryInterface::PARENT_LOADER);
+        }
+        yield from $this->getTargetEagerRelations($role);
+    }
+
+    protected function getTargetEagerRelations(string $target): \Generator
+    {
+        $relations = $this->orm->getSchema()->define($target, Schema::RELATIONS) ?? [];
         foreach ($relations as $relation => $schema) {
             if (($schema[Relation::LOAD] ?? null) === Relation::LOAD_EAGER) {
                 yield $relation;

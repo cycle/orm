@@ -70,6 +70,10 @@ final class RelationConfig extends InjectableConfig
                 self::LOADER   => Select\Loader\ManyToManyLoader::class,
                 self::RELATION => Relation\ManyToMany::class
             ],
+            Relation::JOINED_TABLE       => [
+                self::LOADER   => Select\Loader\JoinedTableInheritanceLoader::class,
+                self::RELATION => Relation\ManyToMany::class
+            ],
             Relation::MORPHED_HAS_ONE    => [
                 self::LOADER   => Select\Loader\Morphed\MorphedHasOneLoader::class,
                 self::RELATION => Relation\Morphed\MorphedHasOne::class

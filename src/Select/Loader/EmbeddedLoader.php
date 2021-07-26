@@ -32,21 +32,15 @@ final class EmbeddedLoader implements JoinableInterface
         'minify' => true,
     ];
 
-    private array $columns = [];
-
-    /**
-     * @param ORMInterface $orm
-     * @param string       $target
-     */
     public function __construct(ORMInterface $orm, string $target)
     {
         $this->orm = $orm;
         $this->target = $target;
 
         // never duplicate primary key in data selection
-        $primaryKey = $this->define(Schema::PRIMARY_KEY);
+        $primaryKey = (array)$this->define(Schema::PRIMARY_KEY);
         foreach ($this->define(Schema::COLUMNS) as $internal => $external) {
-            if ($internal !== $primaryKey && $external !== $primaryKey) {
+            if (!in_array($internal, $primaryKey, true) && !in_array($external, $primaryKey, true)) {
                 $this->columns[$internal] = $external;
             }
         }
@@ -57,7 +51,7 @@ final class EmbeddedLoader implements JoinableInterface
      */
     final public function __destruct()
     {
-        $this->parent = null;
+        unset($this->parent);
     }
 
     /**
@@ -133,14 +127,6 @@ final class EmbeddedLoader implements JoinableInterface
     public function loadData(AbstractNode $node): void
     {
         // embedded entities does not support inner loaders... for now! :)
-    }
-
-    /**
-     * @return array
-     */
-    protected function getColumns(): array
-    {
-        return $this->columns;
     }
 
     /**

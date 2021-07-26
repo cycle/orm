@@ -59,6 +59,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
         $this->name = $name;
         $this->schema = $schema;
+        $this->columns = $this->define(Schema::COLUMNS);
     }
 
     /**
@@ -75,7 +76,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return $this->options['as'];
         }
 
-        throw new LoaderException('Unable to resolve loader alias');
+        throw new LoaderException('Unable to resolve loader alias.');
     }
 
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
@@ -283,14 +284,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     protected function getJoinTable(): string
     {
         return "{$this->define(Schema::TABLE)} AS {$this->getAlias()}";
-    }
-
-    /**
-     * Relation columns.
-     */
-    protected function getColumns(): array
-    {
-        return $this->define(Schema::COLUMNS);
     }
 
     private function makeQueryBuilder(SelectQuery $query): QueryBuilder

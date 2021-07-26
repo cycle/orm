@@ -74,7 +74,7 @@ class ManyToManyLoader extends JoinableLoader
     }
 
     public function loadRelation(
-        string $relation,
+        string|LoaderInterface $relation,
         array $options,
         bool $join = false,
         bool $load = false

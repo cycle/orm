@@ -150,7 +150,7 @@ final class QueryBuilder
      *
      * @param bool $autoload When set to true relation will be automatically loaded.
      */
-    protected function findLoader(string $name, bool $autoload = true): ?LoaderInterface
+    private function findLoader(string $name, bool $autoload = true): ?LoaderInterface
     {
         if (strpos($name, '(')) {
             // expressions are not allowed
@@ -169,7 +169,7 @@ final class QueryBuilder
     /**
      * Replace target where call with another compatible method (for example join or having).
      */
-    protected function targetFunc(string $call): callable
+    private function targetFunc(string $call): callable
     {
         if ($this->forward != null) {
             switch (strtolower($call)) {
@@ -192,7 +192,7 @@ final class QueryBuilder
      * Automatically modify all identifiers to mount table prefix. Provide ability to automatically resolve
      * relations.
      */
-    protected function proxyArgs(array $args): array
+    private function proxyArgs(array $args): array
     {
         if (!isset($args[0])) {
             return $args;

@@ -25,6 +25,7 @@ final class Relation
     public const BELONGS_TO   = 12;
     public const REFERS_TO    = 13;
     public const MANY_TO_MANY = 14;
+    public const JOINED_TABLE = 15;
 
     // Morphed relations
     public const BELONGS_TO_MORPHED = 20;

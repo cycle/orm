@@ -8,16 +8,14 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Book;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use JetBrains\PhpStorm\ArrayShape;
 
-abstract class WithRelationsTest extends BaseTest
+abstract class WithRelationsTest extends JtiBaseTest
 {
     use TableTrait;
 
@@ -27,19 +25,13 @@ abstract class WithRelationsTest extends BaseTest
         BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'],
         BOOK_4 = ['id' => 4, 'title' => 'How to be Foo when you are Bar'],
 
-        EMPLOYEE_1 = ['id' => 1, 'book_id' => 3, 'name' => 'John', 'age' => 38],
-        EMPLOYEE_2 = ['id' => 2, 'book_id' => 2, 'name' => 'Anton', 'age' => 35],
-        EMPLOYEE_3 = ['id' => 3, 'book_id' => 1, 'name' => 'Kentarius', 'age' => 27],
-        EMPLOYEE_4 = ['id' => 4, 'book_id' => null, 'name' => 'Valeriy', 'age' => 32],
+        EMPLOYEE_1 = parent::EMPLOYEE_1 + ['book_id' => 3],
+        EMPLOYEE_2 = parent::EMPLOYEE_2 + ['book_id' => 2],
+        EMPLOYEE_3 = parent::EMPLOYEE_3 + ['book_id' => 1],
+        EMPLOYEE_4 = parent::EMPLOYEE_4 + ['book_id' => null],
 
-        ENGINEER_2 = ['id' => 2, 'tech_book_id' => 1, 'level' => 8],
-        ENGINEER_4 = ['id' => 4, 'tech_book_id' => 4, 'level' => 10],
-
-        PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'],
-        PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'],
-
-        MANAGER_1 = ['id' => 1, 'rank' => 'top'],
-        MANAGER_3 = ['id' => 3, 'rank' => 'bottom'],
+        ENGINEER_2 = parent::ENGINEER_2 + ['tech_book_id' => 1],
+        ENGINEER_4 = parent::ENGINEER_4 + ['tech_book_id' => 4],
 
         EMPLOYEE_1_LOADED = self::EMPLOYEE_1 + ['book' => self::BOOK_3],
         EMPLOYEE_2_LOADED = self::EMPLOYEE_2 + ['book' => self::BOOK_2],
@@ -97,7 +89,7 @@ abstract class WithRelationsTest extends BaseTest
         ], pk: ['id']);
 
         $this->getDatabase()->table('book')->insertMultiple(
-            array_keys(self::BOOK_1),
+            array_keys(static::BOOK_1),
             [
                 self::BOOK_1,
                 self::BOOK_2,
@@ -106,7 +98,7 @@ abstract class WithRelationsTest extends BaseTest
             ]
         );
         $this->getDatabase()->table('employee')->insertMultiple(
-            array_keys(self::EMPLOYEE_1),
+            array_keys(static::EMPLOYEE_1),
             [
                 self::EMPLOYEE_1,
                 self::EMPLOYEE_2,
@@ -115,21 +107,21 @@ abstract class WithRelationsTest extends BaseTest
             ]
         );
         $this->getDatabase()->table('engineer')->insertMultiple(
-            array_keys(self::ENGINEER_2),
+            array_keys(static::ENGINEER_2),
             [
                 self::ENGINEER_2,
                 self::ENGINEER_4,
             ]
         );
         $this->getDatabase()->table('programator')->insertMultiple(
-            array_keys(self::PROGRAMATOR_2),
+            array_keys(static::PROGRAMATOR_2),
             [
                 self::PROGRAMATOR_2,
                 self::PROGRAMATOR_4,
             ]
         );
         $this->getDatabase()->table('manager')->insertMultiple(
-            array_keys(self::MANAGER_1),
+            array_keys(static::MANAGER_1),
             [
                 self::MANAGER_1,
                 self::MANAGER_3,
@@ -140,81 +132,14 @@ abstract class WithRelationsTest extends BaseTest
         $this->logger->display();
     }
 
-    public function testSelectEmployeeAllData(): void
-    {
-        $selector = new Select($this->orm, Employee::class);
-
-        $this->assertEquals(self::EMPLOYEE_ALL_LOADED, $selector->fetchData());
-    }
-
-    public function testSelectEmployeeDataFirst(): void
-    {
-        $selector = (new Select($this->orm, Employee::class))->limit(1);
-
-        $this->assertEquals(self::EMPLOYEE_1_LOADED, $selector->fetchData()[0]);
-    }
-
-    public function testSelectEngineerAllData(): void
-    {
-        $selector = (new Select($this->orm, Engineer::class));
-
-        $this->assertEquals(self::ENGINEER_ALL_LOADED, $selector->fetchData());
-    }
-
-    public function testSelectEngineerDataFirst(): void
-    {
-        $this->logger->display();
-
-        $selector = (new Select($this->orm, Engineer::class))->limit(1);
-
-        $this->assertEquals(self::ENGINEER_2_LOADED, $selector->fetchData()[0]);
-    }
-
-    public function testSelectProgramatorAllData(): void
-    {
-        $selector = (new Select($this->orm, Programator::class));
-
-        $this->assertEquals(self::PROGRAMATOR_ALL_LOADED, $selector->fetchData());
-    }
-
-    public function testSelectProgramatorDataFirst(): void
-    {
-        $selector = (new Select($this->orm, Programator::class))->limit(1);
-
-        $this->assertEquals(self::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
-    }
-
-    public function testSelectProgramatorWithTechBook(): void
-    {
-        $selector = (new Select($this->orm, Programator::class))
-            ->load('tech_book')
-            ->limit(1);
-
-        $this->assertEquals(self::PROGRAMATOR_2_LOADED + ['tech_book' => self::BOOK_1], $selector->fetchData()[0]);
-    }
-
-    public function testSelectManagerAllData(): void
-    {
-        $selector = (new Select($this->orm, Manager::class));
-
-        $this->assertEquals(self::MANAGER_ALL_LOADED, $selector->fetchData());
-    }
-
     public function testSelectManagerDataFirst(): void
     {
         $selector = (new Select($this->orm, Manager::class))->limit(1);
 
-        $this->assertEquals(self::MANAGER_1_LOADED, $selector->fetchData()[0]);
+        $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);
     }
 
-    #[ArrayShape([
-        Employee::class => "array",
-        Programator::class => "array",
-        Engineer::class => "array",
-        Manager::class => "array",
-        Book::class => "array",
-    ])]
-    private function getSchemaArray(): array
+    protected function getSchemaArray(): array
     {
         return [
             Employee::class => [

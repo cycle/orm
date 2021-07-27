@@ -6,6 +6,5 @@ namespace Cycle\ORM\Tests\Relation\JTI\Fixture;
 
 final class Manager extends Employee
 {
-    public ?string $id = null;
     public string $rank = 'none';
 }

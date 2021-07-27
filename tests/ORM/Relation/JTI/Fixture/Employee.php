@@ -6,6 +6,6 @@ namespace Cycle\ORM\Tests\Relation\JTI\Fixture;
 
 class Employee
 {
-    public ?string $id = null;
+    public ?int $id = null;
     public ?string $name = null;
 }

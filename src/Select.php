@@ -342,11 +342,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *
-     * @param string|array $relation
      * @return $this|Select
      * @see load()
      */
-    public function with($relation, array $options = []): self
+    public function with(string|array $relation, array $options = []): self
     {
         if (is_string($relation)) {
             $this->loader->loadRelation($relation, $options, true, false);
@@ -419,13 +418,5 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function sqlStatement(): string
     {
         return $this->buildQuery()->sqlStatement();
-    }
-
-    /**
-     * Return base loader associated with the selector.
-     */
-    private function getLoader(): RootLoader
-    {
-        return $this->loader;
     }
 }

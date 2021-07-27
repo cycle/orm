@@ -4,49 +4,21 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Relation\JTI;
 
+use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
+use Cycle\ORM\Tests\Relation\JTI\Trait\SelectTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use JetBrains\PhpStorm\ArrayShape;
 
-abstract class SelectTest extends BaseTest
+abstract class SimpleTest extends JtiBaseTest
 {
     use TableTrait;
-
-    protected const
-        EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38],
-        EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'age' => 35],
-        EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'age' => 27],
-        EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'age' => 32],
-
-        ENGINEER_2 = ['id' => 2, 'level' => 8],
-        ENGINEER_4 = ['id' => 4, 'level' => 10],
-
-        PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'],
-        PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'],
-
-        MANAGER_1 = ['id' => 1, 'rank' => 'top'],
-        MANAGER_3 = ['id' => 3, 'rank' => 'bottom'],
-
-        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2,
-        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4,
-
-        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED,
-        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED,
-
-        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1,
-        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3,
-
-        EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1, self::EMPLOYEE_2, self::EMPLOYEE_3, self::EMPLOYEE_4],
-        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
-        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+    use SelectTrait;
 
     public function setUp(): void
     {
@@ -111,75 +83,61 @@ abstract class SelectTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
-    public function testSelectEmployeeAllData(): void
-    {
-        $selector = new Select($this->orm, Employee::class);
-
-        $this->assertEquals(self::EMPLOYEE_ALL_LOADED, $selector->fetchData());
-    }
-
-    public function testSelectEmployeeDataFirst(): void
-    {
-        $selector = (new Select($this->orm, Employee::class))->limit(1);
-
-        $this->assertEquals(self::EMPLOYEE_1, $selector->fetchData()[0]);
-    }
-
-    public function testSelectEngineerAllData(): void
-    {
-        $selector = (new Select($this->orm, Engineer::class));
-
-        $this->assertEquals(self::ENGINEER_ALL_LOADED, $selector->fetchData());
-    }
-
-    public function testSelectEngineerDataFirst(): void
-    {
         $this->logger->display();
-
-        $selector = (new Select($this->orm, Engineer::class))->limit(1);
-
-        $this->assertEquals(self::ENGINEER_2_LOADED, $selector->fetchData()[0]);
     }
 
-    public function testSelectProgramatorAllData(): void
+    public function testProgramatorNoChanges(): void
     {
-        $selector = (new Select($this->orm, Programator::class));
+        $programator = (new Select($this->orm, Programator::class))->wherePK(2)->fetchOne();
 
-        $this->assertEquals(self::PROGRAMATOR_ALL_LOADED, $selector->fetchData());
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
     }
 
-    public function testSelectProgramatorDataFirst(): void
+    public function testChangeAndPersistProgramator(): void
     {
-        $this->logger->display();
+        /** @var Programator $programator */
+        $programator = (new Select($this->orm, Programator::class))->wherePK(2)->fetchOne();
+        $programator->language = 'Kotlin';
 
-        $selector = (new Select($this->orm, Programator::class))->limit(1);
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(1);
 
-        $this->assertEquals(self::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
+
+        /** @var Programator $programator */
+        $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))->wherePK(2)->fetchOne();
+        $this->assertSame('Kotlin', $programator->language);
     }
 
-    public function testSelectManagerAllData(): void
+    public function testChangeParentsFieldsAndPersistProgramator(): void
     {
-        $selector = (new Select($this->orm, Manager::class));
+        /** @var Programator $programator */
+        $programator = (new Select($this->orm, Programator::class))->wherePK(2)->fetchOne();
+        $programator->language = 'Kotlin';
+        $programator->level = 99;
+        $programator->name = 'Thomas';
 
-        $this->assertEquals(self::MANAGER_ALL_LOADED, $selector->fetchData());
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(3);
+
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
+
+        /** @var Programator $programator */
+        $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))->wherePK(2)->fetchOne();
+        $this->assertSame('Kotlin', $programator->language);
+        $this->assertSame(99, $programator->level);
+        $this->assertSame('Thomas', $programator->name);
     }
 
-    public function testSelectManagerDataFirst(): void
-    {
-        $selector = (new Select($this->orm, Manager::class))->limit(1);
-
-        $this->assertEquals(self::MANAGER_1_LOADED, $selector->fetchData()[0]);
-    }
-
-    #[ArrayShape([
-        Employee::class => "array",
-        Engineer::class => "array",
-        Programator::class => "array",
-        Manager::class => "array",
-    ])]
-    private function getSchemaArray(): array
+    protected function getSchemaArray(): array
     {
         return [
             Employee::class => [

@@ -94,6 +94,23 @@ final class MultiKeyCollection
         return $result === [] ? [] : array_merge(...$result);
     }
 
+    public function getItems(string $indexName): \Generator
+    {
+        $depth = count($this->indexes[$indexName]);
+
+        $iterator = static function(array $data, $deep) use (&$depth, &$iterator) {
+            if ($deep < $depth) {
+                ++$deep;
+                foreach ($data as $subset) {
+                    yield from $iterator($subset, $deep);
+                }
+                return;
+            }
+            yield from $data;
+        };
+        yield from $iterator($this->data[$indexName], 1);
+    }
+
     /**
      * @param string[] $keys
      */

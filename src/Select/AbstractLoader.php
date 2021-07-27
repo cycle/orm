@@ -61,6 +61,8 @@ abstract class AbstractLoader implements LoaderInterface
     /** @var AbstractLoader[] */
     protected array $join = [];
 
+    protected ?LoaderInterface $inherit = null;
+
     protected ?LoaderInterface $parent = null;
 
     public function __construct(ORMInterface $orm, string $target)
@@ -71,7 +73,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     final public function __destruct()
     {
-        $this->parent = null;
+        unset($this->parent, $this->inherit);
         $this->load = [];
         $this->join = [];
     }
@@ -90,6 +92,8 @@ abstract class AbstractLoader implements LoaderInterface
         foreach ($this->join as $name => $loader) {
             $this->join[$name] = $loader->withContext($this);
         }
+
+        $this->inherit = $this->inherit?->withContext($this);
     }
 
     public function getTarget(): string
@@ -128,7 +132,8 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * Load the relation.
      *
-     * @param string $relation Relation name, or chain of relations separated by.
+     * @param string|LoaderInterface $relation Relation name, or chain of relations separated by. If you need to set
+     * inheritance then pass LoaderInterface object
      * @param array  $options  Loader options (to be applied to last chain element only).
      * @param bool   $join     When set to true loaders will be forced into JOIN mode.
      * @param bool   $load     Load relation data.
@@ -143,9 +148,7 @@ abstract class AbstractLoader implements LoaderInterface
         bool $load = false
     ): LoaderInterface {
         if (is_object($relation)) {
-            $loader = $relation->withContext($this);
-            $this->join[] = $loader;
-            return $loader;
+            return  $this->inherit = $relation->withContext($this);
         }
         $relation = $this->resolvePath($relation);
         if (!empty($options['as'])) {
@@ -206,10 +209,8 @@ abstract class AbstractLoader implements LoaderInterface
     {
         $node = $this->initNode();
 
-        foreach ($this->join as $relation => $loader) {
-            if (is_int($relation)) {
-                $node->joinNode(null, $loader->createNode());
-            }
+        if ($this->inherit !== null) {
+            $node->joinNode(null, $this->inherit->createNode());
         }
 
         foreach ($this->load as $relation => $loader) {
@@ -239,6 +240,12 @@ abstract class AbstractLoader implements LoaderInterface
         foreach ($this->load as $relation => $loader) {
             $loader->loadData($node->getNode($relation));
         }
+
+        // Merge nodes
+        if ($this->inherit !== null) {
+            $this->inherit->loadData($node->getMergeNode());
+            $node->mergeInheritanceNode();
+        }
     }
 
     /**
@@ -249,6 +256,10 @@ abstract class AbstractLoader implements LoaderInterface
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         $query = $this->applyConstrain($query);
+
+        if ($this->inherit !== null) {
+            $query = $this->inherit->configureQuery($query);
+        }
 
         foreach ($this->join as $loader) {
             $query = $loader->configureQuery($query);

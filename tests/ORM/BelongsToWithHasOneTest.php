@@ -118,7 +118,7 @@ abstract class BelongsToWithHasOneTest extends BaseTest
                             Relation::NULLABLE  => true, // todo set false and connect with nested:profile
                             Relation::CASCADE   => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'profile_id',
                         ],
                     ]
                 ]

@@ -109,6 +109,14 @@ final class RootLoader extends AbstractLoader
         foreach ($this->load as $relation => $loader) {
             $loader->loadData($node->getNode($relation));
         }
+
+        // Merge nodes
+        if ($this->inherit !== null) {
+            $inheritNode = $node->getMergeNode();
+            $this->inherit->loadData($inheritNode);
+
+            $node->mergeInheritanceNode();
+        }
     }
 
     public function isLoaded(): bool

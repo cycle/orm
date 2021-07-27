@@ -52,8 +52,8 @@ abstract class WithRelationsTest extends BaseTest
         PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED,
         PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED,
 
-        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1,
-        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3,
+        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED,
+        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED,
 
         EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
@@ -136,7 +136,6 @@ abstract class WithRelationsTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-
     }
 
     public function testSelectEmployeeAllData(): void

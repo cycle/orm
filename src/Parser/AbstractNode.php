@@ -60,8 +60,7 @@ abstract class AbstractNode
     /** @var AbstractNode[] */
     protected array $nodes = [];
 
-    /** @var AbstractNode[] */
-    protected array $joins = [];
+    protected ?AbstractNode $merge = null;
 
     protected ?string $indexName = null;
 
@@ -111,15 +110,6 @@ abstract class AbstractNode
     {
         $data = $this->fetchData($offset, $row);
 
-        // Merge Joined Data
-        $delta = count($this->columns) + $offset;
-        $joinData = [];
-        foreach ($this->joins as $node) {
-            array_unshift($joinData, $node->fetchData($delta, $row));
-            $delta += count($node->columns);
-        }
-        $data += array_merge(...$joinData);
-
         if ($this->deduplicate($data)) {
             foreach ($this->indexedData->getIndexes() as $index) {
                 try {
@@ -143,7 +133,8 @@ abstract class AbstractNode
         }
 
         $innerOffset = 0;
-        foreach (($this->joins + $this->nodes) as $container => $node) {
+        $iterate = $this->merge === null ? $this->nodes : [$this->merge] + $this->nodes;
+        foreach ($iterate as $node) {
             if (!$node->joined) {
                 continue;
             }
@@ -205,7 +196,7 @@ abstract class AbstractNode
             $this->nodes[$container] = $node;
             $node->container = $container;
         } else {
-            $this->joins[] = $node;
+            $this->merge = $node;
             // $this->joins = [...$this->joins, $node, ...$node->joins];
             // # todo: change for different inner/outer keys
             // foreach ($this->joins as $node) {
@@ -252,10 +243,23 @@ abstract class AbstractNode
     public function getNode(string $container): AbstractNode
     {
         if (!isset($this->nodes[$container])) {
-            throw new ParserException("Undefined node `{$container}`");
+            throw new ParserException("Undefined node `{$container}`.");
         }
 
         return $this->nodes[$container];
+    }
+
+    public function getMergeNode(): self
+    {
+        return $this->merge;
+    }
+
+    public function mergeInheritanceNode(): void
+    {
+        if ($this->merge === null) {
+            return;
+        }
+        $this->merge->mergeInheritanceNode();
     }
 
     /**

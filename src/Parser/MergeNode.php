@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
 
-use Cycle\ORM\Exception\ParserException;
-
 /**
  * @internal
  */
@@ -13,6 +11,8 @@ final class MergeNode extends AbstractNode
 {
     /** @var string[] */
     protected array $innerKeys;
+
+    protected array $results = [];
 
     /**
      * @param array      $columns
@@ -30,19 +30,25 @@ final class MergeNode extends AbstractNode
 
     protected function push(array &$data): void
     {
+        $this->results[] = &$data;
+    }
+
+    public function mergeInheritanceNode(): void
+    {
         if ($this->parent === null) {
-            throw new ParserException('Unable to register data tree, parent is missing.');
+            return;
         }
 
-        $parent = $this->parent;
-        do {
-            $parent->mergeData(
+        parent::mergeInheritanceNode();
+
+        foreach ($this->results as $item) {
+            $this->parent->mergeData(
                 $this->indexName,
-                $this->intersectData($this->innerKeys, $data),
-                $data,
+                $this->intersectData($this->innerKeys, $item),
+                $item,
                 false
             );
-            $parent = $parent->parent;
-        } while ($parent instanceof self);
+        }
+        $this->results = [];
     }
 }

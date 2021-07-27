@@ -195,11 +195,14 @@ abstract class AbstractLoader implements LoaderInterface
                 $relation
             );
         } catch (SchemaException | FactoryException $e) {
-            throw new LoaderException(
-                sprintf('Unable to create loader: %s', $e->getMessage()),
-                $e->getCode(),
-                $e
-            );
+            if (!$this->inherit instanceof self) {
+                throw new LoaderException(
+                    sprintf('Unable to create loader: %s', $e->getMessage()),
+                    $e->getCode(),
+                    $e
+                );
+            }
+            return $this->inherit->loadRelation($relation, $options, $join, $load);
         }
 
         return $loaders[$relation] = $loader->withContext($this, $options);

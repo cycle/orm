@@ -25,15 +25,15 @@ abstract class WithRelationsTest extends BaseTest
         BOOK_1 = ['id' => 1, 'title' => 'PHP manual'],
         BOOK_2 = ['id' => 2, 'title' => 'Best mentor'],
         BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'],
-        BOOK_4 = ['id' => 4, 'title' => 'How to Foo when you are Bar'],
+        BOOK_4 = ['id' => 4, 'title' => 'How to be Foo when you are Bar'],
 
         EMPLOYEE_1 = ['id' => 1, 'book_id' => 3, 'name' => 'John', 'age' => 38],
         EMPLOYEE_2 = ['id' => 2, 'book_id' => 2, 'name' => 'Anton', 'age' => 35],
         EMPLOYEE_3 = ['id' => 3, 'book_id' => 1, 'name' => 'Kentarius', 'age' => 27],
         EMPLOYEE_4 = ['id' => 4, 'book_id' => null, 'name' => 'Valeriy', 'age' => 32],
 
-        ENGINEER_2 = ['id' => 2, 'level' => 8],
-        ENGINEER_4 = ['id' => 4, 'level' => 10],
+        ENGINEER_2 = ['id' => 2, 'tech_book_id' => 1, 'level' => 8],
+        ENGINEER_4 = ['id' => 4, 'tech_book_id' => 4, 'level' => 10],
 
         PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'],
         PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'],
@@ -77,8 +77,9 @@ abstract class WithRelationsTest extends BaseTest
             'book_id' => ['table' => 'book', 'column' => 'id']
         ], pk: ['id']);
         $this->makeTable('engineer', [
-            'id'        => 'integer',
-            'level'     => 'integer',
+            'id'           => 'integer',
+            'level'        => 'integer',
+            'tech_book_id' => 'integer',
         ], fk: [
             'id' => ['table' => 'employee', 'column' => 'id']
         ], pk: ['id']);
@@ -96,7 +97,7 @@ abstract class WithRelationsTest extends BaseTest
         ], pk: ['id']);
 
         $this->getDatabase()->table('book')->insertMultiple(
-            ['id', 'title'],
+            array_keys(self::BOOK_1),
             [
                 self::BOOK_1,
                 self::BOOK_2,
@@ -114,21 +115,21 @@ abstract class WithRelationsTest extends BaseTest
             ]
         );
         $this->getDatabase()->table('engineer')->insertMultiple(
-            ['id', 'level'],
+            array_keys(self::ENGINEER_2),
             [
                 self::ENGINEER_2,
                 self::ENGINEER_4,
             ]
         );
         $this->getDatabase()->table('programator')->insertMultiple(
-            ['id', 'language'],
+            array_keys(self::PROGRAMATOR_2),
             [
                 self::PROGRAMATOR_2,
                 self::PROGRAMATOR_4,
             ]
         );
         $this->getDatabase()->table('manager')->insertMultiple(
-            ['id', 'rank'],
+            array_keys(self::MANAGER_1),
             [
                 self::MANAGER_1,
                 self::MANAGER_3,
@@ -136,6 +137,7 @@ abstract class WithRelationsTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+        $this->logger->display();
     }
 
     public function testSelectEmployeeAllData(): void
@@ -177,11 +179,18 @@ abstract class WithRelationsTest extends BaseTest
 
     public function testSelectProgramatorDataFirst(): void
     {
-        $this->logger->display();
-
         $selector = (new Select($this->orm, Programator::class))->limit(1);
 
         $this->assertEquals(self::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectProgramatorWithTechBook(): void
+    {
+        $selector = (new Select($this->orm, Programator::class))
+            ->load('tech_book')
+            ->limit(1);
+
+        $this->assertEquals(self::PROGRAMATOR_2_LOADED + ['tech_book' => self::BOOK_1], $selector->fetchData()[0]);
     }
 
     public function testSelectManagerAllData(): void
@@ -238,10 +247,21 @@ abstract class WithRelationsTest extends BaseTest
                 Schema::TABLE       => 'engineer',
                 Schema::PARENT      => 'employee',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'level'],
-                Schema::TYPECAST    => ['id' => 'int', 'level' => 'int'],
+                Schema::COLUMNS     => ['id', 'level', 'tech_book_id'],
+                Schema::TYPECAST    => ['id' => 'int', 'level' => 'int', 'tech_book_id' => 'int'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                Schema::RELATIONS   => [
+                    'tech_book' => [
+                        Relation::TYPE   => Relation::REFERS_TO,
+                        Relation::TARGET => 'book',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::NULLABLE  => true,
+                            Relation::INNER_KEY => 'tech_book_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ]
+                ],
             ],
             Programator::class => [
                 Schema::ROLE        => 'programator',

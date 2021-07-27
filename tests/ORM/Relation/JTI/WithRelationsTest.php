@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Relation\JTI;
 
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\BaseTest;
+use Cycle\ORM\Tests\Relation\JTI\Fixture\Book;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
@@ -15,15 +17,20 @@ use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use JetBrains\PhpStorm\ArrayShape;
 
-abstract class SelectTest extends BaseTest
+abstract class WithRelationsTest extends BaseTest
 {
     use TableTrait;
 
     protected const
-        EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38],
-        EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'age' => 35],
-        EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'age' => 27],
-        EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'age' => 32],
+        BOOK_1 = ['id' => 1, 'title' => 'PHP manual'],
+        BOOK_2 = ['id' => 2, 'title' => 'Best mentor'],
+        BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'],
+        BOOK_4 = ['id' => 4, 'title' => 'How to Foo when you are Bar'],
+
+        EMPLOYEE_1 = ['id' => 1, 'book_id' => 3, 'name' => 'John', 'age' => 38],
+        EMPLOYEE_2 = ['id' => 2, 'book_id' => 2, 'name' => 'Anton', 'age' => 35],
+        EMPLOYEE_3 = ['id' => 3, 'book_id' => 1, 'name' => 'Kentarius', 'age' => 27],
+        EMPLOYEE_4 = ['id' => 4, 'book_id' => null, 'name' => 'Valeriy', 'age' => 32],
 
         ENGINEER_2 = ['id' => 2, 'level' => 8],
         ENGINEER_4 = ['id' => 4, 'level' => 10],
@@ -34,8 +41,13 @@ abstract class SelectTest extends BaseTest
         MANAGER_1 = ['id' => 1, 'rank' => 'top'],
         MANAGER_3 = ['id' => 3, 'rank' => 'bottom'],
 
-        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2,
-        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4,
+        EMPLOYEE_1_LOADED = self::EMPLOYEE_1 + ['book' => self::BOOK_3],
+        EMPLOYEE_2_LOADED = self::EMPLOYEE_2 + ['book' => self::BOOK_2],
+        EMPLOYEE_3_LOADED = self::EMPLOYEE_3 + ['book' => self::BOOK_1],
+        EMPLOYEE_4_LOADED = self::EMPLOYEE_4 + ['book' => null],
+
+        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED,
+        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED,
 
         PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED,
         PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED,
@@ -43,7 +55,7 @@ abstract class SelectTest extends BaseTest
         MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1,
         MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3,
 
-        EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1, self::EMPLOYEE_2, self::EMPLOYEE_3, self::EMPLOYEE_4],
+        EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
         MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
@@ -52,10 +64,17 @@ abstract class SelectTest extends BaseTest
     {
         parent::setUp();
 
-        $this->makeTable('employee', [
+        $this->makeTable('book', [
             'id'        => 'integer',
-            'name'      => 'string',
-            'age'       => 'integer,nullable',
+            'title'     => 'string',
+        ], pk: ['id']);
+        $this->makeTable('employee', [
+            'id'      => 'integer',
+            'name'    => 'string',
+            'age'     => 'integer,nullable',
+            'book_id' => 'integer,nullable',
+        ], fk: [
+            'book_id' => ['table' => 'book', 'column' => 'id']
         ], pk: ['id']);
         $this->makeTable('engineer', [
             'id'        => 'integer',
@@ -76,8 +95,17 @@ abstract class SelectTest extends BaseTest
             'id' => ['table' => 'employee', 'column' => 'id']
         ], pk: ['id']);
 
+        $this->getDatabase()->table('book')->insertMultiple(
+            ['id', 'title'],
+            [
+                self::BOOK_1,
+                self::BOOK_2,
+                self::BOOK_3,
+                self::BOOK_4,
+            ]
+        );
         $this->getDatabase()->table('employee')->insertMultiple(
-            ['id', 'name', 'age'],
+            array_keys(self::EMPLOYEE_1),
             [
                 self::EMPLOYEE_1,
                 self::EMPLOYEE_2,
@@ -85,7 +113,6 @@ abstract class SelectTest extends BaseTest
                 self::EMPLOYEE_4,
             ]
         );
-
         $this->getDatabase()->table('engineer')->insertMultiple(
             ['id', 'level'],
             [
@@ -93,7 +120,6 @@ abstract class SelectTest extends BaseTest
                 self::ENGINEER_4,
             ]
         );
-
         $this->getDatabase()->table('programator')->insertMultiple(
             ['id', 'language'],
             [
@@ -101,7 +127,6 @@ abstract class SelectTest extends BaseTest
                 self::PROGRAMATOR_4,
             ]
         );
-
         $this->getDatabase()->table('manager')->insertMultiple(
             ['id', 'rank'],
             [
@@ -111,6 +136,7 @@ abstract class SelectTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+
     }
 
     public function testSelectEmployeeAllData(): void
@@ -124,7 +150,7 @@ abstract class SelectTest extends BaseTest
     {
         $selector = (new Select($this->orm, Employee::class))->limit(1);
 
-        $this->assertEquals(self::EMPLOYEE_1, $selector->fetchData()[0]);
+        $this->assertEquals(self::EMPLOYEE_1_LOADED, $selector->fetchData()[0]);
     }
 
     public function testSelectEngineerAllData(): void
@@ -175,9 +201,10 @@ abstract class SelectTest extends BaseTest
 
     #[ArrayShape([
         Employee::class => "array",
-        Engineer::class => "array",
         Programator::class => "array",
+        Engineer::class => "array",
         Manager::class => "array",
+        Book::class => "array",
     ])]
     private function getSchemaArray(): array
     {
@@ -188,10 +215,22 @@ abstract class SelectTest extends BaseTest
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'employee',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name', 'age'],
-                Schema::TYPECAST    => ['id' => 'int', 'age' => 'int'],
+                Schema::COLUMNS     => ['id', 'name', 'age', 'book_id'],
+                Schema::TYPECAST    => ['id' => 'int', 'book_id' => 'int', 'age' => 'int'],
                 Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                Schema::RELATIONS   => [
+                    'book' => [
+                        Relation::TYPE   => Relation::REFERS_TO,
+                        Relation::TARGET => 'book',
+                        Relation::LOAD   => Relation::LOAD_EAGER,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::NULLABLE  => true,
+                            Relation::INNER_KEY => 'book_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ]
+                ],
             ],
             Engineer::class => [
                 Schema::ROLE        => 'engineer',
@@ -225,6 +264,17 @@ abstract class SelectTest extends BaseTest
                 Schema::PARENT      => 'employee',
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'rank'],
+                Schema::TYPECAST    => ['id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+            ],
+            Book::class => [
+                Schema::ROLE        => 'book',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'book',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'title'],
                 Schema::TYPECAST    => ['id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],

@@ -207,7 +207,7 @@ abstract class AbstractLoader implements LoaderInterface
         $node = $this->initNode();
 
         foreach ($this->join as $relation => $loader) {
-            if ($relation === null) {
+            if (is_int($relation)) {
                 $node->joinNode(null, $loader->createNode());
             }
         }

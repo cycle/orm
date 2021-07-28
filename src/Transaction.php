@@ -453,16 +453,28 @@ final class Transaction implements TransactionInterface
     public function generateStoreCommand(Tuple $tuple): ?CommandInterface
     {
         $tuple->state = $tuple->state ?? $tuple->node->getState();
+        $isNew = $tuple->node->getStatus() === Node::NEW;
+        $tuple->state->setStatus($isNew ? Node::SCHEDULED_INSERT : Node::SCHEDULED_UPDATE);
 
-        if ($tuple->node->getStatus() === Node::NEW) {
-            $tuple->state->setStatus(Node::SCHEDULED_INSERT);
-            /** @var Insert $command */
-            return $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
+        /**
+         * @see \Cycle\ORM\MapperInterface::queueCreate()
+         * @see \Cycle\ORM\MapperInterface::queueUpdate()
+         */
+        $method = $isNew ? 'queueCreate' : 'queueUpdate';
+
+        $parents = $commands = [];
+        $parent = $this->orm->getSchema()->define($tuple->node->getRole(), SchemaInterface::PARENT);
+        while ($parent !== null) {
+            array_unshift($parents, $parent);
+            $parent = $this->orm->getSchema()->define($parent, SchemaInterface::PARENT);
         }
-        $tuple->state->setStatus(Node::SCHEDULED_UPDATE);
+        foreach ($parents as $parent) {
+            $parentMapper = $this->orm->getMapper($parent);
+            $commands[] = $parentMapper->$method($tuple->entity, $tuple->node, $tuple->state);
+        }
+        $commands[] = $tuple->mapper->$method($tuple->entity, $tuple->node, $tuple->state);
 
-        /** @var Update $command */
-        return $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+        return count($commands) === 1 ? $commands[0] : (new Sequence())->addCommand(...$commands);
     }
 
     public function generateDeleteCommand(Tuple $tuple): CommandInterface

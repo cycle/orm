@@ -105,10 +105,24 @@ final class State implements ConsumerInterface
         return $this->transactionData;
     }
 
-    public function updateTransactionData(): void
+    public function updateTransactionData(array $fields = null): void
     {
-        $this->transactionData = array_merge($this->transactionData, $this->data);
-        $this->state = Node::MANAGED;
+        if ($fields === null) {
+            $this->transactionData = array_merge($this->transactionData, $this->data);
+            $this->state = Node::MANAGED;
+            return;
+        }
+        $changes = false;
+        foreach ($this->data as $field => $value) {
+            if (in_array($field, $fields, true)) {
+                $this->transactionData[$field] = $this->data[$field];
+                continue;
+            }
+            $changes = $changes || Node::compare($value, $this->transactionData[$field] ?? null) !== 0;
+        }
+        if (!$changes) {
+            $this->state = Node::MANAGED;
+        }
     }
 
     public function getChanges(): array

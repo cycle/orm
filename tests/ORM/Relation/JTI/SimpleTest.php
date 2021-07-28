@@ -14,6 +14,7 @@ use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
 use Cycle\ORM\Tests\Relation\JTI\Trait\SelectTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Transaction;
 
 abstract class SimpleTest extends JtiBaseTest
 {
@@ -25,9 +26,9 @@ abstract class SimpleTest extends JtiBaseTest
         parent::setUp();
 
         $this->makeTable('employee', [
-            'id'        => 'integer',
-            'name'      => 'string',
-            'age'       => 'integer,nullable',
+            'id'          => 'integer',
+            'name_column' => 'string',
+            'age'         => 'integer,nullable',
         ], pk: ['id']);
         $this->makeTable('engineer', [
             'id'        => 'integer',
@@ -49,7 +50,7 @@ abstract class SimpleTest extends JtiBaseTest
         ], pk: ['id']);
 
         $this->getDatabase()->table('employee')->insertMultiple(
-            ['id', 'name', 'age'],
+            ['id', 'name_column', 'age'],
             [
                 self::EMPLOYEE_1,
                 self::EMPLOYEE_2,
@@ -137,6 +138,48 @@ abstract class SimpleTest extends JtiBaseTest
         $this->assertSame('Thomas', $programator->name);
     }
 
+    public function testRemoveProgramator(): void
+    {
+        /** @var Engineer $engineer */
+        $engineer = (new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne();
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(0);
+
+        $this->assertNull((new Select($this->orm, Programator::class))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne());
+        $this->assertNotNull((new Select($this->orm, Employee::class))->wherePK(2)->fetchOne());
+    }
+
+    public function testCreateProgramator(): void
+    {
+        $programator = new Programator();
+        $programator->name = 'Merlin';
+        $programator->level = 50;
+        $programator->language = 'VanillaJS';
+
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(3);
+
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
+
+        /** @var Programator $programator */
+        $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
+            ->wherePK($programator->id)
+            ->fetchOne();
+        $this->assertSame('Merlin', $programator->name);
+        $this->assertSame(50, $programator->level);
+        $this->assertSame('VanillaJS', $programator->language);
+    }
+
     protected function getSchemaArray(): array
     {
         return [
@@ -146,7 +189,7 @@ abstract class SimpleTest extends JtiBaseTest
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'employee',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name', 'age'],
+                Schema::COLUMNS     => ['id', 'name' => 'name_column', 'age'],
                 Schema::TYPECAST    => ['id' => 'int', 'age' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],

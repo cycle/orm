@@ -79,7 +79,7 @@ class PromiseMapper extends DatabaseMapper
      */
     public function fetchFields(object $entity): array
     {
-        $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
+        $columns = array_intersect_key($this->extract($entity), $this->columns);
 
         $class = get_class($entity);
         if ($class !== $this->entity) {

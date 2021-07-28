@@ -32,8 +32,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     protected array $columns;
 
-    /** @var array */
-    protected $fields;
+    protected array $parentColumns = [];
 
     /** @var string[] */
     protected array $primaryColumns = [];
@@ -51,16 +50,22 @@ abstract class DatabaseMapper implements MapperInterface
         $this->role = $role;
 
         $this->source = $orm->getSource($role);
-        $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
+        foreach ($orm->getSchema()->define($role, Schema::COLUMNS) as $property => $column) {
+            $this->columns[is_int($property) ? $column : $property] = $column;
+        }
+
+        // Parent's fields
+        $parent = $orm->getSchema()->define($role, Schema::PARENT);
+        while ($parent !== null) {
+            foreach ($orm->getSchema()->define($parent, Schema::COLUMNS) as $property => $column) {
+                $this->parentColumns[is_int($property) ? $column : $property] = $column;
+            }
+            $parent = $orm->getSchema()->define($parent, Schema::PARENT);
+        }
 
         $this->primaryKeys = (array)$orm->getSchema()->define($role, Schema::PRIMARY_KEY);
         foreach ($this->primaryKeys as $PK) {
             $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
-        }
-
-        // Resolve field names
-        foreach ($this->columns as $name => $column) {
-            $this->fields[] = is_string($name) ? $name : $column;
         }
     }
 
@@ -97,7 +102,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
-        $fromData = $node->getState()->getTransactionData();
+        $fromData = $state->getTransactionData();
         \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . count($node->getChanges()) . "\n";
 
         $update = new Update(
@@ -139,11 +144,15 @@ abstract class DatabaseMapper implements MapperInterface
         return null;
     }
 
-    public function mapColumns(array $values): array
+    public function mapColumns(array &$values): array
     {
         $result = [];
         foreach ($values as $column => $value) {
-            $result[$this->columns[$column] ?? $column] = $value;
+            if (isset($this->columns[$column])) {
+                $result[$this->columns[$column]] = $value;
+            } else {
+                unset($values[$column]);
+            }
         }
 
         return $result;

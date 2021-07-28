@@ -59,7 +59,7 @@ class Mapper extends DatabaseMapper
     {
         $columns = array_intersect_key(
             $this->entityFactory->extractData($this->relationMap, $entity),
-            array_flip($this->fields)
+            $this->columns + $this->parentColumns
         );
 
         $class = get_class($entity);

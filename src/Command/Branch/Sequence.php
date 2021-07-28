@@ -46,9 +46,12 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
         return true;
     }
 
-    public function addCommand(CommandInterface $command): void
+    public function addCommand(CommandInterface ...$commands): self
     {
-        $this->commands[] = $command;
+        foreach ($commands as $command) {
+            $this->commands[] = $command;
+        }
+        return $this;
     }
 
     /**

@@ -68,7 +68,7 @@ final class ORM implements ORMInterface
         ];
     }
 
-    public function resolveRole($entity): string
+    public function resolveRole(string|object $entity): string
     {
         if (is_object($entity)) {
             $node = $this->getHeap()->get($entity);
@@ -194,7 +194,7 @@ final class ORM implements ORMInterface
         return $this->heap;
     }
 
-    public function getMapper($entity): MapperInterface
+    public function getMapper(string|object $entity): MapperInterface
     {
         $role = $this->resolveRole($entity);
         if (isset($this->mappers[$role])) {
@@ -204,7 +204,7 @@ final class ORM implements ORMInterface
         return $this->mappers[$role] = $this->factory->mapper($this, $role);
     }
 
-    public function getRepository($entity): RepositoryInterface
+    public function getRepository(string|object $entity): RepositoryInterface
     {
         $role = $this->resolveRole($entity);
         if (isset($this->repositories[$role])) {
@@ -265,19 +265,6 @@ final class ORM implements ORMInterface
     public function getRelationMap(string $entity): RelationMap
     {
         $role = $this->resolveRole($entity);
-        if (isset($this->relMaps[$role])) {
-            return $this->relMaps[$role];
-        }
-
-        $outerRelations = $this->schema->getOuterRelations($role);
-        $innerRelations = $this->schema->getInnerRelations($role);
-        $relations = [];
-
-        foreach ($innerRelations as $relName => $relSchema) {
-            $relations[$relName] = $this->factory->relation($this, $this->schema, $role, $relName);
-        }
-        $map = new RelationMap($relations, $outerRelations);
-        $this->relMaps[$role] = $map;
-        return $map;
+        return $this->relMaps[$role] ?? ($this->relMaps[$role] = RelationMap::build($this, $role));
     }
 }

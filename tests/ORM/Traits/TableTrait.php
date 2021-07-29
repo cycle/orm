@@ -26,7 +26,7 @@ trait TableTrait
         }
 
         if (!empty($pk)) {
-            $schema->setPrimaryKeys([$pk]);
+            $schema->setPrimaryKeys($pk);
         }
 
         $schema->save();

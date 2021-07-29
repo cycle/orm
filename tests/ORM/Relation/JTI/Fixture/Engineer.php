@@ -7,4 +7,5 @@ namespace Cycle\ORM\Tests\Relation\JTI\Fixture;
 class Engineer extends Employee
 {
     public int $level = 0;
+    public ?Book $tech_book = null;
 }

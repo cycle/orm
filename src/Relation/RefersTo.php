@@ -22,10 +22,8 @@ class RefersTo extends AbstractRelation implements DependencyInterface
     public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
     {
         $node = $tuple->node;
-        // $related = $tuple->state->getRelation($this->getName());
         $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
-        $original = $node->getRelation($this->getName());
 
         if ($related instanceof ReferenceInterface) {
             if ($related->hasValue() || $this->resolve($related, false) !== null) {
@@ -33,18 +31,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 $tuple->state->setRelation($this->getName(), $related);
             }
         }
-        if ($related === null) {
-            // Original is not null
-            if ($original !== null) {
-                // Reset keys
-                $state = $node->getState();
-                foreach ($this->innerKeys as $innerKey) {
-                    $state->register($innerKey, null);
-                }
-            }
-
-            $node->setRelation($this->getName(), null);
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        if ($this->checkNullValue($tuple->node, $related)) {
             return;
         }
         $this->registerWaitingFields($tuple->state, false);
@@ -77,6 +64,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
+        }
+        if ($this->checkNullValue($tuple->node, $related)) {
+            return;
         }
         $rTuple = $pool->offsetGet($related);
         if ($rTuple === null) {
@@ -127,5 +117,25 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 $node->register($this->innerKeys[$i], $changes[$outerKey]);
             }
         }
+    }
+
+    private function checkNullValue(Node $node, mixed $value): bool
+    {
+        if ($value !== null) {
+            return false;
+        }
+        $original = $node->getRelation($this->getName());
+        // Original is not null
+        if ($original !== null) {
+            // Reset keys
+            $state = $node->getState();
+            foreach ($this->innerKeys as $innerKey) {
+                $state->register($innerKey, null);
+            }
+        }
+
+        $node->setRelation($this->getName(), null);
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        return true;
     }
 }

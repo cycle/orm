@@ -63,4 +63,11 @@ trait SelectTrait
 
         $this->assertEquals(static::MANAGER_ALL_LOADED, $selector->fetchData());
     }
+
+    public function testSelectManagerDataFirst(): void
+    {
+        $selector = (new Select($this->orm, Manager::class))->limit(1);
+
+        $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);
+    }
 }

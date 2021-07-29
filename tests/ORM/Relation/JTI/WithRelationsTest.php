@@ -13,13 +13,24 @@ use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
+use Cycle\ORM\Tests\Relation\JTI\Fixture\Tool;
+use Cycle\ORM\Tests\Relation\JTI\Trait\PersistTrait;
+use Cycle\ORM\Tests\Relation\JTI\Trait\SelectTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Transaction;
 
 abstract class WithRelationsTest extends JtiBaseTest
 {
     use TableTrait;
+    use SelectTrait;
+    use PersistTrait;
 
     protected const
+        TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'],
+        TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'],
+        TOOL_3 = ['id' => 3, 'engineer_id' => 2, 'title' => 'Notepad'],
+        TOOL_4 = ['id' => 4, 'engineer_id' => 2, 'title' => 'IDE'],
+
         BOOK_1 = ['id' => 1, 'title' => 'PHP manual'],
         BOOK_2 = ['id' => 2, 'title' => 'Best mentor'],
         BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'],
@@ -60,6 +71,11 @@ abstract class WithRelationsTest extends JtiBaseTest
             'id'        => 'integer',
             'title'     => 'string',
         ], pk: ['id']);
+        $this->makeTable('tool', [
+            'id'          => 'integer, primary',
+            'engineer_id' => 'integer',
+            'title'       => 'string',
+        ], pk: ['id']);
         $this->makeTable('employee', [
             'id'      => 'integer',
             'name'    => 'string',
@@ -88,6 +104,15 @@ abstract class WithRelationsTest extends JtiBaseTest
             'id' => ['table' => 'employee', 'column' => 'id']
         ], pk: ['id']);
 
+        $this->getDatabase()->table('tool')->insertMultiple(
+            array_keys(static::TOOL_1),
+            [
+                self::TOOL_1,
+                self::TOOL_2,
+                self::TOOL_3,
+                self::TOOL_4,
+            ]
+        );
         $this->getDatabase()->table('book')->insertMultiple(
             array_keys(static::BOOK_1),
             [
@@ -132,11 +157,40 @@ abstract class WithRelationsTest extends JtiBaseTest
         $this->logger->display();
     }
 
-    public function testSelectManagerDataFirst(): void
+    /**
+     * Parent's relation should be initialized
+     */
+    public function testLoadProgramatorAndCheckParentsRelations(): void
     {
-        $selector = (new Select($this->orm, Manager::class))->limit(1);
+        /** @var Programator $entity */
+        $entity = (new Select($this->orm, Programator::class))->wherePK(2)->fetchOne();
 
-        $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);
+        $this->assertInstanceOf(Book::class, $entity->book);
+        $this->assertInstanceOf(Book::class, $entity->tech_book);
+    }
+
+    /**
+     * Parent's relations should be removed or not removed with their parent
+     */
+    public function testRemoveProgramatorWithRelations(): void
+    {
+        /** @var Engineer $engineer */
+        $engineer = (new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne();
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(0);
+
+        $this->assertNull((new Select($this->orm, Programator::class))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne());
+        /** @var Employee $employee */
+        $employee = (new Select($this->orm, Employee::class))->wherePK(2)->fetchOne();
+        $this->assertInstanceOf(Employee::class, $employee);
+        $this->assertInstanceOf(Book::class, $employee->book);
     }
 
     protected function getSchemaArray(): array
@@ -185,7 +239,17 @@ abstract class WithRelationsTest extends JtiBaseTest
                             Relation::INNER_KEY => 'tech_book_id',
                             Relation::OUTER_KEY => 'id',
                         ],
-                    ]
+                    ],
+                    'tools' => [
+                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TARGET => 'tool',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE   => true,
+                            Relation::NULLABLE  => false,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'engineer_id',
+                        ],
+                    ],
                 ],
             ],
             Programator::class => [
@@ -220,6 +284,17 @@ abstract class WithRelationsTest extends JtiBaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS     => ['id', 'title'],
                 Schema::TYPECAST    => ['id' => 'int'],
+                Schema::SCHEMA      => [],
+                Schema::RELATIONS   => [],
+            ],
+            Tool::class => [
+                Schema::ROLE        => 'tool',
+                Schema::MAPPER      => Mapper::class,
+                Schema::DATABASE    => 'default',
+                Schema::TABLE       => 'tool',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS     => ['id', 'title', 'engineer_id'],
+                Schema::TYPECAST    => ['id' => 'int', 'engineer_id' => 'int'],
                 Schema::SCHEMA      => [],
                 Schema::RELATIONS   => [],
             ],

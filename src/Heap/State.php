@@ -46,11 +46,7 @@ final class State implements ConsumerInterface
      */
     public function getStorage(string $type): array
     {
-        if (!isset($this->storage[$type])) {
-            return $this->storage[$type] = [];
-        }
-
-        return $this->storage[$type];
+        return $this->storage[$type] ?? ($this->storage[$type] = []);
     }
 
     public function addToStorage(string $type, Node $node): void

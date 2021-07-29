@@ -68,7 +68,7 @@ final class ORM implements ORMInterface
         ];
     }
 
-    public function resolveRole($entity): string
+    public function resolveRole(string|object $entity): string
     {
         if (is_object($entity)) {
             $node = $this->getHeap()->get($entity);
@@ -194,7 +194,7 @@ final class ORM implements ORMInterface
         return $this->heap;
     }
 
-    public function getMapper($entity): MapperInterface
+    public function getMapper(string|object $entity): MapperInterface
     {
         $role = $this->resolveRole($entity);
         if (isset($this->mappers[$role])) {
@@ -204,7 +204,7 @@ final class ORM implements ORMInterface
         return $this->mappers[$role] = $this->factory->mapper($this, $role);
     }
 
-    public function getRepository($entity): RepositoryInterface
+    public function getRepository(string|object $entity): RepositoryInterface
     {
         $role = $this->resolveRole($entity);
         if (isset($this->repositories[$role])) {

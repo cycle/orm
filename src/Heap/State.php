@@ -38,13 +38,13 @@ final class State implements ConsumerInterface
     }
 
     /**
-     * Storage to store temporary cross entity links.
+     * Storage to store temporary cross entity nodes.
      *
-     * @return iterable<int, Node>
+     * @return Node[]
      *
      * @internal
      */
-    public function getStorage(string $type): iterable
+    public function getStorage(string $type): array
     {
         if (!isset($this->storage[$type])) {
             return $this->storage[$type] = [];

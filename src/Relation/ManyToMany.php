@@ -112,19 +112,26 @@ class ManyToMany extends Relation\AbstractRelation
 
         // $relationName = $this->getTargetRelationName();
         $relationName = $tuple->node->getRole() . '.' . $this->name . ':' . $this->pivotEntity;
+        $pNodes = [];
         foreach ($related as $item) {
             $pivot = $related->get($item);
             if ($pivot !== null) {
                 $pTuple = $pool->offsetGet($pivot);
                 $this->applyPivotChanges($node, $pTuple->node);
+                $pNodes[] = $pTuple->node;
                 $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
         }
         if ($this->mirrorRelation !== null) {
-            foreach ($tuple->state->getStorage($this->name) as $pNode) {
+            $storage = $tuple->state->getStorage($this->name);
+            foreach ($storage as $pNode) {
+                if (in_array($pNode, $pNodes, true)) {
+                    continue;
+                }
                 $this->applyPivotChanges($node, $pNode);
                 $pNode->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
+            $tuple->state->clearStorage($this->name);
         }
     }
 

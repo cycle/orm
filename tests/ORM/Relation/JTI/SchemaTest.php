@@ -4,25 +4,18 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Relation\JTI;
 
-use Cycle\ORM\Heap\Heap;
+use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
-use Cycle\ORM\Tests\Relation\JTI\Trait\PersistTrait;
-use Cycle\ORM\Tests\Relation\JTI\Trait\SelectTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
-abstract class SimpleTest extends JtiBaseTest
+abstract class SchemaTest extends JtiBaseTest
 {
-    use TableTrait;
-    use SelectTrait;
-    use PersistTrait;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -84,9 +77,6 @@ abstract class SimpleTest extends JtiBaseTest
                 self::MANAGER_3,
             ]
         );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-        $this->logger->display();
     }
 
     protected function getSchemaArray(): array
@@ -141,4 +131,60 @@ abstract class SimpleTest extends JtiBaseTest
             ],
         ];
     }
+
+    // todo: move this case to schema-checker
+    // /**
+    //  * @runInSeparateProcess
+    //  */
+    // public function testCyclicParents(): void
+    // {
+    //     set_time_limit(1);
+    //
+    //     $schema = [
+    //         Employee::class => [
+    //             SchemaInterface::ROLE        => 'employee',
+    //             SchemaInterface::MAPPER      => Mapper::class,
+    //             SchemaInterface::DATABASE    => 'default',
+    //             SchemaInterface::TABLE       => 'employee',
+    //             SchemaInterface::PARENT      => 'programator',
+    //             SchemaInterface::PRIMARY_KEY => 'id',
+    //             SchemaInterface::COLUMNS     => ['id', 'name' => 'name_column', 'age'],
+    //             SchemaInterface::TYPECAST    => ['id' => 'int', 'age' => 'int'],
+    //             SchemaInterface::SCHEMA      => [],
+    //             SchemaInterface::RELATIONS   => [],
+    //         ],
+    //         Engineer::class => [
+    //             SchemaInterface::ROLE        => 'engineer',
+    //             SchemaInterface::MAPPER      => Mapper::class,
+    //             SchemaInterface::DATABASE    => 'default',
+    //             SchemaInterface::TABLE       => 'engineer',
+    //             SchemaInterface::PARENT      => 'employee',
+    //             SchemaInterface::PRIMARY_KEY => 'id',
+    //             SchemaInterface::COLUMNS     => ['id', 'level'],
+    //             SchemaInterface::TYPECAST    => ['id' => 'int', 'level' => 'int'],
+    //             SchemaInterface::SCHEMA      => [],
+    //             SchemaInterface::RELATIONS   => [],
+    //         ],
+    //         Programator::class => [
+    //             SchemaInterface::ROLE        => 'programator',
+    //             SchemaInterface::MAPPER      => Mapper::class,
+    //             SchemaInterface::DATABASE    => 'default',
+    //             SchemaInterface::TABLE       => 'programator',
+    //             SchemaInterface::PARENT      => 'engineer',
+    //             SchemaInterface::PRIMARY_KEY => 'id',
+    //             SchemaInterface::COLUMNS     => ['id', 'language'],
+    //             SchemaInterface::TYPECAST    => ['id' => 'int'],
+    //             SchemaInterface::SCHEMA      => [],
+    //             SchemaInterface::RELATIONS   => [],
+    //         ],
+    //     ];
+    //     $this->orm = $this->orm->withSchema(new Schema($schema));
+    //
+    //     $this->expectException(SchemaException::class);
+    //     $this->expectExceptionMessage(
+    //         'A cyclic dependency was found when requesting a relations schema for role `employee`.'
+    //     );
+    //
+    //     (new Select($this->orm, Employee::class))->fetchData();
+    // }
 }

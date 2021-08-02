@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Relation\JTI;
 
+use Cycle\ORM\Collection\ArrayCollectionFactory;
+use Cycle\ORM\Config\RelationConfig;
+use Cycle\ORM\Factory;
+use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\BaseTest;
-use Cycle\ORM\Tests\Relation\JTI\Trait\SelectTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class JtiBaseTest extends BaseTest
 {
     use TableTrait;
-    use SelectTrait;
 
     protected const
         EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38],
@@ -48,4 +50,18 @@ abstract class JtiBaseTest extends BaseTest
         MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
 
     abstract protected function getSchemaArray(): array;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $factory = new Factory(
+            $this->dbal,
+            RelationConfig::getDefault(),
+            null,
+            new ArrayCollectionFactory()
+        );
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()))->withFactory($factory);
+        $this->logger->display();
+    }
 }

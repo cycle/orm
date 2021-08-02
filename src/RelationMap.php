@@ -7,12 +7,10 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation\ActiveRelationInterface;
 use Cycle\ORM\Relation\DependencyInterface;
-use Cycle\ORM\Relation\ManyToMany;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\SameRowRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Relation\ShadowHasMany;
-use JetBrains\PhpStorm\ExpectedValues;
 
 use function count;
 
@@ -59,6 +57,21 @@ final class RelationMap
         foreach ($innerRelations as $relName => $relSchema) {
             $relations[$relName] = $factory->relation($orm, $ormSchema, $role, $relName);
         }
+
+        // add Parent's relations
+        $parent = $ormSchema->define($role, SchemaInterface::PARENT);
+        while ($parent !== null) {
+            foreach ($ormSchema->getInnerRelations($parent) as $relName => $relSchema) {
+                if (isset($relations[$relName])) {
+                    continue;
+                }
+                $relations[$relName] = $factory->relation($orm, $ormSchema, $parent, $relName);
+            }
+
+            $outerRelations += $ormSchema->getOuterRelations($parent);
+            $parent = $ormSchema->define($parent, SchemaInterface::PARENT);
+        }
+
         $result = new self($relations, $outerRelations);
 
         foreach ($outerRelations as $outerRole => $relations) {
@@ -129,7 +142,6 @@ final class RelationMap
                     continue;
                 }
 
-                // $data[$name] = $relation->initDeferred($node);
                 $data[$name] = $relation->initReference($node);
                 $node->setRelation($name, $data[$name]);
                 continue;

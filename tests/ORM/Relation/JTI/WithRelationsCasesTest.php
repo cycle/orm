@@ -6,7 +6,7 @@ namespace Cycle\ORM\Tests\Relation\JTI;
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Book;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
@@ -14,17 +14,10 @@ use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Tool;
-use Cycle\ORM\Tests\Relation\JTI\Trait\PersistTrait;
-use Cycle\ORM\Tests\Relation\JTI\Trait\SelectTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
-abstract class WithRelationsTest extends JtiBaseTest
+abstract class WithRelationsCasesTest extends SimpleCasesTest
 {
-    use TableTrait;
-    use SelectTrait;
-    use PersistTrait;
-
     protected const
         TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'],
         TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'],
@@ -65,7 +58,7 @@ abstract class WithRelationsTest extends JtiBaseTest
 
     public function setUp(): void
     {
-        parent::setUp();
+        JtiBaseTest::setUp();
 
         $this->makeTable('book', [
             'id'        => 'integer',
@@ -152,9 +145,6 @@ abstract class WithRelationsTest extends JtiBaseTest
                 self::MANAGER_3,
             ]
         );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-        $this->logger->display();
     }
 
     /**
@@ -197,15 +187,15 @@ abstract class WithRelationsTest extends JtiBaseTest
     {
         return [
             Employee::class => [
-                Schema::ROLE        => 'employee',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'employee',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name', 'age', 'book_id'],
-                Schema::TYPECAST    => ['id' => 'int', 'book_id' => 'int', 'age' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                SchemaInterface::ROLE        => 'employee',
+                SchemaInterface::MAPPER      => Mapper::class,
+                SchemaInterface::DATABASE    => 'default',
+                SchemaInterface::TABLE       => 'employee',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS     => ['id', 'name', 'age', 'book_id'],
+                SchemaInterface::TYPECAST    => ['id' => 'int', 'book_id' => 'int', 'age' => 'int'],
+                SchemaInterface::SCHEMA      => [],
+                SchemaInterface::RELATIONS   => [
                     'book' => [
                         Relation::TYPE   => Relation::REFERS_TO,
                         Relation::TARGET => 'book',
@@ -220,16 +210,16 @@ abstract class WithRelationsTest extends JtiBaseTest
                 ],
             ],
             Engineer::class => [
-                Schema::ROLE        => 'engineer',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'engineer',
-                Schema::PARENT      => 'employee',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'level', 'tech_book_id'],
-                Schema::TYPECAST    => ['id' => 'int', 'level' => 'int', 'tech_book_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                SchemaInterface::ROLE        => 'engineer',
+                SchemaInterface::MAPPER      => Mapper::class,
+                SchemaInterface::DATABASE    => 'default',
+                SchemaInterface::TABLE       => 'engineer',
+                SchemaInterface::PARENT      => 'employee',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS     => ['id', 'level', 'tech_book_id'],
+                SchemaInterface::TYPECAST    => ['id' => 'int', 'level' => 'int', 'tech_book_id' => 'int'],
+                SchemaInterface::SCHEMA      => [],
+                SchemaInterface::RELATIONS   => [
                     'tech_book' => [
                         Relation::TYPE   => Relation::REFERS_TO,
                         Relation::TARGET => 'book',
@@ -253,50 +243,50 @@ abstract class WithRelationsTest extends JtiBaseTest
                 ],
             ],
             Programator::class => [
-                Schema::ROLE        => 'programator',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'programator',
-                Schema::PARENT      => 'engineer',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'language'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                SchemaInterface::ROLE        => 'programator',
+                SchemaInterface::MAPPER      => Mapper::class,
+                SchemaInterface::DATABASE    => 'default',
+                SchemaInterface::TABLE       => 'programator',
+                SchemaInterface::PARENT      => 'engineer',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS     => ['id', 'language'],
+                SchemaInterface::TYPECAST    => ['id' => 'int'],
+                SchemaInterface::SCHEMA      => [],
+                SchemaInterface::RELATIONS   => [],
             ],
             Manager::class => [
-                Schema::ROLE        => 'manager',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'manager',
-                Schema::PARENT      => 'employee',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'rank'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                SchemaInterface::ROLE        => 'manager',
+                SchemaInterface::MAPPER      => Mapper::class,
+                SchemaInterface::DATABASE    => 'default',
+                SchemaInterface::TABLE       => 'manager',
+                SchemaInterface::PARENT      => 'employee',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS     => ['id', 'rank'],
+                SchemaInterface::TYPECAST    => ['id' => 'int'],
+                SchemaInterface::SCHEMA      => [],
+                SchemaInterface::RELATIONS   => [],
             ],
             Book::class => [
-                Schema::ROLE        => 'book',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'book',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'title'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                SchemaInterface::ROLE        => 'book',
+                SchemaInterface::MAPPER      => Mapper::class,
+                SchemaInterface::DATABASE    => 'default',
+                SchemaInterface::TABLE       => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS     => ['id', 'title'],
+                SchemaInterface::TYPECAST    => ['id' => 'int'],
+                SchemaInterface::SCHEMA      => [],
+                SchemaInterface::RELATIONS   => [],
             ],
             Tool::class => [
-                Schema::ROLE        => 'tool',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tool',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'title', 'engineer_id'],
-                Schema::TYPECAST    => ['id' => 'int', 'engineer_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                SchemaInterface::ROLE        => 'tool',
+                SchemaInterface::MAPPER      => Mapper::class,
+                SchemaInterface::DATABASE    => 'default',
+                SchemaInterface::TABLE       => 'tool',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS     => ['id', 'title', 'engineer_id'],
+                SchemaInterface::TYPECAST    => ['id' => 'int', 'engineer_id' => 'int'],
+                SchemaInterface::SCHEMA      => [],
+                SchemaInterface::RELATIONS   => [],
             ],
         ];
     }

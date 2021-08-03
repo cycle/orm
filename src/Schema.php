@@ -154,6 +154,14 @@ final class Schema implements SchemaInterface
                 $aliases[$item[self::ENTITY]] = $role;
             }
 
+            if (isset($item[self::PARENT]) && class_exists($item[self::PARENT])) {
+                $parent = $item[self::PARENT];
+                while (isset($aliases[$parent])) {
+                    $parent = $aliases[$parent];
+                }
+                $item[self::PARENT] = $parent;
+            }
+
             unset($item[self::ROLE]);
             $result[$role] = $item;
         }

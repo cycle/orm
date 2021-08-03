@@ -1,16 +1,10 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Fixtures;
+namespace Cycle\ORM\Command\Branch;
 
+use Closure;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Command\StoreCommandInterface;
@@ -21,8 +15,7 @@ final class WrappedStoreCommand implements StoreCommandInterface
 {
     private StoreCommandInterface $command;
 
-    /** @var null|callable */
-    private $beforeExecute;
+    private ?Closure $beforeExecute = null;
 
     private function __construct(StoreCommandInterface $command)
     {
@@ -50,10 +43,15 @@ final class WrappedStoreCommand implements StoreCommandInterface
         return new self(new Update($db, $table, $state, $primaryKeys, $mapper));
     }
 
+    public static function wrapStoreCommand(StoreCommandInterface $command): self
+    {
+        return new self($command);
+    }
+
     public function withBeforeExecute(?callable $callable): self
     {
         $clone = clone $this;
-        $clone->beforeExecute = $callable;
+        $clone->beforeExecute = $callable instanceof Closure ? $callable : Closure::fromCallable($callable);
         return $clone;
     }
 
@@ -70,7 +68,7 @@ final class WrappedStoreCommand implements StoreCommandInterface
     public function execute(): void
     {
         if ($this->beforeExecute !== null) {
-            \Closure::bind($this->beforeExecute, null, self::class)($this);
+            Closure::bind($this->beforeExecute, null, self::class)($this);
         }
         $this->command->execute();
     }

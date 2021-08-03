@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\Branch\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
@@ -455,6 +457,7 @@ final class Transaction implements TransactionInterface
         $tuple->state = $tuple->state ?? $tuple->node->getState();
         $isNew = $tuple->node->getStatus() === Node::NEW;
         $tuple->state->setStatus($isNew ? Node::SCHEDULED_INSERT : Node::SCHEDULED_UPDATE);
+        $schema = $this->orm->getSchema();
 
         /**
          * @see \Cycle\ORM\MapperInterface::queueCreate()
@@ -463,18 +466,18 @@ final class Transaction implements TransactionInterface
         $method = $isNew ? 'queueCreate' : 'queueUpdate';
 
         $parents = $commands = [];
-        $parent = $this->orm->getSchema()->define($tuple->node->getRole(), SchemaInterface::PARENT);
+        $parent = $schema->define($tuple->node->getRole(), SchemaInterface::PARENT);
         while ($parent !== null) {
             array_unshift($parents, $parent);
-            $parent = $this->orm->getSchema()->define($parent, SchemaInterface::PARENT);
+            $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
         foreach ($parents as $parent) {
             $parentMapper = $this->orm->getMapper($parent);
-            $commands[] = $parentMapper->$method($tuple->entity, $tuple->node, $tuple->state);
+            $commands[$parent] = $parentMapper->$method($tuple->entity, $tuple->node, $tuple->state);
         }
-        $commands[] = $tuple->mapper->$method($tuple->entity, $tuple->node, $tuple->state);
+        $commands[$tuple->node->getRole()] = $tuple->mapper->$method($tuple->entity, $tuple->node, $tuple->state);
 
-        return count($commands) === 1 ? $commands[0] : (new Sequence())->addCommand(...$commands);
+        return count($commands) === 1 ? current($commands) : $this->buildStoreSequence($commands, $tuple);
     }
 
     public function generateDeleteCommand(Tuple $tuple): CommandInterface
@@ -498,5 +501,40 @@ final class Transaction implements TransactionInterface
         $keys = $this->orm->getSchema()->define($role, Schema::FIND_BY_KEYS) ?? [];
 
         return $this->indexes[$role] = array_merge([$pk], $keys);
+    }
+
+    /**
+     * @param array<string, StoreCommandInterface> $commands
+     */
+    private function buildStoreSequence(array $commands, Tuple $tuple): CommandInterface
+    {
+        $parent = null;
+        $schema = $this->orm->getSchema();
+        $result = [];
+        foreach ($commands as $role => $command) {
+            // Current parent has no parent
+            if ($parent === null) {
+                $result[] = $command;
+                $parent = $role;
+                continue;
+            }
+
+            $command = WrappedStoreCommand::wrapStoreCommand($command);
+
+            // Transact PK from previous parent to current
+            $parentKey = (array)($schema->define($role, SchemaInterface::PARENT_KEY)
+                ?? $schema->define($parent, SchemaInterface::PRIMARY_KEY));
+            $primaryKey = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
+            $result[] = $command->withBeforeExecute(
+                static function (WrappedStoreCommand $command) use ($tuple, $parentKey, $primaryKey): void {
+                    foreach ($primaryKey as $i => $pk) {
+                        $command->registerAppendix($pk, $tuple->state->getValue($parentKey[$i]));
+                    }
+                }
+            );
+            $parent = $role;
+        }
+
+        return (new Sequence())->addCommand(...$result);
     }
 }

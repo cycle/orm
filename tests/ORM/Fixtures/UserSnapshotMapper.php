@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Fixtures;
 
 use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\Branch\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Heap\Node;

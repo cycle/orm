@@ -52,6 +52,7 @@ abstract class SingleTableTest extends SimpleCasesTest
     public function setUp(): void
     {
         JtiBaseTest::setUp();
+        $this->logger->hide();
 
         $this->makeTable('employee_table', [
             'employee_id_column' => 'integer',
@@ -68,7 +69,7 @@ abstract class SingleTableTest extends SimpleCasesTest
         ], fk: [
             'role_id_column' => ['table' => 'employee_table', 'column' => 'employee_id_column'],
             'subrole_id_column' => ['table' => 'role_table', 'column' => 'role_id_column'],
-        ], pk: ['role_id_column']);
+        ]);
 
         $this->getDatabase()->table('employee_table')->insertMultiple(
             ['employee_id_column', 'name_column', 'age'],
@@ -95,6 +96,7 @@ abstract class SingleTableTest extends SimpleCasesTest
                 self::PROGRAMATOR_4,
             ]
         );
+        $this->logger->display();
     }
 
     protected function getSchemaArray(): array
@@ -204,10 +206,17 @@ abstract class SingleTableTest extends SimpleCasesTest
         $this->save($programator);
         $this->assertNumWrites(0);
 
+        $this->assertSame(5, $programator->employee_id);
+        $this->assertSame(5, $programator->role_id);
+        $this->assertSame(5, $programator->subrole_id);
+
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
             ->wherePK($programator->subrole_id)
             ->fetchOne();
+        $this->assertSame(5, $programator->employee_id);
+        $this->assertSame(5, $programator->role_id);
+        $this->assertSame(5, $programator->subrole_id);
         $this->assertSame('Merlin', $programator->name);
         $this->assertSame(50, $programator->level);
         $this->assertSame('VanillaJS', $programator->language);

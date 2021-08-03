@@ -17,11 +17,6 @@ final class Insert extends StoreCommand
 {
     use ErrorTrait;
 
-    /**
-     * Special identifier to forward insert key into
-     */
-    public const INSERT_ID = '@lastInsertID';
-
     /** @var string[] */
     protected array $primaryKeys;
 
@@ -87,6 +82,8 @@ final class Insert extends StoreCommand
                 unset($data[$key]);
             }
         }
+
+        $toInsert = $this->mapper === null ? $data : ($this->mapper)($data);
 
         $insert = $this->db
             ->insert($this->table)

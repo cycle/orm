@@ -16,6 +16,40 @@ use Cycle\ORM\Transaction;
 
 abstract class SimpleCasesTest extends JtiBaseTest
 {
+    protected const
+        EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38],
+        EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'age' => 35],
+        EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'age' => 27],
+        EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'age' => 32],
+
+        ENGINEER_2 = ['id' => 2, 'level' => 8],
+        ENGINEER_4 = ['id' => 4, 'level' => 10],
+
+        PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'],
+        PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'],
+
+        MANAGER_1 = ['id' => 1, 'rank' => 'top'],
+        MANAGER_3 = ['id' => 3, 'rank' => 'bottom'],
+
+        EMPLOYEE_1_LOADED = self::EMPLOYEE_1,
+        EMPLOYEE_2_LOADED = self::EMPLOYEE_2,
+        EMPLOYEE_3_LOADED = self::EMPLOYEE_3,
+        EMPLOYEE_4_LOADED = self::EMPLOYEE_4,
+
+        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED,
+        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED,
+
+        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED,
+        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED,
+
+        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED,
+        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED,
+
+        EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
+        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
+        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
+        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+
     public function setUp(): void
     {
         parent::setUp();
@@ -157,8 +191,6 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEngineerDataFirst(): void
     {
-        $this->logger->display();
-
         $selector = (new Select($this->orm, Engineer::class))->limit(1);
 
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);
@@ -271,15 +303,15 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testRemoveEngineer(): void
     {
-        /** @var Engineer $engineer */
-        $engineer = (new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne();
+        /** @var Engineer $entity */
+        $entity = (new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne();
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
+        (new Transaction($this->orm))->delete($entity)->run();
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
+        (new Transaction($this->orm))->delete($entity)->run();
         $this->assertNumWrites(0);
 
         $this->assertNull((new Select($this->orm, Programator::class))->wherePK(2)->fetchOne());

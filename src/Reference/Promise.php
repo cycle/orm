@@ -48,12 +48,12 @@ final class Promise implements ReferenceInterface
         return $this->origin->hasValue();
     }
 
-    public function setValue($value): void
+    public function setValue(mixed $value): void
     {
         $this->origin->setValue($value);
     }
 
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->origin->getValue();
     }

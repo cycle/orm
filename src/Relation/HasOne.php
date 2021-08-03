@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\DeferredReference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Transaction\Pool;
@@ -27,7 +26,7 @@ class HasOne extends AbstractRelation
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $this->compareReference($original, $related)) {
+            if (!$load && $this->compareReferences($original, $related)) {
                 $original = $related instanceof ReferenceInterface ? $this->resolve($related, false) : $related;
                 if ($original === null) {
                     // not found in heap
@@ -63,17 +62,6 @@ class HasOne extends AbstractRelation
             $this->deleteChild($pool, $original);
         }
         $pool->attachStore($related, true, $rNode);
-    }
-
-    private function compareReference(ReferenceInterface $original, $related): bool
-    {
-        if ($original instanceof DeferredReference || $original === $related) {
-            return true;
-        }
-        if ($related instanceof ReferenceInterface) {
-            return $related->getScope() === $original->getScope();
-        }
-        return false;
     }
 
     public function queue(Pool $pool, Tuple $tuple): void

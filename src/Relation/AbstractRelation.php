@@ -11,7 +11,6 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\SourceInterface;
-use JetBrains\PhpStorm\ExpectedValues;
 
 abstract class AbstractRelation implements ActiveRelationInterface
 {
@@ -146,5 +145,16 @@ abstract class AbstractRelation implements ActiveRelationInterface
         foreach ($this->innerKeys as $key) {
             $state->waitField($key, $required);
         }
+    }
+
+    protected function compareReferences(ReferenceInterface $original, mixed $related): bool
+    {
+        if ($original === $related) {
+            return true;
+        }
+        if ($related instanceof ReferenceInterface) {
+            return $related->getScope() === $original->getScope();
+        }
+        return false;
     }
 }

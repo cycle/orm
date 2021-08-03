@@ -162,8 +162,6 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
 
         $t->setPreference($p);
 
-        $this->logger->display();
-
         $this->captureWriteQueries();
         $this->save($t);
         $this->assertNumWrites(3);

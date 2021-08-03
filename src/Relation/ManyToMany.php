@@ -11,6 +11,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\RootNode;
+use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
@@ -198,9 +199,7 @@ class ManyToMany extends Relation\AbstractRelation
         $nodeData = $node->getData();
         foreach ($this->innerKeys as $key) {
             if (!isset($nodeData[$key])) {
-                $result = new \Cycle\ORM\Reference\DeferredReference($node->getRole(), []);
-                $result->setValue(new PivotedStorage());
-                return $result;
+                return new EmptyReference($node->getRole(), new PivotedStorage());
             }
             $scope[$key] = $nodeData[$key];
         }

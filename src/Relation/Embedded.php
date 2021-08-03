@@ -10,7 +10,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
@@ -98,7 +98,7 @@ final class Embedded implements SameRowRelationInterface
             $result->setValue(null);
             return $result;
         }
-        return $scope === [] ? new DeferredReference($this->target, []) :  new Reference($this->target, $scope);
+        return $scope === [] ? new EmptyReference($this->target, null) :  new Reference($this->target, $scope);
     }
 
     protected function getReferenceScope(Node $node): ?array

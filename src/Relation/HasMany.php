@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
@@ -22,12 +22,11 @@ class HasMany extends AbstractRelation
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        // $related = $tuple->state->getRelation($this->getName());
         $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $related === $original && !$original->hasValue()) {
+            if (!$load && $this->compareReferences($original, $related) && !$original->hasValue()) {
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
@@ -144,7 +143,7 @@ class HasMany extends AbstractRelation
     {
         $scope = $this->getReferenceScope($node);
         return $scope === null
-            ? new DeferredReference($node->getRole(), [])
+            ? new EmptyReference($node->getRole(), [])
             : new Reference($this->target, $scope);
     }
 

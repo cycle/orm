@@ -22,13 +22,7 @@ interface ReferenceInterface
 
     public function hasValue(): bool;
 
-    /**
-     * @param mixed $value
-     */
-    public function setValue($value): void;
+    public function setValue(mixed $value): void;
 
-    /**
-     * @return mixed
-     */
-    public function getValue();
+    public function getValue(): mixed;
 }

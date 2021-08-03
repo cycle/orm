@@ -16,7 +16,7 @@ use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Tool;
 use Cycle\ORM\Transaction;
 
-abstract class WithRelationsCasesTest extends SimpleCasesTest
+abstract class WithRelationsTest extends SimpleCasesTest
 {
     protected const
         TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'],

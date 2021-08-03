@@ -8,6 +8,6 @@ final class Manager extends Employee
 {
     public ?int $role_id = null;
 
-    public int $level = 0;
+    public ?int $level = null;
     public string $rank = 'none';
 }

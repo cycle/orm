@@ -27,9 +27,10 @@ abstract class CompositePKTest extends SimpleCasesTest
         MANAGER_3 =  ['_type' => 'manager', 'id' => 3, 'role_id' => 4, 'level' => null, 'rank' => 'bottom'],
 
         ENGINEER_2_PK = ['id' => 2, 'role_id' => 3],
+        PROGRAMATOR_2_PK = ['second_id' => 3, 'subrole_id' => 2],
 
-        PROGRAMATOR_2 = ['id' => 2, 'subrole_id' => 3, 'language' => 'php'],
-        PROGRAMATOR_4 = ['id' => 4, 'subrole_id' => 5, 'language' => 'go'],
+        PROGRAMATOR_2 = ['second_id' => 3, 'subrole_id' => 2, 'language' => 'php'],
+        PROGRAMATOR_4 = ['second_id' => 5, 'subrole_id' => 4, 'language' => 'go'],
 
         EMPLOYEE_1_LOADED = self::EMPLOYEE_1,
         EMPLOYEE_2_LOADED = self::EMPLOYEE_2,
@@ -76,8 +77,8 @@ abstract class CompositePKTest extends SimpleCasesTest
             'subrole_id' => 'integer',
             'language' => 'string',
         ], fk: [
-            'id' => ['table' => 'engineer', 'column' => 'id'],
-            'subrole_id' => ['table' => 'engineer', 'column' => 'role_id'],
+            'id' => ['table' => 'engineer', 'column' => 'role_id'],
+            'subrole_id' => ['table' => 'engineer', 'column' => 'id'],
         ], pk: ['id', 'subrole_id']);
 
         $this->getDatabase()->table('employee')->insertMultiple(
@@ -155,9 +156,10 @@ abstract class CompositePKTest extends SimpleCasesTest
                 SchemaInterface::DATABASE    => 'default',
                 SchemaInterface::TABLE       => 'programator',
                 SchemaInterface::PARENT      => Engineer::class,
-                SchemaInterface::PRIMARY_KEY => ['id', 'subrole_id'],
-                SchemaInterface::COLUMNS     => ['id', 'subrole_id', 'language'],
-                SchemaInterface::TYPECAST    => ['id' => 'int', 'subrole_id' => 'int'],
+                SchemaInterface::PARENT_KEY  => ['role_id', 'id'],
+                SchemaInterface::PRIMARY_KEY => ['second_id', 'subrole_id'],
+                SchemaInterface::COLUMNS     => ['second_id' => 'id', 'subrole_id', 'language'],
+                SchemaInterface::TYPECAST    => ['second_id' => 'int', 'subrole_id' => 'int'],
                 SchemaInterface::SCHEMA      => [],
                 SchemaInterface::RELATIONS   => [],
             ],
@@ -221,12 +223,13 @@ abstract class CompositePKTest extends SimpleCasesTest
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
-            ->wherePK([10, 11])
+            ->wherePK(['second_id' => 11, 'subrole_id' => 10])
             ->fetchOne();
         $this->assertSame(10, $programator->id);
         $this->assertSame(11, $programator->employee_id);
         $this->assertSame(11, $programator->role_id);
-        $this->assertSame(11, $programator->subrole_id);
+        $this->assertSame(10, $programator->subrole_id);
+        $this->assertSame(11, $programator->second_id);
         $this->assertSame('Merlin', $programator->name);
         $this->assertSame(50, $programator->level);
         $this->assertSame('VanillaJS', $programator->language);

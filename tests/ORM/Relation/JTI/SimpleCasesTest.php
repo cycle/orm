@@ -23,7 +23,6 @@ abstract class SimpleCasesTest extends JtiBaseTest
         EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'age' => 32],
 
         ENGINEER_2 = ['id' => 2, 'level' => 8],
-        ENGINEER_2_PK = 2,
         ENGINEER_4 = ['id' => 4, 'level' => 10],
 
         PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'],
@@ -31,6 +30,9 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
         MANAGER_1 = ['id' => 1, 'rank' => 'top'],
         MANAGER_3 = ['id' => 3, 'rank' => 'bottom'],
+
+        ENGINEER_2_PK = 2,
+        PROGRAMATOR_2_PK = self::ENGINEER_2_PK,
 
         EMPLOYEE_1_LOADED = self::EMPLOYEE_1,
         EMPLOYEE_2_LOADED = self::EMPLOYEE_2,
@@ -229,7 +231,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testProgramatorNoChanges(): void
     {
-        $programator = (new Select($this->orm, Programator::class))->wherePK(static::ENGINEER_2_PK)->fetchOne();
+        $programator = (new Select($this->orm, Programator::class))->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
 
         $this->captureWriteQueries();
         $this->save($programator);
@@ -240,7 +242,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     {
         /** @var Programator $programator */
         $programator = (new Select($this->orm, Programator::class))
-            ->wherePK(static::ENGINEER_2_PK)->fetchOne();
+            ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $programator->language = 'Kotlin';
 
         $this->captureWriteQueries();
@@ -253,7 +255,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
-            ->wherePK(static::ENGINEER_2_PK)->fetchOne();
+            ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $this->assertSame('Kotlin', $programator->language);
     }
 
@@ -261,7 +263,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     {
         /** @var Programator $programator */
         $programator = (new Select($this->orm, Programator::class))
-            ->wherePK(static::ENGINEER_2_PK)->fetchOne();
+            ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $programator->language = 'Kotlin';
         $programator->level = 99;
         $programator->name = 'Thomas';
@@ -276,7 +278,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
-            ->wherePK(static::ENGINEER_2_PK)->fetchOne();
+            ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $this->assertSame('Kotlin', $programator->language);
         $this->assertSame(99, $programator->level);
         $this->assertSame('Thomas', $programator->name);

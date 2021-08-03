@@ -9,7 +9,7 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\MergeNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
@@ -36,9 +36,9 @@ class JoinedTableInheritanceLoader extends JoinableLoader
         $schema = $orm->getSchema();
 
         $schemaArray = [
-            Relation::INNER_KEY => $schema->define($role, Schema::PRIMARY_KEY),
-            Relation::OUTER_KEY => $schema->define($target, Schema::PARENT_KEY)
-                ?? $schema->define($target, Schema::PRIMARY_KEY),
+            Relation::INNER_KEY => $schema->define($role, SchemaInterface::PRIMARY_KEY),
+            Relation::OUTER_KEY => $schema->define($role, SchemaInterface::PARENT_KEY)
+                ?? $schema->define($target, SchemaInterface::PRIMARY_KEY),
         ];
         $this->options['as'] ??= $target;
         parent::__construct($orm, $role, $target, $schemaArray);
@@ -90,12 +90,12 @@ class JoinedTableInheritanceLoader extends JoinableLoader
 
         $node = new MergeNode(
             $this->columnNames(),
-            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],
             (array)$this->schema[Relation::INNER_KEY]
         );
 
-        $typecast = $this->define(Schema::TYPECAST);
+        $typecast = $this->define(SchemaInterface::TYPECAST);
         if ($typecast !== null) {
             $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
         }

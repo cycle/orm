@@ -64,6 +64,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
     public function setUp(): void
     {
         JtiBaseTest::setUp();
+        $this->logger->hide();
 
         $this->makeTable('book', [
             'id'        => 'integer',
@@ -150,6 +151,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
                 self::MANAGER_3,
             ]
         );
+        $this->logger->display();
     }
 
     /**
@@ -158,10 +160,12 @@ abstract class WithRelationsTest extends SimpleCasesTest
     public function testLoadProgramatorAndCheckParentsRelations(): void
     {
         /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne();
+        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->load('tech_book')
+            ->wherePK(2)->fetchOne();
 
-        $this->assertInstanceOf(Book::class, $entity->book);
-        $this->assertInstanceOf(Book::class, $entity->tech_book);
+        $this->assertNotNull($entity->book);
+        $this->assertNotNull($entity->tech_book);
     }
 
     /**

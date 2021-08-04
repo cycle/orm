@@ -69,9 +69,9 @@ class ClasslessProxyFactory
         foreach ((array)$entity as $key => $value) {
             $result[$key[0] === "\0" ? substr($key, strrpos($key, "\0", 1) + 1) : $key] = $value;
         }
-        unset($result['__cycle_orm_rel_map']);
-        unset($result['__cycle_orm_rel_data']);
-        return $result;
+        $relations = $result['__cycle_orm_rel_data'];
+        unset($result['__cycle_orm_rel_map'], $result['__cycle_orm_rel_data']);
+        return $relations + $result;
     }
 
     private function defineClass(string $role, RelationMap $relMap, array $fields): ?string
@@ -98,11 +98,11 @@ class ClasslessProxyFactory
         $properties = implode("\n    ", $properties);
 
         $this->classMap[$role] = $class;
-        /** @see \Cycle\ORM\Mapper\Proxy\EntityProxyTrait */
+        /** @see \Cycle\ORM\Mapper\Proxy\ClasslessProxyTrait */
         $classStr = <<<PHP
             namespace {$namespace};
             class {$className} {
-                use \\Cycle\ORM\\Mapper\\Proxy\\EntityProxyTrait;
+                use \\Cycle\ORM\\Mapper\\Proxy\\ClasslessProxyTrait;
 
                 {$properties}
             }

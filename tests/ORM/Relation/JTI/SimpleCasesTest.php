@@ -61,6 +61,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     public function setUp(): void
     {
         parent::setUp();
+        $this->logger->hide();
 
         $this->makeTable('employee', [
             'id'          => 'integer',
@@ -119,6 +120,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
                 self::MANAGER_3,
             ]
         );
+        $this->logger->display();
     }
 
     protected function getSchemaArray(): array

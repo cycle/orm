@@ -24,7 +24,7 @@ final class ClasslessMapper extends DatabaseMapper
 
     public function init(array $data): object
     {
-        return $this->entityFactory->create($this->orm, $this->role, array_keys($this->columns));
+        return $this->entityFactory->create($this->orm, $this->role, array_keys($this->columns + $this->parentColumns));
     }
 
     public function hydrate($entity, array $data): object

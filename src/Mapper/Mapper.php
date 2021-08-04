@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
+use Cycle\ORM\Mapper\Traits\SingleTableTrait;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
 use Cycle\ORM\RelationMap;
@@ -16,9 +17,9 @@ use Cycle\ORM\SchemaInterface;
  */
 class Mapper extends DatabaseMapper
 {
-    // system column to store entity type for STI
-    public const ENTITY_TYPE = '_type';
+    use SingleTableTrait;
 
+    /** @var class-string */
     protected string $entity;
 
     protected array $children = [];
@@ -35,6 +36,7 @@ class Mapper extends DatabaseMapper
         $this->children = $orm->getSchema()->define($role, SchemaInterface::CHILDREN) ?? [];
         $this->entityFactory = $entityFactory;
         $this->relationMap = $orm->getRelationMap($role);
+        $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
     }
 
     public function init(array $data): object
@@ -57,40 +59,15 @@ class Mapper extends DatabaseMapper
 
     public function fetchFields(object $entity): array
     {
-        $columns = array_intersect_key(
+        $values = array_intersect_key(
             $this->entityFactory->extractData($this->relationMap, $entity),
             $this->columns + $this->parentColumns
         );
-
-        $class = get_class($entity);
-        if ($class !== $this->entity) {
-            // inheritance
-            foreach ($this->children as $alias => $childClass) {
-                if ($childClass == $class) {
-                    $columns[self::ENTITY_TYPE] = $alias;
-                    break;
-                }
-            }
-        }
-
-        return $columns;
+        return $values + $this->getDiscriminatorValues($entity);
     }
 
     public function fetchRelations(object $entity): array
     {
         return $this->entityFactory->extractRelations($this->relationMap, $entity);
-    }
-
-    /**
-     * Classname to represent entity.
-     */
-    protected function resolveClass(array $data): string
-    {
-        $class = $this->entity;
-        if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
-            $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
-        }
-
-        return $class;
     }
 }

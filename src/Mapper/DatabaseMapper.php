@@ -16,6 +16,7 @@ use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\SourceInterface;
 
@@ -42,28 +43,24 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function __construct(ORMInterface $orm, string $role)
     {
-        if (!$orm instanceof Select\SourceProviderInterface) {
-            throw new MapperException('Source factory is missing');
-        }
-
         $this->orm = $orm;
         $this->role = $role;
 
         $this->source = $orm->getSource($role);
-        foreach ($orm->getSchema()->define($role, Schema::COLUMNS) as $property => $column) {
+        foreach ($orm->getSchema()->define($role, SchemaInterface::COLUMNS) as $property => $column) {
             $this->columns[is_int($property) ? $column : $property] = $column;
         }
 
         // Parent's fields
-        $parent = $orm->getSchema()->define($role, Schema::PARENT);
+        $parent = $orm->getSchema()->define($role, SchemaInterface::PARENT);
         while ($parent !== null) {
-            foreach ($orm->getSchema()->define($parent, Schema::COLUMNS) as $property => $column) {
+            foreach ($orm->getSchema()->define($parent, SchemaInterface::COLUMNS) as $property => $column) {
                 $this->parentColumns[is_int($property) ? $column : $property] = $column;
             }
-            $parent = $orm->getSchema()->define($parent, Schema::PARENT);
+            $parent = $orm->getSchema()->define($parent, SchemaInterface::PARENT);
         }
 
-        $this->primaryKeys = (array)$orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $this->primaryKeys = (array)$orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
         foreach ($this->primaryKeys as $PK) {
             $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
         }

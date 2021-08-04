@@ -21,10 +21,10 @@ abstract class SingleTableTest extends SimpleCasesTest
         EMPLOYEE_3 = ['employee_id' => 3, 'name' => 'Kentarius', 'age' => 27],
         EMPLOYEE_4 = ['employee_id' => 4, 'name' => 'Valeriy', 'age' => 32],
 
-        ENGINEER_2 = ['_type' => 'engineer', 'role_id' => 2, 'level' => 8, 'rank' => ''],
-        ENGINEER_4 = ['_type' => 'engineer', 'role_id' => 4, 'level' => 10, 'rank' => ''],
-        MANAGER_1  = ['_type' => 'manager', 'role_id' => 1, 'level' => 0, 'rank' => 'top'],
-        MANAGER_3  = ['_type' => 'manager', 'role_id' => 3, 'level' => 0, 'rank' => 'bottom'],
+        ENGINEER_2 = ['discriminator' => 'engineer', 'role_id' => 2, 'level' => 8, 'rank' => ''],
+        ENGINEER_4 = ['discriminator' => 'engineer', 'role_id' => 4, 'level' => 10, 'rank' => ''],
+        MANAGER_1  = ['discriminator' => 'manager', 'role_id' => 1, 'level' => 0, 'rank' => 'top'],
+        MANAGER_3  = ['discriminator' => 'manager', 'role_id' => 3, 'level' => 0, 'rank' => 'bottom'],
 
         PROGRAMATOR_2 = ['subrole_id' => 2, 'language' => 'php'],
         PROGRAMATOR_4 = ['subrole_id' => 4, 'language' => 'go'],
@@ -45,6 +45,7 @@ abstract class SingleTableTest extends SimpleCasesTest
 
         EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
+        ROLES_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::ENGINEER_2_LOADED, self::EMPLOYEE_3_LOADED, self::ENGINEER_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
         MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED],
 
@@ -65,7 +66,7 @@ abstract class SingleTableTest extends SimpleCasesTest
         $this->makeTable('role_table', [
             'role_id_column' => 'integer,nullable',
             'subrole_id_column' => 'integer,nullable',
-            '_type' => 'string,nullable',
+            'discriminator' => 'string,nullable',
             'level' => 'integer,nullable',
             'rank' => 'string,nullable',
             'language' => 'string,nullable',
@@ -84,7 +85,7 @@ abstract class SingleTableTest extends SimpleCasesTest
             ]
         );
         $this->getDatabase()->table('role_table')->insertMultiple(
-            ['_type', 'role_id_column', 'level', 'rank'],
+            ['discriminator', 'role_id_column', 'level', 'rank'],
             [
                 self::MANAGER_1,
                 self::ENGINEER_2,
@@ -136,7 +137,8 @@ abstract class SingleTableTest extends SimpleCasesTest
                     'manager'  => Manager::class,
                 ],
                 SchemaInterface::PRIMARY_KEY => 'role_id',
-                SchemaInterface::COLUMNS     => ['role_id' => 'role_id_column', 'level', 'rank', '_type'],
+                SchemaInterface::DISCRIMINATOR => 'discriminator',
+                SchemaInterface::COLUMNS     => ['role_id' => 'role_id_column', 'level', 'rank', 'discriminator'],
                 SchemaInterface::TYPECAST    => ['role_id' => 'int', 'level' => 'int'],
                 SchemaInterface::SCHEMA      => [],
                 SchemaInterface::RELATIONS   => [],
@@ -160,16 +162,31 @@ abstract class SingleTableTest extends SimpleCasesTest
     {
         $selector = (new Select($this->orm, Engineer::class))
             // todo: this condition should be added automatically by STI
-            ->where('_type', '=', 'engineer');
+            ->where('discriminator', '=', 'engineer');
 
         $this->assertEquals(static::ENGINEER_ALL_LOADED, $selector->fetchData());
+    }
+
+    public function testFetchAllChildren(): void
+    {
+        /** @var Manager[]|Engineer[] $entities */
+        $entities = (new Select($this->orm, 'role'))->fetchAll();
+
+        $this->assertSame(1, $entities[0]->role_id);
+        $this->assertInstanceOf(Manager::class, $entities[0]);
+        $this->assertSame(2, $entities[1]->role_id);
+        $this->assertInstanceOf(Engineer::class, $entities[1]);
+        $this->assertSame(3, $entities[2]->role_id);
+        $this->assertInstanceOf(Manager::class, $entities[2]);
+        $this->assertSame(4, $entities[3]->role_id);
+        $this->assertInstanceOf(Engineer::class, $entities[3]);
     }
 
     public function testSelectEngineerDataFirst(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
             // todo: this condition should be added automatically by STI
-            ->where('_type', '=', 'engineer')
+            ->where('discriminator', '=', 'engineer')
             ->limit(1);
 
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);
@@ -179,7 +196,7 @@ abstract class SingleTableTest extends SimpleCasesTest
     {
         $selector = (new Select($this->orm, Manager::class))
             // todo: this condition should be added automatically by STI
-            ->where('_type', '=', 'manager');
+            ->where('discriminator', '=', 'manager');
 
         $this->assertEquals(static::MANAGER_ALL_LOADED, $selector->fetchData());
     }
@@ -188,7 +205,7 @@ abstract class SingleTableTest extends SimpleCasesTest
     {
         $selector = (new Select($this->orm, Manager::class))
             // todo: this condition should be added automatically by STI
-            ->where('_type', '=', 'manager')
+            ->where('discriminator', '=', 'manager')
             ->limit(1);
 
         $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);

@@ -113,7 +113,6 @@ abstract class ManyToManySingleEntityTest extends BaseTest
             ->wherePK('superAdmin')->fetchOne();
 
         self::assertInstanceOf(RbacRole::class, $fetchedRole);
-        $fetchedRole->children;
         self::assertCount(1, $fetchedRole->children);
         self::assertInstanceOf(RbacPermission::class, $fetchedRole->children->first());
         self::assertSame('writeUser', $fetchedRole->children->first()->name);

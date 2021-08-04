@@ -13,7 +13,7 @@ final class Schema implements SchemaInterface
 {
     private array $aliases;
 
-    private array $schema = [];
+    private array $schema;
 
     public function __construct(array $schema)
     {
@@ -95,12 +95,12 @@ final class Schema implements SchemaInterface
         return isset($this->schema[$role]) || isset($this->aliases[$role]);
     }
 
-    public function define(string $role, int $property)
+    public function define(string $role, int $property): mixed
     {
         $role = $this->resolveAlias($role) ?? $role;
 
         if (!isset($this->schema[$role])) {
-            throw new SchemaException("Undefined schema `{$role}`, not found");
+            throw new SchemaException("Undefined schema `{$role}`, not found.");
         }
 
         return $this->schema[$role][$property] ?? null;
@@ -111,7 +111,7 @@ final class Schema implements SchemaInterface
         $relations = $this->define($role, self::RELATIONS);
 
         if (!isset($relations[$relation])) {
-            throw new SchemaException("Undefined relation `{$role}`.`{$relation}`");
+            throw new SchemaException("Undefined relation `{$role}`.`{$relation}`.");
         }
 
         return $relations[$relation];

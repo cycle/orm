@@ -57,7 +57,7 @@ abstract class AbstractNode
     /** @internal */
     protected ?TypecastInterface $typecast = null;
 
-    /** @var AbstractNode[] */
+    /** @var array<string, AbstractNode> */
     protected array $nodes = [];
 
     protected ?AbstractNode $merge = null;
@@ -102,8 +102,6 @@ abstract class AbstractNode
     /**
      * Parse given row of data and populate reference tree.
      *
-     * @param int   $offset
-     * @param array $row
      * @return int Must return number of parsed columns.
      */
     public function parseRow(int $offset, array $row): int
@@ -164,8 +162,6 @@ abstract class AbstractNode
     /**
      * Get list of reference key values aggregated by parent.
      *
-     * @return array
-     *
      * @throws ParserException
      */
     public function getReferenceValues(): array
@@ -184,9 +180,6 @@ abstract class AbstractNode
      * Register new node into NodeTree. Nodes used to convert flat results into tree representation
      * using reference aggregations. Node would not be used to parse incoming row results.
      *
-     * @param string       $container
-     * @param AbstractNode $node
-     *
      * @throws ParserException
      */
     public function linkNode(?string $container, AbstractNode $node): void
@@ -197,11 +190,6 @@ abstract class AbstractNode
             $node->container = $container;
         } else {
             $this->merge = $node;
-            // $this->joins = [...$this->joins, $node, ...$node->joins];
-            // # todo: change for different inner/outer keys
-            // foreach ($this->joins as $node) {
-            //     $node->parent = $this;
-            // }
         }
 
         if ($node->indexName !== null) {
@@ -221,9 +209,6 @@ abstract class AbstractNode
      * Register new node into NodeTree. Nodes used to convert flat results into tree representation
      * using reference aggregations. Node will used to parse row results.
      *
-     * @param string       $container
-     * @param AbstractNode $node
-     *
      * @throws ParserException
      */
     public function joinNode(?string $container, AbstractNode $node): void
@@ -234,9 +219,6 @@ abstract class AbstractNode
 
     /**
      * Fetch sub node.
-     *
-     * @param string $container
-     * @return AbstractNode
      *
      * @throws ParserException
      */
@@ -277,11 +259,6 @@ abstract class AbstractNode
      * "user_id" in "profile" record, which defines reference criteria as 1.
      *
      * Attention, data WILL be referenced to new memory location!
-     *
-     * @param string $container
-     * @param string $index
-     * @param array $criteria
-     * @param array $data
      *
      * @throws ParserException
      */
@@ -371,10 +348,6 @@ abstract class AbstractNode
 
     /**
      * Fetch record columns from query row, must use data offset to slice required part of query.
-     *
-     * @param int   $dataOffset
-     * @param array $line
-     * @return array
      */
     protected function fetchData(int $dataOffset, array $line): array
     {

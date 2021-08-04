@@ -45,7 +45,7 @@ final class ClasslessMapper extends DatabaseMapper
     {
         return array_intersect_key(
             $this->entityFactory->extractData($this->relationMap, $entity),
-            $this->columns
+            $this->columns + $this->parentColumns
         );
     }
 

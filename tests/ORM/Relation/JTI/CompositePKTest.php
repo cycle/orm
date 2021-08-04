@@ -12,6 +12,7 @@ use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
 use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
+use Cycle\ORM\Transaction;
 
 abstract class CompositePKTest extends SimpleCasesTest
 {
@@ -49,12 +50,16 @@ abstract class CompositePKTest extends SimpleCasesTest
         EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED],
+
+        // todo: remove when STI will support classless entities and Schema::CHILDREN's roles
+        PROGRAMATOR_ROLE = Programator::class,
+        ENGINEER_ROLE = Engineer::class;
 
     public function setUp(): void
     {
         JtiBaseTest::setUp();
-        $this->logger->hide();
+        // $this->logger->hide();
 
         $this->makeTable('employee', [
             'id' => 'integer',

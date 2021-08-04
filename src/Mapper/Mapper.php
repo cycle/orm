@@ -7,7 +7,7 @@ namespace Cycle\ORM\Mapper;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
 use Cycle\ORM\RelationMap;
-use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 
 /**
  * Provide the ability to carry data over the specific class instances using proxy classes.
@@ -31,8 +31,8 @@ class Mapper extends DatabaseMapper
     {
         parent::__construct($orm, $role);
 
-        $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
-        $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
+        $this->entity = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
+        $this->children = $orm->getSchema()->define($role, SchemaInterface::CHILDREN) ?? [];
         $this->entityFactory = $entityFactory;
         $this->relationMap = $orm->getRelationMap($role);
     }

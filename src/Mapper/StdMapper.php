@@ -49,7 +49,7 @@ final class StdMapper extends DatabaseMapper
     {
         return array_intersect_key(
             $this->extract($entity),
-            array_flip($this->columns)
+            $this->columns + $this->parentColumns
         );
     }
 

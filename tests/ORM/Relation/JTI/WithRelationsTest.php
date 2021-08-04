@@ -19,6 +19,8 @@ use Cycle\ORM\Transaction;
 abstract class WithRelationsTest extends SimpleCasesTest
 {
     protected const
+        DEFAULT_MAPPER = Mapper::class,
+
         TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'],
         TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'],
         TOOL_3 = ['id' => 3, 'engineer_id' => 2, 'title' => 'Notepad'],
@@ -54,7 +56,10 @@ abstract class WithRelationsTest extends SimpleCasesTest
         EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED],
+
+        TOOL_ROLE = 'tool',
+        BOOK_ROLE = 'book';
 
     public function setUp(): void
     {
@@ -80,7 +85,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
         $this->makeTable('engineer', [
             'id'           => 'integer',
             'level'        => 'integer',
-            'tech_book_id' => 'integer',
+            'tech_book_id' => 'integer,nullable',
         ], fk: [
             'id' => ['table' => 'employee', 'column' => 'id']
         ], pk: ['id']);
@@ -153,7 +158,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
     public function testLoadProgramatorAndCheckParentsRelations(): void
     {
         /** @var Programator $entity */
-        $entity = (new Select($this->orm, Programator::class))->wherePK(2)->fetchOne();
+        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne();
 
         $this->assertInstanceOf(Book::class, $entity->book);
         $this->assertInstanceOf(Book::class, $entity->tech_book);
@@ -165,7 +170,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
     public function testRemoveProgramatorWithRelations(): void
     {
         /** @var Engineer $engineer */
-        $engineer = (new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne();
+        $engineer = (new Select($this->orm, static::ENGINEER_ROLE))->wherePK(2)->fetchOne();
 
         $this->captureWriteQueries();
         (new Transaction($this->orm))->delete($engineer)->run();
@@ -175,20 +180,20 @@ abstract class WithRelationsTest extends SimpleCasesTest
         (new Transaction($this->orm))->delete($engineer)->run();
         $this->assertNumWrites(0);
 
-        $this->assertNull((new Select($this->orm, Programator::class))->wherePK(2)->fetchOne());
-        $this->assertNull((new Select($this->orm, Engineer::class))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->wherePK(2)->fetchOne());
         /** @var Employee $employee */
-        $employee = (new Select($this->orm, Employee::class))->wherePK(2)->fetchOne();
-        $this->assertInstanceOf(Employee::class, $employee);
-        $this->assertInstanceOf(Book::class, $employee->book);
+        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->wherePK(2)->fetchOne();
+        $this->assertNotNull($employee);
+        $this->assertNotNull($employee->book);
     }
 
     protected function getSchemaArray(): array
     {
         return [
-            Employee::class => [
-                SchemaInterface::ROLE        => 'employee',
-                SchemaInterface::MAPPER      => Mapper::class,
+            static::EMPLOYEE_ROLE => [
+                SchemaInterface::ENTITY      => Employee::class,
+                SchemaInterface::MAPPER      => static::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE    => 'default',
                 SchemaInterface::TABLE       => 'employee',
                 SchemaInterface::PRIMARY_KEY => 'id',
@@ -198,7 +203,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
                 SchemaInterface::RELATIONS   => [
                     'book' => [
                         Relation::TYPE   => Relation::REFERS_TO,
-                        Relation::TARGET => 'book',
+                        Relation::TARGET => static::BOOK_ROLE,
                         Relation::LOAD   => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
@@ -209,12 +214,12 @@ abstract class WithRelationsTest extends SimpleCasesTest
                     ]
                 ],
             ],
-            Engineer::class => [
-                SchemaInterface::ROLE        => 'engineer',
-                SchemaInterface::MAPPER      => Mapper::class,
+            static::ENGINEER_ROLE => [
+                SchemaInterface::ENTITY      => Engineer::class,
+                SchemaInterface::MAPPER      => static::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE    => 'default',
                 SchemaInterface::TABLE       => 'engineer',
-                SchemaInterface::PARENT      => 'employee',
+                SchemaInterface::PARENT      => static::EMPLOYEE_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS     => ['id', 'level', 'tech_book_id'],
                 SchemaInterface::TYPECAST    => ['id' => 'int', 'level' => 'int', 'tech_book_id' => 'int'],
@@ -222,7 +227,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
                 SchemaInterface::RELATIONS   => [
                     'tech_book' => [
                         Relation::TYPE   => Relation::REFERS_TO,
-                        Relation::TARGET => 'book',
+                        Relation::TARGET => static::BOOK_ROLE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::NULLABLE  => true,
@@ -232,7 +237,7 @@ abstract class WithRelationsTest extends SimpleCasesTest
                     ],
                     'tools' => [
                         Relation::TYPE   => Relation::HAS_MANY,
-                        Relation::TARGET => 'tool',
+                        Relation::TARGET => static::TOOL_ROLE,
                         Relation::SCHEMA => [
                             Relation::CASCADE   => true,
                             Relation::NULLABLE  => false,
@@ -242,33 +247,33 @@ abstract class WithRelationsTest extends SimpleCasesTest
                     ],
                 ],
             ],
-            Programator::class => [
-                SchemaInterface::ROLE        => 'programator',
-                SchemaInterface::MAPPER      => Mapper::class,
+            static::PROGRAMATOR_ROLE => [
+                SchemaInterface::ENTITY      => Programator::class,
+                SchemaInterface::MAPPER      => static::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE    => 'default',
                 SchemaInterface::TABLE       => 'programator',
-                SchemaInterface::PARENT      => 'engineer',
+                SchemaInterface::PARENT      => static::ENGINEER_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS     => ['id', 'language'],
                 SchemaInterface::TYPECAST    => ['id' => 'int'],
                 SchemaInterface::SCHEMA      => [],
                 SchemaInterface::RELATIONS   => [],
             ],
-            Manager::class => [
-                SchemaInterface::ROLE        => 'manager',
-                SchemaInterface::MAPPER      => Mapper::class,
+            static::MANAGER_ROLE => [
+                SchemaInterface::ENTITY      => Manager::class,
+                SchemaInterface::MAPPER      => static::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE    => 'default',
                 SchemaInterface::TABLE       => 'manager',
-                SchemaInterface::PARENT      => 'employee',
+                SchemaInterface::PARENT      => static::EMPLOYEE_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS     => ['id', 'rank'],
                 SchemaInterface::TYPECAST    => ['id' => 'int'],
                 SchemaInterface::SCHEMA      => [],
                 SchemaInterface::RELATIONS   => [],
             ],
-            Book::class => [
-                SchemaInterface::ROLE        => 'book',
-                SchemaInterface::MAPPER      => Mapper::class,
+            static::BOOK_ROLE => [
+                SchemaInterface::ENTITY      => Book::class,
+                SchemaInterface::MAPPER      => static::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE    => 'default',
                 SchemaInterface::TABLE       => 'book',
                 SchemaInterface::PRIMARY_KEY => 'id',
@@ -277,9 +282,9 @@ abstract class WithRelationsTest extends SimpleCasesTest
                 SchemaInterface::SCHEMA      => [],
                 SchemaInterface::RELATIONS   => [],
             ],
-            Tool::class => [
-                SchemaInterface::ROLE        => 'tool',
-                SchemaInterface::MAPPER      => Mapper::class,
+            static::TOOL_ROLE => [
+                SchemaInterface::ENTITY      => Tool::class,
+                SchemaInterface::MAPPER      => static::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE    => 'default',
                 SchemaInterface::TABLE       => 'tool',
                 SchemaInterface::PRIMARY_KEY => 'id',

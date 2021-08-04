@@ -51,7 +51,12 @@ abstract class SimpleCasesTest extends JtiBaseTest
         EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED],
+
+        EMPLOYEE_ROLE = 'employee',
+        ENGINEER_ROLE = 'engineer',
+        MANAGER_ROLE = 'manager',
+        PROGRAMATOR_ROLE = 'programator';
 
     public function setUp(): void
     {
@@ -173,56 +178,56 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEmployeeAllData(): void
     {
-        $selector = new Select($this->orm, Employee::class);
+        $selector = new Select($this->orm, static::EMPLOYEE_ROLE);
 
         $this->assertEquals(static::EMPLOYEE_ALL_LOADED, $selector->fetchData());
     }
 
     public function testSelectEmployeeDataFirst(): void
     {
-        $selector = (new Select($this->orm, Employee::class))->limit(1);
+        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))->limit(1);
 
         $this->assertEquals(static::EMPLOYEE_1_LOADED, $selector->fetchData()[0]);
     }
 
     public function testSelectEngineerAllData(): void
     {
-        $selector = (new Select($this->orm, Engineer::class));
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE));
 
         $this->assertEquals(static::ENGINEER_ALL_LOADED, $selector->fetchData());
     }
 
     public function testSelectEngineerDataFirst(): void
     {
-        $selector = (new Select($this->orm, Engineer::class))->limit(1);
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))->limit(1);
 
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);
     }
 
     public function testSelectProgramatorAllData(): void
     {
-        $selector = (new Select($this->orm, Programator::class));
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE));
 
         $this->assertEquals(static::PROGRAMATOR_ALL_LOADED, $selector->fetchData());
     }
 
     public function testSelectProgramatorDataFirst(): void
     {
-        $selector = (new Select($this->orm, Programator::class))->limit(1);
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))->limit(1);
 
         $this->assertEquals(static::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
     }
 
     public function testSelectManagerAllData(): void
     {
-        $selector = (new Select($this->orm, Manager::class));
+        $selector = (new Select($this->orm, static::MANAGER_ROLE));
 
         $this->assertEquals(static::MANAGER_ALL_LOADED, $selector->fetchData());
     }
 
     public function testSelectManagerDataFirst(): void
     {
-        $selector = (new Select($this->orm, Manager::class))->limit(1);
+        $selector = (new Select($this->orm, static::MANAGER_ROLE))->limit(1);
 
         $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);
     }
@@ -231,7 +236,8 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testProgramatorNoChanges(): void
     {
-        $programator = (new Select($this->orm, Programator::class))->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
+        $programator = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
 
         $this->captureWriteQueries();
         $this->save($programator);
@@ -241,7 +247,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     public function testChangeAndPersistProgramator(): void
     {
         /** @var Programator $programator */
-        $programator = (new Select($this->orm, Programator::class))
+        $programator = (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $programator->language = 'Kotlin';
 
@@ -254,7 +260,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertNumWrites(0);
 
         /** @var Programator $programator */
-        $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
+        $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $this->assertSame('Kotlin', $programator->language);
     }
@@ -262,7 +268,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     public function testChangeParentsFieldsAndPersistProgramator(): void
     {
         /** @var Programator $programator */
-        $programator = (new Select($this->orm, Programator::class))
+        $programator = (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $programator->language = 'Kotlin';
         $programator->level = 99;
@@ -277,7 +283,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertNumWrites(0);
 
         /** @var Programator $programator */
-        $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
+        $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $this->assertSame('Kotlin', $programator->language);
         $this->assertSame(99, $programator->level);
@@ -311,7 +317,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     public function testRemoveEngineer(): void
     {
         /** @var Engineer $entity */
-        $entity = (new Select($this->orm, Engineer::class))->wherePK(static::ENGINEER_2_PK)->fetchOne();
+        $entity = (new Select($this->orm, static::ENGINEER_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne();
 
         $this->captureWriteQueries();
         (new Transaction($this->orm))->delete($entity)->run();
@@ -321,8 +327,8 @@ abstract class SimpleCasesTest extends JtiBaseTest
         (new Transaction($this->orm))->delete($entity)->run();
         $this->assertNumWrites(0);
 
-        $this->assertNull((new Select($this->orm, Programator::class))->wherePK(static::ENGINEER_2_PK)->fetchOne());
-        $this->assertNull((new Select($this->orm, Engineer::class))->wherePK(static::ENGINEER_2_PK)->fetchOne());
-        $this->assertNotNull((new Select($this->orm, Employee::class))->wherePK(static::ENGINEER_2_PK)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
+        $this->assertNotNull((new Select($this->orm, static::EMPLOYEE_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
     }
 }

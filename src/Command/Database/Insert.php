@@ -83,8 +83,6 @@ final class Insert extends StoreCommand
             }
         }
 
-        $toInsert = $this->mapper === null ? $data : ($this->mapper)($data);
-
         $insert = $this->db
             ->insert($this->table)
             ->values(array_merge(

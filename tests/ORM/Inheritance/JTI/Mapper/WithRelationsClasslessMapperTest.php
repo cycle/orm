@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Relation\JTI\Mapper;
+namespace Cycle\ORM\Tests\Inheritance\JTI\Mapper;
 
 use Cycle\ORM\Mapper\ClasslessMapper;
 

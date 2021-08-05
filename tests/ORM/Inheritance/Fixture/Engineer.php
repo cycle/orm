@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Relation\JTI\Fixture;
+namespace Cycle\ORM\Tests\Inheritance\Fixture;
 
 use Cycle\ORM\Reference\ReferenceInterface;
 

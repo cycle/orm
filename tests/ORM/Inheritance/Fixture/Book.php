@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Relation\JTI\Fixture;
+namespace Cycle\ORM\Tests\Inheritance\Fixture;
 
-class Tool
+class Book
 {
     public ?int $id = null;
     public string $title;

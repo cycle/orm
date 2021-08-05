@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Relation\JTI;
+namespace Cycle\ORM\Tests\Inheritance\JTI;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Relation\JTI\Fixture\Employee;
-use Cycle\ORM\Tests\Relation\JTI\Fixture\Engineer;
-use Cycle\ORM\Tests\Relation\JTI\Fixture\Manager;
-use Cycle\ORM\Tests\Relation\JTI\Fixture\Programator;
+use Cycle\ORM\Tests\Inheritance\Fixture\Employee;
+use Cycle\ORM\Tests\Inheritance\Fixture\Engineer;
+use Cycle\ORM\Tests\Inheritance\Fixture\Manager;
+use Cycle\ORM\Tests\Inheritance\Fixture\Programator;
 use Cycle\ORM\Transaction;
 
 abstract class SimpleCasesTest extends JtiBaseTest
@@ -61,7 +61,6 @@ abstract class SimpleCasesTest extends JtiBaseTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->logger->hide();
 
         $this->makeTable('employee', [
             'id'          => 'integer',

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Relation\JTI\Mapper;
+namespace Cycle\ORM\Tests\Inheritance\JTI\Mapper;
 
 use Cycle\ORM\Mapper\PromiseMapper;
-use Cycle\ORM\Tests\Relation\JTI\WithRelationsTest;
+use Cycle\ORM\Tests\Inheritance\JTI\WithRelationsTest;
 
 abstract class WithRelationsPromiseMapperTest extends WithRelationsTest
 {

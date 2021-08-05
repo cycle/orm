@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Relation\JTI;
+namespace Cycle\ORM\Tests\Inheritance\JTI;
 
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
@@ -28,6 +28,5 @@ abstract class JtiBaseTest extends BaseTest
             new ArrayCollectionFactory()
         );
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()))->withFactory($factory);
-        $this->logger->display();
     }
 }

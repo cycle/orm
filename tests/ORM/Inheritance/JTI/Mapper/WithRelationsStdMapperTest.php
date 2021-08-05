@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Relation\JTI\Mapper;
+namespace Cycle\ORM\Tests\Inheritance\JTI\Mapper;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Relation\JTI\WithRelationsTest;
+use Cycle\ORM\Tests\Inheritance\JTI\WithRelationsTest;
 
 abstract class WithRelationsStdMapperTest extends WithRelationsTest
 {

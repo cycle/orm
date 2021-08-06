@@ -11,12 +11,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Fixtures\RbacItemAbstract;
-use Cycle\ORM\Tests\Fixtures\RbacPermission;
-use Cycle\ORM\Tests\Fixtures\RbacRole;
+use Cycle\ORM\Tests\Inheritance\Fixture\RbacItemAbstract;
+use Cycle\ORM\Tests\Inheritance\Fixture\RbacPermission;
+use Cycle\ORM\Tests\Inheritance\Fixture\RbacRole;
 use stdClass;
 
-abstract class ManyToManySingleEntityTest extends StiBaseTest
+abstract class ManyToManyTest extends StiBaseTest
 {
     protected const PARENT_MAPPER = Mapper::class;
     protected const CHILD_MAPPER = StdMapper::class;
@@ -119,6 +119,7 @@ abstract class ManyToManySingleEntityTest extends StiBaseTest
 
         /** @var RbacRole $fetchedRole */
         $fetchedRole = (new Select($this->orm->withHeap(new Heap()), 'rbac_item'))
+            ->load('children')
             ->wherePK('superAdmin')->fetchOne();
 
         self::assertInstanceOf(RbacRole::class, $fetchedRole);
@@ -143,9 +144,11 @@ abstract class ManyToManySingleEntityTest extends StiBaseTest
 
         /** @var RbacRole $fetchedRole */
         $fetchedRole = (new Select($this->orm, 'rbac_item'))
+            ->load('children')
             ->wherePK('superAdmin')->fetchOne();
         /** @var RbacPermission $fetchedPermission */
         $fetchedPermission = (new Select($this->orm, 'rbac_item'))
+            ->load('parents')
             ->wherePK('writeUser')->fetchOne();
 
         $fetchedRole->children->removeElement($fetchedPermission);
@@ -194,9 +197,11 @@ abstract class ManyToManySingleEntityTest extends StiBaseTest
         $this->orm = $this->orm->withHeap(new Heap());
 
         /** @var RbacRole $fetchedRole */
-        $fetchedRole = (new Select($this->orm, 'rbac_item'))->wherePK('superAdmin')->fetchOne();
+        $fetchedRole = (new Select($this->orm, 'rbac_item'))
+            ->wherePK('superAdmin')->load('children')->fetchOne();
         /** @var RbacPermission $fetchedPermission */
-        $fetchedPermission = (new Select($this->orm, 'rbac_item'))->wherePK('writeUser')->fetchOne();
+        $fetchedPermission = (new Select($this->orm, 'rbac_item'))
+            ->wherePK('writeUser')->load('parents')->fetchOne();
 
         $fetchedRole->description = 'updated description';
 

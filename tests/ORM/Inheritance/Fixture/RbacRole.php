@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Fixtures;
+namespace Cycle\ORM\Tests\Inheritance\Fixture;
 
 class RbacRole extends RbacItemAbstract
 {

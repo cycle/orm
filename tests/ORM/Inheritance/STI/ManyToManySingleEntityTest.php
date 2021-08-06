@@ -2,22 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests;
+namespace Cycle\ORM\Tests\Inheritance\STI;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\RbacItemAbstract;
 use Cycle\ORM\Tests\Fixtures\RbacPermission;
 use Cycle\ORM\Tests\Fixtures\RbacRole;
-use Cycle\ORM\Tests\Traits\TableTrait;
 
-abstract class ManyToManySingleEntityTest extends BaseTest
+abstract class ManyToManySingleEntityTest extends StiBaseTest
 {
-    use TableTrait;
+    protected const PARENT_MAPPER = Mapper::class;
+    protected const CHILD_MAPPER = StdMapper::class;
 
     public function setUp(): void
     {
@@ -38,21 +39,27 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $this->makeFK('rbac_item_inheritance', 'parent', 'rbac_item', 'name', 'NO ACTION', 'NO ACTION');
         $this->makeFK('rbac_item_inheritance', 'child', 'rbac_item', 'name', 'NO ACTION', 'NO ACTION');
 
-        $this->withSchema(new Schema([
+        $this->withSchema(new Schema($this->getSchemaArray()));
+    }
+
+    protected function getSchemaArray(): array
+    {
+        return [
             RbacItemAbstract::class => [
-                Schema::ROLE => 'rbac_item',
-                Schema::CHILDREN => [
+                SchemaInterface::ROLE => 'rbac_item',
+                SchemaInterface::CHILDREN => [
                     'role' => RbacRole::class,
                     'permission' => RbacPermission::class,
                 ],
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'rbac_item',
-                Schema::PRIMARY_KEY => 'name',
-                Schema::COLUMNS => ['name', 'description', '_type'],
-                Schema::RELATIONS => [
+                SchemaInterface::MAPPER => static::PARENT_MAPPER,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'rbac_item',
+                SchemaInterface::PRIMARY_KEY => 'name',
+                SchemaInterface::COLUMNS => ['name', 'description', '_type'],
+                SchemaInterface::RELATIONS => [
                     'parents' => [
                         Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::COLLECTION_TYPE => 'doctrine',
                         Relation::TARGET => 'rbac_item',
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
@@ -66,6 +73,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
                     ],
                     'children' => [
                         Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::COLLECTION_TYPE => 'doctrine',
                         Relation::TARGET => 'rbac_item',
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
@@ -80,21 +88,21 @@ abstract class ManyToManySingleEntityTest extends BaseTest
                 ],
             ],
             RbacRole::class => [
-                Schema::ROLE => RbacItemAbstract::class,
+                SchemaInterface::ROLE => RbacItemAbstract::class,
             ],
             RbacPermission::class => [
-                Schema::ROLE => RbacItemAbstract::class,
+                SchemaInterface::ROLE => RbacItemAbstract::class,
             ],
             'rbac_item_inheritance' => [
-                Schema::ROLE => 'rbac_item_inheritance',
-                Schema::MAPPER => StdMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'rbac_item_inheritance',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'parent', 'child'],
-                Schema::RELATIONS => [],
+                SchemaInterface::ROLE => 'rbac_item_inheritance',
+                SchemaInterface::MAPPER => static::CHILD_MAPPER,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'rbac_item_inheritance',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'parent', 'child'],
+                SchemaInterface::RELATIONS => [],
             ],
-        ]));
+        ];
     }
 
     public function testStore(): void
@@ -121,7 +129,6 @@ abstract class ManyToManySingleEntityTest extends BaseTest
     public function testClearAndFillRelation(): void
     {
         $role = new RbacRole('superAdmin');
-
         $permission = new RbacPermission('writeUser');
 
         $role->children->add($permission);

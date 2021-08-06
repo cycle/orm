@@ -55,7 +55,7 @@ class HasOne extends AbstractRelation
         }
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
-        $rNode = $this->getNode($related, +1);
+        $rNode = $this->getNode($related);
         $this->assertValid($rNode);
 
         if ($original !== null && $original !== $related) {

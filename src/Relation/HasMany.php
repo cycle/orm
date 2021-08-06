@@ -51,7 +51,7 @@ class HasMany extends AbstractRelation
         // $relationName = $this->getTargetRelationName()
         // Store new and existing items
         foreach ($related as $item) {
-            $rNode = $this->getNode($item, +1);
+            $rNode = $this->getNode($item);
             $this->assertValid($rNode);
             $pool->attachStore($item, true, $rNode);
             if ($this->isNullable()) {

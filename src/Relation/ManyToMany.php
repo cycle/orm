@@ -88,7 +88,6 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
         if ($this->mirrorRelation === null && count($related) === 0) {
-            // $node->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
@@ -296,7 +295,7 @@ class ManyToMany extends Relation\AbstractRelation
         if ($pivot !== null) {
             $pool->attachDelete($pivot, $this->isCascade());
         }
-        $pool->attachStore($child, false);
+        $pool->attachStore($child, true);
     }
 
     protected function newLink(Pool $pool, Tuple $tuple, PivotedStorage $storage, object $related): void

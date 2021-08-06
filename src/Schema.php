@@ -120,8 +120,10 @@ final class Schema implements SchemaInterface
     public function resolveAlias(string $role): ?string
     {
         // walk throught all children until parent entity found
-        while (isset($this->aliases[$role])) {
-            $role = $this->aliases[$role];
+        $found = $this->aliases[$role] ?? null;
+        while ($found !== null && $found !== $role) {
+            $role = $found;
+            $found = $this->aliases[$found] ?? null;
         }
 
         return $role;
@@ -154,6 +156,12 @@ final class Schema implements SchemaInterface
                 $aliases[$item[self::ENTITY]] = $role;
             }
 
+            unset($item[self::ROLE]);
+            $result[$role] = $item;
+        }
+
+        // Normalize PARENT option
+        foreach ($result as &$item) {
             if (isset($item[self::PARENT]) && class_exists($item[self::PARENT])) {
                 $parent = $item[self::PARENT];
                 while (isset($aliases[$parent])) {
@@ -161,12 +169,22 @@ final class Schema implements SchemaInterface
                 }
                 $item[self::PARENT] = $parent;
             }
+        }
+        unset($item);
 
-            unset($item[self::ROLE]);
-            $result[$role] = $item;
+        // Extract aliases from CHILDREN options
+        foreach ($result as $role => $item) {
+            if (isset($item[self::CHILDREN])) {
+                foreach ($item[self::CHILDREN] as $child) {
+                    if (isset($aliases[$child]) && class_exists($child)) {
+                        $aliases[$aliases[$child]] = $role;
+                    }
+                    $aliases[$child] = $role;
+                }
+            }
         }
 
-        // normalizing relation associations
+        // Normalize relation associations
         foreach ($result as &$item) {
             if (isset($item[self::RELATIONS])) {
                 $item[self::RELATIONS] = iterator_to_array($this->normalizeRelations(
@@ -174,9 +192,8 @@ final class Schema implements SchemaInterface
                     $aliases
                 ));
             }
-
-            unset($item);
         }
+        unset($item);
 
         $result = $this->linkRelations($result, $aliases);
 

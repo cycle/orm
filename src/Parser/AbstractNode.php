@@ -338,6 +338,8 @@ abstract class AbstractNode
      */
     protected function mountArray(string $container, string $key, $criteria, array &$data): void
     {
+        $criteria = (string) $criteria;
+
         if (!array_key_exists($criteria, $this->references[$key])) {
             throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }

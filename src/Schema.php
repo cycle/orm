@@ -12,6 +12,7 @@ use Cycle\ORM\Exception\SchemaException;
 final class Schema implements SchemaInterface
 {
     private array $aliases;
+    private array $classes;
 
     private array $schema;
 
@@ -97,6 +98,9 @@ final class Schema implements SchemaInterface
 
     public function define(string $role, int $property): mixed
     {
+        if ($property === SchemaInterface::ENTITY) {
+            return $this->defineEntityClass($role);
+        }
         $role = $this->resolveAlias($role) ?? $role;
 
         if (!isset($this->schema[$role])) {
@@ -119,7 +123,7 @@ final class Schema implements SchemaInterface
 
     public function resolveAlias(string $role): ?string
     {
-        // walk throught all children until parent entity found
+        // walk through all children until parent entity found
         $found = $this->aliases[$role] ?? null;
         while ($found !== null && $found !== $role) {
             $role = $found;
@@ -154,6 +158,7 @@ final class Schema implements SchemaInterface
 
             if ($item[self::ENTITY] !== $role && class_exists($item[self::ENTITY])) {
                 $aliases[$item[self::ENTITY]] = $role;
+                $this->classes[$role] = $item[self::ENTITY];
             }
 
             unset($item[self::ROLE]);
@@ -346,5 +351,10 @@ final class Schema implements SchemaInterface
             return false;
         }
         return true;
+    }
+
+    private function defineEntityClass(string $role)
+    {
+        return $this->classes[$role] ?? $this->classes[$this->resolveAlias($role) ?? $role] ?? null;
     }
 }

@@ -46,9 +46,9 @@ class PromiseMapper extends DatabaseMapper
         $this->instantiator = new Instantiator\Instantiator();
     }
 
-    public function init(array $data): object
+    public function init(array $data, string $role = null): object
     {
-        $class = $this->resolveClass($data);
+        $class = $this->resolveClass($data, $role);
         return $this->instantiator->instantiate($class);
     }
 

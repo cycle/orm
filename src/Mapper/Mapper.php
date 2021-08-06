@@ -39,9 +39,9 @@ class Mapper extends DatabaseMapper
         $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
     }
 
-    public function init(array $data): object
+    public function init(array $data, string $role = null): object
     {
-        $class = $this->resolveClass($data);
+        $class = $this->resolveClass($data, $role);
         return $this->entityFactory->create($this->orm, $class, $data, $class);
     }
 

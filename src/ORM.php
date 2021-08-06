@@ -143,7 +143,7 @@ final class ORM implements ORMInterface
         }
 
         $node = new Node($status, $data, $role);
-        $e = $mapper->init($data);
+        $e = $mapper->init($data, $role);
 
         /** Entity should be attached before {@see RelationMap::init()} running */
         $this->heap->attach($e, $node, $this->getIndexes($role));

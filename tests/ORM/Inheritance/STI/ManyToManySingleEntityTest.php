@@ -14,6 +14,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\RbacItemAbstract;
 use Cycle\ORM\Tests\Fixtures\RbacPermission;
 use Cycle\ORM\Tests\Fixtures\RbacRole;
+use stdClass;
 
 abstract class ManyToManySingleEntityTest extends StiBaseTest
 {
@@ -88,10 +89,10 @@ abstract class ManyToManySingleEntityTest extends StiBaseTest
                 ],
             ],
             RbacRole::class => [
-                SchemaInterface::ROLE => RbacItemAbstract::class,
+                SchemaInterface::ROLE => 'rbac_role',
             ],
             RbacPermission::class => [
-                SchemaInterface::ROLE => RbacItemAbstract::class,
+                SchemaInterface::ROLE => 'rbac_permission',
             ],
             'rbac_item_inheritance' => [
                 SchemaInterface::ROLE => 'rbac_item_inheritance',
@@ -159,6 +160,22 @@ abstract class ManyToManySingleEntityTest extends StiBaseTest
         $this->save($fetchedRole);
 
         self::assertTrue(true);
+    }
+
+    public function testMakeEntityUsingRole(): void
+    {
+        $this->assertInstanceOf(RbacRole::class, $this->orm->make('rbac_role'));
+        $this->assertInstanceOf(RbacPermission::class, $this->orm->make('rbac_permission'));
+        $this->assertInstanceOf(stdClass::class, $this->orm->make('rbac_item_inheritance'));
+    }
+
+    public function testMakeUndefinedChildRole(): void
+    {
+        $mapper = $this->orm->getMapper('rbac_item');
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $mapper->init([], 'some_undefined_role');
     }
 
     public function testNotTriggersRehydrate(): void

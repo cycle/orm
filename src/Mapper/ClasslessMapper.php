@@ -22,7 +22,7 @@ final class ClasslessMapper extends DatabaseMapper
         $this->relationMap = $orm->getRelationMap($role);
     }
 
-    public function init(array $data): object
+    public function init(array $data, string $role = null): object
     {
         return $this->entityFactory->create($this->orm, $this->role, array_keys($this->columns + $this->parentColumns));
     }

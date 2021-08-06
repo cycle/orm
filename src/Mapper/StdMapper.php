@@ -12,7 +12,7 @@ use Cycle\ORM\Reference\ReferenceInterface;
  */
 final class StdMapper extends DatabaseMapper
 {
-    public function init(array $data): object
+    public function init(array $data, string $role = null): object
     {
         return new \stdClass();
     }

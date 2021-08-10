@@ -124,7 +124,7 @@ final class EmbeddedLoader implements JoinableInterface
         return $node;
     }
 
-    public function loadData(AbstractNode $node): void
+    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void
     {
         // embedded entities does not support inner loaders... for now! :)
     }

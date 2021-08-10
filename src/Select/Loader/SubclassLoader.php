@@ -90,6 +90,7 @@ class SubclassLoader extends JoinableLoader
     protected function initNode(): AbstractNode
     {
         $node = new SubclassMergeNode(
+            $this->target,
             $this->columnNames(),
             (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],

@@ -232,7 +232,6 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEngineerDataFirstWithInheritance(): void
     {
-        $this->logger->display();
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))->limit(1);
 
         $this->assertEquals(static::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
@@ -240,10 +239,16 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEngineerDataFirstWithoutInheritance(): void
     {
-        $this->logger->display();
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))->limit(1);
 
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectEngineerEntityFirstWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))->limit(1);
+
+        $this->assertInstanceof(Programator::class, $selector->fetchOne());
     }
 
     public function testSelectProgramatorAllData(): void

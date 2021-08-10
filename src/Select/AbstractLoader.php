@@ -256,7 +256,7 @@ abstract class AbstractLoader implements LoaderInterface
         return $node;
     }
 
-    public function loadData(AbstractNode $node): void
+    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void
     {
         $this->loadChild($node);
     }

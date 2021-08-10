@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Select\LoaderInterface;
 
 /**
  * Iterates over given data-set and instantiates objects.
  */
 final class Iterator implements \IteratorAggregate
 {
-    private \Cycle\ORM\ORMInterface $orm;
+    private ORMInterface $orm;
 
     private string $role;
 
@@ -41,27 +42,30 @@ final class Iterator implements \IteratorAggregate
                 $data = $data['@'];
             }
 
+            // get role from joined table inheritance
+            $role = $data[LoaderInterface::DISCRIMINATOR_KEY] ?? $this->role;
+
             // add pipeline filter support?
 
-            yield $index => $this->getEntity($data);
+            yield $index => $this->getEntity($data, $role);
         }
     }
 
-    private function getEntity(array $data): object
+    private function getEntity(array $data, string $role): object
     {
         if ($this->findInHeap) {
-            $pk = $this->orm->getSchema()->define($this->role, SchemaInterface::PRIMARY_KEY);
+            $pk = $this->orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
             if (is_array($pk)) {
-                $e = $this->orm->getHeap()->find($this->role, $data);
+                $e = $this->orm->getHeap()->find($role, $data);
             } else {
                 $id = $data[$pk] ?? null;
 
                 if ($id !== null) {
-                    $e = $this->orm->getHeap()->find($this->role, [$pk => $id]);
+                    $e = $this->orm->getHeap()->find($role, [$pk => $id]);
                 }
             }
         }
 
-        return $e ?? $this->orm->make($this->role, $data, Node::MANAGED);
+        return $e ?? $this->orm->make($role, $data, Node::MANAGED);
     }
 }

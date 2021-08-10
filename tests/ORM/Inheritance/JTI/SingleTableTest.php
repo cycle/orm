@@ -43,7 +43,18 @@ abstract class SingleTableTest extends SimpleCasesTest
         MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED,
         MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED,
 
-        EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
+        EMPLOYEE_ALL_LOADED = [
+            self::EMPLOYEE_1_LOADED,
+            self::EMPLOYEE_2_LOADED,
+            self::EMPLOYEE_3_LOADED,
+            self::EMPLOYEE_4_LOADED,
+        ],
+        EMPLOYEE_INHERITED_LOADED = [
+            self::MANAGER_1_LOADED,
+            self::PROGRAMATOR_2_LOADED,
+            self::MANAGER_3_LOADED,
+            self::PROGRAMATOR_4_LOADED,
+        ],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
         ROLES_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::ENGINEER_2_LOADED, self::EMPLOYEE_3_LOADED, self::ENGINEER_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
@@ -158,15 +169,6 @@ abstract class SingleTableTest extends SimpleCasesTest
         ];
     }
 
-    public function testSelectEngineerAllData(): void
-    {
-        $selector = (new Select($this->orm, Engineer::class))
-            // todo: this condition should be added automatically by STI
-            ->where('discriminator', '=', 'engineer');
-
-        $this->assertEquals(static::ENGINEER_ALL_LOADED, $selector->fetchData());
-    }
-
     public function testFetchAllChildren(): void
     {
         /** @var Manager[]|Engineer[] $entities */
@@ -182,14 +184,52 @@ abstract class SingleTableTest extends SimpleCasesTest
         $this->assertInstanceOf(Engineer::class, $entities[3]);
     }
 
-    public function testSelectEngineerDataFirst(): void
+    public function testSelectEngineerAllDataWithInheritance(): void
     {
-        $selector = (new Select($this->orm, Engineer::class))
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer');
+
+        $this->assertEquals(static::PROGRAMATOR_ALL_LOADED, $selector->fetchData());
+    }
+
+    public function testSelectEngineerAllDataWithoutInheritance(): void
+    {
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer');
+
+        $this->assertEquals(static::ENGINEER_ALL_LOADED, $selector->fetchData());
+    }
+
+    public function testSelectEngineerDataFirstWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer')
+            ->limit(1);
+
+        $this->assertEquals(static::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectEngineerDataFirstWithoutInheritance(): void
+    {
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
             // todo: this condition should be added automatically by STI
             ->where('discriminator', '=', 'engineer')
             ->limit(1);
 
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectEngineerEntityFirstWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer')
+            ->limit(1);
+
+        $this->assertInstanceof(Programator::class, $selector->fetchOne());
     }
 
     public function testSelectManagerAllData(): void

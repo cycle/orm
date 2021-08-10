@@ -96,7 +96,7 @@ final class RootLoader extends AbstractLoader
         return $this->configureQuery(clone $this->query);
     }
 
-    public function loadData(AbstractNode $node): void
+    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void
     {
         $statement = $this->buildQuery()->run();
 
@@ -108,13 +108,13 @@ final class RootLoader extends AbstractLoader
 
         // loading child datasets
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->getNode($relation));
+            $loader->loadData($node->getNode($relation), $includeDiscriminator);
         }
 
         // Merge parent nodes
         if ($this->inherit !== null) {
             $inheritNode = $node->getParentMergeNode();
-            $this->inherit->loadData($inheritNode);
+            $this->inherit->loadData($inheritNode, $includeDiscriminator);
 
         }
         // Merge subclass nodes
@@ -122,9 +122,9 @@ final class RootLoader extends AbstractLoader
         // todo
         foreach ($this->subclasses as $i => $loader) {
             $inheritNode = $subclassNodes[$i];
-            $loader->loadData($inheritNode);
+            $loader->loadData($inheritNode, $includeDiscriminator);
         }
-        $node->mergeInheritanceNodes();
+        $node->mergeInheritanceNodes($includeDiscriminator);
     }
 
     public function isLoaded(): bool

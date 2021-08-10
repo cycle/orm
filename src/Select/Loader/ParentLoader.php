@@ -95,6 +95,7 @@ class ParentLoader extends JoinableLoader
         // throw new \RuntimeException('This method should not be called.');
 
         $node = new ParentMergeNode(
+            $this->target,
             $this->columnNames(),
             (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],

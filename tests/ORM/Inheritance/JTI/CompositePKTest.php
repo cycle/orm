@@ -220,6 +220,16 @@ abstract class CompositePKTest extends SimpleCasesTest
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);
     }
 
+    public function testSelectEngineerEntityFirstWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->where('_type', '=', 'engineer')
+            ->limit(1);
+
+        $this->assertInstanceof(Programator::class, $selector->fetchOne());
+    }
+
     public function testSelectManagerAllData(): void
     {
         $selector = (new Select($this->orm, Manager::class))

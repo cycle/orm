@@ -45,4 +45,9 @@ abstract class WithRelationsStdMapperTest extends WithRelationsTest
         $this->assertSame(50, $programator->level);
         $this->assertSame('VanillaJS', $programator->language);
     }
+
+    public function testSelectEngineerEntityFirstWithInheritance(): void
+    {
+        $this->markTestSkipped('Should not check entity class.');
+    }
 }

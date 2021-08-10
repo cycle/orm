@@ -53,7 +53,18 @@ abstract class WithRelationsTest extends SimpleCasesTest
         MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED,
         MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED,
 
-        EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
+        EMPLOYEE_ALL_LOADED = [
+            self::EMPLOYEE_1_LOADED,
+            self::EMPLOYEE_2_LOADED,
+            self::EMPLOYEE_3_LOADED,
+            self::EMPLOYEE_4_LOADED,
+        ],
+        EMPLOYEE_INHERITED_LOADED = [
+            self::MANAGER_1_LOADED,
+            self::PROGRAMATOR_2_LOADED,
+            self::MANAGER_3_LOADED,
+            self::PROGRAMATOR_4_LOADED,
+        ],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
         MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED],

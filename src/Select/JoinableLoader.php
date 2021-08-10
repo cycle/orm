@@ -121,7 +121,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         return $loader;
     }
 
-    public function loadData(AbstractNode $node): void
+    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void
     {
         if ($this->isJoined() || !$this->isLoaded()) {
             // load data for all nested relations

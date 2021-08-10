@@ -8,6 +8,7 @@ use Countable;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use InvalidArgumentException;
@@ -373,13 +374,18 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function fetchOne(array $query = null): ?object
     {
-        $data = (clone $this)->where($query)->limit(1)->fetchData();
+        $select = (clone $this)->where($query)->limit(1);
+        $node = $select->loader->createNode();
+        $select->loader->loadData($node, true);
+        $data = $node->getResult();
 
         if (!isset($data[0])) {
             return null;
         }
+        $role = $data[0][LoaderInterface::DISCRIMINATOR_KEY] ?? $this->loader->getTarget();
+        unset($data[LoaderInterface::DISCRIMINATOR_KEY]);
 
-        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED);
+        return $this->orm->make($role, $data[0], Node::MANAGED);
     }
 
     /**
@@ -394,10 +400,13 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     public function getIterator(): Iterator
     {
+        $node = $this->loader->createNode();
+        $this->loader->loadData($node, true);
+
         return new Iterator(
             $this->orm,
             $this->loader->getTarget(),
-            $this->fetchData()
+            $node->getResult()
         );
     }
 
@@ -407,7 +416,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function fetchData(): array
     {
         $node = $this->loader->createNode();
-        $this->loader->loadData($node);
+        $this->loader->loadData($node, false);
 
         return $node->getResult();
     }

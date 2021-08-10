@@ -256,13 +256,13 @@ abstract class AbstractNode
         return $this->mergeSubclass;
     }
 
-    public function mergeInheritanceNodes(): bool
+    public function mergeInheritanceNodes(bool $withDiscriminator = false): bool
     {
         if ($this->mergeParent !== null) {
             $this->mergeParent->mergeInheritanceNodes();
         }
         foreach ($this->mergeSubclass as $subclassNode) {
-            $subclassNode->mergeInheritanceNodes();
+            $subclassNode->mergeInheritanceNodes($withDiscriminator);
         }
         return true;
     }

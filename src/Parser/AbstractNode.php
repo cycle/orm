@@ -60,7 +60,10 @@ abstract class AbstractNode
     /** @var array<string, AbstractNode> */
     protected array $nodes = [];
 
-    protected ?AbstractNode $merge = null;
+    protected ?ParentMergeNode $mergeParent = null;
+
+    /** @var SubclassMergeNode[]  */
+    protected array $mergeSubclass = [];
 
     protected ?string $indexName = null;
 
@@ -118,7 +121,7 @@ abstract class AbstractNode
 
             //Let's force placeholders for every sub loaded
             foreach ($this->nodes as $name => $node) {
-                if ($node instanceof MergeNode) {
+                if ($node instanceof ParentMergeNode) {
                     continue;
                 }
                 $data[$name] = $node instanceof ArrayNode ? [] : null;
@@ -131,7 +134,11 @@ abstract class AbstractNode
         }
 
         $innerOffset = 0;
-        $iterate = $this->merge === null ? $this->nodes : [$this->merge] + $this->nodes;
+        $iterate = array_merge(
+            $this->mergeParent === null ? [] : [$this->mergeParent],
+            $this->nodes,
+            $this->mergeSubclass
+        );
         foreach ($iterate as $node) {
             if (!$node->joined) {
                 continue;
@@ -189,7 +196,12 @@ abstract class AbstractNode
             $this->nodes[$container] = $node;
             $node->container = $container;
         } else {
-            $this->merge = $node;
+            if ($node instanceof ParentMergeNode) {
+                $this->mergeParent = $node;
+            }
+            if ($node instanceof SubclassMergeNode) {
+                $this->mergeSubclass[] = $node;
+            }
         }
 
         if ($node->indexName !== null) {
@@ -231,17 +243,28 @@ abstract class AbstractNode
         return $this->nodes[$container];
     }
 
-    public function getMergeNode(): self
+    public function getParentMergeNode(): ParentMergeNode
     {
-        return $this->merge;
+        return $this->mergeParent;
     }
 
-    public function mergeInheritanceNode(): void
+    /**
+     * @return SubclassMergeNode[]
+     */
+    public function getSubclassMergeNodes(): array
     {
-        if ($this->merge === null) {
-            return;
+        return $this->mergeSubclass;
+    }
+
+    public function mergeInheritanceNodes(): bool
+    {
+        if ($this->mergeParent !== null) {
+            $this->mergeParent->mergeInheritanceNodes();
         }
-        $this->merge->mergeInheritanceNode();
+        foreach ($this->mergeSubclass as $subclassNode) {
+            $subclassNode->mergeInheritanceNodes();
+        }
+        return true;
     }
 
     /**

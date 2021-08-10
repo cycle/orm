@@ -70,4 +70,13 @@ interface SchemaInterface
      * Resolve the role name using entity class name.
      */
     public function resolveAlias(string $role): ?string;
+
+    /**
+     * Get children roles for JTI resolving
+     *
+     * @param string $parent Parent role
+     *
+     * @return array<string, array> Tree of children
+     */
+    public function getInheritedRoles(string $parent): array;
 }

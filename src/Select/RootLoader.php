@@ -9,6 +9,7 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -110,13 +111,20 @@ final class RootLoader extends AbstractLoader
             $loader->loadData($node->getNode($relation));
         }
 
-        // Merge nodes
+        // Merge parent nodes
         if ($this->inherit !== null) {
-            $inheritNode = $node->getMergeNode();
+            $inheritNode = $node->getParentMergeNode();
             $this->inherit->loadData($inheritNode);
 
-            $node->mergeInheritanceNode();
         }
+        // Merge subclass nodes
+        $subclassNodes = $node->getSubclassMergeNodes();
+        // todo
+        foreach ($this->subclasses as $i => $loader) {
+            $inheritNode = $subclassNodes[$i];
+            $loader->loadData($inheritNode);
+        }
+        $node->mergeInheritanceNodes();
     }
 
     public function isLoaded(): bool

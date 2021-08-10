@@ -111,6 +111,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             $loader->setConstrain($this->getSource()->getConstrain());
         }
 
+        // todo maybe is not loaded?
         if ($loader->isLoaded()) {
             foreach ($loader->getEagerRelations() as $relation) {
                 $loader->loadRelation($relation, [], false, true);

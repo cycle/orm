@@ -7,8 +7,10 @@ namespace Cycle\ORM\Parser;
 /**
  * @internal
  */
-final class MergeNode extends AbstractNode
+abstract class AbstractMergeNode extends AbstractNode
 {
+    protected const OVERWRITE_DATA = false;
+
     /** @var string[] */
     protected array $innerKeys;
 
@@ -33,22 +35,39 @@ final class MergeNode extends AbstractNode
         $this->results[] = &$data;
     }
 
-    public function mergeInheritanceNode(): void
+    public function mergeInheritanceNodes(): bool
     {
         if ($this->parent === null) {
-            return;
+            return false;
         }
 
-        parent::mergeInheritanceNode();
+        parent::mergeInheritanceNodes();
 
         foreach ($this->results as $item) {
+            if ($this->isEmptyKeys($this->innerKeys, $item)) {
+                continue;
+            }
             $this->parent->mergeData(
                 $this->indexName,
                 $this->intersectData($this->innerKeys, $item),
                 $item,
-                false
+                self::OVERWRITE_DATA
             );
         }
         $this->results = [];
+        return true;
+    }
+
+    /**
+     * @psalm-pure
+     */
+    private function isEmptyKeys(array $keys, array $data): bool
+    {
+        foreach ($keys as $key) {
+            if (isset($data[$key])) {
+                return false;
+            }
+        }
+        return true;
     }
 }

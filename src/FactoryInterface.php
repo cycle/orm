@@ -16,7 +16,9 @@ use Spiral\Database\DatabaseProviderInterface;
  */
 interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
-    public const PARENT_LOADER = '::parent::';
+    public const
+        PARENT_LOADER = '::parent::',
+        CHILD_LOADER = '::child::';
 
     /**
      * Create mapper associated with given role.

@@ -11,7 +11,9 @@ use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select\Loader\ParentLoader;
+use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -63,17 +65,25 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected ?LoaderInterface $inherit = null;
 
+    /** @var SubclassLoader[] */
+    protected array $subclasses = [];
+
     protected ?LoaderInterface $parent = null;
+
+    /** @var array<string, array> */
+    protected array $children;
 
     public function __construct(ORMInterface $orm, string $target)
     {
         $this->orm = $orm;
         $this->target = $target;
+
+        $this->children = $orm->getSchema()->getInheritedRoles($target);
     }
 
     final public function __destruct()
     {
-        unset($this->parent, $this->inherit);
+        unset($this->parent, $this->inherit, $this->subclasses);
         $this->load = [];
         $this->join = [];
     }
@@ -94,6 +104,10 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         $this->inherit = $this->inherit?->withContext($this);
+
+        foreach ($this->subclasses as $i => $loader) {
+            $this->subclasses[$i] = $loader->withContext($this);
+        }
     }
 
     public function getTarget(): string
@@ -147,8 +161,13 @@ abstract class AbstractLoader implements LoaderInterface
         bool $join = false,
         bool $load = false
     ): LoaderInterface {
-        if (is_object($relation)) {
-            return  $this->inherit = $relation->withContext($this);
+        if ($relation instanceof ParentLoader) {
+            return $this->inherit = $relation->withContext($this);
+        }
+        if ($relation instanceof SubclassLoader) {
+            $loader = $relation->withContext($this);
+            $this->subclasses[] = $loader;
+            return $loader;
         }
         $relation = $this->resolvePath($relation);
         if (!empty($options['as'])) {
@@ -195,14 +214,19 @@ abstract class AbstractLoader implements LoaderInterface
                 $relation
             );
         } catch (SchemaException | FactoryException $e) {
-            if (!$this->inherit instanceof self) {
-                throw new LoaderException(
-                    sprintf('Unable to create loader: %s', $e->getMessage()),
-                    $e->getCode(),
-                    $e
-                );
+            if ($this->inherit instanceof self) {
+                return $this->inherit->loadRelation($relation, $options, $join, $load);
             }
-            return $this->inherit->loadRelation($relation, $options, $join, $load);
+            // foreach ($this->subclasses as $loader) {
+            //     if ($loader instanceof ParentLoader) {
+            //         return $loader->loadRelation($relation, $options, $join, $load);
+            //     }
+            // }
+            throw new LoaderException(
+                sprintf('Unable to create loader: %s', $e->getMessage()),
+                $e->getCode(),
+                $e
+            );
         }
 
         return $loaders[$relation] = $loader->withContext($this, $options);
@@ -223,6 +247,10 @@ abstract class AbstractLoader implements LoaderInterface
             }
 
             $node->linkNode($relation, $loader->createNode());
+        }
+
+        foreach ($this->subclasses as $loader) {
+            $node->joinNode(null, $loader->createNode());
         }
 
         return $node;
@@ -246,8 +274,8 @@ abstract class AbstractLoader implements LoaderInterface
 
         // Merge nodes
         if ($this->inherit !== null) {
-            $this->inherit->loadData($node->getMergeNode());
-            $node->mergeInheritanceNode();
+            $this->inherit->loadData($node->getParentMergeNode());
+            $node->mergeInheritanceNodes();
         }
     }
 
@@ -274,6 +302,10 @@ abstract class AbstractLoader implements LoaderInterface
             }
         }
 
+        foreach ($this->subclasses as $loader) {
+            $query = $loader->configureQuery($query);
+        }
+
         return $query;
     }
 
@@ -295,18 +327,36 @@ abstract class AbstractLoader implements LoaderInterface
     protected function getEagerRelations(string $role = null): \Generator
     {
         $role ??= $this->target;
-        $schema = $this->orm->getSchema();
-        $parent = $schema->define($role, Schema::PARENT);
-        if ($parent !== null) {
-            yield $this->orm->getFactory()
-                ->loader($this->orm, $schema, $role, FactoryInterface::PARENT_LOADER);
+        $parentLoader = $this->generateParentLoader($role);
+        if ($parentLoader !== null) {
+            yield $this->generateParentLoader($role);
         }
-        yield from $this->getTargetEagerRelations($role);
+        yield from $this->generateSublassLoaders();
+        yield from $this->generateEagerRelationLoaders($role);
     }
 
-    protected function getTargetEagerRelations(string $target): \Generator
+    protected function generateParentLoader(string $role): ?LoaderInterface
     {
-        $relations = $this->orm->getSchema()->define($target, Schema::RELATIONS) ?? [];
+        $schema = $this->orm->getSchema();
+        $parent = $schema->define($role, SchemaInterface::PARENT);
+        $factory = $this->orm->getFactory();
+        return $parent === null ? null : $factory->loader($this->orm, $schema, $role, FactoryInterface::PARENT_LOADER);
+    }
+
+    protected function generateSublassLoaders(): iterable
+    {
+        $schema = $this->orm->getSchema();
+        $factory = $this->orm->getFactory();
+        if ($this->children !== []) {
+            foreach ($this->children as $subRole => $children) {
+                yield $factory->loader($this->orm, $schema, $subRole, FactoryInterface::CHILD_LOADER);
+            }
+        }
+    }
+
+    protected function generateEagerRelationLoaders(string $target): \Generator
+    {
+        $relations = $this->orm->getSchema()->define($target, SchemaInterface::RELATIONS) ?? [];
         foreach ($relations as $relation => $schema) {
             if (($schema[Relation::LOAD] ?? null) === Relation::LOAD_EAGER) {
                 yield $relation;

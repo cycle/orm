@@ -6,18 +6,20 @@ namespace Cycle\ORM\Select\Loader;
 
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
-use Cycle\ORM\Parser\MergeNode;
+use Cycle\ORM\Parser\ParentMergeNode;
+use Cycle\ORM\Parser\SubclassMergeNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\LoaderInterface;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
 
 /**
  * Load parent data.
  */
-class JoinedTableInheritanceLoader extends JoinableLoader
+class SubclassLoader extends JoinableLoader
 {
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -25,7 +27,7 @@ class JoinedTableInheritanceLoader extends JoinableLoader
     protected array $options = [
         'load'      => true,
         'constrain' => true,
-        'method'    => self::INLOAD,
+        'method'    => self::LEFT_JOIN,
         'minify'    => true,
         'as'        => null,
         'using'     => null,
@@ -36,9 +38,9 @@ class JoinedTableInheritanceLoader extends JoinableLoader
         $schema = $orm->getSchema();
 
         $schemaArray = [
-            Relation::INNER_KEY => $schema->define($role, SchemaInterface::PRIMARY_KEY),
-            Relation::OUTER_KEY => $schema->define($role, SchemaInterface::PARENT_KEY)
-                ?? $schema->define($target, SchemaInterface::PRIMARY_KEY),
+            Relation::INNER_KEY => $schema->define($target, SchemaInterface::PARENT_KEY)
+                ?? $schema->define($role, SchemaInterface::PRIMARY_KEY),
+            Relation::OUTER_KEY => $schema->define($target, SchemaInterface::PRIMARY_KEY),
         ];
         $this->options['as'] ??= $target;
         parent::__construct($orm, $role, $target, $schemaArray);
@@ -60,10 +62,11 @@ class JoinedTableInheritanceLoader extends JoinableLoader
                 $field = $localPrefix . $this->fieldAlias($key);
                 $on[$field] = $parentPrefix . $this->parent->fieldAlias($parentKeys[$i]);
             }
-            $query->innerJoin($this->getJoinTable())->on($on);
+            $query->leftJoin($this->getJoinTable())->on($on);
         } else {
             // relation is loaded using external query
             $fields = array_map(
+                // todo use static fn
                 fn (string $key) => $localPrefix . $this->fieldAlias($key),
                 (array)$this->schema[Relation::OUTER_KEY]
             );
@@ -86,9 +89,7 @@ class JoinedTableInheritanceLoader extends JoinableLoader
 
     protected function initNode(): AbstractNode
     {
-        // throw new \RuntimeException('This method should not be called.');
-
-        $node = new MergeNode(
+        $node = new SubclassMergeNode(
             $this->columnNames(),
             (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],
@@ -101,5 +102,10 @@ class JoinedTableInheritanceLoader extends JoinableLoader
         }
 
         return $node;
+    }
+
+    protected function generateParentLoader(string $role): ?LoaderInterface
+    {
+        return null;
     }
 }

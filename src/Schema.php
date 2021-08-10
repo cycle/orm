@@ -12,7 +12,14 @@ use Cycle\ORM\Exception\SchemaException;
 final class Schema implements SchemaInterface
 {
     private array $aliases;
-    private array $classes;
+    /**
+     * @var string[]
+     * @psalm-var class-string[]
+     */
+    private array $classes = [];
+
+    /** @var array<string, array> */
+    private array $subclasses = [];
 
     private array $schema;
 
@@ -133,6 +140,11 @@ final class Schema implements SchemaInterface
         return $role;
     }
 
+    public function getInheritedRoles(string $parent): array
+    {
+        return $this->subclasses[$parent] ?? [];
+    }
+
     /**
      * Automatically replace class names with their aliases.
      *
@@ -166,13 +178,17 @@ final class Schema implements SchemaInterface
         }
 
         // Normalize PARENT option
-        foreach ($result as &$item) {
-            if (isset($item[self::PARENT]) && class_exists($item[self::PARENT])) {
-                $parent = $item[self::PARENT];
-                while (isset($aliases[$parent])) {
-                    $parent = $aliases[$parent];
+        foreach ($result as $role => &$item) {
+            if (isset($item[self::PARENT])) {
+                if (class_exists($item[self::PARENT])) {
+                    $parent = $item[self::PARENT];
+                    while (isset($aliases[$parent])) {
+                        $parent = $aliases[$parent];
+                    }
+                    $item[self::PARENT] = $parent;
                 }
-                $item[self::PARENT] = $parent;
+                $this->subclasses[$role] ??= [];
+                $this->subclasses[$item[self::PARENT]][$role] = &$this->subclasses[$role];
             }
         }
         unset($item);
@@ -353,7 +369,10 @@ final class Schema implements SchemaInterface
         return true;
     }
 
-    private function defineEntityClass(string $role)
+    /**
+     * @psalm-return null|class-string
+     */
+    private function defineEntityClass(string $role): ?string
     {
         return $this->classes[$role] ?? $this->classes[$this->resolveAlias($role) ?? $role] ?? null;
     }

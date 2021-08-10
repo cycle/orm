@@ -46,8 +46,20 @@ abstract class CompositePKTest extends SimpleCasesTest
         MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED,
         MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED,
 
-        EMPLOYEE_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
+        EMPLOYEE_ALL_LOADED = [
+            self::EMPLOYEE_1_LOADED,
+            self::EMPLOYEE_2_LOADED,
+            self::EMPLOYEE_3_LOADED,
+            self::EMPLOYEE_4_LOADED,
+        ],
+        EMPLOYEE_INHERITED_LOADED = [
+            self::MANAGER_1_LOADED,
+            self::PROGRAMATOR_2_LOADED,
+            self::MANAGER_3_LOADED,
+            self::PROGRAMATOR_4_LOADED,
+        ],
         ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
+        ENGINEER_INHERITED_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
         PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
         MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED],
 
@@ -170,7 +182,16 @@ abstract class CompositePKTest extends SimpleCasesTest
         ];
     }
 
-    public function testSelectEngineerAllData(): void
+    public function testSelectEngineerAllDataWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, Engineer::class))
+            // todo: this condition should be added automatically by STI
+            ->where('_type', '=', 'engineer');
+
+        $this->assertEquals(static::ENGINEER_INHERITED_LOADED, $selector->fetchData());
+    }
+
+    public function testSelectEngineerAllDataWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
             // todo: this condition should be added automatically by STI
@@ -179,7 +200,17 @@ abstract class CompositePKTest extends SimpleCasesTest
         $this->assertEquals(static::ENGINEER_ALL_LOADED, $selector->fetchData());
     }
 
-    public function testSelectEngineerDataFirst(): void
+    public function testSelectEngineerDataFirstWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, Engineer::class))
+            // todo: this condition should be added automatically by STI
+            ->where('_type', '=', 'engineer')
+            ->limit(1);
+
+        $this->assertEquals(static::PROGRAMATOR_2_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectEngineerDataFirstWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
             // todo: this condition should be added automatically by STI

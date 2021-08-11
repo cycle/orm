@@ -68,6 +68,8 @@ abstract class AbstractLoader implements LoaderInterface
     /** @var SubclassLoader[] */
     protected array $subclasses = [];
 
+    protected bool $loadSubclasses = true;
+
     protected ?LoaderInterface $parent = null;
 
     /** @var array<string, array> */
@@ -108,6 +110,11 @@ abstract class AbstractLoader implements LoaderInterface
         foreach ($this->subclasses as $i => $loader) {
             $this->subclasses[$i] = $loader->withContext($this);
         }
+    }
+
+    public function setSubclassesLoading(bool $enabled): void
+    {
+        $this->loadSubclasses = $enabled;
     }
 
     public function getTarget(): string
@@ -249,14 +256,16 @@ abstract class AbstractLoader implements LoaderInterface
             $node->linkNode($relation, $loader->createNode());
         }
 
-        foreach ($this->subclasses as $loader) {
-            $node->joinNode(null, $loader->createNode());
+        if ($this->loadSubclasses) {
+            foreach ($this->subclasses as $loader) {
+                $node->joinNode(null, $loader->createNode());
+            }
         }
 
         return $node;
     }
 
-    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void
+    public function loadData(AbstractNode $node, bool $includeRole = false): void
     {
         $this->loadChild($node);
     }
@@ -302,8 +311,10 @@ abstract class AbstractLoader implements LoaderInterface
             }
         }
 
-        foreach ($this->subclasses as $loader) {
-            $query = $loader->configureQuery($query);
+        if ($this->loadSubclasses) {
+            foreach ($this->subclasses as $loader) {
+                $query = $loader->configureQuery($query);
+            }
         }
 
         return $query;
@@ -324,7 +335,7 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * Returns list of relations to be automatically joined with parent object.
      */
-    protected function getEagerRelations(string $role = null): \Generator
+    protected function getEagerLoaders(string $role = null): \Generator
     {
         $role ??= $this->target;
         $parentLoader = $this->generateParentLoader($role);

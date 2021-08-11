@@ -42,7 +42,7 @@ final class RootLoader extends AbstractLoader
         );
         $this->columns = $this->define(Schema::COLUMNS);
 
-        foreach ($this->getEagerRelations() as $relation) {
+        foreach ($this->getEagerLoaders() as $relation) {
             $this->loadRelation($relation, [], false, true);
         }
     }
@@ -96,7 +96,7 @@ final class RootLoader extends AbstractLoader
         return $this->configureQuery(clone $this->query);
     }
 
-    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void
+    public function loadData(AbstractNode $node, bool $includeRole = false): void
     {
         $statement = $this->buildQuery()->run();
 
@@ -108,23 +108,29 @@ final class RootLoader extends AbstractLoader
 
         // loading child datasets
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->getNode($relation), $includeDiscriminator);
+            $loader->loadData($node->getNode($relation), $includeRole);
+        }
+
+        if ($this->inherit === null && !$this->loadSubclasses) {
+            return;
         }
 
         // Merge parent nodes
         if ($this->inherit !== null) {
             $inheritNode = $node->getParentMergeNode();
-            $this->inherit->loadData($inheritNode, $includeDiscriminator);
+            $this->inherit->loadData($inheritNode, $includeRole);
+        }
 
-        }
         // Merge subclass nodes
-        $subclassNodes = $node->getSubclassMergeNodes();
-        // todo
-        foreach ($this->subclasses as $i => $loader) {
-            $inheritNode = $subclassNodes[$i];
-            $loader->loadData($inheritNode, $includeDiscriminator);
+        if ($this->loadSubclasses) {
+            $subclassNodes = $node->getSubclassMergeNodes();
+            foreach ($this->subclasses as $i => $loader) {
+                $inheritNode = $subclassNodes[$i];
+                $loader->loadData($inheritNode, $includeRole);
+            }
         }
-        $node->mergeInheritanceNodes($includeDiscriminator);
+
+        $node->mergeInheritanceNodes($includeRole);
     }
 
     public function isLoaded(): bool

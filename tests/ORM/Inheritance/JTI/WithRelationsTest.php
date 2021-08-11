@@ -185,7 +185,9 @@ abstract class WithRelationsTest extends SimpleCasesTest
     public function testRemoveProgramatorWithRelations(): void
     {
         /** @var Engineer $engineer */
-        $engineer = (new Select($this->orm, static::ENGINEER_ROLE))->wherePK(2)->fetchOne();
+        $engineer = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(2)->fetchOne();
 
         $this->captureWriteQueries();
         (new Transaction($this->orm))->delete($engineer)->run();
@@ -196,9 +198,9 @@ abstract class WithRelationsTest extends SimpleCasesTest
         $this->assertNumWrites(0);
 
         $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne());
-        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne());
         /** @var Employee $employee */
-        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->wherePK(2)->fetchOne();
+        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne();
         $this->assertNotNull($employee);
         $this->assertNotNull($employee->book);
     }

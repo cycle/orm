@@ -196,6 +196,7 @@ abstract class SingleTableTest extends SimpleCasesTest
     public function testSelectEngineerAllDataWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
             // todo: this condition should be added automatically by STI
             ->where('discriminator', '=', 'engineer');
 
@@ -215,6 +216,7 @@ abstract class SingleTableTest extends SimpleCasesTest
     public function testSelectEngineerDataFirstWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
             // todo: this condition should be added automatically by STI
             ->where('discriminator', '=', 'engineer')
             ->limit(1);

@@ -45,16 +45,15 @@ abstract class AbstractMergeNode extends AbstractNode
         $this->results[] = &$data;
     }
 
-    public function mergeInheritanceNodes(bool $withDiscriminator = false): bool
+    public function mergeInheritanceNodes(bool $withDiscriminator = false): void
     {
         if ($this->parent === null) {
-            return false;
+            return;
         }
 
-        parent::mergeInheritanceNodes();
+        parent::mergeInheritanceNodes($withDiscriminator);
 
-        $discriminator = $withDiscriminator ? [LoaderInterface::DISCRIMINATOR_KEY => $this->discriminatorValue] : [];
-
+        $discriminator = $withDiscriminator ? [LoaderInterface::ROLE_KEY => $this->discriminatorValue] : [];
         foreach ($this->results as $item) {
             if ($this->isEmptyKeys($this->innerKeys, $item)) {
                 continue;
@@ -62,12 +61,11 @@ abstract class AbstractMergeNode extends AbstractNode
             $this->parent->mergeData(
                 $this->indexName,
                 $this->intersectData($this->innerKeys, $item),
-                $discriminator + $item,
-                self::OVERWRITE_DATA
+                $item + $discriminator,
+                static::OVERWRITE_DATA
             );
         }
         $this->results = [];
-        return true;
     }
 
     /**

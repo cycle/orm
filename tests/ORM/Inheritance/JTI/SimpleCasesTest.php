@@ -188,6 +188,15 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     // Select
 
+    public function testSelectEmployeeHierarchyByPK(): void
+    {
+        $entity = (new Select($this->orm, static::EMPLOYEE_ROLE))
+            ->wherePK(static::ENGINEER_2_PK)
+            ->fetchOne();
+
+        $this->assertInstanceOf(Programator::class, $entity);
+    }
+
     public function testSelectEmployeeAllDataWithInheritance(): void
     {
         $selector = new Select($this->orm, static::EMPLOYEE_ROLE);
@@ -197,7 +206,8 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEmployeeAllDataWithoutInheritance(): void
     {
-        $selector = new Select($this->orm, static::EMPLOYEE_ROLE);
+        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))
+            ->loadSubclasses(false);
 
         $this->assertEquals(static::EMPLOYEE_ALL_LOADED, $selector->fetchData());
     }
@@ -211,7 +221,9 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEmployeeDataFirstWithoutInheritance(): void
     {
-        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))->limit(1);
+        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))
+            ->loadSubclasses(false)
+            ->limit(1);
 
         $this->assertEquals(static::EMPLOYEE_1_LOADED, $selector->fetchData()[0]);
     }
@@ -225,7 +237,8 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEngineerAllDataWithoutInheritance(): void
     {
-        $selector = (new Select($this->orm, static::ENGINEER_ROLE));
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false);
 
         $this->assertEquals(static::ENGINEER_ALL_LOADED, $selector->fetchData());
     }
@@ -239,7 +252,9 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEngineerDataFirstWithoutInheritance(): void
     {
-        $selector = (new Select($this->orm, static::ENGINEER_ROLE))->limit(1);
+        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            ->limit(1);
 
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);
     }
@@ -363,20 +378,26 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testRemoveEngineer(): void
     {
-        // /** @var Engineer $entity */
-        // $entity = (new Select($this->orm, static::ENGINEER_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne();
-        //
-        // $this->captureWriteQueries();
-        // (new Transaction($this->orm))->delete($entity)->run();
-        // $this->assertNumWrites(1);
-        //
-        // $this->captureWriteQueries();
-        // (new Transaction($this->orm))->delete($entity)->run();
-        // $this->assertNumWrites(0);
-        //
-        // // todo load without inheritance
-        // $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
-        // $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
-        $this->assertNotNull((new Select($this->orm, static::EMPLOYEE_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
+        /** @var Engineer $entity */
+        $entity = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(static::ENGINEER_2_PK)->fetchOne();
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($entity)->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($entity)->run();
+        $this->assertNumWrites(0);
+
+        // todo load without inheritance
+        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(static::ENGINEER_2_PK)->fetchOne());
+        $this->assertNotNull((new Select($this->orm, static::EMPLOYEE_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(static::ENGINEER_2_PK)->fetchOne());
     }
 }

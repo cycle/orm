@@ -195,6 +195,7 @@ abstract class CompositePKTest extends SimpleCasesTest
     {
         $selector = (new Select($this->orm, Engineer::class))
             // todo: this condition should be added automatically by STI
+            ->loadSubclasses(false)
             ->where('_type', '=', 'engineer');
 
         $this->assertEquals(static::ENGINEER_ALL_LOADED, $selector->fetchData());
@@ -215,6 +216,7 @@ abstract class CompositePKTest extends SimpleCasesTest
         $selector = (new Select($this->orm, Engineer::class))
             // todo: this condition should be added automatically by STI
             ->where('_type', '=', 'engineer')
+            ->loadSubclasses(false)
             ->limit(1);
 
         $this->assertEquals(static::ENGINEER_2_LOADED, $selector->fetchData()[0]);

@@ -111,9 +111,10 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             $loader->setConstrain($this->getSource()->getConstrain());
         }
 
-        // todo maybe is not loaded?
         if ($loader->isLoaded()) {
-            foreach ($loader->getEagerRelations() as $relation) {
+            $loader->inherit = null;
+            $loader->subclasses = [];
+            foreach ($loader->getEagerLoaders() as $relation) {
                 $loader->loadRelation($relation, [], false, true);
             }
         }
@@ -121,7 +122,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         return $loader;
     }
 
-    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void
+    public function loadData(AbstractNode $node, bool $includeRole = false): void
     {
         if ($this->isJoined() || !$this->isLoaded()) {
             // load data for all nested relations

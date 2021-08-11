@@ -50,4 +50,9 @@ abstract class WithRelationsStdMapperTest extends WithRelationsTest
     {
         $this->markTestSkipped('Should not check entity class.');
     }
+
+    public function testSelectEmployeeHierarchyByPK(): void
+    {
+        $this->markTestSkipped('Should not check entity class.');
+    }
 }

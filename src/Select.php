@@ -253,11 +253,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * Attention, consider disabling entity map if you want to use recursive loading (i.e
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
-     * @param string|array $relation
-     * @return $this|self
      * @see with()
      */
-    public function load($relation, array $options = []): self
+    public function load(string|array $relation, array $options = []): self
     {
         if (is_string($relation)) {
             $this->loader->loadRelation($relation, $options, false, true);
@@ -379,11 +377,13 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         $select->loader->loadData($node, true);
         $data = $node->getResult();
 
+
+        // todo add comment
         if (!isset($data[0])) {
             return null;
         }
-        $role = $data[0][LoaderInterface::DISCRIMINATOR_KEY] ?? $this->loader->getTarget();
-        unset($data[LoaderInterface::DISCRIMINATOR_KEY]);
+        $role = $data[0][LoaderInterface::ROLE_KEY] ?? $this->loader->getTarget();
+        unset($data[LoaderInterface::ROLE_KEY]);
 
         return $this->orm->make($role, $data[0], Node::MANAGED);
     }
@@ -427,5 +427,11 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function sqlStatement(): string
     {
         return $this->buildQuery()->sqlStatement();
+    }
+
+    public function loadSubclasses(bool $load = true): self
+    {
+        $this->loader->setSubclassesLoading($load);
+        return $this;
     }
 }

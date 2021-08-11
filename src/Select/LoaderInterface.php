@@ -13,7 +13,7 @@ use Cycle\ORM\Parser\AbstractNode;
  */
 interface LoaderInterface
 {
-    public const DISCRIMINATOR_KEY = '::role::';
+    public const ROLE_KEY = '@role';
 
     /**
      * Return the relation alias.
@@ -48,5 +48,7 @@ interface LoaderInterface
      *
      * @throws LoaderException
      */
-    public function loadData(AbstractNode $node, bool $includeDiscriminator = false): void;
+    public function loadData(AbstractNode $node, bool $includeRole = false): void;
+
+    public function setSubclassesLoading(bool $enabled): void;
 }

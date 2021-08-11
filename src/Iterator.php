@@ -43,7 +43,7 @@ final class Iterator implements \IteratorAggregate
             }
 
             // get role from joined table inheritance
-            $role = $data[LoaderInterface::DISCRIMINATOR_KEY] ?? $this->role;
+            $role = $data[LoaderInterface::ROLE_KEY] ?? $this->role;
 
             // add pipeline filter support?
 

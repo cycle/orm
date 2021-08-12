@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Inheritance\JTI;
+namespace Cycle\ORM\Tests\Inheritance\JTI\Relation;
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
@@ -14,13 +14,13 @@ use Cycle\ORM\Tests\Inheritance\Fixture\Engineer;
 use Cycle\ORM\Tests\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Inheritance\Fixture\Programator;
 use Cycle\ORM\Tests\Inheritance\Fixture\Tool;
+use Cycle\ORM\Tests\Inheritance\JTI\JtiBaseTest;
+use Cycle\ORM\Tests\Inheritance\JTI\SimpleCasesTest;
 use Cycle\ORM\Transaction;
 
-abstract class WithRelationsTest extends SimpleCasesTest
+abstract class ParentClassRelationsTest extends SimpleCasesTest
 {
     protected const
-        DEFAULT_MAPPER = Mapper::class,
-
         TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'],
         TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'],
         TOOL_3 = ['id' => 3, 'engineer_id' => 2, 'title' => 'Notepad'],
@@ -165,46 +165,6 @@ abstract class WithRelationsTest extends SimpleCasesTest
         $this->logger->display();
     }
 
-    /**
-     * Parent's relation should be initialized
-     */
-    public function testLoadProgramatorAndCheckParentsRelations(): void
-    {
-        /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
-            ->load('tech_book')
-            ->wherePK(2)->fetchOne();
-
-        $this->assertNotNull($entity->book);
-        $this->assertNotNull($entity->tech_book);
-    }
-
-    /**
-     * Parent's relations should be removed or not removed with their parent
-     */
-    public function testRemoveProgramatorWithRelations(): void
-    {
-        /** @var Engineer $engineer */
-        $engineer = (new Select($this->orm, static::ENGINEER_ROLE))
-            ->loadSubclasses(false)
-            ->wherePK(2)->fetchOne();
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
-        $this->assertNumWrites(0);
-
-        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne());
-        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne());
-        /** @var Employee $employee */
-        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne();
-        $this->assertNotNull($employee);
-        $this->assertNotNull($employee->book);
-    }
-
     protected function getSchemaArray(): array
     {
         return [
@@ -311,5 +271,45 @@ abstract class WithRelationsTest extends SimpleCasesTest
                 SchemaInterface::RELATIONS   => [],
             ],
         ];
+    }
+
+    /**
+     * Parent's relation should be initialized
+     */
+    public function testLoadParentRelations(): void
+    {
+        /** @var Programator $entity */
+        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->load('tech_book')
+            ->wherePK(2)->fetchOne();
+
+        $this->assertNotNull($entity->book);
+        $this->assertNotNull($entity->tech_book);
+    }
+
+    /**
+     * Parent's relations should be removed or not removed with their parent
+     */
+    public function testRemoveSubclassWithRelations(): void
+    {
+        /** @var Engineer $engineer */
+        $engineer = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(2)->fetchOne();
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(0);
+
+        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne());
+        /** @var Employee $employee */
+        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne();
+        $this->assertNotNull($employee);
+        $this->assertNotNull($employee->book);
     }
 }

@@ -126,7 +126,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     {
         if ($this->isJoined() || !$this->isLoaded()) {
             // load data for all nested relations
-            parent::loadData($node);
+            parent::loadData($node, $includeRole);
 
             return;
         }
@@ -152,7 +152,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         $statement->close();
 
         // load data for all nested relations
-        parent::loadData($node);
+        parent::loadData($node, $includeRole);
     }
 
     /**

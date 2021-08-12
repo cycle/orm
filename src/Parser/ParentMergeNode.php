@@ -10,4 +10,9 @@ namespace Cycle\ORM\Parser;
 class ParentMergeNode extends AbstractMergeNode
 {
     protected const OVERWRITE_DATA = false;
+
+    public function mergeInheritanceNodes(bool $includeRole = false): void
+    {
+        parent::mergeInheritanceNodes(false);
+    }
 }

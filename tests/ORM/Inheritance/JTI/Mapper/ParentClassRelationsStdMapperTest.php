@@ -8,9 +8,9 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Inheritance\JTI\WithRelationsTest;
+use Cycle\ORM\Tests\Inheritance\JTI\Relation\ParentClassRelationsTest;
 
-abstract class WithRelationsStdMapperTest extends WithRelationsTest
+abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTest
 {
     protected const DEFAULT_MAPPER = StdMapper::class;
 

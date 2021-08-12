@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Inheritance\JTI;
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
+use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -14,6 +15,8 @@ use Cycle\ORM\Tests\Traits\TableTrait;
 abstract class JtiBaseTest extends BaseTest
 {
     use TableTrait;
+
+    protected const DEFAULT_MAPPER = Mapper::class;
 
     abstract protected function getSchemaArray(): array;
 

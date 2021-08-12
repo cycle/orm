@@ -111,26 +111,7 @@ final class RootLoader extends AbstractLoader
             $loader->loadData($node->getNode($relation), $includeRole);
         }
 
-        if ($this->inherit === null && !$this->loadSubclasses) {
-            return;
-        }
-
-        // Merge parent nodes
-        if ($this->inherit !== null) {
-            $inheritNode = $node->getParentMergeNode();
-            $this->inherit->loadData($inheritNode, $includeRole);
-        }
-
-        // Merge subclass nodes
-        if ($this->loadSubclasses) {
-            $subclassNodes = $node->getSubclassMergeNodes();
-            foreach ($this->subclasses as $i => $loader) {
-                $inheritNode = $subclassNodes[$i];
-                $loader->loadData($inheritNode, $includeRole);
-            }
-        }
-
-        $node->mergeInheritanceNodes($includeRole);
+        $this->loadIerarchy($node, $includeRole);
     }
 
     public function isLoaded(): bool

@@ -235,10 +235,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * ]);
      *
      * // In most of cases you don't need to worry about how data was loaded, using external query
-     * // or left join, however if you want to change such behaviour you can force load method to
-     * // INLOAD
+     * // or left join, however if you want to change such behaviour you can force load method
+     * // using {@see Select::SINGLE_QUERY}
      * User::find()->load('tags', [
-     *      'method'     => Loader::INLOAD,
+     *      'method'     => Select::SINGLE_QUERY,
      *      'wherePivot' => ['{@}.approved' => true]
      * ]);
      *
@@ -377,15 +377,11 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         $select->loader->loadData($node, true);
         $data = $node->getResult();
 
-
-        // todo add comment
         if (!isset($data[0])) {
             return null;
         }
-        $role = $data[0][LoaderInterface::ROLE_KEY] ?? $this->loader->getTarget();
-        unset($data[LoaderInterface::ROLE_KEY]);
 
-        return $this->orm->make($role, $data[0], Node::MANAGED);
+        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED);
     }
 
     /**

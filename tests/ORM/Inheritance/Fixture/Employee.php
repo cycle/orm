@@ -6,9 +6,8 @@ namespace Cycle\ORM\Tests\Inheritance\Fixture;
 
 use Cycle\ORM\Reference\ReferenceInterface;
 
-class Employee
+class Employee extends Human
 {
-    public ?int $id = null;
     public ?int $employee_id = null;
 
     public ?string $name = null;

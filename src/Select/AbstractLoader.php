@@ -267,7 +267,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     public function loadData(AbstractNode $node, bool $includeRole = false): void
     {
-        $this->loadChild($node);
+        $this->loadChild($node, $includeRole);
     }
 
     /**
@@ -275,17 +275,36 @@ abstract class AbstractLoader implements LoaderInterface
      */
     abstract public function isLoaded(): bool;
 
-    protected function loadChild(AbstractNode $node): void
+    protected function loadChild(AbstractNode $node, bool $includeRole = false): void
     {
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->getNode($relation));
+            $loader->loadData($node->getNode($relation), $includeRole);
+        }
+        $this->loadIerarchy($node, $includeRole);
+    }
+
+    protected function loadIerarchy(AbstractNode $node, bool $includeRole = false): void
+    {
+        if ($this->inherit === null && !$this->loadSubclasses) {
+            return;
         }
 
-        // Merge nodes
+        // Merge parent nodes
         if ($this->inherit !== null) {
-            $this->inherit->loadData($node->getParentMergeNode());
-            $node->mergeInheritanceNodes();
+            $inheritNode = $node->getParentMergeNode();
+            $this->inherit->loadData($inheritNode, $includeRole);
         }
+
+        // Merge subclass nodes
+        if ($this->loadSubclasses) {
+            $subclassNodes = $node->getSubclassMergeNodes();
+            foreach ($this->subclasses as $i => $loader) {
+                $inheritNode = $subclassNodes[$i];
+                $loader->loadData($inheritNode, $includeRole);
+            }
+        }
+
+        $node->mergeInheritanceNodes($includeRole);
     }
 
     /**

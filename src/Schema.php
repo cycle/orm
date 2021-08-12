@@ -264,7 +264,7 @@ final class Schema implements SchemaInterface
                     continue;
                 }
                 $targetSchema = $result[$target];
-                $targetRelations = $targetSchema[self::RELATIONS];
+                $targetRelations = $targetSchema[self::RELATIONS] ?? [];
                 $handshake = $relation[Relation::SCHEMA][Relation::HANDSHAKE] ?? null;
                 if ($handshake !== null) {
                     if (!array_key_exists($handshake, $targetRelations)) {

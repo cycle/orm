@@ -48,7 +48,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
             throw new CommandException('Unable to execute delete command without a scope.');
         }
 
-        $this->db->delete(
+        $this->affectedRows = $this->db->delete(
             $this->table,
             $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
         )->run();

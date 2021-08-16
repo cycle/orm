@@ -88,7 +88,7 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         $data = $changes !== [] && $this->mapper !== null ? ($this->mapper)($changes) : $changes;
         $fields = array_keys($changes);
         if ($data !== [] || $this->columns !== []) {
-            $this->db
+            $this->affectedRows = $this->db
                 ->update(
                     $this->table,
                     array_merge($this->columns, $data),

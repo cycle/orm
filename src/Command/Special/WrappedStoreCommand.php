@@ -17,6 +17,8 @@ final class WrappedStoreCommand implements StoreCommandInterface
 
     private ?Closure $beforeExecute = null;
 
+    private ?Closure $afterExecute = null;
+
     private function __construct(StoreCommandInterface $command)
     {
         $this->command = $command;
@@ -48,10 +50,17 @@ final class WrappedStoreCommand implements StoreCommandInterface
         return new self($command);
     }
 
-    public function withBeforeExecute(?callable $callable): self
+    public function withBeforeExecution(?callable $callable): self
     {
         $clone = clone $this;
         $clone->beforeExecute = $callable instanceof Closure ? $callable : Closure::fromCallable($callable);
+        return $clone;
+    }
+
+    public function withAfterExecution(?callable $callable): self
+    {
+        $clone = clone $this;
+        $clone->afterExecute = $callable instanceof Closure ? $callable : Closure::fromCallable($callable);
         return $clone;
     }
 
@@ -71,6 +80,9 @@ final class WrappedStoreCommand implements StoreCommandInterface
             Closure::bind($this->beforeExecute, null, self::class)($this);
         }
         $this->command->execute();
+        if ($this->afterExecute !== null) {
+            Closure::bind($this->afterExecute, null, self::class)($this);
+        }
     }
 
     public function getDatabase(): ?DatabaseInterface

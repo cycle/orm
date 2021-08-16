@@ -513,4 +513,19 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         $this->assertInstanceof(MarkdownPage::class, $entity);
         $this->assertInstanceof(Programator::class, $entity->owner);
     }
+
+    /**
+     * todo: inheritance hierarchy should be joined as sub-query
+     */
+    public function testInnerLoadParentClassRelationNullToNull(): void
+    {
+        /** @var MarkdownPage $entity */
+        $entity = (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
+            ->load('ebook', ['method' => Select::SINGLE_QUERY])
+            ->wherePK(5)->fetchOne();
+
+        $this->assertInstanceof(MarkdownPage::class, $entity);
+        $this->assertNull($entity->block_id);
+        $this->assertNull($entity->ebook);
+    }
 }

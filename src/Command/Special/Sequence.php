@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Command\Branch;
+namespace Cycle\ORM\Command\Special;
 
 use Cycle\ORM\Command\CommandInterface;
 use Spiral\Database\DatabaseInterface;

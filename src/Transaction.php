@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Command\Branch\WrappedStoreCommand;
+use Cycle\ORM\Command\Special\Sequence;
+use Cycle\ORM\Command\Special\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\Database\Insert;
-use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Relation\ReversedRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;

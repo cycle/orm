@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Command\Branch;
+namespace Cycle\ORM\Command\Special;
 
 use Closure;
 use Cycle\ORM\Command\Database\Insert;

@@ -523,7 +523,7 @@ final class Transaction implements TransactionInterface
                 ?? $schema->define($parent, SchemaInterface::PRIMARY_KEY));
             $primaryKey = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
             $result[] = $command->withBeforeExecution(
-                static function (WrappedStoreCommand $command) use ($tuple, $parentKey, $primaryKey): void {
+                static function (StoreCommandInterface $command) use ($tuple, $parentKey, $primaryKey): void {
                     foreach ($primaryKey as $i => $pk) {
                         $command->registerAppendix($pk, $tuple->state->getValue($parentKey[$i]));
                     }

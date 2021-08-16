@@ -37,7 +37,7 @@ trait ScopeTrait
 
     public function getAffectedRows(): int
     {
-        if (!$this->executed) {
+        if (!$this->isExecuted()) {
             throw new CommandException('The command was not run.');
         }
         return $this->affectedRows;

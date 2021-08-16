@@ -31,8 +31,8 @@ class WrappedCommand implements CommandInterface
         array $primaryKeys = [],
         string $pkColumn = null,
         callable $mapper = null
-    ): static {
-        return new static(new Insert($db, $table, $state, $primaryKeys, $pkColumn, $mapper));
+    ): WrappedStoreCommand {
+        return new WrappedStoreCommand(new Insert($db, $table, $state, $primaryKeys, $pkColumn, $mapper));
     }
 
     public static function createUpdate(
@@ -41,8 +41,8 @@ class WrappedCommand implements CommandInterface
         State $state,
         array $primaryKeys = [],
         callable $mapper = null
-    ): static {
-        return new static(new Update($db, $table, $state, $primaryKeys, $mapper));
+    ): WrappedStoreCommand {
+        return new WrappedStoreCommand(new Update($db, $table, $state, $primaryKeys, $mapper));
     }
 
     public static function wrapCommand(CommandInterface $command): static
@@ -77,11 +77,11 @@ class WrappedCommand implements CommandInterface
     public function execute(): void
     {
         if ($this->beforeExecute !== null) {
-            Closure::bind($this->beforeExecute, null, static::class)($this);
+            Closure::bind($this->beforeExecute, null, static::class)($this->command);
         }
         $this->command->execute();
         if ($this->afterExecute !== null) {
-            Closure::bind($this->afterExecute, null, static::class)($this);
+            Closure::bind($this->afterExecute, null, static::class)($this->command);
         }
     }
 
@@ -93,5 +93,10 @@ class WrappedCommand implements CommandInterface
     public function hasData(): bool
     {
         return $this->command->hasData();
+    }
+
+    public function getCommand(): CommandInterface
+    {
+        return $this->command;
     }
 }

@@ -49,7 +49,7 @@ class UserSnapshotMapper extends Mapper
             $this->source->getDatabase(),
             'user_snapshots',
             $state
-        )->withBeforeExecution(static function (WrappedStoreCommand $command) use ($node, $state): void {
+        )->withBeforeExecution(static function (StoreCommandInterface $command) use ($node, $state): void {
             $state->register('user_id', $node->getData()['id']);
         });
     }

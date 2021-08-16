@@ -429,7 +429,7 @@ abstract class BelongsToRelationTest extends BaseTest
     }
 
     /**
-     * Nullable BelongsTo relation should be transformed to RefersTo
+     * Nullable BelongsTo relation should not be transformed to RefersTo
      */
     public function testSetNullable(): void
     {
@@ -438,7 +438,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->orm = $this->withSchema(new Schema($schema));
 
         $this->assertInstanceOf(
-            Relation\RefersTo::class,
+            Relation\BelongsTo::class,
             $this->orm->getRelationMap(Profile::class)->getRelations()['user']
         );
     }

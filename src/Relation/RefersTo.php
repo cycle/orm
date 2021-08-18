@@ -31,14 +31,15 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 $tuple->state->setRelation($this->getName(), $related);
             }
         }
-        if ($this->checkNullValue($tuple->node, $related)) {
+        if ($this->checkNullValue($node, $related)) {
             return;
         }
         $this->registerWaitingFields($tuple->state, false);
-        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
         if ($related instanceof ReferenceInterface) {
+            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
             return;
         }
+        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
         $rTuple = $pool->offsetGet($related);
         if ($rTuple === null && $this->isCascade()) {
             $pool->attachStore($related, false, null, null, false);
@@ -73,9 +74,10 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             if ($this->isCascade()) {
                 // todo: cascade true?
                 $rTuple = $pool->attachStore($related, false, null, null, false);
-            } elseif ($node->getRelationStatus($this->getName()) === RelationInterface::STATUS_DEFERRED && $tuple->status === Tuple::STATUS_PROPOSED) {
-                throw new TransactionException('wtf');
-            } else {
+            } elseif (
+                $node->getRelationStatus($this->getName()) !== RelationInterface::STATUS_DEFERRED
+                || $tuple->status !== Tuple::STATUS_PROPOSED
+            ) {
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
                 return;
             }
@@ -99,14 +101,6 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         if ($tuple->status !== Tuple::STATUS_PREPARING) {
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
         }
-        return;
-
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        $rNode = $rTuple->node ?? $this->getNode($related);
-        $this->assertValid($rNode);
-        $node->getState()->setRelation($this->getName(), $related);
-
-        $this->pullValues($node, $rNode);
     }
 
     private function pullValues(Node $node, Node $related): void

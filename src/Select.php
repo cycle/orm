@@ -8,6 +8,7 @@ use Countable;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use InvalidArgumentException;
@@ -54,7 +55,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     {
         $this->orm = $orm;
         $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
-        $this->builder = new QueryBuilder($this->getLoader()->getQuery(), $this->loader);
+        $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
 
     /**
@@ -234,10 +235,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * ]);
      *
      * // In most of cases you don't need to worry about how data was loaded, using external query
-     * // or left join, however if you want to change such behaviour you can force load method to
-     * // INLOAD
+     * // or left join, however if you want to change such behaviour you can force load method
+     * // using {@see Select::SINGLE_QUERY}
      * User::find()->load('tags', [
-     *      'method'     => Loader::INLOAD,
+     *      'method'     => Select::SINGLE_QUERY,
      *      'wherePivot' => ['{@}.approved' => true]
      * ]);
      *
@@ -252,11 +253,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * Attention, consider disabling entity map if you want to use recursive loading (i.e
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
-     * @param string|array $relation
-     * @return $this|self
      * @see with()
      */
-    public function load($relation, array $options = []): self
+    public function load(string|array $relation, array $options = []): self
     {
         if (is_string($relation)) {
             $this->loader->loadRelation($relation, $options, false, true);
@@ -342,11 +341,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *
-     * @param string|array $relation
      * @return $this|Select
      * @see load()
      */
-    public function with($relation, array $options = []): self
+    public function with(string|array $relation, array $options = []): self
     {
         if (is_string($relation)) {
             $this->loader->loadRelation($relation, $options, true, false);
@@ -374,7 +372,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function fetchOne(array $query = null): ?object
     {
-        $data = (clone $this)->where($query)->limit(1)->fetchData();
+        $select = (clone $this)->where($query)->limit(1);
+        $node = $select->loader->createNode();
+        $select->loader->loadData($node, true);
+        $data = $node->getResult();
 
         if (!isset($data[0])) {
             return null;
@@ -395,10 +396,13 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     public function getIterator(): Iterator
     {
+        $node = $this->loader->createNode();
+        $this->loader->loadData($node, true);
+
         return new Iterator(
             $this->orm,
             $this->loader->getTarget(),
-            $this->fetchData()
+            $node->getResult()
         );
     }
 
@@ -408,7 +412,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function fetchData(): array
     {
         $node = $this->loader->createNode();
-        $this->loader->loadData($node);
+        $this->loader->loadData($node, false);
 
         return $node->getResult();
     }
@@ -421,11 +425,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return $this->buildQuery()->sqlStatement();
     }
 
-    /**
-     * Return base loader associated with the selector.
-     */
-    private function getLoader(): RootLoader
+    public function loadSubclasses(bool $load = true): self
     {
-        return $this->loader;
+        $this->loader->setSubclassesLoading($load);
+        return $this;
     }
 }

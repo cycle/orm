@@ -59,6 +59,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
         $this->name = $name;
         $this->schema = $schema;
+        $this->columns = $this->define(Schema::COLUMNS);
     }
 
     /**
@@ -75,7 +76,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return $this->options['as'];
         }
 
-        throw new LoaderException('Unable to resolve loader alias');
+        throw new LoaderException('Unable to resolve loader alias.');
     }
 
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
@@ -111,7 +112,9 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         }
 
         if ($loader->isLoaded()) {
-            foreach ($loader->getEagerRelations() as $relation) {
+            $loader->inherit = null;
+            $loader->subclasses = [];
+            foreach ($loader->getEagerLoaders() as $relation) {
                 $loader->loadRelation($relation, [], false, true);
             }
         }
@@ -119,11 +122,11 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         return $loader;
     }
 
-    public function loadData(AbstractNode $node): void
+    public function loadData(AbstractNode $node, bool $includeRole = false): void
     {
         if ($this->isJoined() || !$this->isLoaded()) {
             // load data for all nested relations
-            parent::loadData($node);
+            parent::loadData($node, $includeRole);
 
             return;
         }
@@ -149,7 +152,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         $statement->close();
 
         // load data for all nested relations
-        parent::loadData($node);
+        parent::loadData($node, $includeRole);
     }
 
     /**
@@ -283,14 +286,6 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     protected function getJoinTable(): string
     {
         return "{$this->define(Schema::TABLE)} AS {$this->getAlias()}";
-    }
-
-    /**
-     * Relation columns.
-     */
-    protected function getColumns(): array
-    {
-        return $this->define(Schema::COLUMNS);
     }
 
     private function makeQueryBuilder(SelectQuery $query): QueryBuilder

@@ -16,6 +16,7 @@ use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\SourceInterface;
 
@@ -32,8 +33,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     protected array $columns;
 
-    /** @var array */
-    protected $fields;
+    protected array $parentColumns = [];
 
     /** @var string[] */
     protected array $primaryColumns = [];
@@ -43,24 +43,26 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function __construct(ORMInterface $orm, string $role)
     {
-        if (!$orm instanceof Select\SourceProviderInterface) {
-            throw new MapperException('Source factory is missing');
-        }
-
         $this->orm = $orm;
         $this->role = $role;
 
         $this->source = $orm->getSource($role);
-        $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
-
-        $this->primaryKeys = (array)$orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        foreach ($this->primaryKeys as $PK) {
-            $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
+        foreach ($orm->getSchema()->define($role, SchemaInterface::COLUMNS) as $property => $column) {
+            $this->columns[is_int($property) ? $column : $property] = $column;
         }
 
-        // Resolve field names
-        foreach ($this->columns as $name => $column) {
-            $this->fields[] = is_string($name) ? $name : $column;
+        // Parent's fields
+        $parent = $orm->getSchema()->define($role, SchemaInterface::PARENT);
+        while ($parent !== null) {
+            foreach ($orm->getSchema()->define($parent, SchemaInterface::COLUMNS) as $property => $column) {
+                $this->parentColumns[is_int($property) ? $column : $property] = $column;
+            }
+            $parent = $orm->getSchema()->define($parent, SchemaInterface::PARENT);
+        }
+
+        $this->primaryKeys = (array)$orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
+        foreach ($this->primaryKeys as $PK) {
+            $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
         }
     }
 
@@ -97,7 +99,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
-        $fromData = $node->getState()->getTransactionData();
+        $fromData = $state->getTransactionData();
         \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . count($node->getChanges()) . "\n";
 
         $update = new Update(
@@ -139,11 +141,15 @@ abstract class DatabaseMapper implements MapperInterface
         return null;
     }
 
-    public function mapColumns(array $values): array
+    public function mapColumns(array &$values): array
     {
         $result = [];
         foreach ($values as $column => $value) {
-            $result[$this->columns[$column] ?? $column] = $value;
+            if (isset($this->columns[$column])) {
+                $result[$this->columns[$column]] = $value;
+            } else {
+                unset($values[$column]);
+            }
         }
 
         return $result;

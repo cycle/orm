@@ -13,6 +13,7 @@ class Post implements ImagedInterface
     public $title;
     public $content;
     public $image;
+    public $lock;
 
     /** @var Comment[]|PivotedCollectionInterface */
     public $comments;

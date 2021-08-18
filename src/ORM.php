@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Exception\ORMException;
+use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 
 use function count;
@@ -111,6 +113,8 @@ final class ORM implements ORMInterface
 
     public function make(string $role, array $data = [], int $status = Node::NEW): ?object
     {
+        $role = $data[LoaderInterface::ROLE_KEY] ?? $role;
+        unset($data[LoaderInterface::ROLE_KEY]);
         $relMap = $this->getRelationMap($role);
         $mapper = $this->getMapper($role);
         if ($status !== Node::NEW) {
@@ -142,7 +146,7 @@ final class ORM implements ORMInterface
         }
 
         $node = new Node($status, $data, $role);
-        $e = $mapper->init($data);
+        $e = $mapper->init($data, $role);
 
         /** Entity should be attached before {@see RelationMap::init()} running */
         $this->heap->attach($e, $node, $this->getIndexes($role));

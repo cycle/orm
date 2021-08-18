@@ -84,17 +84,19 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
             $this->state->updateTransactionData();
             return;
         }
-        $data = $this->state->getChanges();
+        $allChanges = $changes = $this->state->getChanges();
+        $data = $changes !== [] && $this->mapper !== null ? ($this->mapper)($changes) : $changes;
+        $fields = array_keys($changes);
         if ($data !== [] || $this->columns !== []) {
-            $this->db
+            $this->affectedRows = $this->db
                 ->update(
                     $this->table,
-                    array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data)),
+                    array_merge($this->columns, $data),
                     $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
                 )
                 ->run();
         }
-        $this->state->updateTransactionData();
+        $this->state->updateTransactionData($fields !== [] && count($fields) === count($allChanges) ? null : $fields);
 
         parent::execute();
     }

@@ -13,6 +13,8 @@ use Cycle\ORM\Parser\AbstractNode;
  */
 interface LoaderInterface
 {
+    public const ROLE_KEY = '@role';
+
     /**
      * Return the relation alias.
      */
@@ -44,7 +46,11 @@ interface LoaderInterface
     /**
      * Load data into previously created node.
      *
+     * @param bool $includeRole Turn on to include {@see LoaderInterface::ROLE_KEY} key in the result data
+     *
      * @throws LoaderException
      */
-    public function loadData(AbstractNode $node): void;
+    public function loadData(AbstractNode $node, bool $includeRole = false): void;
+
+    public function setSubclassesLoading(bool $enabled): void;
 }

@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\Special\Sequence;
+use Cycle\ORM\Command\Special\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\Database\Insert;
-use Cycle\ORM\Command\Database\Update;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Relation\ReversedRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
@@ -453,16 +452,29 @@ final class Transaction implements TransactionInterface
     public function generateStoreCommand(Tuple $tuple): ?CommandInterface
     {
         $tuple->state = $tuple->state ?? $tuple->node->getState();
+        $isNew = $tuple->node->getStatus() === Node::NEW;
+        $tuple->state->setStatus($isNew ? Node::SCHEDULED_INSERT : Node::SCHEDULED_UPDATE);
+        $schema = $this->orm->getSchema();
 
-        if ($tuple->node->getStatus() === Node::NEW) {
-            $tuple->state->setStatus(Node::SCHEDULED_INSERT);
-            /** @var Insert $command */
-            return $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
+        /**
+         * @see \Cycle\ORM\MapperInterface::queueCreate()
+         * @see \Cycle\ORM\MapperInterface::queueUpdate()
+         */
+        $method = $isNew ? 'queueCreate' : 'queueUpdate';
+
+        $parents = $commands = [];
+        $parent = $schema->define($tuple->node->getRole(), SchemaInterface::PARENT);
+        while ($parent !== null) {
+            array_unshift($parents, $parent);
+            $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
-        $tuple->state->setStatus(Node::SCHEDULED_UPDATE);
+        foreach ($parents as $parent) {
+            $parentMapper = $this->orm->getMapper($parent);
+            $commands[$parent] = $parentMapper->$method($tuple->entity, $tuple->node, $tuple->state);
+        }
+        $commands[$tuple->node->getRole()] = $tuple->mapper->$method($tuple->entity, $tuple->node, $tuple->state);
 
-        /** @var Update $command */
-        return $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+        return count($commands) === 1 ? current($commands) : $this->buildStoreSequence($commands, $tuple);
     }
 
     public function generateDeleteCommand(Tuple $tuple): CommandInterface
@@ -486,5 +498,40 @@ final class Transaction implements TransactionInterface
         $keys = $this->orm->getSchema()->define($role, Schema::FIND_BY_KEYS) ?? [];
 
         return $this->indexes[$role] = array_merge([$pk], $keys);
+    }
+
+    /**
+     * @param array<string, StoreCommandInterface> $commands
+     */
+    private function buildStoreSequence(array $commands, Tuple $tuple): CommandInterface
+    {
+        $parent = null;
+        $schema = $this->orm->getSchema();
+        $result = [];
+        foreach ($commands as $role => $command) {
+            // Current parent has no parent
+            if ($parent === null) {
+                $result[] = $command;
+                $parent = $role;
+                continue;
+            }
+
+            $command = WrappedStoreCommand::wrapStoreCommand($command);
+
+            // Transact PK from previous parent to current
+            $parentKey = (array)($schema->define($role, SchemaInterface::PARENT_KEY)
+                ?? $schema->define($parent, SchemaInterface::PRIMARY_KEY));
+            $primaryKey = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
+            $result[] = $command->withBeforeExecution(
+                static function (StoreCommandInterface $command) use ($tuple, $parentKey, $primaryKey): void {
+                    foreach ($primaryKey as $i => $pk) {
+                        $command->registerAppendix($pk, $tuple->state->getValue($parentKey[$i]));
+                    }
+                }
+            );
+            $parent = $role;
+        }
+
+        return (new Sequence())->addCommand(...$result);
     }
 }

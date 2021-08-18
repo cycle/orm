@@ -12,8 +12,16 @@ use Cycle\ORM\Exception\SchemaException;
 final class Schema implements SchemaInterface
 {
     private array $aliases;
+    /**
+     * @var string[]
+     * @psalm-var class-string[]
+     */
+    private array $classes = [];
 
-    private array $schema = [];
+    /** @var array<string, array> */
+    private array $subclasses = [];
+
+    private array $schema;
 
     public function __construct(array $schema)
     {
@@ -95,12 +103,15 @@ final class Schema implements SchemaInterface
         return isset($this->schema[$role]) || isset($this->aliases[$role]);
     }
 
-    public function define(string $role, int $property)
+    public function define(string $role, int $property): mixed
     {
+        if ($property === SchemaInterface::ENTITY) {
+            return $this->defineEntityClass($role);
+        }
         $role = $this->resolveAlias($role) ?? $role;
 
         if (!isset($this->schema[$role])) {
-            throw new SchemaException("Undefined schema `{$role}`, not found");
+            throw new SchemaException("Undefined schema `{$role}`, not found.");
         }
 
         return $this->schema[$role][$property] ?? null;
@@ -111,7 +122,7 @@ final class Schema implements SchemaInterface
         $relations = $this->define($role, self::RELATIONS);
 
         if (!isset($relations[$relation])) {
-            throw new SchemaException("Undefined relation `{$role}`.`{$relation}`");
+            throw new SchemaException("Undefined relation `{$role}`.`{$relation}`.");
         }
 
         return $relations[$relation];
@@ -119,12 +130,19 @@ final class Schema implements SchemaInterface
 
     public function resolveAlias(string $role): ?string
     {
-        // walk throught all children until parent entity found
-        while (isset($this->aliases[$role])) {
-            $role = $this->aliases[$role];
+        // walk through all children until parent entity found
+        $found = $this->aliases[$role] ?? null;
+        while ($found !== null && $found !== $role) {
+            $role = $found;
+            $found = $this->aliases[$found] ?? null;
         }
 
         return $role;
+    }
+
+    public function getInheritedRoles(string $parent): array
+    {
+        return $this->subclasses[$parent] ?? [];
     }
 
     /**
@@ -152,13 +170,42 @@ final class Schema implements SchemaInterface
 
             if ($item[self::ENTITY] !== $role && class_exists($item[self::ENTITY])) {
                 $aliases[$item[self::ENTITY]] = $role;
+                $this->classes[$role] = $item[self::ENTITY];
             }
 
             unset($item[self::ROLE]);
             $result[$role] = $item;
         }
 
-        // normalizing relation associations
+        // Normalize PARENT option
+        foreach ($result as $role => &$item) {
+            if (isset($item[self::PARENT])) {
+                if (class_exists($item[self::PARENT])) {
+                    $parent = $item[self::PARENT];
+                    while (isset($aliases[$parent])) {
+                        $parent = $aliases[$parent];
+                    }
+                    $item[self::PARENT] = $parent;
+                }
+                $this->subclasses[$role] ??= [];
+                $this->subclasses[$item[self::PARENT]][$role] = &$this->subclasses[$role];
+            }
+        }
+        unset($item);
+
+        // Extract aliases from CHILDREN options
+        foreach ($result as $role => $item) {
+            if (isset($item[self::CHILDREN])) {
+                foreach ($item[self::CHILDREN] as $child) {
+                    if (isset($aliases[$child]) && class_exists($child)) {
+                        $aliases[$aliases[$child]] = $role;
+                    }
+                    $aliases[$child] = $role;
+                }
+            }
+        }
+
+        // Normalize relation associations
         foreach ($result as &$item) {
             if (isset($item[self::RELATIONS])) {
                 $item[self::RELATIONS] = iterator_to_array($this->normalizeRelations(
@@ -166,9 +213,8 @@ final class Schema implements SchemaInterface
                     $aliases
                 ));
             }
-
-            unset($item);
         }
+        unset($item);
 
         $result = $this->linkRelations($result, $aliases);
 
@@ -186,14 +232,10 @@ final class Schema implements SchemaInterface
             $rel[Relation::TARGET] = $target;
 
             $nullable = $rel[Relation::SCHEMA][Relation::NULLABLE] ?? null;
-            // // Transform nullable BelongsTo to RefersTo
-            // if ($rel[Relation::TYPE] === Relation::BELONGS_TO && $nullable === true) {
-            //     $rel[Relation::TYPE] = Relation::REFERS_TO;
-            // }
-            // // Transform not nullable RefersTo to BelongsTo
-            // if ($rel[Relation::TYPE] === Relation::REFERS_TO && $nullable === false) {
-            //     $rel[Relation::TYPE] = Relation::BELONGS_TO;
-            // }
+            // Transform not nullable RefersTo to BelongsTo
+            if ($rel[Relation::TYPE] === Relation::REFERS_TO && $nullable === false) {
+                $rel[Relation::TYPE] = Relation::BELONGS_TO;
+            }
 
             // Normalize THROUGH_ENTITY value
             if ($rel[Relation::TYPE] === Relation::MANY_TO_MANY) {
@@ -218,7 +260,7 @@ final class Schema implements SchemaInterface
                     continue;
                 }
                 $targetSchema = $result[$target];
-                $targetRelations = $targetSchema[self::RELATIONS];
+                $targetRelations = $targetSchema[self::RELATIONS] ?? [];
                 $handshake = $relation[Relation::SCHEMA][Relation::HANDSHAKE] ?? null;
                 if ($handshake !== null) {
                     if (!array_key_exists($handshake, $targetRelations)) {
@@ -321,5 +363,13 @@ final class Schema implements SchemaInterface
             return false;
         }
         return true;
+    }
+
+    /**
+     * @psalm-return null|class-string
+     */
+    private function defineEntityClass(string $role): ?string
+    {
+        return $this->classes[$role] ?? $this->classes[$this->resolveAlias($role) ?? $role] ?? null;
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Command;
 
-use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\Special\Sequence;
 use Cycle\ORM\Tests\Command\Helper\TestInsert;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;

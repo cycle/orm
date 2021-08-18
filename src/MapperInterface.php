@@ -22,7 +22,7 @@ interface MapperInterface
     /**
      * Init empty entity object. Returns empty entity.
      */
-    public function init(array $data): object;
+    public function init(array $data, string $role = null): object;
 
     /**
      * Hydrate entity with dataset.
@@ -48,8 +48,9 @@ interface MapperInterface
 
     /**
      * Map entity key->value to database specific column->value.
+     * Original array also will be filtered: unused fields will be removed
      */
-    public function mapColumns(array $values): array;
+    public function mapColumns(array &$values): array;
 
     /**
      * Initiate chain of commands require to store object and it's data into persistent storage.

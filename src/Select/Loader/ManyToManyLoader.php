@@ -74,7 +74,7 @@ class ManyToManyLoader extends JoinableLoader
     }
 
     public function loadRelation(
-        string $relation,
+        string|LoaderInterface $relation,
         array $options,
         bool $join = false,
         bool $load = false
@@ -193,14 +193,14 @@ class ManyToManyLoader extends JoinableLoader
         return $node;
     }
 
-    protected function loadChild(AbstractNode $node): void
+    protected function loadChild(AbstractNode $node, bool $includeRole = false): void
     {
         $rootNode = $node->getNode('@');
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($rootNode->getNode($relation));
+            $loader->loadData($rootNode->getNode($relation), $includeRole);
         }
 
-        $this->pivot->loadChild($node);
+        $this->pivot->loadChild($node, $includeRole);
     }
 
     protected function mountColumns(

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 
@@ -19,12 +19,7 @@ trait PromiseOneTrait
             $result->setValue(null);
             return $result;
         }
-        if ($scope === [] && $this->isNullable()) {
-            $result = new DeferredReference($this->target, []);
-            $result->setValue(null);
-            return $result;
-        }
-        return $scope === [] ? new DeferredReference($this->target, []) :  new Reference($this->target, $scope);
+        return $scope === [] ? new EmptyReference($this->target, null) : new Reference($this->target, $scope);
     }
 
     public function collect($source): ?object

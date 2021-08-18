@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
+use Cycle\ORM\Mapper\Traits\SingleTableTrait;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
 use Cycle\ORM\RelationMap;
-use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 
 /**
  * Provide the ability to carry data over the specific class instances using proxy classes.
@@ -16,9 +17,9 @@ use Cycle\ORM\Schema;
  */
 class Mapper extends DatabaseMapper
 {
-    // system column to store entity type for STI
-    public const ENTITY_TYPE = '_type';
+    use SingleTableTrait;
 
+    /** @var class-string */
     protected string $entity;
 
     protected array $children = [];
@@ -31,15 +32,16 @@ class Mapper extends DatabaseMapper
     {
         parent::__construct($orm, $role);
 
-        $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
-        $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
+        $this->entity = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
+        $this->children = $orm->getSchema()->define($role, SchemaInterface::CHILDREN) ?? [];
         $this->entityFactory = $entityFactory;
         $this->relationMap = $orm->getRelationMap($role);
+        $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
     }
 
-    public function init(array $data): object
+    public function init(array $data, string $role = null): object
     {
-        $class = $this->resolveClass($data);
+        $class = $this->resolveClass($data, $role);
         return $this->entityFactory->create($this->orm, $class, $data, $class);
     }
 
@@ -57,40 +59,15 @@ class Mapper extends DatabaseMapper
 
     public function fetchFields(object $entity): array
     {
-        $columns = array_intersect_key(
+        $values = array_intersect_key(
             $this->entityFactory->extractData($this->relationMap, $entity),
-            array_flip($this->fields)
+            $this->columns + $this->parentColumns
         );
-
-        $class = get_class($entity);
-        if ($class !== $this->entity) {
-            // inheritance
-            foreach ($this->children as $alias => $childClass) {
-                if ($childClass == $class) {
-                    $columns[self::ENTITY_TYPE] = $alias;
-                    break;
-                }
-            }
-        }
-
-        return $columns;
+        return $values + $this->getDiscriminatorValues($entity);
     }
 
     public function fetchRelations(object $entity): array
     {
         return $this->entityFactory->extractRelations($this->relationMap, $entity);
-    }
-
-    /**
-     * Classname to represent entity.
-     */
-    protected function resolveClass(array $data): string
-    {
-        $class = $this->entity;
-        if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
-            $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
-        }
-
-        return $class;
     }
 }

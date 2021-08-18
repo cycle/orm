@@ -36,13 +36,13 @@ class Reference implements ReferenceInterface
         return $this->loaded;
     }
 
-    final public function setValue($value): void
+    final public function setValue(mixed $value): void
     {
         $this->loaded = true;
         $this->value = $value;
     }
 
-    final public function getValue()
+    final public function getValue(): mixed
     {
         return $this->value;
     }

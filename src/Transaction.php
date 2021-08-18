@@ -437,11 +437,13 @@ final class Transaction implements TransactionInterface
 
         if (!$isDependenciesResolved) {
             if ($tuple->status === Tuple::STATUS_PREPROCESSED) {
-                echo " \033[31m MASTER RELATIONS IS NOT RESOLVED ({$tuple->node->getRole()}): \033[0m \n";
-                foreach ($map->getMasters() as $name => $relation) {
-                    $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-                    if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
-                        echo " - \033[31m $name [$relationStatus] " . get_class($relation) . "\033[0m\n";
+                if (\Cycle\ORM\Transaction\Pool::DEBUG) {
+                    echo " \033[31m MASTER RELATIONS IS NOT RESOLVED ({$tuple->node->getRole()}): \033[0m \n";
+                    foreach ($map->getMasters() as $name => $relation) {
+                        $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                        if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
+                            echo " - \033[31m $name [$relationStatus] " . get_class($relation) . "\033[0m\n";
+                        }
                     }
                 }
                 throw new TransactionException('Relation can not be resolved.');

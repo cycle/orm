@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Traits;
 
+use Cycle\ORM\Exception\CommandException;
+
 trait ScopeTrait
 {
     protected array $scope = [];
 
     /** @var string[] */
     protected array $waitScope = [];
+
+    private int $affectedRows;
 
     /**
      * Wait for the context value.
@@ -29,6 +33,14 @@ trait ScopeTrait
     public function getScope(): array
     {
         return $this->scope;
+    }
+
+    public function getAffectedRows(): int
+    {
+        if (!$this->isExecuted()) {
+            throw new CommandException('The command was not run.');
+        }
+        return $this->affectedRows;
     }
 
     /**

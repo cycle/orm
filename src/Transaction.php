@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Command\Branch\WrappedStoreCommand;
+use Cycle\ORM\Command\Special\Sequence;
+use Cycle\ORM\Command\Special\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\Database\Insert;
-use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Relation\ReversedRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
@@ -525,8 +522,8 @@ final class Transaction implements TransactionInterface
             $parentKey = (array)($schema->define($role, SchemaInterface::PARENT_KEY)
                 ?? $schema->define($parent, SchemaInterface::PRIMARY_KEY));
             $primaryKey = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
-            $result[] = $command->withBeforeExecute(
-                static function (WrappedStoreCommand $command) use ($tuple, $parentKey, $primaryKey): void {
+            $result[] = $command->withBeforeExecution(
+                static function (StoreCommandInterface $command) use ($tuple, $parentKey, $primaryKey): void {
                     foreach ($primaryKey as $i => $pk) {
                         $command->registerAppendix($pk, $tuple->state->getValue($parentKey[$i]));
                     }

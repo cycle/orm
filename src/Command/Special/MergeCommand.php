@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Command\Branch;
+namespace Cycle\ORM\Command\Special;
 
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\StoreCommand;
@@ -20,7 +20,7 @@ final class MergeCommand implements CommandInterface, \IteratorAggregate, \Count
     private array $commands = [];
 
     /**
-     * @param StoreCommandInterface|Sequence|self $primary
+     * @param StoreCommandInterface $primary
      */
     public function __construct(CommandInterface $primary)
     {

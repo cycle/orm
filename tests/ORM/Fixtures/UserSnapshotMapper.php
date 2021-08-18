@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-use Cycle\ORM\Command\Branch\Sequence;
-use Cycle\ORM\Command\Branch\WrappedStoreCommand;
+use Cycle\ORM\Command\Special\Sequence;
+use Cycle\ORM\Command\Special\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Heap\Node;
@@ -49,7 +49,7 @@ class UserSnapshotMapper extends Mapper
             $this->source->getDatabase(),
             'user_snapshots',
             $state
-        )->withBeforeExecute(static function (WrappedStoreCommand $command) use ($node, $state): void {
+        )->withBeforeExecution(static function (StoreCommandInterface $command) use ($node, $state): void {
             $state->register('user_id', $node->getData()['id']);
         });
     }

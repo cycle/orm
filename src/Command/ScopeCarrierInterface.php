@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Command;
 
 use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Exception\CommandException;
 
 /**
  * Command indicates the ability to accept the forwarded scope values.
@@ -17,4 +18,11 @@ interface ScopeCarrierInterface extends CommandInterface, ConsumerInterface
     public function waitScope(string ...$keys): void;
 
     public function getScope(): array;
+
+    /**
+     * Get count of affected rows after execution
+     *
+     * @throws CommandException thrown when the method is called before the command is executed
+     */
+    public function getAffectedRows(): int;
 }

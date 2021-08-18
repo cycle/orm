@@ -130,7 +130,6 @@ abstract class SimpleCasesTest extends JtiBaseTest
                 self::MANAGER_3,
             ]
         );
-        $this->logger->display();
     }
 
     protected function getSchemaArray(): array

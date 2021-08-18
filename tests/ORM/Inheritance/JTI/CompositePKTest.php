@@ -70,7 +70,6 @@ abstract class CompositePKTest extends SimpleCasesTest
     public function setUp(): void
     {
         JtiBaseTest::setUp();
-        // $this->logger->hide();
 
         $this->makeTable('employee', [
             'id' => 'integer',
@@ -122,8 +121,6 @@ abstract class CompositePKTest extends SimpleCasesTest
                 self::PROGRAMATOR_4,
             ]
         );
-
-        $this->logger->display();
     }
 
     protected function getSchemaArray(): array

@@ -75,7 +75,6 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
     public function setUp(): void
     {
         JtiBaseTest::setUp();
-        $this->logger->hide();
 
         $this->makeTable('book', [
             'id'        => 'integer',
@@ -162,7 +161,6 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
                 self::MANAGER_3,
             ]
         );
-        $this->logger->display();
     }
 
     protected function getSchemaArray(): array

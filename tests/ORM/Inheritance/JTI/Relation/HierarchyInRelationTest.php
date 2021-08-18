@@ -268,7 +268,6 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
                 self::TOOL_4,
             ]
         );
-        $this->logger->display();
     }
 
     protected function getSchemaArray(): array

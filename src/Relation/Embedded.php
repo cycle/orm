@@ -127,8 +127,7 @@ final class Embedded implements SameRowRelationInterface
         $related = $tuple->state->getRelation($this->getName());
 
         // Master Node
-        $node = $tuple->node;
-        $original = $node->getRelation($this->getName());
+        $original = $tuple->node->getRelation($this->getName());
 
         if ($related instanceof ReferenceInterface) {
             if ($related === $original) {
@@ -156,7 +155,6 @@ final class Embedded implements SameRowRelationInterface
             }
         }
 
-        $rNode = $this->getNode($related);
         $mapper = $this->orm->getMapper($this->getTarget());
         $changes = $this->getChanges($related, $rNode->getState());
         foreach ($mapper->mapColumns($changes) as $field => $value) {
@@ -165,8 +163,8 @@ final class Embedded implements SameRowRelationInterface
         $rNode->getState()->setStatus(Node::MANAGED);
         $rNode->getState()->updateTransactionData();
 
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        $node->setRelationStatus($rNode->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->node->setRelationStatus($rNode->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
     }
 
     private function getChanges(object $related, State $state): array

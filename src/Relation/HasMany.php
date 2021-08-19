@@ -100,18 +100,19 @@ class HasMany extends AbstractRelation
 
     /**
      * Delete original related entity of no other objects reference to it.
+     * @see \Cycle\ORM\Relation\HasMany::deleteChild todo DRY
      */
-    private function deleteChild(Pool $pool, object $child): ?Tuple
+    private function deleteChild(Pool $pool, object $child): Tuple
     {
         if ($this->isNullable()) {
             $rTuple = $pool->attachStore($child, false);
             foreach ($this->outerKeys as $outerKey) {
                 $rTuple->state->register($outerKey, null);
             }
-            $rTuple->node->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
+            // todo: is it needed?
+            // $rTuple->node->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
             return $rTuple;
         }
-
         return $pool->attachDelete($child, $this->isCascade());
     }
 

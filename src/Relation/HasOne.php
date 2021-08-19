@@ -55,30 +55,21 @@ class HasOne extends AbstractRelation
         }
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
-        $rNode = $this->getNode($related);
-        $this->assertValid($rNode);
+        $rTuple = $pool->attachStore($related, true);
+        $this->assertValid($rTuple->node);
 
         if ($original !== null && $original !== $related) {
             $this->deleteChild($pool, $original);
         }
-        $pool->attachStore($related, true, $rNode);
     }
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
-        $related = $tuple->state->getRelation($this->getName());
-        if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStore($pool, $tuple, $related);
-        } else {
-            // todo ?
-            $this->queueDelete($pool, $tuple, $related);
+        if ($tuple->task !== Tuple::TASK_STORE) {
+            return;
         }
-    }
-
-    private function queueStore(Pool $pool, Tuple $tuple, $related): void
-    {
-        $node = $tuple->node;
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $related = $tuple->state->getRelation($this->getName());
+        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
         if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
             return;
@@ -98,54 +89,21 @@ class HasOne extends AbstractRelation
         }
     }
 
-    private function queueDelete(Pool $pool, Tuple $tuple, $related): void
-    {
-        $node = $tuple->node;
-        $original = $node->getRelation($this->getName());
-
-        if ($original instanceof ReferenceInterface) {
-            $original = $this->resolve($original, true);
-        }
-
-        if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related, true);
-        }
-        if ($original !== null) {
-            $originNode = $this->getNode($original);
-            if ($originNode !== null && $originNode->getStatus() === Node::MANAGED) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
-                $this->deleteChild($pool, $original);
-            }
-        }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        if ($related === $original) {
-            return;
-        }
-        $relatedNode = $this->getNode($related);
-        if ($relatedNode === null || $relatedNode->getStatus() !== Node::MANAGED) {
-            return;
-        }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
-        $this->deleteChild($pool, $related, $relatedNode);
-    }
-
     /**
      * Delete original related entity of no other objects reference to it.
+     * @see \Cycle\ORM\Relation\HasMany::deleteChild todo DRY
      */
-    private function deleteChild(Pool $pool, object $child, ?Node $relatedNode = null): ?Tuple
+    private function deleteChild(Pool $pool, object $child): Tuple
     {
-        $relatedNode = $relatedNode ?? $this->getNode($child);
-        if ($relatedNode->getStatus() !== Node::MANAGED) {
-            return null;
-        }
-
         if ($this->isNullable()) {
+            $rTuple = $pool->attachStore($child, false);
             foreach ($this->outerKeys as $outerKey) {
-                $relatedNode->getState()->register($outerKey, null);
+                $rTuple->state->register($outerKey, null);
             }
-            return $pool->attachStore($child, false, $relatedNode, $relatedNode->getState());
+            // todo: is it needed?
+            // $rTuple->node->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
+            return $rTuple;
         }
-
-        return $pool->attachDelete($child, $this->isCascade(), $relatedNode);
+        return $pool->attachDelete($child, $this->isCascade());
     }
 }

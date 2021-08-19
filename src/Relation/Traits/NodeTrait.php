@@ -12,20 +12,11 @@ trait NodeTrait
     /**
      * Get Node for the given entity. Null if entity does not exists.
      */
-    protected function getNode(?object $entity): ?Node
+    protected function getNode(object $entity): Node
     {
-        if ($entity === null) {
-            return null;
-        }
-
         if ($entity instanceof ReferenceInterface) {
-            if ($entity->hasValue()) {
-                $entity = $entity->getValue();
-            } else {
-                return new Node(Node::PROMISED, $entity->getScope(), $entity->getRole());
-            }
+            throw new \InvalidArgumentException('Entity must not be instance of ReferenceInterface.');
         }
-
         /** @var Node|null $node */
         $node = $this->orm->getHeap()->get($entity);
 

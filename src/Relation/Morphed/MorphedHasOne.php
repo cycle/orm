@@ -7,6 +7,8 @@ namespace Cycle\ORM\Relation\Morphed;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasOne;
 use Cycle\ORM\Transaction\Pool;
@@ -51,16 +53,16 @@ class MorphedHasOne extends HasOne
         parent::queue($pool, $tuple);
         $related = $tuple->state->getRelation($this->getName());
         $node = $tuple->node;
-        if ($related !== null) {
-            $rNode = $this->getNode($related);
-            $nodeData = $rNode->getData();
-
-            if (($nodeData[$this->morphKey] ?? null) !== $node->getRole()) {
-                // $rStore->register($this->morphKey, $node->getRole(), true);
-                $rNode->register($this->morphKey, $node->getRole());
-            }
+            // todo: make test when $related is instance of Reference
+        if ($related === null || $related instanceof ReferenceInterface) {
+            return;
         }
+        $rNode = $this->getNode($related);
+        $nodeData = $rNode->getData();
 
+        if (($nodeData[$this->morphKey] ?? null) !== $node->getRole()) {
+            $rNode->register($this->morphKey, $node->getRole());
+        }
     }
 
     protected function getTargetRelationName(): string

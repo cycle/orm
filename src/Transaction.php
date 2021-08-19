@@ -43,7 +43,7 @@ final class Transaction implements TransactionInterface
     {
         $this->orm = $orm;
         $this->runner = $runner ?? new Runner();
-        $this->pool = new Pool();
+        $this->pool = new Pool($orm);
     }
 
     public function persist(object $entity, int $mode = self::MODE_CASCADE): self
@@ -144,13 +144,11 @@ final class Transaction implements TransactionInterface
      */
     protected function walkPool(): void
     {
-        $heap = $this->orm->getHeap();
-        $pool = $this->pool;
         /**
          * @var object $entity
          * @var Tuple $tuple
          */
-        foreach ($pool as $entity => $tuple) {
+        foreach ($this->pool as $entity => $tuple) {
             if ($entity instanceof ReferenceInterface && $entity->hasValue()) {
                 $entity = $entity->getValue();
                 if ($entity === null) {
@@ -160,29 +158,27 @@ final class Transaction implements TransactionInterface
                 $tuple->entity = $entity;
             }
 
-            $node = $tuple->node = $tuple->node ?? $heap->get($entity);
-            // if ($node !== null && $node->getReadyState() === Node::RESOLVED) {
-            //     continue;
-            // }
+            if (!$tuple->node || !$tuple->state || !$tuple->mapper) {
+                throw new \Exception();
+            }
             // we do not expect to store promises
-            if ($entity instanceof ReferenceInterface
-                || ($tuple->task === Tuple::TASK_FORCE_DELETE && $node === null)) {
+            if ($tuple->task === Tuple::TASK_FORCE_DELETE && $tuple->node === null) {
                 $tuple->status = Tuple::STATUS_PROCESSED;
-                // $pool->detach($entity);
                 continue;
             }
             \Cycle\ORM\Transaction\Pool::DEBUG AND print sprintf(
                 "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
                 ['preparing','waiting','waited','deferred','proposed','preprocessed','processed'][$tuple->status],
                 ['store', 'delete', 'force delete'][$tuple->task],
-                $node === null ? get_class($entity) : $node->getRole(),
+                $tuple->node === null ? get_class($entity) : $tuple->node->getRole(),
                 spl_object_id($entity),
-                $node === null
+                $tuple->node === null
                     ? '(has no Node)'
-                    : implode('|', array_map(static fn($x) => is_object($x) ? get_class($x) : (string)$x,$node->getData()))
+                    : implode('|', array_map(static fn($x) => is_object($x)
+                        ? get_class($x)
+                        : (string)$x, $tuple->node->getData()))
             );
 
-            $tuple->mapper = $tuple->mapper ?? $this->orm->getMapper($entity);
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
                 // todo delete cascaded
@@ -191,50 +187,8 @@ final class Transaction implements TransactionInterface
                 $tuple->status = Tuple::STATUS_PROCESSED;
                 continue;
             }
-
-            // Create new Node
-            if ($node === null) {
-                // automatic entity registration
-                $node = $tuple->node = new Node(Node::NEW, [], $tuple->mapper->getRole());
-                $heap->attach($entity, $node);
-            }
-            if (!$node->hasState()) {
-                $tuple->state = $node->getState();
-                $tuple->state->setData($tuple->mapper->fetchFields($entity));
-            }
-            // todo: remove
-            $tuple->state ??= $node->getState();
-
-            // if (!$tuple->cascade) {
-            //     if ($tuple->status === Tuple::STATUS_PREPARING) {
-            //         continue;
-            //     }
-            //     $this->runCommand($this->generateStoreCommand($tuple));
-            //     $tuple->status = $tuple->status === Tuple::STATUS_DEFERRED ? Tuple::STATUS_DEFERRED : Tuple::STATUS_PROCESSED;
-            //     continue;
-            // }
-
             // Walk relations
             $this->resolveRelations($tuple);
-            if ($tuple->task === Tuple::TASK_STORE && in_array($tuple->status, [Tuple::STATUS_PREPROCESSED, Tuple::STATUS_DEFERRED], true)) {
-                // if ($tuple->node->hasChanges()) {
-                //     $this->generateStoreCommand($tuple);
-                // } else {
-                //     echo "No changes \n";
-                // }
-                continue;
-            }
-            if (in_array($tuple->task, [Tuple::TASK_DELETE, Tuple::TASK_FORCE_DELETE], true) && $tuple->status === Tuple::STATUS_PREPROCESSED) {
-                // $this->generateDeleteCommand($tuple);
-                continue;
-            }
-
-            // if ($node->getReadyState() === Node::READY) {
-            //     yield $this->generateStoreCommand($tuple);
-            // } elseif ($node->getReadyState() === Node::WAITING_DEFERRED && $node->hasChanges()) {
-            //     yield $this->generateStoreCommand($tuple);
-            // }
-            // $pool->attachTuple($tuple);
         }
     }
 

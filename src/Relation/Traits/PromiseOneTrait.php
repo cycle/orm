@@ -22,9 +22,9 @@ trait PromiseOneTrait
         return $scope === [] ? new EmptyReference($this->target, null) : new Reference($this->target, $scope);
     }
 
-    public function collect($source): ?object
+    public function collect($data): ?object
     {
-        return $source;
+        return $data;
     }
 
     protected function getReferenceScope(Node $node): ?array

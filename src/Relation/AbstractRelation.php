@@ -69,7 +69,7 @@ abstract class AbstractRelation implements ActiveRelationInterface
     }
 
     // todo move to OneToOne trait
-    public function init(Node $node, array $data)
+    public function init(Node $node, array $data): object|iterable
     {
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
         $node->setRelation($this->getName(), $item);
@@ -108,10 +108,9 @@ abstract class AbstractRelation implements ActiveRelationInterface
 
     /**
      * Resolve the reference to the object.
-     *
-     * @return mixed|null
+     * todo move to OneToOne trait
      */
-    public function resolve(ReferenceInterface $reference, bool $load)
+    public function resolve(ReferenceInterface $reference, bool $load): object|iterable|null
     {
         if ($reference->hasValue()) {
             return $reference->getValue();

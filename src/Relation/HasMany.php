@@ -128,11 +128,6 @@ class HasMany extends AbstractRelation
 
         $node->setRelation($this->getName(), $elements);
         return $this->collect($elements);
-        // return [
-        //     // new \Cycle\ORM\Reference\DeferredStatic($elements, [$this, 'collect']),
-        //     $this->collect($elements),
-        //     $elements
-        // ];
     }
 
     public function initReference(Node $node): ReferenceInterface

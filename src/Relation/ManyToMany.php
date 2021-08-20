@@ -206,7 +206,7 @@ class ManyToMany extends Relation\AbstractRelation
         return new Reference($this->target, $scope);
     }
 
-    public function resolve(ReferenceInterface $reference, bool $load)
+    public function resolve(ReferenceInterface $reference, bool $load): ?iterable
     {
         if ($reference->hasValue()) {
             return $reference->getValue();

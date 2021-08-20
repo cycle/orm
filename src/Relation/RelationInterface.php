@@ -9,10 +9,11 @@ use Cycle\ORM\Transaction\Tuple;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
- * Manages single branch type between parent entity and other objects.
+ * Base interface for all relations between entities
  */
 interface RelationInterface
 {
+    // Relation statuses in an unfinished transaction
     public const STATUS_PREPARE = 0;
     public const STATUS_PROCESS = 1;
     public const STATUS_DEFERRED = 2;
@@ -35,10 +36,7 @@ interface RelationInterface
      */
     public function isCascade(): bool;
 
-    /**
-     * @param mixed $entityData
-     */
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void;
+    public function prepare(Pool $pool, Tuple $tuple, mixed $entityData, bool $load = true): void;
 
     public function queue(Pool $pool, Tuple $tuple): void;
 }

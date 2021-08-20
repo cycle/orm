@@ -15,26 +15,24 @@ use Cycle\ORM\Reference\ReferenceInterface;
 interface ActiveRelationInterface extends RelationInterface
 {
     /**
-     * Init related entity value(s). Returns tuple [value, value to store as relation context]. If data null
-     * relation must initiate empty relation state (when lazy loading is off).
+     * Init related entity value(s).
      *
      * @param Node $node Parent node.
-     * @return mixed
-     * @throws RelationException
      */
-    public function init(Node $node, array $data);
+    public function init(Node $node, array $data): object|iterable|null;
 
     public function initReference(Node $node): ReferenceInterface;
 
     /**
-     * @return mixed
+     * Resolve instance ReferenceInterface
+     *
+     * @param bool $load If is false then the result will only be searched in the heap only. Int his case the result of
+     * a collection resolving always will be null because the Heap can't contain all items from collection.
      */
-    public function resolve(ReferenceInterface $reference, bool $load);
+    public function resolve(ReferenceInterface $reference, bool $load): object|iterable|null;
 
     /**
      * @param null|object|iterable $data
-     *
-     * @return null|object|iterable
      */
-    public function collect($data);
+    public function collect($data): object|iterable|null;
 }

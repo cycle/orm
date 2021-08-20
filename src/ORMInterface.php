@@ -31,7 +31,7 @@ interface ORMInterface extends SourceProviderInterface
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      */
-    public function make(string $role, array $data = [], int $status = Node::NEW): ?object;
+    public function make(string $role, array $data = [], int $status = Node::NEW): object;
 
     /**
      * Promise object reference, proxy or object from memory heap.

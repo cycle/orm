@@ -14,8 +14,6 @@ use Cycle\ORM\Select\SourceInterface;
 
 abstract class AbstractRelation implements ActiveRelationInterface
 {
-    use Relation\Traits\NodeTrait;
-
     /** @internal */
     protected ORMInterface $orm;
 

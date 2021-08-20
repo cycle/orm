@@ -54,8 +54,7 @@ final class Pool implements IteratorAggregate, \Countable
         }
 
         $tuple = new Tuple($task, $entity, $cascade, $node, $state, $status ?? Tuple::STATUS_PREPARING);
-        $this->smartAttachTuple($tuple, $highPriority);
-        return $tuple;
+        return $this->smartAttachTuple($tuple, $highPriority);
     }
 
     public function attachTuple(Tuple $tuple): void
@@ -69,18 +68,14 @@ final class Pool implements IteratorAggregate, \Countable
         $this->smartAttachTuple($tuple);
     }
 
-    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false): void
+    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false): Tuple
     {
         if ($tuple->status === Tuple::STATUS_PROCESSED) {
-            return;
+            return $tuple;
         }
-        // $tuple->node ??= $this->orm->getHeap()->get($tuple->entity);
-        // if ($tuple->task !== Tuple::TASK_STORE && $tuple->node === null) {
-        //     if (
-        // }
         if ($this->trash !== null) {
             if ($tuple->status === Tuple::STATUS_PREPARING && $this->trash->contains($tuple->entity)) {
-                return;
+                return $this->trash->offsetGet($tuple->entity);
             }
             $this->snap($tuple);
         }
@@ -103,6 +98,7 @@ final class Pool implements IteratorAggregate, \Countable
             \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90m$string\033[0m";
             $this->storage->attach($tuple->entity, $tuple);
         }
+        return $tuple;
     }
 
     public function attachStore(

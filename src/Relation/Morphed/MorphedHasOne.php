@@ -52,16 +52,20 @@ class MorphedHasOne extends HasOne
     {
         parent::queue($pool, $tuple);
         $related = $tuple->state->getRelation($this->getName());
-        $node = $tuple->node;
-            // todo: make test when $related is instance of Reference
+        // todo: make test when $related is instance of Reference
         if ($related === null || $related instanceof ReferenceInterface) {
             return;
         }
-        $rNode = $this->getNode($related);
-        $nodeData = $rNode->getData();
+        $rTuple = $pool->offsetGet($related);
+        if ($rTuple === null) {
+            return;
+        }
 
-        if (($nodeData[$this->morphKey] ?? null) !== $node->getRole()) {
-            $rNode->register($this->morphKey, $node->getRole());
+        $nodeData = $rTuple->node->getData();
+
+        $role = $tuple->node->getRole();
+        if (($nodeData[$this->morphKey] ?? null) !== $role) {
+            $rTuple->node->register($this->morphKey, $role);
         }
     }
 

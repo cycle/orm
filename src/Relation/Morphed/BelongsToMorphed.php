@@ -73,10 +73,14 @@ class BelongsToMorphed extends BelongsTo
         parent::prepare($pool, $tuple, $entityData, $load);
         $related = $tuple->state->getRelation($this->getName());
 
-        if ($related !== null) {
-            $role = $related instanceof ReferenceInterface ? $related->getRole() : $this->getNode($related)->getRole();
+        if ($related === null) {
+            return;
         }
-        $tuple->node->register($this->morphKey, $role ?? null);
+
+        $role = $related instanceof ReferenceInterface
+            ? $related->getRole()
+            : $pool->offsetGet($related)?->node->getRole();
+        $tuple->node->register($this->morphKey, $role);
     }
 
     /**

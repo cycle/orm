@@ -12,11 +12,17 @@ use Spiral\Database\Query\SelectQuery;
 trait ColumnsTrait
 {
     /**
+     * List of columns associated with the loader.
+     * @var string[]
+     */
+    protected array $columns;
+
+    /**
      * Return column name associated with given field.
      */
     public function fieldAlias(string $field): string
     {
-        return $this->getColumns()[$field] ?? $field;
+        return $this->columns[$field] ?? $field;
     }
 
     /**
@@ -36,7 +42,7 @@ trait ColumnsTrait
         $alias = $this->getAlias();
         $columns = $overwrite ? [] : $query->getColumns();
 
-        foreach ($this->getColumns() as $internal => $external) {
+        foreach ($this->columns as $internal => $external) {
             $name = $external;
             if (!is_numeric($internal)) {
                 $name = $internal;
@@ -61,7 +67,7 @@ trait ColumnsTrait
     protected function columnNames(): array
     {
         $result = [];
-        foreach ($this->getColumns() as $internal => $external) {
+        foreach ($this->columns as $internal => $external) {
             if (!is_numeric($internal)) {
                 $result[] = $internal;
             } else {
@@ -76,9 +82,4 @@ trait ColumnsTrait
      * Table alias of the loader.
      */
     abstract protected function getAlias(): string;
-
-    /**
-     * List of columns associated with the loader.
-     */
-    abstract protected function getColumns(): array;
 }

@@ -1,19 +1,13 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\Special\Sequence;
+use Cycle\ORM\Command\Special\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\Database\Insert;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;
@@ -26,7 +20,7 @@ class UserSnapshotMapper extends Mapper
 
         $cs = new Sequence();
         $cs->addCommand($cc);
-        $cs->addCommand($this->snap($node, 'create', $cc));
+        $cs->addCommand($this->snap($node, 'create'));
 
         return $cs;
     }
@@ -37,12 +31,12 @@ class UserSnapshotMapper extends Mapper
 
         $cs = new Sequence();
         $cs->addCommand($cc);
-        $cs->addCommand($this->snap($node, 'update', $cc));
+        $cs->addCommand($this->snap($node, 'update'));
 
         return $cs;
     }
 
-    protected function snap(Node $node, string $action, CommandInterface $cc): Insert
+    protected function snap(Node $node, string $action): StoreCommandInterface
     {
         $data = $node->getData();
         unset($data['id']);
@@ -51,19 +45,12 @@ class UserSnapshotMapper extends Mapper
             'action' => $action
         ]);
 
-        $snap = new Insert(
+        return WrappedStoreCommand::createInsert(
             $this->source->getDatabase(),
             'user_snapshots',
             $state
-        );
-
-        if ($cc instanceof Insert) {
-            $state->waitContext('user_id', true);
-            $node->forward('id', $state, 'user_id');
-        } else {
-            $state->register('user_id', $node->getData()['id'], true);
-        }
-
-        return $snap;
+        )->withBeforeExecution(static function (StoreCommandInterface $command) use ($node, $state): void {
+            $state->register('user_id', $node->getData()['id']);
+        });
     }
 }

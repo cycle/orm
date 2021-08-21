@@ -22,9 +22,9 @@ final class ClasslessMapper extends DatabaseMapper
         $this->relationMap = $orm->getRelationMap($role);
     }
 
-    public function init(array $data): object
+    public function init(array $data, string $role = null): object
     {
-        return $this->entityFactory->create($this->orm, $this->role, $this->fields);
+        return $this->entityFactory->create($this->orm, $this->role, array_keys($this->columns + $this->parentColumns));
     }
 
     public function hydrate($entity, array $data): object
@@ -45,7 +45,7 @@ final class ClasslessMapper extends DatabaseMapper
     {
         return array_intersect_key(
             $this->entityFactory->extractData($this->relationMap, $entity),
-            array_flip($this->fields)
+            $this->columns + $this->parentColumns
         );
     }
 

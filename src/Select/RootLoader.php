@@ -9,6 +9,7 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
@@ -39,8 +40,9 @@ final class RootLoader extends AbstractLoader
         $this->query = $this->getSource()->getDatabase()->select()->from(
             sprintf('%s AS %s', $this->getSource()->getTable(), $this->getAlias())
         );
+        $this->columns = $this->define(Schema::COLUMNS);
 
-        foreach ($this->getEagerRelations() as $relation) {
+        foreach ($this->getEagerLoaders() as $relation) {
             $this->loadRelation($relation, [], false, true);
         }
     }
@@ -64,7 +66,7 @@ final class RootLoader extends AbstractLoader
      *
      * @return string|string[]
      */
-    public function getPK()
+    public function getPK(): array|string
     {
         $pk = $this->define(Schema::PRIMARY_KEY);
         if (is_array($pk)) {
@@ -94,7 +96,7 @@ final class RootLoader extends AbstractLoader
         return $this->configureQuery(clone $this->query);
     }
 
-    public function loadData(AbstractNode $node): void
+    public function loadData(AbstractNode $node, bool $includeRole = false): void
     {
         $statement = $this->buildQuery()->run();
 
@@ -106,8 +108,10 @@ final class RootLoader extends AbstractLoader
 
         // loading child datasets
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->getNode($relation));
+            $loader->loadData($node->getNode($relation), $includeRole);
         }
+
+        $this->loadIerarchy($node, $includeRole);
     }
 
     public function isLoaded(): bool
@@ -133,13 +137,5 @@ final class RootLoader extends AbstractLoader
         }
 
         return $node;
-    }
-
-    /**
-     * Relation columns.
-     */
-    protected function getColumns(): array
-    {
-        return $this->define(Schema::COLUMNS);
     }
 }

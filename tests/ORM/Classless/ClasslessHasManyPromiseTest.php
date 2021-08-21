@@ -214,7 +214,6 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->captureReadQueries();
         $this->captureWriteQueries();
         $this->save($u);
-
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
     }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\DeferredReference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 use Cycle\ORM\Transaction\Pool;
@@ -18,14 +17,16 @@ class HasOne extends AbstractRelation
 {
     use PromiseOneTrait;
 
-    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        $related = $tuple->state->getRelation($this->getName());
+        // $related = $tuple->state->getRelation($this->getName());
+        $related = $entityData;
+        $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $this->compareReference($original, $related)) {
+            if (!$load && $this->compareReferences($original, $related)) {
                 $original = $related instanceof ReferenceInterface ? $this->resolve($related, false) : $related;
                 if ($original === null) {
                     // not found in heap
@@ -54,24 +55,13 @@ class HasOne extends AbstractRelation
         }
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
-        $rNode = $this->getNode($related, +1);
+        $rNode = $this->getNode($related);
         $this->assertValid($rNode);
 
         if ($original !== null && $original !== $related) {
             $this->deleteChild($pool, $original);
         }
         $pool->attachStore($related, true, $rNode);
-    }
-
-    private function compareReference(ReferenceInterface $original, $related): bool
-    {
-        if ($original instanceof DeferredReference || $original === $related) {
-            return true;
-        }
-        if ($related instanceof ReferenceInterface) {
-            return $related->getScope() === $original->getScope();
-        }
-        return false;
     }
 
     public function queue(Pool $pool, Tuple $tuple): void
@@ -151,7 +141,7 @@ class HasOne extends AbstractRelation
 
         if ($this->isNullable()) {
             foreach ($this->outerKeys as $outerKey) {
-                $relatedNode->getState()->register($outerKey, null, true);
+                $relatedNode->getState()->register($outerKey, null);
             }
             return $pool->attachStore($child, false, $relatedNode, $relatedNode->getState());
         }

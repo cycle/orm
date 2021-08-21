@@ -7,7 +7,7 @@ namespace Cycle\ORM\Relation\Morphed;
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
@@ -65,20 +65,19 @@ class BelongsToMorphed extends BelongsTo
         // $scope[$this->morphKey] = $nodeData[$this->morphKey];
         $target = $nodeData[$this->morphKey];
 
-        return $scope === [] ? new DeferredReference($target, []) :  new Reference($target, $scope);
+        return $scope === [] ? new EmptyReference($target, null) :  new Reference($target, $scope);
     }
 
-    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
     {
-        parent::prepare($pool, $tuple, $load);
+        parent::prepare($pool, $tuple, $entityData, $load);
         $related = $tuple->state->getRelation($this->getName());
 
         $tuple->node->register(
             $this->morphKey,
             $related === null
                 ? null
-                : $this->getNode($related)->getRole(),
-            true
+                : $this->getNode($related)->getRole()
         );
     }
 

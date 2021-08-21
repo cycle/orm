@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\DeferredReference;
+use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
@@ -18,14 +18,15 @@ use Doctrine\Common\Collections\Collection;
  */
 class HasMany extends AbstractRelation
 {
-    public function prepare(Pool $pool, Tuple $tuple, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        $related = $tuple->state->getRelation($this->getName());
+        $related = $entityData;
+        $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $related === $original && !$original->hasValue()) {
+            if (!$load && $this->compareReferences($original, $related) && !$original->hasValue()) {
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
@@ -50,7 +51,7 @@ class HasMany extends AbstractRelation
         // $relationName = $this->getTargetRelationName()
         // Store new and existing items
         foreach ($related as $item) {
-            $rNode = $this->getNode($item, +1);
+            $rNode = $this->getNode($item);
             $this->assertValid($rNode);
             $pool->attachStore($item, true, $rNode);
             if ($this->isNullable()) {
@@ -110,7 +111,7 @@ class HasMany extends AbstractRelation
 
         if ($this->isNullable()) {
             foreach ($this->outerKeys as $outerKey) {
-                $relatedNode->getState()->register($outerKey, null, true);
+                $relatedNode->getState()->register($outerKey, null);
             }
             // todo relation status
             return $pool->attachStore($child, false, $relatedNode, $relatedNode->getState());
@@ -142,7 +143,7 @@ class HasMany extends AbstractRelation
     {
         $scope = $this->getReferenceScope($node);
         return $scope === null
-            ? new DeferredReference($node->getRole(), [])
+            ? new EmptyReference($node->getRole(), [])
             : new Reference($this->target, $scope);
     }
 

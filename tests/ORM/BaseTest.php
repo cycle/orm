@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Config\RelationConfig;
+use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
@@ -328,10 +329,14 @@ abstract class BaseTest extends TestCase
                 continue;
             }
 
-            $relation = $this->orm->getSchema()->defineRelation($eName, $name);
-            if ($relation[Relation::TYPE] === Relation::EMBEDDED) {
-                // do not run integrity check for embedded nodes, they do not have their own node
-                continue;
+            try {
+                $relation = $this->orm->getSchema()->defineRelation($eName, $name);
+                if ($relation[Relation::TYPE] === Relation::EMBEDDED) {
+                    // do not run integrity check for embedded nodes, they do not have their own node
+                    continue;
+                }
+            } catch (SchemaException) {
+                // todo what should i do with JTI?
             }
 
             $rValue = $relations[$name];

@@ -10,10 +10,9 @@ use Cycle\ORM\Reference\ReferenceInterface;
 trait NodeTrait
 {
     /**
-     * Get Node for the given entity. Null if entity does not exists. Automatically
-     * register entity claims.
+     * Get Node for the given entity. Null if entity does not exists.
      */
-    protected function getNode(?object $entity, int $claim = 0): ?Node
+    protected function getNode(?object $entity): ?Node
     {
         if ($entity === null) {
             return null;
@@ -38,14 +37,6 @@ trait NodeTrait
         if (!$node->hasState()) {
             $node->setData($this->orm->getMapper($entity)->fetchFields($entity));
         }
-
-        // if ($claim === 1) {
-        //     $node->getState()->addClaim();
-        // }
-        //
-        // if ($claim === -1) {
-        //     $node->getState()->decClaim();
-        // }
 
         return $node;
     }

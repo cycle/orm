@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Branch\Sequence;
+use Cycle\ORM\Command\Special\Sequence;
+use Cycle\ORM\Command\Special\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\Database\Insert;
-use Cycle\ORM\Command\Database\Update;
+use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
@@ -271,8 +271,8 @@ final class Transaction implements TransactionInterface
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
                         $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
-                        $tuple->state->setRelation($name, $entityData[$name] ?? null);
-                        $relation->prepare($this->pool, $tuple);
+                        // $tuple->state->setRelation($name, $entityData[$name] ?? null);
+                        $relation->prepare($this->pool, $tuple, $entityData[$name] ?? null);
                         $relationStatus = $tuple->node->getRelationStatus($relation->getName());
                     }
                 } else {
@@ -326,10 +326,11 @@ final class Transaction implements TransactionInterface
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
                 // $relData ??= $tuple->mapper->extract($tuple->entity);
                 $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
-                $tuple->state->setRelation($name, $relData[$name] ?? null);
+                // $tuple->state->setRelation($name, $relData[$name] ?? null);
                 $relation->prepare(
                     $this->pool,
                     $tuple,
+                    $relData[$name] ?? null,
                     $isWaitingKeys || $hasChangedKeys
                 );
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
@@ -436,11 +437,13 @@ final class Transaction implements TransactionInterface
 
         if (!$isDependenciesResolved) {
             if ($tuple->status === Tuple::STATUS_PREPROCESSED) {
-                echo " \033[31m MASTER RELATIONS IS NOT RESOLVED : \033[0m \n";
-                foreach ($map->getMasters() as $name => $relation) {
-                    $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-                    if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
-                        echo " - \033[31m $name [$relationStatus] " . get_class($relation) . "\033[0m\n";
+                if (\Cycle\ORM\Transaction\Pool::DEBUG) {
+                    echo " \033[31m MASTER RELATIONS IS NOT RESOLVED ({$tuple->node->getRole()}): \033[0m \n";
+                    foreach ($map->getMasters() as $name => $relation) {
+                        $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                        if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
+                            echo " - \033[31m $name [$relationStatus] " . get_class($relation) . "\033[0m\n";
+                        }
                     }
                 }
                 throw new TransactionException('Relation can not be resolved.');
@@ -451,16 +454,29 @@ final class Transaction implements TransactionInterface
     public function generateStoreCommand(Tuple $tuple): ?CommandInterface
     {
         $tuple->state = $tuple->state ?? $tuple->node->getState();
+        $isNew = $tuple->node->getStatus() === Node::NEW;
+        $tuple->state->setStatus($isNew ? Node::SCHEDULED_INSERT : Node::SCHEDULED_UPDATE);
+        $schema = $this->orm->getSchema();
 
-        if ($tuple->node->getStatus() === Node::NEW) {
-            $tuple->state->setStatus(Node::SCHEDULED_INSERT);
-            /** @var Insert $command */
-            return $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state);
+        /**
+         * @see \Cycle\ORM\MapperInterface::queueCreate()
+         * @see \Cycle\ORM\MapperInterface::queueUpdate()
+         */
+        $method = $isNew ? 'queueCreate' : 'queueUpdate';
+
+        $parents = $commands = [];
+        $parent = $schema->define($tuple->node->getRole(), SchemaInterface::PARENT);
+        while ($parent !== null) {
+            array_unshift($parents, $parent);
+            $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
-        $tuple->state->setStatus(Node::SCHEDULED_UPDATE);
+        foreach ($parents as $parent) {
+            $parentMapper = $this->orm->getMapper($parent);
+            $commands[$parent] = $parentMapper->$method($tuple->entity, $tuple->node, $tuple->state);
+        }
+        $commands[$tuple->node->getRole()] = $tuple->mapper->$method($tuple->entity, $tuple->node, $tuple->state);
 
-        /** @var Update $command */
-        return $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+        return count($commands) === 1 ? current($commands) : $this->buildStoreSequence($commands, $tuple);
     }
 
     public function generateDeleteCommand(Tuple $tuple): CommandInterface
@@ -484,5 +500,40 @@ final class Transaction implements TransactionInterface
         $keys = $this->orm->getSchema()->define($role, Schema::FIND_BY_KEYS) ?? [];
 
         return $this->indexes[$role] = array_merge([$pk], $keys);
+    }
+
+    /**
+     * @param array<string, StoreCommandInterface> $commands
+     */
+    private function buildStoreSequence(array $commands, Tuple $tuple): CommandInterface
+    {
+        $parent = null;
+        $schema = $this->orm->getSchema();
+        $result = [];
+        foreach ($commands as $role => $command) {
+            // Current parent has no parent
+            if ($parent === null) {
+                $result[] = $command;
+                $parent = $role;
+                continue;
+            }
+
+            $command = WrappedStoreCommand::wrapStoreCommand($command);
+
+            // Transact PK from previous parent to current
+            $parentKey = (array)($schema->define($role, SchemaInterface::PARENT_KEY)
+                ?? $schema->define($parent, SchemaInterface::PRIMARY_KEY));
+            $primaryKey = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
+            $result[] = $command->withBeforeExecution(
+                static function (StoreCommandInterface $command) use ($tuple, $parentKey, $primaryKey): void {
+                    foreach ($primaryKey as $i => $pk) {
+                        $command->registerAppendix($pk, $tuple->state->getValue($parentKey[$i]));
+                    }
+                }
+            );
+            $parent = $role;
+        }
+
+        return (new Sequence())->addCommand(...$result);
     }
 }

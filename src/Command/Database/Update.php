@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
 
-use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
-use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\State;
 use Spiral\Database\DatabaseInterface;
@@ -86,22 +84,24 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
             $this->state->updateTransactionData();
             return;
         }
-        $data = $this->state->getChanges();
+        $allChanges = $changes = $this->state->getChanges();
+        $data = $changes !== [] && $this->mapper !== null ? ($this->mapper)($changes) : $changes;
+        $fields = array_keys($changes);
         if ($data !== [] || $this->columns !== []) {
-            $this->db
+            $this->affectedRows = $this->db
                 ->update(
                     $this->table,
-                    array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data)),
+                    array_merge($this->columns, $data),
                     $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
                 )
                 ->run();
         }
-        $this->state->updateTransactionData();
+        $this->state->updateTransactionData($fields !== [] && count($fields) === count($allChanges) ? null : $fields);
 
         parent::execute();
     }
 
-    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
+    public function register(string $key, mixed $value, int $stream = self::DATA): void
     {
         if ($stream === self::SCOPE) {
             if (empty($value)) {
@@ -113,6 +113,6 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
 
             return;
         }
-        $this->state->register($key, $value, $fresh);
+        $this->state->register($key, $value);
     }
 }

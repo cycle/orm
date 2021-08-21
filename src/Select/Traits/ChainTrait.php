@@ -11,7 +11,7 @@ use Cycle\ORM\Select\LoaderInterface;
 trait ChainTrait
 {
     abstract public function loadRelation(
-        string $relation,
+        string|LoaderInterface $relation,
         array $options,
         bool $join = false,
         bool $load = false
@@ -22,7 +22,7 @@ trait ChainTrait
      */
     protected function isChain(string $relation): bool
     {
-        return strpos($relation, '.') !== false;
+        return str_contains($relation, '.');
     }
 
     /**

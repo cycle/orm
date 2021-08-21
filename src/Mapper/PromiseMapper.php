@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
+use Cycle\ORM\Mapper\Traits\SingleTableTrait;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\Promise;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Doctrine\Instantiator;
 use Laminas\Hydrator;
 use Laminas\Hydrator\HydratorInterface;
@@ -19,8 +21,7 @@ use Laminas\Hydrator\ReflectionHydrator;
  */
 class PromiseMapper extends DatabaseMapper
 {
-    // system column to store entity type
-    public const ENTITY_TYPE = '_type';
+    use SingleTableTrait;
 
     protected string $entity;
 
@@ -36,6 +37,7 @@ class PromiseMapper extends DatabaseMapper
 
         $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
+        $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
 
         $this->hydrator = class_exists('Laminas\Hydrator\ReflectionHydrator')
             ? new ReflectionHydrator()
@@ -44,9 +46,9 @@ class PromiseMapper extends DatabaseMapper
         $this->instantiator = new Instantiator\Instantiator();
     }
 
-    public function init(array $data): object
+    public function init(array $data, string $role = null): object
     {
-        $class = $this->resolveClass($data);
+        $class = $this->resolveClass($data, $role);
         return $this->instantiator->instantiate($class);
     }
 
@@ -79,20 +81,8 @@ class PromiseMapper extends DatabaseMapper
      */
     public function fetchFields(object $entity): array
     {
-        $columns = array_intersect_key($this->extract($entity), array_flip($this->fields));
-
-        $class = get_class($entity);
-        if ($class !== $this->entity) {
-            // inheritance
-            foreach ($this->children as $alias => $childClass) {
-                if ($childClass == $class) {
-                    $columns[self::ENTITY_TYPE] = $alias;
-                    break;
-                }
-            }
-        }
-
-        return $columns;
+        $values = array_intersect_key($this->extract($entity), $this->columns + $this->parentColumns);
+        return $values + $this->getDiscriminatorValues($entity);
     }
 
     public function fetchRelations(object $entity): array
@@ -103,16 +93,16 @@ class PromiseMapper extends DatabaseMapper
         );
     }
 
-    /**
-     * Classname to represent entity.
-     */
-    protected function resolveClass(array $data): string
-    {
-        $class = $this->entity;
-        if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
-            $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
-        }
-
-        return $class;
-    }
+    // /**
+    //  * Classname to represent entity.
+    //  */
+    // protected function resolveClass(array $data): string
+    // {
+    //     $class = $this->entity;
+    //     if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
+    //         $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
+    //     }
+    //
+    //     return $class;
+    // }
 }

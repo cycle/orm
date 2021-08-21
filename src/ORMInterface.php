@@ -17,10 +17,8 @@ interface ORMInterface extends SourceProviderInterface
 {
     /**
      * Automatically resolve role based on object name or instance.
-     *
-     * @param string|object $entity
      */
-    public function resolveRole($entity): string;
+    public function resolveRole(string|object $entity): string;
 
     /**
      * Get/load entity by unique key/value pair.
@@ -59,17 +57,13 @@ interface ORMInterface extends SourceProviderInterface
 
     /**
      * Get mapper associated with given entity class, role or instance.
-     *
-     * @param string|object $entity
      */
-    public function getMapper($entity): MapperInterface;
+    public function getMapper(string|object $entity): MapperInterface;
 
     /**
      * Get repository associated with given entity.
-     *
-     * @param string|object $entity
      */
-    public function getRepository($entity): RepositoryInterface;
+    public function getRepository(string|object $entity): RepositoryInterface;
 
     public function withSchema(SchemaInterface $schema): ORMInterface;
 

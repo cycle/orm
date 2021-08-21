@@ -159,18 +159,16 @@ abstract class ClasslessInverseRelationTest extends BaseTest
         $u->profile->user = $u;
 
         $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
+        $this->save($u);
         $this->assertNumWrites(2);
 
         $this->assertEquals(3, $u->id);
         $this->assertEquals(4, $u->profile->id);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), 'user');
-        $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
+        $u = (new Select($this->orm->withHeap(new Heap()), 'user'))
+            ->load('profile.user')
+            ->wherePK(3)
+            ->fetchOne();
 
         $this->assertSame($u, $u->profile->user);
 

@@ -57,8 +57,13 @@ abstract class AbstractNode
     /** @internal */
     protected ?TypecastInterface $typecast = null;
 
-    /** @var AbstractNode[] */
+    /** @var array<string, AbstractNode> */
     protected array $nodes = [];
+
+    protected ?ParentMergeNode $mergeParent = null;
+
+    /** @var SubclassMergeNode[]  */
+    protected array $mergeSubclass = [];
 
     protected ?string $indexName = null;
 
@@ -100,8 +105,6 @@ abstract class AbstractNode
     /**
      * Parse given row of data and populate reference tree.
      *
-     * @param int   $offset
-     * @param array $row
      * @return int Must return number of parsed columns.
      */
     public function parseRow(int $offset, array $row): int
@@ -118,6 +121,9 @@ abstract class AbstractNode
 
             //Let's force placeholders for every sub loaded
             foreach ($this->nodes as $name => $node) {
+                if ($node instanceof ParentMergeNode) {
+                    continue;
+                }
                 $data[$name] = $node instanceof ArrayNode ? [] : null;
             }
 
@@ -128,7 +134,12 @@ abstract class AbstractNode
         }
 
         $innerOffset = 0;
-        foreach ($this->nodes as $container => $node) {
+        $iterate = array_merge(
+            $this->mergeParent === null ? [] : [$this->mergeParent],
+            $this->nodes,
+            $this->mergeSubclass
+        );
+        foreach ($iterate as $node) {
             if (!$node->joined) {
                 continue;
             }
@@ -158,8 +169,6 @@ abstract class AbstractNode
     /**
      * Get list of reference key values aggregated by parent.
      *
-     * @return array
-     *
      * @throws ParserException
      */
     public function getReferenceValues(): array
@@ -178,16 +187,22 @@ abstract class AbstractNode
      * Register new node into NodeTree. Nodes used to convert flat results into tree representation
      * using reference aggregations. Node would not be used to parse incoming row results.
      *
-     * @param string       $container
-     * @param AbstractNode $node
-     *
      * @throws ParserException
      */
-    public function linkNode(string $container, AbstractNode $node): void
+    public function linkNode(?string $container, AbstractNode $node): void
     {
-        $this->nodes[$container] = $node;
-        $node->container = $container;
         $node->parent = $this;
+        if ($container !== null) {
+            $this->nodes[$container] = $node;
+            $node->container = $container;
+        } else {
+            if ($node instanceof ParentMergeNode) {
+                $this->mergeParent = $node;
+            }
+            if ($node instanceof SubclassMergeNode) {
+                $this->mergeSubclass[] = $node;
+            }
+        }
 
         if ($node->indexName !== null) {
             foreach ($node->outerKeys as $key) {
@@ -206,12 +221,9 @@ abstract class AbstractNode
      * Register new node into NodeTree. Nodes used to convert flat results into tree representation
      * using reference aggregations. Node will used to parse row results.
      *
-     * @param string       $container
-     * @param AbstractNode $node
-     *
      * @throws ParserException
      */
-    public function joinNode(string $container, AbstractNode $node): void
+    public function joinNode(?string $container, AbstractNode $node): void
     {
         $node->joined = true;
         $this->linkNode($container, $node);
@@ -220,18 +232,36 @@ abstract class AbstractNode
     /**
      * Fetch sub node.
      *
-     * @param string $container
-     * @return AbstractNode
-     *
      * @throws ParserException
      */
     public function getNode(string $container): AbstractNode
     {
         if (!isset($this->nodes[$container])) {
-            throw new ParserException("Undefined node `{$container}`");
+            throw new ParserException("Undefined node `{$container}`.");
         }
 
         return $this->nodes[$container];
+    }
+
+    public function getParentMergeNode(): ParentMergeNode
+    {
+        return $this->mergeParent;
+    }
+
+    /**
+     * @return SubclassMergeNode[]
+     */
+    public function getSubclassMergeNodes(): array
+    {
+        return $this->mergeSubclass;
+    }
+
+    public function mergeInheritanceNodes(bool $includeRole = false): void
+    {
+        $this->mergeParent?->mergeInheritanceNodes();
+        foreach ($this->mergeSubclass as $subclassNode) {
+            $subclassNode->mergeInheritanceNodes($includeRole);
+        }
     }
 
     /**
@@ -249,11 +279,6 @@ abstract class AbstractNode
      * "user_id" in "profile" record, which defines reference criteria as 1.
      *
      * Attention, data WILL be referenced to new memory location!
-     *
-     * @param string $container
-     * @param string $index
-     * @param array $criteria
-     * @param array $data
      *
      * @throws ParserException
      */
@@ -298,14 +323,9 @@ abstract class AbstractNode
      *
      * Add added records will be added as array items.
      *
-     * @param string $container
-     * @param string $index
-     * @param mixed  $criteria
-     * @param array  $data
-     *
      * @throws ParserException
      */
-    protected function mountArray(string $container, string $index, $criteria, array &$data): void
+    protected function mountArray(string $container, string $index, mixed $criteria, array &$data): void
     {
         if (!$this->indexedData->hasIndex($index)) {
             throw new ParserException("Undefined index `{$index}`.");
@@ -320,18 +340,34 @@ abstract class AbstractNode
     }
 
     /**
+     * @throws ParserException
+     */
+    protected function mergeData(string $index, array $criteria, array $data, bool $overwrite): void
+    {
+        if ($criteria === self::LAST_REFERENCE) {
+            if (!$this->indexedData->hasIndex($index)) {
+                return;
+            }
+            $criteria = $this->indexedData->getLastItemKeys($index);
+        }
+
+        if ($this->indexedData->getItemsCount($index, $criteria) === 0) {
+            throw new ParserException(sprintf('Undefined reference `%s` "%s".', $index, implode(':', $criteria)));
+        }
+
+        foreach ($this->indexedData->getItemsSubset($index, $criteria) as &$subset) {
+            $subset = $overwrite ? array_merge($subset, $data) : array_merge($data, $subset);
+            unset($subset);
+        }
+    }
+
+    /**
      * Register data result.
-     *
-     * @param array $data
      */
     abstract protected function push(array &$data);
 
     /**
      * Fetch record columns from query row, must use data offset to slice required part of query.
-     *
-     * @param int   $dataOffset
-     * @param array $line
-     * @return array
      */
     protected function fetchData(int $dataOffset, array $line): array
     {

@@ -11,6 +11,8 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\ScopeInterface;
+use Cycle\ORM\Select\Loader\ParentLoader;
+use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
@@ -89,6 +91,14 @@ final class Factory implements FactoryInterface
         string $role,
         string $relation
     ): LoaderInterface {
+        if ($relation === self::PARENT_LOADER) {
+            $parent = $schema->define($role, SchemaInterface::PARENT);
+            return new ParentLoader($orm, $role, $parent);
+        }
+        if ($relation === self::CHILD_LOADER) {
+            $parent = $schema->define($role, SchemaInterface::PARENT);
+            return new SubclassLoader($orm, $parent, $role);
+        }
         $definition = $schema->defineRelation($role, $relation);
 
         return $this->config->getLoader($definition[Relation::TYPE])->resolve(

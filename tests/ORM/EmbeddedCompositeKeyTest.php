@@ -42,9 +42,9 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         CHILD_3 = ['key3' => 'baz'],
 
         ALL_LOADED = [
-            self::KEY_1 + self::PARENT_1 + [self::CHILD_CONTAINER => self::KEY_1 + self::CHILD_1],
-            self::KEY_2 + self::PARENT_2 + [self::CHILD_CONTAINER => self::KEY_2 + self::CHILD_2],
-            self::KEY_3 + self::PARENT_3 + [self::CHILD_CONTAINER => self::KEY_3 + self::CHILD_3],
+            self::KEY_1 + self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1],
+            self::KEY_2 + self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2],
+            self::KEY_3 + self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3],
         ];
 
     public function setUp(): void

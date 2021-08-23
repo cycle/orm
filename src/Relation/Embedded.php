@@ -23,8 +23,6 @@ use Cycle\ORM\Transaction\Tuple;
  */
 final class Embedded implements SameRowRelationInterface
 {
-    use Relation\Traits\NodeTrait;
-
     /** @internal */
     private ORMInterface $orm;
 
@@ -117,6 +115,8 @@ final class Embedded implements SameRowRelationInterface
 
     public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
     {
+        // $related = $tuple->state->getRelation($this->getName());
+        // $pool->attach($related, Tuple::TASK_STORE, false);
     }
 
     public function queue(Pool $pool, Tuple $tuple, StoreCommandInterface $command = null): void
@@ -127,8 +127,7 @@ final class Embedded implements SameRowRelationInterface
         $related = $tuple->state->getRelation($this->getName());
 
         // Master Node
-        $node = $tuple->node;
-        $original = $node->getRelation($this->getName());
+        $original = $tuple->node->getRelation($this->getName());
 
         if ($related instanceof ReferenceInterface) {
             if ($related === $original) {
@@ -146,27 +145,29 @@ final class Embedded implements SameRowRelationInterface
         if ($related === null) {
             throw new NullException("Embedded relation `{$this->name}` can't be null.");
         }
+        $tuple->state->setRelation($this->getName(), $related);
 
-        $rNode = $this->getNode($related);
+        $rTuple = $pool->attach($related, Tuple::TASK_STORE, false);
         // calculate embedded node changes
-        $changes = $this->getChanges($related, $rNode->getState());
+        $changes = $this->getChanges($related, $rTuple->state);
         foreach ($this->primaryKeys as $key) {
             if (isset($changes[$key])) {
-                $rNode->register($key, $changes[$key]);
+                $rTuple->node->register($key, $changes[$key]);
             }
         }
 
-        $rNode = $this->getNode($related);
         $mapper = $this->orm->getMapper($this->getTarget());
-        $changes = $this->getChanges($related, $rNode->getState());
-        foreach ($mapper->mapColumns($changes) as $field => $value) {
-            $command->registerColumn($field, $value);
+        $changes = $this->getChanges($related, $rTuple->state);
+        if ($command !== null) {
+            foreach ($mapper->mapColumns($changes) as $field => $value) {
+                $command->registerColumn($field, $value);
+            }
         }
-        $rNode->getState()->setStatus(Node::MANAGED);
-        $rNode->getState()->updateTransactionData();
+        $rTuple->state->setStatus(Node::MANAGED);
+        $rTuple->state->updateTransactionData();
 
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        $node->setRelationStatus($rNode->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->node->setRelationStatus($rTuple->node->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
     }
 
     private function getChanges(object $related, State $state): array
@@ -180,21 +181,15 @@ final class Embedded implements SameRowRelationInterface
         return array_udiff_assoc($data, $state->getTransactionData(), [static::class, 'compare']);
     }
 
-    /**
-     * @param mixed $a
-     * @param mixed $b
-     */
-    private static function compare($a, $b): int
+    private static function compare(mixed $a, mixed $b): int
     {
         return $a <=> $b;
     }
 
     /**
      * Resolve the reference to the object.
-     *
-     * @return mixed|null
      */
-    public function resolve(ReferenceInterface $reference, bool $load)
+    public function resolve(ReferenceInterface $reference, bool $load): ?object
     {
         if ($reference->hasValue()) {
             return $reference->getValue();

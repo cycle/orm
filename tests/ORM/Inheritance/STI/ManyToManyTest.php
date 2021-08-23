@@ -131,11 +131,14 @@ abstract class ManyToManyTest extends StiBaseTest
     public function testClearAndFillRelation(): void
     {
         $role = new RbacRole('superAdmin');
+        $role->description = 'admin';
         $permission = new RbacPermission('writeUser');
+        $permission->description = 'premission';
 
         $role->children->add($permission);
         $permission->parents->add($role);
 
+        $this->logger->display();
         $this->save($role);
 
         unset($role, $permission);

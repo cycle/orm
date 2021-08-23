@@ -6,6 +6,8 @@ namespace Cycle\ORM\Transaction;
 
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Reference\ReferenceInterface;
 use IteratorAggregate;
 use JetBrains\PhpStorm\ExpectedValues;
 use SplObjectStorage;
@@ -23,8 +25,9 @@ final class Pool implements IteratorAggregate, \Countable
     private ?SplObjectStorage $trash = null;
     private int $happens = 0;
 
-    public function __construct()
-    {
+    public function __construct(
+        private ORMInterface $orm
+    ) {
         $this->storage = new SplObjectStorage();
     }
 
@@ -51,8 +54,7 @@ final class Pool implements IteratorAggregate, \Countable
         }
 
         $tuple = new Tuple($task, $entity, $cascade, $node, $state, $status ?? Tuple::STATUS_PREPARING);
-        $this->smartAttachTuple($tuple, $highPriority);
-        return $tuple;
+        return $this->smartAttachTuple($tuple, $highPriority);
     }
 
     public function attachTuple(Tuple $tuple): void
@@ -66,13 +68,16 @@ final class Pool implements IteratorAggregate, \Countable
         $this->smartAttachTuple($tuple);
     }
 
-    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false): void
+    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false): Tuple
     {
         if ($tuple->status === Tuple::STATUS_PROCESSED) {
-            return;
+            return $tuple;
         }
-        if ($tuple->status === Tuple::STATUS_PREPARING && $this->trash !== null && $this->trash->contains($tuple->entity)) {
-            return;
+        if ($this->trash !== null) {
+            if ($tuple->status === Tuple::STATUS_PREPARING && $this->trash->contains($tuple->entity)) {
+                return $this->trash->offsetGet($tuple->entity);
+            }
+            $this->snap($tuple);
         }
         if ($tuple->node !== null) {
             switch ($tuple->task) {
@@ -93,6 +98,7 @@ final class Pool implements IteratorAggregate, \Countable
             \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90m$string\033[0m";
             $this->storage->attach($tuple->entity, $tuple);
         }
+        return $tuple;
     }
 
     public function attachStore(
@@ -140,6 +146,19 @@ final class Pool implements IteratorAggregate, \Countable
     {
         $this->trash = new SplObjectStorage();
         $this->activatePriorityStorage();
+
+        // Snap all entities before store
+        while ($this->storage->valid()) {
+            /** @var Tuple $tuple */
+            $tuple = $this->storage->getInfo();
+            $this->snap($tuple);
+            if ($tuple->node === null) {
+                $this->storage->detach($this->storage->current());
+            } else {
+                $this->storage->next();
+            }
+        }
+
         $stage = 0;
         do {
             // High priority first
@@ -240,9 +259,32 @@ final class Pool implements IteratorAggregate, \Countable
         unset($this->priorityStorage);
         $this->trash = null;
     }
+
     public function count(): int
     {
         return count($this->storage) + ($this->priorityEnabled ? $this->priorityStorage->count() : 0);
+    }
+
+    /**
+     * Make snapshot: create Node, State if not exists. Also attach Mapper
+     */
+    private function snap(Tuple $tuple): void
+    {
+        $entity = $tuple->entity;
+        $tuple->node ??= $this->orm->getHeap()->get($entity);
+        if (($tuple->node === null && $tuple->task !== Tuple::TASK_STORE) || $entity instanceof ReferenceInterface) {
+            return;
+        }
+        $tuple->mapper ??= $this->orm->getMapper($tuple->node?->getRole() ?? $entity);
+        if ($tuple->node === null) {
+            $node = new Node(Node::NEW, [], $tuple->mapper->getRole());
+            $this->orm->getHeap()->attach($entity, $node);
+            $node->setData($tuple->mapper->fetchFields($entity));
+            $tuple->node = $node;
+        } elseif (!$tuple->node->hasState()) {
+            $tuple->node->setData($tuple->mapper->fetchFields($entity));
+        }
+        $tuple->state ??= $tuple->node->getState();
     }
 
     private function trashIt(object $entity, Tuple $tuple, SplObjectStorage $storage): void
@@ -260,6 +302,7 @@ final class Pool implements IteratorAggregate, \Countable
         }
         $this->storage->attach($tuple->entity, $tuple);
     }
+
     private function activatePriorityStorage(): void
     {
         if ($this->priorityEnabled === true) {
@@ -268,6 +311,7 @@ final class Pool implements IteratorAggregate, \Countable
         $this->priorityEnabled = true;
         $this->priorityStorage = new SplObjectStorage();
     }
+
     private function updateTuple(Tuple $tuple, int $task, ?int $status, bool $cascade, ?Node $node, ?State $state): void
     {
         if ($status !== null && $tuple->status !== $status) {
@@ -291,6 +335,7 @@ final class Pool implements IteratorAggregate, \Countable
         $tuple->node = $tuple->node ?? $node;
         $tuple->state = $tuple->state ?? $state;
     }
+
     private function findTuple(object $entity): ?Tuple
     {
         if ($this->priorityEnabled && $this->priorityStorage->contains($entity)) {

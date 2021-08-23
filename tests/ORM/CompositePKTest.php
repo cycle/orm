@@ -74,8 +74,8 @@ abstract class CompositePKTest extends BaseTest
         $this->save($u1);
 
         (new Transaction($this->orm))
-            ->delete($u1)
             ->delete($u2)
+            ->delete($u1)
             ->run();
 
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))->fetchData();

@@ -19,7 +19,6 @@ final class Node implements ConsumerInterface
     use RelationTrait;
 
     // Different entity states in a pool
-    public const PROMISED         = 0;
     public const NEW              = 1;
     public const MANAGED          = 2;
     public const SCHEDULED_INSERT = 3;
@@ -90,11 +89,7 @@ final class Node implements ConsumerInterface
      */
     public function getStatus(): int
     {
-        if ($this->state !== null) {
-            return $this->state->getStatus();
-        }
-
-        return $this->status;
+        return $this->state?->getStatus() ?? $this->status;
     }
 
     /**
@@ -110,11 +105,7 @@ final class Node implements ConsumerInterface
      */
     public function getData(): array
     {
-        if ($this->state !== null) {
-            return $this->state->getData();
-        }
-
-        return $this->data;
+        return $this->state?->getData() ?? $this->data;
     }
 
     /**

@@ -14,8 +14,6 @@ use Cycle\ORM\Select\SourceInterface;
 
 abstract class AbstractRelation implements ActiveRelationInterface
 {
-    use Relation\Traits\NodeTrait;
-
     /** @internal */
     protected ORMInterface $orm;
 
@@ -71,7 +69,7 @@ abstract class AbstractRelation implements ActiveRelationInterface
     }
 
     // todo move to OneToOne trait
-    public function init(Node $node, array $data)
+    public function init(Node $node, array $data): object|iterable
     {
         $item = $this->orm->make($this->target, $data, Node::MANAGED);
         $node->setRelation($this->getName(), $item);
@@ -103,17 +101,16 @@ abstract class AbstractRelation implements ActiveRelationInterface
      */
     protected function assertValid(Node $related): void
     {
-        if ($related->getRole() != $this->target) {
+        if ($related->getRole() !== $this->target) {
             throw new RelationException(sprintf('Unable to link %s, given `%s`.', $this, $related->getRole()));
         }
     }
 
     /**
      * Resolve the reference to the object.
-     *
-     * @return mixed|null
+     * todo move to OneToOne trait
      */
-    public function resolve(ReferenceInterface $reference, bool $load)
+    public function resolve(ReferenceInterface $reference, bool $load): object|iterable|null
     {
         if ($reference->hasValue()) {
             return $reference->getValue();

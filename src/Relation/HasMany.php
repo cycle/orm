@@ -51,9 +51,8 @@ class HasMany extends AbstractRelation
         // $relationName = $this->getTargetRelationName()
         // Store new and existing items
         foreach ($related as $item) {
-            $rNode = $this->getNode($item);
-            $this->assertValid($rNode);
-            $pool->attachStore($item, true, $rNode);
+            $rTuple = $pool->attachStore($item, true);
+            $this->assertValid($rTuple->node);
             if ($this->isNullable()) {
                 // todo?
                 // $rNode->setRelationStatus($relationName, RelationInterface::STATUS_DEFERRED);
@@ -101,23 +100,20 @@ class HasMany extends AbstractRelation
 
     /**
      * Delete original related entity of no other objects reference to it.
+     * @see \Cycle\ORM\Relation\HasMany::deleteChild todo DRY
      */
-    private function deleteChild(Pool $pool, object $child, ?Node $relatedNode = null): ?Tuple
+    private function deleteChild(Pool $pool, object $child): Tuple
     {
-        $relatedNode = $relatedNode ?? $this->getNode($child);
-        if ($relatedNode->getStatus() !== Node::MANAGED) {
-            return null;
-        }
-
         if ($this->isNullable()) {
+            $rTuple = $pool->attachStore($child, false);
             foreach ($this->outerKeys as $outerKey) {
-                $relatedNode->getState()->register($outerKey, null);
+                $rTuple->state->register($outerKey, null);
             }
-            // todo relation status
-            return $pool->attachStore($child, false, $relatedNode, $relatedNode->getState());
+            // todo: is it needed?
+            // $rTuple->node->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
+            return $rTuple;
         }
-
-        return $pool->attachDelete($child, $this->isCascade(), $relatedNode);
+        return $pool->attachDelete($child, $this->isCascade());
     }
 
     /**
@@ -132,11 +128,6 @@ class HasMany extends AbstractRelation
 
         $node->setRelation($this->getName(), $elements);
         return $this->collect($elements);
-        // return [
-        //     // new \Cycle\ORM\Reference\DeferredStatic($elements, [$this, 'collect']),
-        //     $this->collect($elements),
-        //     $elements
-        // ];
     }
 
     public function initReference(Node $node): ReferenceInterface

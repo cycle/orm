@@ -206,7 +206,7 @@ class ManyToMany extends Relation\AbstractRelation
         return new Reference($this->target, $scope);
     }
 
-    public function resolve(ReferenceInterface $reference, bool $load)
+    public function resolve(ReferenceInterface $reference, bool $load): ?iterable
     {
         if ($reference->hasValue()) {
             return $reference->getValue();
@@ -300,25 +300,22 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected function newLink(Pool $pool, Tuple $tuple, PivotedStorage $storage, object $related): void
     {
-        $rNode = $this->getNode($related);
-        $this->assertValid($rNode);
+        $rTuple = $pool->attachStore($related, $this->isCascade());
+        $this->assertValid($rTuple->node);
 
         $pivot = $storage->get($related);
         if (!is_object($pivot)) {
             // first time initialization
-            # todo
-            $pivot = $this->initPivot($tuple->entity, $storage, $related, $pivot);
+            $pivot = $this->initPivot($tuple->entity, $storage, $rTuple, $pivot);
             $storage->set($related, $pivot);
         }
 
-        $pNode = $this->getNode($pivot);
+        $pTuple = $pool->attachStore($pivot, $this->isCascade());
         // $pRelationName = $tuple->node->getRole() . '.' . $this->getName() . ':' . $this->pivotEntity;
         // $pNode->setRelationStatus($pRelationName, RelationInterface::STATUS_RESOLVED);
 
-        $pState = $pNode->getState();
-        $rState = $rNode->getState();
         foreach ($this->throughInnerKeys as $i => $pInnerKey) {
-            $pState->register($pInnerKey, $tuple->node->getState()->getTransactionData()[$this->innerKeys[$i]] ?? null);
+            $pTuple->state->register($pInnerKey, $tuple->state->getTransactionData()[$this->innerKeys[$i]] ?? null);
 
             // $rState->forward($this->outerKeys[$i], $pState, $this->throughOuterKeys[$i]);
         }
@@ -327,33 +324,29 @@ class ManyToMany extends Relation\AbstractRelation
             // send the Pivot into child's State for the ShadowHasMany relation
             // $relName = $tuple->node->getRole() . '.' . $this->name . ':' . $this->target;
             $relName = $this->getTargetRelationName();
-            $pivots = $rNode->getState()->getRelations()[$relName] ?? [];
+            $pivots = $rTuple->state->getRelations()[$relName] ?? [];
             $pivots[] = $pivot;
-            $rNode->getState()->setRelation($relName, $pivots);
+            $rTuple->state->setRelation($relName, $pivots);
         } else {
-            $rState->addToStorage($this->mirrorRelation, $pNode);
+            $rTuple->state->addToStorage($this->mirrorRelation, $pTuple->node);
         }
-
-        $pool->attachStore($related, $this->isCascade(), $rNode, $rState);
-        // defer the insert until pivot keys are resolved
-        $pool->attachStore($pivot, $this->isCascade(), $pNode, $pState);
     }
 
     /**
      * Since many to many relation can overlap from two directions we have to properly resolve the pivot entity upon
      * it's generation. This is achieved using temporary mapping associated with each of the entity states.
      */
-    protected function initPivot(object $parent, PivotedStorage $storage, object $related, ?array $pivot): ?object
+    protected function initPivot(object $parent, PivotedStorage $storage, Tuple $rTuple, ?array $pivot): ?object
     {
         if ($this->mirrorRelation !== null) {
-            $relatedStorage = $this->getNode($related)->getState()->getRelation($this->mirrorRelation);
+            $relatedStorage = $rTuple->state->getRelation($this->mirrorRelation);
             if ($relatedStorage instanceof PivotedStorage && $relatedStorage->hasContext($parent)) {
                 return $relatedStorage->get($parent);
             }
         }
 
         $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
-        $storage->set($related, $entity);
+        $storage->set($rTuple->entity, $entity);
         return $entity;
     }
 

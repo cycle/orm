@@ -14,6 +14,8 @@ namespace Cycle\ORM\Tests;
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -297,11 +299,47 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u2Data = $this->extractEntity($u2);
         $u->credentials = $u2Data['credentials'];
 
+        $this->logger->display();
         $this->captureWriteQueries();
         $this->captureReadQueries();
         $this->save($u);
         $this->assertNumWrites(1);
         $this->assertNumReads(1);
+
+        $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('credentials')->wherePK($u->id)->fetchOne();
+
+        $this->assertEquals($u->id, $u3->id);
+        $this->assertSame('user2', $u3->credentials->username);
+
+        $u4 = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('credentials')->wherePK($u2->id)->fetchOne();
+
+        // unchanged
+        $this->assertEquals($u2->id, $u4->id);
+        $this->assertSame('user2', $u4->credentials->username);
+    }
+
+    public function testMoveLoadedPromise(): void
+    {
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
+        $selector = new Select($this->orm, User::class);
+        $u2 = $selector->orderBy('id', 'ASC')->wherePK(2)->fetchOne();
+
+        /** @var Reference $promise */
+        $promise = $this->extractEntity($u2)['credentials'];
+        $promise->setValue($this->orm->get($promise->getRole(), $promise->getScope(), true));
+
+        $u->credentials = $promise;
+
+        $this->logger->display();
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();

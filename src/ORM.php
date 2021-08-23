@@ -111,7 +111,7 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    public function make(string $role, array $data = [], int $status = Node::NEW): ?object
+    public function make(string $role, array $data = [], int $status = Node::NEW): object
     {
         $role = $data[LoaderInterface::ROLE_KEY] ?? $role;
         unset($data[LoaderInterface::ROLE_KEY]);

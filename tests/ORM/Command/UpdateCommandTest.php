@@ -11,7 +11,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 class UpdateCommandTest extends TestCase
 {

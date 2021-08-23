@@ -17,7 +17,7 @@ use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
-use Spiral\Database\Injection\Expression;
+use Cycle\Database\Injection\Expression;
 
 abstract class RelationWithColumnAliasTest extends BaseTest
 {

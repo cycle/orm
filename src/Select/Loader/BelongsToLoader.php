@@ -11,8 +11,8 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Spiral\Database\Injection\Parameter;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Load parent data. Similar to HasOne but use POSTLOAD as default method.

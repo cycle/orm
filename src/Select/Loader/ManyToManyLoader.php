@@ -15,9 +15,9 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Spiral\Database\Injection\Parameter;
-use Spiral\Database\Query\SelectQuery;
-use Spiral\Database\StatementInterface;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
+use Cycle\Database\StatementInterface;
 
 class ManyToManyLoader extends JoinableLoader
 {

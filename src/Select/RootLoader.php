@@ -12,8 +12,8 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
-use Spiral\Database\Query\SelectQuery;
-use Spiral\Database\StatementInterface;
+use Cycle\Database\Query\SelectQuery;
+use Cycle\Database\StatementInterface;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins

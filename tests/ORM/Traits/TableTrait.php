@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Traits;
 
 use Cycle\ORM\Tests\Util\TableRenderer;
-use Spiral\Database\Database;
-use Spiral\Database\ForeignKeyInterface;
+use Cycle\Database\Database;
+use Cycle\Database\ForeignKeyInterface;
 
 trait TableTrait
 {

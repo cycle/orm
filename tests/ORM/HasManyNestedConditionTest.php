@@ -20,7 +20,7 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Spiral\Database\Injection\Expression;
+use Cycle\Database\Injection\Expression;
 
 abstract class HasManyNestedConditionTest extends BaseTest
 {

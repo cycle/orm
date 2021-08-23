@@ -10,8 +10,8 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
-use Spiral\Database\Query\SelectQuery;
-use Spiral\Database\StatementInterface;
+use Cycle\Database\Query\SelectQuery;
+use Cycle\Database\StatementInterface;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.

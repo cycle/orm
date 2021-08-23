@@ -19,8 +19,8 @@ use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Spiral\Database\DatabaseInterface;
-use Spiral\Database\DatabaseProviderInterface;
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\DatabaseProviderInterface;
 
 final class Factory implements FactoryInterface
 {

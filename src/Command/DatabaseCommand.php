@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command;
 
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 abstract class DatabaseCommand implements CommandInterface
 {

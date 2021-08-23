@@ -7,7 +7,7 @@ namespace Cycle\ORM\Tests\Command\Helper;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Context\ConsumerInterface;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 class TestInsert extends DatabaseCommand implements ConsumerInterface
 {

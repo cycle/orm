@@ -16,7 +16,7 @@ use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,

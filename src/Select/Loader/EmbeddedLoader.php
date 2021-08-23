@@ -12,7 +12,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Loads object sub-section (column subset).

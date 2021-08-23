@@ -6,7 +6,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Tests\Util\TableRenderer as Renderer;
-use Spiral\Database\Schema\AbstractTable;
+use Cycle\Database\Schema\AbstractTable;
 
 abstract class TableRendererTest extends BaseTest
 {

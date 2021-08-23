@@ -13,7 +13,7 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Spiral\Database\Injection\Parameter;
+use Cycle\Database\Injection\Parameter;
 
 abstract class LinkedTreeTest extends BaseTest
 {

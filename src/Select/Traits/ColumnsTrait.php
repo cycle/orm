@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
 
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Provides ability to add aliased columns into SelectQuery.

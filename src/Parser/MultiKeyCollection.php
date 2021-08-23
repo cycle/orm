@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Parser;
 
 use Cycle\ORM\Exception\ParserException;
-use Spiral\Database\Injection\Parameter;
+use Cycle\Database\Injection\Parameter;
 
 /**
  * @internal

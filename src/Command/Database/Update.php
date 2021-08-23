@@ -10,7 +10,7 @@ use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\State;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 /**
  * Update data CAN be modified by parent commands using context.

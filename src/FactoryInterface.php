@@ -9,7 +9,7 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Spiral\Database\DatabaseProviderInterface;
+use Cycle\Database\DatabaseProviderInterface;
 
 /**
  * Must provide access to generic DI.

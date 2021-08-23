@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Fixtures;
 
 use Ramsey\Uuid\Uuid as UuidBody;
-use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Injection\ValueInterface;
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\Injection\ValueInterface;
 
 class Uuid implements ValueInterface
 {

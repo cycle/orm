@@ -8,7 +8,7 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;
-use Spiral\Database\Injection\Fragment;
+use Cycle\Database\Injection\Fragment;
 
 class SequenceDefaultValueMapper extends Mapper
 {

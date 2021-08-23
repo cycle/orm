@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Declares an ability to modify parent query.

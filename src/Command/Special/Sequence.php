@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Command\Special;
 
 use Cycle\ORM\Command\CommandInterface;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 /**
  * Wraps multiple commands into one sequence.

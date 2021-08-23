@@ -11,7 +11,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Loads given entity table without any specific condition.

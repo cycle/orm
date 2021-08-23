@@ -11,8 +11,8 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Spiral\Database\Injection\Parameter;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.

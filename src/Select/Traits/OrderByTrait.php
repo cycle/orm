@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Select\Traits;
 
 use Cycle\ORM\Select\QueryBuilder;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to configure relation specific where conditions.

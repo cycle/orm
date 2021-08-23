@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 class UuidPrimaryKey
 {

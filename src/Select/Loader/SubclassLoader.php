@@ -13,8 +13,8 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
-use Spiral\Database\Injection\Parameter;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Load parent data.

@@ -7,7 +7,7 @@ namespace Cycle\ORM\Select\Loader\Morphed;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\Loader\HasManyLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Creates an additional query constrain based on parent entity alias.

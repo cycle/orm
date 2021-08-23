@@ -6,7 +6,7 @@ namespace Cycle\ORM\Parser;
 
 use Cycle\ORM\Exception\TypecastException;
 use DateTimeImmutable;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 use Throwable;
 
 final class Typecast implements TypecastInterface

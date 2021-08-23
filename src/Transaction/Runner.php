@@ -8,7 +8,7 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\CompleteMethodInterface;
 use Cycle\ORM\Command\RollbackMethodInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
-use Spiral\Database\Driver\DriverInterface;
+use Cycle\Database\Driver\DriverInterface;
 use Traversable;
 
 final class Runner implements RunnerInterface

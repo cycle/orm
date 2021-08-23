@@ -14,7 +14,7 @@ use Cycle\ORM\Tests\Fixtures\Favorite;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Spiral\Database\ForeignKeyInterface;
+use Cycle\Database\ForeignKeyInterface;
 
 abstract class CyclicReferencesTest extends BaseTest
 {

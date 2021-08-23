@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Spiral, Core Components
- *
- * @author Wolfy-J
- */
-
 declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;

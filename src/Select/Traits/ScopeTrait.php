@@ -7,7 +7,7 @@ namespace Cycle\ORM\Select\Traits;
 use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\QueryBuilder;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to assign the scope to the AbstractLoader.

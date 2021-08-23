@@ -13,7 +13,7 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Spiral\Database\Exception\StatementException;
+use Cycle\Database\Exception\StatementException;
 
 abstract class ManyToManyScopeTest extends BaseTest
 {

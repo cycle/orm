@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 /**
  * Defines the access to the SQL database.

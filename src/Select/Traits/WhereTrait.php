@@ -6,7 +6,7 @@ namespace Cycle\ORM\Select\Traits;
 
 use Closure;
 use Cycle\ORM\Select\QueryBuilder;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to configure relation specific where conditions.

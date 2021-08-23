@@ -12,7 +12,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Spiral\Database\ForeignKeyInterface;
+use Cycle\Database\ForeignKeyInterface;
 
 abstract class ClasslessCyclicReferencesTest extends BaseTest
 {

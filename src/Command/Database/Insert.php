@@ -7,8 +7,8 @@ namespace Cycle\ORM\Command\Database;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Heap\State;
-use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Driver\Postgres\Query\PostgresInsertQuery;
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\Driver\Postgres\Query\PostgresInsertQuery;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.

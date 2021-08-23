@@ -8,13 +8,12 @@ use Countable;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use InvalidArgumentException;
 use IteratorAggregate;
-use Spiral\Database\Injection\Parameter;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
 use Spiral\Pagination\PaginableInterface;
 
 /**

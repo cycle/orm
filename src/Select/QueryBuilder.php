@@ -7,8 +7,8 @@ namespace Cycle\ORM\Select;
 use Closure;
 use Cycle\ORM\Exception\BuilderException;
 use JetBrains\PhpStorm\ExpectedValues;
-use Spiral\Database\Driver\Compiler;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Driver\Compiler;
+use Cycle\Database\Query\SelectQuery;
 
 /**
  * Mocks SelectQuery and automatically resolves identifiers for the loaded relations.

@@ -6,7 +6,7 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\SourceInterface;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 class DifferentSource implements SourceInterface
 {

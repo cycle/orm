@@ -7,7 +7,7 @@ namespace Cycle\ORM\Command\Special;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\StoreCommandInterface;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 
 /**
  * Wraps multiple commands and merge into one.

@@ -237,7 +237,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'constrain' => $this->orm->getSource($this->target)->getConstrain(),
+            'scope' => $this->orm->getSource($this->target)->getScope(),
             'as'        => $this->target,
             'method'    => JoinableLoader::POSTLOAD
         ]);

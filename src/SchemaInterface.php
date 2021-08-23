@@ -30,9 +30,6 @@ interface SchemaInterface
     public const PARENT_KEY   = 16;
     public const DISCRIMINATOR = 17; // Discriminator column name for single table inheritance
 
-    /** @deprecated Use {@see SCOPE} instead. */
-    public const CONSTRAIN    = 12;
-
     /**
      * Return all roles defined within the schema.
      */

@@ -54,7 +54,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected array $options = [
         'load'      => false,
-        'constrain' => true,
+        'scope' => true,
     ];
 
     /** @var LoaderInterface[] */
@@ -314,7 +314,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
-        $query = $this->applyConstrain($query);
+        $query = $this->applyScope($query);
 
         if ($this->inherit !== null) {
             $query = $this->inherit->configureQuery($query);
@@ -339,7 +339,7 @@ abstract class AbstractLoader implements LoaderInterface
         return $query;
     }
 
-    abstract protected function applyConstrain(SelectQuery $query): SelectQuery;
+    abstract protected function applyScope(SelectQuery $query): SelectQuery;
 
     /**
      * Define schema option associated with the entity.

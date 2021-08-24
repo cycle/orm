@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile
 
 declare(strict_types=1);
 

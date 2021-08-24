@@ -77,6 +77,8 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
+        $options = $this->prepareOptions($options);
+
         /** @var ManyToManyLoader $loader */
         $loader = parent::withContext($parent, $options);
         $loader->pivot = $loader->pivot->withContext(

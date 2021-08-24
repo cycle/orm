@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Cycle\ORM\Select\QueryBuilder;
-use Cycle\ORM\Select\ScopeInterface;
-
 /**
  * Provides the ability to scope query and load necessary relations into the loader.
  * @final
  */
-class QueryScope implements ScopeInterface
+class QueryScope implements ConstrainInterface
 {
     /** @var array */
     private $where;

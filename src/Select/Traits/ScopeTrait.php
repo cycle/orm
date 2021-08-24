@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
 
+use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\ScopeInterface;
@@ -17,27 +18,27 @@ trait ScopeTrait
     /** @var null|ScopeInterface */
     protected $constrain;
 
-    public function getScope(): ?ScopeInterface
-    {
-        return $this->constrain;
-    }
+    abstract public function getAlias(): string;
 
     /**
      * Associate scope with the selector.
+     *
+     * @return AbstractLoader|$this
      */
-    public function setScope(ScopeInterface $scope = null): void
+    public function setScope(ScopeInterface $scope = null): self
     {
         $this->constrain = $scope;
+        return $this;
     }
 
     /**
      * @deprecated Use {@see setScope()} instead.
+     *
+     * @return AbstractLoader|$this
      */
     public function setConstrain(ConstrainInterface $constrain = null): self
     {
-        $this->setScope($constrain);
-
-        return $this;
+        return $this->setScope($constrain);
     }
 
     protected function applyScope(SelectQuery $query): SelectQuery

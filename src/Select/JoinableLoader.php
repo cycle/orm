@@ -130,6 +130,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             } elseif (is_string($loader->options['scope'])) {
                 $loader->setScope($this->orm->getFactory()->make($loader->options['scope']));
             }
+        } else {
+            $loader->setScope($this->getSource()->getConstrain());
         }
 
         if ($loader->isLoaded()) {

@@ -16,7 +16,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
-use Cycle\ORM\Select\Traits\ConstrainTrait;
+use Cycle\ORM\Select\Traits\ScopeTrait;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Database\StatementInterface;
 
@@ -26,7 +26,7 @@ use Spiral\Database\StatementInterface;
 abstract class JoinableLoader extends AbstractLoader implements JoinableInterface
 {
     use ColumnsTrait;
-    use ConstrainTrait;
+    use ScopeTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
@@ -38,7 +38,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         'load'      => false,
 
         // true or instance to enable, false or null to disable
-        'constrain' => true,
+        'scope'     => true,
 
         // scope to be used for the relation
         'method'    => null,
@@ -102,6 +102,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
+        $options = $this->prepareOptions($options);
+
         /**
          * @var AbstractLoader $parent
          * @var self           $loader
@@ -122,14 +124,12 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         //Calculate table alias
         $loader->options['as'] = $loader->calculateAlias($parent);
 
-        if (array_key_exists('constrain', $options)) {
-            if ($loader->options['constrain'] instanceof ConstrainInterface) {
-                $loader->setConstrain($loader->options['constrain']);
-            } elseif (is_string($loader->options['constrain'])) {
-                $loader->setConstrain($this->orm->getFactory()->make($loader->options['constrain']));
+        if (array_key_exists('scope', $options)) {
+            if ($loader->options['scope'] instanceof ScopeInterface) {
+                $loader->setScope($loader->options['scope']);
+            } elseif (is_string($loader->options['scope'])) {
+                $loader->setScope($this->orm->getFactory()->make($loader->options['scope']));
             }
-        } else {
-            $loader->setConstrain($this->getSource()->getConstrain());
         }
 
         if ($loader->isLoaded()) {
@@ -218,7 +218,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 $this->mountColumns($query, $this->options['minify'], '', true);
             }
 
-            if ($this->options['load'] instanceof ConstrainInterface) {
+            if ($this->options['load'] instanceof ScopeInterface) {
                 $this->options['load']->apply($this->makeQueryBuilder($query));
             }
 

@@ -33,16 +33,14 @@ interface SourceInterface
     public function getTable(): string;
 
     /**
-     * Associate query constrain (or remove association).
-     *
+     * @deprecated Will be renamed to `withScope` in the Cycle ORM v2.
      * @param ConstrainInterface|null $constrain
      * @return SourceInterface
      */
     public function withConstrain(?ConstrainInterface $constrain): SourceInterface;
 
     /**
-     * Return associated query constrain.
-     *
+     * @deprecated Will be renamed to `getScope` in the Cycle ORM v2.
      * @return ConstrainInterface|null
      */
     public function getConstrain(): ?ConstrainInterface;

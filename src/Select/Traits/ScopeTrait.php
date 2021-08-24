@@ -15,11 +15,11 @@ use Spiral\Database\Query\SelectQuery;
 trait ScopeTrait
 {
     /** @var null|ScopeInterface */
-    protected $scope;
+    protected $constrain;
 
     public function getScope(): ?ScopeInterface
     {
-        return $this->scope;
+        return $this->constrain;
     }
 
     /**
@@ -27,7 +27,7 @@ trait ScopeTrait
      */
     public function setScope(ScopeInterface $scope = null): void
     {
-        $this->scope = $scope;
+        $this->constrain = $scope;
     }
 
     /**
@@ -42,10 +42,18 @@ trait ScopeTrait
 
     protected function applyScope(SelectQuery $query): SelectQuery
     {
-        if ($this->scope !== null) {
-            $this->scope->apply(new QueryBuilder($query, $this));
+        if ($this->constrain !== null) {
+            $this->constrain->apply(new QueryBuilder($query, $this));
         }
 
         return $query;
+    }
+
+    /**
+     * @deprecated Use {@see applyScope()} instead.
+     */
+    protected function applyConstrain(SelectQuery $query): SelectQuery
+    {
+        return $this->applyScope($query);
     }
 }

@@ -16,8 +16,8 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select\Traits\ScopeTrait;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
-use Cycle\ORM\Select\Traits\ConstrainTrait;
 use Spiral\Database\Query\SelectQuery;
 use Spiral\Database\StatementInterface;
 
@@ -30,12 +30,12 @@ use Spiral\Database\StatementInterface;
 final class RootLoader extends AbstractLoader
 {
     use ColumnsTrait;
-    use ConstrainTrait;
+    use ScopeTrait;
 
     /** @var array */
     protected $options = [
-        'load'      => true,
-        'constrain' => true,
+        'load' => true,
+        'scope' => true,
     ];
 
     /** @var SelectQuery */

@@ -52,7 +52,7 @@ abstract class AbstractLoader implements LoaderInterface
     public const JOIN      = 3;
     public const LEFT_JOIN = 4;
 
-    /** @var ORMInterface|SourceProviderInterface @internal */
+    /** @var ORMInterface @internal */
     protected $orm;
 
     /** @var string */
@@ -60,8 +60,8 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var array */
     protected $options = [
-        'load'      => false,
-        'constrain' => true,
+        'load'  => false,
+        'scope' => true,
     ];
 
     /** @var LoaderInterface[] */
@@ -132,6 +132,8 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
+        $options = $this->prepareOptions($options);
+
         // check that given options are known
         if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
             throw new LoaderException(
@@ -324,5 +326,15 @@ abstract class AbstractLoader implements LoaderInterface
                 yield $relation;
             }
         }
+    }
+
+    protected function prepareOptions(array $options): array
+    {
+        if (array_key_exists('constrain', $options) && !array_key_exists('scope', $options)) {
+            $options['scope'] = $options['constrain'];
+        }
+        unset($options['constrain']);
+
+        return $options;
     }
 }

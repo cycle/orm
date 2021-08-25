@@ -32,9 +32,9 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         return $this->innerKeys;
     }
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
-        $tuple->state->setRelation($this->getName(), $entityData);
+        $tuple->state->setRelation($this->getName(), $related);
         $this->registerWaitingFields($tuple->state, !$this->isNullable());
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
     }

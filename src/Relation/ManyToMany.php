@@ -47,16 +47,12 @@ class ManyToMany extends Relation\AbstractRelation
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
     }
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $node = $tuple->node;
 
         /** @var PivotedStorage|ReferenceInterface|null $original */
         $original = $node->getRelation($this->getName());
-
-        /** @var iterable|ReferenceInterface|PivotedCollectionInterface $related */
-        // $related = $tuple->state->getRelation($this->getName());
-        $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {

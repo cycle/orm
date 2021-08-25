@@ -13,7 +13,6 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
@@ -70,7 +69,7 @@ final class Embedded implements SameRowRelationInterface
         return true;
     }
 
-    public function init(Node $node, array $data): ?object
+    public function init(Node $node, array $data): object
     {
         foreach ($this->primaryKeys as $key) {
             // ensure proper object reference
@@ -113,7 +112,7 @@ final class Embedded implements SameRowRelationInterface
         return $scope;
     }
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         // $related = $tuple->state->getRelation($this->getName());
         // $pool->attach($related, Tuple::TASK_STORE, false);
@@ -156,7 +155,7 @@ final class Embedded implements SameRowRelationInterface
             }
         }
 
-        $mapper = $this->orm->getMapper($this->getTarget());
+        $mapper = $this->orm->getMapper($this->target);
         $changes = $this->getChanges($related, $rTuple->state);
         if ($command !== null) {
             foreach ($mapper->mapColumns($changes) as $field => $value) {

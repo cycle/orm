@@ -68,14 +68,6 @@ abstract class AbstractRelation implements ActiveRelationInterface
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
-    // todo move to OneToOne trait
-    public function init(Node $node, array $data): object|iterable
-    {
-        $item = $this->orm->make($this->target, $data, Node::MANAGED);
-        $node->setRelation($this->getName(), $item);
-        return $item;
-    }
-
     protected function isNullable(): bool
     {
         return !empty($this->schema[Relation::NULLABLE]);
@@ -106,37 +98,6 @@ abstract class AbstractRelation implements ActiveRelationInterface
         ) {
             throw new RelationException(sprintf('Unable to link %s, given `%s`.', (string)$this, $related->getRole()));
         }
-    }
-
-    /**
-     * Resolve the reference to the object.
-     * todo move to OneToOne trait
-     */
-    public function resolve(ReferenceInterface $reference, bool $load): object|iterable|null
-    {
-        if ($reference->hasValue()) {
-            return $reference->getValue();
-        }
-
-        $result = $this->orm->get($reference->getRole(), $reference->getScope(), $load);
-        if ($load === true || $result !== null) {
-            $reference->setValue($result);
-        }
-        return $result;
-    }
-
-    protected function isResolved(ReferenceInterface $reference): bool
-    {
-        // if ($reference instanceof PromiseInterface) {
-        return $reference->hasValue();
-        // }
-
-        // return false;
-    }
-
-    public function getSchema(): array
-    {
-        return $this->schema;
     }
 
     protected function registerWaitingFields(State $state, bool $required = true): void

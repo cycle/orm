@@ -6,7 +6,6 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use JetBrains\PhpStorm\ExpectedValues;
 
 /**
  * Base interface for all relations between entities
@@ -27,16 +26,11 @@ interface RelationInterface
     public function getName(): string;
 
     /**
-     * Target entity role.
-     */
-    public function getTarget(): string;
-
-    /**
      * Must return true to trigger queue.
      */
     public function isCascade(): bool;
 
-    public function prepare(Pool $pool, Tuple $tuple, mixed $entityData, bool $load = true): void;
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void;
 
     public function queue(Pool $pool, Tuple $tuple): void;
 }

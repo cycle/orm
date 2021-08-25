@@ -9,8 +9,15 @@ use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 
-trait PromiseOneTrait
+trait ToOneTrait
 {
+    public function init(Node $node, array $data): object
+    {
+        $item = $this->orm->make($this->target, $data, Node::MANAGED);
+        $node->setRelation($this->getName(), $item);
+        return $item;
+    }
+
     public function initReference(Node $node): ReferenceInterface
     {
         $scope = $this->getReferenceScope($node);
@@ -20,6 +27,22 @@ trait PromiseOneTrait
             return $result;
         }
         return $scope === [] ? new EmptyReference($this->target, null) : new Reference($this->target, $scope);
+    }
+
+    /**
+     * Resolve the reference to the object.
+     */
+    public function resolve(ReferenceInterface $reference, bool $load): object|iterable|null
+    {
+        if ($reference->hasValue()) {
+            return $reference->getValue();
+        }
+
+        $result = $this->orm->get($reference->getRole(), $reference->getScope(), $load);
+        if ($load === true || $result !== null) {
+            $reference->setValue($result);
+        }
+        return $result;
     }
 
     public function collect($data): ?object

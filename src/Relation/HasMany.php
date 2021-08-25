@@ -196,7 +196,9 @@ class HasMany extends AbstractRelation
         if ($data instanceof Collection) {
             return $data->toArray();
         }
-
+        if ($data instanceof \Traversable) {
+            return iterator_to_array($data);
+        }
         return is_array($data) ? $data : [];
     }
 

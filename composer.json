@@ -13,7 +13,7 @@
     "cycle/database": "^1.0"
   },
   "require-dev": {
-    "illuminate/collections": "^8.49",
+    "illuminate/collections": "^8.0",
     "mockery/mockery": "^1.1",
     "phpunit/phpunit": "^9.5",
     "ramsey/uuid": "^4.0",

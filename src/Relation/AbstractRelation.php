@@ -101,8 +101,10 @@ abstract class AbstractRelation implements ActiveRelationInterface
      */
     protected function assertValid(Node $related): void
     {
-        if ($related->getRole() !== $this->target) {
-            throw new RelationException(sprintf('Unable to link %s, given `%s`.', $this, $related->getRole()));
+        if ($related->getRole() !== $this->target
+            && $this->orm->getSchema()->resolveAlias($related->getRole()) !== $this->target
+        ) {
+            throw new RelationException(sprintf('Unable to link %s, given `%s`.', (string)$this, $related->getRole()));
         }
     }
 

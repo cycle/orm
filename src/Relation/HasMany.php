@@ -12,7 +12,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Traits\HasSomeTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use Doctrine\Common\Collections\Collection;
 
 /**
  * Provides the ability to own the collection of entities.
@@ -165,12 +164,10 @@ class HasMany extends AbstractRelation
 
     /**
      * Convert entity data into array.
-     *
-     * @param mixed $data
      */
-    public function extract($data): array
+    public function extract(mixed $data): array
     {
-        if ($data instanceof Collection) {
+        if ($data instanceof \Doctrine\Common\Collections\Collection) {
             return $data->toArray();
         }
         if ($data instanceof \Traversable) {

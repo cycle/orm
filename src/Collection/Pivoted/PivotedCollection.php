@@ -10,8 +10,10 @@ use SplObjectStorage;
 /**
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
  * filtered.
+ *
+ * @template-extends  ArrayCollection
  */
-final class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
+class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
     protected SplObjectStorage $pivotContext;
 
@@ -26,12 +28,12 @@ final class PivotedCollection extends ArrayCollection implements PivotedCollecti
         return $this->pivotContext->offsetExists($element);
     }
 
-    public function getPivot($element)
+    public function getPivot(object $element): mixed
     {
         return $this->pivotContext[$element] ?? null;
     }
 
-    public function setPivot(object $element, $pivot): void
+    public function setPivot(object $element, mixed $pivot): void
     {
         $this->pivotContext[$element] = $pivot;
     }
@@ -41,7 +43,7 @@ final class PivotedCollection extends ArrayCollection implements PivotedCollecti
         return $this->pivotContext;
     }
 
-    protected function createFrom(array $elements): self
+    protected function createFrom(array $elements): static
     {
         $new = parent::createFrom($elements);
         $new->pivotContext = $this->pivotContext;

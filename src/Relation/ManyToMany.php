@@ -21,7 +21,6 @@ use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use Doctrine\Common\Collections\Collection;
 use SplObjectStorage;
 use Traversable;
 
@@ -167,7 +166,7 @@ class ManyToMany extends Relation\AbstractRelation
             $data instanceof PivotedCollectionInterface => new PivotedStorage(
                 $data->toArray(), $data->getPivotContext()
             ),
-            $data instanceof Collection => new PivotedStorage($data->toArray()),
+            $data instanceof \Doctrine\Common\Collections\Collection => new PivotedStorage($data->toArray()),
             $data === null => new PivotedStorage(),
             $data instanceof Traversable => new PivotedStorage(iterator_to_array($data)),
             default => new PivotedStorage((array)$data),

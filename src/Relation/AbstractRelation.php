@@ -10,6 +10,7 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
 
 abstract class AbstractRelation implements ActiveRelationInterface
@@ -19,7 +20,18 @@ abstract class AbstractRelation implements ActiveRelationInterface
 
     protected string $name;
 
+    /**
+     * Primary target role
+     */
     protected string $target;
+
+    /**
+     * Additional target roles: class-name of the primary role, roles and classes of primary role parents if the primary
+     * role has parents
+     *
+     * @var string[]|class-string[]
+     */
+    protected array $targets = [];
 
     protected array $schema;
 
@@ -93,11 +105,24 @@ abstract class AbstractRelation implements ActiveRelationInterface
      */
     protected function assertValid(Node $related): void
     {
-        if ($related->getRole() !== $this->target
-            && $this->orm->getSchema()->resolveAlias($related->getRole()) !== $this->target
-        ) {
-            throw new RelationException(sprintf('Unable to link %s, given `%s`.', (string)$this, $related->getRole()));
+        if ($related->getRole() === $this->target || in_array($related->getRole(), $this->targets, true)) {
+            return;
         }
+        $role = $this->orm->getSchema()->resolveAlias($related->getRole());
+        if ($role === $this->target) {
+            $this->targets[] = $related->getRole();
+            return;
+        }
+        // Check parents
+        do {
+            $parent = $this->orm->getSchema()->define($role, SchemaInterface::PARENT);
+            if ($parent === $this->target) {
+                $this->targets[] = $related->getRole();
+                return;
+            }
+            $role = $parent;
+        } while ($parent !== null);
+        throw new RelationException(sprintf('Unable to link %s, given `%s`.', (string)$this, $related->getRole()));
     }
 
     protected function registerWaitingFields(State $state, bool $required = true): void

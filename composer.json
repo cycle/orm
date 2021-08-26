@@ -8,7 +8,7 @@
     "ext-pdo": "*",
     "doctrine/inflector": "^1.4|^2.0",
     "doctrine/instantiator": "^1.2",
-    "laminas/laminas-hydrator": "^2.4|^3.0|^4.0",
+    "laminas/laminas-hydrator": "^4.0",
     "cycle/database": "^1.0"
   },
   "require-dev": {

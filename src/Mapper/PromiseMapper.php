@@ -11,7 +11,6 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Doctrine\Instantiator;
-use Laminas\Hydrator;
 use Laminas\Hydrator\HydratorInterface;
 use Laminas\Hydrator\ReflectionHydrator;
 
@@ -39,9 +38,9 @@ class PromiseMapper extends DatabaseMapper
         $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
         $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
 
-        $this->hydrator = class_exists('Laminas\Hydrator\ReflectionHydrator')
-            ? new ReflectionHydrator()
-            : new Hydrator\Reflection();
+        if (!isset($this->hydrator)) {
+            $this->hydrator = new ReflectionHydrator();
+        }
 
         $this->instantiator = new Instantiator\Instantiator();
     }
@@ -92,17 +91,4 @@ class PromiseMapper extends DatabaseMapper
             $this->orm->getRelationMap($this->role)->getRelations()
         );
     }
-
-    // /**
-    //  * Classname to represent entity.
-    //  */
-    // protected function resolveClass(array $data): string
-    // {
-    //     $class = $this->entity;
-    //     if (!empty($this->children) && !empty($data[self::ENTITY_TYPE])) {
-    //         $class = $this->children[$data[self::ENTITY_TYPE]] ?? $class;
-    //     }
-    //
-    //     return $class;
-    // }
 }

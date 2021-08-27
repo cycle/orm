@@ -124,6 +124,10 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
+            if ($tuple->status >= Tuple::STATUS_WAITED) {
+                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            }
+            return;
         }
         $rTuple = $pool->offsetGet($related) ?? $pool->attachStore($related, true, null, null, true);
 

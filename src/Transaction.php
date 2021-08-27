@@ -149,13 +149,17 @@ final class Transaction implements TransactionInterface
          * @var Tuple $tuple
          */
         foreach ($this->pool as $entity => $tuple) {
-            if ($entity instanceof ReferenceInterface && $entity->hasValue()) {
-                $entity = $entity->getValue();
-                if ($entity === null) {
-                    \Cycle\ORM\Transaction\Pool::DEBUG AND print "pool: skip unresolved promise\n";
+            if ($entity instanceof ReferenceInterface) {
+                if ($entity->hasValue()) {
+                    $entity = $entity->getValue();
+                    if ($entity === null) {
+                        \Cycle\ORM\Transaction\Pool::DEBUG and print "pool: skip unresolved promise\n";
+                        continue;
+                    }
+                    $tuple->entity = $entity;
+                } else {
                     continue;
                 }
-                $tuple->entity = $entity;
             }
 
             if (!$tuple->node || !$tuple->state || !$tuple->mapper) {

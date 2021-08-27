@@ -29,7 +29,7 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         DatabaseInterface $db,
         string $table,
         State $state,
-        array $primaryKeys = [],
+        array $primaryKeys,
         callable $mapper = null
     ) {
         parent::__construct($db, $table, $state);

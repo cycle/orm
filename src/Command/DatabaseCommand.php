@@ -8,17 +8,13 @@ use Cycle\Database\DatabaseInterface;
 
 abstract class DatabaseCommand implements CommandInterface
 {
-    /** @internal */
-    protected ?DatabaseInterface $db = null;
-
-    protected ?string $table = null;
-
     private bool $executed = false;
 
-    public function __construct(DatabaseInterface $db, string $table = null)
-    {
-        $this->db = $db;
-        $this->table = $table;
+    public function __construct(
+        /** @internal */
+        protected DatabaseInterface $db,
+        protected ?string $table = null
+    ) {
     }
 
     public function getDatabase(): ?DatabaseInterface

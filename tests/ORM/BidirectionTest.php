@@ -159,7 +159,6 @@ abstract class BidirectionTest extends BaseTest
 
         $u->comments[0]->user = null;
 
-        echo '-=====-';
         $this->captureWriteQueries();
         $this->save($u);
         $this->assertNumWrites(1);

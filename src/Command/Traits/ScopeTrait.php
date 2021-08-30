@@ -45,10 +45,8 @@ trait ScopeTrait
 
     /**
      * Set scope value.
-     *
-     * @param mixed  $value
      */
-    public function setScope(string $key, $value): void
+    public function setScope(string $key, mixed $value): void
     {
         $this->scope[$key] = $value;
     }

@@ -26,7 +26,6 @@ final class Factory implements FactoryInterface
 {
     private RelationConfig $config;
     private CoreFactory $factory;
-    private DatabaseProviderInterface $dbal;
 
     /** @var array<string, string> */
     private array $defaults = [
@@ -48,12 +47,11 @@ final class Factory implements FactoryInterface
     private CollectionFactoryInterface $defaultCollectionFactory;
 
     public function __construct(
-        DatabaseProviderInterface $dbal,
+        private DatabaseProviderInterface $dbal,
         RelationConfig $config = null,
         CoreFactory $factory = null,
         CollectionFactoryInterface $defaultCollectionFactory = null
     ) {
-        $this->dbal = $dbal;
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
         $this->defaultCollectionFactory = $defaultCollectionFactory ?? new ArrayCollectionFactory();

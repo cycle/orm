@@ -14,6 +14,7 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\TestLogger;
 use Cycle\ORM\Transaction;
@@ -94,7 +95,8 @@ abstract class BaseTest extends TestCase
                 RelationConfig::getDefault(),
                 null,
                 new DoctrineCollectionFactory()
-            )
+            ),
+            new Schema([])
         );
     }
 

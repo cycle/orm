@@ -366,7 +366,8 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
                 RelationConfig::getDefault(),
                 null,
                 new \Cycle\ORM\Collection\ArrayCollectionFactory()
-            ))
+            )),
+            new Schema([])
         );
     }
 

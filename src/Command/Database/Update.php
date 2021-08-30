@@ -80,10 +80,7 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         if ($this->appendix !== []) {
             $this->state->setData($this->appendix);
         }
-        if ($this->db === null) {
-            $this->state->updateTransactionData();
-            return;
-        }
+
         $allChanges = $changes = $this->state->getChanges();
         $data = $changes !== [] && $this->mapper !== null ? ($this->mapper)($changes) : $changes;
         $fields = array_keys($changes);

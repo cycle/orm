@@ -17,26 +17,20 @@ final class Insert extends StoreCommand
 {
     use ErrorTrait;
 
-    /** @var string[] */
-    protected array $primaryKeys;
-
     /** @var null|callable */
     private $mapper;
-
-    private ?string $pkColumn;
 
     public function __construct(
         DatabaseInterface $db,
         string $table,
         State $state,
-        array $primaryKeys = [],
-        string $pkColumn = null,
+        /** @var string[] */
+        private array $primaryKeys = [],
+        private ?string $pkColumn = null,
         callable $mapper = null
     ) {
         parent::__construct($db, $table, $state);
-        $this->primaryKeys = $primaryKeys;
         $this->mapper = $mapper;
-        $this->pkColumn = $pkColumn;
     }
 
     public function isReady(): bool
@@ -68,10 +62,6 @@ final class Insert extends StoreCommand
 
         if ($this->appendix !== []) {
             $state->setData($this->appendix);
-        }
-        if ($this->db === null) {
-            $state->updateTransactionData();
-            return;
         }
 
         $data = $state->getData();

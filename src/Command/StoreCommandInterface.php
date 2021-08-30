@@ -11,15 +11,11 @@ interface StoreCommandInterface extends CommandInterface
     /**
      * Register optional value to store in database. Having this value would not cause command to be executed
      * if data is empty. In case the command is executed, the appendix data will be transferred to the entity state.
-     *
-     * @param mixed $value
      */
-    public function registerAppendix(string $key, $value): void;
+    public function registerAppendix(string $key, mixed $value): void;
 
     /**
      * Add raw data to store.
-     *
-     * @param mixed $value
      */
-    public function registerColumn(string $key, $value): void;
+    public function registerColumn(string $key, mixed $value): void;
 }

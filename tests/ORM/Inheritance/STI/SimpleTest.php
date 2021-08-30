@@ -179,4 +179,32 @@ abstract class SimpleTest extends StiBaseTest
             ->wherePK($manager->id)->fetchOne();
         $this->assertInstanceOf(Manager::class, $fetchedManager);
     }
+
+    public function testMultipleDiscriminaorValueOnOneRole(): void
+    {
+        $schemaArray = $this->getSchemaArray();
+        $schemaArray[static::BASE_ROLE][SchemaInterface::CHILDREN][static::MANAGER_VALUE . '_two'] = Manager::class;
+        $this->orm = $this->withSchema(new Schema($schemaArray));
+
+        $entity = $this->orm->make(static::BASE_ROLE, [
+            '_type' => static::MANAGER_VALUE . '_two',
+            'name' => 'Senya',
+            'email' => 'sene4ka@hamster.me',
+            'age' => 12,
+        ]);
+
+        $this->assertInstanceOf(Manager::class, $entity);
+
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(0);
+
+        $loadedEntity = (new Select($this->orm->withHeap(new Heap()), Employee::class))
+            ->wherePK($entity->id)->fetchData();
+        $this->assertSame(static::MANAGER_VALUE . '_two', $loadedEntity[0]['_type']);
+    }
 }

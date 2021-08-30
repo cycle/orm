@@ -68,9 +68,9 @@ class BelongsToMorphed extends BelongsTo
         return $scope === [] ? new EmptyReference($target, null) :  new Reference($target, $scope);
     }
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
-        parent::prepare($pool, $tuple, $entityData, $load);
+        parent::prepare($pool, $tuple, $related, $load);
         $related = $tuple->state->getRelation($this->getName());
 
         if ($related === null) {

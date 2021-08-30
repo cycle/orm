@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Tenant;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Preference;
@@ -85,12 +83,11 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
                     ],
                 ]
             ],
-            Preference::class => [Schema::PRIMARY_KEY => ['tenant_id', 'id'],
+            Preference::class => [
                 Schema::ROLE        => 'preference',
                 Schema::MAPPER      => TimestampedMapper::class,
                 Schema::DATABASE    => 'default',
                 Schema::TABLE       => 'preferences',
-//                Schema::PRIMARY_KEY => 'id',
                 Schema::PRIMARY_KEY => ['id'],
                 Schema::COLUMNS     => ['tenant_id', 'id', 'flag', 'option', 'created_at', 'updated_at'],
                 Schema::SCHEMA      => [],
@@ -170,19 +167,5 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
        $this->captureWriteQueries();
        $this->save($t);
        $this->assertNumWrites(0);
-//
-//        $this->orm = $this->orm->withHeap(new Heap());
-//        $selector = new Select($this->orm, Post::class);
-//        $selector->load('lastComment.user')
-//                 ->load('comments.user');
-//
-//        $p1 = $selector->wherePK(1)->fetchOne();
-//
-//        $this->assertEquals($p->id, $p1->id);
-//        $this->assertEquals($p->lastComment->id, $p1->lastComment->id);
-//
-//        $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
-//        $this->assertEquals($p->comments[0]->id, $p1->comments[0]->id);
-//        $this->assertEquals($p1->id, $p1->comments[0]->post_id);
     }
 }

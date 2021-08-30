@@ -7,7 +7,7 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Relation\Traits\PromiseOneTrait;
+use Cycle\ORM\Relation\Traits\ToOneTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -17,12 +17,11 @@ use Cycle\ORM\Transaction\Tuple;
  */
 class RefersTo extends AbstractRelation implements DependencyInterface
 {
-    use PromiseOneTrait;
+    use ToOneTrait;
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $node = $tuple->node;
-        $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($related instanceof ReferenceInterface) {

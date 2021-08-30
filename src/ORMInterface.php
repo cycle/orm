@@ -7,7 +7,6 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
@@ -30,6 +29,11 @@ interface ORMInterface extends SourceProviderInterface
     /**
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
+     *
+     * @template T
+     * @param string|class-string<T> $role
+     * @return T
+     * @psalm-return ($role is class-string ? T : object)
      */
     public function make(string $role, array $data = [], int $status = Node::NEW): object;
 

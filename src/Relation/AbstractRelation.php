@@ -10,6 +10,7 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
 
 abstract class AbstractRelation implements ActiveRelationInterface
@@ -19,7 +20,18 @@ abstract class AbstractRelation implements ActiveRelationInterface
 
     protected string $name;
 
+    /**
+     * Primary target role
+     */
     protected string $target;
+
+    /**
+     * Additional target roles: class-name of the primary role, roles and classes of primary role parents if the primary
+     * role has parents
+     *
+     * @var string[]|class-string[]
+     */
+    protected array $targets = [];
 
     protected array $schema;
 
@@ -68,14 +80,6 @@ abstract class AbstractRelation implements ActiveRelationInterface
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
-    // todo move to OneToOne trait
-    public function init(Node $node, array $data): object|iterable
-    {
-        $item = $this->orm->make($this->target, $data, Node::MANAGED);
-        $node->setRelation($this->getName(), $item);
-        return $item;
-    }
-
     protected function isNullable(): bool
     {
         return !empty($this->schema[Relation::NULLABLE]);
@@ -101,40 +105,24 @@ abstract class AbstractRelation implements ActiveRelationInterface
      */
     protected function assertValid(Node $related): void
     {
-        if ($related->getRole() !== $this->target) {
-            throw new RelationException(sprintf('Unable to link %s, given `%s`.', $this, $related->getRole()));
+        if ($related->getRole() === $this->target || in_array($related->getRole(), $this->targets, true)) {
+            return;
         }
-    }
-
-    /**
-     * Resolve the reference to the object.
-     * todo move to OneToOne trait
-     */
-    public function resolve(ReferenceInterface $reference, bool $load): object|iterable|null
-    {
-        if ($reference->hasValue()) {
-            return $reference->getValue();
+        $role = $this->orm->getSchema()->resolveAlias($related->getRole());
+        if ($role === $this->target) {
+            $this->targets[] = $related->getRole();
+            return;
         }
-
-        $result = $this->orm->get($reference->getRole(), $reference->getScope(), $load);
-        if ($load === true || $result !== null) {
-            $reference->setValue($result);
-        }
-        return $result;
-    }
-
-    protected function isResolved(ReferenceInterface $reference): bool
-    {
-        // if ($reference instanceof PromiseInterface) {
-        return $reference->hasValue();
-        // }
-
-        // return false;
-    }
-
-    public function getSchema(): array
-    {
-        return $this->schema;
+        // Check parents
+        do {
+            $parent = $this->orm->getSchema()->define($role, SchemaInterface::PARENT);
+            if ($parent === $this->target) {
+                $this->targets[] = $related->getRole();
+                return;
+            }
+            $role = $parent;
+        } while ($parent !== null);
+        throw new RelationException(sprintf('Unable to link %s, given `%s`.', (string)$this, $related->getRole()));
     }
 
     protected function registerWaitingFields(State $state, bool $required = true): void

@@ -33,10 +33,10 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
         return $this->innerKeys;
     }
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
-        $related = $tuple->state->getRelation($this->getName());
-        $tuple->state->setRelation($this->getName(), $related ?? []);
+        $value = $tuple->state->getRelation($this->getName());
+        $tuple->state->setRelation($this->getName(), $value ?? []);
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
     }
 

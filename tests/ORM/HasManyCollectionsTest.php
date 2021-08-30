@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Collection\ArrayCollectionFactory;
+use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Collection\IlluminateCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
@@ -23,9 +25,16 @@ abstract class HasManyCollectionsTest extends BaseTest
 {
     use TableTrait;
 
+    /**
+     * @var CollectionFactoryInterface[]
+     */
+    private array $collectionFactory = [];
+
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->collectionFactory = [];
 
         $this->makeTable('user', [
             'id'      => 'primary',
@@ -67,10 +76,10 @@ abstract class HasManyCollectionsTest extends BaseTest
     /**
      * @dataProvider collectionTypesProvider
      */
-    public function testCustomCollection(?string $type, bool $lazy, string $class): void
+    public function testCustomCollectionLoad(?string $factory, bool $lazy, string $class): void
     {
         $this->orm = $this->createOrm()->withSchema(
-            new Schema($this->schemaWithCollectionType(User::class, 'comments', $type))
+            new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory))
         );
 
         $select = new Select($this->orm, User::class);
@@ -80,6 +89,41 @@ abstract class HasManyCollectionsTest extends BaseTest
         $res = $select->wherePK(1)->fetchOne();
 
         $this->assertInstanceOf($class, $res->comments);
+    }
+
+    /**
+     * @dataProvider collectionFactoryProvider
+     */
+    public function testCustomCollectionPersist(string $factory, string $type): void
+    {
+        $this->orm = $this->createOrm()->withSchema(
+            new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory))
+        );
+        $comments = $this->collectionFactory[$factory]->collect([
+            $this->orm->make(Comment::class, ['level' => 90, 'message' => 'test 90']),
+            $this->orm->make(Comment::class, ['level' => 91, 'message' => 'test 91']),
+            $this->orm->make(Comment::class, ['level' => 92, 'message' => 'test 92']),
+            $this->orm->make(Comment::class, ['level' => 93, 'message' => 'test 93']),
+        ]);
+        $user = $this->orm->make(User::class, ['email' => 'new-test@mail', 'balance' => 101]);
+        $user->comments = $comments;
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(5);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+    }
+
+    public function collectionFactoryProvider(): array
+    {
+        return [
+            'Doctrine collection factory' => ['doctrine', \Doctrine\Common\Collections\Collection::class],
+            'Illuminate collection factory' => ['illuminate', \Illuminate\Support\Collection::class],
+            'Array factory' => ['array', 'array'],
+        ];
     }
 
     public function collectionTypesProvider(): array
@@ -98,17 +142,32 @@ abstract class HasManyCollectionsTest extends BaseTest
 
     private function createOrm(): ORMInterface
     {
-        $doctrineFactory = new DoctrineCollectionFactory();
-        $illuminateFactory = new IlluminateCollectionFactory();
+        $this->collectionFactory['doctrine'] = new DoctrineCollectionFactory();
+        $this->collectionFactory['illuminate'] = new IlluminateCollectionFactory();
+        $this->collectionFactory['array'] = new ArrayCollectionFactory();
+
         return new ORM(
             (new Factory(
                 $this->dbal,
                 RelationConfig::getDefault(),
                 null,
-                $doctrineFactory
+                $this->collectionFactory['doctrine']
             ))
-                ->withCollectionFactory('doctrine', $doctrineFactory, \Doctrine\Common\Collections\Collection::class)
-                ->withCollectionFactory('illuminate', $illuminateFactory, \Illuminate\Support\Collection::class)
+                ->withCollectionFactory(
+                    'doctrine',
+                    $this->collectionFactory['doctrine'],
+                    \Doctrine\Common\Collections\Collection::class
+                )
+                ->withCollectionFactory(
+                    'illuminate',
+                    $this->collectionFactory['illuminate'],
+                    \Illuminate\Support\Collection::class
+                )
+                ->withCollectionFactory(
+                    'array',
+                    $this->collectionFactory['array'],
+                    \Illuminate\Support\Collection::class
+                )
         );
     }
 

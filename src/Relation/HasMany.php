@@ -9,20 +9,21 @@ use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\Traits\HasSomeTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use Doctrine\Common\Collections\Collection;
 
 /**
  * Provides the ability to own the collection of entities.
  */
 class HasMany extends AbstractRelation
 {
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    use HasSomeTrait;
+
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
@@ -89,31 +90,6 @@ class HasMany extends AbstractRelation
             $this->applyChanges($tuple, $rTuple);
             $rTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
         }
-    }
-
-    protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
-    {
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $tuple->node->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
-        }
-    }
-
-    /**
-     * Delete original related entity of no other objects reference to it.
-     * @see \Cycle\ORM\Relation\HasMany::deleteChild todo DRY
-     */
-    private function deleteChild(Pool $pool, object $child): Tuple
-    {
-        if ($this->isNullable()) {
-            $rTuple = $pool->attachStore($child, false);
-            foreach ($this->outerKeys as $outerKey) {
-                $rTuple->state->register($outerKey, null);
-            }
-            // todo: is it needed?
-            // $rTuple->node->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
-            return $rTuple;
-        }
-        return $pool->attachDelete($child, $this->isCascade());
     }
 
     /**
@@ -188,15 +164,15 @@ class HasMany extends AbstractRelation
 
     /**
      * Convert entity data into array.
-     *
-     * @param mixed $data
      */
-    public function extract($data): array
+    public function extract(mixed $data): array
     {
-        if ($data instanceof Collection) {
+        if ($data instanceof \Doctrine\Common\Collections\Collection) {
             return $data->toArray();
         }
-
+        if ($data instanceof \Traversable) {
+            return iterator_to_array($data);
+        }
         return is_array($data) ? $data : [];
     }
 

@@ -9,21 +9,16 @@ use Cycle\Database\DatabaseInterface;
 
 abstract class StoreCommand extends DatabaseCommand implements StoreCommandInterface
 {
-    protected State $state;
-
     protected array $columns = [];
 
     protected array $appendix = [];
 
     public function __construct(
         DatabaseInterface $db,
-        string $table = null,
-        State $state,
-        array $primaryKeys = []
+        ?string $table,
+        protected State $state
     ) {
         parent::__construct($db, $table);
-        $this->primaryKeys = $primaryKeys;
-        $this->state = $state;
     }
 
     /**
@@ -31,12 +26,12 @@ abstract class StoreCommand extends DatabaseCommand implements StoreCommandInter
      */
     abstract public function getStoreData(): array;
 
-    public function registerColumn(string $key, $value): void
+    public function registerColumn(string $key, mixed $value): void
     {
         $this->columns[$key] = $value;
     }
 
-    public function registerAppendix(string $key, $value): void
+    public function registerAppendix(string $key, mixed $value): void
     {
         $this->appendix[$key] = $value;
     }

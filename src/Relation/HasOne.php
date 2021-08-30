@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Relation\Traits\PromiseOneTrait;
+use Cycle\ORM\Relation\Traits\HasSomeTrait;
+use Cycle\ORM\Relation\Traits\ToOneTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -15,14 +15,13 @@ use Cycle\ORM\Transaction\Tuple;
  */
 class HasOne extends AbstractRelation
 {
-    use PromiseOneTrait;
+    use ToOneTrait;
+    use HasSomeTrait;
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        // $related = $tuple->state->getRelation($this->getName());
-        $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
@@ -71,7 +70,7 @@ class HasOne extends AbstractRelation
         $related = $tuple->state->getRelation($this->getName());
         $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
-        if ($related instanceof ReferenceInterface && !$this->isResolved($related)) {
+        if ($related instanceof ReferenceInterface && !$related->hasValue()) {
             return;
         }
 
@@ -80,30 +79,5 @@ class HasOne extends AbstractRelation
 
         $this->applyChanges($tuple, $rTuple);
         $rNode->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
-    }
-
-    protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
-    {
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $tuple->node->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
-        }
-    }
-
-    /**
-     * Delete original related entity of no other objects reference to it.
-     * @see \Cycle\ORM\Relation\HasMany::deleteChild todo DRY
-     */
-    private function deleteChild(Pool $pool, object $child): Tuple
-    {
-        if ($this->isNullable()) {
-            $rTuple = $pool->attachStore($child, false);
-            foreach ($this->outerKeys as $outerKey) {
-                $rTuple->state->register($outerKey, null);
-            }
-            // todo: is it needed?
-            // $rTuple->node->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
-            return $rTuple;
-        }
-        return $pool->attachDelete($child, $this->isCascade());
     }
 }

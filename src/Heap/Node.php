@@ -134,10 +134,11 @@ final class Node implements ConsumerInterface
 
         $relations = $relMap->getRelations();
         foreach ($this->state->getRelations() as $name => $relation) {
-            if (isset($relations[$name]) && (isset($this->relations[$name]) XOR $this->state->getRelation($name) !== null)) {
-                $changes[$name] = $relation instanceof ReferenceInterface
-                    ? $relation
-                    : $relations[$name]->collect($relation);
+            if ($relation instanceof ReferenceInterface
+                && isset($relations[$name])
+                && (isset($this->relations[$name]) XOR $this->state->getRelation($name) !== null)
+            ) {
+                $changes[$name] = $relation->hasValue() ? $relation->getValue() : $relation;
             }
             $this->setRelation($name, $relation);
         }

@@ -23,37 +23,24 @@ final class Tuple
     public const STATUS_PREPROCESSED = 5;
     public const STATUS_PROCESSED = 6;
 
-    #[ExpectedValues(values: [self::TASK_STORE, self::TASK_DELETE, self::TASK_FORCE_DELETE])]
-    public int $task;
-
-    #[ExpectedValues(values: [self::STATUS_PREPARING, self::STATUS_WAITING, self::STATUS_DEFERRED, self::STATUS_PROCESSED])]
-    public int $status;
-
-    public object $entity;
-
-    public bool $cascade;
-
-    public ?Node $node;
-
-    public ?State $state;
-
-    public ?MapperInterface $mapper;
-
     public function __construct(
         #[ExpectedValues(values: [self::TASK_STORE, self::TASK_DELETE, self::TASK_FORCE_DELETE])]
-        int $task,
-        object $entity,
-        bool $cascade,
-        ?Node $node,
-        ?State $state,
-        #[ExpectedValues(values: [self::STATUS_PREPARING, self::STATUS_WAITING, self::STATUS_DEFERRED, self::STATUS_PROCESSED])]
-        int $status = self::STATUS_PREPARING
+        public int $task,
+        public object $entity,
+        public bool $cascade,
+        public ?Node $node,
+        public ?State $state,
+        #[ExpectedValues(values: [
+            self::STATUS_PREPARING,
+            self::STATUS_WAITING,
+            self::STATUS_WAITED,
+            self::STATUS_DEFERRED,
+            self::STATUS_PROPOSED,
+            self::STATUS_PREPROCESSED,
+            self::STATUS_PROCESSED,
+        ])]
+        public int $status,
+        public ?MapperInterface $mapper = null
     ) {
-        $this->cascade = $cascade;
-        $this->entity = $entity;
-        $this->node = $node;
-        $this->state = $state;
-        $this->task = $task;
-        $this->status = $status;
     }
 }

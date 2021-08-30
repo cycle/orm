@@ -15,14 +15,13 @@ class ClassPropertiesExtractor
     /**
      * Extract all properties from given class
      *
-     * @param string|object $objectOrClass
      * @param string[] $relations
      *
      * @return array<string, ReflectionClass>
      *
      * @throws \ReflectionException
      */
-    public function extract($objectOrClass, array $relations): array
+    public function extract(string|object $objectOrClass, array $relations): array
     {
         $classProperties = [];
         $relationProperties = [];

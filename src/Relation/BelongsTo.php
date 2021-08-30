@@ -8,7 +8,7 @@ use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Relation\Traits\PromiseOneTrait;
+use Cycle\ORM\Relation\Traits\ToOneTrait;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -19,7 +19,7 @@ use Cycle\ORM\Transaction\Tuple;
  */
 class BelongsTo extends AbstractRelation implements DependencyInterface
 {
-    use PromiseOneTrait;
+    use ToOneTrait;
 
     private function checkNullValuePossibility(Tuple $tuple): bool
     {
@@ -49,12 +49,10 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
     /**
      * todo: deduplicate with {@see \Cycle\ORM\Relation\RefersTo::prepare()}
      */
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        $related = $tuple->state->getRelation($this->getName());
-        $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($related === null) {
@@ -126,6 +124,10 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
+            if ($tuple->status >= Tuple::STATUS_WAITED) {
+                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            }
+            return;
         }
         $rTuple = $pool->offsetGet($related) ?? $pool->attachStore($related, true, null, null, true);
 

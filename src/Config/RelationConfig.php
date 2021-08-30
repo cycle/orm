@@ -7,6 +7,7 @@ namespace Cycle\ORM\Config;
 use Cycle\ORM\Exception\ConfigException;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
+use JetBrains\PhpStorm\Pure;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
 
@@ -19,10 +20,7 @@ final class RelationConfig extends InjectableConfig
     /** @var array */
     protected $config = [];
 
-    /**
-     * @param int|string $type
-     */
-    public function getLoader($type): Autowire
+    public function getLoader(int|string $type): Autowire
     {
         if (!isset($this->config[$type][self::LOADER])) {
             throw new ConfigException("Unable to get relation loader `{$type}`.");
@@ -31,10 +29,7 @@ final class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::LOADER]);
     }
 
-    /**
-     * @param int|string $type
-     */
-    public function getRelation($type): Autowire
+    public function getRelation(int|string $type): Autowire
     {
         if (!isset($this->config[$type][self::RELATION])) {
             throw new ConfigException("Unable to get relation `{$type}`.");
@@ -43,9 +38,10 @@ final class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::RELATION]);
     }
 
+    #[Pure]
     public static function getDefault(): self
     {
-        return new static([
+        return new self([
             Relation::EMBEDDED           => [
                 self::LOADER   => Select\Loader\EmbeddedLoader::class,
                 self::RELATION => Relation\Embedded::class,

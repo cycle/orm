@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 
 /**
@@ -19,7 +17,7 @@ interface ActiveRelationInterface extends RelationInterface
      *
      * @param Node $node Parent node.
      */
-    public function init(Node $node, array $data): object|iterable|null;
+    public function init(Node $node, array $data): object|iterable;
 
     public function initReference(Node $node): ReferenceInterface;
 

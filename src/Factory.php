@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Collection\DoctrineCollectionFactory;
+use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
@@ -56,7 +56,7 @@ final class Factory implements FactoryInterface
         $this->dbal = $dbal;
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
-        $this->defaultCollectionFactory = $defaultCollectionFactory ?? new DoctrineCollectionFactory();
+        $this->defaultCollectionFactory = $defaultCollectionFactory ?? new ArrayCollectionFactory();
     }
 
     public function make(

@@ -21,7 +21,6 @@ use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use Doctrine\Common\Collections\Collection;
 use SplObjectStorage;
 use Traversable;
 
@@ -47,16 +46,12 @@ class ManyToMany extends Relation\AbstractRelation
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
     }
 
-    public function prepare(Pool $pool, Tuple $tuple, $entityData, bool $load = true): void
+    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $node = $tuple->node;
 
         /** @var PivotedStorage|ReferenceInterface|null $original */
         $original = $node->getRelation($this->getName());
-
-        /** @var iterable|ReferenceInterface|PivotedCollectionInterface $related */
-        // $related = $tuple->state->getRelation($this->getName());
-        $related = $entityData;
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
@@ -171,7 +166,7 @@ class ManyToMany extends Relation\AbstractRelation
             $data instanceof PivotedCollectionInterface => new PivotedStorage(
                 $data->toArray(), $data->getPivotContext()
             ),
-            $data instanceof Collection => new PivotedStorage($data->toArray()),
+            $data instanceof \Doctrine\Common\Collections\Collection => new PivotedStorage($data->toArray()),
             $data === null => new PivotedStorage(),
             $data instanceof Traversable => new PivotedStorage(iterator_to_array($data)),
             default => new PivotedStorage((array)$data),

@@ -292,7 +292,6 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u2Data = $this->extractEntity($u2);
         $u->credentials = $u2Data['credentials'];
 
-        $this->logger->display();
         $this->captureWriteQueries();
         $this->captureReadQueries();
         $this->save($u);
@@ -327,7 +326,6 @@ abstract class EmbeddedRelationTest extends BaseTest
 
         $u->credentials = $promise;
 
-        $this->logger->display();
         $this->captureWriteQueries();
         $this->captureReadQueries();
         $this->save($u);

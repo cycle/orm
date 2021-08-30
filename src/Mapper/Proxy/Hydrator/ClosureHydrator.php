@@ -26,7 +26,7 @@ class ClosureHydrator
 
             Closure::bind(static function (object $object, array $properties, array &$data): void {
                 foreach ($properties as $property) {
-                    if (!isset($data[$property])) {
+                    if (!array_key_exists($property, $data)) {
                         continue;
                     }
 

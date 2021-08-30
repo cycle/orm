@@ -140,15 +140,18 @@ abstract class BidirectionTest extends BaseTest
 
         $this->assertCount(2, $u->comments);
 
-        $u->comments->removeElement($u->comments[0]);
+        $comment = $u->comments[0];
+        $u->comments->removeElement($comment);
 
         $this->save($u);
+        $this->assertSame($u, $comment->user);
 
         /** @var User $u2 */
         $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertCount(1, $u2->comments);
+        $this->orm->getHeap()->clean();
     }
 
     public function testRemoveFromCommentEnd(): void

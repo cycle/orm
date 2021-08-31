@@ -19,6 +19,9 @@ trait DuplicateTrait
     /** @internal */
     protected array $duplicates = [];
 
+    /**
+     * @param string[] $columns
+     */
     protected function setDuplicateCriteria(array $columns): void
     {
         $this->duplicateCriteria = $columns;

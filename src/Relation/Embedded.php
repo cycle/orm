@@ -22,13 +22,6 @@ use Cycle\ORM\Transaction\Tuple;
  */
 final class Embedded implements SameRowRelationInterface
 {
-    /** @internal */
-    private ORMInterface $orm;
-
-    private string $name;
-
-    private string $target;
-
     private MapperInterface $mapper;
 
     /** @var string[] */
@@ -36,11 +29,12 @@ final class Embedded implements SameRowRelationInterface
 
     private array $columns;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
-    {
-        $this->orm = $orm;
-        $this->name = $name;
-        $this->target = $target;
+    public function __construct(
+        /** @internal */
+        private ORMInterface $orm,
+        private string $name,
+        private string $target
+    ) {
         $this->mapper = $this->orm->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
@@ -98,7 +92,7 @@ final class Embedded implements SameRowRelationInterface
         return $scope === [] ? new EmptyReference($this->target, null) :  new Reference($this->target, $scope);
     }
 
-    protected function getReferenceScope(Node $node): ?array
+    private function getReferenceScope(Node $node): ?array
     {
         $scope = [];
         $nodeData = $node->getData();

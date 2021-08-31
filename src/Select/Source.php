@@ -8,16 +8,12 @@ use Cycle\Database\DatabaseInterface;
 
 final class Source implements SourceInterface
 {
-    private DatabaseInterface $database;
-
-    private string $table;
-
     private ?ScopeInterface $scope = null;
 
-    public function __construct(DatabaseInterface $database, string $table)
-    {
-        $this->database = $database;
-        $this->table = $table;
+    public function __construct(
+        private DatabaseInterface $database,
+        private string $table
+    ) {
     }
 
     public function getDatabase(): DatabaseInterface

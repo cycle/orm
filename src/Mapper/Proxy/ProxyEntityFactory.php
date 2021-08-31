@@ -25,20 +25,17 @@ class ProxyEntityFactory
 
     private Instantiator $instantiator;
     private Closure $initializer;
-    private ClosureHydrator $hydrator;
-    private ClassPropertiesExtractor $propertiesExtractor;
 
-    public function __construct(ClosureHydrator $hydrator, ClassPropertiesExtractor $propertiesExtractor)
-    {
+    public function __construct(
+        private ClosureHydrator $hydrator,
+        private ClassPropertiesExtractor $propertiesExtractor
+    ) {
         $this->instantiator = new Instantiator();
         $this->initializer = static function (object $self, array $properties): void {
             foreach ($properties as $name) {
                 unset($self->$name);
             }
         };
-
-        $this->hydrator = $hydrator;
-        $this->propertiesExtractor = $propertiesExtractor;
     }
 
     /**
@@ -141,7 +138,7 @@ class ProxyEntityFactory
         $this->classMap[$class] = $className;
 
         if (!class_exists($className, false)) {
-            if (strpos($className, '\\') !== false) {
+            if (str_contains($className, '\\')) {
                 $pos = strrpos($className, '\\');
                 $namespaceStr = sprintf("namespace %s;\n", substr($className, 0, $pos));
                 $classNameStr = substr($className, $pos + 1);
@@ -171,7 +168,7 @@ class ProxyEntityFactory
      */
     private function getEntityProperties(object $entity, RelationMap $relMap): array
     {
-        return $this->classProperties[get_class($entity)] ??= $this->propertiesExtractor
+        return $this->classProperties[$entity::class] ??= $this->propertiesExtractor
             ->extract($entity, array_keys($relMap->getRelations()));
     }
 }

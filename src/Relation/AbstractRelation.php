@@ -13,18 +13,8 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
 
-abstract class AbstractRelation implements ActiveRelationInterface
+abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
 {
-    /** @internal */
-    protected ORMInterface $orm;
-
-    protected string $name;
-
-    /**
-     * Primary target role
-     */
-    protected string $target;
-
     /**
      * Additional target roles: class-name of the primary role, roles and classes of primary role parents if the primary
      * role has parents
@@ -33,23 +23,23 @@ abstract class AbstractRelation implements ActiveRelationInterface
      */
     protected array $targets = [];
 
-    protected array $schema;
-
     /** @var string[] */
     protected array $innerKeys;
 
     /** @var string[] */
     protected array $outerKeys;
 
-    private string $role;
-
-    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
-    {
-        $this->orm = $orm;
-        $this->role = $role;
-        $this->name = $name;
-        $this->target = $target;
-        $this->schema = $schema;
+    /**
+     * @param string $target Primary target role
+     */
+    public function __construct(
+        /** @internal */
+        protected ORMInterface $orm,
+        private string $role,
+        protected string $name,
+        protected string $target,
+        protected array $schema
+    ) {
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
     }
@@ -62,7 +52,7 @@ abstract class AbstractRelation implements ActiveRelationInterface
     public function __toString(): string
     {
         // this is incorrect class
-        return sprintf('`%s` (%s)->%s', $this->name, get_class($this), $this->target);
+        return sprintf('`%s` (%s)->%s', $this->name, $this::class, $this->target);
     }
 
     public function getName(): string

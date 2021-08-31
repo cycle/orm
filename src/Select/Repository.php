@@ -12,14 +12,12 @@ use Cycle\ORM\Select;
  */
 class Repository implements RepositoryInterface
 {
-    protected Select $select;
-
     /**
      * Create repository linked to one specific selector.
      */
-    public function __construct(Select $select)
-    {
-        $this->select = $select;
+    public function __construct(
+        protected Select $select
+    ) {
     }
 
     /**

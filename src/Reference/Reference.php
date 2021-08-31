@@ -6,19 +6,14 @@ namespace Cycle\ORM\Reference;
 
 class Reference implements ReferenceInterface
 {
-    protected string $role;
-
-    protected array $scope;
-
     private bool $loaded = false;
 
-    /** @var mixed */
-    private $value;
+    private mixed $value;
 
-    public function __construct(string $role, array $scope)
-    {
-        $this->role = $role;
-        $this->scope = $scope;
+    public function __construct(
+        protected string $role,
+        protected array $scope
+    ) {
     }
 
     final public function getRole(): string

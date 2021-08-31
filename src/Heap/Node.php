@@ -26,22 +26,14 @@ final class Node implements ConsumerInterface
     public const SCHEDULED_DELETE = 5;
     public const DELETED          = 6;
 
-    private string $role;
-
-    private int $status;
-
-    private array $data;
     private ?State $state = null;
 
     public function __construct(
         #[ExpectedValues(valuesFromClass: self::class)]
-        int $status,
-        array $data,
-        string $role
+        private int $status,
+        private array $data,
+        private string $role
     ) {
-        $this->status = $status;
-        $this->data = $data;
-        $this->role = $role;
     }
 
     /**
@@ -49,9 +41,7 @@ final class Node implements ConsumerInterface
      */
     public function __destruct()
     {
-        $this->data = [];
-        $this->state = null;
-        $this->relations = [];
+        unset($this->data, $this->state, $this->relations);
     }
 
     public function getRole(): string
@@ -156,16 +146,14 @@ final class Node implements ConsumerInterface
     public function hasChanges(): bool
     {
         return ($this->state !== null && $this->state->getStatus() === self::NEW)
-            // || array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']) !== [];
             || $this->state->getChanges() !== [];
     }
 
     public function getChanges(): array
     {
         if ($this->state === null) {
-            return $this->status === self::NEW ? ($this->data ?? []) : [];
+            return $this->status === self::NEW ? $this->data : [];
         }
-        // return array_udiff_assoc($this->state->getData(), $this->state->getTransactionData(), [self::class, 'compare']);
         return $this->state->getChanges();
     }
 
@@ -181,11 +169,7 @@ final class Node implements ConsumerInterface
         $this->relationStatus = [];
     }
 
-    /**
-     * @param mixed $a
-     * @param mixed $b
-     */
-    public static function compare($a, $b): int
+    public static function compare(mixed $a, mixed $b): int
     {
         // return $a <=> $b;
         // todo refactor and test this

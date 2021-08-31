@@ -9,13 +9,10 @@ namespace Cycle\ORM\Select;
  */
 final class QueryScope implements ScopeInterface
 {
-    private array $where;
-    private array $orderBy;
-
-    public function __construct(array $where, array $orderBy = [])
-    {
-        $this->where = $where;
-        $this->orderBy = $orderBy;
+    public function __construct(
+        private array $where,
+        private array $orderBy = []
+    ) {
     }
 
     public function apply(QueryBuilder $query): void

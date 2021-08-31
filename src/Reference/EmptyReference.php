@@ -6,14 +6,10 @@ namespace Cycle\ORM\Reference;
 
 final class EmptyReference implements ReferenceInterface
 {
-    private string $role;
-
-    private mixed $value;
-
-    public function __construct(string $role, mixed $value)
-    {
-        $this->role = $role;
-        $this->value = $value;
+    public function __construct(
+        private string $role,
+        private mixed $value
+    ) {
     }
 
     public function getRole(): string

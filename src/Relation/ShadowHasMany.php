@@ -7,27 +7,27 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use JetBrains\PhpStorm\ExpectedValues;
 
 class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
 {
-    private string $name;
-    private string $target;
     private string $targetContainer;
 
-    private array $innerKeys;
-    private array $outerKeys;
-
-    public function __construct(string $role, string $container, string $target, array $innerKeys, array $outerKeys)
-    {
-        // $this->role = $role;
-        $this->name = $container;
-        $this->target = $target;
-        $this->targetContainer = $container . ':' . $target;
-        $this->innerKeys = $innerKeys;
-        $this->outerKeys = $outerKeys;
+    /**
+     * @param string[] $innerKeys
+     * @param string[] $outerKeys
+     */
+    public function __construct(
+        private string $name,
+        private string $target,
+        private array $innerKeys,
+        private array $outerKeys
+    ) {
+        $this->targetContainer = $name . ':' . $target;
     }
 
+    /**
+     * @return string[]
+     */
     public function getInnerKeys(): array
     {
         return $this->innerKeys;

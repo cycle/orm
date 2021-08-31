@@ -8,13 +8,10 @@ class PropertyMap
 {
     public const PUBLIC_CLASS = '';
 
-    private array $properties;
-    private string $class;
-
-    public function __construct(string $class, array $properties)
-    {
-        $this->class = $class;
-        $this->properties = $properties;
+    public function __construct(
+        private string $class,
+        private array $properties
+    ) {
     }
 
     public function isPublicProperty(string $name): bool

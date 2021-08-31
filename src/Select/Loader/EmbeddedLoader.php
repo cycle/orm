@@ -21,10 +21,6 @@ final class EmbeddedLoader implements JoinableInterface
 {
     use ColumnsTrait;
 
-    private ORMInterface $orm;
-
-    private string $target;
-
     private ?LoaderInterface $parent = null;
 
     private array $options = [
@@ -32,11 +28,10 @@ final class EmbeddedLoader implements JoinableInterface
         'minify' => true,
     ];
 
-    public function __construct(ORMInterface $orm, string $target)
-    {
-        $this->orm = $orm;
-        $this->target = $target;
-
+    public function __construct(
+        private ORMInterface $orm,
+        private string $target
+    ) {
         // never duplicate primary key in data selection
         $primaryKey = (array)$this->define(Schema::PRIMARY_KEY);
         foreach ($this->define(Schema::COLUMNS) as $internal => $external) {

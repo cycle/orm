@@ -13,31 +13,23 @@ abstract class AbstractMergeNode extends AbstractNode
 {
     protected const OVERWRITE_DATA = false;
 
-    /** @var string[] */
-    protected array $innerKeys;
-
     protected array $results = [];
 
-    private string $discriminatorValue;
-
     /**
-     * @param array      $columns
-     * @param array      $primaryKeys
-     * @param array      $innerKeys Inner relation keys (for example user_id)
-     * @param array|null $outerKeys Outer (parent) relation keys (for example id = parent.id)
+     * @param string[] $columns
+     * @param string[] $primaryKeys
+     * @param string[] $innerKeys Inner relation keys (for example user_id)
+     * @param string[]|null $outerKeys Outer (parent) relation keys (for example id = parent.id)
      */
     public function __construct(
-        string $discriminatorValue,
+        private string $discriminatorValue,
         array $columns,
         array $primaryKeys,
-        array $innerKeys,
+        protected array $innerKeys,
         ?array $outerKeys
     ) {
         parent::__construct($columns, $outerKeys);
         $this->setDuplicateCriteria($primaryKeys);
-
-        $this->innerKeys = $innerKeys;
-        $this->discriminatorValue = $discriminatorValue;
     }
 
     protected function push(array &$data): void

@@ -7,7 +7,7 @@ namespace Cycle\ORM\Select;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
-use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
 use Cycle\Database\Query\SelectQuery;
@@ -49,17 +49,14 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         // where conditions (if any)
     ];
 
-    protected string $name;
-
-    protected array $schema;
-
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
-    {
+    public function __construct(
+        ORMInterface $orm,
+        protected string $name,
+        string $target,
+        protected array $schema
+    ) {
         parent::__construct($orm, $target);
-
-        $this->name = $name;
-        $this->schema = $schema;
-        $this->columns = $this->define(Schema::COLUMNS);
+        $this->columns = $this->define(SchemaInterface::COLUMNS);
     }
 
     /**
@@ -253,10 +250,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      *
      * Example:
      * $this->getKey(Relation::OUTER_KEY);
-     *
-     * @param string|int $key
      */
-    protected function localKey($key): ?string
+    protected function localKey(string|int $key): ?string
     {
         if (empty($this->schema[$key])) {
             return null;
@@ -267,10 +262,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Get parent identifier based on relation configuration key.
-     *
-     * @param string|int $key
      */
-    protected function parentKey($key): string
+    protected function parentKey(string|int $key): string
     {
         return $this->parent->getAlias() . '.' . $this->parent->fieldAlias($this->schema[$key]);
     }
@@ -285,7 +278,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     protected function getJoinTable(): string
     {
-        return "{$this->define(Schema::TABLE)} AS {$this->getAlias()}";
+        return "{$this->define(SchemaInterface::TABLE)} AS {$this->getAlias()}";
     }
 
     private function makeQueryBuilder(SelectQuery $query): QueryBuilder

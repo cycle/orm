@@ -13,21 +13,20 @@ use Cycle\ORM\Exception\ParserException;
  */
 final class SingularNode extends AbstractNode
 {
-    /** @var string[] */
-    protected array $innerKeys;
-
     /**
-     * @param array      $columns
-     * @param array      $primaryKeys
-     * @param array      $innerKeys Inner relation keys (for example user_id)
-     * @param array|null $outerKeys Outer (parent) relation keys (for example id = parent.id)
+     * @param string[] $columns
+     * @param string[] $primaryKeys
+     * @param string[] $innerKeys Inner relation keys (for example user_id)
+     * @param string[]|null $outerKeys Outer (parent) relation keys (for example id = parent.id)
      */
-    public function __construct(array $columns, array $primaryKeys, array $innerKeys, ?array $outerKeys)
-    {
+    public function __construct(
+        array $columns,
+        array $primaryKeys,
+        protected array $innerKeys,
+        ?array $outerKeys
+    ) {
         parent::__construct($columns, $outerKeys);
         $this->setDuplicateCriteria($primaryKeys);
-
-        $this->innerKeys = $innerKeys;
     }
 
     protected function push(array &$data): void

@@ -17,8 +17,6 @@ final class State implements ConsumerInterface
     use RelationTrait;
     use WaitFieldTrait;
 
-    private int $state;
-
     /** @var array<string, mixed> */
     private array $data;
 
@@ -29,10 +27,9 @@ final class State implements ConsumerInterface
 
     public function __construct(
         #[ExpectedValues(valuesFromClass: Node::class)]
-        int $state,
+        private int $state,
         array $data
     ) {
-        $this->state = $state;
         $this->data = $data;
         $this->transactionData = $state === Node::NEW ? [] : $data;
     }

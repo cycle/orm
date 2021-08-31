@@ -27,10 +27,6 @@ abstract class DatabaseMapper implements MapperInterface
 {
     protected SourceInterface $source;
 
-    protected ORMInterface $orm;
-
-    protected string $role;
-
     protected array $columns;
 
     protected array $parentColumns = [];
@@ -41,11 +37,10 @@ abstract class DatabaseMapper implements MapperInterface
     /** @var string[] */
     protected array $primaryKeys;
 
-    public function __construct(ORMInterface $orm, string $role)
-    {
-        $this->orm = $orm;
-        $this->role = $role;
-
+    public function __construct(
+        protected ORMInterface $orm,
+        protected string $role
+    ) {
         $this->source = $orm->getSource($role);
         foreach ($orm->getSchema()->define($role, SchemaInterface::COLUMNS) as $property => $column) {
             $this->columns[is_int($property) ? $column : $property] = $column;

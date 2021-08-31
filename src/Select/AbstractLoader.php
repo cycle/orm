@@ -48,10 +48,6 @@ abstract class AbstractLoader implements LoaderInterface
     public const JOIN      = 3;
     public const LEFT_JOIN = 4;
 
-    protected ORMInterface $orm;
-
-    protected string $target;
-
     protected array $options = [
         'load'      => false,
         'scope' => true,
@@ -75,11 +71,10 @@ abstract class AbstractLoader implements LoaderInterface
     /** @var array<string, array> */
     protected array $children;
 
-    public function __construct(ORMInterface $orm, string $target)
-    {
-        $this->orm = $orm;
-        $this->target = $target;
-
+    public function __construct(
+        protected ORMInterface $orm,
+        protected string $target
+    ) {
         $this->children = $orm->getSchema()->getInheritedRoles($target);
     }
 
@@ -137,7 +132,7 @@ abstract class AbstractLoader implements LoaderInterface
             throw new LoaderException(
                 sprintf(
                     'Relation %s does not support option: %s',
-                    get_class($this),
+                    $this::class,
                     implode(',', $wrong)
                 )
             );

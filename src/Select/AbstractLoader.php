@@ -59,7 +59,7 @@ abstract class AbstractLoader implements LoaderInterface
     /** @var AbstractLoader[] */
     protected array $join = [];
 
-    protected ?LoaderInterface $inherit = null;
+    protected ?AbstractLoader $inherit = null;
 
     /** @var SubclassLoader[] */
     protected array $subclasses = [];

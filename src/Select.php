@@ -21,19 +21,22 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method Select distinct()
- * @method Select where(...$args);
- * @method Select andWhere(...$args);
- * @method Select orWhere(...$args);
- * @method Select having(...$args);
- * @method Select andHaving(...$args);
- * @method Select orHaving(...$args);
- * @method Select orderBy($expression, $direction = 'ASC');
+ * @method $this distinct()
+ * @method $this where(...$args)
+ * @method $this andWhere(...$args);
+ * @method $this orWhere(...$args);
+ * @method $this having(...$args);
+ * @method $this andHaving(...$args);
+ * @method $this orHaving(...$args);
+ * @method $this orderBy($expression, $direction = 'ASC');
  *
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method mixed sum($identifier) Perform aggregation (SUM) based on column or expression value.
+ *
+ * @template TEntity of object
+ * @template-implements IteratorAggregate<mixed, TEntity>
  */
 final class Select implements IteratorAggregate, Countable, PaginableInterface
 {
@@ -47,6 +50,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     private QueryBuilder $builder;
 
+    /**
+     * @param string|class-string<TEntity> $role
+     */
     public function __construct(
         /** @internal */
         private ORMInterface $orm,
@@ -66,10 +72,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Bypassing call to primary select query.
-     *
-     * @return Select|mixed
      */
-    public function __call(string $name, array $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
             // aggregations
@@ -99,6 +103,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Create new Selector with applied scope. By default no scope used.
+     *
+     * @return $this
      */
     public function scope(ScopeInterface $scope = null): self
     {
@@ -184,6 +190,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return (int) $this->__call('count', [$column]);
     }
 
+    /**
+     * @return $this
+     */
     public function limit(int $limit): self
     {
         $this->loader->getQuery()->limit($limit);
@@ -191,6 +200,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function offset(int $offset): self
     {
         $this->loader->getQuery()->offset($offset);
@@ -250,6 +262,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
      * @see with()
+     * @return $this
      */
     public function load(string|array $relation, array $options = []): self
     {
@@ -337,8 +350,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *
-     * @return $this|Select
      * @see load()
+     * @return $this
      */
     public function with(string|array $relation, array $options = []): self
     {
@@ -363,6 +376,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Find one entity or return null. Method provides the ability to configure custom query parameters.
+     *
+     * @return TEntity|null
      */
     public function fetchOne(array $query = null): ?object
     {
@@ -381,13 +396,16 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Fetch all records in a form of array.
      *
-     * @return object[]
+     * @return array<array-key, TEntity>
      */
     public function fetchAll(): array
     {
-        return iterator_to_array($this->getIterator());
+        return iterator_to_array($this->getIterator(), false);
     }
 
+    /**
+     * @return Iterator<TEntity>
+     */
     public function getIterator(): Iterator
     {
         $node = $this->loader->createNode();
@@ -402,6 +420,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Load data tree from database and linked loaders in a form of array.
+     *
+     * @return array<array-key, array<string, mixed>>
      */
     public function fetchData(): array
     {

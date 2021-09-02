@@ -11,12 +11,22 @@ use SplObjectStorage;
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
  * filtered.
  *
- * @template-extends  ArrayCollection
+ * @psalm-template TKey of array-key
+ * @psalm-template TEntity of object
+ * @psalm-template TPivot
+ *
+ * @template-extends ArrayCollection<TKey, TEntity>
+ * @template-implements PivotedCollectionInterface<TEntity, TPivot>
  */
 class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
+    /** @var SplObjectStorage<TEntity, TPivot> */
     protected SplObjectStorage $pivotContext;
 
+    /**
+     * @param array<TKey, TEntity> $elements
+     * @param null|SplObjectStorage<TEntity, TPivot> $pivotData
+     */
     public function __construct(array $elements = [], SplObjectStorage $pivotData = null)
     {
         parent::__construct($elements);
@@ -43,6 +53,13 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
         return $this->pivotContext;
     }
 
+    /**
+     * @param array<K, V> $elements
+     * @return static<K, V, TPivot>
+     *
+     * @template K of TKey
+     * @template V of TEntity
+     */
     protected function createFrom(array $elements): static
     {
         $new = parent::createFrom($elements);

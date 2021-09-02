@@ -111,7 +111,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         $data = $node->getData();
         foreach ($index as $key) {
             $isComposite = false;
-            if (is_array($key)) {
+            if (\is_array($key)) {
                 switch (\count($key)) {
                     case 0:
                         continue 2;

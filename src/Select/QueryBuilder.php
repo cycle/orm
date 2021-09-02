@@ -194,11 +194,11 @@ final class QueryBuilder
             return $args;
         }
 
-        if (is_string($args[0])) {
+        if (\is_string($args[0])) {
             $args[0] = $this->resolve($args[0]);
         }
 
-        if (is_array($args[0])) {
+        if (\is_array($args[0])) {
             $args[0] = $this->walkRecursive($args[0], [$this, 'wrap']);
         }
 
@@ -218,7 +218,7 @@ final class QueryBuilder
      */
     private function wrap(int|string &$identifier, &$value): void
     {
-        if (!is_numeric($identifier)) {
+        if (!\is_numeric($identifier)) {
             $identifier = $this->resolve($identifier);
         }
 
@@ -236,8 +236,8 @@ final class QueryBuilder
     {
         $result = [];
         foreach ($input as $k => $v) {
-            if (is_array($v)) {
-                if (!is_numeric($k) && in_array(strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR], true)) {
+            if (\is_array($v)) {
+                if (!\is_numeric($k) && \in_array(strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR], true)) {
                     // complex expression like @OR and @AND
                     $result[$k] = $this->walkRecursive($v, $func, true);
                     continue;

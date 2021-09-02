@@ -69,7 +69,7 @@ final class Factory implements FactoryInterface
         $schema = $orm->getSchema();
         $class = $schema->define($role, Schema::MAPPER) ?? $this->defaults[Schema::MAPPER];
 
-        if (!is_subclass_of($class, MapperInterface::class)) {
+        if (!\is_subclass_of($class, MapperInterface::class)) {
             throw new TypecastException(sprintf('%s does not implement %s.', $class, MapperInterface::class));
         }
 
@@ -124,7 +124,7 @@ final class Factory implements FactoryInterface
         }
         // Find by interface
         foreach ($this->collectionFactoryInterface as $interface => $factory) {
-            if (is_subclass_of($type, $interface, true)) {
+            if (\is_subclass_of($type, $interface, true)) {
                 return $this->collectionFactoryAlias[$type] = $factory->withCollectionClass($type);
             }
         }
@@ -167,7 +167,7 @@ final class Factory implements FactoryInterface
     ): RepositoryInterface {
         $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
 
-        if (!is_subclass_of($class, RepositoryInterface::class)) {
+        if (!\is_subclass_of($class, RepositoryInterface::class)) {
             throw new TypecastException($class . ' does not implement ' . RepositoryInterface::class);
         }
 
@@ -188,7 +188,7 @@ final class Factory implements FactoryInterface
     ): SourceInterface {
         $source = $schema->define($role, Schema::SOURCE) ?? $this->defaults[Schema::SOURCE];
 
-        if (!is_subclass_of($source, SourceInterface::class)) {
+        if (!\is_subclass_of($source, SourceInterface::class)) {
             throw new TypecastException($source . ' does not implement ' . SourceInterface::class);
         }
 
@@ -207,11 +207,11 @@ final class Factory implements FactoryInterface
             return $source;
         }
 
-        if (!is_subclass_of($scope, ScopeInterface::class)) {
+        if (!\is_subclass_of($scope, ScopeInterface::class)) {
             throw new TypecastException($scope . ' does not implement ' . ScopeInterface::class);
         }
 
-        return $source->withScope(is_object($scope) ? $scope : $this->factory->make($scope));
+        return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));
     }
 
     /**

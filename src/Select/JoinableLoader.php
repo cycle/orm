@@ -101,7 +101,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         if (array_key_exists('scope', $options)) {
             if ($loader->options['scope'] instanceof ScopeInterface) {
                 $loader->setScope($loader->options['scope']);
-            } elseif (is_string($loader->options['scope'])) {
+            } elseif (\is_string($loader->options['scope'])) {
                 $loader->setScope($this->orm->getFactory()->make($loader->options['scope']));
             }
         } else {

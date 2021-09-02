@@ -20,6 +20,6 @@ final class ArrayCollectionFactory implements CollectionFactoryInterface
 
     public function collect(iterable $data): array
     {
-        return is_array($data) ? $data : iterator_to_array($data);
+        return \is_array($data) ? $data : \iterator_to_array($data);
     }
 }

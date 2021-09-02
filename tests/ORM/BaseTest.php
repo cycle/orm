@@ -243,7 +243,7 @@ abstract class BaseTest extends TestCase
      */
     protected function enableProfiling(): void
     {
-        if (!is_null($this->logger)) {
+        if (!\is_null($this->logger)) {
             $this->logger->display();
         }
     }
@@ -253,7 +253,7 @@ abstract class BaseTest extends TestCase
      */
     protected function disableProfiling(): void
     {
-        if (!is_null($this->logger)) {
+        if (!\is_null($this->logger)) {
             $this->logger->hide();
         }
     }

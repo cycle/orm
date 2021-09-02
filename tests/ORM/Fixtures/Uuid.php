@@ -56,7 +56,7 @@ class Uuid implements ValueInterface
      */
     public static function parse($value, DatabaseInterface $db): Uuid
     {
-        if (is_resource($value)) {
+        if (\is_resource($value)) {
             // postgres
             $value = fread($value, 16);
         }

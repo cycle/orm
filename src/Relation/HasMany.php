@@ -153,7 +153,7 @@ class HasMany extends AbstractRelation
 
     public function collect($data): iterable
     {
-        if (!is_iterable($data)) {
+        if (!\is_iterable($data)) {
             throw new \InvalidArgumentException('Collected data in the HasMany relation should be iterable.');
         }
         return $this->orm->getFactory()->collection(
@@ -171,9 +171,9 @@ class HasMany extends AbstractRelation
             return $data->toArray();
         }
         if ($data instanceof \Traversable) {
-            return iterator_to_array($data);
+            return \iterator_to_array($data);
         }
-        return is_array($data) ? $data : [];
+        return \is_array($data) ? $data : [];
     }
 
     /**

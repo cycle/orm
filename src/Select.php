@@ -138,20 +138,20 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function wherePK(string|int|array|Parameter ...$ids): self
     {
         $pk = $this->loader->getPK();
-        $pk = is_array($pk) && \count($pk) > 1 ? $pk : ((array)$pk)[0];
+        $pk = \is_array($pk) && \count($pk) > 1 ? $pk : ((array)$pk)[0];
         # todo: support assoc ids [key1 => value1, ...]
-        if (is_array($pk) && \count($pk) > 1) {
+        if (\is_array($pk) && \count($pk) > 1) {
             $assoc = [];
             foreach ($ids as $id) {
                 $id = $id instanceof Parameter ? $id->getValue() : $id;
-                if (!is_array($id)) {
+                if (!\is_array($id)) {
                     throw new InvalidArgumentException('Composite primary key must be defined using an array.');
                 }
                 if (\count($pk) !== \count($id)) {
                     throw new InvalidArgumentException(sprintf('Primary key should contain %d values.', \count($pk)));
                 }
 
-                $values = array_values($id);
+                $values = \array_values($id);
                 $i = 0;
                 $set = [];
                 foreach ($pk as $key) {
@@ -182,9 +182,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         if ($column === null) {
             // @tuneyourserver solves the issue with counting on queries with joins.
             $pk = $this->loader->getPK();
-            $column = is_array($pk)
+            $column = \is_array($pk)
                 ? '*'
-                : sprintf('DISTINCT(%s)', $pk);
+                : \sprintf('DISTINCT(%s)', $pk);
         }
 
         return (int) $this->__call('count', [$column]);
@@ -266,14 +266,14 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function load(string|array $relation, array $options = []): self
     {
-        if (is_string($relation)) {
+        if (\is_string($relation)) {
             $this->loader->loadRelation($relation, $options, false, true);
 
             return $this;
         }
 
         foreach ($relation as $name => $subOption) {
-            if (is_string($subOption)) {
+            if (\is_string($subOption)) {
                 // array of relation names
                 $this->load($subOption, $options);
             } else {
@@ -355,14 +355,14 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function with(string|array $relation, array $options = []): self
     {
-        if (is_string($relation)) {
+        if (\is_string($relation)) {
             $this->loader->loadRelation($relation, $options, true, false);
 
             return $this;
         }
 
         foreach ($relation as $name => $subOption) {
-            if (is_string($subOption)) {
+            if (\is_string($subOption)) {
                 //Array of relation names
                 $this->with($subOption, []);
             } else {

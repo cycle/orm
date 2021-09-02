@@ -91,7 +91,7 @@ final class RelationMap
             return;
         }
         if ($relationType === Relation::MANY_TO_MANY) {
-            $handshaked = is_string($relationSchema[Relation::SCHEMA][Relation::HANDSHAKE] ?? null);
+            $handshaked = \is_string($relationSchema[Relation::SCHEMA][Relation::HANDSHAKE] ?? null);
             // Create ShadowHasMany
             if (!$handshaked) {
                 $relation = new ShadowHasMany(
@@ -147,7 +147,7 @@ final class RelationMap
             }
 
             $item = $data[$name];
-            if (is_object($item) || $item === null) {
+            if (\is_object($item) || $item === null) {
                 // cyclic initialization
                 $node->setRelation($name, $item);
                 continue;

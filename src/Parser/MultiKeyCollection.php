@@ -70,7 +70,7 @@ final class MultiKeyCollection
         $itemKeys = [];
         foreach ($this->indexes[$index] as $key) {
             $keyValue = $data[$key] ?? null;
-            if (!is_scalar($keyValue)) {
+            if (!\is_scalar($keyValue)) {
                 throw new \InvalidArgumentException("Invalid value on the key `$key`.");
             }
             $itemKeys[] = $keyValue;

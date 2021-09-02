@@ -70,7 +70,7 @@ final class RootLoader extends AbstractLoader
     public function getPK(): array|string
     {
         $pk = $this->define(Schema::PRIMARY_KEY);
-        if (is_array($pk)) {
+        if (\is_array($pk)) {
             $result = [];
             foreach ($pk as $key) {
                 $result[] = $this->getAlias() . '.' . $this->fieldAlias($key);

@@ -177,7 +177,7 @@ final class Transaction implements TransactionInterface
                 spl_object_id($entity),
                 $tuple->node === null
                     ? '(has no Node)'
-                    : implode('|', array_map(static fn($x) => is_object($x)
+                    : implode('|', array_map(static fn($x) => \is_object($x)
                         ? $x::class
                         : (string)$x, $tuple->node->getData()))
             );

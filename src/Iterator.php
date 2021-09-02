@@ -67,7 +67,7 @@ final class Iterator implements IteratorAggregate
     {
         if ($this->findInHeap) {
             $pk = $this->orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
-            if (is_array($pk)) {
+            if (\is_array($pk)) {
                 $e = $this->orm->getHeap()->find($role, $data);
             } else {
                 $id = $data[$pk] ?? null;

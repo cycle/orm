@@ -125,7 +125,7 @@ final class TableRenderer
             return;
         }
 
-        if (is_null($default)) {
+        if (\is_null($default)) {
             // default value is stated and NULL, clear what to do
             $column->nullable(true);
         }

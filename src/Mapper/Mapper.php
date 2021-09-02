@@ -24,17 +24,17 @@ class Mapper extends DatabaseMapper
 
     protected array $children = [];
 
-    protected ProxyEntityFactory $entityFactory;
-
     private RelationMap $relationMap;
 
-    public function __construct(ORMInterface $orm, ProxyEntityFactory $entityFactory, string $role)
-    {
+    public function __construct(
+        ORMInterface $orm,
+        protected ProxyEntityFactory $entityFactory,
+        string $role
+    ) {
         parent::__construct($orm, $role);
 
         $this->entity = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
         $this->children = $orm->getSchema()->define($role, SchemaInterface::CHILDREN) ?? [];
-        $this->entityFactory = $entityFactory;
         $this->relationMap = $orm->getRelationMap($role);
         $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
     }

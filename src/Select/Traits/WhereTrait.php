@@ -18,8 +18,13 @@ trait WhereTrait
      * @param string        $target Query target section (accepts: where, having, onWhere, on)
      * @param array|Closure $where  Where conditions in a form or short array form.
      */
-    private function setWhere(SelectQuery $query, string $table, string $target, $where = null): SelectQuery
-    {
+    private function setWhere(
+        SelectQuery $query,
+        /** todo: can be deleted */
+        string $table,
+        string $target,
+        array|\Closure $where = null
+    ): SelectQuery {
         if (empty($where)) {
             // no conditions, nothing to do
             return $query;

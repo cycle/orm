@@ -95,7 +95,6 @@ final class RelationMap
             // Create ShadowHasMany
             if (!$handshaked) {
                 $relation = new ShadowHasMany(
-                    $relationSchema[Relation::TARGET],
                     $role . '.' . $container . ':' . $relationSchema[Relation::TARGET],
                     $relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY],
                     (array)$relationSchema[Relation::SCHEMA][Relation::OUTER_KEY],

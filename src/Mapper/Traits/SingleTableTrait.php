@@ -28,7 +28,7 @@ trait SingleTableTrait
 
     protected function getDiscriminatorValues(object $entity): array
     {
-        $class = get_class($entity);
+        $class = $entity::class;
         if ($class !== $this->entity) {
             // inheritance
             foreach ($this->children as $alias => $childClass) {

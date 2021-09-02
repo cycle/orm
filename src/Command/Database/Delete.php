@@ -18,19 +18,16 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
     use ScopeTrait;
     use ErrorTrait;
 
-    private State $state;
-
     /** @var null|callable */
     private $mapper;
 
     public function __construct(
         DatabaseInterface $db,
         string $table,
-        State $state,
+        private State $state,
         callable $mapper = null
     ) {
         parent::__construct($db, $table);
-        $this->state = $state;
         $this->mapper = $mapper;
     }
 

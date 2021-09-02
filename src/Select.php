@@ -43,16 +43,15 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     // load related data after the query
     public const OUTER_QUERY = JoinableLoader::POSTLOAD;
 
-    /** @internal */
-    private ?ORMInterface $orm;
+    private RootLoader $loader;
 
-    private ?RootLoader $loader;
+    private QueryBuilder $builder;
 
-    private ?QueryBuilder $builder;
-
-    public function __construct(ORMInterface $orm, string $role)
-    {
-        $this->orm = $orm;
+    public function __construct(
+        /** @internal */
+        private ORMInterface $orm,
+        string $role
+    ) {
         $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
         $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
@@ -62,9 +61,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function __destruct()
     {
-        $this->orm = null;
-        $this->loader = null;
-        $this->builder = null;
+        unset($this->orm, $this->loader, $this->builder);
     }
 
     /**
@@ -129,10 +126,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
-     * @param string|int|string[]|int[]|Parameter ...$ids
-     * @return $this|Select
+     * @psalm-param string|int|list<string|int>|Parameter ...$ids
+     * @return $this
      */
-    public function wherePK(...$ids): self
+    public function wherePK(string|int|array|Parameter ...$ids): self
     {
         $pk = $this->loader->getPK();
         $pk = is_array($pk) && count($pk) > 1 ? $pk : ((array)$pk)[0];

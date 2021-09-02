@@ -10,10 +10,6 @@ class ClosureHydrator
 {
     /**
      * @param array<string, PropertyMap> $propertyMaps Array of class properties
-     * @param object $object
-     * @param array $data
-     *
-     * @return object
      */
     public function hydrate(array $propertyMaps, object $object, array $data): object
     {

@@ -49,7 +49,7 @@ final class MultiKeyCollection
     {
         try {
             return count($this->getValues($this->data[$index], $values));
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return 0;
         }
     }

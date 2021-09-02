@@ -43,7 +43,7 @@ trait ChainTrait
 
         if (!$child instanceof AbstractLoader) {
             throw new LoaderException(
-                sprintf("Loader '%s' does not support chain relation loading", get_class($child))
+                sprintf('Loader `%s` does not support chain relation loading.', $child::class)
             );
         }
 

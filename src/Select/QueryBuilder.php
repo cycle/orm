@@ -31,17 +31,13 @@ use Cycle\Database\Query\SelectQuery;
  */
 final class QueryBuilder
 {
-    private SelectQuery $query;
-
-    /** @internal */
-    private AbstractLoader $loader;
-
     private ?string $forward = null;
 
-    public function __construct(SelectQuery $query, AbstractLoader $loader)
-    {
-        $this->query = $query;
-        $this->loader = $loader;
+    public function __construct(
+        private SelectQuery $query,
+        /** @internal */
+        private AbstractLoader $loader
+    ) {
     }
 
     /**
@@ -112,7 +108,7 @@ final class QueryBuilder
             return '*';
         }
 
-        if (strpos($identifier, '.') === false) {
+        if (!str_contains($identifier, '.')) {
             // parent element
             return sprintf(
                 '%s.%s',
@@ -218,10 +214,9 @@ final class QueryBuilder
     /**
      * Automatically resolve identifier value or wrap the expression.
      *
-     * @param int|string $identifier
      * @param mixed $value
      */
-    private function wrap(&$identifier, &$value): void
+    private function wrap(int|string &$identifier, &$value): void
     {
         if (!is_numeric($identifier)) {
             $identifier = $this->resolve($identifier);

@@ -8,13 +8,10 @@ use Cycle\ORM\Relation\ActiveRelationInterface;
 
 final class Promise implements ReferenceInterface
 {
-    private ActiveRelationInterface $relation;
-    private ReferenceInterface $origin;
-
-    public function __construct(ActiveRelationInterface $relation, ReferenceInterface $origin)
-    {
-        $this->relation = $relation;
-        $this->origin = $origin;
+    public function __construct(
+        private ActiveRelationInterface $relation,
+        private ReferenceInterface $origin
+    ) {
     }
 
     /**

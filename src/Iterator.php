@@ -12,20 +12,15 @@ use Cycle\ORM\Select\LoaderInterface;
  */
 final class Iterator implements \IteratorAggregate
 {
-    private ORMInterface $orm;
-
     private string $role;
 
-    private iterable $source;
-
-    private bool $findInHeap;
-
-    public function __construct(ORMInterface $orm, string $class, iterable $source, bool $findInHeap = false)
-    {
-        $this->orm = $orm;
+    public function __construct(
+        private ORMInterface $orm,
+        string $class,
+        private iterable $source,
+        private bool $findInHeap = false
+    ) {
         $this->role = $orm->resolveRole($class);
-        $this->source = $source;
-        $this->findInHeap = $findInHeap;
     }
 
     /**

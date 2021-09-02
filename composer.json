@@ -4,23 +4,22 @@
   "license": "MIT",
   "description": "PHP DataMapper ORM and Data Modelling Engine",
   "require": {
-    "php": "^8.0",
+    "php": ">=8.0",
     "ext-pdo": "*",
     "doctrine/inflector": "^1.4|^2.0",
-    "doctrine/instantiator": "^1.2",
+    "doctrine/instantiator": "^1.3.1",
     "laminas/laminas-hydrator": "^4.0",
     "cycle/database": "^1.0"
   },
   "require-dev": {
-    "doctrine/collections": "^1.5",
+    "doctrine/collections": "^1.6",
     "illuminate/collections": "^8.0",
     "mockery/mockery": "^1.1",
     "phpunit/phpunit": "^9.5",
     "ramsey/uuid": "^4.0",
     "spiral/code-style": "^1.0",
-    "spiral/dumper": "^2.7",
-    "spiral/tokenizer": "^2.7",
-    "vimeo/psalm": "^4.8"
+    "spiral/tokenizer": "^2.8",
+    "vimeo/psalm": "^4.9"
   },
   "autoload": {
     "psr-4": {

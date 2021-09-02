@@ -13,15 +13,13 @@ use Cycle\Database\DatabaseInterface;
 
 class WrappedCommand implements CommandInterface
 {
-    protected CommandInterface $command;
-
     private ?Closure $beforeExecute = null;
 
     private ?Closure $afterExecute = null;
 
-    protected function __construct(CommandInterface $command)
-    {
-        $this->command = $command;
+    protected function __construct(
+        protected CommandInterface $command
+    ) {
     }
 
     public static function createInsert(
@@ -88,11 +86,6 @@ class WrappedCommand implements CommandInterface
     public function getDatabase(): ?DatabaseInterface
     {
         return $this->command->getDatabase();
-    }
-
-    public function hasData(): bool
-    {
-        return $this->command->hasData();
     }
 
     public function getCommand(): CommandInterface

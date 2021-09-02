@@ -33,12 +33,6 @@ abstract class AbstractNode
     protected bool $joined = false;
 
     /**
-     * List of columns node must fetch from the row.
-     *
-     */
-    protected array $columns = [];
-
-    /**
      * Declared column list which must be aggregated in a parent node. i.e. Parent Key
      * @var string[]
      */
@@ -65,7 +59,7 @@ abstract class AbstractNode
     /** @var SubclassMergeNode[]  */
     protected array $mergeSubclass = [];
 
-    protected ?string $indexName = null;
+    protected ?string $indexName;
 
     /**
      * Indexed keys and values associated with references
@@ -75,13 +69,15 @@ abstract class AbstractNode
     protected ?MultiKeyCollection $indexedData = null;
 
     /**
-     * @param array $columns  When columns are empty original line will be returned as result.
-     * @param array|null $outerKeys Defines column name in parent Node to be aggregated.
+     * @param string[] $columns  List of columns node must fetch from the row.
+     *                           When columns are empty original line will be returned as result.
+     * @param string[]|null $outerKeys Defines column name in parent Node to be aggregated.
      */
-    public function __construct(array $columns, array $outerKeys = null)
-    {
-        $this->columns = $columns;
-        $this->indexName = $outerKeys === null ? null : implode(':', $outerKeys);
+    public function __construct(
+        protected array $columns,
+        array $outerKeys = null
+    ) {
+        $this->indexName = empty($outerKeys) ? null : implode(':', $outerKeys);
         $this->outerKeys = $outerKeys ?? [];
         $this->indexedData = new MultiKeyCollection();
     }
@@ -94,9 +90,6 @@ abstract class AbstractNode
         $this->duplicates = [];
     }
 
-    /**
-     * @param TypecastInterface $typecast
-     */
     public function setTypecast(TypecastInterface $typecast): void
     {
         $this->typecast = $typecast;
@@ -115,7 +108,7 @@ abstract class AbstractNode
             foreach ($this->indexedData->getIndexes() as $index) {
                 try {
                     $this->indexedData->addItem($index, $data);
-                } catch (Throwable $e) {
+                } catch (Throwable) {
                 }
             }
 

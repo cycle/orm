@@ -31,17 +31,16 @@ final class Transaction implements TransactionInterface
     private const RELATIONS_RESOLVED = 1;
     private const RELATIONS_DEFERRED = 2;
 
-    private ORMInterface $orm;
-
     private Pool $pool;
 
     private RunnerInterface $runner;
 
     private array $indexes = [];
 
-    public function __construct(ORMInterface $orm, RunnerInterface $runner = null)
-    {
-        $this->orm = $orm;
+    public function __construct(
+        private ORMInterface $orm,
+        RunnerInterface $runner = null
+    ) {
         $this->runner = $runner ?? new Runner();
         $this->pool = new Pool($orm);
     }
@@ -93,7 +92,7 @@ final class Transaction implements TransactionInterface
     /**
      * Sync all entity states with generated changes.
      */
-    protected function syncHeap(): void
+    private function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
         // $iterator = (clone $heap)->getIterator();
@@ -131,7 +130,7 @@ final class Transaction implements TransactionInterface
     /**
      * Reset heap to it's initial state and remove all the changes.
      */
-    protected function resetHeap(): void
+    private function resetHeap(): void
     {
         $heap = $this->orm->getHeap();
         foreach ($heap as $e) {
@@ -142,7 +141,7 @@ final class Transaction implements TransactionInterface
     /**
      * Return flattened list of commands required to store and delete associated entities.
      */
-    protected function walkPool(): void
+    private function walkPool(): void
     {
         /**
          * @var object $entity
@@ -174,12 +173,12 @@ final class Transaction implements TransactionInterface
                 "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
                 ['preparing','waiting','waited','deferred','proposed','preprocessed','processed'][$tuple->status],
                 ['store', 'delete', 'force delete'][$tuple->task],
-                $tuple->node === null ? get_class($entity) : $tuple->node->getRole(),
+                $tuple->node === null ? $entity::class : $tuple->node->getRole(),
                 spl_object_id($entity),
                 $tuple->node === null
                     ? '(has no Node)'
                     : implode('|', array_map(static fn($x) => is_object($x)
-                        ? get_class($x)
+                        ? $x::class
                         : (string)$x, $tuple->node->getData()))
             );
 
@@ -206,7 +205,7 @@ final class Transaction implements TransactionInterface
         $resolved = true;
         $waitKeys = [];
         foreach ($map->getMasters() as $name => $relation) {
-            $className = "\033[33m" . substr(get_class($relation), strrpos(get_class($relation), '\\') + 1) . "\033[0m";
+            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             if (/*!$relation->isCascade() || */$relationStatus === RelationInterface::STATUS_RESOLVED) {
@@ -271,7 +270,7 @@ final class Transaction implements TransactionInterface
         }
         foreach ($map->getSlaves() as $name => $relation) {
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-            $className = "\033[33m" . substr(get_class($relation), strrpos(get_class($relation), '\\') + 1) . "\033[0m";
+            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
             if (!$relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 // todo check changes for not cascaded relations?
@@ -360,7 +359,7 @@ final class Transaction implements TransactionInterface
 
     private function resolveRelations(Tuple $tuple): void
     {
-        $map = $this->orm->getRelationMap(isset($tuple->node) ? $tuple->node->getRole() : get_class($tuple->entity));
+        $map = $this->orm->getRelationMap($tuple->node?->getRole() ?? $tuple->entity::class);
 
         // Dependency relations
         $result = $tuple->task === Tuple::TASK_STORE
@@ -400,7 +399,7 @@ final class Transaction implements TransactionInterface
                     foreach ($map->getMasters() as $name => $relation) {
                         $relationStatus = $tuple->node->getRelationStatus($relation->getName());
                         if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
-                            echo " - \033[31m $name [$relationStatus] " . get_class($relation) . "\033[0m\n";
+                            echo " - \033[31m $name [$relationStatus] " . $relation::class . "\033[0m\n";
                         }
                     }
                 }

@@ -12,14 +12,12 @@ use Cycle\Database\DatabaseInterface;
  */
 final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 {
-    private ?CommandInterface $primary;
-
     /** @var CommandInterface[] */
     private array $commands = [];
 
-    public function __construct(CommandInterface $primary = null)
-    {
-        $this->primary = $primary;
+    public function __construct(
+        private ?CommandInterface $primary = null
+    ) {
         if ($primary !== null) {
             $this->commands[] = $primary;
         }

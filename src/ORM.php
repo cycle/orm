@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Exception\ORMException;
-use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
@@ -17,14 +16,12 @@ use function count;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
+ *
+ * @template-extends ORMInterface
  */
 final class ORM implements ORMInterface
 {
-    private FactoryInterface $factory;
-
     private HeapInterface $heap;
-
-    private SchemaInterface $schema;
 
     /** @var MapperInterface[] */
     private array $mappers = [];
@@ -41,12 +38,9 @@ final class ORM implements ORMInterface
     private array $sources = [];
 
     public function __construct(
-        FactoryInterface $factory,
-        SchemaInterface $schema = null
+        private FactoryInterface $factory,
+        private SchemaInterface $schema
     ) {
-        $this->factory = $factory;
-        $this->schema = $schema ?? new Schema([]);
-
         $this->heap = new Heap();
     }
 
@@ -78,7 +72,7 @@ final class ORM implements ORMInterface
                 return $node->getRole();
             }
 
-            $class = get_class($entity);
+            $class = $entity::class;
             if (!$this->schema->defines($class)) {
                 // todo: redesign
                 // temporary solution for proxy objects
@@ -268,6 +262,8 @@ final class ORM implements ORMInterface
 
     /**
      * Get relation map associated with the given class.
+     *
+     * todo: the ORMInterface hasn't this method
      */
     public function getRelationMap(string $entity): RelationMap
     {

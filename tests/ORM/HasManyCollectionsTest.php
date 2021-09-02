@@ -167,7 +167,8 @@ abstract class HasManyCollectionsTest extends BaseTest
                     'array',
                     $this->collectionFactory['array'],
                     \Illuminate\Support\Collection::class
-                )
+                ),
+            new Schema([])
         );
     }
 

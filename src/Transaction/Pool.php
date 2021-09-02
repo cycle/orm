@@ -87,7 +87,7 @@ final class Pool implements IteratorAggregate, \Countable
         }
         $string = sprintf(
             "pool:attach %s, task: %s, status: %s\n",
-            $tuple->node === null ? get_class($tuple->entity) : $tuple->node->getRole(),
+            $tuple->node === null ? $tuple->entity::class : $tuple->node->getRole(),
             $tuple->task,
             $tuple->status
         );
@@ -119,22 +119,15 @@ final class Pool implements IteratorAggregate, \Countable
     ): Tuple {
         return $this->attach($entity, Tuple::TASK_DELETE, $cascade, $node, $state);
     }
-    // public function detach(object $entity): void
-    // {
-    //     $this->storage->detach($entity);
-    //     $this->storage->offsetUnset($entity);
-    // }
+
     public function offsetGet(object $entity): ?Tuple
     {
-        switch (true) {
-            case $this->storage->contains($entity):
-                return $this->storage->offsetGet($entity);
-            case $this->priorityEnabled && $this->priorityStorage->contains($entity):
-                return $this->priorityStorage->offsetGet($entity);
-            case $this->trash !== null && $this->trash->contains($entity):
-                return $this->trash->offsetGet($entity);
-        }
-        return null;
+        return match (true) {
+            $this->storage->contains($entity) => $this->storage->offsetGet($entity),
+            $this->priorityEnabled && $this->priorityStorage->contains($entity) => $this->priorityStorage->offsetGet($entity),
+            $this->trash !== null && $this->trash->contains($entity) => $this->trash->offsetGet($entity),
+            default => null,
+        };
     }
 
     /**

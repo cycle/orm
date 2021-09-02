@@ -49,7 +49,7 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
 
         $related = $tuple->state->getRelation($this->getName());
 
-        if (count($related) === 0) {
+        if (\count($related) === 0) {
             return;
         }
 

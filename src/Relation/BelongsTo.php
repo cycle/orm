@@ -140,7 +140,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
     private function shouldPull(Tuple $tuple, Tuple $rTuple): bool
     {
-        if ($rTuple->status <= Tuple::STATUS_PROPOSED || count(array_intersect($this->outerKeys, $rTuple->state->getWaitingFields())) > 0) {
+        if ($rTuple->status <= Tuple::STATUS_PROPOSED || \count(array_intersect($this->outerKeys, $rTuple->state->getWaitingFields())) > 0) {
             return false;
         }
         // Check bidirected relation: when related entity has been removed from HasSome relation

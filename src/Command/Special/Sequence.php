@@ -76,7 +76,7 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
 
     public function count(): int
     {
-        return count($this->commands);
+        return \count($this->commands);
     }
 
     public function execute(): void

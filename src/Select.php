@@ -132,17 +132,17 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function wherePK(string|int|array|Parameter ...$ids): self
     {
         $pk = $this->loader->getPK();
-        $pk = is_array($pk) && count($pk) > 1 ? $pk : ((array)$pk)[0];
+        $pk = is_array($pk) && \count($pk) > 1 ? $pk : ((array)$pk)[0];
         # todo: support assoc ids [key1 => value1, ...]
-        if (is_array($pk) && count($pk) > 1) {
+        if (is_array($pk) && \count($pk) > 1) {
             $assoc = [];
             foreach ($ids as $id) {
                 $id = $id instanceof Parameter ? $id->getValue() : $id;
                 if (!is_array($id)) {
                     throw new InvalidArgumentException('Composite primary key must be defined using an array.');
                 }
-                if (count($pk) !== count($id)) {
-                    throw new InvalidArgumentException(sprintf('Primary key should contain %d values.', count($pk)));
+                if (\count($pk) !== \count($id)) {
+                    throw new InvalidArgumentException(sprintf('Primary key should contain %d values.', \count($pk)));
                 }
 
                 $values = array_values($id);
@@ -161,7 +161,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             }]);
             return $this;
         }
-        return count($ids) > 1
+        return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
             : $this->__call('where', [$pk, current($ids)]);
     }

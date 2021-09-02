@@ -93,6 +93,6 @@ class PivotedStorage implements \IteratorAggregate, \Countable
 
     public function count(): int
     {
-        return count($this->elements);
+        return \count($this->elements);
     }
 }

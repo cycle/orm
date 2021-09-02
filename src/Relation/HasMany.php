@@ -43,7 +43,7 @@ class HasMany extends AbstractRelation
             $this->deleteChild($pool, $item);
         }
 
-        if (count($related) === 0) {
+        if (\count($related) === 0) {
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }

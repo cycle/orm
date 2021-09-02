@@ -47,7 +47,7 @@ final class QueryBuilder
      */
     public function __call(string $func, array $args)
     {
-        $result = call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
+        $result = \call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
         if ($result === $this->query) {
             return $this;
         }
@@ -247,7 +247,7 @@ final class QueryBuilder
                 }
             }
 
-            call_user_func_array($func, [&$k, &$v]);
+            \call_user_func_array($func, [&$k, &$v]);
             $result[$k] = $v;
         }
 

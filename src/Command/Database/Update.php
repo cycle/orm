@@ -93,7 +93,7 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
                 )
                 ->run();
         }
-        $this->state->updateTransactionData($fields !== [] && count($fields) === count($allChanges) ? null : $fields);
+        $this->state->updateTransactionData($fields !== [] && \count($fields) === \count($allChanges) ? null : $fields);
 
         parent::execute();
     }

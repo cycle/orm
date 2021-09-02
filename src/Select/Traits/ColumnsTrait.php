@@ -52,7 +52,7 @@ trait ColumnsTrait
 
             if ($minify) {
                 //Let's use column number instead of full name
-                $column = 'c' . count($columns);
+                $column = 'c' . \count($columns);
             }
 
             $columns[] = "{$alias}.{$external} AS {$prefix}{$column}";

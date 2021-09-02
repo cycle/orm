@@ -65,7 +65,7 @@ class HasOneLoader extends JoinableLoader
                 (array)$this->schema[Relation::OUTER_KEY]
             );
 
-            if (count($fields) === 1) {
+            if (\count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
             } else {
                 $query->andWhere(

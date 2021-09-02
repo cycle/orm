@@ -192,7 +192,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 $this->options['load']->apply($this->makeQueryBuilder($query));
             }
 
-            if (is_callable($this->options['load'], true)) {
+            if (\is_callable($this->options['load'], true)) {
                 ($this->options['load'])($this->makeQueryBuilder($query));
             }
         }

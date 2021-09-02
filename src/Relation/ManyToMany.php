@@ -82,7 +82,7 @@ class ManyToMany extends Relation\AbstractRelation
             }
         }
 
-        if ($this->mirrorRelation === null && count($related) === 0) {
+        if ($this->mirrorRelation === null && \count($related) === 0) {
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
@@ -176,7 +176,7 @@ class ManyToMany extends Relation\AbstractRelation
     public function extractRelated(?iterable $data, PivotedStorage $original): PivotedStorage
     {
         $related = $this->extract($data);
-        if ($data instanceof PivotedStorage || $data instanceof PivotedCollectionInterface || count($original) === 0) {
+        if ($data instanceof PivotedStorage || $data instanceof PivotedCollectionInterface || \count($original) === 0) {
             return $related;
         }
         foreach ($related as $item) {

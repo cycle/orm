@@ -117,17 +117,17 @@ final class RelationMap
 
     public function hasDependencies(): bool
     {
-        return count($this->dependencies) > 0;
+        return $this->dependencies !== [];
     }
 
     public function hasSlaves(): bool
     {
-        return count($this->slaves) > 0;
+        return $this->slaves !== [];
     }
 
     public function hasEmbedded(): bool
     {
-        return count($this->embedded) > 0;
+        return $this->embedded !== [];
     }
 
     /**

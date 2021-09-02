@@ -147,7 +147,7 @@ abstract class AbstractNode
              *
              * This means offset has to be calculated using all nested nodes
              */
-            $innerColumns = $node->parseRow(count($this->columns) + $offset, $row);
+            $innerColumns = $node->parseRow(\count($this->columns) + $offset, $row);
 
             //Counting next selection offset
             $offset += $innerColumns;
@@ -156,7 +156,7 @@ abstract class AbstractNode
             $innerOffset += $innerColumns;
         }
 
-        return count($this->columns) + $innerOffset;
+        return \count($this->columns) + $innerOffset;
     }
 
     /**
@@ -368,7 +368,7 @@ abstract class AbstractNode
             //Combine column names with sliced piece of row
             $result = array_combine(
                 $this->columns,
-                array_slice($line, $dataOffset, count($this->columns))
+                \array_slice($line, $dataOffset, \count($this->columns))
             );
 
             if ($this->typecast !== null) {

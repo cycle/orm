@@ -233,7 +233,7 @@ final class ORM implements ORMInterface
 
     public function promise(string $role, array $scope): object
     {
-        if (count($scope) === 1) {
+        if (\count($scope) === 1) {
             $e = $this->heap->find($role, $scope);
             if ($e !== null) {
                 return $e;

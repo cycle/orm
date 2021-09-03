@@ -13,28 +13,39 @@ use PHPUnit\Framework\TestCase;
 class HeapTest extends TestCase
 {
     protected const
-        INDEX_FIELDS_1 = 'id',
-        INDEX_VALUES_1_1 = 42,
-        INDEX_VALUES_1_2 = 24,
-        INDEX_FIND_1_1 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1],
-        INDEX_FIND_1_2 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2],
-        INDEX_FIND_1_BAD = [self::INDEX_FIELDS_1 => 404],
-
-        INDEX_FIELDS_2 = 'email',
-        INDEX_VALUES_2_1 = 'mail1@spiral',
-        INDEX_VALUES_2_2 = 'mail2@spiral',
-        INDEX_FIND_2_1 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1],
-        INDEX_FIND_2_2 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2],
-        INDEX_FIND_2_BAD = [self::INDEX_FIELDS_2 => 505],
-
+        INDEX_FIELDS_1 = 'id';
+    protected const
+        INDEX_VALUES_1_1 = 42;
+    protected const
+        INDEX_VALUES_1_2 = 24;
+    protected const
+        INDEX_FIND_1_1 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1];
+    protected const
+        INDEX_FIND_1_2 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2];
+    protected const
+        INDEX_FIND_1_BAD = [self::INDEX_FIELDS_1 => 404];
+    protected const
+        INDEX_FIELDS_2 = 'email';
+    protected const
+        INDEX_VALUES_2_1 = 'mail1@spiral';
+    protected const
+        INDEX_VALUES_2_2 = 'mail2@spiral';
+    protected const
+        INDEX_FIND_2_1 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1];
+    protected const
+        INDEX_FIND_2_2 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2];
+    protected const
+        INDEX_FIND_2_BAD = [self::INDEX_FIELDS_2 => 505];
+    protected const
         ENTITY_SET_1 = [
-        self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1,
-        self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1,
-    ],
+            self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1,
+            self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1,
+        ];
+    protected const
         ENTITY_SET_2 = [
-        self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2,
-        self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
-    ];
+            self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2,
+            self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
+        ];
 
     public function testAttachAndFind(): void
     {
@@ -66,7 +77,7 @@ class HeapTest extends TestCase
         $this->assertTrue($heap->has($entity1));
         $this->assertTrue($heap->has($entity2));
 
-        # Now detach it
+        // Now detach it
         $heap->detach($entity1);
         $heap->detach($entity2);
 
@@ -100,7 +111,7 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [self::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [self::INDEX_FIELDS_1]);
 
-        # Now detach it
+        // Now detach it
         $heap->clean();
 
         $this->assertNull($heap->find('user', self::INDEX_FIND_1_1));

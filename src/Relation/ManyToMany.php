@@ -20,7 +20,6 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\Collection\CollectionPromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Relation\Pivoted;
 use Doctrine\Common\Collections\Collection;
 
 class ManyToMany extends Relation\AbstractRelation
@@ -69,7 +68,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         return [
             new Pivoted\PivotedCollection($elements, $pivotData),
-            new Pivoted\PivotedStorage($elements, $pivotData)
+            new Pivoted\PivotedStorage($elements, $pivotData),
         ];
     }
 
@@ -159,6 +158,7 @@ class ManyToMany extends Relation\AbstractRelation
      * @param object $related
      * @param object $pivot
      * @param Pivoted\PivotedStorage $storage
+     *
      * @return CommandInterface
      */
     protected function link(Node $node, $related, $pivot, Pivoted\PivotedStorage $storage): CommandInterface
@@ -210,6 +210,7 @@ class ManyToMany extends Relation\AbstractRelation
      * @param Node $node
      * @param object $related
      * @param mixed $pivot
+     *
      * @return mixed|object|null
      */
     protected function initPivot(Node $node, $related, $pivot)
@@ -232,6 +233,7 @@ class ManyToMany extends Relation\AbstractRelation
      *
      * @param Node $node
      * @param Node $related
+     *
      * @return Node[]
      */
     protected function sortRelation(Node $node, Node $related): array

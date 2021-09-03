@@ -34,6 +34,7 @@ class HasMany extends AbstractRelation
      *
      * @param Node  $node
      * @param array $data
+     *
      * @return array
      */
     public function init(Node $node, array $data): array
@@ -50,6 +51,7 @@ class HasMany extends AbstractRelation
      * Convert entity data into array.
      *
      * @param mixed $data
+     *
      * @return array|PromiseInterface
      */
     public function extract($data)
@@ -79,7 +81,7 @@ class HasMany extends AbstractRelation
             $this->orm,
             $this->target,
             [
-                $this->outerKey => $innerKey
+                $this->outerKey => $innerKey,
             ],
             $this->schema[Relation::WHERE] ?? []
         );
@@ -118,6 +120,7 @@ class HasMany extends AbstractRelation
      *
      * @param array $related
      * @param array $original
+     *
      * @return array
      */
     protected function calcDeleted(array $related, array $original)
@@ -132,6 +135,7 @@ class HasMany extends AbstractRelation
      *
      * @param Node   $node
      * @param object $related
+     *
      * @return CC
      */
     protected function queueStore(Node $node, $related): CC
@@ -155,6 +159,7 @@ class HasMany extends AbstractRelation
      * Remove one of related objects.
      *
      * @param object $related
+     *
      * @return CommandInterface
      */
     protected function queueDelete($related): CommandInterface

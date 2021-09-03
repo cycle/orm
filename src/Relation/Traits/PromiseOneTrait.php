@@ -34,6 +34,7 @@ trait PromiseOneTrait
      *
      * @param Node   $node
      * @param string $key
+     *
      * @return mixed|null
      */
     abstract protected function fetchKey(?Node $node, string $key);

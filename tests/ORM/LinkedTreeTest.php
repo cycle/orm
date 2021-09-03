@@ -31,9 +31,9 @@ abstract class LinkedTreeTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -45,10 +45,10 @@ abstract class LinkedTreeTest extends BaseTest
         );
 
         $this->makeTable('nested', [
-            'id'       => 'primary',
-            'user_id'  => 'integer',
+            'id' => 'primary',
+            'user_id' => 'integer',
             'owner_id' => 'integer',
-            'label'    => 'string'
+            'label' => 'string',
         ]);
 
         $this->makeFK('nested', 'user_id', 'user', 'id');
@@ -61,45 +61,45 @@ abstract class LinkedTreeTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class   => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'nested' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Nested::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
                     ],
-                    'owned'  => [
-                        Relation::TYPE   => Relation::HAS_ONE,
+                    'owned' => [
+                        Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Nested::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'owner_id',
                         ],
                     ],
-                ]
+                ],
             ],
             Nested::class => [
-                Schema::ROLE        => 'nested',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'nested',
+                Schema::ROLE => 'nested',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'nested',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'owner_id', 'label'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'owner_id', 'label'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 
@@ -110,27 +110,27 @@ abstract class LinkedTreeTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
-                'nested'  => [
-                    'id'       => 1,
-                    'user_id'  => 1,
+                'nested' => [
+                    'id' => 1,
+                    'user_id' => 1,
                     'owner_id' => 2,
-                    'label'    => 'nested-label',
+                    'label' => 'nested-label',
                 ],
-                'owned'   => null,
+                'owned' => null,
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
-                'nested'  => null,
-                'owned'   => [
-                    'id'       => 1,
-                    'user_id'  => 1,
+                'nested' => null,
+                'owned' => [
+                    'id' => 1,
+                    'user_id' => 1,
                     'owner_id' => 2,
-                    'label'    => 'nested-label',
+                    'label' => 'nested-label',
                 ],
             ],
         ], $selector->fetchData());
@@ -165,27 +165,27 @@ abstract class LinkedTreeTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 3,
-                'email'   => 'u1@email.com',
+                'id' => 3,
+                'email' => 'u1@email.com',
                 'balance' => 900.0,
-                'nested'  => [
-                    'id'       => 2,
-                    'user_id'  => 3,
+                'nested' => [
+                    'id' => 2,
+                    'user_id' => 3,
                     'owner_id' => 4,
-                    'label'    => 'nested to u1 and u2',
+                    'label' => 'nested to u1 and u2',
                 ],
-                'owned'   => null,
+                'owned' => null,
             ],
             [
-                'id'      => 4,
-                'email'   => 'u2@email.com',
+                'id' => 4,
+                'email' => 'u2@email.com',
                 'balance' => 100.0,
-                'nested'  => null,
-                'owned'   => [
-                    'id'       => 2,
-                    'user_id'  => 3,
+                'nested' => null,
+                'owned' => [
+                    'id' => 2,
+                    'user_id' => 3,
                     'owner_id' => 4,
-                    'label'    => 'nested to u1 and u2',
+                    'label' => 'nested to u1 and u2',
                 ],
             ],
         ], $selector->fetchData());

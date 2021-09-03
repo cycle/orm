@@ -29,8 +29,8 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
 
         $this->makeTable('user', [
             'user_pk' => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -42,9 +42,9 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
         );
 
         $this->makeTable('profile', [
-            'profile_pk'    => 'primary',
+            'profile_pk' => 'primary',
             'user_id_field' => 'integer',
-            'image'         => 'string'
+            'image' => 'string',
         ]);
 
         $this->getDatabase()->table('profile')->insertMultiple(
@@ -57,9 +57,9 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
         );
 
         $this->makeTable('nested', [
-            'nested_pk'        => 'primary',
+            'nested_pk' => 'primary',
             'profile_id_field' => 'integer',
-            'label'            => 'string'
+            'label' => 'string',
         ]);
 
         $this->getDatabase()->table('nested')->insertMultiple(
@@ -78,56 +78,56 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
     private function getSchemaDefinition(): array
     {
         return [
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'user_pk', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id' => 'user_pk', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             Profile::class => [
-                Schema::ROLE        => 'profile',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'profile',
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'profile_pk', 'user_id' => 'user_id_field', 'image'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id' => 'profile_pk', 'user_id' => 'user_id_field', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'user' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
-            Nested::class  => [
-                Schema::ROLE        => 'nested',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'nested',
+            Nested::class => [
+                Schema::ROLE => 'nested',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'nested',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'nested_pk', 'profile_id' => 'profile_id_field', 'label'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id' => 'nested_pk', 'profile_id' => 'profile_id_field', 'label'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'profile' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'profile_id',
                             Relation::OUTER_KEY => 'id',
                         ],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -138,9 +138,9 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
         $this->orm = $this->withSchema(new Schema($schema));
 
         $this->makeTable('profile', [
-            'profile_pk'    => 'primary',
+            'profile_pk' => 'primary',
             'user_id_field' => 'integer,nullable',
-            'image'         => 'string'
+            'image' => 'string',
         ]);
 
         $s = new Select($this->orm, Profile::class);

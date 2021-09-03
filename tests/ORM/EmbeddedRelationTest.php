@@ -31,9 +31,9 @@ abstract class EmbeddedRelationTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'             => 'primary',
-            'email'          => 'string',
-            'balance'        => 'float',
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
             'creds_username' => 'string',
             'creds_password' => 'string',
         ]);
@@ -47,37 +47,37 @@ abstract class EmbeddedRelationTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class            => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'credentials' => [
-                        Relation::TYPE   => Relation::EMBEDDED,
+                        Relation::TYPE => Relation::EMBEDDED,
                         Relation::TARGET => 'user:credentials',
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [],
                     ],
-                ]
+                ],
             ],
             UserCredentials::class => [
-                Schema::ROLE        => 'user:credentials',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user:credentials',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => [
-                    'id'       => 'id',
+                Schema::COLUMNS => [
+                    'id' => 'id',
                     'username' => 'creds_username',
                     'password' => 'creds_password',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 
@@ -88,23 +88,23 @@ abstract class EmbeddedRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'          => 1,
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'credentials' => [
                     'username' => 'user1',
                     'password' => 'pass1',
-                ]
+                ],
             ],
             [
-                'id'          => 2,
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'credentials' => [
                     'username' => 'user2',
                     'password' => 'pass2',
-                ]
-            ]
+                ],
+            ],
         ], $selector->fetchData());
     }
 
@@ -176,11 +176,11 @@ abstract class EmbeddedRelationTest extends BaseTest
         // make sure no other fields are updated
         $this->dbal->database()->table('user')->update(
             [
-                'balance'        => 800,
+                'balance' => 800,
                 'creds_username' => 'altered',
             ],
             [
-                'id' => $u->id
+                'id' => $u->id,
             ]
         )->run();
 

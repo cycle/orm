@@ -22,9 +22,6 @@ use Cycle\ORM\Heap\Node;
  */
 final class CommandGenerator
 {
-    /**
-     * @inheritdoc
-     */
     public function generateStore(MapperInterface $mapper, $entity, Node $node): ContextCarrierInterface
     {
         $state = $node->getState();
@@ -53,9 +50,7 @@ final class CommandGenerator
         return $split;
     }
 
-    /**
-     * @inheritdoc
-     */
+
     public function generateDelete(MapperInterface $mapper, $entity, Node $node): CommandInterface
     {
         // currently we rely on db to delete all nested records (or soft deletes)

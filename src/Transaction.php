@@ -202,6 +202,7 @@ final class Transaction implements TransactionInterface
      * as generated value and delayed commands as the key.
      *
      * @param iterable $commands
+     *
      * @return \Generator
      */
     protected function sort(iterable $commands): \Generator
@@ -226,6 +227,7 @@ final class Transaction implements TransactionInterface
 
     /**
      * @param array $commands
+     *
      * @return string
      */
     private function listCommands(array $commands): string
@@ -240,13 +242,14 @@ final class Transaction implements TransactionInterface
             }
         }
 
-        return join(', ', $errors);
+        return implode(', ', $errors);
     }
 
     /**
      * Indexable node fields.
      *
      * @param string $role
+     *
      * @return array
      */
     private function getIndexes(string $role): array

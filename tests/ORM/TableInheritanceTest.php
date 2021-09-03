@@ -29,11 +29,11 @@ abstract class TableInheritanceTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'          => 'primary',
-            '_type'       => 'string,nullable',
-            'email'       => 'string',
-            'balance'     => 'float',
-            'permissions' => 'string,nullable'
+            'id' => 'primary',
+            '_type' => 'string,nullable',
+            'email' => 'string',
+            'balance' => 'float',
+            'permissions' => 'string,nullable',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -46,20 +46,20 @@ abstract class TableInheritanceTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class  => [
-                Schema::ROLE        => 'user',
-                Schema::CHILDREN    => [
-                    'admin' => Admin::class
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::CHILDREN => [
+                    'admin' => Admin::class,
                 ],
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', '_type', 'email', 'balance', 'permissions'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', '_type', 'email', 'balance', 'permissions'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
-            Admin::class => [Schema::ROLE => User::class]
+            Admin::class => [Schema::ROLE => User::class],
         ]));
     }
 
@@ -69,27 +69,26 @@ abstract class TableInheritanceTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'          => 1,
-                '_type'       => 'user',
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
-                'permissions' => ''
+                'id' => 1,
+                '_type' => 'user',
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'permissions' => '',
             ],
             [
-                'id'          => 2,
-                '_type'       => 'admin',
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
-                'permissions' => '*'
+                'id' => 2,
+                '_type' => 'admin',
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'permissions' => '*',
             ],
             [
-                'id'          => 3,
-                '_type'       => null,
-                'email'       => 'third@world.com',
-                'balance'     => 300.0,
-                'permissions' => ''
+                'id' => 3,
+                '_type' => null,
+                'email' => 'third@world.com',
+                'balance' => 300.0,
+                'permissions' => '',
             ],
-
         ], $selector->fetchData());
     }
 

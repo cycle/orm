@@ -48,9 +48,10 @@ interface RelationInterface
      *
      * @param Node       $node Parent node.
      * @param array|null $data
-     * @return array
      *
      * @throws RelationException
+     *
+     * @return array
      */
     public function init(Node $node, array $data): array;
 
@@ -58,9 +59,10 @@ interface RelationInterface
      * Extract the related values from the entity field value.
      *
      * @param mixed $value
-     * @return mixed
      *
      * @throws RelationException
+     *
+     * @return mixed
      */
     public function extract($value);
 
@@ -68,9 +70,10 @@ interface RelationInterface
      * Returns tuple of [promise to insert into entity, promise to store as relation context].
      *
      * @param Node $node
-     * @return array
      *
      * @throws RelationException
+     *
+     * @return array
      */
     public function initPromise(Node $node): array;
 
@@ -82,9 +85,10 @@ interface RelationInterface
      * @param Node   $node
      * @param object $related
      * @param object $original
-     * @return CommandInterface
      *
      * @throws RelationException
+     *
+     * @return CommandInterface
      */
     public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface;
 }

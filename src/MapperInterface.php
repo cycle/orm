@@ -34,6 +34,7 @@ interface MapperInterface
      * return tuple [entity, entityData].
      *
      * @param array $data
+     *
      * @return array
      */
     public function init(array $data): array;
@@ -43,9 +44,10 @@ interface MapperInterface
      *
      * @param object $entity
      * @param array  $data
-     * @return object
      *
      * @throws MapperException
+     *
+     * @return object
      */
     public function hydrate($entity, array $data);
 
@@ -53,6 +55,7 @@ interface MapperInterface
      * Extract all values from the entity.
      *
      * @param object $entity
+     *
      * @return array
      */
     public function extract($entity): array;
@@ -63,9 +66,10 @@ interface MapperInterface
      * @param object $entity
      * @param Node   $node
      * @param State  $state
-     * @return ContextCarrierInterface
      *
      * @throws MapperException
+     *
+     * @return ContextCarrierInterface
      */
     public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface;
 
@@ -75,9 +79,10 @@ interface MapperInterface
      * @param object $entity
      * @param Node   $node
      * @param State  $state
-     * @return ContextCarrierInterface
      *
      * @throws MapperException
+     *
+     * @return ContextCarrierInterface
      */
     public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface;
 
@@ -87,9 +92,10 @@ interface MapperInterface
      * @param object $entity
      * @param Node   $node
      * @param State  $state
-     * @return CommandInterface
      *
      * @throws MapperException
+     *
+     * @return CommandInterface
      */
     public function queueDelete($entity, Node $node, State $state): CommandInterface;
 }

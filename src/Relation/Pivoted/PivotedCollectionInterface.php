@@ -22,6 +22,7 @@ interface PivotedCollectionInterface extends Collection
      * Return true if element has pivot data associated (can be null).
      *
      * @param object $element
+     *
      * @return bool
      */
     public function hasPivot($element): bool;
@@ -30,6 +31,7 @@ interface PivotedCollectionInterface extends Collection
      * Return pivot data associated with element or null.
      *
      * @param object $element
+     *
      * @return mixed|null
      */
     public function getPivot($element);

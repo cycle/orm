@@ -34,9 +34,9 @@ abstract class HasManyPromiseTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -48,9 +48,9 @@ abstract class HasManyPromiseTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'message' => 'string'
+            'message' => 'string',
         ]);
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
@@ -65,39 +65,38 @@ abstract class HasManyPromiseTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id'
+                            Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::CONSTRAIN => SortByIDConstrain::class,
+            ],
         ]));
     }
 
@@ -108,31 +107,31 @@ abstract class HasManyPromiseTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
         ], $selector->fetchData());
@@ -191,7 +190,7 @@ abstract class HasManyPromiseTest extends BaseTest
 
         /** @var PromiseInterface $p */
         $this->assertEquals([
-            'user_id' => 1
+            'user_id' => 1,
         ], $p->__scope());
     }
 
@@ -334,7 +333,7 @@ abstract class HasManyPromiseTest extends BaseTest
          */
         [$a, $b] = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
-            'as'     => 'comment'
+            'as' => 'comment',
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->comments);

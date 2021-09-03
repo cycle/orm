@@ -90,14 +90,15 @@ final class ORM implements ORMInterface
     public function __debugInfo()
     {
         return [
-            'schema' => $this->schema
+            'schema' => $this->schema,
         ];
     }
 
     /**
      * Automatically resolve role based on object name or instance.
      *
-     * @param string|object $entity
+     * @param object|string $entity
+     *
      * @return string
      */
     public function resolveRole($entity): string
@@ -287,6 +288,7 @@ final class ORM implements ORMInterface
      * Overlay existing promise factory.
      *
      * @param PromiseFactoryInterface $promiseFactory
+     *
      * @return ORM
      */
     public function withPromiseFactory(PromiseFactoryInterface $promiseFactory = null): self
@@ -382,6 +384,7 @@ final class ORM implements ORMInterface
      * Get list of keys entity must be indexed in a Heap by.
      *
      * @param string $role
+     *
      * @return array
      */
     protected function getIndexes(string $role): array
@@ -400,6 +403,7 @@ final class ORM implements ORMInterface
      * Get relation map associated with the given class.
      *
      * @param string $entity
+     *
      * @return RelationMap
      */
     protected function getRelationMap($entity): RelationMap

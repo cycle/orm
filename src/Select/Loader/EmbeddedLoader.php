@@ -39,8 +39,8 @@ final class EmbeddedLoader implements JoinableInterface
 
     /** @var array */
     private $options = [
-        'load'   => false,
-        'minify' => true
+        'load' => false,
+        'minify' => true,
     ];
 
     /** @var array */
@@ -67,7 +67,7 @@ final class EmbeddedLoader implements JoinableInterface
     /**
      * Destruct loader.
      */
-    final public function __destruct()
+    public function __destruct()
     {
         $this->parent = null;
     }
@@ -182,6 +182,7 @@ final class EmbeddedLoader implements JoinableInterface
      * Define schema option associated with the entity.
      *
      * @param int $property
+     *
      * @return mixed
      */
     protected function define(int $property)

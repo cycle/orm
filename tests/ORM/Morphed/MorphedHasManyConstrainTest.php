@@ -33,9 +33,9 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -47,10 +47,10 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         );
 
         $this->makeTable('post', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,nullable',
-            'title'   => 'string',
-            'content' => 'string'
+            'title' => 'string',
+            'content' => 'string',
         ]);
 
         $this->getDatabase()->table('post')->insertMultiple(
@@ -64,11 +64,11 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id'          => 'primary',
-            'parent_id'   => 'integer',
+            'id' => 'primary',
+            'parent_id' => 'integer',
             'parent_type' => 'string',
-            'level'       => 'int',
-            'message'     => 'string'
+            'level' => 'int',
+            'message' => 'string',
         ]);
 
         $this->getDatabase()->table('comment')->insertMultiple(
@@ -183,7 +183,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->fetchAll();
 
         $this->assertCount(4, $a->comments);
@@ -206,7 +206,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->comments);
@@ -229,7 +229,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('post.id', 'ASC')->fetchAll();
 
         $this->assertCount(4, $a->comments);
@@ -252,7 +252,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('post.id', 'ASC')->fetchAll();
 
         $this->assertCount(4, $a->comments);
@@ -293,7 +293,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -312,7 +312,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
@@ -352,7 +352,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
@@ -371,7 +371,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
@@ -392,7 +392,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -411,11 +411,11 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->fetchAll();
 
         $this->assertCount(3, $a->comments);
@@ -428,12 +428,11 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-
     public function testOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
@@ -452,12 +451,12 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         // overwrites default one
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
-            'where' => ['@.level' => 1]
+            'where' => ['@.level' => 1],
         ])->fetchAll();
 
         $this->assertCount(1, $a->comments);
@@ -471,13 +470,13 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
-            Relation::WHERE   => ['@.level' => ['>=' => 2]]
+            Relation::WHERE => ['@.level' => ['>=' => 2]],
         ]);
 
         // overwrites default one
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->load('comments', [
-            'where'  => ['@.level' => 1],
-            'method' => Select\JoinableLoader::INLOAD
+            'where' => ['@.level' => 1],
+            'method' => Select\JoinableLoader::INLOAD,
         ])->fetchAll();
 
         $this->assertCount(1, $a->comments);
@@ -490,7 +489,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testWithWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE => ['@.level' => 4]
+            Relation::WHERE => ['@.level' => 4],
         ]);
 
         // second user has been filtered out
@@ -503,12 +502,12 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE => ['@.level' => 4]
+            Relation::WHERE => ['@.level' => 4],
         ]);
 
         // second user has been filtered out
         $res = (new Select($this->orm, User::class))->with('comments', [
-            'where' => ['@.level' => 1]
+            'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(2, $res);
@@ -546,13 +545,13 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
     public function testInloadWithOrderAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE   => ['@.level' => ['>=' => 3]],
+            Relation::WHERE => ['@.level' => ['>=' => 3]],
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
         $res = (new Select($this->orm, User::class))->load('comments', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
         $this->assertCount(2, $res);
@@ -572,7 +571,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         $this->expectException(StatementException::class);
 
         $this->orm = $this->withCommentsSchema([
-            Relation::WHERE   => ['@.level' => ['>=' => 3]],
+            Relation::WHERE => ['@.level' => ['>=' => 3]],
             Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'DESC']),
         ]);
 
@@ -596,61 +595,61 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
         }
 
         return $this->orm->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                                Relation::CASCADE   => true,
-                                Relation::INNER_KEY => 'id',
-                                Relation::OUTER_KEY => 'parent_id',
-                                Relation::MORPH_KEY => 'parent_type',
-                            ] + $rSchema,
-                    ]
-                ],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-            ],
-            Post::class    => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
-                    'comments' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
-                        Relation::SCHEMA => [
-                                Relation::CASCADE   => true,
-                                Relation::INNER_KEY => 'id',
-                                Relation::OUTER_KEY => 'parent_id',
-                                Relation::MORPH_KEY => 'parent_type',
-                            ] + $rSchema,
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type',
+                        ] + $rSchema,
                     ],
-                ]
+                ],
+                Schema::CONSTRAIN => SortByIDConstrain::class,
+            ],
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type',
+                        ] + $rSchema,
+                    ],
+                ],
             ],
             Comment::class => [
-                    Schema::ROLE        => 'comment',
-                    Schema::MAPPER      => Mapper::class,
-                    Schema::DATABASE    => 'default',
-                    Schema::TABLE       => 'comment',
-                    Schema::PRIMARY_KEY => 'id',
-                    Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'message', 'level'],
-                    Schema::SCHEMA      => [],
-                    Schema::RELATIONS   => []
-                ] + $eSchema
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'message', 'level'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ] + $eSchema,
         ]));
     }
 }

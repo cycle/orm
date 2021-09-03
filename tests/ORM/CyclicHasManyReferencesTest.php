@@ -31,90 +31,90 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'         => 'primary',
-            'email'      => 'string',
+            'id' => 'primary',
+            'email' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ]);
 
         $this->makeTable('post', [
-            'id'              => 'primary',
-            'title'           => 'string',
-            'content'         => 'string',
+            'id' => 'primary',
+            'title' => 'string',
+            'content' => 'string',
             'last_comment_id' => 'integer,nullable',
-            'created_at'      => 'datetime',
-            'updated_at'      => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ]);
 
         $this->makeTable('comment', [
-            'id'         => 'primary',
-            'post_id'    => 'integer',
-            'user_id'    => 'integer',
-            'message'    => 'string',
+            'id' => 'primary',
+            'post_id' => 'integer',
+            'user_id' => 'integer',
+            'message' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ]);
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => TimestampedMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => TimestampedMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'created_at', 'updated_at'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'email', 'created_at', 'updated_at'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => TimestampedMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => TimestampedMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'post_id', 'message', 'created_at', 'updated_at'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'post_id', 'message', 'created_at', 'updated_at'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'user' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
                     ],
-                ]
+                ],
             ],
-            Post::class    => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => TimestampedMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => TimestampedMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'title', 'content', 'last_comment_id', 'created_at', 'updated_at'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'title', 'content', 'last_comment_id', 'created_at', 'updated_at'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'lastComment' => [
-                        Relation::TYPE   => Relation::REFERS_TO,
+                        Relation::TYPE => Relation::REFERS_TO,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'last_comment_id',
                             Relation::OUTER_KEY => 'id',
-                            Relation::NULLABLE  => true
+                            Relation::NULLABLE => true,
                         ],
                     ],
-                    'comments'    => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'post_id',
                         ],
                     ],
-                ]
+                ],
             ],
         ]));
     }

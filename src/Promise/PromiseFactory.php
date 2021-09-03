@@ -23,6 +23,7 @@ final class PromiseFactory implements PromiseFactoryInterface
      * @param ORMInterface $orm
      * @param string       $target
      * @param array        $scope
+     *
      * @return PromiseInterface
      */
     public function promise(ORMInterface $orm, string $target, array $scope): PromiseInterface

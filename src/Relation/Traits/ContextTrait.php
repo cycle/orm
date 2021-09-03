@@ -22,7 +22,6 @@ use Cycle\ORM\Heap\Node;
  */
 trait ContextTrait
 {
-
     /**
      * True if given relation is not required for the object to be saved (i.e. NULL).
      *
@@ -36,8 +35,9 @@ trait ContextTrait
      * @param Node      $from
      * @param string    $fromKey
      * @param CC        $carrier
-     * @param null|Node $to
+     * @param Node|null $to
      * @param string    $toKey
+     *
      * @return CC
      */
     protected function forwardContext(Node $from, string $fromKey, CC $carrier, Node $to, string $toKey): CC
@@ -69,6 +69,7 @@ trait ContextTrait
      * @param string $fromKey
      * @param CS     $carrier
      * @param string $toKey
+     *
      * @return CS
      */
     protected function forwardScope(Node $from, string $fromKey, CS $carrier, string $toKey): CS
@@ -86,6 +87,7 @@ trait ContextTrait
      *
      * @param Node   $node
      * @param string $key
+     *
      * @return mixed|null
      */
     protected function fetchKey(?Node $node, string $key)
@@ -102,6 +104,7 @@ trait ContextTrait
      *
      * @param Node   $node
      * @param string $field
+     *
      * @return string
      */
     abstract protected function columnName(Node $node, string $field): string;

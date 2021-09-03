@@ -23,6 +23,7 @@ trait NodeTrait
      *
      * @param object $entity
      * @param int    $claim
+     *
      * @return Node|null
      */
     protected function getNode($entity, int $claim = 0): ?Node

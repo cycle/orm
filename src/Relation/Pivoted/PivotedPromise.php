@@ -39,7 +39,7 @@ final class PivotedPromise implements PromiseInterface
     /** @var mixed */
     private $innerKey;
 
-    /** @var null|PivotedStorage */
+    /** @var PivotedStorage|null */
     private $resolved;
 
     /**
@@ -78,7 +78,7 @@ final class PivotedPromise implements PromiseInterface
     public function __scope(): array
     {
         return [
-            $this->relationSchema[Relation::INNER_KEY] => $this->innerKey
+            $this->relationSchema[Relation::INNER_KEY] => $this->innerKey,
         ];
     }
 
@@ -113,9 +113,9 @@ final class PivotedPromise implements PromiseInterface
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'scope'  => $this->orm->getSource($this->target)->getConstrain(),
-            'as'     => $this->target,
-            'method' => JoinableLoader::POSTLOAD
+            'scope' => $this->orm->getSource($this->target)->getConstrain(),
+            'as' => $this->target,
+            'method' => JoinableLoader::POSTLOAD,
         ]);
 
         $query = $loader->configureQuery($query, [$this->innerKey]);

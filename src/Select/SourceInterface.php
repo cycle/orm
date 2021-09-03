@@ -34,13 +34,16 @@ interface SourceInterface
 
     /**
      * @deprecated Will be renamed to `withScope` in the Cycle ORM v2.
+     *
      * @param ConstrainInterface|null $constrain
+     *
      * @return SourceInterface
      */
-    public function withConstrain(?ConstrainInterface $constrain): SourceInterface;
+    public function withConstrain(?ConstrainInterface $constrain): self;
 
     /**
      * @deprecated Will be renamed to `getScope` in the Cycle ORM v2.
+     *
      * @return ConstrainInterface|null
      */
     public function getConstrain(): ?ConstrainInterface;

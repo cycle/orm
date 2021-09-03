@@ -70,9 +70,9 @@ class UserPromise extends User implements PromiseInterface
      */
     public function __resolve()
     {
-        if (!is_null($this->orm)) {
+        if (null !== $this->orm) {
             // entity has already been loaded in memory
-            if (!is_null($e = $this->orm->getHeap()->find($this->target, $this->scope))) {
+            if (null !== ($e = $this->orm->getHeap()->find($this->target, $this->scope))) {
                 $this->orm = null;
                 return $this->resolved = $e;
             }

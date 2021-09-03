@@ -55,6 +55,7 @@ final class RelationMap
      *
      * @param Node  $node
      * @param array $data
+     *
      * @return array
      */
     public function init(Node $node, array $data): array
@@ -92,6 +93,7 @@ final class RelationMap
      * @param object $parentEntity
      * @param Node   $parentNode
      * @param array  $parentData
+     *
      * @return CC
      */
     public function queueRelations(CC $parentStore, $parentEntity, Node $parentNode, array $parentData): CC
@@ -160,6 +162,7 @@ final class RelationMap
      * @param RelationInterface $relation
      * @param mixed             $related
      * @param mixed             $original
+     *
      * @return CommandInterface|null
      */
     private function queueRelation(
@@ -198,6 +201,7 @@ final class RelationMap
      *
      * @param mixed $a
      * @param mixed $b
+     *
      * @return bool
      */
     private function sameReference($a, $b): bool

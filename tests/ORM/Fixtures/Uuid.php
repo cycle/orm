@@ -45,10 +45,11 @@ class Uuid implements ValueInterface
     }
 
     /**
-     * @return Uuid
      * @throws \Exception
+     *
+     * @return Uuid
      */
-    public static function create(): Uuid
+    public static function create(): self
     {
         $uuid = new static();
         $uuid->uuid = UuidBody::uuid4();
@@ -59,9 +60,10 @@ class Uuid implements ValueInterface
     /**
      * @param string            $value
      * @param DatabaseInterface $db
+     *
      * @return Uuid
      */
-    public static function parse($value, DatabaseInterface $db): Uuid
+    public static function parse($value, DatabaseInterface $db): self
     {
         if (is_resource($value)) {
             // postgres

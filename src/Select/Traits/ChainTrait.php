@@ -17,7 +17,6 @@ use Cycle\ORM\Select\LoaderInterface;
 
 trait ChainTrait
 {
-
     /**
      * @inheritdoc
      */
@@ -32,6 +31,7 @@ trait ChainTrait
      * Check if given relation points to the relation chain.
      *
      * @param string $relation
+     *
      * @return bool
      */
     protected function isChain(string $relation): bool
@@ -43,11 +43,12 @@ trait ChainTrait
      * @param string $chain
      * @param array  $options Final loader options.
      * @param bool   $join    See loadRelation().
-     * @return LoaderInterface
      *
      * @throws LoaderException When one of the elements can not be chained.
-     * @see joinRelation()
      *
+     * @return LoaderInterface
+     *
+     * @see joinRelation()
      * @see loadRelation()
      */
     protected function loadChain(string $chain, array $options, bool $join, bool $load): LoaderInterface

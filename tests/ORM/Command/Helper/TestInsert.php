@@ -70,7 +70,7 @@ class TestInsert extends DatabaseCommand implements InitCarrierInterface, Produc
      */
     public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
-        if ($fresh || !is_null($value)) {
+        if ($fresh || null !== $value) {
             $this->freeContext($key);
         }
 

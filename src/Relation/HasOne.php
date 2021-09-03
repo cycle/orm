@@ -79,6 +79,7 @@ class HasOne extends AbstractRelation
      * Delete original related entity of no other objects reference to it.
      *
      * @param object $original
+     *
      * @return CommandInterface
      */
     protected function deleteOriginal($original): CommandInterface

@@ -67,7 +67,7 @@ class ProfilePromise extends Profile implements PromiseInterface
      */
     public function __resolve()
     {
-        if (!is_null($this->orm)) {
+        if (null !== $this->orm) {
             $select = new Select($this->orm, $this->target);
             $data = $select->constrain(
                 $this->orm->getSource($this->target)->getConstrain()

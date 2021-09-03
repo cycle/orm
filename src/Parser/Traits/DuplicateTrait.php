@@ -38,6 +38,7 @@ trait DuplicateTrait
      *
      * @param array $data Reference to parsed record data, reference will be pointed to valid and
      *                    existed data segment if such data was already parsed.
+     *
      * @return bool Return true if data is unique.
      */
     final protected function deduplicate(array &$data): bool

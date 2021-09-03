@@ -21,7 +21,7 @@ class Cyclic
     /** @var Cyclic|null */
     public $other;
 
-    public function __construct(string $name = '', ?Cyclic $parent = null, ?Cyclic $other = null)
+    public function __construct(string $name = '', ?self $parent = null, ?self $other = null)
     {
         $this->name = $name;
         $this->cyclic = $parent;

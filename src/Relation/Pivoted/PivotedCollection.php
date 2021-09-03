@@ -66,6 +66,7 @@ final class PivotedCollection extends ArrayCollection implements PivotedCollecti
 
     /**
      * @param array $elements
+     *
      * @return PivotedCollection
      */
     protected function createFrom(array $elements)

@@ -18,6 +18,7 @@ trait AliasTrait
 
     /**
      * @param string $relation
+     *
      * @return string
      */
     private function resolvePath(string $relation): string

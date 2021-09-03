@@ -44,7 +44,7 @@ class HasOneLoader extends JoinableLoader
         'minify' => true,
         'as' => null,
         'using' => null,
-        'where' => null
+        'where' => null,
     ];
 
     /**

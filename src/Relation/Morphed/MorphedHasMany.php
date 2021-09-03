@@ -66,6 +66,7 @@ class MorphedHasMany extends HasMany
      *
      * @param Node   $node
      * @param object $related
+     *
      * @return ContextCarrierInterface
      */
     protected function queueStore(Node $node, $related): ContextCarrierInterface

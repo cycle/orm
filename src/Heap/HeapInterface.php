@@ -20,6 +20,7 @@ interface HeapInterface
      * Check if entity known to the heap.
      *
      * @param object $entity
+     *
      * @return bool
      */
     public function has($entity): bool;
@@ -28,6 +29,7 @@ interface HeapInterface
      * Get Node associated with given entity.
      *
      * @param object $entity
+     *
      * @return Node|null
      */
     public function get($entity): ?Node;
@@ -38,7 +40,8 @@ interface HeapInterface
      *
      * @param string $role
      * @param array  $scope
-     * @return null|object
+     *
+     * @return object|null
      */
     public function find(string $role, array $scope);
 

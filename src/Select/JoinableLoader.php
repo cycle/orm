@@ -35,25 +35,25 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     protected $options = [
         // load relation data
-        'load'      => false,
+        'load' => false,
 
         // true or instance to enable, false or null to disable
-        'scope'     => true,
+        'scope' => true,
 
         // scope to be used for the relation
-        'method'    => null,
+        'method' => null,
 
         // load method, see AbstractLoader constants
-        'minify'    => true,
+        'minify' => true,
 
         // when true all loader columns will be minified (only for loading)
-        'as'        => null,
+        'as' => null,
 
         // table alias
-        'using'     => null,
+        'using' => null,
 
         // alias used by another relation
-        'where'     => null,
+        'where' => null,
 
         // where conditions (if any)
     ];
@@ -207,6 +207,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      *
      * @param SelectQuery $query
      * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
+     *
      * @return SelectQuery
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
@@ -234,6 +235,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * @param SelectQuery $query
+     *
      * @return SelectQuery
      */
     protected function applyConstrain(SelectQuery $query): SelectQuery
@@ -269,6 +271,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * Calculate table alias.
      *
      * @param AbstractLoader $parent
+     *
      * @return string
      */
     protected function calculateAlias(AbstractLoader $parent): string
@@ -295,6 +298,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * $this->getKey(Relation::OUTER_KEY);
      *
      * @param mixed $key
+     *
      * @return string|null
      */
     protected function localKey($key): ?string
@@ -310,6 +314,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * Get parent identifier based on relation configuration key.
      *
      * @param mixed $key
+     *
      * @return string
      */
     protected function parentKey($key): string
@@ -347,6 +352,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * @param SelectQuery $query
+     *
      * @return QueryBuilder
      */
     private function makeQueryBuilder(SelectQuery $query): QueryBuilder

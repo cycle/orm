@@ -39,9 +39,9 @@ final class Factory implements FactoryInterface
     /** @var array<string, string> */
     private $defaults = [
         Schema::REPOSITORY => Repository::class,
-        Schema::SOURCE     => Source::class,
-        Schema::MAPPER     => Mapper::class,
-        Schema::SCOPE      => null,
+        Schema::SOURCE => Source::class,
+        Schema::MAPPER => Mapper::class,
+        Schema::SCOPE => null,
     ];
 
     /**
@@ -86,9 +86,9 @@ final class Factory implements FactoryInterface
         return $this->factory->make(
             $class,
             [
-                'orm'    => $orm,
-                'role'   => $role,
-                'schema' => $schema->define($role, Schema::SCHEMA)
+                'orm' => $orm,
+                'role' => $role,
+                'schema' => $schema->define($role, Schema::SCHEMA),
             ]
         );
     }
@@ -107,10 +107,10 @@ final class Factory implements FactoryInterface
         return $this->config->getLoader($schema[Relation::TYPE])->resolve(
             $this->factory,
             [
-                'orm'    => $orm,
-                'name'   => $relation,
+                'orm' => $orm,
+                'name' => $relation,
                 'target' => $schema[Relation::TARGET],
-                'schema' => $schema[Relation::SCHEMA]
+                'schema' => $schema[Relation::SCHEMA],
             ]
         );
     }
@@ -130,8 +130,8 @@ final class Factory implements FactoryInterface
         return $this->config->getRelation($type)->resolve(
             $this->factory,
             [
-                'orm'    => $orm,
-                'name'   => $relation,
+                'orm' => $orm,
+                'name' => $relation,
                 'target' => $relSchema[Relation::TARGET],
                 'schema' => $relSchema[Relation::SCHEMA] + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null],
             ]
@@ -165,8 +165,8 @@ final class Factory implements FactoryInterface
             $class,
             [
                 'select' => $select,
-                'orm'    => $orm,
-                'role'   => $role,
+                'orm' => $orm,
+                'role' => $role,
             ]
         );
     }
@@ -211,6 +211,7 @@ final class Factory implements FactoryInterface
      * Add default classes for resolve
      *
      * @param array $defaults
+     *
      * @return FactoryInterface
      */
     public function withDefaultSchemaClasses(array $defaults): FactoryInterface

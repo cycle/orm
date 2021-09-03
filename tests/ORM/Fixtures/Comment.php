@@ -23,7 +23,7 @@ class Comment
     /** @var User */
     public $user;
 
-    /** @var User[]|PivotedCollectionInterface */
+    /** @var PivotedCollectionInterface|User[] */
     public $favoredBy;
 
     public $parent;

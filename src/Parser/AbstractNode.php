@@ -50,7 +50,7 @@ abstract class AbstractNode
     /**
      * Declared column which must be aggregated in a parent node. i.e. Parent Key
      *
-     * @var null|string
+     * @var string|null
      */
     protected $outerKey;
 
@@ -58,18 +58,21 @@ abstract class AbstractNode
      * Node location in a tree. Set when node is registered.
      *
      * @internal
+     *
      * @var string
      */
     protected $container;
 
     /**
      * @internal
+     *
      * @var AbstractNode
      */
     protected $parent;
 
     /**
      * @internal
+     *
      * @var TypecastInterface|null
      */
     protected $typecast;
@@ -82,6 +85,7 @@ abstract class AbstractNode
      * $this->collectedReferences[id][ID_VALUE] = [ITEM1, ITEM2, ...].
      *
      * @internal
+     *
      * @var array
      */
     protected $references = [];
@@ -90,6 +94,7 @@ abstract class AbstractNode
      * Set of keys to be aggregated by Parser while parsing results.
      *
      * @internal
+     *
      * @var array
      */
     protected $trackReferences = [];
@@ -129,6 +134,7 @@ abstract class AbstractNode
      *
      * @param int   $offset
      * @param array $row
+     *
      * @return int Must return number of parsed columns.
      */
     public function parseRow(int $offset, array $row): int
@@ -184,9 +190,9 @@ abstract class AbstractNode
     /**
      * Get list of reference key values aggregated by parent.
      *
-     * @return array
-     *
      * @throws ParserException
+     *
+     * @return array
      */
     public function getReferences(): array
     {
@@ -210,7 +216,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    public function linkNode(string $container, AbstractNode $node): void
+    public function linkNode(string $container, self $node): void
     {
         $this->nodes[$container] = $node;
         $node->container = $container;
@@ -238,7 +244,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    public function joinNode(string $container, AbstractNode $node): void
+    public function joinNode(string $container, self $node): void
     {
         $node->joined = true;
         $this->linkNode($container, $node);
@@ -248,11 +254,12 @@ abstract class AbstractNode
      * Fetch sub node.
      *
      * @param string $container
-     * @return AbstractNode
      *
      * @throws ParserException
+     *
+     * @return AbstractNode
      */
-    public function getNode(string $container): AbstractNode
+    public function getNode(string $container): self
     {
         if (!isset($this->nodes[$container])) {
             throw new ParserException("Undefined node `{$container}`");
@@ -366,6 +373,7 @@ abstract class AbstractNode
      *
      * @param int   $dataOffset
      * @param array $line
+     *
      * @return array
      */
     protected function fetchData(int $dataOffset, array $line): array

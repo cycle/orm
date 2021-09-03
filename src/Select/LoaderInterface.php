@@ -38,6 +38,7 @@ interface LoaderInterface
      * Get column name related to internal key.
      *
      * @param string $key
+     *
      * @return string
      */
     public function fieldAlias(string $key): string;
@@ -48,10 +49,11 @@ interface LoaderInterface
      * @param LoaderInterface $parent
      * @param array           $options
      *
-     * @return LoaderInterface
      * @throws LoaderException
+     *
+     * @return LoaderInterface
      */
-    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface;
+    public function withContext(self $parent, array $options = []): self;
 
     /**
      * Create node to represent collected data in a tree form. Nodes can declare dependencies

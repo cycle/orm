@@ -188,19 +188,21 @@ final class Embedded implements RelationInterface
     /**
      * @param mixed $related
      * @param State $state
+     *
      * @return array
      */
     protected function getChanges($related, State $state): array
     {
         $data = array_intersect_key($this->mapper->extract($related), $this->columns);
 
-        return array_udiff_assoc($data, $state->getData(), [static::class, 'compare']);
+        return array_udiff_assoc($data, $state->getData(), [self::class, 'compare']);
     }
 
     /**
      * Map internal field names to database specific column names.
      *
      * @param array $columns
+     *
      * @return array
      */
     protected function mapColumns(array $columns): array
@@ -220,6 +222,7 @@ final class Embedded implements RelationInterface
     /**
      * @param mixed $a
      * @param mixed $b
+     *
      * @return int
      */
     protected static function compare($a, $b): int
@@ -235,6 +238,7 @@ final class Embedded implements RelationInterface
      * Resolve the reference to the object.
      *
      * @param ReferenceInterface $reference
+     *
      * @return mixed|null
      */
     protected function resolve(ReferenceInterface $reference)
@@ -251,6 +255,7 @@ final class Embedded implements RelationInterface
      *
      * @param Node   $state
      * @param string $key
+     *
      * @return mixed|null
      */
     protected function fetchKey(?Node $state, string $key)

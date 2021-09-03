@@ -6,5 +6,4 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 final class RbacPermission extends RbacItemAbstract
 {
-
 }

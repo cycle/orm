@@ -35,7 +35,6 @@ use Spiral\Pagination\PaginableInterface;
  * @method Select andHaving(...$args);
  * @method Select orHaving(...$args);
  * @method Select orderBy($expression, $direction = 'ASC');
- *
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
@@ -84,7 +83,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @param string $name
      * @param array  $arguments
-     * @return Select|mixed
+     *
+     * @return mixed|Select
      */
     public function __call(string $name, array $arguments)
     {
@@ -155,7 +155,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
-     * @param string|int $id
+     * @param int|string $id
+     *
      * @return $this|Select
      */
     public function wherePK($id): self
@@ -167,6 +168,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * Attention, column will be quoted by driver!
      *
      * @param string|null $column When column is null DISTINCT(PK) will be generated.
+     *
      * @return int
      */
     public function count(string $column = null): int
@@ -250,9 +252,11 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * Attention, consider disabling entity map if you want to use recursive loading (i.e
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
-     * @param string|array $relation
+     * @param array|string $relation
      * @param array        $options
+     *
      * @return $this|self
+     *
      * @see with()
      */
     public function load($relation, array $options = []): self
@@ -341,9 +345,11 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *
-     * @param string|array $relation
+     * @param array|string $relation
      * @param array        $options
+     *
      * @return $this|Select
+     *
      * @see load()
      */
     public function with($relation, array $options = []): self
@@ -373,6 +379,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * joined tables), make sure to set the constrain in the query.
      *
      * @param array|null $query
+     *
      * @return object|null
      */
     public function fetchOne(array $query = null)

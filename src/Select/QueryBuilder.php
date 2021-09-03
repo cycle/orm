@@ -29,7 +29,6 @@ use Spiral\Database\Query\SelectQuery;
  * @method QueryBuilder orderBy($expression, $direction = 'ASC');
  * @method QueryBuilder limit(int $limit)
  * @method QueryBuilder offset(int $offset)
- *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
@@ -61,7 +60,8 @@ final class QueryBuilder
      *
      * @param string $func
      * @param array  $args
-     * @return SelectQuery|mixed
+     *
+     * @return mixed|SelectQuery
      */
     public function __call(string $func, array $args)
     {
@@ -97,6 +97,7 @@ final class QueryBuilder
      * Select query method prefix for all "where" queries. Can route "where" to "onWhere".
      *
      * @param string $forward "where", "onWhere"
+     *
      * @return QueryBuilder
      */
     public function withForward(string $forward = null): self
@@ -109,6 +110,7 @@ final class QueryBuilder
 
     /**
      * @param SelectQuery $query
+     *
      * @return QueryBuilder
      */
     public function withQuery(SelectQuery $query): self
@@ -127,9 +129,10 @@ final class QueryBuilder
      *
      * @param string $identifier
      * @param bool   $autoload If set to true (default) target relation will be automatically loaded.
-     * @return string
      *
      * @throws BuilderException
+     *
+     * @return string
      */
     public function resolve(string $identifier, bool $autoload = true): string
     {
@@ -165,6 +168,7 @@ final class QueryBuilder
      *
      * @param string $relation
      * @param array  $options
+     *
      * @return QueryBuilder
      */
     public function with(string $relation, array $options = []): self
@@ -179,6 +183,7 @@ final class QueryBuilder
      *
      * @param string $name
      * @param bool   $autoload When set to true relation will be automatically loaded.
+     *
      * @return AbstractLoader|null
      */
     protected function findLoader(string $name, bool $autoload = true): ?LoaderInterface
@@ -201,6 +206,7 @@ final class QueryBuilder
      * Replace target where call with another compatible method (for example join or having).
      *
      * @param string $call
+     *
      * @return callable
      */
     protected function targetFunc(string $call): callable
@@ -227,6 +233,7 @@ final class QueryBuilder
      * relations.
      *
      * @param array $args
+     *
      * @return array
      */
     protected function proxyArgs(array $args): array
@@ -277,6 +284,7 @@ final class QueryBuilder
      * @param array    $input
      * @param callable $func
      * @param bool     $complex
+     *
      * @return array
      */
     private function walkRecursive(array $input, callable $func, bool $complex = false): array
@@ -288,12 +296,13 @@ final class QueryBuilder
                     // complex expression like @OR and @AND
                     $result[$k] = $this->walkRecursive($v, $func, true);
                     continue;
-                } elseif ($complex) {
+                }
+                if ($complex) {
                     $v = $this->walkRecursive($v, $func);
                 }
             }
 
-            call_user_func_array($func, [&$k, &$v]);
+            $func(...[&$k, &$v]);
             $result[$k] = $v;
         }
 

@@ -30,10 +30,10 @@ abstract class TypecastTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'active'  => 'bool',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'active' => 'bool',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -46,21 +46,21 @@ abstract class TypecastTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'active', 'balance'],
-                Schema::TYPECAST    => [
-                    'id'      => 'int',
-                    'active'  => 'bool',
-                    'balance' => 'float'
+                Schema::COLUMNS => ['id', 'email', 'active', 'balance'],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'active' => 'bool',
+                    'balance' => 'float',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::CONSTRAIN => SortByIDConstrain::class,
+            ],
         ]));
     }
 
@@ -160,9 +160,9 @@ abstract class TypecastTest extends BaseTest
 
         $this->assertSame(
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
-                'active'  => true,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'active' => true,
                 'balance' => 100.0,
             ],
             $this->orm->getHeap()->get($result)->getData()

@@ -75,7 +75,6 @@ trait TableTrait
         $schema->save();
     }
 
-
     /**
      * @return Database
      */

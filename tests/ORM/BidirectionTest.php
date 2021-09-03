@@ -30,17 +30,17 @@ abstract class BidirectionTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
+            'id' => 'primary',
+            'email' => 'string',
             'balance' => 'float',
         ]);
 
         $this->makeTable('comment', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,nullable',
-            'message' => 'string'
+            'message' => 'string',
         ], [
-            'user_id' => ['table' => 'user', 'column' => 'id']
+            'user_id' => ['table' => 'user', 'column' => 'id'],
         ]);
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
@@ -62,48 +62,48 @@ abstract class BidirectionTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::NULLABLE  => true,
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
                     ],
-                ]
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'user' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::NULLABLE  => true,
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
                     ],
-                ]
-            ]
+                ],
+            ],
         ]));
     }
 
@@ -114,26 +114,26 @@ abstract class BidirectionTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
         ], $selector->fetchData());

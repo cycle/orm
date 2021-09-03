@@ -52,12 +52,12 @@ class SequenceDefaultValueTest extends BaseTest
                             'id' => 'int',
                             'balance' => 'float',
                             'user_code' => 'int',
-                            'deleted_at' => 'datetime'
+                            'deleted_at' => 'datetime',
                         ],
                         Schema::SCHEMA => [],
                         Schema::RELATIONS => [],
-                        Schema::CONSTRAIN => NotDeletedConstrain::class
-                    ]
+                        Schema::CONSTRAIN => NotDeletedConstrain::class,
+                    ],
                 ]
             )
         );

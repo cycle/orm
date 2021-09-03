@@ -17,7 +17,7 @@ namespace Cycle\ORM\Context;
 interface ConsumerInterface
 {
     // Value destinations.
-    public const DATA  = 1;
+    public const DATA = 1;
     public const SCOPE = 2;
 
     /**
@@ -28,6 +28,7 @@ interface ConsumerInterface
      * @param mixed  $value  The key value.
      * @param bool   $fresh  Indicates that value has not been received by any other acceptor.
      * @param int    $stream One of the context types (data context, scope context).
+     *
      * @see ProducerInterface
      */
     public function register(

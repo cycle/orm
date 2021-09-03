@@ -36,15 +36,15 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id_int'        => 'primary',
-            'email_str'     => 'string',
-            'balance_float' => 'float'
+            'id_int' => 'primary',
+            'email_str' => 'string',
+            'balance_float' => 'float',
         ]);
 
         $this->makeTable('comment', [
-            'id_int'      => 'primary',
+            'id_int' => 'primary',
             'user_id_int' => 'integer',
-            'message_str' => 'string'
+            'message_str' => 'string',
         ]);
 
         $this->makeFK('comment', 'user_id_int', 'user', 'id_int');
@@ -67,37 +67,37 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'id_int', 'user_id' => 'user_id_int', 'message' => 'message_str'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-            ]
+                Schema::COLUMNS => ['id' => 'id_int', 'user_id' => 'user_id_int', 'message' => 'message_str'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::CONSTRAIN => SortByIDConstrain::class,
+            ],
         ]));
     }
 
@@ -108,31 +108,31 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
         ], $selector->fetchData());
@@ -145,31 +145,31 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
         ], $selector->fetchData());
@@ -182,31 +182,31 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
         ], $selector->fetchData());
@@ -221,22 +221,22 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
                     ],
@@ -254,22 +254,22 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
                     ],
@@ -288,22 +288,22 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 1,
                         'message' => 'msg 3',
                     ],
@@ -419,17 +419,17 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 3,
-                'email'    => 'test@email.com',
-                'balance'  => 300.0,
+                'id' => 3,
+                'email' => 'test@email.com',
+                'balance' => 300.0,
                 'comments' => [
                     [
-                        'id'      => 4,
+                        'id' => 4,
                         'user_id' => 3,
                         'message' => 'msg A',
                     ],
                     [
-                        'id'      => 5,
+                        'id' => 5,
                         'user_id' => 3,
                         'message' => 'msg B',
                     ],
@@ -549,7 +549,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
          */
         [$a, $b] = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
-            'as'     => 'comment'
+            'as' => 'comment',
         ])->orderBy('user.id_int')->fetchAll();
 
         $this->assertCount(1, $a->comments);

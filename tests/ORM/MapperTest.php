@@ -31,9 +31,9 @@ abstract class MapperTest extends BaseTest
         $this->makeTable(
             'user',
             [
-                'id'      => 'primary',
-                'email'   => 'string',
-                'balance' => 'float,nullable'
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float,nullable',
             ]
         );
 
@@ -49,16 +49,16 @@ abstract class MapperTest extends BaseTest
             new Schema(
                 [
                     User::class => [
-                        Schema::ROLE        => 'user',
-                        Schema::MAPPER      => Mapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'user',
+                        Schema::ROLE => 'user',
+                        Schema::MAPPER => Mapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'email', 'balance'],
-                        Schema::TYPECAST    => ['balance' => 'float'],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => []
-                    ]
+                        Schema::COLUMNS => ['id', 'email', 'balance'],
+                        Schema::TYPECAST => ['balance' => 'float'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );
@@ -71,15 +71,15 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(
             [
                 [
-                    'id'      => 1,
-                    'email'   => 'hello@world.com',
+                    'id' => 1,
+                    'email' => 'hello@world.com',
                     'balance' => 100.0,
                 ],
                 [
-                    'id'      => 2,
-                    'email'   => 'another@world.com',
+                    'id' => 2,
+                    'email' => 'another@world.com',
                     'balance' => 200.0,
-                ]
+                ],
             ],
             $selector->fetchData()
         );
@@ -211,8 +211,8 @@ abstract class MapperTest extends BaseTest
 
         $this->assertEquals(
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
             $this->orm->getHeap()->get($result)->getData()

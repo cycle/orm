@@ -23,8 +23,8 @@ use Cycle\ORM\Heap\Traits\VisitorTrait;
  */
 final class State implements ConsumerInterface, ProducerInterface
 {
-    use RelationTrait;
     use ClaimTrait;
+    use RelationTrait;
     use VisitorTrait;
 
     /** @var int */
@@ -36,7 +36,7 @@ final class State implements ConsumerInterface, ProducerInterface
     /** @var array */
     private $transactionData = [];
 
-    /** @var null|ContextCarrierInterface */
+    /** @var ContextCarrierInterface|null */
     private $command;
 
     /** @var ContextCarrierInterface[] */
@@ -116,6 +116,7 @@ final class State implements ConsumerInterface, ProducerInterface
      * Set the reference to the object creation command (non executed).
      *
      * @param ContextCarrierInterface|null $cmd
+     *
      * @internal
      */
     public function setCommand(ContextCarrierInterface $cmd = null): void
@@ -124,7 +125,8 @@ final class State implements ConsumerInterface, ProducerInterface
     }
 
     /**
-     * @return null|ContextCarrierInterface
+     * @return ContextCarrierInterface|null
+     *
      * @internal
      */
     public function getCommand(): ?ContextCarrierInterface
@@ -136,7 +138,9 @@ final class State implements ConsumerInterface, ProducerInterface
      * Storage to store temporary cross entity links.
      *
      * @param string $type
+     *
      * @return \SplObjectStorage
+     *
      * @internal
      */
     public function getStorage(string $type): \SplObjectStorage

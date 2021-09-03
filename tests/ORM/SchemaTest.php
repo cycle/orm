@@ -23,9 +23,9 @@ class SchemaTest extends TestCase
     {
         $schema = new Schema([
             User::class => [
-                1            => 'value',
-                Schema::ROLE => 'user'
-            ]
+                1 => 'value',
+                Schema::ROLE => 'user',
+            ],
         ]);
 
         $this->assertSame('value', $schema->define(User::class, 1));
@@ -37,8 +37,8 @@ class SchemaTest extends TestCase
 
         $schema = new Schema([
             User::class => [
-                1 => 'value'
-            ]
+                1 => 'value',
+            ],
         ]);
 
         $schema->define(Profile::class, 1);
@@ -48,9 +48,9 @@ class SchemaTest extends TestCase
     {
         $schema = new Schema([
             User::class => [
-                1            => 'value',
-                Schema::ROLE => 'user'
-            ]
+                1 => 'value',
+                Schema::ROLE => 'user',
+            ],
         ]);
 
         $this->assertNull($schema->define(User::class, 2));

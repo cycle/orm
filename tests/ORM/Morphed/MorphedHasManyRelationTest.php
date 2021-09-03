@@ -33,9 +33,9 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -47,10 +47,10 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         );
 
         $this->makeTable('post', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,nullable',
-            'title'   => 'string',
-            'content' => 'string'
+            'title' => 'string',
+            'content' => 'string',
         ]);
 
         $this->getDatabase()->table('post')->insertMultiple(
@@ -64,10 +64,10 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id'          => 'primary',
-            'parent_id'   => 'integer',
+            'id' => 'primary',
+            'parent_id' => 'integer',
             'parent_type' => 'string',
-            'message'     => 'string'
+            'message' => 'string',
         ]);
 
         $this->getDatabase()->table('comment')->insertMultiple(
@@ -85,66 +85,66 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
                             Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
-                    'posts'    => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                    'posts' => [
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Post::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ],
-            Post::class    => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
                             Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
-                ]
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
         ]));
     }
@@ -156,37 +156,36 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
-
                     [
-                        'id'          => 1,
-                        'parent_id'   => 1,
+                        'id' => 1,
+                        'parent_id' => 1,
                         'parent_type' => 'user',
-                        'message'     => 'first comment',
+                        'message' => 'first comment',
                     ],
 
                     [
-                        'id'          => 2,
-                        'parent_id'   => 1,
+                        'id' => 2,
+                        'parent_id' => 1,
                         'parent_type' => 'user',
-                        'message'     => 'second comment',
+                        'message' => 'second comment',
                     ],
 
                     [
-                        'id'          => 3,
-                        'parent_id'   => 1,
+                        'id' => 3,
+                        'parent_id' => 1,
                         'parent_type' => 'user',
-                        'message'     => 'third comment',
+                        'message' => 'third comment',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
         ], $selector->fetchData());
@@ -199,57 +198,57 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'user_id'  => 1,
-                'title'    => 'post 1',
-                'content'  => 'post 1 body',
+                'id' => 1,
+                'user_id' => 1,
+                'title' => 'post 1',
+                'content' => 'post 1 body',
                 'comments' => [
                     [
-                        'id'          => 4,
-                        'parent_id'   => 1,
+                        'id' => 4,
+                        'parent_id' => 1,
                         'parent_type' => 'post',
-                        'message'     => 'post 1 comment',
+                        'message' => 'post 1 comment',
                     ],
                     [
-                        'id'          => 6,
-                        'parent_id'   => 1,
+                        'id' => 6,
+                        'parent_id' => 1,
                         'parent_type' => 'post',
-                        'message'     => 'post 1.1 comment',
+                        'message' => 'post 1.1 comment',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'user_id'  => 1,
-                'title'    => 'post 2',
-                'content'  => 'post 2 body',
+                'id' => 2,
+                'user_id' => 1,
+                'title' => 'post 2',
+                'content' => 'post 2 body',
                 'comments' => [
                     [
-                        'id'          => 5,
-                        'parent_id'   => 2,
+                        'id' => 5,
+                        'parent_id' => 2,
                         'parent_type' => 'post',
-                        'message'     => 'post 2 comment',
+                        'message' => 'post 2 comment',
                     ],
                     [
-                        'id'          => 7,
-                        'parent_id'   => 2,
+                        'id' => 7,
+                        'parent_id' => 2,
                         'parent_type' => 'post',
-                        'message'     => 'post 2.1 comment',
+                        'message' => 'post 2.1 comment',
                     ],
                 ],
             ],
             [
-                'id'       => 3,
-                'user_id'  => 2,
-                'title'    => 'post 3',
-                'content'  => 'post 3 body',
+                'id' => 3,
+                'user_id' => 2,
+                'title' => 'post 3',
+                'content' => 'post 3 body',
                 'comments' => [],
             ],
             [
-                'id'       => 4,
-                'user_id'  => 2,
-                'title'    => 'post 4',
-                'content'  => 'post 4 body',
+                'id' => 4,
+                'user_id' => 2,
+                'title' => 'post 4',
+                'content' => 'post 4 body',
                 'comments' => [],
             ],
         ], $selector->fetchData());
@@ -265,89 +264,89 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
-                'posts'    => [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'posts' => [
                     [
-                        'id'       => 1,
-                        'user_id'  => 1,
-                        'title'    => 'post 1',
-                        'content'  => 'post 1 body',
+                        'id' => 1,
+                        'user_id' => 1,
+                        'title' => 'post 1',
+                        'content' => 'post 1 body',
                         'comments' => [
                             [
-                                'id'          => 4,
-                                'parent_id'   => 1,
+                                'id' => 4,
+                                'parent_id' => 1,
                                 'parent_type' => 'post',
-                                'message'     => 'post 1 comment',
+                                'message' => 'post 1 comment',
                             ],
                             [
-                                'id'          => 6,
-                                'parent_id'   => 1,
+                                'id' => 6,
+                                'parent_id' => 1,
                                 'parent_type' => 'post',
-                                'message'     => 'post 1.1 comment',
+                                'message' => 'post 1.1 comment',
                             ],
                         ],
                     ],
                     [
-                        'id'       => 2,
-                        'user_id'  => 1,
-                        'title'    => 'post 2',
-                        'content'  => 'post 2 body',
+                        'id' => 2,
+                        'user_id' => 1,
+                        'title' => 'post 2',
+                        'content' => 'post 2 body',
                         'comments' => [
                             [
-                                'id'          => 5,
-                                'parent_id'   => 2,
+                                'id' => 5,
+                                'parent_id' => 2,
                                 'parent_type' => 'post',
-                                'message'     => 'post 2 comment',
+                                'message' => 'post 2 comment',
                             ],
                             [
-                                'id'          => 7,
-                                'parent_id'   => 2,
+                                'id' => 7,
+                                'parent_id' => 2,
                                 'parent_type' => 'post',
-                                'message'     => 'post 2.1 comment',
+                                'message' => 'post 2.1 comment',
                             ],
                         ],
                     ],
                 ],
                 'comments' => [
                     [
-                        'id'          => 1,
-                        'parent_id'   => 1,
+                        'id' => 1,
+                        'parent_id' => 1,
                         'parent_type' => 'user',
-                        'message'     => 'first comment',
+                        'message' => 'first comment',
                     ],
                     [
-                        'id'          => 2,
-                        'parent_id'   => 1,
+                        'id' => 2,
+                        'parent_id' => 1,
                         'parent_type' => 'user',
-                        'message'     => 'second comment',
+                        'message' => 'second comment',
                     ],
                     [
-                        'id'          => 3,
-                        'parent_id'   => 1,
+                        'id' => 3,
+                        'parent_id' => 1,
                         'parent_type' => 'user',
-                        'message'     => 'third comment',
+                        'message' => 'third comment',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
-                'posts'    => [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'posts' => [
                     [
-                        'id'       => 3,
-                        'user_id'  => 2,
-                        'title'    => 'post 3',
-                        'content'  => 'post 3 body',
+                        'id' => 3,
+                        'user_id' => 2,
+                        'title' => 'post 3',
+                        'content' => 'post 3 body',
                         'comments' => [],
                     ],
                     [
-                        'id'       => 4,
-                        'user_id'  => 2,
-                        'title'    => 'post 4',
-                        'content'  => 'post 4 body',
+                        'id' => 4,
+                        'user_id' => 2,
+                        'title' => 'post 4',
+                        'content' => 'post 4 body',
                         'comments' => [],
                     ],
                 ],

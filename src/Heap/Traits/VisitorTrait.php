@@ -23,6 +23,7 @@ trait VisitorTrait
      * Return true if relation branch was already visited.
      *
      * @param string $branch
+     *
      * @return bool
      */
     public function visited(string $branch): bool

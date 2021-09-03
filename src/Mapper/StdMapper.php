@@ -48,6 +48,7 @@ final class StdMapper extends DatabaseMapper
      * Get entity columns.
      *
      * @param object $entity
+     *
      * @return array
      */
     protected function fetchFields($entity): array

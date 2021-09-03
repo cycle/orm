@@ -126,7 +126,8 @@ abstract class BaseTest extends TestCase
      * Calculates missing parameters for typecasting.
      *
      * @param SchemaInterface $schema
-     * @return ORM|\Cycle\ORM\ORMInterface
+     *
+     * @return \Cycle\ORM\ORMInterface|ORM
      */
     public function withSchema(SchemaInterface $schema)
     {
@@ -150,10 +151,10 @@ abstract class BaseTest extends TestCase
             $this->driver = new $class(
                 [
                     'connection' => $config['conn'],
-                    'username'   => $config['user'],
-                    'password'   => $config['pass'],
-                    'options'    => [],
-                    'queryCache' => true
+                    'username' => $config['user'],
+                    'password' => $config['pass'],
+                    'options' => [],
+                    'queryCache' => true,
                 ]
             );
         }
@@ -248,7 +249,7 @@ abstract class BaseTest extends TestCase
      */
     protected function enableProfiling(): void
     {
-        if (!is_null($this->logger)) {
+        if (null !== $this->logger) {
             $this->logger->display();
         }
     }
@@ -258,7 +259,7 @@ abstract class BaseTest extends TestCase
      */
     protected function disableProfiling(): void
     {
-        if (!is_null($this->logger)) {
+        if (null !== $this->logger) {
             $this->logger->hide();
         }
     }

@@ -14,7 +14,6 @@ namespace Cycle\ORM\Tests\Command;
 use Cycle\ORM\Command\Branch\Condition;
 use Cycle\ORM\Command\CommandInterface;
 use PHPUnit\Framework\TestCase;
-use TestCommand;
 
 class ConditionCommandTest extends TestCase
 {
@@ -50,7 +49,6 @@ class ConditionCommandTest extends TestCase
             }
         };
     }
-
 
     public function testIterate(): void
     {

@@ -32,9 +32,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -46,10 +46,10 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         );
 
         $this->makeTable('post', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,nullable',
-            'title'   => 'string',
-            'content' => 'string'
+            'title' => 'string',
+            'content' => 'string',
         ]);
 
         $this->getDatabase()->table('post')->insertMultiple(
@@ -63,10 +63,10 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         );
 
         $this->makeTable('image', [
-            'id'          => 'primary',
-            'parent_id'   => 'integer',
+            'id' => 'primary',
+            'parent_id' => 'integer',
             'parent_type' => 'string',
-            'url'         => 'string'
+            'url' => 'string',
         ]);
 
         $this->getDatabase()->table('image')->insertMultiple(
@@ -81,66 +81,66 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class  => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'image' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
+                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
                         Relation::TARGET => Image::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
                     'posts' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Post::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id'
-                        ]
-                    ]
-                ]
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
             ],
-            Post::class  => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'image' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
+                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
                         Relation::TARGET => Image::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::MORPH_KEY => 'parent_type',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Image::class => [
-                Schema::ROLE        => 'image',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'image',
+                Schema::ROLE => 'image',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'image',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'url'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'url'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
         ]));
     }
@@ -152,26 +152,26 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
-                'image'   => [
-                    'id'          => 1,
-                    'parent_id'   => 1,
+                'image' => [
+                    'id' => 1,
+                    'parent_id' => 1,
                     'parent_type' => 'user',
-                    'url'         => 'user-image.png',
+                    'url' => 'user-image.png',
                 ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
-                'image'   =>
+                'image' =>
                     [
-                        'id'          => 3,
-                        'parent_id'   => 2,
+                        'id' => 3,
+                        'parent_id' => 2,
                         'parent_type' => 'user',
-                        'url'         => 'user-2-image.png',
+                        'url' => 'user-2-image.png',
                     ],
             ],
         ], $selector->fetchData());
@@ -184,47 +184,47 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
+                'id' => 1,
                 'user_id' => 1,
-                'title'   => 'post 1',
+                'title' => 'post 1',
                 'content' => 'post 1 body',
-                'image'   => [
-                    'id'          => 2,
-                    'parent_id'   => 1,
+                'image' => [
+                    'id' => 2,
+                    'parent_id' => 1,
                     'parent_type' => 'post',
-                    'url'         => 'post-image.png',
+                    'url' => 'post-image.png',
                 ],
             ],
             [
-                'id'      => 2,
+                'id' => 2,
                 'user_id' => 1,
-                'title'   => 'post 2',
+                'title' => 'post 2',
                 'content' => 'post 2 body',
-                'image'   => [
-                    'id'          => 4,
-                    'parent_id'   => 2,
+                'image' => [
+                    'id' => 4,
+                    'parent_id' => 2,
                     'parent_type' => 'post',
-                    'url'         => 'post-2-image.png',
+                    'url' => 'post-2-image.png',
                 ],
             ],
             [
-                'id'      => 3,
+                'id' => 3,
                 'user_id' => 2,
-                'title'   => 'post 3',
+                'title' => 'post 3',
                 'content' => 'post 3 body',
-                'image'   => [
-                    'id'          => 5,
-                    'parent_id'   => 3,
+                'image' => [
+                    'id' => 5,
+                    'parent_id' => 3,
                     'parent_type' => 'post',
-                    'url'         => 'post-3-image.png',
+                    'url' => 'post-3-image.png',
                 ],
             ],
             [
-                'id'      => 4,
+                'id' => 4,
                 'user_id' => 2,
-                'title'   => 'post 4',
+                'title' => 'post 4',
                 'content' => 'post 4 body',
-                'image'   => null,
+                'image' => null,
             ],
         ], $selector->fetchData());
     }
@@ -239,71 +239,71 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
-                'image'   => [
-                    'id'          => 1,
-                    'parent_id'   => 1,
+                'image' => [
+                    'id' => 1,
+                    'parent_id' => 1,
                     'parent_type' => 'user',
-                    'url'         => 'user-image.png',
+                    'url' => 'user-image.png',
                 ],
-                'posts'   => [
+                'posts' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
-                        'title'   => 'post 1',
+                        'title' => 'post 1',
                         'content' => 'post 1 body',
-                        'image'   => [
-                            'id'          => 2,
-                            'parent_id'   => 1,
+                        'image' => [
+                            'id' => 2,
+                            'parent_id' => 1,
                             'parent_type' => 'post',
-                            'url'         => 'post-image.png',
+                            'url' => 'post-image.png',
                         ],
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
-                        'title'   => 'post 2',
+                        'title' => 'post 2',
                         'content' => 'post 2 body',
-                        'image'   => [
-                            'id'          => 4,
-                            'parent_id'   => 2,
+                        'image' => [
+                            'id' => 4,
+                            'parent_id' => 2,
                             'parent_type' => 'post',
-                            'url'         => 'post-2-image.png',
+                            'url' => 'post-2-image.png',
                         ],
                     ],
                 ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
-                'image'   => [
-                    'id'          => 3,
-                    'parent_id'   => 2,
+                'image' => [
+                    'id' => 3,
+                    'parent_id' => 2,
                     'parent_type' => 'user',
-                    'url'         => 'user-2-image.png',
+                    'url' => 'user-2-image.png',
                 ],
-                'posts'   => [
+                'posts' => [
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 2,
-                        'title'   => 'post 3',
+                        'title' => 'post 3',
                         'content' => 'post 3 body',
-                        'image'   => [
-                            'id'          => 5,
-                            'parent_id'   => 3,
+                        'image' => [
+                            'id' => 5,
+                            'parent_id' => 3,
                             'parent_type' => 'post',
-                            'url'         => 'post-3-image.png',
+                            'url' => 'post-3-image.png',
                         ],
                     ],
                     [
-                        'id'      => 4,
+                        'id' => 4,
                         'user_id' => 2,
-                        'title'   => 'post 4',
+                        'title' => 'post 4',
                         'content' => 'post 4 body',
-                        'image'   => null,
+                        'image' => null,
                     ],
                 ],
             ],
@@ -487,7 +487,6 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $this->assertSame('post-image.png', $u->image->url);
         $this->assertSame(null, $p->image);
     }
-
 
     public function testChangeParents(): void
     {

@@ -24,13 +24,13 @@ final class Node implements ProducerInterface, ConsumerInterface
     use RelationTrait;
 
     // Different entity states in a pool
-    public const PROMISED         = 0;
-    public const NEW              = 1;
-    public const MANAGED          = 2;
+    public const PROMISED = 0;
+    public const NEW = 1;
+    public const MANAGED = 2;
     public const SCHEDULED_INSERT = 3;
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
-    public const DELETED          = 6;
+    public const DELETED = 6;
 
     /** @var string */
     private $role;
@@ -41,7 +41,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     /** @var array */
     private $data;
 
-    /** @var null|State */
+    /** @var State|null */
     private $state;
 
     /**
@@ -183,7 +183,7 @@ final class Node implements ProducerInterface, ConsumerInterface
             return [];
         }
 
-        $changes = array_udiff_assoc($this->state->getData(), $this->data, [static::class, 'compare']);
+        $changes = array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']);
         foreach ($this->state->getRelations() as $name => $relation) {
             $this->setRelation($name, $relation);
         }
@@ -207,6 +207,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     /**
      * @param mixed $a
      * @param mixed $b
+     *
      * @return int
      */
     public static function compare($a, $b): int

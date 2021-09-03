@@ -30,15 +30,15 @@ abstract class QueryBuilderTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id_int'        => 'primary',
-            'email_str'     => 'string',
-            'balance_float' => 'float'
+            'id_int' => 'primary',
+            'email_str' => 'string',
+            'balance_float' => 'float',
         ]);
 
         $this->makeTable('comment', [
-            'id_int'      => 'primary',
+            'id_int' => 'primary',
             'user_id_int' => 'integer',
-            'message_str' => 'string'
+            'message_str' => 'string',
         ]);
 
         $this->makeFK('comment', 'user_id_int', 'user', 'id_int');
@@ -61,46 +61,46 @@ abstract class QueryBuilderTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
-                Schema::SCHEMA      => [],
-                Schema::TYPECAST    => [
-                    'id'      => 'int',
-                    'active'  => 'bool',
-                    'balance' => 'float'
+                Schema::COLUMNS => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
+                Schema::SCHEMA => [],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'active' => 'bool',
+                    'balance' => 'float',
                 ],
-                Schema::RELATIONS   => [
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'id_int', 'user_id' => 'user_id_int', 'message' => 'message_str'],
-                Schema::TYPECAST    => [
-                    'id'      => 'int',
-                    'user_id' => 'int'
+                Schema::COLUMNS => ['id' => 'id_int', 'user_id' => 'user_id_int', 'message' => 'message_str'],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'user_id' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::CONSTRAIN => SortByIDConstrain::class,
+            ],
         ]));
     }
 
@@ -111,29 +111,29 @@ abstract class QueryBuilderTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => 1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                 ],
             ],
             [
-                'id'       => 2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 2,
                         'message' => 'msg 3',
                     ],
@@ -163,7 +163,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->orderBy([
-            'id' => 'DESC'
+            'id' => 'DESC',
         ])->fetchAll();
 
         $this->assertSame(2, $a->id);
@@ -192,7 +192,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a] = $select->where([
-            'id' => 2
+            'id' => 2,
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(2, $a->id);
@@ -202,7 +202,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->where([
-            'id' => new Parameter([1, 2])
+            'id' => new Parameter([1, 2]),
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -213,7 +213,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->where([
-            'id' => ['>' => 0, '<' => 3]
+            'id' => ['>' => 0, '<' => 3],
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -225,9 +225,9 @@ abstract class QueryBuilderTest extends BaseTest
         $select = new Select($this->orm, User::class);
         [$a] = $select->where([
             'user.id' => [
-                '>'  => 1,
-                '<=' => 2
-            ]
+                '>' => 1,
+                '<=' => 2,
+            ],
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(2, $a->id);
@@ -252,7 +252,7 @@ abstract class QueryBuilderTest extends BaseTest
         [$a, $b] = $select
             ->with('comments')
             ->where([
-                'comments.message' => new Parameter(['msg 3', 'msg 1'])
+                'comments.message' => new Parameter(['msg 3', 'msg 1']),
             ])
             ->orderBy('id')->fetchAll();
 
@@ -266,7 +266,7 @@ abstract class QueryBuilderTest extends BaseTest
         [$a, $b] = $select
             ->with('comments', ['as' => 'c'])
             ->where([
-                'c.message' => new Parameter(['msg 3', 'msg 1'])
+                'c.message' => new Parameter(['msg 3', 'msg 1']),
             ])
             ->orderBy('id')->fetchAll();
 
@@ -282,15 +282,14 @@ abstract class QueryBuilderTest extends BaseTest
             ->where([
                 'comments.id' => [
                     '>=' => 1,
-                    '<'  => 4
-                ]
+                    '<' => 4,
+                ],
             ])
             ->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
         $this->assertSame(2, $b->id);
     }
-
 
     public function testRelationComplexArrayAliased(): void
     {
@@ -300,8 +299,8 @@ abstract class QueryBuilderTest extends BaseTest
             ->where([
                 'cc.id' => [
                     '>=' => 1,
-                    '<'  => 4
-                ]
+                    '<' => 4,
+                ],
             ])
             ->orderBy('id')->fetchAll();
 
@@ -317,8 +316,8 @@ abstract class QueryBuilderTest extends BaseTest
             ->where([
                 'comments.id' => [
                     '>=' => 3,
-                    '<'  => 4
-                ]
+                    '<' => 4,
+                ],
             ])
             ->orderBy('id')->fetchAll();
 
@@ -462,7 +461,7 @@ abstract class QueryBuilderTest extends BaseTest
         [$a] = $select->with('comments', [
             'where' => function (Select\QueryBuilder $q): void {
                 $q->where('message', 'msg 3');
-            }
+            },
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(2, $a->id);
@@ -474,7 +473,7 @@ abstract class QueryBuilderTest extends BaseTest
         [$a, $b] = $select->with('comments', [
             'where' => function (Select\QueryBuilder $q): void {
                 $q->where('message', 'msg 3')->orWhere('message', 'msg 1');
-            }
+            },
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -485,7 +484,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->with('comments', [
-            'where' => ['id' => ['in' => new Parameter([1, 3])]]
+            'where' => ['id' => ['in' => new Parameter([1, 3])]],
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -496,7 +495,7 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->load('comments', [
-            'where' => ['message' => 'msg 1']
+            'where' => ['message' => 'msg 1'],
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -513,7 +512,7 @@ abstract class QueryBuilderTest extends BaseTest
         [$a, $b] = $select->load('comments', [
             'where' => function ($q): void {
                 $q->where('message', new Parameter(['msg 1', 'msg 3']));
-            }
+            },
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -529,8 +528,8 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->load('comments', [
-            'where'  => ['message' => 'msg 1'],
-            'method' => Select\JoinableLoader::INLOAD
+            'where' => ['message' => 'msg 1'],
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -545,8 +544,8 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->load('comments', [
-            'where'  => ['message' => 'msg 3'],
-            'method' => Select\JoinableLoader::INLOAD
+            'where' => ['message' => 'msg 3'],
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);
@@ -561,10 +560,10 @@ abstract class QueryBuilderTest extends BaseTest
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->load('comments', [
-            'where'  => function (Select\QueryBuilder $q): void {
+            'where' => function (Select\QueryBuilder $q): void {
                 $q->where('message', new Parameter(['msg 1', 'msg 3']));
             },
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('id')->fetchAll();
 
         $this->assertSame(1, $a->id);

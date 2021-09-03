@@ -15,7 +15,7 @@ use Spiral\Database\Query\SelectQuery;
  */
 trait ScopeTrait
 {
-    /** @var null|ScopeInterface */
+    /** @var ScopeInterface|null */
     protected $constrain;
 
     abstract public function getAlias(): string;
@@ -23,7 +23,7 @@ trait ScopeTrait
     /**
      * Associate scope with the selector.
      *
-     * @return AbstractLoader|$this
+     * @return $this|AbstractLoader
      */
     public function setScope(ScopeInterface $scope = null): self
     {
@@ -34,7 +34,7 @@ trait ScopeTrait
     /**
      * @deprecated Use {@see setScope()} instead.
      *
-     * @return AbstractLoader|$this
+     * @return $this|AbstractLoader
      */
     public function setConstrain(ConstrainInterface $constrain = null): self
     {

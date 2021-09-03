@@ -10,7 +10,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Identity;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
 abstract class RenamedPKTest extends BaseTest
 {
@@ -61,7 +60,7 @@ abstract class RenamedPKTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
-        $this->assertSame(1, count($data));
+        $this->assertCount(1, $data);
         $u = $data[0];
         $u->setId(8);
 
@@ -72,7 +71,7 @@ abstract class RenamedPKTest extends BaseTest
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
 
-        $this->assertSame(1, count($data));
+        $this->assertCount(1, $data);
         $this->assertSame(8, $data[0]->getId());
     }
 
@@ -100,25 +99,24 @@ abstract class RenamedPKTest extends BaseTest
 
     private function getSchemaArray1(): array
     {
-
         return [
             Identity::class => [
-                Schema::ROLE        => 'simple_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'simple_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'simple_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'simple_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'id' => 'identity_id',
                     'key' => 'identity_key',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'id' => 'int',
                     'key' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ];
     }
 }

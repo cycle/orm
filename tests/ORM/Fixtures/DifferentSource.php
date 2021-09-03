@@ -10,7 +10,6 @@ use Spiral\Database\DatabaseInterface;
 
 class DifferentSource implements SourceInterface
 {
-
     /**
      * @inheritDoc
      */

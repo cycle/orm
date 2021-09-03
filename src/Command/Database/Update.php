@@ -28,8 +28,8 @@ use Spiral\Database\DatabaseInterface;
 final class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
 {
     use ContextTrait;
-    use ScopeTrait;
     use ErrorTrait;
+    use ScopeTrait;
 
     /** @var array */
     protected $data = [];
@@ -65,7 +65,7 @@ final class Update extends DatabaseCommand implements ContextCarrierInterface, S
     /**
      * Avoid opening transaction when no changes are expected.
      *
-     * @return null|DatabaseInterface
+     * @return DatabaseInterface|null
      */
     public function getDatabase(): ?DatabaseInterface
     {

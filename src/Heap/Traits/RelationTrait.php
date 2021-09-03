@@ -28,6 +28,7 @@ trait RelationTrait
 
     /**
      * @param string $name
+     *
      * @return bool
      */
     public function hasRelation(string $name): bool
@@ -37,6 +38,7 @@ trait RelationTrait
 
     /**
      * @param string $name
+     *
      * @return mixed
      */
     public function getRelation(string $name)

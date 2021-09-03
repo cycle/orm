@@ -33,9 +33,9 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -47,10 +47,10 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         );
 
         $this->makeTable('post', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,nullable',
-            'title'   => 'string',
-            'content' => 'string'
+            'title' => 'string',
+            'content' => 'string',
         ]);
 
         $this->getDatabase()->table('post')->insertMultiple(
@@ -64,10 +64,10 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id'          => 'primary',
-            'parent_id'   => 'integer',
+            'id' => 'primary',
+            'parent_id' => 'integer',
             'parent_type' => 'string',
-            'message'     => 'string'
+            'message' => 'string',
         ]);
 
         $this->getDatabase()->table('comment')->insertMultiple(
@@ -85,72 +85,71 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
                             Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
-                    'posts'    => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                    'posts' => [
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Post::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ],
-            Post::class    => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_MANY,
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
                         Relation::TARGET => Comment::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
                             Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
-                ]
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
         ]));
     }
-
 
     public function testAccessEntity(): void
     {

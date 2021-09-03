@@ -35,9 +35,10 @@ final class Schema implements SchemaInterface
 
     /**
      * @param array $an_array
+     *
      * @return Schema
      */
-    public static function __set_state($an_array): Schema
+    public static function __set_state($an_array): self
     {
         $schema = new self([]);
         $schema->schema = $an_array['schema'];
@@ -111,11 +112,11 @@ final class Schema implements SchemaInterface
         return $entity;
     }
 
-
     /**
      * Automatically replace class names with their aliases.
      *
      * @param array $schema
+     *
      * @return array Pair of [schema, aliases]
      */
     protected function normalize(array $schema): array
@@ -162,6 +163,7 @@ final class Schema implements SchemaInterface
     /**
      * @param array $relations
      * @param array $aliases
+     *
      * @return \Generator
      */
     private function normalizeRelations(array $relations, array $aliases): \Generator

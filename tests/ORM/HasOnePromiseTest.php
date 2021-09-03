@@ -32,21 +32,21 @@ abstract class HasOnePromiseTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->makeTable('profile', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'image'   => 'string'
+            'image' => 'string',
         ]);
 
         $this->makeTable('nested', [
-            'id'         => 'primary',
+            'id' => 'primary',
             'profile_id' => 'integer',
-            'label'      => 'string'
+            'label' => 'string',
         ]);
 
         $this->makeFK('profile', 'user_id', 'user', 'id');
@@ -76,58 +76,58 @@ abstract class HasOnePromiseTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'profile' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Profile::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Profile::class => [
-                Schema::ROLE         => 'profile',
-                Schema::MAPPER       => Mapper::class,
-                Schema::DATABASE     => 'default',
-                Schema::TABLE        => 'profile',
-                Schema::PRIMARY_KEY  => 'id',
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
+                Schema::PRIMARY_KEY => 'id',
                 Schema::FIND_BY_KEYS => ['user_id'],
-                Schema::COLUMNS      => ['id', 'user_id', 'image'],
-                Schema::SCHEMA       => [],
-                Schema::RELATIONS    => [
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'nested' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Nested::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'profile_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
-            Nested::class  => [
-                Schema::ROLE        => 'nested',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'nested',
+            Nested::class => [
+                Schema::ROLE => 'nested',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'nested',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'profile_id', 'label'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'profile_id', 'label'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 
@@ -138,21 +138,21 @@ abstract class HasOnePromiseTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
                 'profile' => [
-                    'id'      => 1,
+                    'id' => 1,
                     'user_id' => 1,
-                    'image'   => 'image.png'
-                ]
+                    'image' => 'image.png',
+                ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
-                'profile' => null
-            ]
+                'profile' => null,
+            ],
         ], $selector->fetchData());
     }
 
@@ -212,7 +212,7 @@ abstract class HasOnePromiseTest extends BaseTest
         $this->assertInstanceOf(PromiseInterface::class, $b->profile);
 
         $this->assertEquals([
-            'user_id' => 1
+            'user_id' => 1,
         ], $a->profile->__scope());
     }
 

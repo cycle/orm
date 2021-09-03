@@ -51,8 +51,8 @@ class UserSnapshotMapper extends Mapper
             $this->source->getDatabase(),
             'user_snapshots',
             $data + [
-                'at'     => new \DateTimeImmutable(),
-                'action' => $action
+                'at' => new \DateTimeImmutable(),
+                'action' => $action,
             ]
         );
 

@@ -25,7 +25,7 @@ class NodeTest extends TestCase
 
         $data = [
             [1, 'email@gmail.com'],
-            [2, 'other@gmail.com']
+            [2, 'other@gmail.com'],
         ];
 
         foreach ($data as $row) {
@@ -34,13 +34,13 @@ class NodeTest extends TestCase
 
         $this->assertSame([
             [
-                'id'    => 1,
-                'email' => 'email@gmail.com'
+                'id' => 1,
+                'email' => 'email@gmail.com',
             ],
             [
-                'id'    => 2,
-                'email' => 'other@gmail.com'
-            ]
+                'id' => 2,
+                'email' => 'other@gmail.com',
+            ],
         ], $node->getResult());
     }
 
@@ -61,13 +61,13 @@ class NodeTest extends TestCase
 
         $this->assertSame([
             [
-                'id'    => 1,
-                'email' => 'email@gmail.com'
+                'id' => 1,
+                'email' => 'email@gmail.com',
             ],
             [
-                'id'    => 2,
-                'email' => 'other@gmail.com'
-            ]
+                'id' => 2,
+                'email' => 'other@gmail.com',
+            ],
         ], $node->getResult());
     }
 
@@ -93,27 +93,27 @@ class NodeTest extends TestCase
 
         $this->assertSame([
             [
-                'id'      => 1,
-                'email'   => 'email@gmail.com',
+                'id' => 1,
+                'email' => 'email@gmail.com',
                 'balance' => [
-                    'id'      => 1,
+                    'id' => 1,
                     'user_id' => 1,
-                    'balance' => 100
-                ]
+                    'balance' => 100,
+                ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'other@gmail.com',
+                'id' => 2,
+                'email' => 'other@gmail.com',
                 'balance' => [
-                    'id'      => 2,
+                    'id' => 2,
                     'user_id' => 2,
-                    'balance' => 200
-                ]
+                    'balance' => 200,
+                ],
             ],
             [
-                'id'      => 3,
-                'email'   => 'third@gmail.com',
-                'balance' => null
+                'id' => 3,
+                'email' => 'third@gmail.com',
+                'balance' => null,
             ],
         ], $node->getResult());
     }
@@ -177,7 +177,7 @@ class NodeTest extends TestCase
 
         $childData = [
             [1, 1, 100],
-            [2, 2, 200]
+            [2, 2, 200],
         ];
 
         foreach ($childData as $row) {
@@ -186,31 +186,30 @@ class NodeTest extends TestCase
 
         $this->assertSame([
             [
-                'id'      => 1,
-                'email'   => 'email@gmail.com',
+                'id' => 1,
+                'email' => 'email@gmail.com',
                 'balance' => [
-                    'id'      => 1,
+                    'id' => 1,
                     'user_id' => 1,
-                    'balance' => 100
-                ]
+                    'balance' => 100,
+                ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'other@gmail.com',
+                'id' => 2,
+                'email' => 'other@gmail.com',
                 'balance' => [
-                    'id'      => 2,
+                    'id' => 2,
                     'user_id' => 2,
-                    'balance' => 200
-                ]
+                    'balance' => 200,
+                ],
             ],
             [
-                'id'      => 3,
-                'email'   => 'third@gmail.com',
-                'balance' => null
+                'id' => 3,
+                'email' => 'third@gmail.com',
+                'balance' => null,
             ],
         ], $node->getResult());
     }
-
 
     public function testSingularInvalidReference(): void
     {
@@ -236,7 +235,7 @@ class NodeTest extends TestCase
 
         $childData = [
             [1, 1, 100],
-            [2, -1, 200]
+            [2, -1, 200],
         ];
 
         foreach ($childData as $row) {
@@ -279,7 +278,6 @@ class NodeTest extends TestCase
 
         $this->assertInstanceOf(SingularNode::class, $node->getNode('balance'));
     }
-
 
     public function testGetUndefinedNode(): void
     {
@@ -327,36 +325,36 @@ class NodeTest extends TestCase
 
         $this->assertSame([
             [
-                'id'    => 1,
+                'id' => 1,
                 'email' => 'email@gmail.com',
                 'lines' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
-                        'value'   => 100
-                    ]
-                ]
+                        'value' => 100,
+                    ],
+                ],
             ],
             [
-                'id'    => 2,
+                'id' => 2,
                 'email' => 'other@gmail.com',
                 'lines' => [
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 2,
-                        'value'   => 200
+                        'value' => 200,
                     ],
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 2,
-                        'value'   => 300
-                    ]
-                ]
+                        'value' => 300,
+                    ],
+                ],
             ],
             [
-                'id'    => 3,
+                'id' => 3,
                 'email' => 'third@gmail.com',
-                'lines' => []
+                'lines' => [],
             ],
         ], $node->getResult());
     }
@@ -385,7 +383,7 @@ class NodeTest extends TestCase
 
         $childData = [
             [1, 1, 100],
-            [2, -1, 200]
+            [2, -1, 200],
         ];
 
         foreach ($childData as $row) {

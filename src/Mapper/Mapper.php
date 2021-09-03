@@ -85,6 +85,7 @@ class Mapper extends DatabaseMapper
      * Get entity columns.
      *
      * @param object $entity
+     *
      * @return array
      */
     protected function fetchFields($entity): array
@@ -109,6 +110,7 @@ class Mapper extends DatabaseMapper
      * Classname to represent entity.
      *
      * @param array $data
+     *
      * @return string
      */
     protected function resolveClass(array $data): string

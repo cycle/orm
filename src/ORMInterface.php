@@ -26,7 +26,8 @@ interface ORMInterface extends SourceProviderInterface
     /**
      * Automatically resolve role based on object name.
      *
-     * @param string|object $entity
+     * @param object|string $entity
+     *
      * @return string
      */
     public function resolveRole($entity): string;
@@ -37,6 +38,7 @@ interface ORMInterface extends SourceProviderInterface
      * @param string $role
      * @param array  $scope KV pair to locate the model, currently only support one pair.
      * @param bool   $load
+     *
      * @return object|null
      */
     public function get(string $role, array $scope, bool $load = true);
@@ -48,6 +50,7 @@ interface ORMInterface extends SourceProviderInterface
      * @param string $role
      * @param array  $data
      * @param int    $node
+     *
      * @return object|null
      */
     public function make(string $role, array $data = [], int $node = Node::NEW);
@@ -57,7 +60,8 @@ interface ORMInterface extends SourceProviderInterface
      *
      * @param string $role
      * @param array  $scope
-     * @return ReferenceInterface|mixed|null
+     *
+     * @return mixed|ReferenceInterface|null
      */
     public function promise(string $role, array $scope);
 
@@ -85,7 +89,8 @@ interface ORMInterface extends SourceProviderInterface
     /**
      * Get mapper associated with given entity class, role or instance.
      *
-     * @param string|object $entity
+     * @param object|string $entity
+     *
      * @return MapperInterface
      */
     public function getMapper($entity): MapperInterface;
@@ -93,7 +98,8 @@ interface ORMInterface extends SourceProviderInterface
     /**
      * Get repository associated with given entity.
      *
-     * @param string|object $entity
+     * @param object|string $entity
+     *
      * @return RepositoryInterface
      */
     public function getRepository($entity): RepositoryInterface;
@@ -103,6 +109,7 @@ interface ORMInterface extends SourceProviderInterface
      *
      * @param object $entity
      * @param int    $mode
+     *
      * @return ContextCarrierInterface
      */
     public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface;
@@ -112,6 +119,7 @@ interface ORMInterface extends SourceProviderInterface
      *
      * @param object $entity
      * @param int    $mode
+     *
      * @return CommandInterface
      */
     public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface;

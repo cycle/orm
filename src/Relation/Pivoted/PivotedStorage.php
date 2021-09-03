@@ -52,6 +52,7 @@ final class PivotedStorage
      * Check if entity belongs to the storage.
      *
      * @param object $entity
+     *
      * @return bool
      */
     public function has($entity)
@@ -63,6 +64,7 @@ final class PivotedStorage
      * Get entity context.
      *
      * @param object $entity
+     *
      * @return mixed|null
      */
     public function get($entity)

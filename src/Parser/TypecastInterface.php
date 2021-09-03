@@ -22,9 +22,10 @@ interface TypecastInterface
      * Typecast key-values into internal representation.
      *
      * @param array $values
-     * @return array
      *
      * @throws TypecastException
+     *
+     * @return array
      */
     public function cast(array $values): array;
 }

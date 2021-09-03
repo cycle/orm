@@ -24,8 +24,8 @@ use Cycle\ORM\Select\SourceProviderInterface;
 
 abstract class AbstractRelation implements RelationInterface
 {
-    use Traits\ContextTrait;
     use Relation\Traits\NodeTrait;
+    use Traits\ContextTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;
@@ -67,7 +67,7 @@ abstract class AbstractRelation implements RelationInterface
     public function __toString()
     {
         // this is incorrect class
-        return sprintf('%s(%s)->%s', $this->name, get_class($this), $this->target);
+        return sprintf('%s(%s)->%s', $this->name, static::class, $this->target);
     }
 
     /**
@@ -124,6 +124,7 @@ abstract class AbstractRelation implements RelationInterface
      * Get the source associated with the role.
      *
      * @param string|null $role
+     *
      * @return SourceInterface
      */
     protected function getSource(string $role = null): SourceInterface
@@ -135,6 +136,7 @@ abstract class AbstractRelation implements RelationInterface
      * Get the mapper associated with a role.
      *
      * @param string|null $role
+     *
      * @return MapperInterface
      */
     protected function getMapper(string $role = null): MapperInterface
@@ -145,6 +147,7 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * @param Node   $node
      * @param string $field
+     *
      * @return string
      */
     protected function columnName(Node $node, string $field): string
@@ -170,6 +173,7 @@ abstract class AbstractRelation implements RelationInterface
      * Resolve the reference to the object.
      *
      * @param ReferenceInterface $reference
+     *
      * @return mixed|null
      */
     protected function resolve(ReferenceInterface $reference)

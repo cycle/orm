@@ -30,18 +30,18 @@ abstract class EmbeddedLoaderTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'               => 'primary',
-            'email'            => 'string',
-            'balance'          => 'float',
-            'creds_username'   => 'string',
-            'creds_password'   => 'string',
-            'creds_num_logins' => 'int'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+            'creds_username' => 'string',
+            'creds_password' => 'string',
+            'creds_num_logins' => 'int',
         ]);
 
         $this->makeTable('comment', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,null',
-            'message' => 'string'
+            'message' => 'string',
         ]);
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
@@ -64,58 +64,58 @@ abstract class EmbeddedLoaderTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class            => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'credentials' => [
-                        Relation::TYPE   => Relation::EMBEDDED,
+                        Relation::TYPE => Relation::EMBEDDED,
                         Relation::TARGET => UserCredentials::class,
-                        Relation::LOAD   => null,
+                        Relation::LOAD => null,
                         Relation::SCHEMA => [],
                     ],
-                    'comments'    => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             UserCredentials::class => [
-                Schema::ROLE        => 'user_credentials',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user_credentials',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => [
-                    'id'         => 'id',
-                    'username'   => 'creds_username',
-                    'password'   => 'creds_password',
-                    'num_logins' => 'creds_num_logins'
+                Schema::COLUMNS => [
+                    'id' => 'id',
+                    'username' => 'creds_username',
+                    'password' => 'creds_password',
+                    'num_logins' => 'creds_num_logins',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
-            Comment::class         => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::CONSTRAIN   => SortByIDConstrain::class
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::CONSTRAIN => SortByIDConstrain::class,
+            ],
         ]));
     }
 
@@ -125,15 +125,15 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
-            ]
+            ],
         ], $selector->fetchData());
     }
 
@@ -144,160 +144,160 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'          => 1,
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'credentials' => [
-                    'username'   => 'user1',
-                    'password'   => 'pass1',
-                    'num_logins' => 0
-                ]
+                    'username' => 'user1',
+                    'password' => 'pass1',
+                    'num_logins' => 0,
+                ],
             ],
             [
-                'id'          => 2,
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'credentials' => [
-                    'username'   => 'user2',
-                    'password'   => 'pass2',
-                    'num_logins' => 1
-                ]
-            ]
+                    'username' => 'user2',
+                    'password' => 'pass2',
+                    'num_logins' => 1,
+                ],
+            ],
         ], $selector->fetchData());
     }
 
     public function testLoadDataLoadAutomatically(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class            => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'credentials' => [
-                        Relation::TYPE   => Relation::EMBEDDED,
+                        Relation::TYPE => Relation::EMBEDDED,
                         Relation::TARGET => UserCredentials::class,
-                        Relation::LOAD   => Relation::LOAD_EAGER,
+                        Relation::LOAD => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             UserCredentials::class => [
-                Schema::ROLE        => 'user_credentials',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user_credentials',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => [
-                    'id'         => 'id',
-                    'username'   => 'creds_username',
-                    'password'   => 'creds_password',
-                    'num_logins' => 'creds_num_logins'
+                Schema::COLUMNS => [
+                    'id' => 'id',
+                    'username' => 'creds_username',
+                    'password' => 'creds_password',
+                    'num_logins' => 'creds_num_logins',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
 
         $selector = new Select($this->orm, User::class);
 
         $this->assertEquals([
             [
-                'id'          => 1,
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'credentials' => [
-                    'username'   => 'user1',
-                    'password'   => 'pass1',
-                    'num_logins' => 0
-                ]
+                    'username' => 'user1',
+                    'password' => 'pass1',
+                    'num_logins' => 0,
+                ],
             ],
             [
-                'id'          => 2,
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'credentials' => [
-                    'username'   => 'user2',
-                    'password'   => 'pass2',
-                    'num_logins' => 1
-                ]
-            ]
+                    'username' => 'user2',
+                    'password' => 'pass2',
+                    'num_logins' => 1,
+                ],
+            ],
         ], $selector->fetchData());
     }
 
     public function testLoadDataLoadTypecast(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class            => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::TYPECAST    => [
-                    'id'      => 'int',
-                    'balance' => 'float'
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'balance' => 'float',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'credentials' => [
-                        Relation::TYPE   => Relation::EMBEDDED,
+                        Relation::TYPE => Relation::EMBEDDED,
                         Relation::TARGET => UserCredentials::class,
-                        Relation::LOAD   => Relation::LOAD_EAGER,
+                        Relation::LOAD => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             UserCredentials::class => [
-                Schema::ROLE        => 'user:credentials',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user:credentials',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => [
-                    'id'         => 'int',
-                    'username'   => 'creds_username',
-                    'password'   => 'creds_password',
-                    'num_logins' => 'creds_num_logins'
+                Schema::COLUMNS => [
+                    'id' => 'int',
+                    'username' => 'creds_username',
+                    'password' => 'creds_password',
+                    'num_logins' => 'creds_num_logins',
                 ],
-                Schema::TYPECAST    => [
-                    'num_logins' => 'int'
+                Schema::TYPECAST => [
+                    'num_logins' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
 
         $selector = new Select($this->orm, User::class);
 
         $this->assertSame([
             [
-                'id'          => 1,
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'credentials' => [
-                    'username'   => 'user1',
-                    'password'   => 'pass1',
-                    'num_logins' => 0
-                ]
+                    'username' => 'user1',
+                    'password' => 'pass1',
+                    'num_logins' => 0,
+                ],
             ],
             [
-                'id'          => 2,
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'credentials' => [
-                    'username'   => 'user2',
-                    'password'   => 'pass2',
-                    'num_logins' => 1
-                ]
-            ]
+                    'username' => 'user2',
+                    'password' => 'pass2',
+                    'num_logins' => 1,
+                ],
+            ],
         ], $selector->fetchData());
     }
 
@@ -308,8 +308,8 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
         ], $selector->fetchData());
@@ -324,15 +324,15 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'          => 2,
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'credentials' => [
-                    'username'   => 'user2',
-                    'password'   => 'pass2',
-                    'num_logins' => 1
-                ]
-            ]
+                    'username' => 'user2',
+                    'password' => 'pass2',
+                    'num_logins' => 1,
+                ],
+            ],
         ], $selector->fetchData());
     }
 
@@ -345,42 +345,42 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'          => 1,
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
-                'comments'    => [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                 ],
                 'credentials' => [
-                    'username'   => 'user1',
-                    'password'   => 'pass1',
-                    'num_logins' => 0
+                    'username' => 'user1',
+                    'password' => 'pass1',
+                    'num_logins' => 0,
                 ],
             ],
             [
-                'id'          => 2,
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
-                'comments'    => [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'comments' => [
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 2,
                         'message' => 'msg 3',
                     ],
                 ],
                 'credentials' => [
-                    'username'   => 'user2',
-                    'password'   => 'pass2',
-                    'num_logins' => 1
+                    'username' => 'user2',
+                    'password' => 'pass2',
+                    'num_logins' => 1,
                 ],
             ],
         ], $selector->fetchData());
@@ -395,42 +395,42 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'          => 1,
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
-                'comments'    => [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'comments' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
                         'message' => 'msg 2',
                     ],
                 ],
                 'credentials' => [
-                    'username'   => 'user1',
-                    'password'   => 'pass1',
-                    'num_logins' => 0
+                    'username' => 'user1',
+                    'password' => 'pass1',
+                    'num_logins' => 0,
                 ],
             ],
             [
-                'id'          => 2,
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
-                'comments'    => [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'comments' => [
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 2,
                         'message' => 'msg 3',
                     ],
                 ],
                 'credentials' => [
-                    'username'   => 'user2',
-                    'password'   => 'pass2',
-                    'num_logins' => 1
+                    'username' => 'user2',
+                    'password' => 'pass2',
+                    'num_logins' => 1,
                 ],
             ],
         ], $selector->fetchData());

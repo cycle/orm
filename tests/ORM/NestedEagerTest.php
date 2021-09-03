@@ -31,19 +31,19 @@ abstract class NestedEagerTest extends BaseTest
         $this->makeTable(
             'user',
             [
-                'id'      => 'primary',
-                'email'   => 'string',
-                'balance' => 'float'
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float',
             ]
         );
 
         $this->makeTable(
             'profile',
             [
-                'id'      => 'primary',
+                'id' => 'primary',
                 'user_id' => 'integer,nullable',
-                'image'   => 'string',
-                'label'   => 'string'
+                'image' => 'string',
+                'label' => 'string',
             ]
         );
 
@@ -69,56 +69,56 @@ abstract class NestedEagerTest extends BaseTest
         $this->orm = $this->withSchema(
             new Schema(
                 [
-                    User::class    => [
-                        Schema::ROLE        => 'user',
-                        Schema::MAPPER      => Mapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'user',
+                    User::class => [
+                        Schema::ROLE => 'user',
+                        Schema::MAPPER => Mapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'email', 'balance'],
-                        Schema::SCHEMA      => [],
-                        Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
-                        Schema::RELATIONS   => [
+                        Schema::COLUMNS => ['id', 'email', 'balance'],
+                        Schema::SCHEMA => [],
+                        Schema::TYPECAST => ['id' => 'int', 'balance' => 'float'],
+                        Schema::RELATIONS => [
                             'profile' => [
-                                Relation::TYPE   => Relation::HAS_ONE,
+                                Relation::TYPE => Relation::HAS_ONE,
                                 Relation::TARGET => Profile::class,
-                                Relation::LOAD   => Relation::LOAD_EAGER,
+                                Relation::LOAD => Relation::LOAD_EAGER,
                                 Relation::SCHEMA => [
-                                    Relation::CASCADE   => true,
+                                    Relation::CASCADE => true,
                                     Relation::INNER_KEY => 'id',
                                     Relation::OUTER_KEY => 'user_id',
                                 ],
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                     Profile::class => [
-                        Schema::ROLE        => 'profile',
-                        Schema::MAPPER      => Mapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'profile',
+                        Schema::ROLE => 'profile',
+                        Schema::MAPPER => Mapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'profile',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'user_id', 'image'],
-                        Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int'],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => [
+                        Schema::COLUMNS => ['id', 'user_id', 'image'],
+                        Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [
                             'nested' => [
-                                Relation::TYPE   => Relation::EMBEDDED,
+                                Relation::TYPE => Relation::EMBEDDED,
                                 Relation::TARGET => Nested::class,
-                                Relation::LOAD   => Relation::LOAD_EAGER,
+                                Relation::LOAD => Relation::LOAD_EAGER,
                                 Relation::SCHEMA => [],
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
-                    Nested::class  => [
-                        Schema::ROLE        => 'nested',
-                        Schema::MAPPER      => Mapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'profile',
+                    Nested::class => [
+                        Schema::ROLE => 'nested',
+                        Schema::MAPPER => Mapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'profile',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['label'],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => []
-                    ]
+                        Schema::COLUMNS => ['label'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );
@@ -132,33 +132,33 @@ abstract class NestedEagerTest extends BaseTest
         $this->assertEquals(
             [
                 [
-                    'id'      => 1,
-                    'email'   => 'hello@world.com',
+                    'id' => 1,
+                    'email' => 'hello@world.com',
                     'balance' => 100.0,
                     'profile' => [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
-                        'image'   => 'image.png',
-                        'nested'  => [
+                        'image' => 'image.png',
+                        'nested' => [
                             'label' => 'hello',
                         ],
                     ],
                 ],
                 [
-                    'id'      => 2,
-                    'email'   => 'another@world.com',
+                    'id' => 2,
+                    'email' => 'another@world.com',
                     'balance' => 200.0,
                     'profile' => null,
                 ],
                 [
-                    'id'      => 3,
-                    'email'   => 'third@world.com',
+                    'id' => 3,
+                    'email' => 'third@world.com',
                     'balance' => 150.0,
                     'profile' => [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 3,
-                        'image'   => 'third.png',
-                        'nested'  => [
+                        'image' => 'third.png',
+                        'nested' => [
                             'label' => 'hello3',
                         ],
                     ],
@@ -176,33 +176,33 @@ abstract class NestedEagerTest extends BaseTest
         $this->assertEquals(
             [
                 [
-                    'id'      => 3,
-                    'email'   => 'third@world.com',
+                    'id' => 3,
+                    'email' => 'third@world.com',
                     'balance' => 150.0,
                     'profile' => [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 3,
-                        'image'   => 'third.png',
-                        'nested'  => [
+                        'image' => 'third.png',
+                        'nested' => [
                             'label' => 'hello3',
                         ],
                     ],
                 ],
                 [
-                    'id'      => 2,
-                    'email'   => 'another@world.com',
+                    'id' => 2,
+                    'email' => 'another@world.com',
                     'balance' => 200.0,
                     'profile' => null,
                 ],
                 [
-                    'id'      => 1,
-                    'email'   => 'hello@world.com',
+                    'id' => 1,
+                    'email' => 'hello@world.com',
                     'balance' => 100.0,
                     'profile' => [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
-                        'image'   => 'image.png',
-                        'nested'  => [
+                        'image' => 'image.png',
+                        'nested' => [
                             'label' => 'hello',
                         ],
                     ],

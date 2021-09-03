@@ -20,8 +20,8 @@ use Spiral\Database\DatabaseInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
-    use ScopeTrait;
     use ErrorTrait;
+    use ScopeTrait;
 
     /**
      * @param DatabaseInterface $db

@@ -22,6 +22,7 @@ trait ColumnsTrait
      * Return column name associated with given field.
      *
      * @param string $field
+     *
      * @return string
      */
     public function fieldAlias(string $field): string
@@ -37,6 +38,7 @@ trait ColumnsTrait
      *                               FETCH_NUM mode).
      * @param string      $prefix    Prefix to be added for each column name.
      * @param bool        $overwrite When set to true existed columns will be removed.
+     *
      * @return SelectQuery
      */
     protected function mountColumns(

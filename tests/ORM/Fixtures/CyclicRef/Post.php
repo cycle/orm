@@ -23,7 +23,7 @@ class Post
     /** @var Comment */
     public $lastComment;
 
-    /** @var Comment[]|Collection */
+    /** @var Collection|Comment[] */
     public $comments;
 
     public $created_at;

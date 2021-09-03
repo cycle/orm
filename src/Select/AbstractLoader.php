@@ -43,13 +43,13 @@ use Spiral\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait;
     use AliasTrait;
+    use ChainTrait;
 
     // Loading methods for data loaders.
-    public const INLOAD    = 1;
-    public const POSTLOAD  = 2;
-    public const JOIN      = 3;
+    public const INLOAD = 1;
+    public const POSTLOAD = 2;
+    public const JOIN = 3;
     public const LEFT_JOIN = 4;
 
     /** @var ORMInterface @internal */
@@ -60,7 +60,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var array */
     protected $options = [
-        'load'  => false,
+        'load' => false,
         'scope' => true,
     ];
 
@@ -139,7 +139,7 @@ abstract class AbstractLoader implements LoaderInterface
             throw new LoaderException(
                 sprintf(
                     'Relation %s does not support option: %s',
-                    get_class($this),
+                    static::class,
                     implode(',', $wrong)
                 )
             );
@@ -159,9 +159,10 @@ abstract class AbstractLoader implements LoaderInterface
      * @param array  $options  Loader options (to be applied to last chain element only).
      * @param bool   $join     When set to true loaders will be forced into JOIN mode.
      * @param bool   $load     Load relation data.
-     * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
+     *
+     * @return LoaderInterface Must return loader for a requested relation.
      */
     public function loadRelation(
         string $relation,
@@ -277,6 +278,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * @param SelectQuery $query
+     *
      * @return SelectQuery
      */
     protected function configureQuery(SelectQuery $query): SelectQuery
@@ -298,6 +300,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * @param SelectQuery $query
+     *
      * @return SelectQuery
      */
     abstract protected function applyConstrain(SelectQuery $query): SelectQuery;
@@ -306,6 +309,7 @@ abstract class AbstractLoader implements LoaderInterface
      * Define schema option associated with the entity.
      *
      * @param int $property
+     *
      * @return mixed
      */
     protected function define(int $property)

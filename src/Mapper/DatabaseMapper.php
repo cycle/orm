@@ -172,6 +172,7 @@ abstract class DatabaseMapper implements MapperInterface
      * Get entity columns.
      *
      * @param object $entity
+     *
      * @return array
      */
     abstract protected function fetchFields($entity): array;
@@ -180,6 +181,7 @@ abstract class DatabaseMapper implements MapperInterface
      * Map internal field names to database specific column names.
      *
      * @param array $columns
+     *
      * @return array
      */
     protected function mapColumns(array $columns): array

@@ -19,18 +19,21 @@ class Annotated
 {
     /**
      * @column (type="primary", name="internal_id")
+     *
      * @var int
      */
     protected $id;
 
     /**
      * @column (type="string(32)", name="email_str")
+     *
      * @var string
      */
     protected $email;
 
     /**
      * @hasOne (target="user", nullable=true, cascade=true)
+     *
      * @var User
      */
     protected $user;

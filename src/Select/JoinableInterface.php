@@ -30,6 +30,7 @@ interface JoinableInterface extends LoaderInterface
      *
      * @param SelectQuery $query
      * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
+     *
      * @return SelectQuery
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery;

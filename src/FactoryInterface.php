@@ -28,6 +28,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * @param ORMInterface    $orm
      * @param SchemaInterface $schema
      * @param string          $role
+     *
      * @return MapperInterface
      */
     public function mapper(
@@ -43,6 +44,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * @param SchemaInterface $schema
      * @param string          $role
      * @param string          $relation
+     *
      * @return LoaderInterface
      */
     public function loader(
@@ -52,7 +54,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $relation
     ): LoaderInterface;
 
-
     /**
      * Create repository associated with given role,
      *
@@ -60,6 +61,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * @param SchemaInterface $schema
      * @param string          $role
      * @param Select          $select
+     *
      * @return RepositoryInterface
      */
     public function repository(
@@ -75,6 +77,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * @param ORMInterface    $orm
      * @param SchemaInterface $schema
      * @param string          $role
+     *
      * @return SourceInterface
      */
     public function source(
@@ -90,6 +93,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * @param SchemaInterface $schema
      * @param string          $role
      * @param string          $relation
+     *
      * @return RelationInterface
      */
     public function relation(

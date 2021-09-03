@@ -36,15 +36,15 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'load'    => false,
-        'scope'   => true,
-        'method'  => self::POSTLOAD,
-        'minify'  => true,
-        'as'      => null,
-        'using'   => null,
-        'where'   => null,
+        'load' => false,
+        'scope' => true,
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
+        'where' => null,
         'orderBy' => null,
-        'pivot'   => null,
+        'pivot' => null,
     ];
 
     /** @var PivotLoader */
@@ -73,6 +73,7 @@ class ManyToManyLoader extends JoinableLoader
     /**
      * @param LoaderInterface $parent
      * @param array           $options
+     *
      * @return LoaderInterface
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
@@ -84,7 +85,7 @@ class ManyToManyLoader extends JoinableLoader
         $loader->pivot = $loader->pivot->withContext(
             $loader,
             [
-                'load'   => $loader->isLoaded(),
+                'load' => $loader->isLoaded(),
                 'method' => $options['method'] ?? self::JOIN,
             ] + ($options['pivot'] ?? [])
         );
@@ -97,6 +98,7 @@ class ManyToManyLoader extends JoinableLoader
      * @param array  $options
      * @param bool   $join
      * @param bool   $load
+     *
      * @return LoaderInterface
      */
     public function loadRelation(

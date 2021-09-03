@@ -19,7 +19,7 @@ class WithConstructor
     public $id;
     public $email;
 
-    /** @var Post[]|Collection */
+    /** @var Collection|Post[] */
     public $comments;
 
     public $called;

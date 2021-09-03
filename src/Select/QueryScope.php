@@ -6,6 +6,7 @@ namespace Cycle\ORM\Select;
 
 /**
  * Provides the ability to scope query and load necessary relations into the loader.
+ *
  * @final
  */
 class QueryScope implements ConstrainInterface

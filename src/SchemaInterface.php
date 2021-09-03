@@ -34,8 +34,8 @@ interface SchemaInterface
     public const TYPECAST     = 13;
     public const SCHEMA       = 14;
 
-    /** @deprecated Use {@see SCOPE} instead. */
-    public const CONSTRAIN    = 12;
+    /** @deprecated Use {@see SchemaInterface::SCOPE} instead. */
+    public const CONSTRAIN    = self::SCOPE;
 
     /**
      * Return all roles defined within the schema.

@@ -15,9 +15,9 @@ use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Select\ConstrainInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Repository;
+use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\Container;
@@ -41,7 +41,7 @@ final class Factory implements FactoryInterface
         Schema::REPOSITORY => Repository::class,
         Schema::SOURCE     => Source::class,
         Schema::MAPPER     => Mapper::class,
-        Schema::CONSTRAIN  => null,
+        Schema::SCOPE      => null,
     ];
 
     /**
@@ -194,17 +194,17 @@ final class Factory implements FactoryInterface
             $schema->define($role, Schema::TABLE)
         );
 
-        $constrain = $schema->define($role, Schema::CONSTRAIN) ?? $this->defaults[Schema::CONSTRAIN];
+        $scope = $schema->define($role, Schema::SCOPE) ?? $this->defaults[Schema::SCOPE];
 
-        if ($constrain === null) {
+        if ($scope === null) {
             return $source;
         }
 
-        if (!is_subclass_of($constrain, ConstrainInterface::class)) {
-            throw new TypecastException($constrain . ' does not implement ' . ConstrainInterface::class);
+        if (!is_subclass_of($scope, ScopeInterface::class)) {
+            throw new TypecastException($scope . ' does not implement ' . ScopeInterface::class);
         }
 
-        return $source->withConstrain(is_object($constrain) ? $constrain : $this->factory->make($constrain));
+        return $source->withConstrain(is_object($scope) ? $scope : $this->factory->make($scope));
     }
 
     /**

@@ -18,7 +18,7 @@
     "mockery/mockery": "^1.1",
     "spiral/dumper": "^2.7",
     "ramsey/uuid": "^3.8",
-    "spiral/code-style": "^1.0"
+    "spiral/code-style": "^1.0.6"
   },
   "autoload": {
     "psr-4": {

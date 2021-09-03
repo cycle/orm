@@ -1,42 +1,17 @@
 <?php
-
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
+// phpcs:ignoreFile
 
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-/**
- * Provides the ability to scope query and load necessary relations into the loader.
- */
-final class QueryConstrain implements ConstrainInterface
-{
-    /** @var array */
-    private $where = [];
+\class_alias(QueryScope::class, __NAMESPACE__ . '\QueryConstrain');
 
-    /** @var array */
-    private $orderBy = [];
-
+if (false) {
     /**
-     * @param array $where
-     * @param array $orderBy
+     * @deprecated Use {@see QueryScope} instead.
      */
-    public function __construct(array $where, array $orderBy = [])
+    class QueryConstrain extends QueryScope
     {
-        $this->where = $where;
-        $this->orderBy = $orderBy;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function apply(QueryBuilder $query): void
-    {
-        $query->where($this->where)->orderBy($this->orderBy);
     }
 }

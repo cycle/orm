@@ -24,7 +24,6 @@ use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Spiral\Database\Injection\Parameter;
 use Spiral\Database\Query\SelectQuery;
-use Spiral\Database\StatementInterface;
 
 class ManyToManyLoader extends JoinableLoader
 {
@@ -37,15 +36,15 @@ class ManyToManyLoader extends JoinableLoader
      * @var array
      */
     protected $options = [
-        'load'      => false,
-        'constrain' => true,
-        'method'    => self::POSTLOAD,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null,
-        'where'     => null,
-        'orderBy'   => null,
-        'pivot'     => null,
+        'load'    => false,
+        'scope'   => true,
+        'method'  => self::POSTLOAD,
+        'minify'  => true,
+        'as'      => null,
+        'using'   => null,
+        'where'   => null,
+        'orderBy' => null,
+        'pivot'   => null,
     ];
 
     /** @var PivotLoader */
@@ -78,6 +77,8 @@ class ManyToManyLoader extends JoinableLoader
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
+        $options = $this->prepareOptions($options);
+
         /** @var ManyToManyLoader $loader */
         $loader = parent::withContext($parent, $options);
         $loader->pivot = $loader->pivot->withContext(

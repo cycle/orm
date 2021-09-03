@@ -1,25 +1,17 @@
 <?php
-
-/**
- * Cycle DataMapper ORM
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
+// phpcs:ignoreFile
 
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-/**
- * Provides the ability to modify the selector and/or entity loader. Can be used to implement multi-table inheritance.
- */
-interface ConstrainInterface
-{
+\class_alias(ScopeInterface::class, __NAMESPACE__ . '\ConstrainInterface');
+
+if (false) {
     /**
-     * Configure query and loader pair using proxy strategy.
-     *
-     * @param QueryBuilder $query
+     * @deprecated Use {@see ScopeInterface} instead.
      */
-    public function apply(QueryBuilder $query);
+    interface ConstrainInterface extends ScopeInterface
+    {
+    }
 }

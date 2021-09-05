@@ -76,7 +76,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         throw new LoaderException('Unable to resolve loader alias.');
     }
 
-    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
+    public function withContext(LoaderInterface $parent, array $options = []): static
     {
         /**
          * @var AbstractLoader $parent todo: should move withContext into LoaderInterface?

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
@@ -15,9 +17,6 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Cycle\Database\Injection\Parameter;
-use Cycle\Database\Query\SelectQuery;
-use Cycle\Database\StatementInterface;
 
 class ManyToManyLoader extends JoinableLoader
 {
@@ -58,7 +57,7 @@ class ManyToManyLoader extends JoinableLoader
         $this->pivot = clone $this->pivot;
     }
 
-    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
+    public function withContext(LoaderInterface $parent, array $options = []): static
     {
         /** @var ManyToManyLoader $loader */
         $loader = parent::withContext($parent, $options);

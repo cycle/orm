@@ -68,7 +68,10 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected ?LoaderInterface $parent = null;
 
-    /** @var array<string, array> */
+    /**
+     * Children roles for Joined Table Inheritance
+     * @var array<string, array>
+     */
     protected array $children;
 
     public function __construct(
@@ -80,9 +83,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     final public function __destruct()
     {
-        unset($this->parent, $this->inherit, $this->subclasses);
-        $this->load = [];
-        $this->join = [];
+        unset($this->parent, $this->inherit, $this->subclasses, $this->load, $this->join);
     }
 
     /**
@@ -125,7 +126,7 @@ abstract class AbstractLoader implements LoaderInterface
         return $this->orm->getSource($this->target);
     }
 
-    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
+    public function withContext(LoaderInterface $parent, array $options = []): static
     {
         // check that given options are known
         if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
@@ -219,11 +220,6 @@ abstract class AbstractLoader implements LoaderInterface
             if ($this->inherit instanceof self) {
                 return $this->inherit->loadRelation($relation, $options, $join, $load);
             }
-            // foreach ($this->subclasses as $loader) {
-            //     if ($loader instanceof ParentLoader) {
-            //         return $loader->loadRelation($relation, $options, $join, $load);
-            //     }
-            // }
             throw new LoaderException(
                 sprintf('Unable to create loader: %s', $e->getMessage()),
                 $e->getCode(),

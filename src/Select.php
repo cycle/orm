@@ -132,6 +132,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
+     * todo Stringable
      * @psalm-param string|int|list<string|int>|Parameter ...$ids
      * @return $this
      */

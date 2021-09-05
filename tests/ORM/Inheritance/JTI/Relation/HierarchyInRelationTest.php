@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Inheritance\JTI\Relation;
 
+use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Mapper\PromiseMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
@@ -477,6 +478,21 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         /** @var EBook $ebook */
         $ebook = $entity->tech_book;
         $this->assertCount(3, $ebook->pages);
+    }
+
+    /**
+     * Subclass relations can't be resolved manually
+     */
+    public function testLoadRelationOfSubclass(): void
+    {
+        $this->expectException(LoaderException::class);
+        $this->expectExceptionMessage('Unable to create loader: Undefined relation `human`.`book`.');
+
+        /** @var Programator $entity */
+        (new Select($this->orm, static::HUMAN_ROLE))
+            // Load subclass relation
+            ->load('book')
+            ->wherePK(2)->fetchOne();
     }
 
     public function testLoadBaseClassAndCheckSubclassEagerRelations(): void

@@ -43,6 +43,7 @@ class MorphedHasOne extends HasOne
         $r = $this->orm->promise($this->target, $scope);
         return [$r, $r];
     }
+
     protected function getReferenceScope(Node $node): ?array
     {
         return parent::getReferenceScope($node) + [$this->morphKey => $node->getRole()];

@@ -23,12 +23,12 @@ class ParentLoader extends JoinableLoader
      * Default set of relation options. Child implementation might defined their of default options.
      */
     protected array $options = [
-        'load'      => true,
+        'load' => true,
         'constrain' => true,
-        'method'    => self::INLOAD,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null,
+        'method' => self::INLOAD,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
     ];
 
     public function __construct(ORMInterface $orm, string $role, string $target)

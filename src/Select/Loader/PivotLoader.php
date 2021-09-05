@@ -24,12 +24,12 @@ class PivotLoader extends JoinableLoader
      * Default set of relation options. Child implementation might defined their of default options.
      */
     protected array $options = [
-        'load'      => false,
-        'scope'     => true,
-        'method'    => self::JOIN,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null
+        'load' => false,
+        'scope' => true,
+        'method' => self::JOIN,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
     ];
 
     public function getTable(): string

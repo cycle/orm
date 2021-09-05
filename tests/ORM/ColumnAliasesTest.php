@@ -21,9 +21,9 @@ abstract class ColumnAliasesTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id_int'        => 'primary',
-            'email_str'     => 'string',
-            'balance_float' => 'float'
+            'id_int' => 'primary',
+            'email_str' => 'string',
+            'balance_float' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -36,15 +36,15 @@ abstract class ColumnAliasesTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 

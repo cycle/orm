@@ -59,17 +59,15 @@ class HasMany extends AbstractRelation
                 // $rNode->setRelationStatus($relationName, RelationInterface::STATUS_DEFERRED);
             }
         }
-
     }
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
         if ($tuple->task === Tuple::TASK_STORE) {
             $this->queueStoreAll($pool, $tuple);
-        } else {
-            // todo
-            // $this->queueDelete($pool, $tuple, $related);
         }
+        // todo
+            // $this->queueDelete($pool, $tuple, $related);
     }
 
     private function queueStoreAll(Pool $pool, Tuple $tuple): void
@@ -187,7 +185,7 @@ class HasMany extends AbstractRelation
             $original ?? [],
             $related,
             // static fn(object $a, object $b): int => strcmp(spl_object_hash($a), spl_object_hash($b))
-            static fn(object $a, object $b): int => (int)($a === $b) - 1
+            static fn (object $a, object $b): int => (int)($a === $b) - 1
         );
     }
 }

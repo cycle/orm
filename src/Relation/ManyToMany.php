@@ -161,10 +161,11 @@ class ManyToMany extends Relation\AbstractRelation
 
     public function extract(?iterable $data): PivotedStorage
     {
-        return match(true) {
+        return match (true) {
             $data instanceof PivotedStorage => $data,
             $data instanceof PivotedCollectionInterface => new PivotedStorage(
-                $data->toArray(), $data->getPivotContext()
+                $data->toArray(),
+                $data->getPivotContext()
             ),
             $data instanceof \Doctrine\Common\Collections\Collection => new PivotedStorage($data->toArray()),
             $data === null => new PivotedStorage(),
@@ -233,8 +234,8 @@ class ManyToMany extends Relation\AbstractRelation
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
             'scope' => $this->orm->getSource($this->target)->getScope(),
-            'as'        => $this->target,
-            'method'    => JoinableLoader::POSTLOAD
+            'as' => $this->target,
+            'method' => JoinableLoader::POSTLOAD,
         ]);
 
         $query = $loader->configureQuery($query, [$scope]);

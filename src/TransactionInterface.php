@@ -10,7 +10,7 @@ namespace Cycle\ORM;
 interface TransactionInterface
 {
     // how to store/delete entity
-    public const MODE_CASCADE     = 0;
+    public const MODE_CASCADE = 0;
     public const MODE_ENTITY_ONLY = 1;
 
     /**

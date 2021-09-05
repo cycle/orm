@@ -35,7 +35,7 @@ interface LoaderInterface
      *
      * @throws LoaderException
      */
-    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface;
+    public function withContext(self $parent, array $options = []): self;
 
     /**
      * Create node to represent collected data in a tree form. Nodes can declare dependencies

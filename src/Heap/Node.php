@@ -19,12 +19,12 @@ final class Node implements ConsumerInterface
     use RelationTrait;
 
     // Different entity states in a pool
-    public const NEW              = 1;
-    public const MANAGED          = 2;
+    public const NEW = 1;
+    public const MANAGED = 2;
     public const SCHEDULED_INSERT = 3;
     public const SCHEDULED_UPDATE = 4;
     public const SCHEDULED_DELETE = 5;
-    public const DELETED          = 6;
+    public const DELETED = 6;
 
     private ?State $state = null;
 
@@ -126,7 +126,7 @@ final class Node implements ConsumerInterface
         foreach ($this->state->getRelations() as $name => $relation) {
             if ($relation instanceof ReferenceInterface
                 && isset($relations[$name])
-                && (isset($this->relations[$name]) XOR $this->state->getRelation($name) !== null)
+                && (isset($this->relations[$name]) xor $this->state->getRelation($name) !== null)
             ) {
                 $changes[$name] = $relation->hasValue() ? $relation->getValue() : $relation;
             }

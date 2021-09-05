@@ -27,7 +27,7 @@ abstract class UUIDTypehintTest extends BaseTest
             [
                 'uuid' => 'string(36),primary',
                 'email' => 'string',
-                'balance' => 'float'
+                'balance' => 'float',
             ]
         );
 
@@ -45,8 +45,8 @@ abstract class UUIDTypehintTest extends BaseTest
                             'uuid' => [UuidPrimaryKey::class, 'typecast'],
                         ],
                         Schema::SCHEMA => [],
-                        Schema::RELATIONS => []
-                    ]
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );

@@ -31,26 +31,26 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
+            'id' => 'primary',
+            'email' => 'string',
         ]);
 
         $this->makeTable('post', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'title'   => 'string',
+            'title' => 'string',
         ]);
 
         $this->makeTable('tag', [
-            'id'   => 'primary',
-            'name' => 'string'
+            'id' => 'primary',
+            'name' => 'string',
         ]);
 
         $this->makeTable('tag_post_map', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'post_id' => 'integer',
-            'tag_id'  => 'integer',
-            'as'      => 'string,nullable'
+            'tag_id' => 'integer',
+            'as' => 'string,nullable',
         ]);
 
         $this->makeFK('post', 'user_id', 'user', 'id');
@@ -107,7 +107,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $post->comments = new ArrayCollection(
             [
                 new Tag(),
-                new Tag()
+                new Tag(),
             ]
         );
         $post->comments[0]->name = 'name 1';
@@ -142,7 +142,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $post->comments = new ArrayCollection(
             [
                 new Tag(),
-                new Tag()
+                new Tag(),
             ]
         );
         $post->comments[0]->name = 'name 1';
@@ -178,84 +178,84 @@ abstract class ManyToManyBelongsToTest extends BaseTest
     private function getSchemaArray(): array
     {
         return [
-            User::class       => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email'],
-                Schema::TYPECAST    => [
-                    'id' => 'int'
-                ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ],
-            Post::class       => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'title'],
-                Schema::TYPECAST    => [
+                Schema::COLUMNS => ['id', 'email'],
+                Schema::TYPECAST => [
                     'id' => 'int',
-                    'user_id' => 'int' # todo: in the benches it crashes if comment same line in BelongsTo relation
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'title'],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'user_id' => 'int', // todo: in the benches it crashes if comment same line in BelongsTo relation
+                ],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'user' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::NULLABLE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
                     ],
                     'comments' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TYPE => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE           => true,
-                            Relation::NULLABLE          => true,
-                            Relation::INNER_KEY         => 'id',
-                            Relation::OUTER_KEY         => 'id',
-                            Relation::THROUGH_ENTITY    => 'tag_context',
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::THROUGH_ENTITY => 'tag_context',
                             Relation::THROUGH_INNER_KEY => 'post_id',
                             Relation::THROUGH_OUTER_KEY => 'tag_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
-            Tag::class        => [
-                Schema::ROLE        => 'tag',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag',
+            Tag::class => [
+                Schema::ROLE => 'tag',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE       => SortByIDScope::class
+                Schema::COLUMNS => ['id', 'name'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => SortByIDScope::class,
             ],
             TagContext::class => [
-                Schema::ROLE        => 'tag_context',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag_post_map',
+                Schema::ROLE => 'tag_context',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag_post_map',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'post_id', 'tag_id'],
-                Schema::TYPECAST    => [
+                Schema::COLUMNS => ['id', 'post_id', 'tag_id'],
+                Schema::TYPECAST => [
                     'id' => 'int',
                     'post_id' => 'int',
-                    'tag_id' => 'int'
+                    'tag_id' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ];
     }
 }

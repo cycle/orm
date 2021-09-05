@@ -13,7 +13,6 @@ abstract class OutputNode extends AbstractNode
 {
     /**
      * Array used to aggregate all nested node results in a form of tree.
-     *
      */
     protected array $result = [];
 

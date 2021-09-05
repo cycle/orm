@@ -67,7 +67,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 $this->registerWaitingFields($tuple->state);
 
                 // if ($this->checkNullValuePossibility($tuple)) {
-                    return;
+                return;
                 // }
                 // throw new NullException("Relation {$this} can not be null.");
             }

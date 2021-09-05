@@ -9,15 +9,11 @@ use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Context\ConsumerInterface;
-use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Select;
 use Cycle\ORM\Select\SourceInterface;
 
 /**
@@ -95,7 +91,7 @@ abstract class DatabaseMapper implements MapperInterface
     public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
         $fromData = $state->getTransactionData();
-        \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . \count($node->getChanges()) . "\n";
+        \Cycle\ORM\Transaction\Pool::DEBUG && print 'changes count: ' . \count($node->getChanges()) . "\n";
 
         $update = new Update(
             $this->source->getDatabase(),

@@ -18,7 +18,7 @@ class ClassPropertiesExtractorTest extends TestCase
         $this->extractor = new ClassPropertiesExtractor();
     }
 
-    function testPropertyFromBaseClassShouldBeExtracted()
+    public function testPropertyFromBaseClassShouldBeExtracted()
     {
         $class = User::class;
 
@@ -27,19 +27,19 @@ class ClassPropertiesExtractorTest extends TestCase
         $this->assertEquals([
             '' => [
                 'id' => 'id',
-                'comments' => 'comments'
+                'comments' => 'comments',
             ],
             'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
                 'email' => 'email',
-            ]
+            ],
         ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
-    function testPropertyFromBaseClassWithRelationsShouldBeExtracted()
+    public function testPropertyFromBaseClassWithRelationsShouldBeExtracted()
     {
         $class = User::class;
 
@@ -47,22 +47,22 @@ class ClassPropertiesExtractorTest extends TestCase
 
         $this->assertEquals([
             '' => [
-                'id' => 'id'
+                'id' => 'id',
             ],
             'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
                 'email' => 'email',
-            ]
+            ],
         ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
             '' => [
-                'comments' => 'comments'
-            ]
+                'comments' => 'comments',
+            ],
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
-    function testPropertyFromExtendedClassShouldBeExtracted()
+    public function testPropertyFromExtendedClassShouldBeExtracted()
     {
         $class = SuperUser::class;
 
@@ -73,7 +73,7 @@ class ClassPropertiesExtractorTest extends TestCase
                 'id' => 'id',
                 'age' => 'age',
                 'totalLogin' => 'totalLogin',
-                'comments' => 'comments'
+                'comments' => 'comments',
             ],
             'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
@@ -86,15 +86,14 @@ class ClassPropertiesExtractorTest extends TestCase
             ],
             'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\SuperUser' => [
                 'isAdmin' => 'isAdmin',
-            ]
+            ],
         ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
-
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
-    function testPropertyFromExtendedClassWithRelationsShouldBeExtracted()
+    public function testPropertyFromExtendedClassWithRelationsShouldBeExtracted()
     {
         $class = SuperUser::class;
 
@@ -104,7 +103,7 @@ class ClassPropertiesExtractorTest extends TestCase
             '' => [
                 'id' => 'id',
                 'age' => 'age',
-                'totalLogin' => 'totalLogin'
+                'totalLogin' => 'totalLogin',
             ],
             'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
                 'username' => 'username',
@@ -116,12 +115,12 @@ class ClassPropertiesExtractorTest extends TestCase
             ],
             'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\SuperUser' => [
                 'isAdmin' => 'isAdmin',
-            ]
+            ],
         ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
 
         $this->assertEquals([
             '' => [
-                'comments' => 'comments'
+                'comments' => 'comments',
             ],
             'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\ExtendedUser' => [
                 'tags' => 'tags',

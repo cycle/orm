@@ -24,9 +24,9 @@ abstract class InverseRelationTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -38,9 +38,9 @@ abstract class InverseRelationTest extends BaseTest
         );
 
         $this->makeTable('profile', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'image'   => 'string'
+            'image' => 'string',
         ]);
 
         $this->makeFK('profile', 'user_id', 'user', 'id');
@@ -55,47 +55,47 @@ abstract class InverseRelationTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'profile' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
+                    ],
                 ],
-                Schema::SCOPE   => SortByIDScope::class
+                Schema::SCOPE => SortByIDScope::class,
             ],
             Profile::class => [
-                Schema::ROLE        => 'profile',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'profile',
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'image'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'user' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
                     ],
                 ],
-                Schema::SCOPE   => SortByIDScope::class
+                Schema::SCOPE => SortByIDScope::class,
             ],
         ]));
     }
@@ -107,31 +107,31 @@ abstract class InverseRelationTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
                 'profile' => [
-                    'id'      => 1,
+                    'id' => 1,
                     'user_id' => 1,
-                    'image'   => 'image.png',
-                    'user'    => [
-                        'id'      => 1,
-                        'email'   => 'hello@world.com',
-                        'balance' => 100.0
+                    'image' => 'image.png',
+                    'user' => [
+                        'id' => 1,
+                        'email' => 'hello@world.com',
+                        'balance' => 100.0,
                     ],
                 ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
                 'profile' => [
-                    'id'      => 2,
+                    'id' => 2,
                     'user_id' => 2,
-                    'image'   => 'second.png',
-                    'user'    => [
-                        'id'      => 2,
-                        'email'   => 'another@world.com',
+                    'image' => 'second.png',
+                    'user' => [
+                        'id' => 2,
+                        'email' => 'another@world.com',
                         'balance' => 200.0,
                     ],
                 ],

@@ -19,25 +19,35 @@ abstract class SimpleTest extends StiBaseTest
      */
     protected static string $discriminator = 'discriminator_value';
     protected const
-        BASE_ROLE = 'employee',
-        MANAGER_ROLE = 'manager',
-
-        EMPLOYEE_VALUE = 'employee',
-        MANAGER_VALUE = 'manager',
-
-        EMPLOYEE_1 = ['_type' => self::MANAGER_VALUE, 'name' => 'John', 'email' => 'captain@black.sea', 'age' => 38],
-        EMPLOYEE_2 = ['_type' => self::EMPLOYEE_VALUE, 'name' => 'Anton', 'email' => 'antonio@mail.org', 'age' => 35],
-        EMPLOYEE_3 = ['_type' => self::MANAGER_VALUE, 'name' => 'Kentarius', 'email' => 'grove@save.com', 'age' => 27],
-        EMPLOYEE_4 = ['_type' => null, 'name' => 'Max', 'email' => 'valhall@go.to', 'age' => 32],
-
-        EMPLOYEE_1_LOADED = ['id' => 1] + self::EMPLOYEE_1,
-        EMPLOYEE_2_LOADED = ['id' => 2] + self::EMPLOYEE_2,
-        EMPLOYEE_3_LOADED = ['id' => 3] + self::EMPLOYEE_3,
-        EMPLOYEE_4_LOADED = ['id' => 4] + self::EMPLOYEE_4,
-
-        EMPLOYEE_LOADED_ALL = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED],
+        BASE_ROLE = 'employee';
+    protected const
+        MANAGER_ROLE = 'manager';
+    protected const
+        EMPLOYEE_VALUE = 'employee';
+    protected const
+        MANAGER_VALUE = 'manager';
+    protected const
+        EMPLOYEE_1 = ['_type' => self::MANAGER_VALUE, 'name' => 'John', 'email' => 'captain@black.sea', 'age' => 38];
+    protected const
+        EMPLOYEE_2 = ['_type' => self::EMPLOYEE_VALUE, 'name' => 'Anton', 'email' => 'antonio@mail.org', 'age' => 35];
+    protected const
+        EMPLOYEE_3 = ['_type' => self::MANAGER_VALUE, 'name' => 'Kentarius', 'email' => 'grove@save.com', 'age' => 27];
+    protected const
+        EMPLOYEE_4 = ['_type' => null, 'name' => 'Max', 'email' => 'valhall@go.to', 'age' => 32];
+    protected const
+        EMPLOYEE_1_LOADED = ['id' => 1] + self::EMPLOYEE_1;
+    protected const
+        EMPLOYEE_2_LOADED = ['id' => 2] + self::EMPLOYEE_2;
+    protected const
+        EMPLOYEE_3_LOADED = ['id' => 3] + self::EMPLOYEE_3;
+    protected const
+        EMPLOYEE_4_LOADED = ['id' => 4] + self::EMPLOYEE_4;
+    protected const
+        EMPLOYEE_LOADED_ALL = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_2_LOADED, self::EMPLOYEE_3_LOADED, self::EMPLOYEE_4_LOADED];
+    protected const
         // Filtered on discriminator value
-        EMPLOYEES_LOADED_ALL = [self::EMPLOYEE_2_LOADED, self::EMPLOYEE_4_LOADED],
+        EMPLOYEES_LOADED_ALL = [self::EMPLOYEE_2_LOADED, self::EMPLOYEE_4_LOADED];
+    protected const
         MANAGERS_LOADED_ALL = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_3_LOADED];
 
     public function setUp(): void
@@ -63,19 +73,19 @@ abstract class SimpleTest extends StiBaseTest
     protected function getSchemaArray(): array
     {
         return [
-            static::BASE_ROLE  => [
-                SchemaInterface::ENTITY      => Employee::class,
-                SchemaInterface::CHILDREN    => [
-                    static::MANAGER_VALUE => Manager::class
+            static::BASE_ROLE => [
+                SchemaInterface::ENTITY => Employee::class,
+                SchemaInterface::CHILDREN => [
+                    static::MANAGER_VALUE => Manager::class,
                 ],
-                SchemaInterface::MAPPER      => Mapper::class,
-                SchemaInterface::DATABASE    => 'default',
-                SchemaInterface::TABLE       => 'employee_table',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'employee_table',
                 SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS     => ['id', '_type' => static::$discriminator, 'name', 'email', 'age'],
-                SchemaInterface::TYPECAST    => ['id' => 'int', 'age' => 'int'],
-                SchemaInterface::SCHEMA      => [],
-                SchemaInterface::RELATIONS   => [],
+                SchemaInterface::COLUMNS => ['id', '_type' => static::$discriminator, 'name', 'email', 'age'],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'age' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
             self::MANAGER_ROLE => [
                 SchemaInterface::ENTITY => Manager::class,

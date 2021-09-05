@@ -20,21 +20,23 @@ class User implements ImagedInterface
 
     /**
      * @invisible
+     *
      * @var Comment
      */
     public $lastComment;
 
     /**
-     * @var Comment[]|Collection
+     * @var Collection|Comment[]
      */
     public $comments;
 
-    /** @var Tag[]|Collection */
+    /** @var Collection|Tag[] */
     public $tags;
 
     /**
      * @invisible
-     * @var Comment[]|Collection
+     *
+     * @var Collection|Comment[]
      */
     public $favorites;
 
@@ -47,7 +49,7 @@ class User implements ImagedInterface
     /** @var Image */
     public $image;
 
-    /** @var Post[]|Collection */
+    /** @var Collection|Post[] */
     public $posts;
 
     /** @var \DateTimeInterface */

@@ -162,9 +162,9 @@ class ProxyEntityFactory
     }
 
     /**
-     * @return PropertyMap[]
-     *
      * @throws \ReflectionException
+     *
+     * @return PropertyMap[]
      */
     private function getEntityProperties(object $entity, RelationMap $relMap): array
     {

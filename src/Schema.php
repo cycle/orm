@@ -29,7 +29,7 @@ final class Schema implements SchemaInterface
         [$this->schema, $this->aliases] = $this->normalize($schema);
     }
 
-    public static function __set_state(array $an_array): Schema
+    public static function __set_state(array $an_array): self
     {
         $schema = new self([]);
         $schema->schema = $an_array['schema'];
@@ -313,7 +313,7 @@ final class Schema implements SchemaInterface
     ): ?string {
         $nullable = $relation[Relation::SCHEMA][Relation::NULLABLE] ?? null;
         /** @var callable $compareCallback */
-        $compareCallback = match($relation[Relation::TYPE]) {
+        $compareCallback = match ($relation[Relation::TYPE]) {
             Relation::MANY_TO_MANY => [$this, 'compareManyToMany'],
             // Relation::HAS_ONE, Relation::HAS_MANY => $nullable === true ? Relation::REFERS_TO : Relation::BELONGS_TO,
             default => null,
@@ -345,7 +345,7 @@ final class Schema implements SchemaInterface
         $schema = $relation[Relation::SCHEMA];
         $targetSchema = $targetRelation[Relation::SCHEMA];
         // MTM connects with MTM only
-        if ($targetRelation[Relation::TYPE] !== Relation::MANY_TO_MANY){
+        if ($targetRelation[Relation::TYPE] !== Relation::MANY_TO_MANY) {
             return false;
         }
         // Pivot entity should be same
@@ -358,11 +358,11 @@ final class Schema implements SchemaInterface
             return false;
         }
         // Optional fields
-        if (($schema[Relation::WHERE] ?? []) !== ($targetSchema[Relation::WHERE] ?? [])
-            || ($schema[Relation::THROUGH_WHERE] ?? []) !== ($targetSchema[Relation::THROUGH_WHERE] ?? [])) {
-            return false;
-        }
-        return true;
+        return ! (($schema[Relation::WHERE] ?? []) !== ($targetSchema[Relation::WHERE] ?? [])
+            || ($schema[Relation::THROUGH_WHERE] ?? []) !== ($targetSchema[Relation::THROUGH_WHERE] ?? []))
+
+
+         ;
     }
 
     /**

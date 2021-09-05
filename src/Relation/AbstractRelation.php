@@ -19,7 +19,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
      * Additional target roles: class-name of the primary role, roles and classes of primary role parents if the primary
      * role has parents
      *
-     * @var string[]|class-string[]
+     * @var class-string[]|string[]
      */
     protected array $targets = [];
 

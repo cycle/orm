@@ -19,21 +19,28 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
     use TableTrait;
 
     protected const
-        CHILD_CONTAINER = 'child_entity',
-        CHILD_ROLE = 'parent_entity:' . self::CHILD_CONTAINER,
-
-        KEY_1 = ['key1' => 1, 'key2' => 1],
-        KEY_2 = ['key1' => 1, 'key2' => 2],
-        KEY_3 = ['key1' => 2, 'key2' => 1],
-
-        PARENT_1 = ['key3' => 1],
-        PARENT_2 = ['key3' => 2],
-        PARENT_3 = ['key3' => 3],
-
-        CHILD_1 = ['key3' => 'foo'],
-        CHILD_2 = ['key3' => 'bar'],
-        CHILD_3 = ['key3' => 'baz'],
-
+        CHILD_CONTAINER = 'child_entity';
+    protected const
+        CHILD_ROLE = 'parent_entity:' . self::CHILD_CONTAINER;
+    protected const
+        KEY_1 = ['key1' => 1, 'key2' => 1];
+    protected const
+        KEY_2 = ['key1' => 1, 'key2' => 2];
+    protected const
+        KEY_3 = ['key1' => 2, 'key2' => 1];
+    protected const
+        PARENT_1 = ['key3' => 1];
+    protected const
+        PARENT_2 = ['key3' => 2];
+    protected const
+        PARENT_3 = ['key3' => 3];
+    protected const
+        CHILD_1 = ['key3' => 'foo'];
+    protected const
+        CHILD_2 = ['key3' => 'bar'];
+    protected const
+        CHILD_3 = ['key3' => 'baz'];
+    protected const
         ALL_LOADED = [
             self::KEY_1 + self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1],
             self::KEY_2 + self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2],
@@ -70,22 +77,22 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
     {
         return [
             CompositePK::class => [
-                Schema::ROLE        => 'parent_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'parent_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'parent_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'parent_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'key1' => 'pField1',
                     'key2' => 'pField2',
                     'key3' => 'pField3',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                     'key3' => 'int',
                 ],
-                Schema::SCHEMA      => [],
+                Schema::SCHEMA => [],
                 Schema::RELATIONS => [
                     self::CHILD_CONTAINER => [
                         Relation::TYPE => Relation::EMBEDDED,
@@ -93,25 +100,25 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
                         Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [],
                     ],
-                ]
+                ],
             ],
             CompositePKChild::class => [
-                Schema::ROLE        => self::CHILD_ROLE,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'parent_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => self::CHILD_ROLE,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'parent_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
-                    'key1'        => 'pField1',
-                    'key2'        => 'pField2',
-                    'key3'        => 'cField3',
+                Schema::COLUMNS => [
+                    'key1' => 'pField1',
+                    'key2' => 'pField2',
+                    'key3' => 'cField3',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
         ];
     }

@@ -17,9 +17,9 @@ class ClassPropertiesExtractor
      *
      * @param string[] $relations
      *
-     * @return array<string, ReflectionClass>
-     *
      * @throws \ReflectionException
+     *
+     * @return array<string, ReflectionClass>
      */
     public function extract(string|object $objectOrClass, array $relations): array
     {

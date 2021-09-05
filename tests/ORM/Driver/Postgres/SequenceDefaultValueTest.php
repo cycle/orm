@@ -12,7 +12,6 @@ use Cycle\ORM\Tests\Fixtures\NotDeletedScope;
 use Cycle\ORM\Tests\Fixtures\SequenceDefaultValueMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 
 class SequenceDefaultValueTest extends BaseTest
 {
@@ -52,12 +51,12 @@ class SequenceDefaultValueTest extends BaseTest
                             'id' => 'int',
                             'balance' => 'float',
                             'user_code' => 'int',
-                            'deleted_at' => 'datetime'
+                            'deleted_at' => 'datetime',
                         ],
                         Schema::SCHEMA => [],
                         Schema::RELATIONS => [],
-                        Schema::SCOPE => NotDeletedScope::class
-                    ]
+                        Schema::SCOPE => NotDeletedScope::class,
+                    ],
                 ]
             )
         );

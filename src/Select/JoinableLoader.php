@@ -26,25 +26,25 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     protected array $options = [
         // load relation data
-        'load'      => false,
+        'load' => false,
 
         // true or instance to enable, false or null to disable
         'scope' => true,
 
         // scope to be used for the relation
-        'method'    => null,
+        'method' => null,
 
         // load method, see AbstractLoader constants
-        'minify'    => true,
+        'minify' => true,
 
         // when true all loader columns will be minified (only for loading)
-        'as'        => null,
+        'as' => null,
 
         // table alias
-        'using'     => null,
+        'using' => null,
 
         // alias used by another relation
-        'where'     => null,
+        'where' => null,
 
         // where conditions (if any)
     ];

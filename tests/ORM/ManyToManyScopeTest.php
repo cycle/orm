@@ -24,22 +24,22 @@ abstract class ManyToManyScopeTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->makeTable('tag', [
-            'id'    => 'primary',
+            'id' => 'primary',
             'level' => 'integer',
-            'name'  => 'string'
+            'name' => 'string',
         ]);
 
         $this->makeTable('tag_user_map', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'tag_id'  => 'integer',
-            'as'      => 'string,nullable'
+            'tag_id' => 'integer',
+            'as' => 'string,nullable',
         ]);
 
         $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
@@ -148,7 +148,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -168,7 +168,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
-            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -195,7 +195,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testWithOrderByAsc(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -222,7 +222,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testWithOrderByDesc(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'DESC']],
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'DESC']],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -249,7 +249,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testWithOrderByInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -259,7 +259,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -278,7 +278,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testWithOrderByPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -307,7 +307,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testWithOrderByAltered(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCHEMA  => [Relation::ORDER_BY => ['@.level' => 'DESC']],
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'DESC']],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -344,7 +344,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -422,7 +422,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -447,7 +447,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testWithOrderByAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::SCHEMA  => [
+            Relation::SCHEMA => [
                 Relation::WHERE => ['@.level' => ['>=' => 3]],
                 Relation::ORDER_BY => ['@.level' => 'ASC'],
             ],
@@ -476,7 +476,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -502,7 +502,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -512,7 +512,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(2, $a->tags);
@@ -530,7 +530,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -540,7 +540,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'method' => Select\JoinableLoader::INLOAD
+            'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(2, $a->tags);
@@ -558,7 +558,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -586,7 +586,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -614,7 +614,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -624,7 +624,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'where' => ['@.level' => 1]
+            'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->tags);
@@ -637,7 +637,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     {
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
-            Relation::SCHEMA  => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -648,7 +648,7 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD,
-            'where'  => ['@.level' => 1]
+            'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->tags);
@@ -673,13 +673,13 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withTagSchema([
-            Relation::WHERE => ['@.level' => ['>=' => 6]]
+            Relation::WHERE => ['@.level' => ['>=' => 6]],
         ]);
 
         $selector = new Select($this->orm, User::class);
 
         $res = $selector->with('tags', [
-            'where' => ['@.level' => ['>=' => 5]]
+            'where' => ['@.level' => ['>=' => 5]],
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(2, $res);
@@ -742,51 +742,51 @@ abstract class ManyToManyScopeTest extends BaseTest
         $rSchema = $relationSchema[Relation::SCHEMA] ?? [];
 
         return $this->withSchema(new Schema([
-            User::class       => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'tags' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TYPE => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                                Relation::CASCADE           => true,
-                                Relation::THROUGH_ENTITY    => TagContext::class,
-                                Relation::INNER_KEY         => 'id',
-                                Relation::OUTER_KEY         => 'id',
-                                Relation::THROUGH_INNER_KEY => 'user_id',
-                                Relation::THROUGH_OUTER_KEY => 'tag_id',
-                            ] + $rSchema,
-                    ]
-                ]
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => TagContext::class,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::THROUGH_INNER_KEY => 'user_id',
+                            Relation::THROUGH_OUTER_KEY => 'tag_id',
+                        ] + $rSchema,
+                    ],
+                ],
             ],
-            Tag::class        => [
-                    Schema::ROLE        => 'tag',
-                    Schema::MAPPER      => Mapper::class,
-                    Schema::DATABASE    => 'default',
-                    Schema::TABLE       => 'tag',
-                    Schema::PRIMARY_KEY => 'id',
-                    Schema::COLUMNS     => ['id', 'name', 'level'],
-                    Schema::SCHEMA      => [],
-                    Schema::RELATIONS   => []
-                ] + $eSchema,
-            TagContext::class => [
-                Schema::ROLE        => 'tag_context',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag_user_map',
+            Tag::class => [
+                Schema::ROLE => 'tag',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
-                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'name', 'level'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ] + $eSchema,
+            TagContext::class => [
+                Schema::ROLE => 'tag_context',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 }

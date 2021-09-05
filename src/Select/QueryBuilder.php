@@ -23,7 +23,6 @@ use Cycle\Database\Query\SelectQuery;
  * @method QueryBuilder orderBy($expression, $direction = 'ASC');
  * @method QueryBuilder limit(int $limit)
  * @method QueryBuilder offset(int $offset)
- *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
@@ -43,7 +42,7 @@ final class QueryBuilder
     /**
      * Forward call to underlying target.
      *
-     * @return SelectQuery|mixed
+     * @return mixed|SelectQuery
      */
     public function __call(string $func, array $args)
     {
@@ -247,7 +246,7 @@ final class QueryBuilder
                 }
             }
 
-            \call_user_func_array($func, [&$k, &$v]);
+            $func(...[&$k, &$v]);
             $result[$k] = $v;
         }
 

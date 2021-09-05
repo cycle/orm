@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Mapper\ProxyEntityMapper;
@@ -51,8 +52,8 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             EntityWithRelationHydrationProfile::class => [
                 Schema::ROLE => 'profile',
@@ -71,13 +72,13 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]));
     }
 
-    function testPrivateRelationPropertyShouldBeFilled()
+    public function testPrivateRelationPropertyShouldBeFilled()
     {
         $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
 

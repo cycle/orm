@@ -23,24 +23,32 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
     use TableTrait;
 
     protected const
-        PARENT_CONTAINER = 'parent',
-        CHILD_CONTAINER = 'child_entity',
-        NESTED_CONTAINER = 'nested',
-
-        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101],
-        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102],
-        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201],
-
-        CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null,   'parent_key1' => 1, 'parent_key2' => 1],
-        CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2],
-        CHILD_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 1, 'parent_key2' => 2],
-
-        NESTED_1 = ['key3' => 'foo', 'parent_key1' => 1, 'parent_key2' => 1],
-
-        CHILD_1_LOADED = self::CHILD_1 + [self::PARENT_CONTAINER => self::PARENT_1],
-        CHILD_2_LOADED = self::CHILD_2 + [self::PARENT_CONTAINER => self::PARENT_2],
-        CHILD_3_LOADED = self::CHILD_3 + [self::PARENT_CONTAINER => self::PARENT_2],
-
+        PARENT_CONTAINER = 'parent';
+    protected const
+        CHILD_CONTAINER = 'child_entity';
+    protected const
+        NESTED_CONTAINER = 'nested';
+    protected const
+        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
+    protected const
+        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
+    protected const
+        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
+    protected const
+        CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null,   'parent_key1' => 1, 'parent_key2' => 1];
+    protected const
+        CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2];
+    protected const
+        CHILD_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 1, 'parent_key2' => 2];
+    protected const
+        NESTED_1 = ['key3' => 'foo', 'parent_key1' => 1, 'parent_key2' => 1];
+    protected const
+        CHILD_1_LOADED = self::CHILD_1 + [self::PARENT_CONTAINER => self::PARENT_1];
+    protected const
+        CHILD_2_LOADED = self::CHILD_2 + [self::PARENT_CONTAINER => self::PARENT_2];
+    protected const
+        CHILD_3_LOADED = self::CHILD_3 + [self::PARENT_CONTAINER => self::PARENT_2];
+    protected const
         CHILDREN_LOADED = [
             self::CHILD_1_LOADED,
             self::CHILD_2_LOADED,
@@ -130,7 +138,6 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
         $e = (new Select($this->orm, CompositePKChild::class));
 
         foreach ($e as $ee) {
-
         }
 
         $selector = (new Select($this->orm, CompositePKChild::class))
@@ -150,7 +157,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->fetchAll();
 
         // 2 local PK + 2 parent PK + 1 custom field
-        $this->assertSame(5, count($data[0]));
+        $this->assertCount(5, $data[0]);
     }
 
     public function testFetchRelationInload(): void
@@ -274,7 +281,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
                 'parent_key1' => 1,
                 'parent_key2' => 1,
                 'parent' => self::PARENT_1,
-            ]
+            ],
         ], $selector->wherePK([202, 202])->fetchData());
     }
 
@@ -296,7 +303,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
                 'parent_key1' => self::PARENT_2['key1'],
                 'parent_key2' => self::PARENT_2['key2'],
                 'parent' => self::PARENT_2,
-            ] + self::CHILD_1
+            ] + self::CHILD_1,
         ], (new Select($this->orm, CompositePKChild::class))
             ->load(self::PARENT_CONTAINER)
             ->wherePK([1, 1])->fetchData());
@@ -413,86 +420,86 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
     {
         return [
             CompositePK::class => [
-                Schema::ROLE        => 'parent_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'parent_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'parent_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'parent_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'key1' => 'pField1',
                     'key2' => 'pField2',
                     'key3' => 'pField3',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                     'key3' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             CompositePKChild::class => [
-                Schema::ROLE        => 'child_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'child_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'child_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'child_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
-                    'key1'        => 'field1',
-                    'key2'        => 'field2',
-                    'key3'        => 'field3',
+                Schema::COLUMNS => [
+                    'key1' => 'field1',
+                    'key2' => 'field2',
+                    'key3' => 'field3',
                     'parent_key1' => 'parent_field1',
                     'parent_key2' => 'parent_field2',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                     'parent_key1' => 'int',
                     'parent_key2' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     self::PARENT_CONTAINER => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => CompositePK::class,
                         Relation::SCHEMA => [
-                            Relation::NULLABLE  => false,
-                            Relation::CASCADE   => true,
+                            Relation::NULLABLE => false,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => ['parent_key1', 'parent_key2'],
                             Relation::OUTER_KEY => ['key1', 'key2'],
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             CompositePKNested::class => [
-                Schema::ROLE        => 'nested_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'nested_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'nested_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'nested_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1'],
-                Schema::COLUMNS     => [
-                    'key1'        => 'field1',
-                    'key3'        => 'field3',
+                Schema::COLUMNS => [
+                    'key1' => 'field1',
+                    'key3' => 'field3',
                     'parent_key1' => 'parent_field1',
                     'parent_key2' => 'parent_field2',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'parent_key1' => 'int',
                     'parent_key2' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     self::PARENT_CONTAINER => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => CompositePKChild::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => ['parent_key1', 'parent_key2'],
                             Relation::OUTER_KEY => ['key1', 'key2'],
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
         ];
     }

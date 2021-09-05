@@ -19,6 +19,7 @@ interface CollectionFactoryInterface
      * @template TValue of array|object
      *
      * @param iterable<TKey, TValue> $data
+     *
      * @return TCollection
      *
      * @psalm-return TCollection|iterable<TKey, TValue>

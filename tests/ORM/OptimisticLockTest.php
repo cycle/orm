@@ -20,23 +20,23 @@ abstract class OptimisticLockTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('post', [
-            'id'      => 'primary',
-            'title'   => 'string',
+            'id' => 'primary',
+            'title' => 'string',
             'content' => 'string',
-            'lock'    => 'string'
+            'lock' => 'string',
         ]);
 
         $this->orm = $this->withSchema(new Schema([
             Post::class => [
-                SchemaInterface::ROLE        => 'post',
-                SchemaInterface::MAPPER      => OptimisticLockMapper::class,
-                SchemaInterface::DATABASE    => 'default',
-                SchemaInterface::TABLE       => 'post',
+                SchemaInterface::ROLE => 'post',
+                SchemaInterface::MAPPER => OptimisticLockMapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'post',
                 SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS     => ['id', 'title', 'content', 'lock'],
-                SchemaInterface::SCHEMA      => [],
-                SchemaInterface::RELATIONS   => []
-            ]
+                SchemaInterface::COLUMNS => ['id', 'title', 'content', 'lock'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
         ]));
     }
 

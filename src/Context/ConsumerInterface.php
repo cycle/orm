@@ -12,7 +12,7 @@ use JetBrains\PhpStorm\ExpectedValues;
 interface ConsumerInterface
 {
     // Value destinations.
-    public const DATA  = 1;
+    public const DATA = 1;
     public const SCOPE = 2;
 
     /**

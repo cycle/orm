@@ -8,7 +8,6 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use JetBrains\PhpStorm\ExpectedValues;
 
 class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
 {
@@ -18,6 +17,7 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
 
     private array $innerKeys;
     private bool $cascade;
+
     public function __construct(string $name, string $target, array $schema)
     {
         $this->name = $target . '.' . $name . ':' . $schema[Relation::TARGET];

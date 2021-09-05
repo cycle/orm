@@ -13,6 +13,7 @@ trait ColumnsTrait
 {
     /**
      * List of columns associated with the loader.
+     *
      * @var string[]
      */
     protected array $columns;

@@ -37,7 +37,7 @@ final class Iterator implements IteratorAggregate
      * Generate entities using incoming data stream. Pivoted data would be
      * returned as key value if set.
      *
-     * @return Generator<array-key|array, TEntity, mixed, void>
+     * @return Generator<array, TEntity, mixed, void|array-key>
      */
     public function getIterator(): Generator
     {
@@ -59,7 +59,7 @@ final class Iterator implements IteratorAggregate
     }
 
     /**
-     * @param string|class-string<TEntity> $role
+     * @param class-string<TEntity>|string $role
      *
      * @return TEntity
      */

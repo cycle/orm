@@ -120,7 +120,7 @@ abstract class CompositePKTest extends BaseTest
         $u2->key1 = 1;
         $u2->key2 = 1;
 
-        #todo details
+        //todo details
         $this->expectException(\Exception:: class);
 
         (new Transaction($this->orm))->persist($u1)->persist($u2)->run();
@@ -168,25 +168,25 @@ abstract class CompositePKTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             CompositePK::class => [
-                Schema::ROLE        => 'simple_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'simple_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'simple_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'simple_entity',
+                Schema::MAPPER => Mapper::class,
                 // Schema::PRIMARY_KEY => 'key1',
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'key1' => 'field1',
                     'key2' => 'field2',
                     'key3' => 'field3',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                     'key3' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 }

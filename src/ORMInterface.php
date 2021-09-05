@@ -31,7 +31,9 @@ interface ORMInterface extends SourceProviderInterface
      * already loaded entity.
      *
      * @template T
-     * @param string|class-string<T> $role
+     *
+     * @param class-string<T>|string $role
+     *
      * @return T
      * @psalm-return ($role is class-string ? T : object)
      */
@@ -40,7 +42,7 @@ interface ORMInterface extends SourceProviderInterface
     /**
      * Promise object reference, proxy or object from memory heap.
      *
-     * @return ReferenceInterface|object
+     * @return object|ReferenceInterface
      */
     public function promise(string $role, array $scope): object;
 
@@ -69,7 +71,7 @@ interface ORMInterface extends SourceProviderInterface
      */
     public function getRepository(string|object $entity): RepositoryInterface;
 
-    public function withSchema(SchemaInterface $schema): ORMInterface;
+    public function withSchema(SchemaInterface $schema): self;
 
-    public function withHeap(HeapInterface $heap): ORMInterface;
+    public function withHeap(HeapInterface $heap): self;
 }

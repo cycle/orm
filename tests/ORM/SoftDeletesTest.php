@@ -22,29 +22,29 @@ abstract class SoftDeletesTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'         => 'primary',
-            'email'      => 'string',
-            'balance'    => 'float',
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
             'deleted_at' => 'datetime,null',
         ]);
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => SoftDeletedMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user',
+                Schema::MAPPER => SoftDeletedMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance', 'deleted_at'],
-                Schema::TYPECAST    => [
-                    'id'         => 'int',
-                    'balance'    => 'float',
-                    'deleted_at' => 'datetime'
+                Schema::COLUMNS => ['id', 'email', 'balance', 'deleted_at'],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'balance' => 'float',
+                    'deleted_at' => 'datetime',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE   => NotDeletedScope::class
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => NotDeletedScope::class,
+            ],
         ]));
     }
 

@@ -26,42 +26,42 @@ abstract class BenchmarkClasslessDoubleLinkedTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('cyclic', [
-            'id'        => 'primary',
-            'name'      => 'string',
-            'parent_id' => 'integer,nullable'
+            'id' => 'primary',
+            'name' => 'string',
+            'parent_id' => 'integer,nullable',
         ]);
 
         $this->orm = $this->withSchema(new Schema([
             'cyclic' => [
-                Schema::MAPPER       => StdMapper::class,
-                Schema::DATABASE     => 'default',
-                Schema::TABLE        => 'cyclic',
-                Schema::PRIMARY_KEY  => 'id',
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'cyclic',
+                Schema::PRIMARY_KEY => 'id',
                 Schema::FIND_BY_KEYS => ['parent_id'],
-                Schema::COLUMNS      => ['id', 'parent_id', 'name'],
-                Schema::SCHEMA       => [],
-                Schema::RELATIONS    => [
+                Schema::COLUMNS => ['id', 'parent_id', 'name'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'cyclic' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => 'cyclic',
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::NULLABLE  => true,
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
                         ],
                     ],
-                    'other'  => [
-                        Relation::TYPE   => Relation::REFERS_TO,
+                    'other' => [
+                        Relation::TYPE => Relation::REFERS_TO,
                         Relation::TARGET => 'cyclic',
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::NULLABLE  => true,
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
                             Relation::INNER_KEY => 'parent_id',
                             Relation::OUTER_KEY => 'id',
                         ],
                     ],
-                ]
+                ],
             ],
         ]));
     }

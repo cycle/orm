@@ -132,7 +132,7 @@ final class State implements ConsumerInterface
     }
 
     /**
-     * @return null|mixed
+     * @return mixed|null
      */
     public function getValue(string $key): mixed
     {
@@ -154,7 +154,7 @@ final class State implements ConsumerInterface
     ): void {
         $this->freeWaitingField($key);
 
-        \Cycle\ORM\Transaction\Pool::DEBUG and print sprintf(
+        \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
             "State(%s):Register {$key} => %s\n",
             spl_object_id($this),
             var_export($value, true)

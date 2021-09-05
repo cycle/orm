@@ -17,7 +17,7 @@ final class Insert extends StoreCommand
 {
     use ErrorTrait;
 
-    /** @var null|callable */
+    /** @var callable|null */
     private $mapper;
 
     public function __construct(

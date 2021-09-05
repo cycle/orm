@@ -19,10 +19,10 @@ use Cycle\Database\DatabaseInterface;
  */
 final class Update extends StoreCommand implements ScopeCarrierInterface
 {
-    use ScopeTrait;
     use ErrorTrait;
+    use ScopeTrait;
 
-    /** @var null|callable */
+    /** @var callable|null */
     private $mapper;
 
     public function __construct(

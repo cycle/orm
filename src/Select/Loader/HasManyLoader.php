@@ -26,14 +26,14 @@ class HasManyLoader extends JoinableLoader
      * Default set of relation options. Child implementation might defined their of default options.
      */
     protected array $options = [
-        'load'      => false,
-        'scope'     => true,
-        'method'    => self::POSTLOAD,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null,
-        'where'     => null,
-        'orderBy'   => null,
+        'load' => false,
+        'scope' => true,
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
+        'where' => null,
+        'orderBy' => null,
     ];
 
     public function __construct(ORMInterface $orm, string $name, string $target, array $schema)

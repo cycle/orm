@@ -15,7 +15,7 @@ final class Promise implements ReferenceInterface
     }
 
     /**
-     * @return null|iterable|object
+     * @return iterable|object|null
      */
     public function getCollection()
     {

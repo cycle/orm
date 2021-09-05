@@ -24,7 +24,7 @@ interface SourceInterface
     /**
      * Associate query scope (or remove association).
      */
-    public function withScope(?ScopeInterface $scope): SourceInterface;
+    public function withScope(?ScopeInterface $scope): self;
 
     /**
      * Return associated query scope.

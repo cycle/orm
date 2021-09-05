@@ -24,18 +24,18 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->makeTable(
             'group',
             [
-                'id'   => 'primary',
-                'name' => 'string'
+                'id' => 'primary',
+                'name' => 'string',
             ]
         );
 
         $this->makeTable(
             'user',
             [
-                'id'             => 'primary',
-                'group_id'       => 'int',
-                'email'          => 'string',
-                'balance'        => 'float',
+                'id' => 'primary',
+                'group_id' => 'int',
+                'email' => 'string',
+                'balance' => 'float',
                 'creds_username' => 'string',
                 'creds_password' => 'string',
             ]
@@ -45,7 +45,7 @@ abstract class DeepEmbeddedTest extends BaseTest
             ['name'],
             [
                 ['first'],
-                ['second']
+                ['second'],
             ]
         );
 
@@ -61,60 +61,60 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->orm = $this->withSchema(
             new Schema(
                 [
-                    Group::class           => [
-                        Schema::ROLE        => 'group',
-                        Schema::MAPPER      => Mapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'group',
+                    Group::class => [
+                        Schema::ROLE => 'group',
+                        Schema::MAPPER => Mapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'group',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'name'],
-                        Schema::SCHEMA      => [],
-                        Schema::TYPECAST    => ['id' => 'int'],
-                        Schema::RELATIONS   => [
+                        Schema::COLUMNS => ['id', 'name'],
+                        Schema::SCHEMA => [],
+                        Schema::TYPECAST => ['id' => 'int'],
+                        Schema::RELATIONS => [
                             'users' => [
-                                Relation::TYPE   => Relation::HAS_MANY,
+                                Relation::TYPE => Relation::HAS_MANY,
                                 Relation::TARGET => User::class,
                                 Relation::SCHEMA => [
-                                    Relation::CASCADE   => true,
+                                    Relation::CASCADE => true,
                                     Relation::INNER_KEY => 'id',
                                     Relation::OUTER_KEY => 'group_id',
                                 ],
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
-                    User::class            => [
-                        Schema::ROLE        => 'user',
-                        Schema::MAPPER      => Mapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'user',
+                    User::class => [
+                        Schema::ROLE => 'user',
+                        Schema::MAPPER => Mapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'group_id', 'email', 'balance'],
-                        Schema::SCHEMA      => [],
-                        Schema::TYPECAST    => ['id' => 'int', 'group_id' => 'int', 'balance' => 'float'],
-                        Schema::RELATIONS   => [
+                        Schema::COLUMNS => ['id', 'group_id', 'email', 'balance'],
+                        Schema::SCHEMA => [],
+                        Schema::TYPECAST => ['id' => 'int', 'group_id' => 'int', 'balance' => 'float'],
+                        Schema::RELATIONS => [
                             'credentials' => [
-                                Relation::TYPE   => Relation::EMBEDDED,
+                                Relation::TYPE => Relation::EMBEDDED,
                                 Relation::TARGET => 'user:credentials',
-                                Relation::LOAD   => Relation::LOAD_EAGER, // IMPORTANT!
+                                Relation::LOAD => Relation::LOAD_EAGER, // IMPORTANT!
                                 Relation::SCHEMA => [],
                             ],
-                        ]
+                        ],
                     ],
                     UserCredentials::class => [
-                        Schema::ROLE        => 'user:credentials',
-                        Schema::MAPPER      => Mapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'user',
+                        Schema::ROLE => 'user:credentials',
+                        Schema::MAPPER => Mapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => [
-                            'id'       => 'id',
+                        Schema::COLUMNS => [
+                            'id' => 'id',
                             'username' => 'creds_username',
                             'password' => 'creds_password',
                         ],
-                        Schema::SCHEMA      => [],
-                        Schema::TYPECAST    => ['id' => 'int'],
-                        Schema::RELATIONS   => []
-                    ]
+                        Schema::SCHEMA => [],
+                        Schema::TYPECAST => ['id' => 'int'],
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );
@@ -128,24 +128,24 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->assertSame(
             [
                 [
-                    'id'    => 1,
-                    'name'  => 'first',
+                    'id' => 1,
+                    'name' => 'first',
                     'users' => [
                         [
-                            'id'          => 1,
-                            'group_id'    => 1,
-                            'email'       => 'hello@world.com',
-                            'balance'     => 100.0,
+                            'id' => 1,
+                            'group_id' => 1,
+                            'email' => 'hello@world.com',
+                            'balance' => 100.0,
                             'credentials' => [
                                 'username' => 'user1',
                                 'password' => 'pass1',
                             ],
                         ],
                         [
-                            'id'          => 2,
-                            'group_id'    => 1,
-                            'email'       => 'another@world.com',
-                            'balance'     => 200.0,
+                            'id' => 2,
+                            'group_id' => 1,
+                            'email' => 'another@world.com',
+                            'balance' => 200.0,
                             'credentials' => [
                                 'username' => 'user2',
                                 'password' => 'pass2',
@@ -154,14 +154,14 @@ abstract class DeepEmbeddedTest extends BaseTest
                     ],
                 ],
                 [
-                    'id'    => 2,
-                    'name'  => 'second',
+                    'id' => 2,
+                    'name' => 'second',
                     'users' => [
                         [
-                            'id'          => 3,
-                            'group_id'    => 2,
-                            'email'       => 'third@world.com',
-                            'balance'     => 200.0,
+                            'id' => 3,
+                            'group_id' => 2,
+                            'email' => 'third@world.com',
+                            'balance' => 200.0,
                             'credentials' => [
                                 'username' => 'user3',
                                 'password' => 'pass3',
@@ -182,11 +182,11 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->assertSame(
             [
                 [
-                    'id'   => 1,
+                    'id' => 1,
                     'name' => 'first',
                 ],
                 [
-                    'id'   => 2,
+                    'id' => 2,
                     'name' => 'second',
                 ],
             ],
@@ -208,24 +208,24 @@ abstract class DeepEmbeddedTest extends BaseTest
         $this->assertSame(
             [
                 [
-                    'id'    => 1,
-                    'name'  => 'first',
+                    'id' => 1,
+                    'name' => 'first',
                     'users' => [
                         [
-                            'id'          => 1,
-                            'group_id'    => 1,
-                            'email'       => 'hello@world.com',
-                            'balance'     => 100.0,
+                            'id' => 1,
+                            'group_id' => 1,
+                            'email' => 'hello@world.com',
+                            'balance' => 100.0,
                             'credentials' => [
                                 'username' => 'user1',
                                 'password' => 'pass1',
                             ],
                         ],
                         [
-                            'id'          => 2,
-                            'group_id'    => 1,
-                            'email'       => 'another@world.com',
-                            'balance'     => 200.0,
+                            'id' => 2,
+                            'group_id' => 1,
+                            'email' => 'another@world.com',
+                            'balance' => 200.0,
                             'credentials' => [
                                 'username' => 'user2',
                                 'password' => 'pass2',
@@ -234,14 +234,14 @@ abstract class DeepEmbeddedTest extends BaseTest
                     ],
                 ],
                 [
-                    'id'    => 2,
-                    'name'  => 'second',
+                    'id' => 2,
+                    'name' => 'second',
                     'users' => [
                         [
-                            'id'          => 3,
-                            'group_id'    => 2,
-                            'email'       => 'third@world.com',
-                            'balance'     => 200.0,
+                            'id' => 3,
+                            'group_id' => 2,
+                            'email' => 'third@world.com',
+                            'balance' => 200.0,
                             'credentials' => [
                                 'username' => 'user3',
                                 'password' => 'pass3',

@@ -17,7 +17,8 @@ use Cycle\Database\DatabaseProviderInterface;
 interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
     public const
-        PARENT_LOADER = '::parent::',
+        PARENT_LOADER = '::parent::';
+    public const
         CHILD_LOADER = '::child::';
 
     /**
@@ -37,7 +38,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $role,
         string $relation
     ): LoaderInterface;
-
 
     /**
      * Create repository associated with given role,

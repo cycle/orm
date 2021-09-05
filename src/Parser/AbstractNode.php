@@ -28,12 +28,12 @@ abstract class AbstractNode
     /**
      * Indicates that node data is joined to parent row and must receive part of incoming row
      * subset.
-     *
      */
     protected bool $joined = false;
 
     /**
      * Declared column list which must be aggregated in a parent node. i.e. Parent Key
+     *
      * @var string[]
      */
     protected array $outerKeys;
@@ -182,7 +182,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    public function linkNode(?string $container, AbstractNode $node): void
+    public function linkNode(?string $container, self $node): void
     {
         $node->parent = $this;
         if ($container !== null) {
@@ -199,7 +199,7 @@ abstract class AbstractNode
 
         if ($node->indexName !== null) {
             foreach ($node->outerKeys as $key) {
-            // foreach ($node->indexValues->getIndex($this->indexName) as $key) {
+                // foreach ($node->indexValues->getIndex($this->indexName) as $key) {
                 if (!in_array($key, $this->columns, true)) {
                     throw new ParserException("Unable to create reference, key `{$key}` does not exist.");
                 }
@@ -216,7 +216,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    public function joinNode(?string $container, AbstractNode $node): void
+    public function joinNode(?string $container, self $node): void
     {
         $node->joined = true;
         $this->linkNode($container, $node);
@@ -227,7 +227,7 @@ abstract class AbstractNode
      *
      * @throws ParserException
      */
-    public function getNode(string $container): AbstractNode
+    public function getNode(string $container): self
     {
         if (!isset($this->nodes[$container])) {
             throw new ParserException("Undefined node `{$container}`.");

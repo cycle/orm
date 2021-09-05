@@ -66,7 +66,7 @@ final class ORM implements ORMInterface
 
     public function resolveRole(string|object $entity): string
     {
-        if (is_object($entity)) {
+        if (\is_object($entity)) {
             $node = $this->getHeap()->get($entity);
             if ($node !== null) {
                 return $node->getRole();
@@ -117,7 +117,7 @@ final class ORM implements ORMInterface
         if ($status !== Node::NEW) {
             // unique entity identifier
             $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-            if (is_array($pk)) {
+            if (\is_array($pk)) {
                 $ids = [];
                 foreach ($pk as $key) {
                     if (!isset($data[$key])) {
@@ -233,7 +233,7 @@ final class ORM implements ORMInterface
 
     public function promise(string $role, array $scope): object
     {
-        if (count($scope) === 1) {
+        if (\count($scope) === 1) {
             $e = $this->heap->find($role, $scope);
             if ($e !== null) {
                 return $e;

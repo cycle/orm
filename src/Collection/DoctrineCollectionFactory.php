@@ -30,6 +30,6 @@ final class DoctrineCollectionFactory implements CollectionFactoryInterface
         if ($data instanceof PivotedStorage && $this->class === ArrayCollection::class) {
             return new PivotedCollection($data->getElements(), $data->getContext());
         }
-        return new $this->class(is_array($data) ? $data : [...$data]);
+        return new $this->class(\is_array($data) ? $data : [...$data]);
     }
 }

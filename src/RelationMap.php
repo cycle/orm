@@ -91,7 +91,7 @@ final class RelationMap
             return;
         }
         if ($relationType === Relation::MANY_TO_MANY) {
-            $handshaked = is_string($relationSchema[Relation::SCHEMA][Relation::HANDSHAKE] ?? null);
+            $handshaked = \is_string($relationSchema[Relation::SCHEMA][Relation::HANDSHAKE] ?? null);
             // Create ShadowHasMany
             if (!$handshaked) {
                 $relation = new ShadowHasMany(
@@ -117,17 +117,17 @@ final class RelationMap
 
     public function hasDependencies(): bool
     {
-        return count($this->dependencies) > 0;
+        return $this->dependencies !== [];
     }
 
     public function hasSlaves(): bool
     {
-        return count($this->slaves) > 0;
+        return $this->slaves !== [];
     }
 
     public function hasEmbedded(): bool
     {
-        return count($this->embedded) > 0;
+        return $this->embedded !== [];
     }
 
     /**
@@ -147,7 +147,7 @@ final class RelationMap
             }
 
             $item = $data[$name];
-            if (is_object($item) || $item === null) {
+            if (\is_object($item) || $item === null) {
                 // cyclic initialization
                 $node->setRelation($name, $item);
                 continue;

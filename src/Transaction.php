@@ -177,7 +177,7 @@ final class Transaction implements TransactionInterface
                 spl_object_id($entity),
                 $tuple->node === null
                     ? '(has no Node)'
-                    : implode('|', array_map(static fn($x) => is_object($x)
+                    : implode('|', array_map(static fn($x) => \is_object($x)
                         ? $x::class
                         : (string)$x, $tuple->node->getData()))
             );
@@ -278,8 +278,8 @@ final class Transaction implements TransactionInterface
                 continue;
             }
 
-            $isWaitingKeys = count(array_intersect($relation->getInnerKeys(), $tuple->state->getWaitingFields(true))) > 0;
-            $hasChangedKeys = count(array_intersect($relation->getInnerKeys(), $changedFields)) > 0;
+            $isWaitingKeys = array_intersect($relation->getInnerKeys(), $tuple->state->getWaitingFields(true)) !== [];
+            $hasChangedKeys = array_intersect($relation->getInnerKeys(), $changedFields) !== [];
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
                 // $relData ??= $tuple->mapper->extract($tuple->entity);
                 $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
@@ -295,7 +295,7 @@ final class Transaction implements TransactionInterface
 
             if ($relationStatus !== RelationInterface::STATUS_PREPARE && $relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
                 && !$hasChangedKeys
-                && count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === count($relation->getInnerKeys())
+                && \count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === \count($relation->getInnerKeys())
             ) {
                 \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
                 $child ??= $tuple->state->getRelation($name);
@@ -433,7 +433,7 @@ final class Transaction implements TransactionInterface
         }
         $commands[$tuple->node->getRole()] = $tuple->mapper->$method($tuple->entity, $tuple->node, $tuple->state);
 
-        return count($commands) === 1 ? current($commands) : $this->buildStoreSequence($commands, $tuple);
+        return \count($commands) === 1 ? current($commands) : $this->buildStoreSequence($commands, $tuple);
     }
 
     public function generateDeleteCommand(Tuple $tuple): CommandInterface

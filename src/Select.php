@@ -21,19 +21,22 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method Select distinct()
- * @method Select where(...$args);
- * @method Select andWhere(...$args);
- * @method Select orWhere(...$args);
- * @method Select having(...$args);
- * @method Select andHaving(...$args);
- * @method Select orHaving(...$args);
- * @method Select orderBy($expression, $direction = 'ASC');
+ * @method $this distinct()
+ * @method $this where(...$args)
+ * @method $this andWhere(...$args);
+ * @method $this orWhere(...$args);
+ * @method $this having(...$args);
+ * @method $this andHaving(...$args);
+ * @method $this orHaving(...$args);
+ * @method $this orderBy($expression, $direction = 'ASC');
  *
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method mixed sum($identifier) Perform aggregation (SUM) based on column or expression value.
+ *
+ * @template TEntity of object
+ * @template-implements IteratorAggregate<mixed, TEntity>
  */
 final class Select implements IteratorAggregate, Countable, PaginableInterface
 {
@@ -47,6 +50,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     private QueryBuilder $builder;
 
+    /**
+     * @param string|class-string<TEntity> $role
+     */
     public function __construct(
         /** @internal */
         private ORMInterface $orm,
@@ -66,10 +72,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Bypassing call to primary select query.
-     *
-     * @return Select|mixed
      */
-    public function __call(string $name, array $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
             // aggregations
@@ -99,6 +103,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Create new Selector with applied scope. By default no scope used.
+     *
+     * @return $this
      */
     public function scope(ScopeInterface $scope = null): self
     {
@@ -126,26 +132,27 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
+     * todo Stringable
      * @psalm-param string|int|list<string|int>|Parameter ...$ids
      * @return $this
      */
     public function wherePK(string|int|array|Parameter ...$ids): self
     {
         $pk = $this->loader->getPK();
-        $pk = is_array($pk) && count($pk) > 1 ? $pk : ((array)$pk)[0];
+        $pk = \is_array($pk) && \count($pk) > 1 ? $pk : ((array)$pk)[0];
         # todo: support assoc ids [key1 => value1, ...]
-        if (is_array($pk) && count($pk) > 1) {
+        if (\is_array($pk) && \count($pk) > 1) {
             $assoc = [];
             foreach ($ids as $id) {
                 $id = $id instanceof Parameter ? $id->getValue() : $id;
-                if (!is_array($id)) {
+                if (!\is_array($id)) {
                     throw new InvalidArgumentException('Composite primary key must be defined using an array.');
                 }
-                if (count($pk) !== count($id)) {
-                    throw new InvalidArgumentException(sprintf('Primary key should contain %d values.', count($pk)));
+                if (\count($pk) !== \count($id)) {
+                    throw new InvalidArgumentException(sprintf('Primary key should contain %d values.', \count($pk)));
                 }
 
-                $values = array_values($id);
+                $values = \array_values($id);
                 $i = 0;
                 $set = [];
                 foreach ($pk as $key) {
@@ -161,7 +168,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             }]);
             return $this;
         }
-        return count($ids) > 1
+        return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
             : $this->__call('where', [$pk, current($ids)]);
     }
@@ -176,14 +183,17 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         if ($column === null) {
             // @tuneyourserver solves the issue with counting on queries with joins.
             $pk = $this->loader->getPK();
-            $column = is_array($pk)
+            $column = \is_array($pk)
                 ? '*'
-                : sprintf('DISTINCT(%s)', $pk);
+                : \sprintf('DISTINCT(%s)', $pk);
         }
 
         return (int) $this->__call('count', [$column]);
     }
 
+    /**
+     * @return $this
+     */
     public function limit(int $limit): self
     {
         $this->loader->getQuery()->limit($limit);
@@ -191,6 +201,9 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function offset(int $offset): self
     {
         $this->loader->getQuery()->offset($offset);
@@ -250,17 +263,18 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
      * @see with()
+     * @return $this
      */
     public function load(string|array $relation, array $options = []): self
     {
-        if (is_string($relation)) {
+        if (\is_string($relation)) {
             $this->loader->loadRelation($relation, $options, false, true);
 
             return $this;
         }
 
         foreach ($relation as $name => $subOption) {
-            if (is_string($subOption)) {
+            if (\is_string($subOption)) {
                 // array of relation names
                 $this->load($subOption, $options);
             } else {
@@ -337,19 +351,19 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *
-     * @return $this|Select
      * @see load()
+     * @return $this
      */
     public function with(string|array $relation, array $options = []): self
     {
-        if (is_string($relation)) {
+        if (\is_string($relation)) {
             $this->loader->loadRelation($relation, $options, true, false);
 
             return $this;
         }
 
         foreach ($relation as $name => $subOption) {
-            if (is_string($subOption)) {
+            if (\is_string($subOption)) {
                 //Array of relation names
                 $this->with($subOption, []);
             } else {
@@ -363,6 +377,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Find one entity or return null. Method provides the ability to configure custom query parameters.
+     *
+     * @return TEntity|null
      */
     public function fetchOne(array $query = null): ?object
     {
@@ -381,13 +397,16 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Fetch all records in a form of array.
      *
-     * @return object[]
+     * @return array<array-key, TEntity>
      */
     public function fetchAll(): array
     {
-        return iterator_to_array($this->getIterator());
+        return iterator_to_array($this->getIterator(), false);
     }
 
+    /**
+     * @return Iterator<TEntity>
+     */
     public function getIterator(): Iterator
     {
         $node = $this->loader->createNode();
@@ -402,6 +421,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * Load data tree from database and linked loaders in a form of array.
+     *
+     * @return array<array-key, array<string, mixed>>
      */
     public function fetchData(): array
     {

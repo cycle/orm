@@ -76,7 +76,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         throw new LoaderException('Unable to resolve loader alias.');
     }
 
-    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
+    public function withContext(LoaderInterface $parent, array $options = []): static
     {
         /**
          * @var AbstractLoader $parent todo: should move withContext into LoaderInterface?
@@ -101,7 +101,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         if (array_key_exists('scope', $options)) {
             if ($loader->options['scope'] instanceof ScopeInterface) {
                 $loader->setScope($loader->options['scope']);
-            } elseif (is_string($loader->options['scope'])) {
+            } elseif (\is_string($loader->options['scope'])) {
                 $loader->setScope($this->orm->getFactory()->make($loader->options['scope']));
             }
         } else {
@@ -192,7 +192,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 $this->options['load']->apply($this->makeQueryBuilder($query));
             }
 
-            if (is_callable($this->options['load'], true)) {
+            if (\is_callable($this->options['load'], true)) {
                 ($this->options['load'])($this->makeQueryBuilder($query));
             }
         }

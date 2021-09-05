@@ -82,7 +82,7 @@ class ManyToMany extends Relation\AbstractRelation
             }
         }
 
-        if ($this->mirrorRelation === null && count($related) === 0) {
+        if ($this->mirrorRelation === null && \count($related) === 0) {
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
@@ -137,7 +137,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         $iterator = new Iterator($this->orm, $this->target, $data, true);
         foreach ($iterator as $pivot => $entity) {
-            if (!is_array($pivot)) {
+            if (!\is_array($pivot)) {
                 // skip partially selected entities (DB level filter)
                 continue;
             }
@@ -176,7 +176,7 @@ class ManyToMany extends Relation\AbstractRelation
     public function extractRelated(?iterable $data, PivotedStorage $original): PivotedStorage
     {
         $related = $this->extract($data);
-        if ($data instanceof PivotedStorage || $data instanceof PivotedCollectionInterface || count($original) === 0) {
+        if ($data instanceof PivotedStorage || $data instanceof PivotedCollectionInterface || \count($original) === 0) {
             return $related;
         }
         foreach ($related as $item) {
@@ -299,7 +299,7 @@ class ManyToMany extends Relation\AbstractRelation
         $this->assertValid($rTuple->node);
 
         $pivot = $storage->get($related);
-        if (!is_object($pivot)) {
+        if (!\is_object($pivot)) {
             // first time initialization
             $pivot = $this->initPivot($tuple->entity, $storage, $rTuple, $pivot);
             $storage->set($related, $pivot);

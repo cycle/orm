@@ -242,7 +242,7 @@ final class Pool implements IteratorAggregate, \Countable
                         continue 2;
                     }
                 }
-                if ($this->happens === 0 && count($pool) > 0) {
+                if ($this->happens === 0 && \count($pool) > 0) {
                     throw new \Exception('Transaction can not be resolved.');
                 }
             }
@@ -255,7 +255,7 @@ final class Pool implements IteratorAggregate, \Countable
 
     public function count(): int
     {
-        return count($this->storage) + ($this->priorityEnabled ? $this->priorityStorage->count() : 0);
+        return \count($this->storage) + ($this->priorityEnabled ? $this->priorityStorage->count() : 0);
     }
 
     /**

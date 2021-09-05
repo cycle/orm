@@ -48,12 +48,12 @@ final class Heap implements HeapInterface, IteratorAggregate
 
     public function find(string $role, array $scope): ?object
     {
-        if (!array_key_exists($role, $this->paths) || count($this->paths[$role]) === 0) {
+        if (!array_key_exists($role, $this->paths) || $this->paths[$role] === []) {
             return null;
         }
 
         $isComposite = false;
-        switch (count($scope)) {
+        switch (\count($scope)) {
             case 0:
                 return null;
             case 1:
@@ -72,11 +72,11 @@ final class Heap implements HeapInterface, IteratorAggregate
         // Find index
         if (!array_key_exists($indexName, $this->paths[$role])) {
             $scopeKeys = array_keys($scope);
-            $scopeCount = count($scopeKeys);
+            $scopeCount = \count($scopeKeys);
             foreach ($this->paths[$role] as $indexName => $values) {
                 $indexKeys = explode(self::INDEX_KEY_SEPARATOR, $indexName);
-                $keysCount = count($indexKeys);
-                if ($keysCount <= $scopeCount && count(array_intersect($indexKeys, $scopeKeys)) === $keysCount) {
+                $keysCount = \count($indexKeys);
+                if ($keysCount <= $scopeCount && \count(array_intersect($indexKeys, $scopeKeys)) === $keysCount) {
                     $result = &$this->paths[$role][$indexName];
                     break;
                 }
@@ -111,8 +111,8 @@ final class Heap implements HeapInterface, IteratorAggregate
         $data = $node->getData();
         foreach ($index as $key) {
             $isComposite = false;
-            if (is_array($key)) {
-                switch (count($key)) {
+            if (\is_array($key)) {
+                switch (\count($key)) {
                     case 0:
                         continue 2;
                     case 1:
@@ -182,7 +182,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                 continue;
             }
             $keys = explode(self::INDEX_KEY_SEPARATOR, $index);
-            $j = count($keys) - 1;
+            $j = \count($keys) - 1;
             $next = &$values;
             $removeFrom = &$next;
             # Walk index
@@ -200,7 +200,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                     break;
                 }
                 // Optimization to remove empty arrays
-                if (count($next[$value]) > 1) {
+                if (\count($next[$value]) > 1) {
                     $removeFrom = &$next[$value];
                     $removeKey = null;
                 }

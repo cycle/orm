@@ -9,7 +9,6 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
 use Cycle\Database\Query\SelectQuery;
@@ -20,6 +19,8 @@ use Cycle\Database\StatementInterface;
  * and etc based on nested loaders.
  *
  * Root load does not load constrain from ORM by default.
+ *
+ * @method RootNode createNode()
  */
 final class RootLoader extends AbstractLoader
 {
@@ -69,7 +70,7 @@ final class RootLoader extends AbstractLoader
     public function getPK(): array|string
     {
         $pk = $this->define(Schema::PRIMARY_KEY);
-        if (is_array($pk)) {
+        if (\is_array($pk)) {
             $result = [];
             foreach ($pk as $key) {
                 $result[] = $this->getAlias() . '.' . $this->fieldAlias($key);
@@ -127,7 +128,7 @@ final class RootLoader extends AbstractLoader
         );
     }
 
-    protected function initNode(): AbstractNode
+    protected function initNode(): RootNode
     {
         $node = new RootNode($this->columnNames(), (array)$this->define(Schema::PRIMARY_KEY));
 

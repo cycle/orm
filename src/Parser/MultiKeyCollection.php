@@ -48,7 +48,7 @@ final class MultiKeyCollection
     public function getItemsCount(string $index, array $values): int
     {
         try {
-            return count($this->getValues($this->data[$index], $values));
+            return \count($this->getValues($this->data[$index], $values));
         } catch (\Exception) {
             return 0;
         }
@@ -70,7 +70,7 @@ final class MultiKeyCollection
         $itemKeys = [];
         foreach ($this->indexes[$index] as $key) {
             $keyValue = $data[$key] ?? null;
-            if (!is_scalar($keyValue)) {
+            if (!\is_scalar($keyValue)) {
                 throw new \InvalidArgumentException("Invalid value on the key `$key`.");
             }
             $itemKeys[] = $keyValue;
@@ -81,7 +81,6 @@ final class MultiKeyCollection
         }
         $pool[] = &$data;
         $this->lastItemKeys[$index] = $itemKeys;
-        // return count($pull);
     }
 
     public function getCriteria(string $index, bool $useParameter = false): array
@@ -96,7 +95,7 @@ final class MultiKeyCollection
 
     public function getItems(string $indexName): \Generator
     {
-        $depth = count($this->indexes[$indexName]);
+        $depth = \count($this->indexes[$indexName]);
 
         $iterator = static function(array $data, $deep) use (&$depth, &$iterator) {
             if ($deep < $depth) {
@@ -121,11 +120,11 @@ final class MultiKeyCollection
         // key1="1" AND key2 IN (1, 2, 3)
         // instead of:
         // (key1="1" AND key2="1") OR (key1="1" AND key2="2") OR (key1="1" AND key2="3")
-        if ($useParameter && $level === count($keys) - 1 && count($data) > 1) {
+        if ($useParameter && $level === \count($keys) - 1 && \count($data) > 1) {
             return [$base + [$keys[$level] => new Parameter(array_keys($data))]];
         }
 
-        if ($level >= count($keys)) {
+        if ($level >= \count($keys)) {
             return [$base];
         }
         $result = [];

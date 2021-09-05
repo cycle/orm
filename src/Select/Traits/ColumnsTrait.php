@@ -44,7 +44,7 @@ trait ColumnsTrait
 
         foreach ($this->columns as $internal => $external) {
             $name = $external;
-            if (!is_numeric($internal)) {
+            if (!\is_numeric($internal)) {
                 $name = $internal;
             }
 
@@ -52,7 +52,7 @@ trait ColumnsTrait
 
             if ($minify) {
                 //Let's use column number instead of full name
-                $column = 'c' . count($columns);
+                $column = 'c' . \count($columns);
             }
 
             $columns[] = "{$alias}.{$external} AS {$prefix}{$column}";
@@ -68,7 +68,7 @@ trait ColumnsTrait
     {
         $result = [];
         foreach ($this->columns as $internal => $external) {
-            if (!is_numeric($internal)) {
+            if (!\is_numeric($internal)) {
                 $result[] = $internal;
             } else {
                 $result[] = $external;

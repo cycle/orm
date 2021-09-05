@@ -43,14 +43,14 @@ abstract class DatabaseMapper implements MapperInterface
     ) {
         $this->source = $orm->getSource($role);
         foreach ($orm->getSchema()->define($role, SchemaInterface::COLUMNS) as $property => $column) {
-            $this->columns[is_int($property) ? $column : $property] = $column;
+            $this->columns[\is_int($property) ? $column : $property] = $column;
         }
 
         // Parent's fields
         $parent = $orm->getSchema()->define($role, SchemaInterface::PARENT);
         while ($parent !== null) {
             foreach ($orm->getSchema()->define($parent, SchemaInterface::COLUMNS) as $property => $column) {
-                $this->parentColumns[is_int($property) ? $column : $property] = $column;
+                $this->parentColumns[\is_int($property) ? $column : $property] = $column;
             }
             $parent = $orm->getSchema()->define($parent, SchemaInterface::PARENT);
         }
@@ -87,7 +87,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getTable(),
             $state,
             $this->primaryKeys,
-            count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
+            \count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
             [$this, 'mapColumns']
         );
     }
@@ -95,7 +95,7 @@ abstract class DatabaseMapper implements MapperInterface
     public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
         $fromData = $state->getTransactionData();
-        \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . count($node->getChanges()) . "\n";
+        \Cycle\ORM\Transaction\Pool::DEBUG AND print "changes count: " . \count($node->getChanges()) . "\n";
 
         $update = new Update(
             $this->source->getDatabase(),

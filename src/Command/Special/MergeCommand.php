@@ -84,7 +84,7 @@ final class MergeCommand implements CommandInterface, \IteratorAggregate, \Count
 
     public function count(): int
     {
-        return count($this->commands);
+        return \count($this->commands);
     }
 
     public function execute(): void

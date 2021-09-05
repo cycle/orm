@@ -85,9 +85,9 @@ final class Insert extends StoreCommand
         $insertID = $insert->run();
 
         $state->updateTransactionData();
-        if (count($this->primaryKeys) > 0) {
+        if ($this->primaryKeys !== []) {
             $fpk = $this->primaryKeys[0]; // first PK
-            if ($insertID !== null && count($this->primaryKeys) === 1 && !isset($data[$fpk])) {
+            if ($insertID !== null && \count($this->primaryKeys) === 1 && !isset($data[$fpk])) {
                 $state->register($fpk, $insertID);
                 $state->updateTransactionData();
             }

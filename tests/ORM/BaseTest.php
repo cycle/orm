@@ -112,7 +112,7 @@ abstract class BaseTest extends TestCase
         $this->orm = null;
         $this->dbal = null;
 
-        if (function_exists('gc_collect_cycles')) {
+        if (\function_exists('gc_collect_cycles')) {
             gc_collect_cycles();
         }
     }
@@ -243,7 +243,7 @@ abstract class BaseTest extends TestCase
      */
     protected function enableProfiling(): void
     {
-        if (!is_null($this->logger)) {
+        if (!\is_null($this->logger)) {
             $this->logger->display();
         }
     }
@@ -253,7 +253,7 @@ abstract class BaseTest extends TestCase
      */
     protected function disableProfiling(): void
     {
-        if (!is_null($this->logger)) {
+        if (!\is_null($this->logger)) {
             $this->logger->hide();
         }
     }

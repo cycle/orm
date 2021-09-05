@@ -29,7 +29,6 @@ use Spiral\Pagination\PaginableInterface;
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
  * @method $this orderBy($expression, $direction = 'ASC');
- *
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
@@ -51,7 +50,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     private QueryBuilder $builder;
 
     /**
-     * @param string|class-string<TEntity> $role
+     * @param class-string<TEntity>|string $role
      */
     public function __construct(
         /** @internal */
@@ -133,14 +132,16 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * Shortcut to where method to set AND condition for entity primary key.
      *
      * todo Stringable
+     *
      * @psalm-param string|int|list<string|int>|Parameter ...$ids
+     *
      * @return $this
      */
     public function wherePK(string|int|array|Parameter ...$ids): self
     {
         $pk = $this->loader->getPK();
         $pk = \is_array($pk) && \count($pk) > 1 ? $pk : ((array)$pk)[0];
-        # todo: support assoc ids [key1 => value1, ...]
+        // todo: support assoc ids [key1 => value1, ...]
         if (\is_array($pk) && \count($pk) > 1) {
             $assoc = [];
             foreach ($ids as $id) {
@@ -263,6 +264,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      * post.tags.posts), but first think why you even need recursive relation loading.
      *
      * @see with()
+     *
      * @return $this
      */
     public function load(string|array $relation, array $options = []): self
@@ -352,6 +354,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *             ->load('comments', ['using' => 'commentsR']);
      *
      * @see load()
+     *
      * @return $this
      */
     public function with(string|array $relation, array $options = []): self

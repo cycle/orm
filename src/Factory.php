@@ -30,9 +30,9 @@ final class Factory implements FactoryInterface
     /** @var array<string, string> */
     private array $defaults = [
         Schema::REPOSITORY => Repository::class,
-        Schema::SOURCE     => Source::class,
-        Schema::MAPPER     => Mapper::class,
-        Schema::SCOPE      => null,
+        Schema::SOURCE => Source::class,
+        Schema::MAPPER => Mapper::class,
+        Schema::SCOPE => null,
     ];
 
     /** @var array<string, CollectionFactoryInterface> */
@@ -76,9 +76,9 @@ final class Factory implements FactoryInterface
         return $this->factory->make(
             $class,
             [
-                'orm'    => $orm,
-                'role'   => $role,
-                'schema' => $schema->define($role, Schema::SCHEMA)
+                'orm' => $orm,
+                'role' => $role,
+                'schema' => $schema->define($role, Schema::SCHEMA),
             ]
         );
     }
@@ -102,11 +102,11 @@ final class Factory implements FactoryInterface
         return $this->config->getLoader($definition[Relation::TYPE])->resolve(
             $this->factory,
             [
-                'orm'    => $orm,
-                'role'   => $role,
-                'name'   => $relation,
+                'orm' => $orm,
+                'role' => $role,
+                'name' => $relation,
                 'target' => $definition[Relation::TARGET],
-                'schema' => $definition[Relation::SCHEMA]
+                'schema' => $definition[Relation::SCHEMA],
             ]
         );
     }
@@ -143,11 +143,11 @@ final class Factory implements FactoryInterface
         return $this->config->getRelation($type)->resolve(
             $this->factory,
             [
-                'orm'     => $orm,
-                'role'    => $role,
-                'name'    => $relation,
-                'target'  => $relSchema[Relation::TARGET],
-                'schema'  => $relSchema[Relation::SCHEMA]
+                'orm' => $orm,
+                'role' => $role,
+                'name' => $relation,
+                'target' => $relSchema[Relation::TARGET],
+                'schema' => $relSchema[Relation::SCHEMA]
                     + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null]
                     + [Relation::COLLECTION_TYPE => $relSchema[Relation::COLLECTION_TYPE] ?? null],
             ]
@@ -175,8 +175,8 @@ final class Factory implements FactoryInterface
             $class,
             [
                 'select' => $select,
-                'orm'    => $orm,
-                'role'   => $role,
+                'orm' => $orm,
+                'role' => $role,
             ]
         );
     }

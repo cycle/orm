@@ -17,64 +17,63 @@ abstract class RefersToRelationRenamedFieldsTest extends RefersToRelationTest
         BaseTest::setUp();
 
         $this->makeTable('user', [
-            'id'         => 'primary',
-            'email'      => 'string',
-            'balance'    => 'float',
-            'last_comment_id_field' => 'integer,nullable'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+            'last_comment_id_field' => 'integer,nullable',
         ]);
 
         $this->makeTable('comment', [
             'comment_id' => 'primary',
             'user_id' => 'integer',
-            'message' => 'string'
+            'message' => 'string',
         ], [
-            'user_id' => ['table' => 'user', 'column' => 'id']
+            'user_id' => ['table' => 'user', 'column' => 'id'],
         ]);
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance', 'comment_id' => 'last_comment_id_field'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance', 'comment_id' => 'last_comment_id_field'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::RELATIONS => [
                     'lastComment' => [
-                        Relation::TYPE   => Relation::REFERS_TO,
+                        Relation::TYPE => Relation::REFERS_TO,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'comment_id',
-                            Relation::OUTER_KEY => 'id'
+                            Relation::OUTER_KEY => 'id',
                         ],
                     ],
-                    'comments'    => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
                     ],
-
-                ]
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'id' => 'comment_id',
                     'user_id',
                     'message',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
         ]));
     }

@@ -41,8 +41,8 @@ class UserSnapshotMapper extends Mapper
         $data = $node->getData();
         unset($data['id']);
         $state = new State(Node::SCHEDULED_INSERT, $data + [
-            'at'     => new \DateTimeImmutable(),
-            'action' => $action
+            'at' => new \DateTimeImmutable(),
+            'action' => $action,
         ]);
 
         return WrappedStoreCommand::createInsert(

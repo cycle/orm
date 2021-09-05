@@ -29,7 +29,6 @@ final class StdMapper extends DatabaseMapper
                     ? $relation->collect($v->getValue())
                     : new Promise($relation, $v);
                 continue;
-
             }
             $entity->{$k} = $v;
         }

@@ -27,21 +27,21 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->makeTable('tag', [
-            'id'   => 'primary',
-            'name' => 'string'
+            'id' => 'primary',
+            'name' => 'string',
         ]);
 
         $this->makeTable('tag_user_map', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'tag_id'  => 'integer',
-            'as'      => 'string,nullable'
+            'tag_id' => 'integer',
+            'as' => 'string,nullable',
         ]);
 
         $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
@@ -92,46 +92,46 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
 
         $this->assertSame([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
-                'tags'    => [
+                'tags' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
-                        'tag_id'  => 1,
-                        'as'      => 'primary',
-                        '@'       => [
-                            'id'   => 1,
+                        'tag_id' => 1,
+                        'as' => 'primary',
+                        '@' => [
+                            'id' => 1,
                             'name' => 'tag a',
                         ],
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
-                        'tag_id'  => 2,
-                        'as'      => 'secondary',
-                        '@'       => [
-                            'id'   => 2,
+                        'tag_id' => 2,
+                        'as' => 'secondary',
+                        '@' => [
+                            'id' => 2,
                             'name' => 'tag b',
                         ],
                     ],
                 ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
-                'tags'    => [
+                'tags' => [
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 2,
-                        'tag_id'  => 3,
-                        'as'      => 'primary',
-                        '@'       => [
-                            'id'   => 3,
+                        'tag_id' => 3,
+                        'as' => 'primary',
+                        '@' => [
+                            'id' => 3,
                             'name' => 'tag c',
-                        ]
+                        ],
                     ],
                 ],
             ],
@@ -143,59 +143,59 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $data = $selector->with('tags')->buildQuery()->fetchAll();
 
-        $this->assertSame(3, count($data[0]));
+        $this->assertCount(3, $data[0]);
     }
 
     public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags', [
-            'method'    => Select\JoinableLoader::INLOAD,
-            'scope' => new Select\QueryScope([], ['id' => 'ASC'])
+            'method' => Select\JoinableLoader::INLOAD,
+            'scope' => new Select\QueryScope([], ['id' => 'ASC']),
         ])->orderBy(['id' => 'ASC']);
 
         $this->assertSame([
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
-                'tags'    => [
+                'tags' => [
                     [
-                        'id'      => 1,
+                        'id' => 1,
                         'user_id' => 1,
-                        'tag_id'  => 1,
-                        'as'      => 'primary',
-                        '@'       => [
-                            'id'   => 1,
+                        'tag_id' => 1,
+                        'as' => 'primary',
+                        '@' => [
+                            'id' => 1,
                             'name' => 'tag a',
                         ],
                     ],
                     [
-                        'id'      => 2,
+                        'id' => 2,
                         'user_id' => 1,
-                        'tag_id'  => 2,
-                        'as'      => 'secondary',
-                        '@'       => [
-                            'id'   => 2,
+                        'tag_id' => 2,
+                        'as' => 'secondary',
+                        '@' => [
+                            'id' => 2,
                             'name' => 'tag b',
                         ],
                     ],
                 ],
             ],
             [
-                'id'      => 2,
-                'email'   => 'another@world.com',
+                'id' => 2,
+                'email' => 'another@world.com',
                 'balance' => 200.0,
-                'tags'    => [
+                'tags' => [
                     [
-                        'id'      => 3,
+                        'id' => 3,
                         'user_id' => 2,
-                        'tag_id'  => 3,
-                        'as'      => 'primary',
-                        '@'       => [
-                            'id'   => 3,
+                        'tag_id' => 3,
+                        'as' => 'primary',
+                        '@' => [
+                            'id' => 3,
                             'name' => 'tag c',
-                        ]
+                        ],
                     ],
                 ],
             ],
@@ -374,52 +374,52 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
     private function getSchemaArray(): array
     {
         return [
-            User::class       => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::TYPECAST => ['id' => 'int', 'balance' => 'float'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'tags' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TYPE => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE           => true,
-                            Relation::THROUGH_ENTITY    => TagContext::class,
-                            Relation::INNER_KEY         => 'id',
-                            Relation::OUTER_KEY         => 'id',
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => TagContext::class,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
                             Relation::THROUGH_INNER_KEY => 'user_id',
                             Relation::THROUGH_OUTER_KEY => 'tag_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
-            Tag::class        => [
-                Schema::ROLE        => 'tag',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag',
+            Tag::class => [
+                Schema::ROLE => 'tag',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'name'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             TagContext::class => [
-                Schema::ROLE        => 'tag_context',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'tag_user_map',
+                Schema::ROLE => 'tag_context',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag_user_map',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
-                Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ];
     }
 }

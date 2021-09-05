@@ -25,9 +25,9 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -39,10 +39,10 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         );
 
         $this->makeTable('post', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,nullable',
-            'title'   => 'string',
-            'content' => 'string'
+            'title' => 'string',
+            'content' => 'string',
         ]);
 
         $this->getDatabase()->table('post')->insertMultiple(
@@ -56,10 +56,10 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         );
 
         $this->makeTable('image', [
-            'id'          => 'primary',
-            'parent_id'   => 'integer',
+            'id' => 'primary',
+            'parent_id' => 'integer',
             'parent_type' => 'string',
-            'url'         => 'string'
+            'url' => 'string',
         ]);
 
         $this->getDatabase()->table('image')->insertMultiple(
@@ -350,69 +350,69 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
     private function getSchemaArray(): array
     {
         return [
-            User::class  => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'image' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
+                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
                         Relation::TARGET => Image::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::MORPH_KEY => 'parent_type',
                         ],
                     ],
                     'posts' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Post::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id'
-                        ]
-                    ]
-                ]
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
             ],
-            Post::class  => [
-                Schema::ROLE        => 'post',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'post',
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'image' => [
-                        Relation::TYPE   => Relation::MORPHED_HAS_ONE,
+                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
                         Relation::TARGET => Image::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type'
+                            Relation::MORPH_KEY => 'parent_type',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Image::class => [
-                Schema::ROLE        => 'image',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'image',
+                Schema::ROLE => 'image',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'image',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'parent_id', 'parent_type', 'url'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'url'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
         ];
     }

@@ -17,21 +17,21 @@ abstract class RefersToProxyMapperRenamedFieldTest extends RefersToProxyMapperTe
         BaseTest::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->makeTable('profile', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id_field' => 'integer,null',
-            'image'   => 'string'
+            'image' => 'string',
         ]);
 
         $this->makeTable('nested', [
-            'id'         => 'primary',
+            'id' => 'primary',
             'profile_id' => 'integer',
-            'label'      => 'string'
+            'label' => 'string',
         ]);
 
         $this->makeFK('nested', 'profile_id', 'profile', 'id');
@@ -60,37 +60,37 @@ abstract class RefersToProxyMapperRenamedFieldTest extends RefersToProxyMapperTe
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             Profile::class => [
-                Schema::ROLE        => 'profile',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'profile',
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id' => 'user_id_field', 'image'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id' => 'user_id_field', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'user' => [
-                        Relation::TYPE   => Relation::REFERS_TO,
+                        Relation::TYPE => Relation::REFERS_TO,
                         Relation::TARGET => User::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
-                            Relation::OUTER_KEY => 'id'
+                            Relation::OUTER_KEY => 'id',
                         ],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]));
     }
 }

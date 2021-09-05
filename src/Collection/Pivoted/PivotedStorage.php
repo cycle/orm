@@ -22,7 +22,7 @@ class PivotedStorage implements \IteratorAggregate, \Countable
 
     /**
      * @param TEntity[] $elements
-     * @param null|SplObjectStorage<TEntity, TPivot> $context
+     * @param SplObjectStorage<TEntity, TPivot>|null $context
      */
     public function __construct(array $elements = [], SplObjectStorage $context = null)
     {

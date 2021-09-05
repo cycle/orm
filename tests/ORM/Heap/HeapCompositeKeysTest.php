@@ -13,36 +13,47 @@ use JetBrains\PhpStorm\ArrayShape;
 final class HeapCompositeKeysTest extends HeapTest
 {
     protected const
-        INDEX_FIELDS_1 = ['id', 'user_code'],
-        INDEX_VALUES_1_1 = [42, 'ytrewq'],
-        INDEX_VALUES_1_2 = [24, 'qwerty'],
+        INDEX_FIELDS_1 = ['id', 'user_code'];
+    protected const
+        INDEX_VALUES_1_1 = [42, 'ytrewq'];
+    protected const
+        INDEX_VALUES_1_2 = [24, 'qwerty'];
+    protected const
         INDEX_FIND_1_1 = [
             self::INDEX_FIELDS_1[0] => self::INDEX_VALUES_1_1[0],
             self::INDEX_FIELDS_1[1] => self::INDEX_VALUES_1_1[1],
-        ],
+        ];
+    protected const
         INDEX_FIND_1_2 = [
             self::INDEX_FIELDS_1[0] => self::INDEX_VALUES_1_2[0],
             self::INDEX_FIELDS_1[1] => self::INDEX_VALUES_1_2[1],
-        ],
+        ];
+    protected const
         INDEX_FIND_1_BAD = [
             self::INDEX_FIELDS_1[0] => 404,
             self::INDEX_FIELDS_1[1] => 'none',
-        ],
-
-        INDEX_FIELDS_2 = 'email',
-        INDEX_VALUES_2_1 = 'mail1@spiral',
-        INDEX_VALUES_2_2 = 'mail2@spiral',
-        INDEX_FIND_2_1 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1],
-        INDEX_FIND_2_2 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2],
-
-        INDEX_FIELDS_BAD = [self::INDEX_FIELDS_1[0], self::INDEX_FIELDS_1[1], 'foo'],
-        INDEX_FIND_BAD = self::INDEX_FIND_1_1 + [self::INDEX_FIELDS_BAD[2] => null],
-
+        ];
+    protected const
+        INDEX_FIELDS_2 = 'email';
+    protected const
+        INDEX_VALUES_2_1 = 'mail1@spiral';
+    protected const
+        INDEX_VALUES_2_2 = 'mail2@spiral';
+    protected const
+        INDEX_FIND_2_1 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1];
+    protected const
+        INDEX_FIND_2_2 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2];
+    protected const
+        INDEX_FIELDS_BAD = [self::INDEX_FIELDS_1[0], self::INDEX_FIELDS_1[1], 'foo'];
+    protected const
+        INDEX_FIND_BAD = self::INDEX_FIND_1_1 + [self::INDEX_FIELDS_BAD[2] => null];
+    protected const
         ENTITY_SET_1 = [
             self::INDEX_FIELDS_1[0] => self::INDEX_VALUES_1_1[0],
             self::INDEX_FIELDS_1[1] => self::INDEX_VALUES_1_1[1],
             self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1,
-        ],
+        ];
+    protected const
         ENTITY_SET_2 = [
             self::INDEX_FIELDS_1[0] => self::INDEX_VALUES_1_2[0],
             self::INDEX_FIELDS_1[1] => self::INDEX_VALUES_1_2[1],
@@ -68,7 +79,7 @@ final class HeapCompositeKeysTest extends HeapTest
             'nodes' => $nodes,
         ] = $this->prepareHeapWithMultipleValues();
 
-        # Now detach every second
+        // Now detach every second
         foreach ($values as $i => $value) {
             if ($i % 2 === 0) {
                 continue;
@@ -76,7 +87,7 @@ final class HeapCompositeKeysTest extends HeapTest
             $heap->detach($entities[$i]);
         }
 
-        # Check
+        // Check
         foreach ($values as $i => $value) {
             if ($i % 2 === 0) {
                 $this->assertTrue($heap->has($entities[$i]));
@@ -97,7 +108,7 @@ final class HeapCompositeKeysTest extends HeapTest
             'nodes' => $nodes,
         ] = $this->prepareHeapWithMultipleValues();
 
-        # Now detach it
+        // Now detach it
         foreach ($values as $i => $value) {
             $this->assertTrue($heap->has($entities[$i]));
             $this->assertSame($entities[$i], $heap->find('user', $value), "Item {$i} exists.");
@@ -136,7 +147,7 @@ final class HeapCompositeKeysTest extends HeapTest
             $nodes[$i] = $node;
         }
 
-        # Check
+        // Check
         foreach ($values as $i => $value) {
             $this->assertTrue($heap->has($entities[$i]));
             $this->assertSame($entities[$i], $heap->find('user', $value), "Item {$i} found.");

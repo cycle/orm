@@ -15,8 +15,8 @@ use Cycle\ORM\Transaction\Tuple;
  */
 class HasOne extends AbstractRelation
 {
-    use ToOneTrait;
     use HasSomeTrait;
+    use ToOneTrait;
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {

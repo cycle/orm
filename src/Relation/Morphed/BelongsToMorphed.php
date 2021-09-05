@@ -65,7 +65,7 @@ class BelongsToMorphed extends BelongsTo
         // $scope[$this->morphKey] = $nodeData[$this->morphKey];
         $target = $nodeData[$this->morphKey];
 
-        return $scope === [] ? new EmptyReference($target, null) :  new Reference($target, $scope);
+        return $scope === [] ? new EmptyReference($target, null) : new Reference($target, $scope);
     }
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void

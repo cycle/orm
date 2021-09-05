@@ -12,8 +12,6 @@ use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 
-use function count;
-
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  *
@@ -60,7 +58,7 @@ final class ORM implements ORMInterface
     public function __debugInfo(): array
     {
         return [
-            'schema' => $this->schema
+            'schema' => $this->schema,
         ];
     }
 

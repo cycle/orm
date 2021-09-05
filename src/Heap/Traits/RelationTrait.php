@@ -27,7 +27,7 @@ trait RelationTrait
     ): void {
         $this->relationStatus[$name] = $status;
         if ($status === RelationInterface::STATUS_RESOLVED) {
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print "[RESOLVED] Relation {$this->getRole()}.$name\n";
+            \Cycle\ORM\Transaction\Pool::DEBUG && print "[RESOLVED] Relation {$this->getRole()}.$name\n";
         }
     }
 

@@ -27,7 +27,7 @@ class EntityHydrationTest extends BaseMapperTest
                         Schema::COLUMNS => ['id', 'username', 'email'],
                         Schema::TYPECAST => [],
                         Schema::SCHEMA => [],
-                        Schema::RELATIONS => []
+                        Schema::RELATIONS => [],
                     ],
                     ExtendedEntityHydrationUser::class => [
                         Schema::MAPPER => Mapper::class,
@@ -37,14 +37,14 @@ class EntityHydrationTest extends BaseMapperTest
                         Schema::COLUMNS => ['id', 'username', 'email', 'isVerified', 'profileId'],
                         Schema::TYPECAST => [],
                         Schema::SCHEMA => [],
-                        Schema::RELATIONS => []
-                    ]
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );
     }
 
-    function testDataForBaseClassShouldBeExtracted()
+    public function testDataForBaseClassShouldBeExtracted()
     {
         $user = new EntityHydrationUser(123, 'guest', 'guest@site.com');
 
@@ -54,11 +54,11 @@ class EntityHydrationTest extends BaseMapperTest
             'id' => 123,
             'username' => 'guest',
             'email' => 'guest@site.com',
-            'attributes' => []
+            'attributes' => [],
         ], $mapper->extract($user));
     }
 
-    function testDataForExtendedClassShouldBeExtracted()
+    public function testDataForExtendedClassShouldBeExtracted()
     {
         $user = new ExtendedEntityHydrationUser(123, 'guest', 'guest@site.com', true, 234);
 
@@ -70,11 +70,11 @@ class EntityHydrationTest extends BaseMapperTest
             'email' => 'guest@site.com',
             'isVerified' => true,
             'profileId' => 234,
-            'attributes' => []
+            'attributes' => [],
         ], $mapper->extract($user));
     }
 
-    function testDataShouldBeHydratedToBaseClass()
+    public function testDataShouldBeHydratedToBaseClass()
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
 
@@ -84,7 +84,7 @@ class EntityHydrationTest extends BaseMapperTest
         $user = $mapper->hydrate($emptyObject, [
             'id' => 123,
             'username' => 'guest',
-            'email' => 'guest@site.com'
+            'email' => 'guest@site.com',
         ]);
 
         $this->assertSame(123, $user->getId());
@@ -92,7 +92,7 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertSame('guest@site.com', $user->getEmail());
     }
 
-    function testDataShouldBeHydratedToExtendedClass()
+    public function testDataShouldBeHydratedToExtendedClass()
     {
         $mapper = $this->orm->getMapper(ExtendedEntityHydrationUser::class);
 
@@ -114,7 +114,7 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertSame(234, $user->getProfileId());
     }
 
-    function testUndefinedPropertiesShouldBePassedThroughSetter()
+    public function testUndefinedPropertiesShouldBePassedThroughSetter()
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
 
@@ -124,13 +124,13 @@ class EntityHydrationTest extends BaseMapperTest
             'id' => 123,
             'tag' => 'test',
             'username' => 'guest',
-            'email' => 'guest@site.com'
+            'email' => 'guest@site.com',
         ]);
 
         $this->assertEquals(['tag' => 'test'], $user->getAttributes());
     }
 
-    function testRequestedUndefinedPropertiesShouldBePassedThroughGetter()
+    public function testRequestedUndefinedPropertiesShouldBePassedThroughGetter()
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
 
@@ -140,7 +140,7 @@ class EntityHydrationTest extends BaseMapperTest
             'id' => 123,
             'tag' => 'test',
             'username' => 'guest',
-            'email' => 'guest@site.com'
+            'email' => 'guest@site.com',
         ]);
 
         $this->assertEquals('test', $user->tag);

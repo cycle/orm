@@ -23,11 +23,11 @@ abstract class AutoTimestampsTest extends BaseTest
         $this->makeTable(
             'user',
             [
-                'id'         => 'primary',
-                'email'      => 'string',
-                'balance'    => 'float',
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float',
                 'created_at' => 'datetime',
-                'updated_at' => 'datetime'
+                'updated_at' => 'datetime',
             ]
         );
 
@@ -35,21 +35,21 @@ abstract class AutoTimestampsTest extends BaseTest
             new Schema(
                 [
                     User::class => [
-                        Schema::ROLE        => 'user',
-                        Schema::MAPPER      => TimestampedMapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'user',
+                        Schema::ROLE => 'user',
+                        Schema::MAPPER => TimestampedMapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'email', 'balance', 'created_at', 'updated_at'],
-                        Schema::TYPECAST    => [
-                            'id'         => 'int',
-                            'balance'    => 'float',
+                        Schema::COLUMNS => ['id', 'email', 'balance', 'created_at', 'updated_at'],
+                        Schema::TYPECAST => [
+                            'id' => 'int',
+                            'balance' => 'float',
                             'created_at' => 'datetime',
-                            'updated_at' => 'datetime'
+                            'updated_at' => 'datetime',
                         ],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => []
-                    ]
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );

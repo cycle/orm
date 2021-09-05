@@ -6,5 +6,4 @@ namespace Cycle\ORM\Tests\Inheritance\Fixture;
 
 class RbacPermission extends RbacItemAbstract
 {
-
 }

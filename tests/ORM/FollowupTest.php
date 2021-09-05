@@ -18,31 +18,31 @@ abstract class FollowupTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->makeTable('user_snapshots', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'int',
-            'at'      => 'datetime',
-            'action'  => 'string',
-            'email'   => 'string',
-            'balance' => 'float'
+            'at' => 'datetime',
+            'action' => 'string',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => UserSnapshotMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user',
+                Schema::MAPPER => UserSnapshotMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 

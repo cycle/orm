@@ -21,9 +21,9 @@ abstract class HasOneCyclicTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('cyclic', [
-            'id'        => 'primary',
-            'name'      => 'string',
-            'parent_id' => 'integer,nullable'
+            'id' => 'primary',
+            'name' => 'string',
+            'parent_id' => 'integer,nullable',
         ]);
 
         $this->getDatabase()->table('cyclic')->insertMultiple(
@@ -37,26 +37,26 @@ abstract class HasOneCyclicTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             Cyclic::class => [
-                Schema::ROLE         => 'cyclic',
-                Schema::MAPPER       => Mapper::class,
-                Schema::DATABASE     => 'default',
-                Schema::TABLE        => 'cyclic',
-                Schema::PRIMARY_KEY  => 'id',
+                Schema::ROLE => 'cyclic',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'cyclic',
+                Schema::PRIMARY_KEY => 'id',
                 Schema::FIND_BY_KEYS => ['parent_id'],
-                Schema::COLUMNS      => ['id', 'parent_id', 'name'],
-                Schema::SCHEMA       => [],
-                Schema::RELATIONS    => [
+                Schema::COLUMNS => ['id', 'parent_id', 'name'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'cyclic' => [
-                        Relation::TYPE   => Relation::HAS_ONE,
+                        Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Cyclic::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
-                            Relation::NULLABLE  => true,
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'parent_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
         ]));
     }
@@ -68,29 +68,29 @@ abstract class HasOneCyclicTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'        => '1',
+                'id' => '1',
                 'parent_id' => null,
-                'name'      => 'first',
-                'cyclic'    => [
-                    'id'        => '2',
+                'name' => 'first',
+                'cyclic' => [
+                    'id' => '2',
                     'parent_id' => '1',
-                    'name'      => 'second',
+                    'name' => 'second',
                 ],
             ],
             [
-                'id'        => '2',
+                'id' => '2',
                 'parent_id' => '1',
-                'name'      => 'second',
-                'cyclic'    => null,
+                'name' => 'second',
+                'cyclic' => null,
             ],
             [
-                'id'        => '3',
+                'id' => '3',
                 'parent_id' => '3',
-                'name'      => 'self-reference',
-                'cyclic'    => [
-                    'id'        => '3',
+                'name' => 'self-reference',
+                'cyclic' => [
+                    'id' => '3',
                     'parent_id' => '3',
-                    'name'      => 'self-reference',
+                    'name' => 'self-reference',
                 ],
             ],
         ], $selector->fetchData());

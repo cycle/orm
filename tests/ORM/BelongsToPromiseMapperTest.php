@@ -24,21 +24,21 @@ abstract class BelongsToPromiseMapperTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->makeTable('profile', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer,null',
-            'image'   => 'string'
+            'image' => 'string',
         ]);
 
         $this->makeTable('nested', [
-            'id'         => 'primary',
+            'id' => 'primary',
             'profile_id' => 'integer',
-            'label'      => 'string'
+            'label' => 'string',
         ]);
 
         $this->makeFK('nested', 'profile_id', 'profile', 'id');
@@ -47,7 +47,6 @@ abstract class BelongsToPromiseMapperTest extends BaseTest
             ['email', 'balance'],
             [
                 ['hello@world.com', 100],
-
             ]
         );
 
@@ -68,38 +67,38 @@ abstract class BelongsToPromiseMapperTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             Profile::class => [
-                Schema::ROLE        => 'profile',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'profile',
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'image'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'user' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
-                            Relation::NULLABLE  => true
+                            Relation::NULLABLE => true,
                         ],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]));
     }
 
@@ -110,19 +109,19 @@ abstract class BelongsToPromiseMapperTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'      => 1,
+                'id' => 1,
                 'user_id' => 1,
-                'image'   => 'image.png',
+                'image' => 'image.png',
             ],
             [
-                'id'      => 2,
+                'id' => 2,
                 'user_id' => 2,
-                'image'   => 'second.png',
+                'image' => 'second.png',
             ],
             [
-                'id'      => 3,
+                'id' => 3,
                 'user_id' => null,
-                'image'   => 'third.png',
+                'image' => 'third.png',
             ],
         ], $selector->fetchData());
     }

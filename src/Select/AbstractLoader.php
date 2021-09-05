@@ -39,17 +39,17 @@ use Cycle\Database\Query\SelectQuery;
  */
 abstract class AbstractLoader implements LoaderInterface
 {
-    use ChainTrait;
     use AliasTrait;
+    use ChainTrait;
 
     // Loading methods for data loaders.
-    public const INLOAD    = 1;
-    public const POSTLOAD  = 2;
-    public const JOIN      = 3;
+    public const INLOAD = 1;
+    public const POSTLOAD = 2;
+    public const JOIN = 3;
     public const LEFT_JOIN = 4;
 
     protected array $options = [
-        'load'      => false,
+        'load' => false,
         'scope' => true,
     ];
 
@@ -70,6 +70,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * Children roles for Joined Table Inheritance
+     *
      * @var array<string, array>
      */
     protected array $children;
@@ -149,14 +150,15 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * Load the relation.
      *
-     * @param string|LoaderInterface $relation Relation name, or chain of relations separated by. If you need to set
+     * @param LoaderInterface|string $relation Relation name, or chain of relations separated by. If you need to set
      * inheritance then pass LoaderInterface object
      * @param array  $options  Loader options (to be applied to last chain element only).
      * @param bool   $join     When set to true loaders will be forced into JOIN mode.
      * @param bool   $load     Load relation data.
-     * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
+     *
+     * @return LoaderInterface Must return loader for a requested relation.
      */
     public function loadRelation(
         string|LoaderInterface $relation,

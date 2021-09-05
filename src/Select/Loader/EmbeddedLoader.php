@@ -24,7 +24,7 @@ final class EmbeddedLoader implements JoinableInterface
     private ?LoaderInterface $parent = null;
 
     private array $options = [
-        'load'   => false,
+        'load' => false,
         'minify' => true,
     ];
 
@@ -44,7 +44,7 @@ final class EmbeddedLoader implements JoinableInterface
     /**
      * Destruct loader.
      */
-    final public function __destruct()
+    public function __destruct()
     {
         unset($this->parent);
     }

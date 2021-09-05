@@ -12,8 +12,6 @@ use Cycle\ORM\Relation\SameRowRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Relation\ShadowHasMany;
 
-use function count;
-
 /**
  * Manages the position of node in the relation graph and provide access to neighbours.
  */

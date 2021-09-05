@@ -9,7 +9,6 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\ClasslessMapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Mapper\BaseMapperTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
@@ -25,9 +24,9 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $this->makeTable(
             'user',
             [
-                'id'      => 'primary',
-                'email'   => 'string',
-                'balance' => 'float,nullable'
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float,nullable',
             ]
         );
 
@@ -43,15 +42,15 @@ abstract class ClasslessMapperTest extends BaseMapperTest
             new Schema(
                 [
                     'user' => [
-                        Schema::MAPPER      => ClasslessMapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'user',
+                        Schema::MAPPER => ClasslessMapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'email', 'balance'],
-                        Schema::TYPECAST    => ['balance' => 'float'],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => []
-                    ]
+                        Schema::COLUMNS => ['id', 'email', 'balance'],
+                        Schema::TYPECAST => ['balance' => 'float'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );
@@ -62,15 +61,15 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $this->assertEquals(
             [
                 [
-                    'id'      => 1,
-                    'email'   => 'hello@world.com',
+                    'id' => 1,
+                    'email' => 'hello@world.com',
                     'balance' => 100.0,
                 ],
                 [
-                    'id'      => 2,
-                    'email'   => 'another@world.com',
+                    'id' => 2,
+                    'email' => 'another@world.com',
                     'balance' => 200.0,
-                ]
+                ],
             ],
             (new Select($this->orm, 'user'))->fetchData()
         );
@@ -198,8 +197,8 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 
         $this->assertEquals(
             [
-                'id'      => 1,
-                'email'   => 'hello@world.com',
+                'id' => 1,
+                'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
             $this->orm->getHeap()->get($result)->getData()

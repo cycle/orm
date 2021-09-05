@@ -20,24 +20,24 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('distributions', [
-            'id'   => 'primary',
+            'id' => 'primary',
             'name' => 'string',
         ]);
 
         $this->makeTable('version_distribution', [
-            'id'         => 'primary',
-            'dist_id'    => 'int',
+            'id' => 'primary',
+            'dist_id' => 'int',
             'version_id' => 'int',
         ]);
 
         $this->makeTable('versions', [
-            'id'        => 'primary',
-            'version'   => 'string',
-            'module_id' => 'int'
+            'id' => 'primary',
+            'version' => 'string',
+            'module_id' => 'int',
         ]);
 
         $this->makeTable('modules', [
-            'id'   => 'primary',
+            'id' => 'primary',
             'name' => 'string',
         ]);
 
@@ -87,78 +87,78 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            'distribution'         => [
-                Schema::ROLE        => 'distribution',
-                Schema::MAPPER      => StdMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'distributions',
+            'distribution' => [
+                Schema::ROLE => 'distribution',
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'distributions',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'name'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'versions' => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TYPE => Relation::MANY_TO_MANY,
                         Relation::TARGET => 'version',
-                        Relation::LOAD   => Relation::LOAD_PROMISE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
-                            Relation::CASCADE           => true,
-                            Relation::THROUGH_ENTITY    => 'version_distribution',
-                            Relation::INNER_KEY         => 'id',
-                            Relation::OUTER_KEY         => 'id',
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => 'version_distribution',
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
                             Relation::THROUGH_INNER_KEY => 'dist_id',
                             Relation::THROUGH_OUTER_KEY => 'version_id',
                         ],
-                    ]
+                    ],
                 ],
-                Schema::SCOPE   => SortByIDScope::class
+                Schema::SCOPE => SortByIDScope::class,
             ],
             'version_distribution' => [
-                Schema::ROLE        => 'version_context',
-                Schema::MAPPER      => StdMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'version_distribution',
+                Schema::ROLE => 'version_context',
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'version_distribution',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'dist_id', 'version_id'],
-                Schema::TYPECAST    => ['id' => 'int', 'dist_id' => 'int', 'version_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::COLUMNS => ['id', 'dist_id', 'version_id'],
+                Schema::TYPECAST => ['id' => 'int', 'dist_id' => 'int', 'version_id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
-            'version'              => [
-                Schema::ROLE        => 'tag',
-                Schema::MAPPER      => StdMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'versions',
+            'version' => [
+                Schema::ROLE => 'tag',
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'versions',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'version', 'module_id'],
-                Schema::TYPECAST    => ['id' => 'int', 'module_id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'version', 'module_id'],
+                Schema::TYPECAST => ['id' => 'int', 'module_id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'module' => [
-                        Relation::TYPE   => Relation::BELONGS_TO,
+                        Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => 'module',
-                        Relation::LOAD   => Relation::LOAD_EAGER,
+                        Relation::LOAD => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => false,
+                            Relation::CASCADE => false,
                             Relation::INNER_KEY => 'module_id',
                             Relation::OUTER_KEY => 'id',
                         ],
-                    ]
+                    ],
                 ],
-                Schema::SCOPE   => SortByIDScope::class
+                Schema::SCOPE => SortByIDScope::class,
             ],
-            'module'               => [
-                Schema::ROLE        => 'module',
-                Schema::MAPPER      => StdMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'modules',
+            'module' => [
+                Schema::ROLE => 'module',
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'modules',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'name'],
-                Schema::TYPECAST    => ['id' => 'int'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE   => SortByIDScope::class
-            ]
+                Schema::COLUMNS => ['id', 'name'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => SortByIDScope::class,
+            ],
         ]));
     }
 
@@ -169,47 +169,47 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
 
         $this->assertSame([
             [
-                'id'       => 1,
-                'name'     => 'production',
+                'id' => 1,
+                'name' => 'production',
                 'versions' => [
                     [
-                        'id'         => 1,
-                        'dist_id'    => 1,
+                        'id' => 1,
+                        'dist_id' => 1,
                         'version_id' => 1,
-                        '@'          => [
-                            'id'        => 1,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 1,
+                            'version' => 'v1.0',
                             'module_id' => 1,
-                            'module'    => [
-                                'id'   => 1,
+                            'module' => [
+                                'id' => 1,
                                 'name' => 'Module A',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 2,
-                        'dist_id'    => 1,
+                        'id' => 2,
+                        'dist_id' => 1,
                         'version_id' => 3,
-                        '@'          => [
-                            'id'        => 3,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 3,
+                            'version' => 'v1.0',
                             'module_id' => 2,
-                            'module'    => [
-                                'id'   => 2,
+                            'module' => [
+                                'id' => 2,
                                 'name' => 'Module B',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 3,
-                        'dist_id'    => 1,
+                        'id' => 3,
+                        'dist_id' => 1,
                         'version_id' => 4,
-                        '@'          => [
-                            'id'        => 4,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 4,
+                            'version' => 'v1.0',
                             'module_id' => 3,
-                            'module'    => [
-                                'id'   => 3,
+                            'module' => [
+                                'id' => 3,
                                 'name' => 'Module C',
                             ],
                         ],
@@ -217,48 +217,48 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
                 ],
             ],
             [
-                'id'       => 2,
-                'name'     => 'staging',
+                'id' => 2,
+                'name' => 'staging',
                 'versions' => [
                     [
-                        'id'         => 4,
-                        'dist_id'    => 2,
+                        'id' => 4,
+                        'dist_id' => 2,
                         'version_id' => 2,
-                        '@'          => [
-                            'id'        => 2,
-                            'version'   => 'v2.0',
+                        '@' => [
+                            'id' => 2,
+                            'version' => 'v2.0',
                             'module_id' => 1,
-                            'module'    => [
-                                'id'   => 1,
+                            'module' => [
+                                'id' => 1,
                                 'name' => 'Module A',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 5,
-                        'dist_id'    => 2,
+                        'id' => 5,
+                        'dist_id' => 2,
                         'version_id' => 3,
-                        '@'          => [
-                            'id'        => 3,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 3,
+                            'version' => 'v1.0',
                             'module_id' => 2,
-                            'module'    => [
-                                'id'   => 2,
+                            'module' => [
+                                'id' => 2,
                                 'name' => 'Module B',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 6,
-                        'dist_id'    => 2,
+                        'id' => 6,
+                        'dist_id' => 2,
                         'version_id' => 5,
-                        '@'          => [
-                            'id'        => 5,
-                            'version'   => 'v2.0',
+                        '@' => [
+                            'id' => 5,
+                            'version' => 'v2.0',
                             'module_id' => 3,
-                            'module'    =>
+                            'module' =>
                                 [
-                                    'id'   => 3,
+                                    'id' => 3,
                                     'name' => 'Module C',
                                 ],
                         ],
@@ -275,47 +275,47 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
 
         $this->assertSame([
             [
-                'id'       => 1,
-                'name'     => 'production',
+                'id' => 1,
+                'name' => 'production',
                 'versions' => [
                     [
-                        'id'         => 1,
-                        'dist_id'    => 1,
+                        'id' => 1,
+                        'dist_id' => 1,
                         'version_id' => 1,
-                        '@'          => [
-                            'id'        => 1,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 1,
+                            'version' => 'v1.0',
                             'module_id' => 1,
-                            'module'    => [
-                                'id'   => 1,
+                            'module' => [
+                                'id' => 1,
                                 'name' => 'Module A',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 2,
-                        'dist_id'    => 1,
+                        'id' => 2,
+                        'dist_id' => 1,
                         'version_id' => 3,
-                        '@'          => [
-                            'id'        => 3,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 3,
+                            'version' => 'v1.0',
                             'module_id' => 2,
-                            'module'    => [
-                                'id'   => 2,
+                            'module' => [
+                                'id' => 2,
                                 'name' => 'Module B',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 3,
-                        'dist_id'    => 1,
+                        'id' => 3,
+                        'dist_id' => 1,
                         'version_id' => 4,
-                        '@'          => [
-                            'id'        => 4,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 4,
+                            'version' => 'v1.0',
                             'module_id' => 3,
-                            'module'    => [
-                                'id'   => 3,
+                            'module' => [
+                                'id' => 3,
                                 'name' => 'Module C',
                             ],
                         ],
@@ -323,48 +323,48 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
                 ],
             ],
             [
-                'id'       => 2,
-                'name'     => 'staging',
+                'id' => 2,
+                'name' => 'staging',
                 'versions' => [
                     [
-                        'id'         => 4,
-                        'dist_id'    => 2,
+                        'id' => 4,
+                        'dist_id' => 2,
                         'version_id' => 2,
-                        '@'          => [
-                            'id'        => 2,
-                            'version'   => 'v2.0',
+                        '@' => [
+                            'id' => 2,
+                            'version' => 'v2.0',
                             'module_id' => 1,
-                            'module'    => [
-                                'id'   => 1,
+                            'module' => [
+                                'id' => 1,
                                 'name' => 'Module A',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 5,
-                        'dist_id'    => 2,
+                        'id' => 5,
+                        'dist_id' => 2,
                         'version_id' => 3,
-                        '@'          => [
-                            'id'        => 3,
-                            'version'   => 'v1.0',
+                        '@' => [
+                            'id' => 3,
+                            'version' => 'v1.0',
                             'module_id' => 2,
-                            'module'    => [
-                                'id'   => 2,
+                            'module' => [
+                                'id' => 2,
                                 'name' => 'Module B',
                             ],
                         ],
                     ],
                     [
-                        'id'         => 6,
-                        'dist_id'    => 2,
+                        'id' => 6,
+                        'dist_id' => 2,
                         'version_id' => 5,
-                        '@'          => [
-                            'id'        => 5,
-                            'version'   => 'v2.0',
+                        '@' => [
+                            'id' => 5,
+                            'version' => 'v2.0',
                             'module_id' => 3,
-                            'module'    =>
+                            'module' =>
                                 [
-                                    'id'   => 3,
+                                    'id' => 3,
                                     'name' => 'Module C',
                                 ],
                         ],
@@ -386,7 +386,6 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
             $this->assertNotNull($version->module);
         }
     }
-
 
     public function testLoadPromised(): void
     {

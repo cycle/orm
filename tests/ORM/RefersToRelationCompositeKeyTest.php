@@ -20,7 +20,8 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
     use TableTrait;
 
     protected const
-        CHILD_CONTAINER = 'child_entity',
+        CHILD_CONTAINER = 'child_entity';
+    protected const
         CHILDREN_CONTAINER = 'children';
 
     public function setUp(): void
@@ -332,69 +333,68 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
     {
         return [
             CompositePK::class => [
-                Schema::ROLE        => 'parent_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'parent_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'parent_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'parent_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'key1' => 'pField1',
                     'key2' => 'pField2',
                     'key3' => 'pField3',
                     'child_key1' => 'cField1',
                     'child_key2' => 'cField2',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                     'key3' => 'int',
                     'child_key1' => 'int',
                     'child_key2' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     self::CHILD_CONTAINER => [
-                        Relation::TYPE   => Relation::REFERS_TO,
+                        Relation::TYPE => Relation::REFERS_TO,
                         Relation::TARGET => CompositePKChild::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => ['child_key1', 'child_key2'],
                             Relation::OUTER_KEY => ['key1', 'key2'],
                         ],
                     ],
                     self::CHILDREN_CONTAINER => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => CompositePKChild::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => ['key1', 'key2'],
                             Relation::OUTER_KEY => ['parent_key1', 'parent_key2'],
                         ],
                     ],
-
-                ]
+                ],
             ],
             CompositePKChild::class => [
-                Schema::ROLE        => 'child_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'child_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'child_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'child_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
-                    'key1'        => 'field1',
-                    'key2'        => 'field2',
-                    'key3'        => 'field3',
+                Schema::COLUMNS => [
+                    'key1' => 'field1',
+                    'key2' => 'field2',
+                    'key3' => 'field3',
                     'parent_key1' => 'parent_field1',
                     'parent_key2' => 'parent_field2',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                     'parent_key1' => 'int',
                     'parent_key2' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
         ];
     }

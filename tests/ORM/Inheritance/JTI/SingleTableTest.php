@@ -16,52 +16,71 @@ use Cycle\ORM\Tests\Inheritance\Fixture\Programator;
 abstract class SingleTableTest extends SimpleCasesTest
 {
     protected const
-        EMPLOYEE_1 = ['employee_id' => 1, 'name' => 'John', 'age' => 38],
-        EMPLOYEE_2 = ['employee_id' => 2, 'name' => 'Anton', 'age' => 35],
-        EMPLOYEE_3 = ['employee_id' => 3, 'name' => 'Kentarius', 'age' => 27],
-        EMPLOYEE_4 = ['employee_id' => 4, 'name' => 'Valeriy', 'age' => 32],
-
-        ENGINEER_2 = ['discriminator' => 'engineer', 'role_id' => 2, 'level' => 8, 'rank' => ''],
-        ENGINEER_4 = ['discriminator' => 'engineer', 'role_id' => 4, 'level' => 10, 'rank' => ''],
-        MANAGER_1  = ['discriminator' => 'manager', 'role_id' => 1, 'level' => 0, 'rank' => 'top'],
-        MANAGER_3  = ['discriminator' => 'manager', 'role_id' => 3, 'level' => 0, 'rank' => 'bottom'],
-
-        PROGRAMATOR_2 = ['subrole_id' => 2, 'language' => 'php'],
-        PROGRAMATOR_4 = ['subrole_id' => 4, 'language' => 'go'],
-
-        EMPLOYEE_1_LOADED = self::EMPLOYEE_1,
-        EMPLOYEE_2_LOADED = self::EMPLOYEE_2,
-        EMPLOYEE_3_LOADED = self::EMPLOYEE_3,
-        EMPLOYEE_4_LOADED = self::EMPLOYEE_4,
-
-        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED,
-        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED,
-
-        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED,
-        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED,
-
-        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED,
-        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED,
-
+        EMPLOYEE_1 = ['employee_id' => 1, 'name' => 'John', 'age' => 38];
+    protected const
+        EMPLOYEE_2 = ['employee_id' => 2, 'name' => 'Anton', 'age' => 35];
+    protected const
+        EMPLOYEE_3 = ['employee_id' => 3, 'name' => 'Kentarius', 'age' => 27];
+    protected const
+        EMPLOYEE_4 = ['employee_id' => 4, 'name' => 'Valeriy', 'age' => 32];
+    protected const
+        ENGINEER_2 = ['discriminator' => 'engineer', 'role_id' => 2, 'level' => 8, 'rank' => ''];
+    protected const
+        ENGINEER_4 = ['discriminator' => 'engineer', 'role_id' => 4, 'level' => 10, 'rank' => ''];
+    protected const
+        MANAGER_1 = ['discriminator' => 'manager', 'role_id' => 1, 'level' => 0, 'rank' => 'top'];
+    protected const
+        MANAGER_3 = ['discriminator' => 'manager', 'role_id' => 3, 'level' => 0, 'rank' => 'bottom'];
+    protected const
+        PROGRAMATOR_2 = ['subrole_id' => 2, 'language' => 'php'];
+    protected const
+        PROGRAMATOR_4 = ['subrole_id' => 4, 'language' => 'go'];
+    protected const
+        EMPLOYEE_1_LOADED = self::EMPLOYEE_1;
+    protected const
+        EMPLOYEE_2_LOADED = self::EMPLOYEE_2;
+    protected const
+        EMPLOYEE_3_LOADED = self::EMPLOYEE_3;
+    protected const
+        EMPLOYEE_4_LOADED = self::EMPLOYEE_4;
+    protected const
+        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
+    protected const
+        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
+    protected const
+        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
+    protected const
+        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
+    protected const
+        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
+    protected const
+        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
+    protected const
         EMPLOYEE_ALL_LOADED = [
             self::EMPLOYEE_1_LOADED,
             self::EMPLOYEE_2_LOADED,
             self::EMPLOYEE_3_LOADED,
             self::EMPLOYEE_4_LOADED,
-        ],
+        ];
+    protected const
         EMPLOYEE_INHERITED_LOADED = [
             self::MANAGER_1_LOADED,
             self::PROGRAMATOR_2_LOADED,
             self::MANAGER_3_LOADED,
             self::PROGRAMATOR_4_LOADED,
-        ],
-        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED],
-        ROLES_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::ENGINEER_2_LOADED, self::EMPLOYEE_3_LOADED, self::ENGINEER_4_LOADED],
-        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED],
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED],
-
+        ];
+    protected const
+        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
+    protected const
+        ROLES_ALL_LOADED = [self::EMPLOYEE_1_LOADED, self::ENGINEER_2_LOADED, self::EMPLOYEE_3_LOADED, self::ENGINEER_4_LOADED];
+    protected const
+        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
+    protected const
+        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+    protected const
         // todo: remove when STI will support classless entities and Schema::CHILDREN's roles
-        PROGRAMATOR_ROLE = Programator::class,
+        PROGRAMATOR_ROLE = Programator::class;
+    protected const
         ENGINEER_ROLE = Engineer::class;
 
     public function setUp(): void
@@ -116,60 +135,60 @@ abstract class SingleTableTest extends SimpleCasesTest
     {
         return [
             Employee::class => [
-                SchemaInterface::ROLE        => 'employee',
-                SchemaInterface::MAPPER      => Mapper::class,
-                SchemaInterface::DATABASE    => 'default',
-                SchemaInterface::TABLE       => 'employee_table',
+                SchemaInterface::ROLE => 'employee',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'employee_table',
                 SchemaInterface::PRIMARY_KEY => 'employee_id',
-                SchemaInterface::COLUMNS     => [
+                SchemaInterface::COLUMNS => [
                     'employee_id' => 'employee_id_column',
                     'name' => 'name_column',
                     'age',
                 ],
-                SchemaInterface::TYPECAST    => ['employee_id' => 'int', 'age' => 'int'],
-                SchemaInterface::SCHEMA      => [],
-                SchemaInterface::RELATIONS   => [],
+                SchemaInterface::TYPECAST => ['employee_id' => 'int', 'age' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
             Manager::class => [
-                SchemaInterface::ROLE        => 'role',
+                SchemaInterface::ROLE => 'role',
             ],
             Engineer::class => [
-                SchemaInterface::ROLE        => 'role',
+                SchemaInterface::ROLE => 'role',
             ],
             'role' => [
-                SchemaInterface::MAPPER      => Mapper::class,
-                SchemaInterface::DATABASE    => 'default',
-                SchemaInterface::TABLE       => 'role_table',
-                SchemaInterface::PARENT      => 'employee',
-                SchemaInterface::CHILDREN    => [
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'role_table',
+                SchemaInterface::PARENT => 'employee',
+                SchemaInterface::CHILDREN => [
                     'engineer' => Engineer::class,
-                    'manager'  => Manager::class,
+                    'manager' => Manager::class,
                 ],
                 SchemaInterface::PRIMARY_KEY => 'role_id',
                 SchemaInterface::DISCRIMINATOR => 'discriminator',
-                SchemaInterface::COLUMNS     => ['role_id' => 'role_id_column', 'level', 'rank', 'discriminator'],
-                SchemaInterface::TYPECAST    => ['role_id' => 'int', 'level' => 'int'],
-                SchemaInterface::SCHEMA      => [],
-                SchemaInterface::RELATIONS   => [],
+                SchemaInterface::COLUMNS => ['role_id' => 'role_id_column', 'level', 'rank', 'discriminator'],
+                SchemaInterface::TYPECAST => ['role_id' => 'int', 'level' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
             Programator::class => [
-                SchemaInterface::ROLE        => 'subrole',
-                SchemaInterface::MAPPER      => Mapper::class,
-                SchemaInterface::DATABASE    => 'default',
-                SchemaInterface::TABLE       => 'role_table',
-                SchemaInterface::PARENT      => Engineer::class,
+                SchemaInterface::ROLE => 'subrole',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'role_table',
+                SchemaInterface::PARENT => Engineer::class,
                 SchemaInterface::PRIMARY_KEY => 'subrole_id',
-                SchemaInterface::COLUMNS     => ['subrole_id' => 'subrole_id_column', 'language'],
-                SchemaInterface::TYPECAST    => ['subrole_id' => 'int'],
-                SchemaInterface::SCHEMA      => [],
-                SchemaInterface::RELATIONS   => [],
+                SchemaInterface::COLUMNS => ['subrole_id' => 'subrole_id_column', 'language'],
+                SchemaInterface::TYPECAST => ['subrole_id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
         ];
     }
 
     public function testFetchAllChildren(): void
     {
-        /** @var Manager[]|Engineer[] $entities */
+        /** @var Engineer[]|Manager[] $entities */
         $entities = (new Select($this->orm, 'role'))->fetchAll();
 
         $this->assertSame(1, $entities[0]->role_id);

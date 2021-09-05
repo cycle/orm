@@ -27,15 +27,15 @@ class ManyToManyLoader extends JoinableLoader
      * Default set of relation options. Child implementation might defined their of default options.
      */
     protected array $options = [
-        'load'      => false,
-        'scope'     => true,
-        'method'    => self::POSTLOAD,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null,
-        'where'     => null,
-        'orderBy'   => null,
-        'pivot'     => null,
+        'load' => false,
+        'scope' => true,
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
+        'where' => null,
+        'orderBy' => null,
+        'pivot' => null,
     ];
 
     protected PivotLoader $pivot;
@@ -64,7 +64,7 @@ class ManyToManyLoader extends JoinableLoader
         $loader->pivot = $loader->pivot->withContext(
             $loader,
             [
-                'load'   => $loader->isLoaded(),
+                'load' => $loader->isLoaded(),
                 'method' => $options['method'] ?? self::JOIN,
             ] + ($options['pivot'] ?? [])
         );

@@ -152,7 +152,7 @@ final class Transaction implements TransactionInterface
                 if ($entity->hasValue()) {
                     $entity = $entity->getValue();
                     if ($entity === null) {
-                        \Cycle\ORM\Transaction\Pool::DEBUG and print "pool: skip unresolved promise\n";
+                        \Cycle\ORM\Transaction\Pool::DEBUG && print "pool: skip unresolved promise\n";
                         continue;
                     }
                     $tuple->entity = $entity;
@@ -169,7 +169,7 @@ final class Transaction implements TransactionInterface
                 $tuple->status = Tuple::STATUS_PROCESSED;
                 continue;
             }
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print sprintf(
+            \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
                 "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
                 ['preparing','waiting','waited','deferred','proposed','preprocessed','processed'][$tuple->status],
                 ['store', 'delete', 'force delete'][$tuple->task],
@@ -177,7 +177,7 @@ final class Transaction implements TransactionInterface
                 spl_object_id($entity),
                 $tuple->node === null
                     ? '(has no Node)'
-                    : implode('|', array_map(static fn($x) => \is_object($x)
+                    : implode('|', array_map(static fn ($x) => \is_object($x)
                         ? $x::class
                         : (string)$x, $tuple->node->getData()))
             );
@@ -209,21 +209,21 @@ final class Transaction implements TransactionInterface
             $role = $tuple->node->getRole();
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             if (/*!$relation->isCascade() || */$relationStatus === RelationInterface::STATUS_RESOLVED) {
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Master {$role}.{$name}\033[0m skip {$className}\n";
+                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
             }
 
             if ($relation instanceof ShadowBelongsTo) {
-                # Check relation is connected
-                # Connected -> $parentNode->getRelationStatus()
-                # Disconnected -> WAIT if Tuple::STATUS_PREPARING
+                // Check relation is connected
+                // Connected -> $parentNode->getRelationStatus()
+                // Disconnected -> WAIT if Tuple::STATUS_PREPARING
                 $relation->queue($this->pool, $tuple);
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
 
                 // if ($tuple->status < Tuple::STATUS_PROPOSED) {
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
-                // }
+            // }
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
@@ -241,10 +241,10 @@ final class Transaction implements TransactionInterface
             }
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
                 $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
-                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
-                // $waitKeys[] = $relation->getInnerKeys();
+                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
+            // $waitKeys[] = $relation->getInnerKeys();
             } else {
-                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
+                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }
         }
 
@@ -274,7 +274,7 @@ final class Transaction implements TransactionInterface
             $role = $tuple->node->getRole();
             if (!$relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 // todo check changes for not cascaded relations?
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m skip {$className}\n";
+                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
             }
 
@@ -297,14 +297,14 @@ final class Transaction implements TransactionInterface
                 && !$hasChangedKeys
                 && \count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === \count($relation->getInnerKeys())
             ) {
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
+                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
                 $child ??= $tuple->state->getRelation($name);
                 $relation->queue($this->pool, $tuple);
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             } elseif ($relationStatus === RelationInterface::STATUS_RESOLVED) {
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[32m  Slave {$role}.{$name}\033[0m resolved {$className}\n";
+                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolved {$className}\n";
             } else {
-                \Cycle\ORM\Transaction\Pool::DEBUG and print "\033[34m  Slave {$role}.{$name}\033[0m process {$relationStatus} {$className}\n";
+                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Slave {$role}.{$name}\033[0m process {$relationStatus} {$className}\n";
             }
             $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
             $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
@@ -316,7 +316,7 @@ final class Transaction implements TransactionInterface
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map, bool $hasDeferredRelations): void
     {
         if (!$map->hasEmbedded() && !$tuple->node->hasChanges()) {
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print "No changes, no embedded \n";
+            \Cycle\ORM\Transaction\Pool::DEBUG && print "No changes, no embedded \n";
             $tuple->status = !$hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED
                 : max(Tuple::STATUS_DEFERRED, $tuple->status);

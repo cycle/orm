@@ -19,7 +19,7 @@ trait ScopeTrait
     /**
      * Associate scope with the selector.
      *
-     * @return AbstractLoader|$this
+     * @return $this|AbstractLoader
      */
     public function setScope(ScopeInterface $scope = null): self
     {

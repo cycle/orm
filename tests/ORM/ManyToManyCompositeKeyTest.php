@@ -22,70 +22,85 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
     use TableTrait;
 
     protected const
-        CHILDREN_CONTAINER = 'pivoted',
-        PARENTS_CONTAINER = 'pivoted',
-
-        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101],
-        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102],
-        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201],
-        PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202],
-
-        CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null],
-        CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo1'],
-        CHILD_3 = ['key1' => 2, 'key2' => 1, 'key3' => 'bar1'],
-        CHILD_4 = ['key1' => 3, 'key2' => 3, 'key3' => 'fiz'],
-
+        CHILDREN_CONTAINER = 'pivoted';
+    protected const
+        PARENTS_CONTAINER = 'pivoted';
+    protected const
+        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
+    protected const
+        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
+    protected const
+        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
+    protected const
+        PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202];
+    protected const
+        CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null];
+    protected const
+        CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo1'];
+    protected const
+        CHILD_3 = ['key1' => 2, 'key2' => 1, 'key3' => 'bar1'];
+    protected const
+        CHILD_4 = ['key1' => 3, 'key2' => 3, 'key3' => 'fiz'];
+    protected const
         PIVOT_1_1 = [
             'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
             'child_key1' => self::CHILD_1['key1'], 'child_key2' => self::CHILD_1['key2'],
-            'as' => 'foo1'
-        ],
+            'as' => 'foo1',
+        ];
+    protected const
         PIVOT_1_2 = [
             'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
             'child_key1' => self::CHILD_2['key1'], 'child_key2' => self::CHILD_2['key2'],
-            'as' => 'foo2'
-        ],
+            'as' => 'foo2',
+        ];
+    protected const
         PIVOT_1_3 = [
             'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
             'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
-            'as' => 'foo3'
-        ],
+            'as' => 'foo3',
+        ];
+    protected const
         PIVOT_2_2 = [
             'parent_key1' => self::PARENT_2['key1'], 'parent_key2' => self::PARENT_2['key2'],
             'child_key1' => self::CHILD_2['key1'], 'child_key2' => self::CHILD_2['key2'],
-            'as' => 'bar2'
-        ],
+            'as' => 'bar2',
+        ];
+    protected const
         PIVOT_2_3 = [
             'parent_key1' => self::PARENT_2['key1'], 'parent_key2' => self::PARENT_2['key2'],
             'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
-            'as' => 'bar2'
-        ],
+            'as' => 'bar2',
+        ];
+    protected const
         PIVOT_3_3 = [
             'parent_key1' => self::PARENT_3['key1'], 'parent_key2' => self::PARENT_3['key2'],
             'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
-            'as' => 'baz3'
-        ],
-
+            'as' => 'baz3',
+        ];
+    protected const
         PARENT_1_FULL = self::PARENT_1 + [
             self::CHILDREN_CONTAINER => [
                 ['key1' => 1] + self::PIVOT_1_1 + ['@' => self::CHILD_1],
                 ['key1' => 2] + self::PIVOT_1_2 + ['@' => self::CHILD_2],
                 ['key1' => 3] + self::PIVOT_1_3 + ['@' => self::CHILD_3],
-            ]
-        ],
+            ],
+        ];
+    protected const
         PARENT_2_FULL = self::PARENT_2 + [
             self::CHILDREN_CONTAINER => [
                 ['key1' => 4] + self::PIVOT_2_2 + ['@' => self::CHILD_2],
                 ['key1' => 5] + self::PIVOT_2_3 + ['@' => self::CHILD_3],
-            ]
-        ],
+            ],
+        ];
+    protected const
         PARENT_3_FULL = self::PARENT_3 + [
             self::CHILDREN_CONTAINER => [
                 ['key1' => 6] + self::PIVOT_3_3 + ['@' => self::CHILD_3],
-            ]
-        ],
-        PARENT_4_FULL = self::PARENT_4 + [self::CHILDREN_CONTAINER => []],
-
+            ],
+        ];
+    protected const
+        PARENT_4_FULL = self::PARENT_4 + [self::CHILDREN_CONTAINER => []];
+    protected const
         PARENTS_FULL = [
             self::PARENT_1_FULL,
             self::PARENT_2_FULL,
@@ -121,7 +136,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             'parent_field_2' => 'bigInteger',
             'child_field_1' => 'bigInteger',
             'child_field_2' => 'bigInteger',
-            'as' => 'string,nullable'
+            'as' => 'string,nullable',
         ]);
 
         $this->makeCompositeFK(
@@ -192,15 +207,15 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $selector = new Select($this->orm, CompositePK::class);
         $data = $selector->with(self::CHILDREN_CONTAINER)->buildQuery()->fetchAll();
 
-        $this->assertSame(3, count($data[0]));
+        $this->assertCount(3, $data[0]);
     }
 
     public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load(self::CHILDREN_CONTAINER, [
-            'method'    => Select\JoinableLoader::INLOAD,
-            'scope' => new Select\QueryScope([], ['key1' => 'ASC', 'key2' => 'ASC'])
+            'method' => Select\JoinableLoader::INLOAD,
+            'scope' => new Select\QueryScope([], ['key1' => 'ASC', 'key2' => 'ASC']),
         ])->orderBy(['key3' => 'ASC']);
 
         $this->assertSame(self::PARENTS_FULL, $selector->fetchData());
@@ -381,7 +396,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
 
         $a->pivoted->remove(0);
         $a->pivoted->add($tagSelector->wherePK([
-            self::CHILD_4['key1'], self::CHILD_4['key2']
+            self::CHILD_4['key1'], self::CHILD_4['key2'],
         ])->fetchOne());
         $a->pivoted->getPivot($a->pivoted[1])->as = 'new';
 
@@ -483,63 +498,63 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
     private function getSchemaArray(): array
     {
         return [
-            CompositePK::class    => [
-                Schema::ROLE        => 'parent_entity',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'parent_entity',
+            CompositePK::class => [
+                Schema::ROLE => 'parent_entity',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'parent_entity',
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'key1' => 'pField1',
                     'key2' => 'pField2',
                     'key3' => 'pField3',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                     'key3' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     self::CHILDREN_CONTAINER => [
-                        Relation::TYPE   => Relation::MANY_TO_MANY,
+                        Relation::TYPE => Relation::MANY_TO_MANY,
                         Relation::TARGET => CompositePKChild::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE           => true,
-                            Relation::THROUGH_ENTITY    => CompositePKPivot::class,
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => CompositePKPivot::class,
                             Relation::INNER_KEY => ['key1', 'key2'],
                             Relation::OUTER_KEY => ['key1', 'key2'],
                             Relation::THROUGH_INNER_KEY => ['parent_key1', 'parent_key2'],
                             Relation::THROUGH_OUTER_KEY => ['child_key1', 'child_key2'],
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             CompositePKChild::class => [
-                Schema::ROLE        => 'child_entity',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'child_entity',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'child_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'child_entity',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS     => [
-                    'key1'        => 'field1',
-                    'key2'        => 'field2',
-                    'key3'        => 'field3',
+                Schema::COLUMNS => [
+                    'key1' => 'field1',
+                    'key2' => 'field2',
+                    'key3' => 'field3',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'key2' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             CompositePKPivot::class => [
-                Schema::ROLE        => 'pivot_entity',
-                Schema::TABLE       => 'pivot_entity',
-                Schema::DATABASE    => 'default',
-                Schema::MAPPER      => Mapper::class,
+                Schema::ROLE => 'pivot_entity',
+                Schema::TABLE => 'pivot_entity',
+                Schema::DATABASE => 'default',
+                Schema::MAPPER => Mapper::class,
                 Schema::PRIMARY_KEY => 'key1',
-                Schema::COLUMNS     => [
+                Schema::COLUMNS => [
                     'key1' => 'pivot_id',
                     'parent_key1' => 'parent_field_1',
                     'parent_key2' => 'parent_field_2',
@@ -547,16 +562,16 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
                     'child_key2' => 'child_field_2',
                     'as' => 'as',
                 ],
-                Schema::TYPECAST    => [
+                Schema::TYPECAST => [
                     'key1' => 'int',
                     'parent_key1' => 'int',
                     'parent_key2' => 'int',
                     'child_key1' => 'int',
                     'child_key2' => 'int',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ];
     }
 }

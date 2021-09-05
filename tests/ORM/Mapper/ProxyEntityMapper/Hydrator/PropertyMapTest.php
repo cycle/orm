@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator;
@@ -17,7 +18,7 @@ class PropertyMapTest extends TestCase
         $this->properties = new PropertyMap('User', [
             '' => [
                 'id' => 'id',
-                'username' => 'username'
+                'username' => 'username',
             ],
             'Test\User\ExtendedUser' => [
                 'is_verified' => 'is_verified',
@@ -26,11 +27,11 @@ class PropertyMapTest extends TestCase
             'Test\User\SuperUser' => [
                 'is_admin' => 'is_admin',
                 'is_blocked' => 'is_blocked',
-            ]
+            ],
         ]);
     }
 
-    function testGetsPropertyClass()
+    public function testGetsPropertyClass()
     {
         $this->assertEquals('', $this->properties->getPropertyClass('id'));
         $this->assertEquals('', $this->properties->getPropertyClass('username'));
@@ -42,7 +43,7 @@ class PropertyMapTest extends TestCase
         $this->assertEquals('Test\User\SuperUser', $this->properties->getPropertyClass('is_blocked'));
     }
 
-    function testCheckPropertyPublicity()
+    public function testCheckPropertyPublicity()
     {
         $this->assertTrue($this->properties->isPublicProperty('id'));
         $this->assertTrue($this->properties->isPublicProperty('username'));
@@ -54,12 +55,12 @@ class PropertyMapTest extends TestCase
         $this->assertFalse($this->properties->isPublicProperty('is_blocked'));
     }
 
-    function testGetsProperties()
+    public function testGetsProperties()
     {
         $this->assertIsArray($this->properties->getProperties());
     }
 
-    function testGetsClass()
+    public function testGetsClass()
     {
         $this->assertEquals('User', $this->properties->getClass());
     }

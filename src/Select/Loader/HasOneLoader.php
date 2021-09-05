@@ -29,13 +29,13 @@ class HasOneLoader extends JoinableLoader
      * Default set of relation options. Child implementation might defined their of default options.
      */
     protected array $options = [
-        'load'      => false,
-        'scope'     => true,
-        'method'    => self::INLOAD,
-        'minify'    => true,
-        'as'        => null,
-        'using'     => null,
-        'where'     => null
+        'load' => false,
+        'scope' => true,
+        'method' => self::INLOAD,
+        'minify' => true,
+        'as' => null,
+        'using' => null,
+        'where' => null,
     ];
 
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery

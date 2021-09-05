@@ -18,11 +18,11 @@ abstract class TableRendererTest extends BaseTest
         $renderer->renderColumns(
             $table,
             [
-                'id'   => 'primary',
-                'name' => 'string'
+                'id' => 'primary',
+                'name' => 'string',
             ],
             [
-                'name' => 'default'
+                'name' => 'default',
             ]
         );
 
@@ -44,11 +44,11 @@ abstract class TableRendererTest extends BaseTest
         $renderer->renderColumns(
             $table,
             [
-                'id'   => 'primary',
-                'name' => 'string'
+                'id' => 'primary',
+                'name' => 'string',
             ],
             [
-                'name' => null
+                'name' => null,
             ]
         );
 
@@ -70,8 +70,8 @@ abstract class TableRendererTest extends BaseTest
         $renderer->renderColumns(
             $table,
             [
-                'id'   => 'primary',
-                'name' => 'string,null'
+                'id' => 'primary',
+                'name' => 'string,null',
             ],
             []
         );
@@ -93,8 +93,8 @@ abstract class TableRendererTest extends BaseTest
         $renderer->renderColumns(
             $table,
             [
-                'id'   => 'primary',
-                'name' => 'string,nullable'
+                'id' => 'primary',
+                'name' => 'string,nullable',
             ],
             []
         );
@@ -116,8 +116,8 @@ abstract class TableRendererTest extends BaseTest
         $renderer->renderColumns(
             $table,
             [
-                'id'   => 'primary',
-                'name' => 'enum(active,disabled)'
+                'id' => 'primary',
+                'name' => 'enum(active,disabled)',
             ],
             []
         );
@@ -142,11 +142,11 @@ abstract class TableRendererTest extends BaseTest
         $renderer->renderColumns(
             $table,
             [
-                'id'   => 'primary',
-                'name' => 'enum(active,disabled)'
+                'id' => 'primary',
+                'name' => 'enum(active,disabled)',
             ],
             [
-                'name' => null
+                'name' => null,
             ]
         );
 
@@ -170,11 +170,11 @@ abstract class TableRendererTest extends BaseTest
         $renderer->renderColumns(
             $table,
             [
-                'id'   => 'primary',
-                'name' => 'enum(active,disabled)'
+                'id' => 'primary',
+                'name' => 'enum(active,disabled)',
             ],
             [
-                'name' => 'disabled'
+                'name' => 'disabled',
             ]
         );
 
@@ -240,6 +240,7 @@ abstract class TableRendererTest extends BaseTest
 
     /**
      * @param AbstractTable $table
+     *
      * @return AbstractTable
      */
     private function reload(AbstractTable $table): AbstractTable

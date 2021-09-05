@@ -41,7 +41,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         try {
             return $this->storage->offsetGet($entity);
         } catch (UnexpectedValueException) {
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print "Heap: node not found\n";
+            \Cycle\ORM\Transaction\Pool::DEBUG && print "Heap: node not found\n";
             return null;
         }
     }
@@ -185,7 +185,7 @@ final class Heap implements HeapInterface, IteratorAggregate
             $j = \count($keys) - 1;
             $next = &$values;
             $removeFrom = &$next;
-            # Walk index
+            // Walk index
             foreach ($keys as $i => $key) {
                 $value = isset($data[$key]) ? (string)$data[$key] : null;
                 if ($value === null || !isset($next[$value])) {

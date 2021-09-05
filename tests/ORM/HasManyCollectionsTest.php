@@ -37,9 +37,9 @@ abstract class HasManyCollectionsTest extends BaseTest
         $this->collectionFactory = [];
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -51,10 +51,10 @@ abstract class HasManyCollectionsTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'level'   => 'integer',
-            'message' => 'string'
+            'level' => 'integer',
+            'message' => 'string',
         ]);
 
         $this->getDatabase()->table('comment')->insertMultiple(
@@ -186,36 +186,36 @@ abstract class HasManyCollectionsTest extends BaseTest
     private function getSchemaArray(): array
     {
         return [
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ];
     }
 }

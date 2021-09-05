@@ -25,7 +25,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
 
     /**
      * @param array<TKey, TEntity> $elements
-     * @param null|SplObjectStorage<TEntity, TPivot> $pivotData
+     * @param SplObjectStorage<TEntity, TPivot>|null $pivotData
      */
     public function __construct(array $elements = [], SplObjectStorage $pivotData = null)
     {
@@ -55,6 +55,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
 
     /**
      * @param array<K, V> $elements
+     *
      * @return static<K, V, TPivot>
      *
      * @template K of TKey

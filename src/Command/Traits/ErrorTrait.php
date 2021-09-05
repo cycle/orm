@@ -22,6 +22,6 @@ trait ErrorTrait
             }
         }
 
-        return sprintf('%s(%s)', $this::class, join(', ', $missing));
+        return sprintf('%s(%s)', $this::class, implode(', ', $missing));
     }
 }

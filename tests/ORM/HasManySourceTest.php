@@ -23,9 +23,9 @@ abstract class HasManySourceTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -37,10 +37,10 @@ abstract class HasManySourceTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'level'   => 'integer',
-            'message' => 'string'
+            'level' => 'integer',
+            'message' => 'string',
         ]);
 
         $this->getDatabase()->table('comment')->insertMultiple(
@@ -57,36 +57,36 @@ abstract class HasManySourceTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 
@@ -171,7 +171,7 @@ abstract class HasManySourceTest extends BaseTest
         $s->scope(new Select\QueryScope([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'scope' => new Select\QueryScope(['@.level' => 4])
+            'scope' => new Select\QueryScope(['@.level' => 4]),
         ])->fetchAll();
 
         [$b, $a] = $res;
@@ -188,8 +188,8 @@ abstract class HasManySourceTest extends BaseTest
         $s->scope(new Select\QueryScope([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'method'    => Select\JoinableLoader::INLOAD,
-            'scope' => new Select\QueryScope(['@.level' => 4])
+            'method' => Select\JoinableLoader::INLOAD,
+            'scope' => new Select\QueryScope(['@.level' => 4]),
         ])->fetchAll();
 
         [$b, $a] = $res;
@@ -206,7 +206,7 @@ abstract class HasManySourceTest extends BaseTest
         $s->scope(new Select\QueryScope([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'scope' => new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
+            'scope' => new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']),
         ])->fetchAll();
 
         [$b, $a] = $res;
@@ -226,8 +226,8 @@ abstract class HasManySourceTest extends BaseTest
         $s->scope(new Select\QueryScope([], ['@.balance' => 'DESC']));
 
         $res = $s->load('comments', [
-            'method'    => Select\JoinableLoader::INLOAD,
-            'scope' => new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC'])
+            'method' => Select\JoinableLoader::INLOAD,
+            'scope' => new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']),
         ])->fetchAll();
 
         [$b, $a] = $res;
@@ -244,36 +244,36 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelation(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE   => LeveledHasManyScope::class
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => LeveledHasManyScope::class,
+            ],
         ]));
 
         $s = new Select($this->orm, User::class);
@@ -295,36 +295,36 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelationInload(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE   => LeveledHasManyScope::class
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => LeveledHasManyScope::class,
+            ],
         ]));
 
         $s = new Select($this->orm, User::class);
@@ -348,37 +348,37 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelationPromise(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE   => LeveledHasManyScope::class
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => LeveledHasManyScope::class,
+            ],
         ]));
 
         $s = new Select($this->orm, User::class);
@@ -400,37 +400,37 @@ abstract class HasManySourceTest extends BaseTest
     public function testScopeViaMapperRelationPromiseShort(): void
     {
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE   => ShortLeveledHasManyScope::class
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => ShortLeveledHasManyScope::class,
+            ],
         ]));
 
         $s = new Select($this->orm, User::class);

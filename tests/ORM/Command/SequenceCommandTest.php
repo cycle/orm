@@ -26,7 +26,7 @@ class SequenceCommandTest extends TestCase
         }
 
         $this->assertSame(2, $count);
-        $this->assertSame(2, count($command));
+        $this->assertCount(2, $command);
         $this->assertCount(2, $command->getCommands());
 
         //Nothing

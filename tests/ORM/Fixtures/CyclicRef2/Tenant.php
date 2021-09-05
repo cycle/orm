@@ -12,7 +12,7 @@ class Tenant
     public $id;
     public $name;
 
-    /** @var Preference[]|Collection */
+    /** @var Collection|Preference[] */
     public $preferences;
 
     /** @var Preference */

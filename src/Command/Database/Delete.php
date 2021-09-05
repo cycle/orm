@@ -15,10 +15,10 @@ use Cycle\Database\DatabaseInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
-    use ScopeTrait;
     use ErrorTrait;
+    use ScopeTrait;
 
-    /** @var null|callable */
+    /** @var callable|null */
     private $mapper;
 
     public function __construct(

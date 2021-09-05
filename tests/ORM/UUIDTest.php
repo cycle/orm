@@ -33,15 +33,15 @@ abstract class UUIDTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'string(36),primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'string(36),primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->makeTable('comment', [
-            'id'      => 'string(36),primary',
+            'id' => 'string(36),primary',
             'user_id' => 'string(36)',
-            'message' => 'string'
+            'message' => 'string',
         ]);
 
         $this->makeFK('comment', 'user_id', 'user', 'id');
@@ -71,37 +71,37 @@ abstract class UUIDTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => UUIDMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => UUIDMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => UUIDMapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => UUIDMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
-                Schema::SCOPE   => SortByMsgScope::class
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => SortByMsgScope::class,
+            ],
         ]));
     }
 
@@ -112,28 +112,28 @@ abstract class UUIDTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => $this->u2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => $this->u2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
             [
-                'id'       => $this->u1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => $this->u1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => $this->c1,
+                        'id' => $this->c1,
                         'user_id' => $this->u1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => $this->c2,
+                        'id' => $this->c2,
                         'user_id' => $this->u1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => $this->c3,
+                        'id' => $this->c3,
                         'user_id' => $this->u1,
                         'message' => 'msg 3',
                     ],
@@ -149,28 +149,28 @@ abstract class UUIDTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => $this->u2,
-                'email'    => 'another@world.com',
-                'balance'  => 200.0,
+                'id' => $this->u2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'comments' => [],
             ],
             [
-                'id'       => $this->u1,
-                'email'    => 'hello@world.com',
-                'balance'  => 100.0,
+                'id' => $this->u1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'comments' => [
                     [
-                        'id'      => $this->c1,
+                        'id' => $this->c1,
                         'user_id' => $this->u1,
                         'message' => 'msg 1',
                     ],
                     [
-                        'id'      => $this->c2,
+                        'id' => $this->c2,
                         'user_id' => $this->u1,
                         'message' => 'msg 2',
                     ],
                     [
-                        'id'      => $this->c3,
+                        'id' => $this->c3,
                         'user_id' => $this->u1,
                         'message' => 'msg 3',
                     ],
@@ -252,17 +252,17 @@ abstract class UUIDTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'       => $e->id,
-                'email'    => 'test@email.com',
-                'balance'  => 300.0,
+                'id' => $e->id,
+                'email' => 'test@email.com',
+                'balance' => 300.0,
                 'comments' => [
                     [
-                        'id'      => $e->comments[0]->id,
+                        'id' => $e->comments[0]->id,
                         'user_id' => $e->id,
                         'message' => 'msg A',
                     ],
                     [
-                        'id'      => $e->comments[1]->id,
+                        'id' => $e->comments[1]->id,
                         'user_id' => $e->id,
                         'message' => 'msg B',
                     ],
@@ -382,7 +382,7 @@ abstract class UUIDTest extends BaseTest
          */
         [$b, $a] = $selector->load('comments', [
             'method' => Select\JoinableLoader::INLOAD,
-            'as'     => 'comment'
+            'as' => 'comment',
         ])->orderBy('user.email')->fetchAll();
 
         $this->assertCount(1, $a->comments);

@@ -38,15 +38,15 @@ class EntityWithRelationCreationTest extends BaseMapperTest
                                     Relation::INNER_KEY => 'id',
                                     Relation::OUTER_KEY => 'user_id',
                                 ],
-                            ]
-                        ]
-                    ]
+                            ],
+                        ],
+                    ],
                 ]
             )
         );
     }
 
-    function testProxyEntityRelationPropertiesShouldBeUnsetAfterCreation()
+    public function testProxyEntityRelationPropertiesShouldBeUnsetAfterCreation()
     {
         $mapper = $this->orm->getMapper(EntityWithRelationCreationUser::class);
 

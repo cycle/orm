@@ -10,7 +10,6 @@ use Cycle\Database\DatabaseInterface;
 
 class DifferentSource implements SourceInterface
 {
-
     /**
      * @inheritDoc
      */

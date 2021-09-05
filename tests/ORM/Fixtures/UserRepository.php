@@ -10,6 +10,7 @@ class UserRepository extends Repository
 {
     /**
      * @param string $email
+     *
      * @return User|null
      */
     public function findByEmail(string $email): ?User

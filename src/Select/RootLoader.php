@@ -29,8 +29,8 @@ final class RootLoader extends AbstractLoader
 
     /** @var array */
     protected array $options = [
-        'load'      => true,
-        'scope'     => true,
+        'load' => true,
+        'scope' => true,
     ];
 
     private SelectQuery $query;

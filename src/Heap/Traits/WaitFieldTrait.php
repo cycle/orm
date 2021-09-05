@@ -18,7 +18,7 @@ trait WaitFieldTrait
 
     public function getWaitingFields(bool $requiredOnly = false): array
     {
-         return array_keys($requiredOnly ? array_filter($this->waitingFields) : $this->waitingFields);
+        return array_keys($requiredOnly ? array_filter($this->waitingFields) : $this->waitingFields);
     }
 
     /**

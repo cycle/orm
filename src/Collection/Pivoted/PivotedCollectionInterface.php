@@ -25,6 +25,7 @@ interface PivotedCollectionInterface
      * Return pivot data associated with element or null.
      *
      * @param TEntity $element
+     *
      * @return TPivot
      */
     public function getPivot(object $element): mixed;

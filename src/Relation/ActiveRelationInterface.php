@@ -30,7 +30,7 @@ interface ActiveRelationInterface extends RelationInterface
     public function resolve(ReferenceInterface $reference, bool $load): object|iterable|null;
 
     /**
-     * @param null|object|iterable $data
+     * @param iterable|object|null $data
      */
     public function collect($data): object|iterable|null;
 }

@@ -37,10 +37,10 @@ abstract class DatetimeTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'           => 'primary',
-            'email'        => 'string',
+            'id' => 'primary',
+            'email' => 'string',
             'time_created' => 'datetime',
-            'balance'      => 'float'
+            'balance' => 'float',
         ]);
 
         $this->now = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Minsk'));
@@ -55,20 +55,20 @@ abstract class DatetimeTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'time_created', 'balance'],
-                Schema::TYPECAST    => [
-                    'id'           => 'int',
-                    'balance'      => 'float',
-                    'time_created' => 'datetime'
+                Schema::COLUMNS => ['id', 'email', 'time_created', 'balance'],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'balance' => 'float',
+                    'time_created' => 'datetime',
                 ],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 

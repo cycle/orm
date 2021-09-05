@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
-use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Tag;
@@ -25,9 +24,9 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
         $this->makeTable(
             'user',
             [
-                'id'         => 'primary',
-                'email'      => 'string',
-                'balance'    => 'float',
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float',
                 'created_at' => 'datetime',
                 'updated_at' => 'datetime',
             ]
@@ -36,8 +35,8 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
         $this->makeTable(
             'tag',
             [
-                'id'         => 'primary',
-                'name'       => 'string',
+                'id' => 'primary',
+                'name' => 'string',
                 'created_at' => 'datetime',
                 'updated_at' => 'datetime',
             ]
@@ -46,10 +45,10 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
         $this->makeTable(
             'tag_user_map',
             [
-                'id'         => 'primary',
-                'user_id'    => 'integer',
-                'tag_id'     => 'integer',
-                'as'         => 'string,nullable',
+                'id' => 'primary',
+                'user_id' => 'integer',
+                'tag_id' => 'integer',
+                'as' => 'string,nullable',
                 'created_at' => 'datetime',
                 'updated_at' => 'datetime',
             ]
@@ -88,73 +87,73 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
         $this->orm = $this->withSchema(
             new Schema(
                 [
-                    User::class       => [
-                        Schema::ROLE        => 'user',
-                        Schema::MAPPER      => TimestampedMapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'user',
+                    User::class => [
+                        Schema::ROLE => 'user',
+                        Schema::MAPPER => TimestampedMapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'email', 'balance'],
-                        Schema::TYPECAST    => ['id' => 'int', 'balance' => 'float'],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => [
+                        Schema::COLUMNS => ['id', 'email', 'balance'],
+                        Schema::TYPECAST => ['id' => 'int', 'balance' => 'float'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [
                             'tags' => [
-                                Relation::TYPE   => Relation::MANY_TO_MANY,
+                                Relation::TYPE => Relation::MANY_TO_MANY,
                                 Relation::TARGET => Tag::class,
-                                Relation::LOAD   => Relation::LOAD_PROMISE,
+                                Relation::LOAD => Relation::LOAD_PROMISE,
                                 Relation::SCHEMA => [
-                                    Relation::CASCADE           => true,
-                                    Relation::NULLABLE          => false,
-                                    Relation::THROUGH_ENTITY    => TagContext::class,
-                                    Relation::INNER_KEY         => 'id',
-                                    Relation::OUTER_KEY         => 'id',
+                                    Relation::CASCADE => true,
+                                    Relation::NULLABLE => false,
+                                    Relation::THROUGH_ENTITY => TagContext::class,
+                                    Relation::INNER_KEY => 'id',
+                                    Relation::OUTER_KEY => 'id',
                                     Relation::THROUGH_INNER_KEY => 'user_id',
                                     Relation::THROUGH_OUTER_KEY => 'tag_id',
-                                    Relation::WHERE             => [],
-                                    Relation::THROUGH_WHERE     => [],
+                                    Relation::WHERE => [],
+                                    Relation::THROUGH_WHERE => [],
                                 ],
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
-                    Tag::class        => [
-                        Schema::ROLE        => 'tag',
-                        Schema::MAPPER      => TimestampedMapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'tag',
+                    Tag::class => [
+                        Schema::ROLE => 'tag',
+                        Schema::MAPPER => TimestampedMapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'tag',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'name'],
-                        Schema::TYPECAST    => ['id' => 'int'],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => [
+                        Schema::COLUMNS => ['id', 'name'],
+                        Schema::TYPECAST => ['id' => 'int'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [
                             'users' => [
-                                Relation::TYPE   => Relation::MANY_TO_MANY,
+                                Relation::TYPE => Relation::MANY_TO_MANY,
                                 Relation::TARGET => User::class,
-                                Relation::LOAD   => Relation::LOAD_PROMISE,
+                                Relation::LOAD => Relation::LOAD_PROMISE,
                                 Relation::SCHEMA => [
-                                    Relation::CASCADE           => true,
-                                    Relation::NULLABLE          => false,
-                                    Relation::THROUGH_ENTITY    => TagContext::class,
-                                    Relation::INNER_KEY         => 'id',
-                                    Relation::OUTER_KEY         => 'id',
+                                    Relation::CASCADE => true,
+                                    Relation::NULLABLE => false,
+                                    Relation::THROUGH_ENTITY => TagContext::class,
+                                    Relation::INNER_KEY => 'id',
+                                    Relation::OUTER_KEY => 'id',
                                     Relation::THROUGH_INNER_KEY => 'tag_id',
                                     Relation::THROUGH_OUTER_KEY => 'user_id',
-                                    Relation::WHERE             => [],
-                                    Relation::THROUGH_WHERE     => [],
+                                    Relation::WHERE => [],
+                                    Relation::THROUGH_WHERE => [],
                                 ],
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                     TagContext::class => [
-                        Schema::ROLE        => 'tag_context',
-                        Schema::MAPPER      => TimestampedMapper::class,
-                        Schema::DATABASE    => 'default',
-                        Schema::TABLE       => 'tag_user_map',
+                        Schema::ROLE => 'tag_context',
+                        Schema::MAPPER => TimestampedMapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'tag_user_map',
                         Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS     => ['id', 'user_id', 'tag_id', 'as'],
-                        Schema::TYPECAST    => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
-                        Schema::SCHEMA      => [],
-                        Schema::RELATIONS   => []
-                    ]
+                        Schema::COLUMNS => ['id', 'user_id', 'tag_id', 'as'],
+                        Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [],
+                    ],
                 ]
             )
         );

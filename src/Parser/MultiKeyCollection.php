@@ -14,6 +14,7 @@ final class MultiKeyCollection
 {
     /**
      * [Index] = [key1, key2, ...]
+     *
      * @var string[][]
      */
     private array $indexes = [];
@@ -97,7 +98,7 @@ final class MultiKeyCollection
     {
         $depth = \count($this->indexes[$indexName]);
 
-        $iterator = static function(array $data, $deep) use (&$depth, &$iterator) {
+        $iterator = static function (array $data, $deep) use (&$depth, &$iterator) {
             if ($deep < $depth) {
                 ++$deep;
                 foreach ($data as $subset) {
@@ -141,7 +142,7 @@ final class MultiKeyCollection
         $value = &$dataSet;
         foreach ($keys as $key) {
             if (!array_key_exists($key, $value)) {
-                throw new ParserException("Value not found.");
+                throw new ParserException('Value not found.');
             }
             $value = &$value[$key];
         }

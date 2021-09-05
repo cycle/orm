@@ -89,7 +89,7 @@ final class Embedded implements SameRowRelationInterface
             $result->setValue(null);
             return $result;
         }
-        return $scope === [] ? new EmptyReference($this->target, null) :  new Reference($this->target, $scope);
+        return $scope === [] ? new EmptyReference($this->target, null) : new Reference($this->target, $scope);
     }
 
     private function getReferenceScope(Node $node): ?array
@@ -171,7 +171,7 @@ final class Embedded implements SameRowRelationInterface
             unset($data[$key]);
         }
 
-        return array_udiff_assoc($data, $state->getTransactionData(), [static::class, 'compare']);
+        return array_udiff_assoc($data, $state->getTransactionData(), [self::class, 'compare']);
     }
 
     private static function compare(mixed $a, mixed $b): int

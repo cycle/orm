@@ -22,9 +22,9 @@ abstract class SelectorTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'      => 'primary',
-            'email'   => 'string',
-            'balance' => 'float'
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -36,10 +36,10 @@ abstract class SelectorTest extends BaseTest
         );
 
         $this->makeTable('comment', [
-            'id'      => 'primary',
+            'id' => 'primary',
             'user_id' => 'integer',
-            'level'   => 'integer',
-            'message' => 'string'
+            'level' => 'integer',
+            'message' => 'string',
         ]);
 
         $this->getDatabase()->table('comment')->insertMultiple(
@@ -56,36 +56,36 @@ abstract class SelectorTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class    => [
-                Schema::ROLE        => 'user',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
                     'comments' => [
-                        Relation::TYPE   => Relation::HAS_MANY,
+                        Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                            Relation::CASCADE   => true,
+                            Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             Comment::class => [
-                Schema::ROLE        => 'comment',
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'comment',
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => []
-            ]
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
         ]));
     }
 
@@ -115,15 +115,15 @@ abstract class SelectorTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'             => 1,
-                'balance'        => 400.0,
-                'count_comments' => 4
+                'id' => 1,
+                'balance' => 400.0,
+                'count_comments' => 4,
             ],
             [
-                'id'             => 2,
-                'balance'        => 600.0,
-                'count_comments' => 3
-            ]
+                'id' => 2,
+                'balance' => 600.0,
+                'count_comments' => 3,
+            ],
         ], $result);
     }
 }

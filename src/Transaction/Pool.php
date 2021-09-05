@@ -46,7 +46,7 @@ final class Pool implements IteratorAggregate, \Countable
         int $status = null,
         bool $highPriority = false
     ): Tuple {
-        # Find existing
+        // Find existing
         $tuple = $this->findTuple($entity);
         if ($tuple !== null) {
             $this->updateTuple($tuple, $task, $status, $cascade, $node, $state);
@@ -59,7 +59,7 @@ final class Pool implements IteratorAggregate, \Countable
 
     public function attachTuple(Tuple $tuple): void
     {
-        # Find existing
+        // Find existing
         $found = $this->findTuple($tuple->entity);
         if ($found !== null) {
             $this->updateTuple($found, $tuple->task, $tuple->status, $tuple->cascade, $tuple->node, $tuple->state);
@@ -92,10 +92,10 @@ final class Pool implements IteratorAggregate, \Countable
             $tuple->status
         );
         if (($this->priorityAutoAttach || $highPriority) && $tuple->status === Tuple::STATUS_PREPARING) {
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mWith priority $string\033[0m";
+            self::DEBUG && print "\033[90mWith priority $string\033[0m";
             $this->priorityStorage->attach($tuple->entity, $tuple);
         } else {
-            \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90m$string\033[0m";
+            self::DEBUG && print "\033[90m$string\033[0m";
             $this->storage->attach($tuple->entity, $tuple);
         }
         return $tuple;
@@ -195,7 +195,7 @@ final class Pool implements IteratorAggregate, \Countable
                 }
                 $this->priorityAutoAttach = true;
                 $stage = 1;
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mPOOL_STAGE $stage\033[0m\n";
+                self::DEBUG && print "\033[90mPOOL_STAGE $stage\033[0m\n";
                 $this->storage->rewind();
             }
             if ($stage === 1) {
@@ -217,7 +217,7 @@ final class Pool implements IteratorAggregate, \Countable
                     }
                 }
                 $stage = 2;
-                \Cycle\ORM\Transaction\Pool::DEBUG AND print "\033[90mPOOL_STAGE $stage\033[0m\n";
+                self::DEBUG && print "\033[90mPOOL_STAGE $stage\033[0m\n";
                 $this->storage->rewind();
             }
             if ($stage === 2) {

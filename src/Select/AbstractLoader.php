@@ -360,7 +360,7 @@ abstract class AbstractLoader implements LoaderInterface
         $role ??= $this->target;
         $parentLoader = $this->generateParentLoader($role);
         if ($parentLoader !== null) {
-            yield $this->generateParentLoader($role);
+            yield $parentLoader;
         }
         yield from $this->generateSublassLoaders();
         yield from $this->generateEagerRelationLoaders($role);

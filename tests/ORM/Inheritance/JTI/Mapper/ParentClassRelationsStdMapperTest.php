@@ -48,11 +48,11 @@ abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTes
 
     public function testSelectEngineerEntityFirstWithInheritance(): void
     {
-        $this->markTestSkipped('Should not check entity class.');
+        $this->markTestSkipped('Skip for classless mapper.');
     }
 
     public function testSelectEmployeeHierarchyByPK(): void
     {
-        $this->markTestSkipped('Should not check entity class.');
+        $this->markTestSkipped('Skip for classless mapper.');
     }
 }

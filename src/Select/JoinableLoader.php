@@ -50,6 +50,11 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         // where conditions (if any)
     ];
 
+    /**
+     * Eager relations and inheritance hierarchies has been loaded
+     */
+    private bool $eagerLoaded = false;
+
     public function __construct(
         ORMInterface $orm,
         protected string $name,
@@ -109,7 +114,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             $loader->setScope($this->getSource()->getScope());
         }
 
-        if ($loader->isLoaded()) {
+        if (!$loader->eagerLoaded && $loader->isLoaded()) {
+            $loader->eagerLoaded = true;
             $loader->inherit = null;
             $loader->subclasses = [];
             foreach ($loader->getEagerLoaders() as $relation) {
@@ -178,7 +184,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function isLoaded(): bool
     {
-        return $this->options['load'] || in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD]);
+        return $this->options['load'] || in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD], true);
     }
 
     protected function configureSubQuery(SelectQuery $query): SelectQuery

@@ -8,6 +8,7 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select\Loader\SubQueryLoader;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
 use Cycle\Database\Query\SelectQuery;
@@ -165,11 +166,29 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     }
 
     /**
+     * Indicated that loaded must generate JOIN statement.
+     */
+    public function isSubQueried(): bool
+    {
+        return $this->getMethod() === self::SUBQUERY;
+    }
+
+    /**
      * Indication that loader want to load data.
      */
     public function isLoaded(): bool
     {
         return $this->options['load'] || in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD]);
+    }
+
+    protected function configureSubQuery(SelectQuery $query): SelectQuery
+    {
+        if (!$this->isJoined()) {
+            return $this->configureQuery($query);
+        }
+
+        $loader = new SubQueryLoader($this->orm, $this, $this->options);
+        return $loader->configureQuery($query);
     }
 
     /**
@@ -180,7 +199,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded()) {
-            if ($this->isJoined()) {
+            if ($this->isJoined() || $this->isSubQueried()) {
                 // mounting the columns to parent query
                 $this->mountColumns($query, $this->options['minify']);
             } else {
@@ -202,9 +221,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     protected function applyScope(SelectQuery $query): SelectQuery
     {
-        if ($this->scope !== null) {
-            $this->scope->apply($this->makeQueryBuilder($query));
-        }
+        $this->scope?->apply($this->makeQueryBuilder($query));
 
         return $query;
     }

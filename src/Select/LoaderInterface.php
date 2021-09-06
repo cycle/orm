@@ -53,4 +53,9 @@ interface LoaderInterface
     public function loadData(AbstractNode $node, bool $includeRole = false): void;
 
     public function setSubclassesLoading(bool $enabled): void;
+
+    /**
+     * @return bool True if this loader loads parents or children for JTI
+     */
+    public function isHierarchical(): bool;
 }

@@ -54,7 +54,7 @@ class BelongsToLoader extends JoinableLoader
                 $this->getJoinMethod(),
                 $this->getJoinTable()
             )->on($on);
-        } else {
+        } elseif ($outerKeys !== []) {
             // relation is loaded using external query
             $fields = array_map(
                 fn (string $key) => $localPrefix . $this->fieldAlias($key),

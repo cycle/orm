@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
 
-use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\Database\Query\SelectQuery;
@@ -18,8 +17,6 @@ trait ScopeTrait
 
     /**
      * Associate scope with the selector.
-     *
-     * @return $this|AbstractLoader
      */
     public function setScope(ScopeInterface $scope = null): self
     {
@@ -32,9 +29,7 @@ trait ScopeTrait
 
     protected function applyScope(SelectQuery $query): SelectQuery
     {
-        if ($this->scope !== null) {
-            $this->scope->apply(new QueryBuilder($query, $this));
-        }
+        $this->scope?->apply(new QueryBuilder($query, $this));
 
         return $query;
     }

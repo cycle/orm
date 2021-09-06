@@ -137,4 +137,10 @@ final class EmbeddedLoader implements JoinableInterface
     public function setSubclassesLoading(bool $enabled): void
     {
     }
+
+    public function isHierarchical(): bool
+    {
+        // Embedded can't be hierarchical
+        return false;
+    }
 }

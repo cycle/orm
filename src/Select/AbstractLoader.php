@@ -47,6 +47,7 @@ abstract class AbstractLoader implements LoaderInterface
     public const POSTLOAD = 2;
     public const JOIN = 3;
     public const LEFT_JOIN = 4;
+    protected const SUBQUERY = 5;
 
     protected array $options = [
         'load' => false,
@@ -107,6 +108,11 @@ abstract class AbstractLoader implements LoaderInterface
         foreach ($this->subclasses as $i => $loader) {
             $this->subclasses[$i] = $loader->withContext($this);
         }
+    }
+
+    public function isHierarchical(): bool
+    {
+        return $this->inherit !== null || ($this->loadSubclasses && $this->children !== []);
     }
 
     public function setSubclassesLoading(bool $enabled): void
@@ -319,7 +325,9 @@ abstract class AbstractLoader implements LoaderInterface
 
         foreach ($this->load as $loader) {
             if ($loader instanceof JoinableInterface && $loader->isJoined()) {
-                $query = $loader->configureQuery($query);
+                $query = $loader->isHierarchical()
+                    ? $loader->configureSubQuery($query)
+                    : $loader->configureQuery($query);
             }
         }
 
@@ -352,7 +360,7 @@ abstract class AbstractLoader implements LoaderInterface
         $role ??= $this->target;
         $parentLoader = $this->generateParentLoader($role);
         if ($parentLoader !== null) {
-            yield $this->generateParentLoader($role);
+            yield $parentLoader;
         }
         yield from $this->generateSublassLoaders();
         yield from $this->generateEagerRelationLoaders($role);

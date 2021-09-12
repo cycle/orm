@@ -132,7 +132,7 @@ class ManyToManyLoader extends JoinableLoader
                 $this->getJoinMethod(),
                 $this->getJoinTable()
             )->on($on);
-        } else {
+        } elseif ($outerKeys !== []) {
             // reset all the columns when query is isolated (we have to do it manually
             // since underlying loader believes it's loaded)
             $query->columns([]);
@@ -149,10 +149,11 @@ class ManyToManyLoader extends JoinableLoader
                 $this->pivot->getJoinTable()
             )->on($on);
 
-            $fields = array_map(
-                fn (string $key) => $pivotPrefix . $this->pivot->fieldAlias($key),
-                (array)$this->pivot->schema[Relation::THROUGH_INNER_KEY]
-            );
+            $fields = [];
+            foreach ((array)$this->pivot->schema[Relation::THROUGH_INNER_KEY] as $key) {
+                $fields[] = $pivotPrefix . $this->pivot->fieldAlias($key);
+            }
+
             if (\count($fields) === 1) {
                 $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
             } else {

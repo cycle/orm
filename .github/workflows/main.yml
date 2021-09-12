@@ -70,7 +70,6 @@ jobs:
           file: ./coverage.xml
 
   sqlite:
-    needs: lint
     name: SQLite PHP ${{ matrix.php-version }}
     runs-on: ${{ matrix.os }}
     strategy:

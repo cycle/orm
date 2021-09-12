@@ -361,7 +361,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
                 SchemaInterface::RELATIONS => [
                     'tech_book' => [
                         Relation::TYPE => Relation::REFERS_TO,
-                        Relation::TARGET => static::BOOK_ROLE,
+                        Relation::TARGET => static::EBOOK_ROLE,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
                             Relation::NULLABLE => true,
@@ -572,7 +572,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
     }
 
     /**
-     * todo: inheritance hierarchy should be joined as sub-query
+     * Inheritance hierarchy should be joined as sub-query
      */
     public function testInnerLoadParentClassRelationNullToNull(): void
     {
@@ -584,6 +584,30 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         $this->assertInstanceof(MarkdownPage::class, $entity);
         $this->assertNull($entity->block_id);
         $this->assertNull($entity->ebook);
+    }
+
+    public function testLoadTwoInheritancesInSingleQuery(): void
+    {
+        $this->captureReadQueries();
+
+        /** @var Programator $entity */
+        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->load('book', ['method' => Select::SINGLE_QUERY])
+            ->load('tech_book', ['method' => Select::SINGLE_QUERY])
+            ->load('tech_book.pages', ['method' => Select::SINGLE_QUERY])
+            ->wherePK(2)->fetchOne();
+
+        $this->assertNumReads(1);
+        $this->captureReadQueries();
+
+        $this->assertInstanceof(EBook::class, $entity->book);
+        $this->assertSame(4, $entity->book->id);
+        $this->assertInstanceof(EBook::class, $entity->tech_book);
+        $this->assertSame(3, $entity->tech_book->id);
+        $this->assertNotEmpty($entity->tech_book->pages);
+
+        // Don't use promises
+        $this->assertNumReads(0);
     }
 
     public function testPersistRelatedHierarchy(): void

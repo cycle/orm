@@ -138,7 +138,6 @@ abstract class ManyToManyTest extends StiBaseTest
         $role->children->add($permission);
         $permission->parents->add($role);
 
-        $this->logger->display();
         $this->save($role);
 
         unset($role, $permission);

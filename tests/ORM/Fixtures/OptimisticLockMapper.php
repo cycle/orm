@@ -7,7 +7,6 @@ namespace Cycle\ORM\Tests\Fixtures;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Command\ScopeCarrierInterface;
-use Cycle\ORM\Command\Special\Sequence;
 use Cycle\ORM\Command\Special\WrappedCommand;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Heap\Node;

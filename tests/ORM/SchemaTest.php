@@ -24,6 +24,7 @@ class SchemaTest extends TestCase
 
         $this->assertSame('value', $schema->define(User::class, SchemaInterface::ENTITY));
     }
+
     public function testEntity(): void
     {
         $schema = new Schema([

@@ -23,7 +23,7 @@ trait WhereTrait
         /** todo: can be deleted */
         string $table,
         string $target,
-        array|\Closure $where = null
+        array|Closure $where = null
     ): SelectQuery {
         if (empty($where)) {
             // no conditions, nothing to do

@@ -370,6 +370,12 @@ final class Schema implements SchemaInterface
      */
     private function defineEntityClass(string $role): ?string
     {
-        return $this->classes[$role] ?? $this->classes[$this->resolveAlias($role) ?? $role] ?? null;
+        if (array_key_exists($role, $this->classes)) {
+            return $this->classes[$role];
+        }
+        $rr = $this->resolveAlias($role) ?? $role;
+        return $this->classes[$rr]
+            ?? $this->schema[$rr][self::ENTITY]
+            ?? throw new SchemaException("Undefined schema `{$role}`, not found.");
     }
 }

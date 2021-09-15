@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use PHPUnit\Framework\TestCase;
@@ -16,12 +17,23 @@ class SchemaTest extends TestCase
     {
         $schema = new Schema([
             User::class => [
-                1 => 'value',
-                Schema::ROLE => 'user',
+                SchemaInterface::ENTITY => 'value',
+                SchemaInterface::ROLE => 'user',
             ],
         ]);
 
-        $this->assertSame('value', $schema->define(User::class, 1));
+        $this->assertSame('value', $schema->define(User::class, SchemaInterface::ENTITY));
+    }
+    public function testEntity(): void
+    {
+        $schema = new Schema([
+            'user' => [
+                SchemaInterface::ENTITY => User::class,
+            ],
+        ]);
+
+        $this->assertSame(User::class, $schema->define('user', SchemaInterface::ENTITY));
+        $this->assertSame(User::class, $schema->define(User::class, SchemaInterface::ENTITY));
     }
 
     public function testSchemaException(): void
@@ -30,22 +42,22 @@ class SchemaTest extends TestCase
 
         $schema = new Schema([
             User::class => [
-                1 => 'value',
+                SchemaInterface::ENTITY => 'value',
             ],
         ]);
 
-        $schema->define(Profile::class, 1);
+        $schema->define(Profile::class, SchemaInterface::ENTITY);
     }
 
     public function testSchemaNull(): void
     {
         $schema = new Schema([
             User::class => [
-                1 => 'value',
-                Schema::ROLE => 'user',
+                SchemaInterface::ENTITY => 'value',
+                SchemaInterface::ROLE => 'user',
             ],
         ]);
 
-        $this->assertNull($schema->define(User::class, 2));
+        $this->assertNull($schema->define(User::class, SchemaInterface::MAPPER));
     }
 }

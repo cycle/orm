@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Inheritance\STI;
 
+use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Mapper\StdMapper;
@@ -178,7 +179,8 @@ abstract class ManyToManyTest extends StiBaseTest
     {
         $mapper = $this->orm->getMapper('rbac_item');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(SchemaException::class);
+        $this->expectExceptionMessageMatches('/`some_undefined_role`.+not found/');
 
         $mapper->init([], 'some_undefined_role');
     }

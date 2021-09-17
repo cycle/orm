@@ -23,7 +23,7 @@ abstract class DatabaseMapper implements MapperInterface
 {
     protected SourceInterface $source;
 
-    protected array $columns;
+    protected array $columns = [];
 
     protected array $parentColumns = [];
 

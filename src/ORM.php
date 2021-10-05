@@ -114,7 +114,7 @@ final class ORM implements ORMInterface
         $mapper = $this->getMapper($role);
         if ($status !== Node::NEW) {
             // unique entity identifier
-            $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+            $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
             if (\is_array($pk)) {
                 $ids = [];
                 foreach ($pk as $key) {
@@ -133,6 +133,7 @@ final class ORM implements ORMInterface
 
                 if ($e !== null) {
                     $node = $this->heap->get($e);
+                    \assert($node !== null);
                     $data = $relMap->init($node, $data);
 
                     return $mapper->hydrate($e, $data);
@@ -150,42 +151,14 @@ final class ORM implements ORMInterface
         return $mapper->hydrate($e, $data);
     }
 
-    public function withFactory(FactoryInterface $factory): ORMInterface
-    {
-        $orm = clone $this;
-        $orm->factory = $factory;
-
-        return $orm;
-    }
-
     public function getFactory(): FactoryInterface
     {
         return $this->factory;
     }
 
-    public function withSchema(SchemaInterface $schema): ORMInterface
-    {
-        $orm = clone $this;
-        $orm->schema = $schema;
-
-        return $orm;
-    }
-
     public function getSchema(): SchemaInterface
     {
-        if ($this->schema === null) {
-            throw new ORMException('ORM is not configured, schema is missing');
-        }
-
         return $this->schema;
-    }
-
-    public function withHeap(HeapInterface $heap): ORMInterface
-    {
-        $orm = clone $this;
-        $orm->heap = $heap;
-
-        return $orm;
     }
 
     public function getHeap(): HeapInterface
@@ -196,11 +169,7 @@ final class ORM implements ORMInterface
     public function getMapper(string|object $entity): MapperInterface
     {
         $role = $this->resolveRole($entity);
-        if (isset($this->mappers[$role])) {
-            return $this->mappers[$role];
-        }
-
-        return $this->mappers[$role] = $this->factory->mapper($this, $role);
+        return $this->mappers[$role] ?? ($this->mappers[$role] = $this->factory->mapper($this, $role));
     }
 
     public function getRepository(string|object $entity): RepositoryInterface
@@ -212,7 +181,7 @@ final class ORM implements ORMInterface
 
         $select = null;
 
-        if ($this->schema->define($role, Schema::TABLE) !== null) {
+        if ($this->schema->define($role, SchemaInterface::TABLE) !== null) {
             $select = new Select($this, $role);
             $select->scope($this->getSource($role)->getScope());
         }
@@ -252,10 +221,10 @@ final class ORM implements ORMInterface
             return $this->indexes[$role];
         }
 
-        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
-        $keys = $this->schema->define($role, Schema::FIND_BY_KEYS) ?? [];
+        $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
+        $keys = $this->schema->define($role, SchemaInterface::FIND_BY_KEYS) ?? [];
 
-        return $this->indexes[$role] = array_unique(array_merge([$pk], $keys));
+        return $this->indexes[$role] = array_unique(array_merge([$pk], $keys), SORT_REGULAR);
     }
 
     /**
@@ -267,5 +236,29 @@ final class ORM implements ORMInterface
     {
         $role = $this->resolveRole($entity);
         return $this->relMaps[$role] ?? ($this->relMaps[$role] = RelationMap::build($this, $role));
+    }
+
+    public function withSchema(SchemaInterface $schema): ORMInterface
+    {
+        $orm = clone $this;
+        $orm->schema = $schema;
+
+        return $orm;
+    }
+
+    public function withFactory(FactoryInterface $factory): ORMInterface
+    {
+        $orm = clone $this;
+        $orm->factory = $factory;
+
+        return $orm;
+    }
+
+    public function withHeap(HeapInterface $heap): ORMInterface
+    {
+        $orm = clone $this;
+        $orm->heap = $heap;
+
+        return $orm;
     }
 }

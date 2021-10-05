@@ -60,7 +60,7 @@ final class Factory implements FactoryInterface
     public function make(
         string $alias,
         array $parameters = []
-    ) {
+    ): mixed {
         return $this->factory->make($alias, $parameters);
     }
 

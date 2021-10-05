@@ -73,4 +73,12 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $role,
         string $relation
     ): RelationInterface;
+
+    public function withDefaultSchemaClasses(array $defaults): self;
+
+    public function withCollectionFactory(
+        string $alias,
+        CollectionFactoryInterface $factory,
+        string $interface = null
+    ): self;
 }

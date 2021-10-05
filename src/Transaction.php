@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Command\Special\Sequence;
-use Cycle\ORM\Command\Special\WrappedStoreCommand;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
+use Cycle\ORM\Transaction\CommandGeneratorInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\RunnerInterface;
@@ -35,7 +34,7 @@ final class Transaction implements TransactionInterface
 
     private RunnerInterface $runner;
 
-    private array $indexes = [];
+    private CommandGeneratorInterface $commandGenerator;
 
     public function __construct(
         private ORMInterface $orm,
@@ -43,6 +42,7 @@ final class Transaction implements TransactionInterface
     ) {
         $this->runner = $runner ?? new Runner();
         $this->pool = new Pool($orm);
+        $this->commandGenerator = $orm->getCommandGenerator();
     }
 
     public function persist(object $entity, int $mode = self::MODE_CASCADE): self
@@ -117,7 +117,7 @@ final class Transaction implements TransactionInterface
             }
 
             // reindex the entity while it has old data
-            $heap->attach($e, $node, $this->getIndexes($node->getRole()));
+            $heap->attach($e, $node, $this->orm->getIndexes($node->getRole()));
 
             // sync the current entity data with newly generated data
             $mapper = $this->orm->getMapper($node->getRole());
@@ -185,7 +185,7 @@ final class Transaction implements TransactionInterface
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
                 // todo delete cascaded
-                $command = $this->generateDeleteCommand($tuple);
+                $command = $this->commandGenerator->generateDeleteCommand($this->orm, $tuple);
                 $this->runCommand($command);
                 $tuple->status = Tuple::STATUS_PROCESSED;
                 continue;
@@ -322,7 +322,7 @@ final class Transaction implements TransactionInterface
                 : max(Tuple::STATUS_DEFERRED, $tuple->status);
             return;
         }
-        $command = $this->generateStoreCommand($tuple);
+        $command = $this->commandGenerator->generateStoreCommand($this->orm, $tuple);
 
         if (!$map->hasEmbedded()) {
             // Not embedded but has changes
@@ -379,7 +379,7 @@ final class Transaction implements TransactionInterface
             } elseif ($tuple->status === Tuple::STATUS_PREPARING) {
                 $tuple->status = Tuple::STATUS_WAITING;
             } else {
-                $command = $this->generateDeleteCommand($tuple);
+                $command = $this->commandGenerator->generateDeleteCommand($this->orm, $tuple);
                 $this->runCommand($command);
                 $tuple->status = Tuple::STATUS_PROCESSED;
             }
@@ -406,91 +406,5 @@ final class Transaction implements TransactionInterface
                 throw new TransactionException('Relation can not be resolved.');
             }
         }
-    }
-
-    public function generateStoreCommand(Tuple $tuple): ?CommandInterface
-    {
-        $tuple->state = $tuple->state ?? $tuple->node->getState();
-        $isNew = $tuple->node->getStatus() === Node::NEW;
-        $tuple->state->setStatus($isNew ? Node::SCHEDULED_INSERT : Node::SCHEDULED_UPDATE);
-        $schema = $this->orm->getSchema();
-
-        /**
-         * @see \Cycle\ORM\MapperInterface::queueCreate()
-         * @see \Cycle\ORM\MapperInterface::queueUpdate()
-         */
-        $method = $isNew ? 'queueCreate' : 'queueUpdate';
-
-        $parents = $commands = [];
-        $parent = $schema->define($tuple->node->getRole(), SchemaInterface::PARENT);
-        while ($parent !== null) {
-            array_unshift($parents, $parent);
-            $parent = $schema->define($parent, SchemaInterface::PARENT);
-        }
-        foreach ($parents as $parent) {
-            $parentMapper = $this->orm->getMapper($parent);
-            $commands[$parent] = $parentMapper->$method($tuple->entity, $tuple->node, $tuple->state);
-        }
-        $commands[$tuple->node->getRole()] = $tuple->mapper->$method($tuple->entity, $tuple->node, $tuple->state);
-
-        return \count($commands) === 1 ? current($commands) : $this->buildStoreSequence($commands, $tuple);
-    }
-
-    public function generateDeleteCommand(Tuple $tuple): CommandInterface
-    {
-        // currently we rely on db to delete all nested records (or soft deletes)
-        return $tuple->mapper->queueDelete($tuple->entity, $tuple->node, $tuple->node->getState());
-    }
-
-    /**
-     * Indexable node fields.
-     *
-     * todo: deduplicate with {@see \Cycle\ORM\ORM::getIndexes}
-     */
-    private function getIndexes(string $role): array
-    {
-        if (isset($this->indexes[$role])) {
-            return $this->indexes[$role];
-        }
-
-        $pk = $this->orm->getSchema()->define($role, Schema::PRIMARY_KEY);
-        $keys = $this->orm->getSchema()->define($role, Schema::FIND_BY_KEYS) ?? [];
-
-        return $this->indexes[$role] = array_merge([$pk], $keys);
-    }
-
-    /**
-     * @param array<string, StoreCommandInterface> $commands
-     */
-    private function buildStoreSequence(array $commands, Tuple $tuple): CommandInterface
-    {
-        $parent = null;
-        $schema = $this->orm->getSchema();
-        $result = [];
-        foreach ($commands as $role => $command) {
-            // Current parent has no parent
-            if ($parent === null) {
-                $result[] = $command;
-                $parent = $role;
-                continue;
-            }
-
-            $command = WrappedStoreCommand::wrapStoreCommand($command);
-
-            // Transact PK from previous parent to current
-            $parentKey = (array)($schema->define($role, SchemaInterface::PARENT_KEY)
-                ?? $schema->define($parent, SchemaInterface::PRIMARY_KEY));
-            $primaryKey = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
-            $result[] = $command->withBeforeExecution(
-                static function (StoreCommandInterface $command) use ($tuple, $parentKey, $primaryKey): void {
-                    foreach ($primaryKey as $i => $pk) {
-                        $command->registerAppendix($pk, $tuple->state->getValue($parentKey[$i]));
-                    }
-                }
-            );
-            $parent = $role;
-        }
-
-        return (new Sequence())->addCommand(...$result);
     }
 }

@@ -11,6 +11,8 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Transaction\CommandGenerator;
+use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -35,11 +37,15 @@ final class ORM implements ORMInterface
     /** @var SourceInterface[] */
     private array $sources = [];
 
+    private CommandGeneratorInterface $commandGenerator;
+
     public function __construct(
         private FactoryInterface $factory,
-        private SchemaInterface $schema
+        private SchemaInterface $schema,
+        CommandGeneratorInterface $commandGenerator = null
     ) {
         $this->heap = new Heap();
+        $this->commandGenerator = $commandGenerator ?? new CommandGenerator();
     }
 
     /**
@@ -151,6 +157,11 @@ final class ORM implements ORMInterface
         return $mapper->hydrate($e, $data);
     }
 
+    public function getCommandGenerator(): CommandGeneratorInterface
+    {
+        return $this->commandGenerator;
+    }
+
     public function getFactory(): FactoryInterface
     {
         return $this->factory;
@@ -210,12 +221,7 @@ final class ORM implements ORMInterface
         return new Reference($role, $scope);
     }
 
-    /**
-     * Get list of keys entity must be indexed in a Heap by.
-     *
-     * todo: deduplicate with {@see \Cycle\ORM\Transaction::getIndexes}
-     */
-    private function getIndexes(string $role): array
+    public function getIndexes(string $role): array
     {
         if (isset($this->indexes[$role])) {
             return $this->indexes[$role];

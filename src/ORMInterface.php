@@ -7,12 +7,12 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Select\SourceProviderInterface;
+use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**
  * Provide the access to all ORM services.
  */
-interface ORMInterface extends SourceProviderInterface
+interface ORMInterface extends EntityAroundInterface
 {
     /**
      * Automatically resolve role based on object name or instance.
@@ -27,7 +27,7 @@ interface ORMInterface extends SourceProviderInterface
     public function get(string $role, array $scope, bool $load = true): ?object;
 
     /**
-     * Create new entity based on given role and input data. Method will attempt to re-use
+     * OnCreate new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      *
      * @template T
@@ -52,6 +52,11 @@ interface ORMInterface extends SourceProviderInterface
     public function getFactory(): FactoryInterface;
 
     /**
+     * Get configured Event Dispatcher.
+     */
+    public function getCommandGenerator(): CommandGeneratorInterface;
+
+    /**
      * Get ORM relation and entity schema provider.
      */
     public function getSchema(): SchemaInterface;
@@ -60,16 +65,6 @@ interface ORMInterface extends SourceProviderInterface
      * Get current Heap (entity map).
      */
     public function getHeap(): HeapInterface;
-
-    /**
-     * Get mapper associated with given entity class, role or instance.
-     */
-    public function getMapper(string|object $entity): MapperInterface;
-
-    /**
-     * Get repository associated with given entity.
-     */
-    public function getRepository(string|object $entity): RepositoryInterface;
 
     public function withSchema(SchemaInterface $schema): self;
 

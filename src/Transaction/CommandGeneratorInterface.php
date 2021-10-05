@@ -9,6 +9,6 @@ use Cycle\ORM\ORMInterface;
 
 interface CommandGeneratorInterface
 {
-    public function generateStoreCommand(ORMInterface $orm, Tuple $tuple): CommandInterface;
-    public function generateDeleteCommand(ORMInterface $orm, Tuple $tuple): CommandInterface;
+    public function generateStoreCommand(ORMInterface $orm, Tuple $tuple): ?CommandInterface;
+    public function generateDeleteCommand(ORMInterface $orm, Tuple $tuple): ?CommandInterface;
 }

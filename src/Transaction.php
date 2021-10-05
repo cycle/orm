@@ -336,6 +336,8 @@ final class Transaction implements TransactionInterface
             return;
         }
 
+        // todo decide case when $command is null
+
         $entityData = $tuple->mapper->extract($tuple->entity);
         // todo: use class MergeCommand here
         foreach ($map->getEmbedded() as $name => $relation) {

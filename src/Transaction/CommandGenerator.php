@@ -14,18 +14,29 @@ use Cycle\ORM\SchemaInterface;
 
 class CommandGenerator implements CommandGeneratorInterface
 {
-    public function generateStoreCommand(ORMInterface $orm, Tuple $tuple): CommandInterface
+    public function generateStoreCommand(ORMInterface $orm, Tuple $tuple): ?CommandInterface
     {
         $isNew = $tuple->node->getStatus() === Node::NEW;
         $tuple->state->setStatus($isNew ? Node::SCHEDULED_INSERT : Node::SCHEDULED_UPDATE);
         $schema = $orm->getSchema();
 
         $commands = $this->storeParents($orm, $tuple, $isNew);
-        $commands[$tuple->node->getRole()] = $this->storeEntity($tuple, $isNew);
+        $entityCommand = $this->storeEntity($orm, $tuple, $isNew);
+        if ($entityCommand !== null) {
+            $commands[$tuple->node->getRole()] = $entityCommand;
+        }
 
-        return \count($commands) === 1
-            ? \current($commands)
-            : $this->buildStoreSequence($schema, $commands, $tuple);
+        return match(\count($commands)) {
+            0 => null,
+            1 => \current($commands),
+            default => $this->buildStoreSequence($schema, $commands, $tuple)
+        };
+    }
+
+    public function generateDeleteCommand(ORMInterface $orm, Tuple $tuple): ?CommandInterface
+    {
+        // currently we rely on db to delete all nested records (or soft deletes)
+        return $this->deleteEntity($orm, $tuple);
     }
 
     /**
@@ -50,11 +61,16 @@ class CommandGenerator implements CommandGeneratorInterface
         return $commands;
     }
 
-    protected function storeEntity(Tuple $tuple, bool $isNew): ?CommandInterface
+    protected function storeEntity(ORMInterface $orm, Tuple $tuple, bool $isNew): ?CommandInterface
     {
         return $isNew
             ? $tuple->mapper->queueCreate($tuple->entity, $tuple->node, $tuple->state)
             : $tuple->mapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
+    }
+
+    protected function deleteEntity(ORMInterface $orm, Tuple $tuple): ?CommandInterface
+    {
+        return $tuple->mapper->queueDelete($tuple->entity, $tuple->node, $tuple->state);
     }
 
     protected function generateParentStoreCommand(
@@ -67,12 +83,6 @@ class CommandGenerator implements CommandGeneratorInterface
         return $isNew
             ? $parentMapper->queueCreate($tuple->entity, $tuple->node, $tuple->state)
             : $parentMapper->queueUpdate($tuple->entity, $tuple->node, $tuple->state);
-    }
-
-    public function generateDeleteCommand(ORMInterface $orm, Tuple $tuple): CommandInterface
-    {
-        // currently we rely on db to delete all nested records (or soft deletes)
-        return $tuple->mapper->queueDelete($tuple->entity, $tuple->node, $tuple->node->getState());
     }
 
     /**

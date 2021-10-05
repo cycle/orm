@@ -43,19 +43,10 @@ trait ScopeTrait
         return $this->affectedRows;
     }
 
-    /**
-     * Set scope value.
-     */
     public function setScope(string $key, mixed $value): void
     {
         $this->scope[$key] = $value;
-    }
-
-    /**
-     * Indicate that context value is not required anymore.
-     */
-    protected function freeScope(string $key): void
-    {
+        // Indicate that context value is not required anymore.
         unset($this->waitScope[$key]);
     }
 }

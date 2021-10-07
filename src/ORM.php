@@ -255,7 +255,12 @@ final class ORM implements ORMInterface
         $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
         $keys = $this->schema->define($role, Schema::FIND_BY_KEYS) ?? [];
 
-        return $this->indexes[$role] = array_unique(array_merge($pk, $keys));
+        return $this->indexes[$role] = array_unique(
+            array_merge(
+                is_string($pk) ? [$pk] : $pk,
+                $keys
+            )
+        );
     }
 
     /**

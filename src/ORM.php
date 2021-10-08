@@ -144,6 +144,7 @@ final class ORM implements ORMInterface
      */
     public function make(string $role, array $data = [], int $node = Node::NEW)
     {
+        $role = $this->resolveRole($role);
         $m = $this->getMapper($role);
 
         // unique entity identifier

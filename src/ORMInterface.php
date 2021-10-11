@@ -7,12 +7,14 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**
  * Provide the access to all ORM services.
  */
-interface ORMInterface extends EntityAroundInterface
+interface ORMInterface extends SourceProviderInterface
 {
     /**
      * Automatically resolve role based on object name or instance.
@@ -57,6 +59,11 @@ interface ORMInterface extends EntityAroundInterface
     public function getCommandGenerator(): CommandGeneratorInterface;
 
     /**
+     * Get entity registry.
+     */
+    public function getEntityRegistry(): EntityRegistryInterface;
+
+    /**
      * Get ORM relation and entity schema provider.
      */
     public function getSchema(): SchemaInterface;
@@ -69,4 +76,14 @@ interface ORMInterface extends EntityAroundInterface
     public function withSchema(SchemaInterface $schema): self;
 
     public function withHeap(HeapInterface $heap): self;
+
+    /**
+     * Get mapper associated with given entity class, role or instance.
+     */
+    public function getMapper(string|object $entity): MapperInterface;
+
+    /**
+     * Get repository associated with given entity class, role or instance.
+     */
+    public function getRepository(string|object $entity): RepositoryInterface;
 }

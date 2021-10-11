@@ -7,17 +7,20 @@ namespace Cycle\ORM;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 
-interface EntityAroundInterface extends SourceProviderInterface
+/**
+ * todo: optimize this interface in the {@see ORM} class
+ */
+interface EntityRegistryInterface extends SourceProviderInterface
 {
     /**
-     * Get mapper associated with given entity class, role or instance.
+     * Get mapper associated with given entity role.
      */
-    public function getMapper(string|object $entity): MapperInterface;
+    public function getMapper(string $role): MapperInterface;
 
     /**
-     * Get repository associated with given entity.
+     * Get repository associated with given entity role.
      */
-    public function getRepository(string|object $entity): RepositoryInterface;
+    public function getRepository(string $role): RepositoryInterface;
 
     /**
      * Get database source associated with given entity role.
@@ -29,7 +32,7 @@ interface EntityAroundInterface extends SourceProviderInterface
     /**
      * Get relation map associated with given entity role.
      */
-    public function getRelationMap(string $entity): RelationMap;
+    public function getRelationMap(string $role): RelationMap;
 
     /**
      * Get list of keys entity must be indexed in a Heap by.

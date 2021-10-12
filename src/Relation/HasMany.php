@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Iterator;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
@@ -141,12 +142,14 @@ class HasMany extends AbstractRelation
         }
 
         $scope = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
-        $query = (new Select($this->orm, $this->target))
+        $select = (new Select($this->orm, $this->target))
+            ->scope($this->orm->getSource($this->target)->getScope())
             ->where($scope)
             ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
-        $this->orm->getSource($this->target)->getScope()?->apply($query->getBuilder());
 
-        $result = $query->fetchAll();
+        $iterator = new Iterator($this->orm, $this->target, $select->fetchData(), true);
+        $result = \iterator_to_array($iterator, false);
+
         $reference->setValue($result);
 
         return $result;

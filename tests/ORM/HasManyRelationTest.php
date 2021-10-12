@@ -458,4 +458,23 @@ abstract class HasManyRelationTest extends BaseTest
 
         $this->assertEquals('new b', $b->comments[0]->message);
     }
+
+    public function testNotTriggersRehydrate(): void
+    {
+        $comment = (new Select($this->orm, Comment::class))->wherePK(1)->fetchOne();
+
+        self::assertInstanceOf(Comment::class, $comment);
+
+        $comment->message = 'updated message';
+        self::assertSame('updated message', $comment->message);
+
+        $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+
+        // Trigger loading of user comments
+        $comments = \iterator_to_array($user->comments);
+        self::assertContains($comment, $comments);
+        self::assertSame('updated message', $comment->message);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+    }
 }

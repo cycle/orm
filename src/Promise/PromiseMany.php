@@ -11,7 +11,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Promise;
 
+use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Select;
 
 /**
  * Promises the selection of the
@@ -87,9 +89,13 @@ final class PromiseMany implements PromiseInterface
             return [];
         }
 
-        foreach ($this->orm->getRepository($this->target)->findAll($this->query + $this->where) as $item) {
-            $this->resolved[] = $item;
-        }
+        $select = new Select($this->orm, $this->target);
+        $select->scope($this->orm->getSource($this->target)->getConstrain());
+        $select->andWhere($this->query + $this->where);
+
+        $iterator = new Iterator($this->orm, $this->target, $select->fetchData(), true);
+
+        $this->resolved = \iterator_to_array($iterator, false);
         $this->orm = null;
 
         return $this->resolved;

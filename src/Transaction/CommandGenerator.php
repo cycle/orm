@@ -26,7 +26,7 @@ class CommandGenerator implements CommandGeneratorInterface
             $commands[$tuple->node->getRole()] = $entityCommand;
         }
 
-        return match(\count($commands)) {
+        return match (\count($commands)) {
             0 => null,
             1 => \current($commands),
             default => $this->buildStoreSequence($schema, $commands, $tuple)

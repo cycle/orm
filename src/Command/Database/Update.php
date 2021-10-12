@@ -105,7 +105,6 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
                 return;
             }
 
-            $this->freeScope($key);
             $this->setScope($key, $value);
 
             return;

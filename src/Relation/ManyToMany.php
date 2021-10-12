@@ -34,13 +34,13 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected string $pivotEntity;
 
-    protected ?string $mirrorRelation;
+    protected ?string $inversion;
 
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
         $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY];
-        $this->mirrorRelation = $this->schema[Relation::HANDSHAKE] ?? null;
+        $this->inversion = $this->schema[Relation::HANDSHAKE] ?? null;
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
@@ -82,7 +82,7 @@ class ManyToMany extends Relation\AbstractRelation
             }
         }
 
-        if ($this->mirrorRelation === null && \count($related) === 0) {
+        if ($this->inversion === null && \count($related) === 0) {
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
@@ -117,7 +117,7 @@ class ManyToMany extends Relation\AbstractRelation
                 $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
         }
-        if ($this->mirrorRelation !== null) {
+        if ($this->inversion !== null) {
             $storage = $tuple->state->getStorage($this->name);
             foreach ($storage as $pNode) {
                 if (in_array($pNode, $pNodes, true)) {
@@ -210,6 +210,7 @@ class ManyToMany extends Relation\AbstractRelation
         if ($load === false) {
             return null;
         }
+        // todo replace with entity registry
         if (!$this->orm instanceof SourceProviderInterface) {
             throw new ORMException('PivotedPromise require ORM to implement SourceFactoryInterface');
         }
@@ -274,7 +275,6 @@ class ManyToMany extends Relation\AbstractRelation
         }
         $result = new PivotedStorage($elements, $pivotData);
         $reference->setValue($result);
-        // $reference->setValue($elements);
         return $result;
     }
 
@@ -287,7 +287,7 @@ class ManyToMany extends Relation\AbstractRelation
 
     private function deleteChild(Pool $pool, ?object $pivot, object $child, ?Node $relatedNode = null): void
     {
-        // todo: add support for nullable pivot entities?
+        // todo: add supporting for nullable pivot entities?
         if ($pivot !== null) {
             $pool->attachDelete($pivot, $this->isCascade());
         }
@@ -316,7 +316,7 @@ class ManyToMany extends Relation\AbstractRelation
             // $rState->forward($this->outerKeys[$i], $pState, $this->throughOuterKeys[$i]);
         }
 
-        if ($this->mirrorRelation === null) {
+        if ($this->inversion === null) {
             // send the Pivot into child's State for the ShadowHasMany relation
             // $relName = $tuple->node->getRole() . '.' . $this->name . ':' . $this->target;
             $relName = $this->getTargetRelationName();
@@ -324,7 +324,7 @@ class ManyToMany extends Relation\AbstractRelation
             $pivots[] = $pivot;
             $rTuple->state->setRelation($relName, $pivots);
         } else {
-            $rTuple->state->addToStorage($this->mirrorRelation, $pTuple->node);
+            $rTuple->state->addToStorage($this->inversion, $pTuple->node);
         }
     }
 
@@ -334,8 +334,8 @@ class ManyToMany extends Relation\AbstractRelation
      */
     protected function initPivot(object $parent, PivotedStorage $storage, Tuple $rTuple, ?array $pivot): ?object
     {
-        if ($this->mirrorRelation !== null) {
-            $relatedStorage = $rTuple->state->getRelation($this->mirrorRelation);
+        if ($this->inversion !== null) {
+            $relatedStorage = $rTuple->state->getRelation($this->inversion);
             if ($relatedStorage instanceof PivotedStorage && $relatedStorage->hasContext($parent)) {
                 return $relatedStorage->get($parent);
             }
@@ -344,15 +344,5 @@ class ManyToMany extends Relation\AbstractRelation
         $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
         $storage->set($rTuple->entity, $entity);
         return $entity;
-    }
-
-    public function getHandshake(): ?string
-    {
-        return $this->mirrorRelation;
-    }
-
-    public function setHandshake(string $name): void
-    {
-        $this->mirrorRelation = $name;
     }
 }

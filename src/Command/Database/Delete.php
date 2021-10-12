@@ -66,7 +66,6 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
             return;
         }
 
-        $this->freeScope($key);
         $this->setScope($key, $value);
     }
 }

@@ -17,6 +17,11 @@ interface ScopeCarrierInterface extends CommandInterface, ConsumerInterface
      */
     public function waitScope(string ...$keys): void;
 
+    /**
+     * Set scope value. Passed key also should be removed from wait-list.
+     */
+    public function setScope(string $key, mixed $value): void;
+
     public function getScope(): array;
 
     /**

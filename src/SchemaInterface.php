@@ -29,6 +29,7 @@ interface SchemaInterface
     public const PARENT = 15; // Parent role in the inheritance hierarchy
     public const PARENT_KEY = 16;
     public const DISCRIMINATOR = 17; // Discriminator column name for single table inheritance
+    public const MACROS = 18;
 
     /**
      * Return all roles defined within the schema.

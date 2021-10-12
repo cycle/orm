@@ -11,35 +11,28 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Transaction\CommandGenerator;
+use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
- *
- * @template-extends ORMInterface
  */
 final class ORM implements ORMInterface
 {
     private HeapInterface $heap;
 
-    /** @var MapperInterface[] */
-    private array $mappers = [];
+    private CommandGeneratorInterface $commandGenerator;
 
-    /** @var RepositoryInterface[] */
-    private array $repositories = [];
-
-    /** @var RelationMap[] */
-    private array $relMaps = [];
-
-    private array $indexes = [];
-
-    /** @var SourceInterface[] */
-    private array $sources = [];
+    private EntityRegistryInterface $entityRegistry;
 
     public function __construct(
         private FactoryInterface $factory,
-        private SchemaInterface $schema
+        private SchemaInterface $schema,
+        CommandGeneratorInterface $commandGenerator = null
     ) {
         $this->heap = new Heap();
+        $this->commandGenerator = $commandGenerator ?? new CommandGenerator();
+        $this->resetEntityRegister();
     }
 
     /**
@@ -48,11 +41,7 @@ final class ORM implements ORMInterface
     public function __clone()
     {
         $this->heap = new Heap();
-        $this->mappers = [];
-        $this->relMaps = [];
-        $this->indexes = [];
-        $this->sources = [];
-        $this->repositories = [];
+        $this->resetEntityRegister();
     }
 
     public function __debugInfo(): array
@@ -87,7 +76,7 @@ final class ORM implements ORMInterface
             $entity = $class;
         }
 
-        return $this->schema->resolveAlias($entity);
+        return $this->schema->resolveAlias($entity) ?? throw new ORMException("Unable to resolve role `$entity`.");
     }
 
     public function get(string $role, array $scope, bool $load = true): ?object
@@ -151,6 +140,11 @@ final class ORM implements ORMInterface
         return $mapper->hydrate($e, $data);
     }
 
+    public function getCommandGenerator(): CommandGeneratorInterface
+    {
+        return $this->commandGenerator;
+    }
+
     public function getFactory(): FactoryInterface
     {
         return $this->factory;
@@ -166,36 +160,30 @@ final class ORM implements ORMInterface
         return $this->heap;
     }
 
+    public function getEntityRegistry(): EntityRegistryInterface
+    {
+        return $this->entityRegistry;
+    }
+
     public function getMapper(string|object $entity): MapperInterface
     {
-        $role = $this->resolveRole($entity);
-        return $this->mappers[$role] ?? ($this->mappers[$role] = $this->factory->mapper($this, $role));
+        return $this->entityRegistry->getMapper(
+            $this->resolveRole($entity)
+        );
     }
 
     public function getRepository(string|object $entity): RepositoryInterface
     {
-        $role = $this->resolveRole($entity);
-        if (isset($this->repositories[$role])) {
-            return $this->repositories[$role];
-        }
-
-        $select = null;
-
-        if ($this->schema->define($role, SchemaInterface::TABLE) !== null) {
-            $select = new Select($this, $role);
-            $select->scope($this->getSource($role)->getScope());
-        }
-
-        return $this->repositories[$role] = $this->factory->repository($this, $this->schema, $role, $select);
+        return $this->entityRegistry->getRepository(
+            $this->resolveRole($entity)
+        );
     }
 
-    public function getSource(string $role): SourceInterface
+    public function getSource(string $entity): SourceInterface
     {
-        if (isset($this->sources[$role])) {
-            return $this->sources[$role];
-        }
-
-        return $this->sources[$role] = $this->factory->source($this, $this->schema, $role);
+        return $this->entityRegistry->getSource(
+            $this->resolveRole($entity)
+        );
     }
 
     public function promise(string $role, array $scope): object
@@ -210,21 +198,11 @@ final class ORM implements ORMInterface
         return new Reference($role, $scope);
     }
 
-    /**
-     * Get list of keys entity must be indexed in a Heap by.
-     *
-     * todo: deduplicate with {@see \Cycle\ORM\Transaction::getIndexes}
-     */
-    private function getIndexes(string $role): array
+    public function getIndexes(string $entity): array
     {
-        if (isset($this->indexes[$role])) {
-            return $this->indexes[$role];
-        }
-
-        $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
-        $keys = $this->schema->define($role, SchemaInterface::FIND_BY_KEYS) ?? [];
-
-        return $this->indexes[$role] = array_unique(array_merge([$pk], $keys), SORT_REGULAR);
+        return $this->entityRegistry->getIndexes(
+            $this->resolveRole($entity)
+        );
     }
 
     /**
@@ -234,14 +212,16 @@ final class ORM implements ORMInterface
      */
     public function getRelationMap(string $entity): RelationMap
     {
-        $role = $this->resolveRole($entity);
-        return $this->relMaps[$role] ?? ($this->relMaps[$role] = RelationMap::build($this, $role));
+        return $this->entityRegistry->getRelationMap(
+            $this->resolveRole($entity)
+        );
     }
 
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
         $orm = clone $this;
         $orm->schema = $schema;
+        $orm->resetEntityRegister();
 
         return $orm;
     }
@@ -250,6 +230,7 @@ final class ORM implements ORMInterface
     {
         $orm = clone $this;
         $orm->factory = $factory;
+        $orm->resetEntityRegister();
 
         return $orm;
     }
@@ -260,5 +241,10 @@ final class ORM implements ORMInterface
         $orm->heap = $heap;
 
         return $orm;
+    }
+
+    private function resetEntityRegister(): void
+    {
+        $this->entityRegistry = new EntityRegistry($this, $this->schema, $this->factory);
     }
 }

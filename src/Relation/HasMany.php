@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Iterator;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Traits\HasSomeTrait;
+use Cycle\ORM\Select;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -139,11 +141,15 @@ class HasMany extends AbstractRelation
             return null;
         }
 
-        $result = [];
-        $query = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
-        foreach ($this->orm->getRepository($this->target)->findAll($query) as $item) {
-            $result[] = $item;
-        }
+        $scope = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
+        $select = (new Select($this->orm, $this->target))
+            ->scope($this->orm->getSource($this->target)->getScope())
+            ->where($scope)
+            ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
+
+        $iterator = new Iterator($this->orm, $this->target, $select->fetchData(), true);
+        $result = \iterator_to_array($iterator, false);
+
         $reference->setValue($result);
 
         return $result;

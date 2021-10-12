@@ -361,7 +361,7 @@ final class Transaction implements TransactionInterface
 
     private function resolveRelations(Tuple $tuple): void
     {
-        $map = $this->orm->getRelationMap($tuple->node?->getRole() ?? $tuple->entity::class);
+        $map = $this->orm->getRelationMap($tuple->node->getRole());
 
         // Dependency relations
         $result = $tuple->task === Tuple::TASK_STORE

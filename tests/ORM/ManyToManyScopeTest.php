@@ -275,6 +275,35 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
+    public function testWithOrderByPostload(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+        ]);
+
+        $selector = new Select($this->orm, User::class);
+
+        /**
+         * @var User $a
+         * @var User $b
+         */
+        [$a, $b] = $selector->load('tags', [
+            'method' => Select\JoinableLoader::POSTLOAD,
+        ])->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('tag a', $a->tags[0]->name);
+        $this->assertSame('tag b', $a->tags[1]->name);
+        $this->assertSame('tag d', $a->tags[2]->name);
+        $this->assertSame('tag e', $a->tags[3]->name);
+
+        $this->assertSame('tag c', $b->tags[0]->name);
+        $this->assertSame('tag d', $b->tags[1]->name);
+        $this->assertSame('tag f', $b->tags[2]->name);
+    }
+
     public function testWithOrderByPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([

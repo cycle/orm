@@ -12,44 +12,28 @@ use PHPUnit\Framework\TestCase;
 
 class HeapTest extends TestCase
 {
-    protected const
-        INDEX_FIELDS_1 = 'id';
-    protected const
-        INDEX_VALUES_1_1 = 42;
-    protected const
-        INDEX_VALUES_1_2 = 24;
-    protected const
-        INDEX_FIND_1_1 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1];
-    protected const
-        INDEX_FIND_1_2 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2];
-    protected const
-        INDEX_FIND_1_BAD = [self::INDEX_FIELDS_1 => 404];
-    protected const
-        INDEX_FIELDS_2 = 'email';
-    protected const
-        INDEX_VALUES_2_1 = 'mail1@spiral';
-    protected const
-        INDEX_VALUES_2_2 = 'mail2@spiral';
-    protected const
-        INDEX_FIND_2_1 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1];
-    protected const
-        INDEX_FIND_2_2 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2];
-    protected const
-        INDEX_FIND_2_BAD = [self::INDEX_FIELDS_2 => 505];
-    protected const
-        INDEX_FIELDS_BAD = 'foo';
-    protected const
-        INDEX_FIND_BAD = [self::INDEX_FIELDS_BAD => null];
-    protected const
-        ENTITY_SET_1 = [
-            self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1,
-            self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1,
-        ];
-    protected const
-        ENTITY_SET_2 = [
-            self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2,
-            self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
-        ];
+    protected const INDEX_FIELDS_1 = 'id';
+    protected const INDEX_VALUES_1_1 = 42;
+    protected const INDEX_VALUES_1_2 = 24;
+    protected const INDEX_FIND_1_1 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1];
+    protected const INDEX_FIND_1_2 = [self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2];
+    protected const INDEX_FIND_1_BAD = [self::INDEX_FIELDS_1 => 404];
+    protected const INDEX_FIELDS_2 = 'email';
+    protected const INDEX_VALUES_2_1 = 'mail1@spiral';
+    protected const INDEX_VALUES_2_2 = 'mail2@spiral';
+    protected const INDEX_FIND_2_1 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1];
+    protected const INDEX_FIND_2_2 = [self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2];
+    protected const INDEX_FIND_2_BAD = [self::INDEX_FIELDS_2 => 505];
+    protected const INDEX_FIELDS_BAD = 'foo';
+    protected const INDEX_FIND_BAD = [self::INDEX_FIELDS_BAD => null];
+    protected const ENTITY_SET_1 = [
+        self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_1,
+        self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_1,
+    ];
+    protected const ENTITY_SET_2 = [
+        self::INDEX_FIELDS_1 => self::INDEX_VALUES_1_2,
+        self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
+    ];
 
     public function testAttachAndFind(): void
     {

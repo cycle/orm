@@ -39,26 +39,51 @@ echo "Generating test classes for all database types...\n";
 $classes = $tokenizer->classLocator()->getClasses(\Cycle\ORM\Tests\BaseTest::class);
 
 foreach ($classes as $class) {
-    if (!$class->isAbstract() || $class->getName() == \Cycle\ORM\Tests\BaseTest::class) {
+
+    foreach ($class->getMethods() as $method) {
+        if ($method->isAbstract()) {
+            echo "Skip class {$class->getName()} with abstract methods.\n";
+            continue 2;
+        }
+    }
+
+    if (
+        !$class->isAbstract()
+        // Has abstract methods
+        || $class->getName() == \Cycle\ORM\Tests\BaseTest::class) {
         continue;
     }
 
     echo "Found {$class->getName()}\n";
+
+    $path = ltrim(str_replace([__DIR__, 'ORM/'], '', $class->getFileName()), '/');
+
     foreach ($databases as $driver => $details) {
-        $filename = sprintf('%s/%s.php', $details['directory'], $class->getShortName());
+        $filename = sprintf('%s%s', $details['directory'], $path);
+        $dir = pathinfo($filename, PATHINFO_DIRNAME);
+
+        $namespace = str_replace('Cycle\\ORM\\Tests', $details['namespace'], $class->getNamespaceName());
+        if (!is_dir($dir)) {
+            mkdir($dir, recursive: true);
+        }
 
         file_put_contents(
             $filename,
             sprintf(
-                '<?phpdeclare(strict_types=1);
+                <<<PHP
+<?php
+
+declare(strict_types=1);
 
 namespace %s;
 
 class %s extends \%s
 {
-    const DRIVER = "%s";
-}',
-                $details['namespace'],
+    public const DRIVER = '%s';
+}
+
+PHP,
+                $namespace,
                 $class->getShortName(),
                 $class->getName(),
                 $driver

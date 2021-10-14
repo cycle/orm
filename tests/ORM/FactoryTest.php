@@ -16,10 +16,8 @@ use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserRepository;
 
-class FactoryTest extends BaseTest
+abstract class FactoryTest extends BaseTest
 {
-    // currently active driver
-    public const DRIVER = 'postgres';
     /**
      * @var Factory
      */

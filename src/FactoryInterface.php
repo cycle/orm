@@ -16,10 +16,8 @@ use Cycle\Database\DatabaseProviderInterface;
  */
 interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
-    public const
-        PARENT_LOADER = '::parent::';
-    public const
-        CHILD_LOADER = '::child::';
+    public const PARENT_LOADER = '::parent::';
+    public const CHILD_LOADER = '::child::';
 
     /**
      * Create mapper associated with given role.
@@ -40,7 +38,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): LoaderInterface;
 
     /**
-     * Create repository associated with given role,
+     * Create repository associated with given role.
      */
     public function repository(
         ORMInterface $orm,
@@ -50,7 +48,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): RepositoryInterface;
 
     /**
-     * Create source associated with given role
+     * Create source associated with given role.
      */
     public function source(
         ORMInterface $orm,
@@ -58,10 +56,13 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $role
     ): SourceInterface;
 
+    /**
+     * @param null|string|class-string $name Collection factory name.
+     *        Can be class name or alias that can be configured in the {@see withCollectionFactory()} method.
+     */
     public function collection(
         ORMInterface $orm,
-        string $type = null,
-        array $options = null
+        string $name = null
     ): CollectionFactoryInterface;
 
     /**
@@ -76,6 +77,12 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 
     public function withDefaultSchemaClasses(array $defaults): self;
 
+    /**
+     * Configure additional collection factories.
+     *
+     * @param string $alias Collection alias name that can be used in {@see Relation::COLLECTION_TYPE} parameter.
+     * @param null|class-string $interface An interface or base class that is common to the collections produced.
+     */
     public function withCollectionFactory(
         string $alias,
         CollectionFactoryInterface $factory,

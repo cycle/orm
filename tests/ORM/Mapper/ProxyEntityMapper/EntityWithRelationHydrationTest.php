@@ -120,11 +120,29 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         try {
             $user->profiles[] = 'test-value';
-            $this->fail('There should be error thrown "Indirect modification of overloaded property"');
+            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
         } catch (\Exception) {
             // That's OK
         }
+        // $user->profile now loaded
         $user->profiles[] = 'test-value';
+        $this->assertContains('test-value', $user->profiles);
+    }
+
+    public function testWriteByLinkLazyOverloadedArray()
+    {
+        $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
+            ->fetchOne();
+
+        try {
+            $collection = &$user->profiles;
+            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
+        } catch (\Exception) {
+            // That's OK
+        }
+        // $user->profile now loaded
+        $collection = &$user->profiles;
+        $collection[] = 'test-value';
         $this->assertContains('test-value', $user->profiles);
     }
 }

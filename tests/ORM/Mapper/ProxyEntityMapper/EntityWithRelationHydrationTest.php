@@ -53,6 +53,16 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                             Relation::OUTER_KEY => 'user_id',
                         ],
                     ],
+                    'profiles' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => EntityWithRelationHydrationProfile::class,
+                        Relation::COLLECTION_TYPE => 'array',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
                 ],
             ],
             EntityWithRelationHydrationProfile::class => [
@@ -90,6 +100,33 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
         $this->assertSame($profile, $profile->getUser()->getProfile());
     }
+
+    public function testLazyLoad()
+    {
+        $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
+
+        $profile = $selector
+            ->fetchOne();
+
+        $this->assertEquals('1', $profile->getUser()->id);
+        $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
+        $this->assertSame($profile, $profile->getUser()->getProfile());
+    }
+
+    public function testChangeLazyOverloadedArray()
+    {
+        $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
+            ->fetchOne();
+
+        try {
+            $user->profiles[] = 'test-value';
+            $this->fail('There should be error thrown "Indirect modification of overloaded property"');
+        } catch (\Exception) {
+            // That's OK
+        }
+        $user->profiles[] = 'test-value';
+        $this->assertContains('test-value', $user->profiles);
+    }
 }
 
 class EntityWithRelationHydrationUser
@@ -97,6 +134,7 @@ class EntityWithRelationHydrationUser
     public $id;
     private $email;
     protected EntityWithRelationHydrationProfile $profile;
+    public array $profiles = [];
 
     public function getEmail()
     {

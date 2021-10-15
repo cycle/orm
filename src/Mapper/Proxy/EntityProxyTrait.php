@@ -27,9 +27,10 @@ trait EntityProxyTrait
 
         $value = $this->__cycle_orm_rel_data[$name] ?? null;
         if ($value instanceof ReferenceInterface) {
-            $this->$name = $relation->collect($relation->resolve($value, true));
+            $value = $relation->collect($relation->resolve($value, true));
+            $this->$name = $value;
             unset($this->__cycle_orm_rel_data[$name]);
-            return $this->$name;
+            return $value;
         }
 
         throw new RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));

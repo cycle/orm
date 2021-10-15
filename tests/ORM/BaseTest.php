@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
+use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Config\RelationConfig;
@@ -90,12 +91,12 @@ abstract class BaseTest extends TestCase
         }
 
         $this->orm = new ORM(
-            new Factory(
+            (new Factory(
                 $this->dbal,
                 RelationConfig::getDefault(),
                 null,
                 new DoctrineCollectionFactory()
-            ),
+            ))->withCollectionFactory('array', new ArrayCollectionFactory()),
             new Schema([])
         );
     }

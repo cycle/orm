@@ -70,7 +70,7 @@ abstract class ManyToManyTest extends StiBaseTest
                             Relation::OUTER_KEY => 'name',
                             Relation::THROUGH_INNER_KEY => 'child',
                             Relation::THROUGH_OUTER_KEY => 'parent',
-                            Relation::HANDSHAKE => 'children',
+                            Relation::INVERSION => 'children',
                         ],
                     ],
                     'children' => [
@@ -84,7 +84,7 @@ abstract class ManyToManyTest extends StiBaseTest
                             Relation::OUTER_KEY => 'name',
                             Relation::THROUGH_INNER_KEY => 'parent',
                             Relation::THROUGH_OUTER_KEY => 'child',
-                            Relation::HANDSHAKE => 'parents',
+                            Relation::INVERSION => 'parents',
                         ],
                     ],
                 ],

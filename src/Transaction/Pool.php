@@ -19,16 +19,30 @@ final class Pool implements IteratorAggregate, \Countable
 
     /** @var SplObjectStorage<object, Tuple> */
     private SplObjectStorage $storage;
+
+    /** @var SplObjectStorage<object, Tuple> */
+    private SplObjectStorage $all;
+
+    /** @var SplObjectStorage<object, Tuple> */
+    private SplObjectStorage $priorityStorage;
+
+    /** @var Tuple[] */
+    private array $unprocessed;
+
     private bool $priorityEnabled = false;
     private bool $priorityAutoAttach = false;
-    private SplObjectStorage $priorityStorage;
-    private ?SplObjectStorage $trash = null;
     private int $happens = 0;
+
+    /**
+     * Indicates that Pool is now iterating
+     */
+    private bool $iterating = false;
 
     public function __construct(
         private ORMInterface $orm
     ) {
         $this->storage = new SplObjectStorage();
+        $this->all = new SplObjectStorage();
     }
 
     public function someHappens(): void
@@ -47,7 +61,7 @@ final class Pool implements IteratorAggregate, \Countable
         bool $highPriority = false
     ): Tuple {
         // Find existing
-        $tuple = $this->findTuple($entity);
+        $tuple = $this->offsetGet($entity);
         if ($tuple !== null) {
             $this->updateTuple($tuple, $task, $status, $cascade, $node, $state);
             return $tuple;
@@ -71,14 +85,15 @@ final class Pool implements IteratorAggregate, \Countable
     private function smartAttachTuple(Tuple $tuple, bool $highPriority = false): Tuple
     {
         if ($tuple->status === Tuple::STATUS_PROCESSED) {
+            $this->all->attach($tuple->entity, $tuple);
             return $tuple;
         }
-        if ($this->trash !== null) {
-            if ($tuple->status === Tuple::STATUS_PREPARING && $this->trash->contains($tuple->entity)) {
-                return $this->trash->offsetGet($tuple->entity);
-            }
-            $this->snap($tuple);
+        if ($tuple->status === Tuple::STATUS_PREPARING && $this->all->contains($tuple->entity)) {
+            return $this->all->offsetGet($tuple->entity);
         }
+        $this->all->attach($tuple->entity, $tuple);
+
+        $this->snap($tuple);
         if ($tuple->node !== null) {
             switch ($tuple->task) {
                 case Tuple::TASK_DELETE:
@@ -122,12 +137,7 @@ final class Pool implements IteratorAggregate, \Countable
 
     public function offsetGet(object $entity): ?Tuple
     {
-        return match (true) {
-            $this->storage->contains($entity) => $this->storage->offsetGet($entity),
-            $this->priorityEnabled && $this->priorityStorage->contains($entity) => $this->priorityStorage->offsetGet($entity),
-            $this->trash !== null && $this->trash->contains($entity) => $this->trash->offsetGet($entity),
-            default => null,
-        };
+        return $this->all->contains($entity) ? $this->all->offsetGet($entity) : null;
     }
 
     /**
@@ -137,8 +147,12 @@ final class Pool implements IteratorAggregate, \Countable
      */
     public function getIterator(): Traversable
     {
-        $this->trash = new SplObjectStorage();
+        if ($this->iterating) {
+            throw new \RuntimeException('The Pool is now iterating.');
+        }
+        $this->iterating = true;
         $this->activatePriorityStorage();
+        $this->unprocessed = [];
 
         // Snap all entities before store
         while ($this->storage->valid()) {
@@ -156,11 +170,8 @@ final class Pool implements IteratorAggregate, \Countable
         do {
             // High priority first
             if ($this->priorityStorage->count() > 0) {
-                // todo: use this feature manually
                 $priorityStorage = $this->priorityStorage;
-                // $this->priorityStorage = new SplObjectStorage();
                 foreach ($priorityStorage as $entity) {
-                    // yield $entity => $priorityStorage->offsetGet($entity);
                     $tuple = $priorityStorage->offsetGet($entity);
                     yield $entity => $tuple;
                     $this->trashIt($entity, $tuple, $priorityStorage);
@@ -175,7 +186,6 @@ final class Pool implements IteratorAggregate, \Countable
             if (!$pool->valid() && $pool->count() > 0) {
                 $pool->rewind();
             }
-            // $this->storage = new SplObjectStorage();
             if ($stage === 0) {
                 // foreach ($pool as $entity) {
                 while ($pool->valid()) {
@@ -199,7 +209,6 @@ final class Pool implements IteratorAggregate, \Countable
                 $this->storage->rewind();
             }
             if ($stage === 1) {
-                // foreach ($pool as $entity) {
                 while ($pool->valid()) {
                     /** @var Tuple $tuple */
                     $entity = $pool->current();
@@ -242,15 +251,24 @@ final class Pool implements IteratorAggregate, \Countable
                         continue 2;
                     }
                 }
+                if ($this->happens !== 0 && $this->unprocessed !== []) {
+                    foreach ($this->unprocessed as $item) {
+                        $this->storage->attach($item->entity, $item);
+                    }
+                    $this->unprocessed = [];
+                    continue;
+                }
                 if ($this->happens === 0 && \count($pool) > 0) {
                     throw new \Exception('Transaction can not be resolved.');
                 }
             }
         } while (true);
+        $this->iterating = false;
         $this->priorityEnabled = false;
         $this->priorityAutoAttach = false;
-        unset($this->priorityStorage);
-        $this->trash = null;
+        $this->unprocessed = [];
+        unset($this->priorityStorage, $this->unprocessed);
+        $this->all = new SplObjectStorage();
     }
 
     public function count(): int
@@ -283,8 +301,15 @@ final class Pool implements IteratorAggregate, \Countable
     private function trashIt(object $entity, Tuple $tuple, SplObjectStorage $storage): void
     {
         $storage->detach($entity);
+
+        if ($tuple->status === Tuple::STATUS_UNPROCESSED) {
+            $tuple->status = Tuple::STATUS_PREPROCESSED;
+            $this->unprocessed[] = $tuple;
+            return;
+        }
+
         if ($tuple->status >= Tuple::STATUS_PREPROCESSED) {
-            $this->trash->attach($tuple->entity, $tuple);
+            $tuple->status = Tuple::STATUS_PROCESSED;
             ++$this->happens;
             return;
         }

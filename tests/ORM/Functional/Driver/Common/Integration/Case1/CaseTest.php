@@ -12,7 +12,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Tag;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
-abstract class Case1Test extends BaseTest
+abstract class CaseTest extends BaseTest
 {
     use TableTrait;
 
@@ -91,9 +91,9 @@ abstract class Case1Test extends BaseTest
     public function countProvider(): array
     {
         return [
-            [1],
-            [10],
-            [50],
+            '1 item' => [1],
+            '10 items' => [10],
+            // '50 items' => [50],
         ];
     }
 
@@ -192,8 +192,7 @@ abstract class Case1Test extends BaseTest
             foreach ($postTags as $tagId) {
                 $tag = $this->tags[$tagId];
                 $post->addTag($tag);
-                // todo: uncomment when issue is resolved https://github.com/cycle/orm/issues/70
-                // $tag->addPost($post);
+                $tag->addPost($post);
             }
             // add comments
             $commentsCount = max(2, $count);

@@ -396,6 +396,7 @@ final class Transaction implements TransactionInterface
 
         if (!$isDependenciesResolved) {
             if ($tuple->status === Tuple::STATUS_PREPROCESSED) {
+                // todo add separated method to get details about unresolved relations
                 if (\Cycle\ORM\Transaction\Pool::DEBUG) {
                     echo " \033[31m MASTER RELATIONS IS NOT RESOLVED ({$tuple->node->getRole()}): \033[0m \n";
                     foreach ($map->getMasters() as $name => $relation) {
@@ -405,7 +406,7 @@ final class Transaction implements TransactionInterface
                         }
                     }
                 }
-                throw new TransactionException('Relation can not be resolved.');
+                $tuple->status = Tuple::STATUS_UNPROCESSED;
             }
         }
     }

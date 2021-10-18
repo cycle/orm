@@ -41,7 +41,6 @@ $classes = $tokenizer
     ->getClasses(\Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class);
 
 foreach ($classes as $class) {
-
     foreach ($class->getMethods() as $method) {
         if ($method->isAbstract()) {
             echo "Skip class {$class->getName()} with abstract methods.\n";

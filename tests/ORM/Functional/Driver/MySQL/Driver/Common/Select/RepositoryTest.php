@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\MySQL\Driver\Common\Select;
 
+// phpcs:ignore
+use Cycle\ORM\Tests\Functional\Driver\Common\Select\RepositoryTest as CommonTest; 
+ 
 /**
  * @group driver
  * @group driver-mysql
  */
-class RepositoryTest extends \Cycle\ORM\Tests\Functional\Driver\Common\Select\RepositoryTest
+class RepositoryTest extends CommonTest
 {
     public const DRIVER = 'mysql';
 }

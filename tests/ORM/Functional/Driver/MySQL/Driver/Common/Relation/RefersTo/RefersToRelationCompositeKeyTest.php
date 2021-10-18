@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\MySQL\Driver\Common\Relation\RefersTo;
 
+// phpcs:ignore
+use Cycle\ORM\Tests\Functional\Driver\Common\Relation\RefersTo\RefersToRelationCompositeKeyTest as CommonTest; 
+ 
 /**
  * @group driver
  * @group driver-mysql
  */
-class RefersToRelationCompositeKeyTest extends \Cycle\ORM\Tests\Functional\Driver\Common\Relation\RefersTo\RefersToRelationCompositeKeyTest
+class RefersToRelationCompositeKeyTest extends CommonTest
 {
     public const DRIVER = 'mysql';
 }

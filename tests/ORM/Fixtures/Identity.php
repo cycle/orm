@@ -1,5 +1,6 @@
 <?php
 
+// phpcs:ignoreFile
 declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
@@ -14,7 +15,7 @@ class Identity
         return $this->id;
     }
 
-    public function setId($id)
+    public function setId($id): void
     {
         $this->id = $id;
     }

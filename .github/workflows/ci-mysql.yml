@@ -83,4 +83,4 @@ jobs:
         env:
           DB: mysql
           MYSQL: ${{ matrix.mysql-version }}
-        run: vendor/bin/phpunit tests/ORM/Driver/MySQL --colors=always
+        run: vendor/bin/phpunit --group driver-mysql --colors=always

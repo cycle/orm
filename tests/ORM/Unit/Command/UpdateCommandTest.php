@@ -21,7 +21,8 @@ class UpdateCommandTest extends TestCase
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            $state
+            $state,
+            []
         );
 
         $this->assertTrue($cmd->isReady());
@@ -35,6 +36,7 @@ class UpdateCommandTest extends TestCase
             m::mock(DatabaseInterface::class),
             'table',
             $state,
+            []
         );
 
         $this->assertTrue($cmd->hasData());
@@ -47,6 +49,7 @@ class UpdateCommandTest extends TestCase
             m::mock(DatabaseInterface::class),
             'table',
             $state,
+            [],
         );
         $cmd->registerAppendix('name', 'new value');
 
@@ -60,6 +63,7 @@ class UpdateCommandTest extends TestCase
             m::mock(DatabaseInterface::class),
             'table',
             $state,
+            [],
         );
         $cmd->registerColumn('name', 'new value');
 
@@ -72,7 +76,8 @@ class UpdateCommandTest extends TestCase
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            $state
+            $state,
+            []
         );
 
         $cmd->register('key', 'value', ConsumerInterface::SCOPE);
@@ -85,7 +90,8 @@ class UpdateCommandTest extends TestCase
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            $state
+            $state,
+            []
         );
 
         $cmd->setScope('key', 'value');
@@ -100,7 +106,8 @@ class UpdateCommandTest extends TestCase
         $cmd = new Update(
             m::mock(DatabaseInterface::class),
             'table',
-            $state
+            $state,
+            []
         );
 
         $cmd->execute();

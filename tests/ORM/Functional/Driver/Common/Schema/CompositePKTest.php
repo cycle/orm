@@ -122,7 +122,7 @@ abstract class CompositePKTest extends BaseTest
         $u2->key2 = 1;
 
         //todo details
-        $this->expectException(\Exception:: class);
+        $this->expectException(\Exception::class);
 
         (new Transaction($this->orm))->persist($u1)->persist($u2)->run();
     }

@@ -11,7 +11,7 @@ ini_set('display_errors', '1');
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
-    'directories' => [__DIR__.'/ORM/Functional/Driver/Common'],
+    'directories' => [__DIR__ . '/ORM/Functional/Driver/Common'],
     'exclude' => [],
 ]));
 

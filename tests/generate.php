@@ -80,8 +80,8 @@ declare(strict_types=1);
 namespace %s;
 
 // phpcs:ignore
-use %s as CommonTest; 
- 
+use %s as CommonTest;
+
 /**
  * @group driver
  * @group driver-%s

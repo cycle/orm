@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\MySQL\Driver\Common\Relation\RefersTo;
 
 // phpcs:ignore
-use Cycle\ORM\Tests\Functional\Driver\Common\Relation\RefersTo\RefersToProxyMapperTest as CommonTest; 
- 
+use Cycle\ORM\Tests\Functional\Driver\Common\Relation\RefersTo\RefersToProxyMapperTest as CommonTest;
+
 /**
  * @group driver
  * @group driver-mysql

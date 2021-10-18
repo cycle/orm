@@ -19,78 +19,47 @@ use Cycle\ORM\Transaction;
 
 abstract class ParentClassRelationsTest extends SimpleCasesTest
 {
-    protected const
-        TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'];
-    protected const
-        TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'];
-    protected const
-        TOOL_3 = ['id' => 3, 'engineer_id' => 2, 'title' => 'Notepad'];
-    protected const
-        TOOL_4 = ['id' => 4, 'engineer_id' => 2, 'title' => 'IDE'];
-    protected const
-        BOOK_1 = ['id' => 1, 'title' => 'PHP manual'];
-    protected const
-        BOOK_2 = ['id' => 2, 'title' => 'Best mentor'];
-    protected const
-        BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'];
-    protected const
-        BOOK_4 = ['id' => 4, 'title' => 'How to be Foo when you are Bar'];
-    protected const
-        EMPLOYEE_1 = parent::EMPLOYEE_1 + ['book_id' => 3];
-    protected const
-        EMPLOYEE_2 = parent::EMPLOYEE_2 + ['book_id' => 2];
-    protected const
-        EMPLOYEE_3 = parent::EMPLOYEE_3 + ['book_id' => 1];
-    protected const
-        EMPLOYEE_4 = parent::EMPLOYEE_4 + ['book_id' => null];
-    protected const
-        ENGINEER_2 = parent::ENGINEER_2 + ['tech_book_id' => 1];
-    protected const
-        ENGINEER_4 = parent::ENGINEER_4 + ['tech_book_id' => 4];
-    protected const
-        EMPLOYEE_1_LOADED = self::EMPLOYEE_1 + ['book' => self::BOOK_3];
-    protected const
-        EMPLOYEE_2_LOADED = self::EMPLOYEE_2 + ['book' => self::BOOK_2];
-    protected const
-        EMPLOYEE_3_LOADED = self::EMPLOYEE_3 + ['book' => self::BOOK_1];
-    protected const
-        EMPLOYEE_4_LOADED = self::EMPLOYEE_4 + ['book' => null];
-    protected const
-        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
-    protected const
-        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
-    protected const
-        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
-    protected const
-        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
-    protected const
-        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
-    protected const
-        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
-    protected const
-        EMPLOYEE_ALL_LOADED = [
-            self::EMPLOYEE_1_LOADED,
-            self::EMPLOYEE_2_LOADED,
-            self::EMPLOYEE_3_LOADED,
-            self::EMPLOYEE_4_LOADED,
-        ];
-    protected const
-        EMPLOYEE_INHERITED_LOADED = [
-            self::MANAGER_1_LOADED,
-            self::PROGRAMATOR_2_LOADED,
-            self::MANAGER_3_LOADED,
-            self::PROGRAMATOR_4_LOADED,
-        ];
-    protected const
-        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
-    protected const
-        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
-    protected const
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
-    protected const
-        TOOL_ROLE = 'tool';
-    protected const
-        BOOK_ROLE = 'book';
+    protected const TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'];
+    protected const TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'];
+    protected const TOOL_3 = ['id' => 3, 'engineer_id' => 2, 'title' => 'Notepad'];
+    protected const TOOL_4 = ['id' => 4, 'engineer_id' => 2, 'title' => 'IDE'];
+    protected const BOOK_1 = ['id' => 1, 'title' => 'PHP manual'];
+    protected const BOOK_2 = ['id' => 2, 'title' => 'Best mentor'];
+    protected const BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'];
+    protected const BOOK_4 = ['id' => 4, 'title' => 'How to be Foo when you are Bar'];
+    protected const EMPLOYEE_1 = parent::EMPLOYEE_1 + ['book_id' => 3];
+    protected const EMPLOYEE_2 = parent::EMPLOYEE_2 + ['book_id' => 2];
+    protected const EMPLOYEE_3 = parent::EMPLOYEE_3 + ['book_id' => 1];
+    protected const EMPLOYEE_4 = parent::EMPLOYEE_4 + ['book_id' => null];
+    protected const ENGINEER_2 = parent::ENGINEER_2 + ['tech_book_id' => 1];
+    protected const ENGINEER_4 = parent::ENGINEER_4 + ['tech_book_id' => 4];
+    protected const EMPLOYEE_1_LOADED = self::EMPLOYEE_1 + ['book' => self::BOOK_3];
+    protected const EMPLOYEE_2_LOADED = self::EMPLOYEE_2 + ['book' => self::BOOK_2];
+    protected const EMPLOYEE_3_LOADED = self::EMPLOYEE_3 + ['book' => self::BOOK_1];
+    protected const EMPLOYEE_4_LOADED = self::EMPLOYEE_4 + ['book' => null];
+    protected const ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
+    protected const ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
+    protected const PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
+    protected const PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
+    protected const MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
+    protected const MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
+    protected const EMPLOYEE_ALL_LOADED = [
+        self::EMPLOYEE_1_LOADED,
+        self::EMPLOYEE_2_LOADED,
+        self::EMPLOYEE_3_LOADED,
+        self::EMPLOYEE_4_LOADED,
+    ];
+    protected const EMPLOYEE_INHERITED_LOADED = [
+        self::MANAGER_1_LOADED,
+        self::PROGRAMATOR_2_LOADED,
+        self::MANAGER_3_LOADED,
+        self::PROGRAMATOR_4_LOADED,
+    ];
+    protected const ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
+    protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
+    protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+    protected const TOOL_ROLE = 'tool';
+    protected const BOOK_ROLE = 'book';
 
     public function setUp(): void
     {
@@ -215,10 +184,23 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
         (new Transaction($this->orm))->delete($engineer)->run();
         $this->assertNumWrites(0);
 
-        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne());
-        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne());
+        $this->assertNull(
+            (new Select($this->orm, static::PROGRAMATOR_ROLE))
+                ->wherePK(2)
+                ->fetchOne()
+        );
+        $this->assertNull(
+            (new Select($this->orm, static::ENGINEER_ROLE))
+                ->loadSubclasses(false)
+                ->wherePK(2)
+                ->fetchOne()
+        );
         /** @var Employee $employee */
-        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne();
+        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(2)
+            ->fetchOne();
+
         $this->assertNotNull($employee);
         $this->assertNotNull($employee->book);
     }

@@ -129,7 +129,7 @@ class ClassPropertiesExtractorTest extends TestCase
     }
 }
 
-
+// phpcs:disable
 class User
 {
     public int $id;
@@ -151,3 +151,4 @@ class SuperUser extends ExtendedUser
     public int $totalLogin;
     private int $isAdmin;
 }
+// phpcs:enable

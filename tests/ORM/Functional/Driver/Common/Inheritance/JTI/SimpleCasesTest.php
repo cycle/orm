@@ -16,78 +16,47 @@ use Cycle\ORM\Transaction;
 
 abstract class SimpleCasesTest extends JtiBaseTest
 {
-    protected const
-        EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38];
-    protected const
-        EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'age' => 35];
-    protected const
-        EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'age' => 27];
-    protected const
-        EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'age' => 32];
-    protected const
-        ENGINEER_2 = ['id' => 2, 'level' => 8];
-    protected const
-        ENGINEER_4 = ['id' => 4, 'level' => 10];
-    protected const
-        PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'];
-    protected const
-        PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'];
-    protected const
-        MANAGER_1 = ['id' => 1, 'rank' => 'top'];
-    protected const
-        MANAGER_3 = ['id' => 3, 'rank' => 'bottom'];
-    protected const
-        ENGINEER_2_PK = 2;
-    protected const
-        PROGRAMATOR_2_PK = self::ENGINEER_2_PK;
-    protected const
-        EMPLOYEE_1_LOADED = self::EMPLOYEE_1;
-    protected const
-        EMPLOYEE_2_LOADED = self::EMPLOYEE_2;
-    protected const
-        EMPLOYEE_3_LOADED = self::EMPLOYEE_3;
-    protected const
-        EMPLOYEE_4_LOADED = self::EMPLOYEE_4;
-    protected const
-        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
-    protected const
-        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
-    protected const
-        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
-    protected const
-        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
-    protected const
-        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
-    protected const
-        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
-    protected const
-        EMPLOYEE_ALL_LOADED = [
-            self::EMPLOYEE_1_LOADED,
-            self::EMPLOYEE_2_LOADED,
-            self::EMPLOYEE_3_LOADED,
-            self::EMPLOYEE_4_LOADED,
-        ];
-    protected const
-        EMPLOYEE_INHERITED_LOADED = [
-            self::MANAGER_1_LOADED,
-            self::PROGRAMATOR_2_LOADED,
-            self::MANAGER_3_LOADED,
-            self::PROGRAMATOR_4_LOADED,
-        ];
-    protected const
-        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
-    protected const
-        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
-    protected const
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
-    protected const
-        EMPLOYEE_ROLE = 'employee';
-    protected const
-        ENGINEER_ROLE = 'engineer';
-    protected const
-        MANAGER_ROLE = 'manager';
-    protected const
-        PROGRAMATOR_ROLE = 'programator';
+    protected const EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38];
+    protected const EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'age' => 35];
+    protected const EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'age' => 27];
+    protected const EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'age' => 32];
+    protected const ENGINEER_2 = ['id' => 2, 'level' => 8];
+    protected const ENGINEER_4 = ['id' => 4, 'level' => 10];
+    protected const PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'];
+    protected const PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'];
+    protected const MANAGER_1 = ['id' => 1, 'rank' => 'top'];
+    protected const MANAGER_3 = ['id' => 3, 'rank' => 'bottom'];
+    protected const ENGINEER_2_PK = 2;
+    protected const PROGRAMATOR_2_PK = self::ENGINEER_2_PK;
+    protected const EMPLOYEE_1_LOADED = self::EMPLOYEE_1;
+    protected const EMPLOYEE_2_LOADED = self::EMPLOYEE_2;
+    protected const EMPLOYEE_3_LOADED = self::EMPLOYEE_3;
+    protected const EMPLOYEE_4_LOADED = self::EMPLOYEE_4;
+    protected const ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
+    protected const ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
+    protected const PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
+    protected const PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
+    protected const MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
+    protected const MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
+    protected const MPLOYEE_ALL_LOADED = [
+        self::EMPLOYEE_1_LOADED,
+        self::EMPLOYEE_2_LOADED,
+        self::EMPLOYEE_3_LOADED,
+        self::EMPLOYEE_4_LOADED,
+    ];
+    protected const EMPLOYEE_INHERITED_LOADED = [
+        self::MANAGER_1_LOADED,
+        self::PROGRAMATOR_2_LOADED,
+        self::MANAGER_3_LOADED,
+        self::PROGRAMATOR_4_LOADED,
+    ];
+    protected const ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
+    protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
+    protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+    protected const EMPLOYEE_ROLE = 'employee';
+    protected const ENGINEER_ROLE = 'engineer';
+    protected const MANAGER_ROLE = 'manager';
+    protected const PROGRAMATOR_ROLE = 'programator';
 
     public function setUp(): void
     {
@@ -358,7 +327,11 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertNumWrites(0);
 
         // todo load without inheritance
-        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(static::ENGINEER_2_PK)->fetchOne());
+        $this->assertNull(
+            (new Select($this->orm, static::PROGRAMATOR_ROLE))
+                ->wherePK(static::ENGINEER_2_PK)
+                ->fetchOne()
+        );
         $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
             ->wherePK(static::ENGINEER_2_PK)->fetchOne());

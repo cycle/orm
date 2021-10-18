@@ -130,14 +130,30 @@ abstract class HasManyCollectionsTest extends BaseTest
     public function collectionTypesProvider(): array
     {
         return [
-            'Default lazy' => [null, true, \Doctrine\Common\Collections\Collection::class],
-            'Default eager' => [null, false, \Doctrine\Common\Collections\Collection::class],
-            'Alias Common Doctrine collection lazy' => ['doctrine', true, \Doctrine\Common\Collections\Collection::class],
-            'Alias Common Doctrine collection eager' => ['doctrine', false, \Doctrine\Common\Collections\Collection::class],
-            'Alias Common Illuminate collection lazy' => ['illuminate', true, \Illuminate\Support\Collection::class],
-            'Alias Common Illuminate collection eager' => ['illuminate', false, \Illuminate\Support\Collection::class],
-            'Class Custom Doctrine collection lazy' => [CustomCollection::class, true, CustomCollection::class],
-            'Class Custom Doctrine collection eager' => [CustomCollection::class, false, CustomCollection::class],
+            'Default lazy' => [
+                null, true, \Doctrine\Common\Collections\Collection::class
+            ],
+            'Default eager' => [
+                null, false, \Doctrine\Common\Collections\Collection::class
+            ],
+            'Alias Common Doctrine collection lazy' => [
+                'doctrine', true, \Doctrine\Common\Collections\Collection::class
+            ],
+            'Alias Common Doctrine collection eager' => [
+                'doctrine', false, \Doctrine\Common\Collections\Collection::class
+            ],
+            'Alias Common Illuminate collection lazy' => [
+                'illuminate', true, \Illuminate\Support\Collection::class
+            ],
+            'Alias Common Illuminate collection eager' => [
+                'illuminate', false, \Illuminate\Support\Collection::class
+            ],
+            'Class Custom Doctrine collection lazy' => [
+                CustomCollection::class, true, CustomCollection::class
+            ],
+            'Class Custom Doctrine collection eager' => [
+                CustomCollection::class, false, CustomCollection::class
+            ],
         ];
     }
 

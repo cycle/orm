@@ -128,7 +128,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->assertContains('test-value', $user->profiles);
     }
 }
-
+// phpcs:disable
 class EntityWithRelationHydrationUser
 {
     public $id;
@@ -158,3 +158,4 @@ class EntityWithRelationHydrationProfile
         return $this->user;
     }
 }
+// phpcs:enable

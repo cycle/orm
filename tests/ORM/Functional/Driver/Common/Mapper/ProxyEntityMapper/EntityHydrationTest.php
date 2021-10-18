@@ -146,7 +146,7 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertEquals('test', $user->tag);
     }
 }
-
+// phpcs:disable
 class EntityHydrationUser
 {
     public int $id;
@@ -218,3 +218,4 @@ class ExtendedEntityHydrationUser extends EntityHydrationUser
         return $this->profileId;
     }
 }
+// phpcs:enable

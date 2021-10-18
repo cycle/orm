@@ -64,6 +64,7 @@ class EntityWithRelationCreationTest extends BaseMapperTest
     }
 }
 
+// phpcs:disable
 class EntityWithRelationCreationAbstractUser
 {
     private $profile = 123;
@@ -90,3 +91,4 @@ class EntityWithRelationCreationProfile
 {
     public int $id = 123;
 }
+// phpcs:enable

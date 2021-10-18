@@ -52,7 +52,7 @@ abstract class SingleTableTest extends SimpleCasesTest
         self::EMPLOYEE_1_LOADED,
         self::ENGINEER_2_LOADED,
         self::EMPLOYEE_3_LOADED,
-        self::ENGINEER_4_LOADE,
+        self::ENGINEER_4_LOADED,
     ];
     protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
     protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];

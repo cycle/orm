@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Integration\Case1\Entity;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity;
 
 use DateTimeImmutable;
 
@@ -17,7 +17,8 @@ class Post
     private DateTimeImmutable $updated_at;
     private ?DateTimeImmutable $published_at = null;
     private ?DateTimeImmutable $deleted_at = null;
-    public ?User $user = null;
+    // todo private User $user;
+    public $user;
     private ?int $user_id = null;
     /**
      * @var Tag[]

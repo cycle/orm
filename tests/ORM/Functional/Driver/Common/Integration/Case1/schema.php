@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use Cycle\ORM\Tests\Integration\Case1\Entity\Comment;
-use Cycle\ORM\Tests\Integration\Case1\Entity\Post;
-use Cycle\ORM\Tests\Integration\Case1\Entity\PostTag;
-use Cycle\ORM\Select\Repository;
-use Cycle\ORM\Tests\Integration\Case1\Entity\Tag;
-use Cycle\ORM\Tests\Integration\Case1\Entity\User;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Select\Source;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
+use Cycle\ORM\Select\Repository;
+use Cycle\ORM\Select\Source;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Comment;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\PostTag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Tag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\User;
 
 return [
     'comment' => [

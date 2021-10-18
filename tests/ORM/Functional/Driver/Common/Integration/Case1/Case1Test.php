@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Integration\Case1;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1;
 
 use Cycle\ORM\Schema;
-use Cycle\ORM\Tests\BaseTest;
-use Cycle\ORM\Tests\Integration\Case1\Entity\Comment;
-use Cycle\ORM\Tests\Integration\Case1\Entity\Post;
-use Cycle\ORM\Tests\Integration\Case1\Entity\Tag;
-use Cycle\ORM\Tests\Integration\Case1\Entity\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Comment;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Tag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
-abstract class RunTest extends BaseTest
+abstract class Case1Test extends BaseTest
 {
     use TableTrait;
 

@@ -18,8 +18,6 @@ abstract class JtiBaseTest extends BaseTest
 
     protected const DEFAULT_MAPPER = Mapper::class;
 
-    abstract protected function getSchemaArray(): array;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -32,4 +30,6 @@ abstract class JtiBaseTest extends BaseTest
         );
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()))->withFactory($factory);
     }
+
+    abstract protected function getSchemaArray(): array;
 }

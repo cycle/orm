@@ -313,6 +313,135 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         );
     }
 
+    /**
+     * Subclasses in relations should be loaded and initialized
+     */
+    public function testLoadSubclassAndCheckParentsRelations(): void
+    {
+        /** @var Programator $entity */
+        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->load('tech_book')
+            ->wherePK(2)->fetchOne();
+
+        $this->assertInstanceof(Programator::class, $entity);
+        /** BOOK_3 */
+        $this->assertInstanceof(Book::class, $entity->tech_book);
+        $this->assertSame(3, $entity->tech_book->id);
+        /** EBOOK_3 */
+        $this->assertInstanceof(EBook::class, $entity->tech_book);
+        $this->assertSame(static::EBOOK_3['url'], $entity->tech_book->url);
+        // Check relation eager loading in the book subclass
+        /** @var EBook $ebook */
+        $ebook = $entity->tech_book;
+        $this->assertCount(3, $ebook->pages);
+    }
+
+    /**
+     * Subclass relations can't be resolved manually
+     */
+    public function testLoadRelationOfSubclass(): void
+    {
+        $this->expectException(LoaderException::class);
+        $this->expectExceptionMessage('Unable to create loader: Undefined relation `human`.`book`.');
+
+        /** @var Programator $entity */
+        (new Select($this->orm, static::HUMAN_ROLE))
+            // Load subclass relation
+            ->load('book')
+            ->wherePK(2)->fetchOne();
+    }
+
+    public function testLoadBaseClassAndCheckSubclassEagerRelations(): void
+    {
+        /** @var Programator $entity */
+        $entity = (new Select($this->orm, static::HUMAN_ROLE))
+            ->wherePK(2)->fetchOne();
+
+        $this->assertInstanceof(Programator::class, $entity);
+        /** BOOK_4 */
+        $this->assertInstanceof(Book::class, $entity->book);
+        $this->assertSame(4, $entity->book->id);
+        /** EBOOK_4 */
+        $this->assertInstanceof(EBook::class, $entity->book);
+        $this->assertSame(static::EBOOK_4['url'], $entity->book->url);
+        // Check relation eager loading in the book subclass
+        /** @var EBook $ebook */
+        $ebook = $entity->book;
+        $this->assertEmpty($ebook->pages);
+    }
+
+    public function testInnerLoadParentClassRelation(): void
+    {
+        $this->captureReadQueries();
+
+        /** @var MarkdownPage $entity */
+        $entity = (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
+            ->load('owner', ['method' => Select::SINGLE_QUERY])
+            ->wherePK(1)->fetchOne();
+
+        $this->assertNumReads(2);
+
+        $this->assertInstanceof(MarkdownPage::class, $entity);
+        $this->assertInstanceof(Programator::class, $entity->owner);
+    }
+
+    /**
+     * Inheritance hierarchy should be joined as sub-query
+     */
+    public function testInnerLoadParentClassRelationNullToNull(): void
+    {
+        /** @var MarkdownPage $entity */
+        $entity = (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
+            ->load('ebook', ['method' => Select::SINGLE_QUERY])
+            ->wherePK(5)->fetchOne();
+
+        $this->assertInstanceof(MarkdownPage::class, $entity);
+        $this->assertNull($entity->block_id);
+        $this->assertNull($entity->ebook);
+    }
+
+    public function testLoadTwoInheritancesInSingleQuery(): void
+    {
+        $this->captureReadQueries();
+
+        /** @var Programator $entity */
+        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->load('book', ['method' => Select::SINGLE_QUERY])
+            ->load('tech_book', ['method' => Select::SINGLE_QUERY])
+            ->load('tech_book.pages', ['method' => Select::SINGLE_QUERY])
+            ->wherePK(2)->fetchOne();
+
+        $this->assertNumReads(1);
+        $this->captureReadQueries();
+
+        $this->assertInstanceof(EBook::class, $entity->book);
+        $this->assertSame(4, $entity->book->id);
+        $this->assertInstanceof(EBook::class, $entity->tech_book);
+        $this->assertSame(3, $entity->tech_book->id);
+        $this->assertNotEmpty($entity->tech_book->pages);
+
+        // Don't use promises
+        $this->assertNumReads(0);
+    }
+
+    public function testPersistRelatedHierarchy(): void
+    {
+        $entity = $this->orm->make(EBook::class, ['title' => 'awesome book', 'url' => 'awesome-book.com']);
+        $entity->pages = [
+            $this->orm->make(Page::class, ['title' => 'page 1', 'content' => '...', 'owner_id' => 1]),
+            $this->orm->make(Page::class, ['title' => 'page 2', 'content' => '...', 'owner_id' => 1]),
+            $this->orm->make(MarkdownPage::class, ['title' => 'page 3', 'content' => '...', 'owner_id' => 2]),
+        ];
+
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(6);
+
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(0);
+    }
+
     protected function getSchemaArray(): array
     {
         return [
@@ -497,134 +626,5 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
                 SchemaInterface::TYPECAST => ['id' => 'int', 'engineer_id' => 'int'],
             ],
         ];
-    }
-
-    /**
-     * Subclasses in relations should be loaded and initialized
-     */
-    public function testLoadSubclassAndCheckParentsRelations(): void
-    {
-        /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
-            ->load('tech_book')
-            ->wherePK(2)->fetchOne();
-
-        $this->assertInstanceof(Programator::class, $entity);
-        /** BOOK_3 */
-        $this->assertInstanceof(Book::class, $entity->tech_book);
-        $this->assertSame(3, $entity->tech_book->id);
-        /** EBOOK_3 */
-        $this->assertInstanceof(EBook::class, $entity->tech_book);
-        $this->assertSame(static::EBOOK_3['url'], $entity->tech_book->url);
-        // Check relation eager loading in the book subclass
-        /** @var EBook $ebook */
-        $ebook = $entity->tech_book;
-        $this->assertCount(3, $ebook->pages);
-    }
-
-    /**
-     * Subclass relations can't be resolved manually
-     */
-    public function testLoadRelationOfSubclass(): void
-    {
-        $this->expectException(LoaderException::class);
-        $this->expectExceptionMessage('Unable to create loader: Undefined relation `human`.`book`.');
-
-        /** @var Programator $entity */
-        (new Select($this->orm, static::HUMAN_ROLE))
-            // Load subclass relation
-            ->load('book')
-            ->wherePK(2)->fetchOne();
-    }
-
-    public function testLoadBaseClassAndCheckSubclassEagerRelations(): void
-    {
-        /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::HUMAN_ROLE))
-            ->wherePK(2)->fetchOne();
-
-        $this->assertInstanceof(Programator::class, $entity);
-        /** BOOK_4 */
-        $this->assertInstanceof(Book::class, $entity->book);
-        $this->assertSame(4, $entity->book->id);
-        /** EBOOK_4 */
-        $this->assertInstanceof(EBook::class, $entity->book);
-        $this->assertSame(static::EBOOK_4['url'], $entity->book->url);
-        // Check relation eager loading in the book subclass
-        /** @var EBook $ebook */
-        $ebook = $entity->book;
-        $this->assertEmpty($ebook->pages);
-    }
-
-    public function testInnerLoadParentClassRelation(): void
-    {
-        $this->captureReadQueries();
-
-        /** @var MarkdownPage $entity */
-        $entity = (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
-            ->load('owner', ['method' => Select::SINGLE_QUERY])
-            ->wherePK(1)->fetchOne();
-
-        $this->assertNumReads(2);
-
-        $this->assertInstanceof(MarkdownPage::class, $entity);
-        $this->assertInstanceof(Programator::class, $entity->owner);
-    }
-
-    /**
-     * Inheritance hierarchy should be joined as sub-query
-     */
-    public function testInnerLoadParentClassRelationNullToNull(): void
-    {
-        /** @var MarkdownPage $entity */
-        $entity = (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
-            ->load('ebook', ['method' => Select::SINGLE_QUERY])
-            ->wherePK(5)->fetchOne();
-
-        $this->assertInstanceof(MarkdownPage::class, $entity);
-        $this->assertNull($entity->block_id);
-        $this->assertNull($entity->ebook);
-    }
-
-    public function testLoadTwoInheritancesInSingleQuery(): void
-    {
-        $this->captureReadQueries();
-
-        /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
-            ->load('book', ['method' => Select::SINGLE_QUERY])
-            ->load('tech_book', ['method' => Select::SINGLE_QUERY])
-            ->load('tech_book.pages', ['method' => Select::SINGLE_QUERY])
-            ->wherePK(2)->fetchOne();
-
-        $this->assertNumReads(1);
-        $this->captureReadQueries();
-
-        $this->assertInstanceof(EBook::class, $entity->book);
-        $this->assertSame(4, $entity->book->id);
-        $this->assertInstanceof(EBook::class, $entity->tech_book);
-        $this->assertSame(3, $entity->tech_book->id);
-        $this->assertNotEmpty($entity->tech_book->pages);
-
-        // Don't use promises
-        $this->assertNumReads(0);
-    }
-
-    public function testPersistRelatedHierarchy(): void
-    {
-        $entity = $this->orm->make(EBook::class, ['title' => 'awesome book', 'url' => 'awesome-book.com']);
-        $entity->pages = [
-            $this->orm->make(Page::class, ['title' => 'page 1', 'content' => '...', 'owner_id' => 1]),
-            $this->orm->make(Page::class, ['title' => 'page 2', 'content' => '...', 'owner_id' => 1]),
-            $this->orm->make(MarkdownPage::class, ['title' => 'page 3', 'content' => '...', 'owner_id' => 2]),
-        ];
-
-        $this->captureWriteQueries();
-        $this->save($entity);
-        $this->assertNumWrites(6);
-
-        $this->captureWriteQueries();
-        $this->save($entity);
-        $this->assertNumWrites(0);
     }
 }

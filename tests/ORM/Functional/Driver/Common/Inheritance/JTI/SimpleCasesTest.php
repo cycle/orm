@@ -152,59 +152,6 @@ abstract class SimpleCasesTest extends JtiBaseTest
         );
     }
 
-    protected function getSchemaArray(): array
-    {
-        return [
-            Employee::class => [
-                SchemaInterface::ROLE => 'employee',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'employee',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'name' => 'name_column', 'age'],
-                SchemaInterface::TYPECAST => ['id' => 'int', 'age' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-            Engineer::class => [
-                SchemaInterface::ROLE => 'engineer',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'engineer',
-                SchemaInterface::PARENT => 'employee',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'level'],
-                SchemaInterface::TYPECAST => ['id' => 'int', 'level' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-            Programator::class => [
-                SchemaInterface::ROLE => 'programator',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'programator',
-                SchemaInterface::PARENT => 'engineer',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'language'],
-                SchemaInterface::TYPECAST => ['id' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-            Manager::class => [
-                SchemaInterface::ROLE => 'manager',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'manager',
-                SchemaInterface::PARENT => 'employee',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'rank'],
-                SchemaInterface::TYPECAST => ['id' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ];
-    }
-
     // Select
 
     public function testSelectEmployeeHierarchyByPK(): void
@@ -418,5 +365,58 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertNotNull((new Select($this->orm, static::EMPLOYEE_ROLE))
             ->loadSubclasses(false)
             ->wherePK(static::ENGINEER_2_PK)->fetchOne());
+    }
+
+    protected function getSchemaArray(): array
+    {
+        return [
+            Employee::class => [
+                SchemaInterface::ROLE => 'employee',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'employee',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'name' => 'name_column', 'age'],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'age' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            Engineer::class => [
+                SchemaInterface::ROLE => 'engineer',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'engineer',
+                SchemaInterface::PARENT => 'employee',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'level'],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'level' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            Programator::class => [
+                SchemaInterface::ROLE => 'programator',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'programator',
+                SchemaInterface::PARENT => 'engineer',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'language'],
+                SchemaInterface::TYPECAST => ['id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            Manager::class => [
+                SchemaInterface::ROLE => 'manager',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'manager',
+                SchemaInterface::PARENT => 'employee',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'rank'],
+                SchemaInterface::TYPECAST => ['id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ];
     }
 }

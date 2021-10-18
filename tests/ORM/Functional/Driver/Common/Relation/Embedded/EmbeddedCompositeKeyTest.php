@@ -74,56 +74,6 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
-    private function getSchemaArray(): array
-    {
-        return [
-            CompositePK::class => [
-                Schema::ROLE => 'parent_entity',
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'parent_entity',
-                Schema::MAPPER => Mapper::class,
-                Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS => [
-                    'key1' => 'pField1',
-                    'key2' => 'pField2',
-                    'key3' => 'pField3',
-                ],
-                Schema::TYPECAST => [
-                    'key1' => 'int',
-                    'key2' => 'int',
-                    'key3' => 'int',
-                ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    self::CHILD_CONTAINER => [
-                        Relation::TYPE => Relation::EMBEDDED,
-                        Relation::TARGET => self::CHILD_ROLE,
-                        Relation::LOAD => Relation::LOAD_PROMISE,
-                        Relation::SCHEMA => [],
-                    ],
-                ],
-            ],
-            CompositePKChild::class => [
-                Schema::ROLE => self::CHILD_ROLE,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'parent_entity',
-                Schema::MAPPER => Mapper::class,
-                Schema::PRIMARY_KEY => ['key1', 'key2'],
-                Schema::COLUMNS => [
-                    'key1' => 'pField1',
-                    'key2' => 'pField2',
-                    'key3' => 'cField3',
-                ],
-                Schema::TYPECAST => [
-                    'key1' => 'int',
-                    'key2' => 'int',
-                ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ];
-    }
-
     public function testFetchData(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))
@@ -446,5 +396,55 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         $this->assertSame($u->key1, $u2->key1);
         $this->assertSame($u->key2, $u2->key2);
         $this->assertSame('user3', $u2->child_entity->key3);
+    }
+
+    private function getSchemaArray(): array
+    {
+        return [
+            CompositePK::class => [
+                Schema::ROLE => 'parent_entity',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'parent_entity',
+                Schema::MAPPER => Mapper::class,
+                Schema::PRIMARY_KEY => ['key1', 'key2'],
+                Schema::COLUMNS => [
+                    'key1' => 'pField1',
+                    'key2' => 'pField2',
+                    'key3' => 'pField3',
+                ],
+                Schema::TYPECAST => [
+                    'key1' => 'int',
+                    'key2' => 'int',
+                    'key3' => 'int',
+                ],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    self::CHILD_CONTAINER => [
+                        Relation::TYPE => Relation::EMBEDDED,
+                        Relation::TARGET => self::CHILD_ROLE,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
+                        Relation::SCHEMA => [],
+                    ],
+                ],
+            ],
+            CompositePKChild::class => [
+                Schema::ROLE => self::CHILD_ROLE,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'parent_entity',
+                Schema::MAPPER => Mapper::class,
+                Schema::PRIMARY_KEY => ['key1', 'key2'],
+                Schema::COLUMNS => [
+                    'key1' => 'pField1',
+                    'key2' => 'pField2',
+                    'key3' => 'cField3',
+                ],
+                Schema::TYPECAST => [
+                    'key1' => 'int',
+                    'key2' => 'int',
+                ],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ];
     }
 }

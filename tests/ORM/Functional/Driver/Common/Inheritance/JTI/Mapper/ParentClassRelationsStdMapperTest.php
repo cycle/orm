@@ -14,15 +14,6 @@ abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTes
 {
     protected const DEFAULT_MAPPER = StdMapper::class;
 
-    protected function getSchemaArray(): array
-    {
-        $schema = parent::getSchemaArray();
-        foreach ($schema as &$subSchema) {
-            unset($subSchema[SchemaInterface::ENTITY]);
-        }
-        return $schema;
-    }
-
     public function testCreateProgramator(): void
     {
         $programator = $this->orm->make(static::PROGRAMATOR_ROLE);
@@ -54,5 +45,14 @@ abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTes
     public function testSelectEmployeeHierarchyByPK(): void
     {
         $this->markTestSkipped('Skip for classless mapper.');
+    }
+
+    protected function getSchemaArray(): array
+    {
+        $schema = parent::getSchemaArray();
+        foreach ($schema as &$subSchema) {
+            unset($subSchema[SchemaInterface::ENTITY]);
+        }
+        return $schema;
     }
 }

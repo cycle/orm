@@ -44,7 +44,7 @@ class EntityHydrationTest extends BaseMapperTest
         );
     }
 
-    public function testDataForBaseClassShouldBeExtracted()
+    public function testDataForBaseClassShouldBeExtracted(): void
     {
         $user = new EntityHydrationUser(123, 'guest', 'guest@site.com');
 
@@ -58,7 +58,7 @@ class EntityHydrationTest extends BaseMapperTest
         ], $mapper->extract($user));
     }
 
-    public function testDataForExtendedClassShouldBeExtracted()
+    public function testDataForExtendedClassShouldBeExtracted(): void
     {
         $user = new ExtendedEntityHydrationUser(123, 'guest', 'guest@site.com', true, 234);
 
@@ -74,7 +74,7 @@ class EntityHydrationTest extends BaseMapperTest
         ], $mapper->extract($user));
     }
 
-    public function testDataShouldBeHydratedToBaseClass()
+    public function testDataShouldBeHydratedToBaseClass(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
 
@@ -92,7 +92,7 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertSame('guest@site.com', $user->getEmail());
     }
 
-    public function testDataShouldBeHydratedToExtendedClass()
+    public function testDataShouldBeHydratedToExtendedClass(): void
     {
         $mapper = $this->orm->getMapper(ExtendedEntityHydrationUser::class);
 
@@ -114,7 +114,7 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertSame(234, $user->getProfileId());
     }
 
-    public function testUndefinedPropertiesShouldBePassedThroughSetter()
+    public function testUndefinedPropertiesShouldBePassedThroughSetter(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
 
@@ -130,7 +130,7 @@ class EntityHydrationTest extends BaseMapperTest
         $this->assertEquals(['tag' => 'test'], $user->getAttributes());
     }
 
-    public function testRequestedUndefinedPropertiesShouldBePassedThroughGetter()
+    public function testRequestedUndefinedPropertiesShouldBePassedThroughGetter(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
 
@@ -161,6 +161,18 @@ class EntityHydrationUser
         $this->email = $email;
     }
 
+    public function __set(string $name, $value): void
+    {
+        $this->attributes[$name] = $value;
+    }
+
+    public function __get(string $name)
+    {
+        if (isset($this->attributes[$name])) {
+            return $this->attributes[$name];
+        }
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -174,18 +186,6 @@ class EntityHydrationUser
     public function getEmail(): string
     {
         return $this->email;
-    }
-
-    public function __set(string $name, $value)
-    {
-        $this->attributes[$name] = $value;
-    }
-
-    public function __get(string $name)
-    {
-        if (isset($this->attributes[$name])) {
-            return $this->attributes[$name];
-        }
     }
 
     public function getAttributes(): array

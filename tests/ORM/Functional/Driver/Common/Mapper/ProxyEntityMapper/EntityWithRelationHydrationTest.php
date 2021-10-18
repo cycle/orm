@@ -88,7 +88,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         ]));
     }
 
-    public function testPrivateRelationPropertyShouldBeFilled()
+    public function testPrivateRelationPropertyShouldBeFilled(): void
     {
         $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
 
@@ -101,7 +101,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->assertSame($profile, $profile->getUser()->getProfile());
     }
 
-    public function testLazyLoad()
+    public function testLazyLoad(): void
     {
         $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
 
@@ -113,7 +113,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->assertSame($profile, $profile->getUser()->getProfile());
     }
 
-    public function testChangeLazyOverloadedArray()
+    public function testChangeLazyOverloadedArray(): void
     {
         $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
             ->fetchOne();
@@ -132,9 +132,9 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 class EntityWithRelationHydrationUser
 {
     public $id;
-    private $email;
-    protected EntityWithRelationHydrationProfile $profile;
     public array $profiles = [];
+    protected EntityWithRelationHydrationProfile $profile;
+    private $email;
 
     public function getEmail()
     {

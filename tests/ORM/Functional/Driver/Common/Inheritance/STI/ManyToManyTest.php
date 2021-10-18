@@ -44,69 +44,6 @@ abstract class ManyToManyTest extends StiBaseTest
         $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
-    protected function getSchemaArray(): array
-    {
-        return [
-            RbacItemAbstract::class => [
-                SchemaInterface::ROLE => 'rbac_item',
-                SchemaInterface::CHILDREN => [
-                    'role' => RbacRole::class,
-                    'permission' => RbacPermission::class,
-                ],
-                SchemaInterface::MAPPER => static::PARENT_MAPPER,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'rbac_item',
-                SchemaInterface::PRIMARY_KEY => 'name',
-                SchemaInterface::COLUMNS => ['name', 'description', '_type'],
-                SchemaInterface::RELATIONS => [
-                    'parents' => [
-                        Relation::TYPE => Relation::MANY_TO_MANY,
-                        Relation::COLLECTION_TYPE => 'doctrine',
-                        Relation::TARGET => 'rbac_item',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::THROUGH_ENTITY => 'rbac_item_inheritance',
-                            Relation::INNER_KEY => 'name',
-                            Relation::OUTER_KEY => 'name',
-                            Relation::THROUGH_INNER_KEY => 'child',
-                            Relation::THROUGH_OUTER_KEY => 'parent',
-                            Relation::HANDSHAKE => 'children',
-                        ],
-                    ],
-                    'children' => [
-                        Relation::TYPE => Relation::MANY_TO_MANY,
-                        Relation::COLLECTION_TYPE => 'doctrine',
-                        Relation::TARGET => 'rbac_item',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::THROUGH_ENTITY => 'rbac_item_inheritance',
-                            Relation::INNER_KEY => 'name',
-                            Relation::OUTER_KEY => 'name',
-                            Relation::THROUGH_INNER_KEY => 'parent',
-                            Relation::THROUGH_OUTER_KEY => 'child',
-                            Relation::HANDSHAKE => 'parents',
-                        ],
-                    ],
-                ],
-            ],
-            RbacRole::class => [
-                SchemaInterface::ROLE => 'rbac_role',
-            ],
-            RbacPermission::class => [
-                SchemaInterface::ROLE => 'rbac_permission',
-            ],
-            'rbac_item_inheritance' => [
-                SchemaInterface::ROLE => 'rbac_item_inheritance',
-                SchemaInterface::MAPPER => static::CHILD_MAPPER,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'rbac_item_inheritance',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'parent', 'child'],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ];
-    }
-
     public function testStore(): void
     {
         $role = new RbacRole('superAdmin');
@@ -216,5 +153,68 @@ abstract class ManyToManyTest extends StiBaseTest
         self::assertSame('updated description', $fetchedRole->description);
 
         $this->orm = $this->orm->withHeap(new Heap());
+    }
+
+    protected function getSchemaArray(): array
+    {
+        return [
+            RbacItemAbstract::class => [
+                SchemaInterface::ROLE => 'rbac_item',
+                SchemaInterface::CHILDREN => [
+                    'role' => RbacRole::class,
+                    'permission' => RbacPermission::class,
+                ],
+                SchemaInterface::MAPPER => static::PARENT_MAPPER,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'rbac_item',
+                SchemaInterface::PRIMARY_KEY => 'name',
+                SchemaInterface::COLUMNS => ['name', 'description', '_type'],
+                SchemaInterface::RELATIONS => [
+                    'parents' => [
+                        Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::COLLECTION_TYPE => 'doctrine',
+                        Relation::TARGET => 'rbac_item',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => 'rbac_item_inheritance',
+                            Relation::INNER_KEY => 'name',
+                            Relation::OUTER_KEY => 'name',
+                            Relation::THROUGH_INNER_KEY => 'child',
+                            Relation::THROUGH_OUTER_KEY => 'parent',
+                            Relation::HANDSHAKE => 'children',
+                        ],
+                    ],
+                    'children' => [
+                        Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::COLLECTION_TYPE => 'doctrine',
+                        Relation::TARGET => 'rbac_item',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => 'rbac_item_inheritance',
+                            Relation::INNER_KEY => 'name',
+                            Relation::OUTER_KEY => 'name',
+                            Relation::THROUGH_INNER_KEY => 'parent',
+                            Relation::THROUGH_OUTER_KEY => 'child',
+                            Relation::HANDSHAKE => 'parents',
+                        ],
+                    ],
+                ],
+            ],
+            RbacRole::class => [
+                SchemaInterface::ROLE => 'rbac_role',
+            ],
+            RbacPermission::class => [
+                SchemaInterface::ROLE => 'rbac_permission',
+            ],
+            'rbac_item_inheritance' => [
+                SchemaInterface::ROLE => 'rbac_item_inheritance',
+                SchemaInterface::MAPPER => static::CHILD_MAPPER,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'rbac_item_inheritance',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'parent', 'child'],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ];
     }
 }

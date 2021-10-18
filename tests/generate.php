@@ -51,7 +51,8 @@ foreach ($classes as $class) {
     if (
         !$class->isAbstract()
         // Has abstract methods
-        || $class->getName() == \Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class) {
+        || $class->getName() == \Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class
+    ) {
         continue;
     }
 

@@ -183,6 +183,46 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
         );
     }
 
+    /**
+     * Parent's relation should be initialized
+     */
+    public function testLoadParentRelations(): void
+    {
+        /** @var Programator $entity */
+        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->load('tech_book')
+            ->wherePK(2)->fetchOne();
+
+        $this->assertNotNull($entity->book);
+        $this->assertNotNull($entity->tech_book);
+    }
+
+    /**
+     * Parent's relations should be removed or not removed with their parent
+     */
+    public function testRemoveSubclassWithRelations(): void
+    {
+        /** @var Engineer $engineer */
+        $engineer = (new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(2)->fetchOne();
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(0);
+
+        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne());
+        /** @var Employee $employee */
+        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne();
+        $this->assertNotNull($employee);
+        $this->assertNotNull($employee->book);
+    }
+
     protected function getSchemaArray(): array
     {
         return [
@@ -289,45 +329,5 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
                 SchemaInterface::RELATIONS => [],
             ],
         ];
-    }
-
-    /**
-     * Parent's relation should be initialized
-     */
-    public function testLoadParentRelations(): void
-    {
-        /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
-            ->load('tech_book')
-            ->wherePK(2)->fetchOne();
-
-        $this->assertNotNull($entity->book);
-        $this->assertNotNull($entity->tech_book);
-    }
-
-    /**
-     * Parent's relations should be removed or not removed with their parent
-     */
-    public function testRemoveSubclassWithRelations(): void
-    {
-        /** @var Engineer $engineer */
-        $engineer = (new Select($this->orm, static::ENGINEER_ROLE))
-            ->loadSubclasses(false)
-            ->wherePK(2)->fetchOne();
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
-        $this->assertNumWrites(0);
-
-        $this->assertNull((new Select($this->orm, static::PROGRAMATOR_ROLE))->wherePK(2)->fetchOne());
-        $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne());
-        /** @var Employee $employee */
-        $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))->loadSubclasses(false)->wherePK(2)->fetchOne();
-        $this->assertNotNull($employee);
-        $this->assertNotNull($employee->book);
     }
 }

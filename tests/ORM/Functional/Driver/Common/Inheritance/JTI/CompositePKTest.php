@@ -143,62 +143,6 @@ abstract class CompositePKTest extends SimpleCasesTest
         );
     }
 
-    protected function getSchemaArray(): array
-    {
-        return [
-            Employee::class => [
-                SchemaInterface::ROLE => 'employee',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'employee',
-                SchemaInterface::PRIMARY_KEY => ['id', 'employee_id'],
-                SchemaInterface::COLUMNS => [
-                    'id',
-                    'employee_id',
-                    'name' => 'name_column',
-                    'age',
-                ],
-                SchemaInterface::TYPECAST => ['id' => 'int', 'employee_id' => 'int', 'age' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-            Manager::class => [
-                SchemaInterface::ROLE => 'role',
-            ],
-            Engineer::class => [
-                SchemaInterface::ROLE => 'role',
-            ],
-            'role' => [
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'role',
-                SchemaInterface::PARENT => Employee::class,
-                SchemaInterface::CHILDREN => [
-                    'engineer' => Engineer::class,
-                    'manager' => Manager::class,
-                ],
-                SchemaInterface::PRIMARY_KEY => ['id', 'role_id'],
-                SchemaInterface::COLUMNS => ['id', 'role_id', 'level', 'rank', '_type'],
-                SchemaInterface::TYPECAST => ['id' => 'int', 'role_id' => 'int', 'level' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-            Programator::class => [
-                SchemaInterface::ROLE => 'programator',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'programator',
-                SchemaInterface::PARENT => Engineer::class,
-                SchemaInterface::PARENT_KEY => ['role_id', 'id'],
-                SchemaInterface::PRIMARY_KEY => ['second_id', 'subrole_id'],
-                SchemaInterface::COLUMNS => ['second_id' => 'id', 'subrole_id', 'language'],
-                SchemaInterface::TYPECAST => ['second_id' => 'int', 'subrole_id' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ];
-    }
-
     public function testSelectEngineerAllDataWithInheritance(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
@@ -297,5 +241,61 @@ abstract class CompositePKTest extends SimpleCasesTest
         $this->assertSame('Merlin', $programator->name);
         $this->assertSame(50, $programator->level);
         $this->assertSame('VanillaJS', $programator->language);
+    }
+
+    protected function getSchemaArray(): array
+    {
+        return [
+            Employee::class => [
+                SchemaInterface::ROLE => 'employee',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'employee',
+                SchemaInterface::PRIMARY_KEY => ['id', 'employee_id'],
+                SchemaInterface::COLUMNS => [
+                    'id',
+                    'employee_id',
+                    'name' => 'name_column',
+                    'age',
+                ],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'employee_id' => 'int', 'age' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            Manager::class => [
+                SchemaInterface::ROLE => 'role',
+            ],
+            Engineer::class => [
+                SchemaInterface::ROLE => 'role',
+            ],
+            'role' => [
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'role',
+                SchemaInterface::PARENT => Employee::class,
+                SchemaInterface::CHILDREN => [
+                    'engineer' => Engineer::class,
+                    'manager' => Manager::class,
+                ],
+                SchemaInterface::PRIMARY_KEY => ['id', 'role_id'],
+                SchemaInterface::COLUMNS => ['id', 'role_id', 'level', 'rank', '_type'],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'role_id' => 'int', 'level' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            Programator::class => [
+                SchemaInterface::ROLE => 'programator',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'programator',
+                SchemaInterface::PARENT => Engineer::class,
+                SchemaInterface::PARENT_KEY => ['role_id', 'id'],
+                SchemaInterface::PRIMARY_KEY => ['second_id', 'subrole_id'],
+                SchemaInterface::COLUMNS => ['second_id' => 'id', 'subrole_id', 'language'],
+                SchemaInterface::TYPECAST => ['second_id' => 'int', 'subrole_id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ];
     }
 }

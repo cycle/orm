@@ -17,8 +17,6 @@ abstract class StiBaseTest extends BaseTest
 {
     use TableTrait;
 
-    abstract protected function getSchemaArray(): array;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -32,4 +30,6 @@ abstract class StiBaseTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()))->withFactory($factory);
     }
+
+    abstract protected function getSchemaArray(): array;
 }

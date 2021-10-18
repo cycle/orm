@@ -88,7 +88,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         ]));
     }
 
-    public function testInitRelation()
+    public function testInitRelation(): void
     {
         $u = $this->orm->make('user');
         $this->assertInstanceOf(ArrayCollection::class, $u->comments);

@@ -18,7 +18,7 @@ class ClassPropertiesExtractorTest extends TestCase
         $this->extractor = new ClassPropertiesExtractor();
     }
 
-    public function testPropertyFromBaseClassShouldBeExtracted()
+    public function testPropertyFromBaseClassShouldBeExtracted(): void
     {
         $class = User::class;
 
@@ -39,7 +39,7 @@ class ClassPropertiesExtractorTest extends TestCase
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
-    public function testPropertyFromBaseClassWithRelationsShouldBeExtracted()
+    public function testPropertyFromBaseClassWithRelationsShouldBeExtracted(): void
     {
         $class = User::class;
 
@@ -62,7 +62,7 @@ class ClassPropertiesExtractorTest extends TestCase
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
-    public function testPropertyFromExtendedClassShouldBeExtracted()
+    public function testPropertyFromExtendedClassShouldBeExtracted(): void
     {
         $class = SuperUser::class;
 
@@ -93,7 +93,7 @@ class ClassPropertiesExtractorTest extends TestCase
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
     }
 
-    public function testPropertyFromExtendedClassWithRelationsShouldBeExtracted()
+    public function testPropertyFromExtendedClassWithRelationsShouldBeExtracted(): void
     {
         $class = SuperUser::class;
 
@@ -133,21 +133,21 @@ class ClassPropertiesExtractorTest extends TestCase
 class User
 {
     public int $id;
+    public array $comments;
     protected string $username;
     private string $email;
-    public array $comments;
 }
 
 class ExtendedUser extends User
 {
+    public int $age;
     protected bool $isVerified;
     private int $profileId;
-    public int $age;
     private array $tags;
 }
 
 class SuperUser extends ExtendedUser
 {
-    private int $isAdmin;
     public int $totalLogin;
+    private int $isAdmin;
 }

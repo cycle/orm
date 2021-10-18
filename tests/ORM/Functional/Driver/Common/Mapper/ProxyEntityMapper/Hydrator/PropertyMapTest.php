@@ -31,7 +31,7 @@ class PropertyMapTest extends TestCase
         ]);
     }
 
-    public function testGetsPropertyClass()
+    public function testGetsPropertyClass(): void
     {
         $this->assertEquals('', $this->properties->getPropertyClass('id'));
         $this->assertEquals('', $this->properties->getPropertyClass('username'));
@@ -43,7 +43,7 @@ class PropertyMapTest extends TestCase
         $this->assertEquals('Test\User\SuperUser', $this->properties->getPropertyClass('is_blocked'));
     }
 
-    public function testCheckPropertyPublicity()
+    public function testCheckPropertyPublicity(): void
     {
         $this->assertTrue($this->properties->isPublicProperty('id'));
         $this->assertTrue($this->properties->isPublicProperty('username'));
@@ -55,12 +55,12 @@ class PropertyMapTest extends TestCase
         $this->assertFalse($this->properties->isPublicProperty('is_blocked'));
     }
 
-    public function testGetsProperties()
+    public function testGetsProperties(): void
     {
         $this->assertIsArray($this->properties->getProperties());
     }
 
-    public function testGetsClass()
+    public function testGetsClass(): void
     {
         $this->assertEquals('User', $this->properties->getClass());
     }

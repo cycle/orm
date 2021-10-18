@@ -14,10 +14,6 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture\Manager;
 
 abstract class SimpleTest extends StiBaseTest
 {
-    /**
-     * Discriminator column name
-     */
-    protected static string $discriminator = 'discriminator_value';
     protected const
         BASE_ROLE = 'employee';
     protected const
@@ -49,6 +45,10 @@ abstract class SimpleTest extends StiBaseTest
         EMPLOYEES_LOADED_ALL = [self::EMPLOYEE_2_LOADED, self::EMPLOYEE_4_LOADED];
     protected const
         MANAGERS_LOADED_ALL = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_3_LOADED];
+    /**
+     * Discriminator column name
+     */
+    protected static string $discriminator = 'discriminator_value';
 
     public function setUp(): void
     {
@@ -68,30 +68,6 @@ abstract class SimpleTest extends StiBaseTest
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
-    protected function getSchemaArray(): array
-    {
-        return [
-            static::BASE_ROLE => [
-                SchemaInterface::ENTITY => Employee::class,
-                SchemaInterface::CHILDREN => [
-                    static::MANAGER_VALUE => Manager::class,
-                ],
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'employee_table',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', '_type' => static::$discriminator, 'name', 'email', 'age'],
-                SchemaInterface::TYPECAST => ['id' => 'int', 'age' => 'int'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-            self::MANAGER_ROLE => [
-                SchemaInterface::ENTITY => Manager::class,
-                // SchemaInterface::ROLE   => Employee::class,
-            ],
-        ];
     }
 
     // Basics
@@ -216,5 +192,29 @@ abstract class SimpleTest extends StiBaseTest
         $loadedEntity = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($entity->id)->fetchData();
         $this->assertSame(static::MANAGER_VALUE . '_two', $loadedEntity[0]['_type']);
+    }
+
+    protected function getSchemaArray(): array
+    {
+        return [
+            static::BASE_ROLE => [
+                SchemaInterface::ENTITY => Employee::class,
+                SchemaInterface::CHILDREN => [
+                    static::MANAGER_VALUE => Manager::class,
+                ],
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'employee_table',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', '_type' => static::$discriminator, 'name', 'email', 'age'],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'age' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            self::MANAGER_ROLE => [
+                SchemaInterface::ENTITY => Manager::class,
+                // SchemaInterface::ROLE   => Employee::class,
+            ],
+        ];
     }
 }

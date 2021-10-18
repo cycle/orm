@@ -71,4 +71,4 @@ jobs:
       - name: Run tests with phpunit without coverage
         env:
           DB: sqlserver
-        run: vendor/bin/phpunit tests/ORM/Driver/SQLServer --colors=always
+        run: vendor/bin/phpunit --group driver-sqlserver --colors=always

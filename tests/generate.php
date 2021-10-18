@@ -11,61 +11,93 @@ ini_set('display_errors', '1');
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
-    'directories' => [__DIR__],
+    'directories' => [__DIR__ . '/ORM/Functional/Driver/Common'],
     'exclude' => [],
 ]));
 
 $databases = [
     'sqlite' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\SQLite',
-        'directory' => __DIR__ . '/ORM/Driver/SQLite/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLite',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/SQLite/',
     ],
     'mysql' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\MySQL',
-        'directory' => __DIR__ . '/ORM/Driver/MySQL/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\MySQL',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/MySQL/',
     ],
     'postgres' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\Postgres',
-        'directory' => __DIR__ . '/ORM/Driver/Postgres/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\Postgres',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/Postgres/',
     ],
     'sqlserver' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\SQLServer',
-        'directory' => __DIR__ . '/ORM/Driver/SQLServer/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLServer',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/SQLServer/',
     ],
 ];
 
 echo "Generating test classes for all database types...\n";
 
-$classes = $tokenizer->classLocator()->getClasses(\Cycle\ORM\Tests\BaseTest::class);
+$classes = $tokenizer
+    ->classLocator()
+    ->getClasses(\Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class);
 
 foreach ($classes as $class) {
-    if (!$class->isAbstract() || $class->getName() == \Cycle\ORM\Tests\BaseTest::class) {
+    foreach ($class->getMethods() as $method) {
+        if ($method->isAbstract()) {
+            echo "Skip class {$class->getName()} with abstract methods.\n";
+            continue 2;
+        }
+    }
+
+    if (
+        !$class->isAbstract()
+        // Has abstract methods
+        || $class->getName() == \Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class
+    ) {
         continue;
     }
 
     echo "Found {$class->getName()}\n";
+
+    $path = ltrim(str_replace([__DIR__, 'ORM/Functional/'], '', $class->getFileName()), '/');
+
     foreach ($databases as $driver => $details) {
-        $filename = sprintf('%s/%s.php', $details['directory'], $class->getShortName());
+        $filename = sprintf('%s%s', $details['directory'], $path);
+        $dir = pathinfo($filename, PATHINFO_DIRNAME);
+
+        $namespace = str_replace('Cycle\\ORM\\Tests\\Functional', $details['namespace'], $class->getNamespaceName());
+        if (!is_dir($dir)) {
+            mkdir($dir, recursive: true);
+        }
 
         file_put_contents(
             $filename,
             sprintf(
-                '<?phpdeclare(strict_types=1);
+                <<<PHP
+<?php
+
+declare(strict_types=1);
 
 namespace %s;
 
-class %s extends \%s
+// phpcs:ignore
+use %s as CommonTest;
+
+/**
+ * @group driver
+ * @group driver-%s
+ */
+class %s extends CommonTest
 {
-    const DRIVER = "%s";
-}',
-                $details['namespace'],
-                $class->getShortName(),
+    public const DRIVER = '%s';
+}
+
+PHP,
+                $namespace,
                 $class->getName(),
+                $driver,
+                $class->getShortName(),
                 $driver
             )
         );
     }
 }
-
-// helper to validate the selection results
-// file_put_contents('out.php', '<?php ' . var_export($selector->fetchData(), true));

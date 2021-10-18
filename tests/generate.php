@@ -11,7 +11,7 @@ ini_set('display_errors', '1');
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
-    'directories' => [__DIR__],
+    'directories' => [__DIR__.'/ORM/Functional/Driver/Common'],
     'exclude' => [],
 ]));
 
@@ -37,8 +37,8 @@ $databases = [
 echo "Generating test classes for all database types...\n";
 
 $classes = $tokenizer
-    ->classLocator([__DIR__.'/ORM/Functional'])
-    ->getClasses(\Cycle\ORM\Tests\Functional\BaseTest::class);
+    ->classLocator()
+    ->getClasses(\Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class);
 
 foreach ($classes as $class) {
 
@@ -52,7 +52,7 @@ foreach ($classes as $class) {
     if (
         !$class->isAbstract()
         // Has abstract methods
-        || $class->getName() == \Cycle\ORM\Tests\Functional\BaseTest::class) {
+        || $class->getName() == \Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class) {
         continue;
     }
 

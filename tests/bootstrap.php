@@ -42,7 +42,7 @@ $drivers = [
 ];
 
 $db = getenv('DB') ?: null;
-\Cycle\ORM\Tests\Functional\BaseTest::$config = [
+\Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::$config = [
     'debug' => false,
     'strict' => true,
     'benchmark' => true,

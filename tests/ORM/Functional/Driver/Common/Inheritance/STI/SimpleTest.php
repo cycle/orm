@@ -22,25 +22,25 @@ abstract class SimpleTest extends StiBaseTest
         '_type' => self::MANAGER_VALUE,
         'name' => 'John',
         'email' => 'captain@black.sea',
-        'age' => 38
+        'age' => 38,
     ];
     protected const EMPLOYEE_2 = [
         '_type' => self::EMPLOYEE_VALUE,
         'name' => 'Anton',
         'email' => 'antonio@mail.org',
-        'age' => 35
+        'age' => 35,
     ];
     protected const EMPLOYEE_3 = [
         '_type' => self::MANAGER_VALUE,
         'name' => 'Kentarius',
         'email' => 'grove@save.com',
-        'age' => 27
+        'age' => 27,
     ];
     protected const EMPLOYEE_4 = [
         '_type' => null,
         'name' => 'Max',
         'email' => 'valhall@go.to',
-        'age' => 32
+        'age' => 32,
     ];
     protected const EMPLOYEE_1_LOADED = ['id' => 1] + self::EMPLOYEE_1;
     protected const EMPLOYEE_2_LOADED = ['id' => 2] + self::EMPLOYEE_2;
@@ -50,7 +50,7 @@ abstract class SimpleTest extends StiBaseTest
         self::EMPLOYEE_1_LOADED,
         self::EMPLOYEE_2_LOADED,
         self::EMPLOYEE_3_LOADED,
-        self::EMPLOYEE_4_LOADED
+        self::EMPLOYEE_4_LOADED,
     ];
     // Filtered on discriminator value
     protected const EMPLOYEES_LOADED_ALL = [self::EMPLOYEE_2_LOADED, self::EMPLOYEE_4_LOADED];

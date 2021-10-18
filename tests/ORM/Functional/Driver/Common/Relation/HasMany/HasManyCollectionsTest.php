@@ -131,28 +131,28 @@ abstract class HasManyCollectionsTest extends BaseTest
     {
         return [
             'Default lazy' => [
-                null, true, \Doctrine\Common\Collections\Collection::class
+                null, true, \Doctrine\Common\Collections\Collection::class,
             ],
             'Default eager' => [
-                null, false, \Doctrine\Common\Collections\Collection::class
+                null, false, \Doctrine\Common\Collections\Collection::class,
             ],
             'Alias Common Doctrine collection lazy' => [
-                'doctrine', true, \Doctrine\Common\Collections\Collection::class
+                'doctrine', true, \Doctrine\Common\Collections\Collection::class,
             ],
             'Alias Common Doctrine collection eager' => [
-                'doctrine', false, \Doctrine\Common\Collections\Collection::class
+                'doctrine', false, \Doctrine\Common\Collections\Collection::class,
             ],
             'Alias Common Illuminate collection lazy' => [
-                'illuminate', true, \Illuminate\Support\Collection::class
+                'illuminate', true, \Illuminate\Support\Collection::class,
             ],
             'Alias Common Illuminate collection eager' => [
-                'illuminate', false, \Illuminate\Support\Collection::class
+                'illuminate', false, \Illuminate\Support\Collection::class,
             ],
             'Class Custom Doctrine collection lazy' => [
-                CustomCollection::class, true, CustomCollection::class
+                CustomCollection::class, true, CustomCollection::class,
             ],
             'Class Custom Doctrine collection eager' => [
-                CustomCollection::class, false, CustomCollection::class
+                CustomCollection::class, false, CustomCollection::class,
             ],
         ];
     }

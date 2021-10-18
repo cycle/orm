@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cycle\ORM\Tests\Functional\Driver\SQLServer\Transaction;
+
+/**
+ * @group driver
+ * @group driver-sqlserver
+ */
+class OptimisticLockTest extends \Cycle\ORM\Tests\Functional\Transaction\OptimisticLockTest
+{
+    public const DRIVER = 'sqlserver';
+}

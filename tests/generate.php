@@ -17,26 +17,28 @@ $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
 
 $databases = [
     'sqlite' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\SQLite',
-        'directory' => __DIR__ . '/ORM/Driver/SQLite/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLite',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/SQLite/',
     ],
     'mysql' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\MySQL',
-        'directory' => __DIR__ . '/ORM/Driver/MySQL/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\MySQL',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/MySQL/',
     ],
     'postgres' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\Postgres',
-        'directory' => __DIR__ . '/ORM/Driver/Postgres/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\Postgres',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/Postgres/',
     ],
     'sqlserver' => [
-        'namespace' => 'Cycle\ORM\Tests\Driver\SQLServer',
-        'directory' => __DIR__ . '/ORM/Driver/SQLServer/',
+        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLServer',
+        'directory' => __DIR__ . '/ORM/Functional/Driver/SQLServer/',
     ],
 ];
 
 echo "Generating test classes for all database types...\n";
 
-$classes = $tokenizer->classLocator()->getClasses(\Cycle\ORM\Tests\BaseTest::class);
+$classes = $tokenizer
+    ->classLocator([__DIR__.'/ORM/Functional'])
+    ->getClasses(\Cycle\ORM\Tests\Functional\BaseTest::class);
 
 foreach ($classes as $class) {
 
@@ -50,19 +52,19 @@ foreach ($classes as $class) {
     if (
         !$class->isAbstract()
         // Has abstract methods
-        || $class->getName() == \Cycle\ORM\Tests\BaseTest::class) {
+        || $class->getName() == \Cycle\ORM\Tests\Functional\BaseTest::class) {
         continue;
     }
 
     echo "Found {$class->getName()}\n";
 
-    $path = ltrim(str_replace([__DIR__, 'ORM/'], '', $class->getFileName()), '/');
+    $path = ltrim(str_replace([__DIR__, 'ORM/Functional/'], '', $class->getFileName()), '/');
 
     foreach ($databases as $driver => $details) {
         $filename = sprintf('%s%s', $details['directory'], $path);
         $dir = pathinfo($filename, PATHINFO_DIRNAME);
 
-        $namespace = str_replace('Cycle\\ORM\\Tests', $details['namespace'], $class->getNamespaceName());
+        $namespace = str_replace('Cycle\\ORM\\Tests\\Functional', $details['namespace'], $class->getNamespaceName());
         if (!is_dir($dir)) {
             mkdir($dir, recursive: true);
         }
@@ -77,6 +79,10 @@ declare(strict_types=1);
 
 namespace %s;
 
+/**
+ * @group driver
+ * @group driver-%s
+ */
 class %s extends \%s
 {
     public const DRIVER = '%s';
@@ -84,6 +90,7 @@ class %s extends \%s
 
 PHP,
                 $namespace,
+                $driver,
                 $class->getShortName(),
                 $class->getName(),
                 $driver
@@ -91,6 +98,3 @@ PHP,
         );
     }
 }
-
-// helper to validate the selection results
-// file_put_contents('out.php', '<?php ' . var_export($selector->fetchData(), true));

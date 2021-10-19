@@ -14,7 +14,7 @@ final class Relation
     public const TARGET = 1;
     public const SCHEMA = 2;
     public const LOAD = 3;
-    public const COLLECTION_TYPE = 4; // todo _options ?
+    public const COLLECTION_TYPE = 4;
 
     // Composite relation type without usage of external table.
     public const EMBEDDED = 1;
@@ -39,7 +39,7 @@ final class Relation
     public const NULLABLE = 31;
     public const OUTER_KEY = 32;
     public const INNER_KEY = 33;
-    public const HANDSHAKE = 34;
+    public const INVERSION = 34;
 
     // Selections
     public const WHERE = 41;

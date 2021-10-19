@@ -10,6 +10,10 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 use JetBrains\PhpStorm\ExpectedValues;
 
+use const FILTER_NULL_ON_FAILURE;
+use const FILTER_VALIDATE_BOOLEAN;
+use const SORT_STRING;
+
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
  * inner states.
@@ -171,16 +175,33 @@ final class Node implements ConsumerInterface
 
     public static function compare(mixed $a, mixed $b): int
     {
-        // return $a <=> $b;
-        // todo refactor and test this
-        if ($a == $b) {
-            if (($a === null) !== ($b === null)) {
-                return 1;
-            }
-
+        if ($a === $b) {
             return 0;
         }
+        if ($a != $b || $a === null || $b === null) {
+            return 1;
+        }
 
-        return ($a > $b) ? 1 : -1;
+        $ta = [\gettype($a), \gettype($b)];
+
+        // array, boolean, double, integer, string
+        \sort($ta, SORT_STRING);
+
+        if ($ta[1] === 'string') {
+            if ($a === '' || $b === '') {
+                return -1;
+            }
+            if (\in_array($ta[0], ['integer', 'double'], true)) {
+                return (int)((string)$a !== (string)$b);
+            }
+        }
+
+        if ($ta[0] === 'boolean') {
+            $a = \filter_var($a, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            $b = \filter_var($b, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            return (int)($a !== $b);
+        }
+
+        return 1;
     }
 }

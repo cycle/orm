@@ -6,15 +6,31 @@ namespace Cycle\ORM\Collection;
 
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
+use Cycle\ORM\Exception\CollectionFactoryException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 /**
+ * Stores related items doctrine collection.
+ * Items and Pivots for `Many to Many` relation stores in {@see PivotedCollection}.
+ *
  * @template TCollection of Collection
  * @template-implements CollectionFactoryInterface<TCollection>
  */
 final class DoctrineCollectionFactory implements CollectionFactoryInterface
 {
+    public function __construct()
+    {
+        if (!class_exists(ArrayCollection::class, true)) {
+            throw new CollectionFactoryException(
+                sprintf(
+                    'There is no %s class. To resolve this issue you can install `doctrine/collections` package.',
+                    ArrayCollection::class
+                )
+            );
+        }
+    }
+
     /** @var class-string<TCollection> */
     private string $class = ArrayCollection::class;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Collection;
 
+use Cycle\ORM\Exception\CollectionFactoryException;
 use Illuminate\Support\Collection;
-use RuntimeException;
 
 /**
  * @template TCollection of Collection
@@ -19,8 +19,12 @@ final class IlluminateCollectionFactory implements CollectionFactoryInterface
     public function __construct()
     {
         if (!class_exists(Collection::class, true)) {
-            // todo: more friendly exception
-            throw new RuntimeException(sprintf('There is no %s class.', Collection::class));
+            throw new CollectionFactoryException(
+                sprintf(
+                    'There is no %s class. To resolve this issue you can install `illuminate/collections` package.',
+                    Collection::class
+                )
+            );
         }
     }
 

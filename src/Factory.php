@@ -113,22 +113,23 @@ final class Factory implements FactoryInterface
 
     public function collection(
         ORMInterface $orm,
-        string $type = null,
-        array $options = null
+        string $name = null
     ): CollectionFactoryInterface {
-        if ($type === null) {
+        if ($name === null) {
             return $this->defaultCollectionFactory;
         }
-        if (array_key_exists($type, $this->collectionFactoryAlias)) {
-            return $this->collectionFactoryAlias[$type];
+        if (array_key_exists($name, $this->collectionFactoryAlias)) {
+            return $this->collectionFactoryAlias[$name];
         }
         // Find by interface
-        foreach ($this->collectionFactoryInterface as $interface => $factory) {
-            if (\is_subclass_of($type, $interface, true)) {
-                return $this->collectionFactoryAlias[$type] = $factory->withCollectionClass($type);
+        if (\class_exists($name)) {
+            foreach ($this->collectionFactoryInterface as $interface => $factory) {
+                if (\is_subclass_of($name, $interface, true)) {
+                    return $this->collectionFactoryAlias[$name] = $factory->withCollectionClass($name);
+                }
             }
         }
-        return $this->collectionFactoryAlias[$type] = $this->make($type);
+        return $this->collectionFactoryAlias[$name] = $this->make($name);
     }
 
     public function relation(

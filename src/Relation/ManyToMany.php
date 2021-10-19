@@ -40,7 +40,7 @@ class ManyToMany extends Relation\AbstractRelation
     {
         parent::__construct($orm, $role, $name, $target, $schema);
         $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY];
-        $this->inversion = $this->schema[Relation::HANDSHAKE] ?? null;
+        $this->inversion = $this->schema[Relation::INVERSION] ?? null;
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];

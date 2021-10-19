@@ -59,7 +59,7 @@ foreach ($classes as $class) {
     echo "Found {$class->getName()}\n";
 
     $path = str_replace(
-        [__DIR__, 'ORM/Functional/Driver/Common/'],
+        [str_replace('\\', '/', __DIR__), 'ORM/Functional/Driver/Common/'],
         '',
         str_replace('\\', '/', $class->getFileName())
     );

@@ -64,7 +64,7 @@ final class Schema implements SchemaInterface
                     if ($through !== $role) {
                         continue;
                     }
-                    $handshake = $item[Relation::SCHEMA][Relation::HANDSHAKE] ?? null;
+                    $handshake = $item[Relation::SCHEMA][Relation::INVERSION] ?? null;
                     $target = $item[Relation::TARGET];
                     $result[$roleName][$relName] = [
                         Relation::TYPE => Relation::HAS_MANY,
@@ -261,7 +261,7 @@ final class Schema implements SchemaInterface
                 }
                 $targetSchema = $result[$target];
                 $targetRelations = $targetSchema[self::RELATIONS] ?? [];
-                $handshake = $relation[Relation::SCHEMA][Relation::HANDSHAKE] ?? null;
+                $handshake = $relation[Relation::SCHEMA][Relation::INVERSION] ?? null;
                 if ($handshake !== null) {
                     if (!array_key_exists($handshake, $targetRelations)) {
                         throw new SchemaException(
@@ -274,7 +274,7 @@ final class Schema implements SchemaInterface
                             )
                         );
                     }
-                    $targetHandshake = $targetRelations[$handshake][Relation::SCHEMA][Relation::HANDSHAKE] ?? null;
+                    $targetHandshake = $targetRelations[$handshake][Relation::SCHEMA][Relation::INVERSION] ?? null;
                     if ($targetHandshake !== null && $container !== $targetHandshake) {
                         throw new SchemaException(
                             sprintf(
@@ -289,7 +289,7 @@ final class Schema implements SchemaInterface
                         );
                     }
                     // $targetSchema[self::RELATIONS][$handshake][Relation::SCHEMA][Relation::HANDSHAKE] = $container;
-                    $result[$target][self::RELATIONS][$handshake][Relation::SCHEMA][Relation::HANDSHAKE] = $container;
+                    $result[$target][self::RELATIONS][$handshake][Relation::SCHEMA][Relation::INVERSION] = $container;
                     continue;
                 }
                 // find relation for handshake
@@ -297,8 +297,8 @@ final class Schema implements SchemaInterface
                 if ($handshake === null) {
                     continue;
                 }
-                $result[$role][self::RELATIONS][$container][Relation::SCHEMA][Relation::HANDSHAKE] = $handshake;
-                $result[$target][self::RELATIONS][$handshake][Relation::SCHEMA][Relation::HANDSHAKE] = $container;
+                $result[$role][self::RELATIONS][$container][Relation::SCHEMA][Relation::INVERSION] = $handshake;
+                $result[$target][self::RELATIONS][$handshake][Relation::SCHEMA][Relation::INVERSION] = $container;
             }
         }
 
@@ -326,8 +326,8 @@ final class Schema implements SchemaInterface
             if ($role !== $targetRelation[Relation::TARGET]) {
                 continue;
             }
-            if (isset($targetSchema[Relation::HANDSHAKE])) {
-                if ($targetSchema[Relation::HANDSHAKE] === $container) {
+            if (isset($targetSchema[Relation::INVERSION])) {
+                if ($targetSchema[Relation::INVERSION] === $container) {
                     // This target relation will be checked in the linkRelations() method
                     return null;
                 }

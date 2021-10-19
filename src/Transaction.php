@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Command\Special\Sequence;
 use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\Special\Sequence;
+use Cycle\ORM\Exception\PoolException;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
@@ -61,7 +62,15 @@ final class Transaction implements TransactionInterface
     public function run(): void
     {
         try {
-            $this->walkPool();
+            try {
+                $this->walkPool();
+            } catch (PoolException) {
+                // Generate detailed exception about unresolved relations
+                throw TransactionException::unresolvedRelations(
+                    $this->pool->getUnresolved(),
+                    $this->orm->getEntityRegistry()
+                );
+            }
         } catch (\Throwable $e) {
             $this->runner->rollback();
 
@@ -147,7 +156,7 @@ final class Transaction implements TransactionInterface
          * @var object $entity
          * @var Tuple $tuple
          */
-        foreach ($this->pool as $entity => $tuple) {
+        foreach ($this->pool->openIterator() as $entity => $tuple) {
             if ($entity instanceof ReferenceInterface) {
                 if ($entity->hasValue()) {
                     $entity = $entity->getValue();
@@ -394,19 +403,8 @@ final class Transaction implements TransactionInterface
                 : $this->resolveMasterRelations($tuple, $map);
         }
 
-        if (!$isDependenciesResolved) {
-            if ($tuple->status === Tuple::STATUS_PREPROCESSED) {
-                if (\Cycle\ORM\Transaction\Pool::DEBUG) {
-                    echo " \033[31m MASTER RELATIONS IS NOT RESOLVED ({$tuple->node->getRole()}): \033[0m \n";
-                    foreach ($map->getMasters() as $name => $relation) {
-                        $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-                        if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
-                            echo " - \033[31m $name [$relationStatus] " . $relation::class . "\033[0m\n";
-                        }
-                    }
-                }
-                throw new TransactionException('Relation can not be resolved.');
-            }
+        if (!$isDependenciesResolved && $tuple->status === Tuple::STATUS_PREPROCESSED) {
+            $tuple->status = Tuple::STATUS_UNPROCESSED;
         }
     }
 }

@@ -38,7 +38,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     protected const PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
     protected const MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
     protected const MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
-    protected const MPLOYEE_ALL_LOADED = [
+    protected const EMPLOYEE_ALL_LOADED = [
         self::EMPLOYEE_1_LOADED,
         self::EMPLOYEE_2_LOADED,
         self::EMPLOYEE_3_LOADED,

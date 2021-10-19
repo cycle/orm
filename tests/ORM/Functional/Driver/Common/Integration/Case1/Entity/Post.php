@@ -141,7 +141,7 @@ class Post
 
     public function addTag(Tag $post): void
     {
-        $this->tags[]  = $post;
+        $this->tags[] = $post;
     }
 
     public function resetTags(): void

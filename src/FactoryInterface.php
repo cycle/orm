@@ -57,7 +57,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): SourceInterface;
 
     /**
-     * @param null|string|class-string $name Collection factory name.
+     * @param class-string|string|null $name Collection factory name.
      *        Can be class name or alias that can be configured in the {@see withCollectionFactory()} method.
      */
     public function collection(
@@ -81,7 +81,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * Configure additional collection factories.
      *
      * @param string $alias Collection alias name that can be used in {@see Relation::COLLECTION_TYPE} parameter.
-     * @param null|class-string $interface An interface or base class that is common to the collections produced.
+     * @param class-string|null $interface An interface or base class that is common to the collections produced.
      */
     public function withCollectionFactory(
         string $alias,

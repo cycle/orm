@@ -182,7 +182,7 @@ final class Node implements ConsumerInterface
             return 1;
         }
 
-        $ta = [\getType($a), \getType($b)];
+        $ta = [\gettype($a), \gettype($b)];
 
         // array, boolean, double, integer, string
         \sort($ta, SORT_STRING);

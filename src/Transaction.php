@@ -6,7 +6,6 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Command\Special\Sequence;
 use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;

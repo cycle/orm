@@ -6,5 +6,4 @@ namespace Cycle\ORM\Exception;
 
 class CollectionFactoryException extends ORMException
 {
-
 }

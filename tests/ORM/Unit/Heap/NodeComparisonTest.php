@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Heap;
+namespace Cycle\ORM\Tests\Unit\Heap;
 
 use Cycle\ORM\Heap\Node;
 use PHPUnit\Framework\TestCase;
@@ -51,6 +51,7 @@ class NodeComparisonTest extends TestCase
             [false, 2, true],
             [false, 2, false],
             [false, 0, true],
+            [false, 300.0, 400],
         ];
     }
 

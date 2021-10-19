@@ -93,7 +93,9 @@ final class Pool implements IteratorAggregate, \Countable
         }
         $this->all->attach($tuple->entity, $tuple);
 
-        $this->snap($tuple);
+        if ($this->iterating) {
+            $this->snap($tuple);
+        }
         if ($tuple->node !== null) {
             switch ($tuple->task) {
                 case Tuple::TASK_DELETE:

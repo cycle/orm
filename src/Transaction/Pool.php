@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Transaction;
 
+use Cycle\ORM\Exception\PoolException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
-use IteratorAggregate;
 use JetBrains\PhpStorm\ExpectedValues;
 use SplObjectStorage;
 use Traversable;
 
-final class Pool implements IteratorAggregate, \Countable
+/**
+ * @internal
+ */
+final class Pool implements \Countable
 {
     public const DEBUG = false;
 
@@ -147,10 +150,10 @@ final class Pool implements IteratorAggregate, \Countable
      *
      * @return Traversable<mixed, Tuple>
      */
-    public function getIterator(): Traversable
+    public function openIterator(): Traversable
     {
         if ($this->iterating) {
-            throw new \RuntimeException('The Pool is now iterating.');
+            throw new \RuntimeException('Iterator is already open.');
         }
         $this->iterating = true;
         $this->activatePriorityStorage();
@@ -253,29 +256,38 @@ final class Pool implements IteratorAggregate, \Countable
                         continue 2;
                     }
                 }
-                if ($this->happens !== 0 && $this->unprocessed !== []) {
+                $hasUnresolved = $this->unprocessed !== [];
+                if ($this->happens !== 0 && $hasUnresolved) {
                     foreach ($this->unprocessed as $item) {
                         $this->storage->attach($item->entity, $item);
                     }
                     $this->unprocessed = [];
                     continue;
                 }
-                if ($this->happens === 0 && \count($pool) > 0) {
-                    throw new \Exception('Transaction can not be resolved.');
+                if ($this->happens === 0 && (\count($pool) > 0 || $hasUnresolved)) {
+                    throw new PoolException('Pool has gone into an infinite loop.');
                 }
             }
         } while (true);
-        $this->iterating = false;
-        $this->priorityEnabled = false;
-        $this->priorityAutoAttach = false;
-        $this->unprocessed = [];
-        unset($this->priorityStorage, $this->unprocessed);
-        $this->all = new SplObjectStorage();
+        $this->closeIterator();
     }
 
     public function count(): int
     {
         return \count($this->storage) + ($this->priorityEnabled ? $this->priorityStorage->count() : 0);
+    }
+
+    /**
+     * Get unresolved entity tuples.
+     *
+     * @return iterable<Tuple>
+     */
+    public function getUnresolved(): iterable
+    {
+        if ($this->iterating) {
+            return $this->unprocessed;
+        }
+        throw new PoolException('The Pool iterator isn\'t open.');
     }
 
     /**
@@ -365,5 +377,15 @@ final class Pool implements IteratorAggregate, \Countable
             return $this->storage->offsetGet($entity);
         }
         return null;
+    }
+
+    private function closeIterator(): void
+    {
+        $this->iterating = false;
+        $this->priorityEnabled = false;
+        $this->priorityAutoAttach = false;
+        $this->unprocessed = [];
+        unset($this->priorityStorage, $this->unprocessed);
+        $this->all = new SplObjectStorage();
     }
 }

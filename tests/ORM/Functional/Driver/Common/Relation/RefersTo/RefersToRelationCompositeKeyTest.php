@@ -235,8 +235,6 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             $tr = new Transaction($this->orm);
             $tr->persist($u);
             $tr->run();
-        } catch (\Throwable $e) {
-            throw $e;
         } finally {
             $this->orm = $this->orm->withHeap(new Heap());
         }

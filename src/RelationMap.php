@@ -167,7 +167,7 @@ final class RelationMap
     }
 
     /**
-     * @return DependencyInterface[]
+     * @return array<string, DependencyInterface>
      */
     public function getMasters(): array
     {

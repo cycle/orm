@@ -9,6 +9,9 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 
+/**
+ * @internal
+ */
 final class Tuple
 {
     public const TASK_STORE = 0;
@@ -39,6 +42,7 @@ final class Tuple
             self::STATUS_PROPOSED,
             self::STATUS_PREPROCESSED,
             self::STATUS_PROCESSED,
+            self::STATUS_UNPROCESSED,
         ])]
         public int $status,
         public ?MapperInterface $mapper = null

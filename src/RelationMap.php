@@ -89,7 +89,7 @@ final class RelationMap
             return;
         }
         if ($relationType === Relation::MANY_TO_MANY) {
-            $handshaked = \is_string($relationSchema[Relation::SCHEMA][Relation::HANDSHAKE] ?? null);
+            $handshaked = \is_string($relationSchema[Relation::SCHEMA][Relation::INVERSION] ?? null);
             // Create ShadowHasMany
             if (!$handshaked) {
                 $relation = new ShadowHasMany(
@@ -167,7 +167,7 @@ final class RelationMap
     }
 
     /**
-     * @return DependencyInterface[]
+     * @return array<string, DependencyInterface>
      */
     public function getMasters(): array
     {

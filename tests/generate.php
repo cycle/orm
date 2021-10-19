@@ -58,13 +58,24 @@ foreach ($classes as $class) {
 
     echo "Found {$class->getName()}\n";
 
-    $path = ltrim(str_replace([__DIR__, 'ORM/Functional/'], '', $class->getFileName()), '/');
+    $path = str_replace(
+        [__DIR__, 'ORM/Functional/Driver/Common/'],
+        '',
+        str_replace('\\', '/', $class->getFileName())
+    );
+
+    $path = ltrim($path, '/');
 
     foreach ($databases as $driver => $details) {
         $filename = sprintf('%s%s', $details['directory'], $path);
         $dir = pathinfo($filename, PATHINFO_DIRNAME);
 
-        $namespace = str_replace('Cycle\\ORM\\Tests\\Functional', $details['namespace'], $class->getNamespaceName());
+        $namespace = str_replace(
+            'Cycle\\ORM\\Tests\\Functional\\Driver\\Common',
+            $details['namespace'],
+            $class->getNamespaceName()
+        );
+
         if (!is_dir($dir)) {
             mkdir($dir, recursive: true);
         }

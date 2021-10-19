@@ -15,8 +15,7 @@ class Comment
     private DateTimeImmutable $updated_at;
     private ?DateTimeImmutable $published_at = null;
     private ?DateTimeImmutable $deleted_at = null;
-    // todo private User $user;
-    public $user;
+    private User $user;
     private ?int $user_id = null;
     /**
      * @var Post

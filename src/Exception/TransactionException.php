@@ -20,7 +20,7 @@ class TransactionException extends ORMException
 
             $status = $tuple->task === Tuple::TASK_STORE && $tuple->node->getStatus() === Node::NEW
                 ? 'Create new'
-                : match($tuple->task) {
+                : match ($tuple->task) {
                     Tuple::TASK_STORE => 'Update',
                     default => 'Delete',
                 };

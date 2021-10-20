@@ -32,8 +32,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
         // Check
         $values = [];
-        // $data = $tuple->node->getChanges();
-        $data = $tuple->node->getData();
+        $data = $tuple->state->getData();
         foreach ($this->innerKeys as $i => $innerKey) {
             if (!isset($data[$innerKey])) {
                 return false;

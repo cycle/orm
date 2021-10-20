@@ -69,6 +69,7 @@ abstract class SingleTableTest extends SimpleCasesTest
             'name_column' => 'string',
             'age' => 'integer,nullable',
         ], pk: ['employee_id_column']);
+
         $this->makeTable('role_table', [
             'role_id_column' => 'integer,nullable',
             'subrole_id_column' => 'integer,nullable',
@@ -78,8 +79,9 @@ abstract class SingleTableTest extends SimpleCasesTest
             'language' => 'string,nullable',
         ], fk: [
             'role_id_column' => ['table' => 'employee_table', 'column' => 'employee_id_column'],
-            'subrole_id_column' => ['table' => 'role_table', 'column' => 'role_id_column'],
         ]);
+        $this->makeIndex('role_table', ['role_id_column', 'subrole_id_column'], true);
+        $this->makeFK('role_table', ['subrole_id_column', 'role_id_column'], 'role_table', ['role_id_column', 'subrole_id_column'], 'NO ACTION', 'NO ACTION');
 
         $this->getDatabase()->table('employee_table')->insertMultiple(
             ['employee_id_column', 'name_column', 'age'],

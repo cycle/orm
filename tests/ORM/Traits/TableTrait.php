@@ -22,7 +22,10 @@ trait TableTrait
         $renderer->renderColumns($schema, $columns, $defaults);
 
         foreach ($fk as $column => $options) {
-            $fkState = $schema->foreignKey([$column])->references($options['table'], [$options['column']]);
+            if (isset($options['from'])) {
+                $column = $options['from'];
+            }
+            $fkState = $schema->foreignKey((array)$column)->references($options['table'], (array)$options['column']);
             $fkState->onUpdate($options['onUpdate'] ?? ForeignKeyInterface::CASCADE);
             $fkState->onDelete($options['onDelete'] ?? ForeignKeyInterface::CASCADE);
         }
@@ -36,14 +39,17 @@ trait TableTrait
 
     public function makeFK(
         string $from,
-        string $fromKey,
+        string|array $fromKey,
         string $to,
-        string $toColumn,
+        string|array $toColumn,
         string $onDelete = ForeignKeyInterface::CASCADE,
         string $onUpdate = ForeignKeyInterface::CASCADE
     ): void {
         $schema = $this->getDatabase()->table($from)->getSchema();
-        $schema->foreignKey([$fromKey])->references($to, [$toColumn])->onDelete($onDelete)->onUpdate($onUpdate);
+        $schema->foreignKey((array)$fromKey)
+            ->references($to, (array)$toColumn)
+            ->onDelete($onDelete)
+            ->onUpdate($onUpdate);
         $schema->save();
     }
 

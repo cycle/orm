@@ -78,6 +78,7 @@ class ProxyEntityFactory
 
         // new set of data and relations always overwrite entity state
         return $this->hydrator->hydrate(
+            $relMap,
             $properties,
             $entity,
             $data

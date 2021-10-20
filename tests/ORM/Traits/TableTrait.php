@@ -22,7 +22,9 @@ trait TableTrait
         $renderer->renderColumns($schema, $columns, $defaults);
 
         foreach ($fk as $column => $options) {
-            $schema->foreignKey([$column])->references($options['table'], [$options['column']]);
+            $fkState = $schema->foreignKey([$column])->references($options['table'], [$options['column']]);
+            $fkState->onUpdate($options['onUpdate'] ?? ForeignKeyInterface::CASCADE);
+            $fkState->onDelete($options['onDelete'] ?? ForeignKeyInterface::CASCADE);
         }
 
         if (!empty($pk)) {

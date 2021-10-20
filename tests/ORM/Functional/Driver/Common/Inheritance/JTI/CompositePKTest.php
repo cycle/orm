@@ -97,6 +97,8 @@ abstract class CompositePKTest extends SimpleCasesTest
             'name_column' => 'string',
             'age' => 'integer,nullable',
         ], pk: ['id', 'employee_id']);
+        $this->makeIndex('employee', ['employee_id'], false);
+
         $this->makeTable('role', [
             'id' => 'integer',
             'role_id' => 'integer',
@@ -107,13 +109,14 @@ abstract class CompositePKTest extends SimpleCasesTest
             'id' => ['table' => 'employee', 'column' => 'id'],
             'role_id' => ['table' => 'employee', 'column' => 'employee_id'],
         ], pk: ['id', 'role_id']);
+
         $this->makeTable('programator', [
             'id' => 'integer',
             'subrole_id' => 'integer',
             'language' => 'string',
         ], fk: [
-            'id' => ['table' => 'engineer', 'column' => 'role_id'],
-            'subrole_id' => ['table' => 'engineer', 'column' => 'id'],
+            'id' => ['table' => 'role', 'column' => 'role_id'],
+            'subrole_id' => ['table' => 'role', 'column' => 'id'],
         ], pk: ['id', 'subrole_id']);
 
         $this->getDatabase()->table('employee')->insertMultiple(

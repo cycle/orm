@@ -29,7 +29,7 @@ class ClassPropertiesExtractorTest extends TestCase
                 'id' => 'id',
                 'comments' => 'comments',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
+            User::class => [
                 'username' => 'username',
                 'email' => 'email',
             ],
@@ -49,7 +49,7 @@ class ClassPropertiesExtractorTest extends TestCase
             '' => [
                 'id' => 'id',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
+            User::class => [
                 'username' => 'username',
                 'email' => 'email',
             ],
@@ -75,16 +75,16 @@ class ClassPropertiesExtractorTest extends TestCase
                 'totalLogin' => 'totalLogin',
                 'comments' => 'comments',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
+            User::class => [
                 'username' => 'username',
                 'email' => 'email',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\ExtendedUser' => [
+            ExtendedUser::class => [
                 'isVerified' => 'isVerified',
                 'profileId' => 'profileId',
                 'tags' => 'tags',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\SuperUser' => [
+            SuperUser::class => [
                 'isAdmin' => 'isAdmin',
             ],
         ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
@@ -105,15 +105,15 @@ class ClassPropertiesExtractorTest extends TestCase
                 'age' => 'age',
                 'totalLogin' => 'totalLogin',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\User' => [
+            User::class => [
                 'username' => 'username',
                 'email' => 'email',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\ExtendedUser' => [
+            ExtendedUser::class => [
                 'isVerified' => 'isVerified',
                 'profileId' => 'profileId',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\SuperUser' => [
+            SuperUser::class => [
                 'isAdmin' => 'isAdmin',
             ],
         ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
@@ -122,7 +122,7 @@ class ClassPropertiesExtractorTest extends TestCase
             '' => [
                 'comments' => 'comments',
             ],
-            'Cycle\ORM\Tests\Mapper\ProxyEntityMapper\Hydrator\ExtendedUser' => [
+            ExtendedUser::class => [
                 'tags' => 'tags',
             ],
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());

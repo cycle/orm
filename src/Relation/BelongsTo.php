@@ -34,11 +34,11 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $values = [];
         // $data = $tuple->node->getChanges();
         $data = $tuple->node->getData();
-        foreach ($this->innerKeys as $innerKey) {
+        foreach ($this->innerKeys as $i => $innerKey) {
             if (!isset($data[$innerKey])) {
                 return false;
             }
-            $values[$innerKey] = $data[$innerKey];
+            $values[$this->outerKeys[$i]] = $data[$innerKey];
         }
 
         $tuple->state->setRelation($this->getName(), new Reference($this->target, $values));

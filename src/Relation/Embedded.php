@@ -21,16 +21,16 @@ use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
-use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * Embeds one object to another.
  */
-final class Embedded implements RelationInterface
+final class Embedded implements RelationInterface, ChangesCheckerInterface
 {
-    use Relation\Traits\NodeTrait;
+    use Traits\HasChangesTrait;
+    use Traits\NodeTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;

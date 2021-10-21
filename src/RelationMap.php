@@ -15,8 +15,7 @@ use Cycle\ORM\Command\Branch\ContextSequence;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Promise\PromiseInterface;
-use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Relation\ChangesCheckerInterface;
 use Cycle\ORM\Relation\DependencyInterface;
 use Cycle\ORM\Relation\RelationInterface;
 
@@ -36,7 +35,7 @@ final class RelationMap
 
     /**
      * @param ORMInterface $orm
-     * @param array        $relations
+     * @param array $relations
      */
     public function __construct(ORMInterface $orm, array $relations)
     {
@@ -173,12 +172,7 @@ final class RelationMap
         $related,
         $original
     ): ?CommandInterface {
-        if (
-            ($related instanceof ReferenceInterface || $related === null)
-            && !($related instanceof PromiseInterface && $related->__loaded())
-            && $related === $original
-        ) {
-            // no changes in non changed promised relation
+        if (!($relation instanceof ChangesCheckerInterface ? $relation->hasChanges($related, $original) : true)) {
             return null;
         }
 
@@ -194,22 +188,5 @@ final class RelationMap
         $parentNode->getState()->setRelation($relation->getName(), $related);
 
         return $relStore;
-    }
-
-    /**
-     * Check if both references are equal.
-     *
-     * @param mixed $a
-     * @param mixed $b
-     *
-     * @return bool
-     */
-    private function sameReference($a, $b): bool
-    {
-        if (!$a instanceof ReferenceInterface || !$b instanceof ReferenceInterface) {
-            return false;
-        }
-
-        return $a->__role() === $b->__role() && $a->__scope() === $b->__scope();
     }
 }

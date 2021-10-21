@@ -22,10 +22,11 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 
-abstract class AbstractRelation implements RelationInterface
+abstract class AbstractRelation implements RelationInterface, ChangesCheckerInterface
 {
-    use Relation\Traits\NodeTrait;
     use Traits\ContextTrait;
+    use Traits\HasChangesTrait;
+    use Traits\NodeTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;

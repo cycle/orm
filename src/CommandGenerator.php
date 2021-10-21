@@ -50,7 +50,6 @@ final class CommandGenerator
         return $split;
     }
 
-
     public function generateDelete(MapperInterface $mapper, $entity, Node $node): CommandInterface
     {
         // currently we rely on db to delete all nested records (or soft deletes)

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Relation;
+namespace Cycle\ORM\Relation\Traits;
 
 use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Promise\ReferenceInterface;
 
-final class DefaultChangesChecker implements ChangesCheckerInterface
+trait HasChangesTrait
 {
     public function hasChanges($related, $original): bool
     {
@@ -22,7 +22,7 @@ final class DefaultChangesChecker implements ChangesCheckerInterface
         return !$this->sameReference($related, $original);
     }
 
-    public function sameReference($a, $b): bool
+    protected function sameReference($a, $b): bool
     {
         if (!$a instanceof ReferenceInterface || !$b instanceof ReferenceInterface) {
             return false;

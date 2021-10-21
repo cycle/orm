@@ -16,7 +16,6 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\ContextCarrierInterface as CC;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation\ChangesCheckerInterface;
-use Cycle\ORM\Relation\DefaultChangesChecker;
 use Cycle\ORM\Relation\DependencyInterface;
 use Cycle\ORM\Relation\RelationInterface;
 
@@ -34,12 +33,9 @@ final class RelationMap
     /** @var DependencyInterface[] */
     private $dependencies = [];
 
-    /** @var DefaultChangesChecker|null */
-    private static $defaultChangesChecker;
-
     /**
      * @param ORMInterface $orm
-     * @param array        $relations
+     * @param array $relations
      */
     public function __construct(ORMInterface $orm, array $relations)
     {
@@ -176,9 +172,7 @@ final class RelationMap
         $related,
         $original
     ): ?CommandInterface {
-        $changesChecker = $relation instanceof ChangesCheckerInterface ? $relation : self::getDefaultChangesChecker();
-        if (!$changesChecker->hasChanges($related, $original)) {
-            // no changes in non changed promised relation
+        if (!($relation instanceof ChangesCheckerInterface ? $relation->hasChanges($related, $original) : true)) {
             return null;
         }
 
@@ -194,14 +188,5 @@ final class RelationMap
         $parentNode->getState()->setRelation($relation->getName(), $related);
 
         return $relStore;
-    }
-
-    private static function getDefaultChangesChecker(): DefaultChangesChecker
-    {
-        if (null === self::$defaultChangesChecker) {
-            self::$defaultChangesChecker = new DefaultChangesChecker();
-        }
-
-        return self::$defaultChangesChecker;
     }
 }

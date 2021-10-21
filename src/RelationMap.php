@@ -34,6 +34,9 @@ final class RelationMap
     /** @var DependencyInterface[] */
     private $dependencies = [];
 
+    /** @var DefaultChangesChecker|null */
+    private static $defaultChangesChecker;
+
     /**
      * @param ORMInterface $orm
      * @param array        $relations
@@ -173,7 +176,7 @@ final class RelationMap
         $related,
         $original
     ): ?CommandInterface {
-        $changesChecker = $relation instanceof ChangesCheckerInterface ? $relation : new DefaultChangesChecker();
+        $changesChecker = $relation instanceof ChangesCheckerInterface ? $relation : self::getDefaultChangesChecker();
         if (!$changesChecker->hasChanges($related, $original)) {
             // no changes in non changed promised relation
             return null;
@@ -191,5 +194,14 @@ final class RelationMap
         $parentNode->getState()->setRelation($relation->getName(), $related);
 
         return $relStore;
+    }
+
+    private static function getDefaultChangesChecker(): DefaultChangesChecker
+    {
+        if (null === self::$defaultChangesChecker) {
+            self::$defaultChangesChecker = new DefaultChangesChecker();
+        }
+
+        return self::$defaultChangesChecker;
     }
 }

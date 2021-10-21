@@ -24,9 +24,9 @@ use Cycle\ORM\Select\SourceProviderInterface;
 
 abstract class AbstractRelation implements RelationInterface, ChangesCheckerInterface
 {
-    use Traits\NodeTrait;
     use Traits\ContextTrait;
     use Traits\HasChangesTrait;
+    use Traits\NodeTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;

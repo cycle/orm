@@ -29,8 +29,8 @@ use Cycle\ORM\Select\SourceProviderInterface;
  */
 final class Embedded implements RelationInterface, ChangesCheckerInterface
 {
-    use Traits\NodeTrait;
     use Traits\HasChangesTrait;
+    use Traits\NodeTrait;
 
     /** @var ORMInterface|SourceProviderInterface @internal */
     protected $orm;

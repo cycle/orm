@@ -171,7 +171,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         ]);
 
         $this->getDatabase()->table('book_table')->insertMultiple(
-            array_diff(array_keys(static::BOOK_1), ['id']),
+            \array_values(\array_diff(\array_keys(static::BOOK_1), ['id'])),
             \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::BOOK_1,
                 self::BOOK_2,
@@ -187,7 +187,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             ]
         );
         $this->getDatabase()->table('human_table')->insertMultiple(
-            array_diff(array_keys(static::HUMAN_1), ['id']),
+            \array_values(\array_diff(\array_keys(static::HUMAN_1), ['id'])),
             \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::HUMAN_1,
                 self::HUMAN_2,
@@ -226,7 +226,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             ]
         );
         $this->getDatabase()->table('page_table')->insertMultiple(
-            array_diff(array_keys(static::PAGE_1), ['id']),
+            \array_values(\array_diff(\array_keys(static::PAGE_1), ['id'])),
             \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::PAGE_1,
                 self::PAGE_2,
@@ -249,7 +249,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             ]
         );
         $this->getDatabase()->table('tool_table')->insertMultiple(
-            array_diff(array_keys(static::TOOL_1), ['id']),
+            \array_values(\array_diff(\array_keys(static::TOOL_1), ['id'])),
             \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::TOOL_1,
                 self::TOOL_2,

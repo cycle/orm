@@ -372,7 +372,11 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
 
     public function testPersistRelatedHierarchy(): void
     {
-        $entity = $this->orm->make(EBook::class, ['title' => 'awesome book', 'url' => 'awesome-book.com']);
+        $entity = $this->orm->make(EBook::class, [
+            'title' => 'awesome book',
+            'url' => 'awesome-book.com',
+            'block_id' => 100,
+        ]);
         $entity->pages = [
             $this->orm->make(Page::class, ['title' => 'page 1', 'content' => '...', 'owner_id' => 1]),
             $this->orm->make(Page::class, ['title' => 'page 2', 'content' => '...', 'owner_id' => 1]),

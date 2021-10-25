@@ -366,7 +366,7 @@ abstract class AbstractNode
     {
         try {
             //Combine column names with sliced piece of row
-            $result = array_combine(
+            $result = \array_combine(
                 $this->columns,
                 \array_slice($line, $dataOffset, \count($this->columns))
             );

@@ -34,7 +34,7 @@ abstract class CaseTest extends BaseTest
 
         // Make tables
         $this->makeTable('user', [
-            'id' => 'int,primary',
+            'id' => 'primary',
             'login' => 'string',
             'password_hash' => 'string',
             'created_at' => 'datetime,nullable',
@@ -42,7 +42,7 @@ abstract class CaseTest extends BaseTest
         ]);
 
         $this->makeTable('post', [
-            'id' => 'int,primary',
+            'id' => 'primary',
             'slug' => 'string',
             'title' => 'string',
             'public' => 'bool',
@@ -56,7 +56,7 @@ abstract class CaseTest extends BaseTest
         $this->makeFK('post', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
 
         $this->makeTable('comment', [
-            'id' => 'int,primary',
+            'id' => 'primary',
             'public' => 'bool',
             'content' => 'string',
             'created_at' => 'datetime,nullable',
@@ -70,13 +70,13 @@ abstract class CaseTest extends BaseTest
         $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
 
         $this->makeTable('tag', [
-            'id' => 'int,primary',
+            'id' => 'primary',
             'label' => 'string',
             'created_at' => 'datetime,nullable',
         ]);
 
         $this->makeTable('post_tag', [
-            'id' => 'int,primary',
+            'id' => 'primary',
             'post_id' => 'int',
             'tag_id' => 'int',
         ]);
@@ -92,7 +92,7 @@ abstract class CaseTest extends BaseTest
     {
         return [
             '1 item' => [1],
-            '10 items' => [10],
+            // '10 items' => [10],
             // '50 items' => [50],
         ];
     }

@@ -10,7 +10,7 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ArrayNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 use Cycle\ORM\Select\Traits\OrderByTrait;
@@ -79,12 +79,12 @@ class HasManyLoader extends JoinableLoader
     {
         $node = new ArrayNode(
             $this->columnNames(),
-            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],
             (array)$this->schema[Relation::INNER_KEY]
         );
 
-        $typecast = $this->define(Schema::TYPECAST);
+        $typecast = $this->define(SchemaInterface::TYPECAST);
         if ($typecast !== null) {
             $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
         }

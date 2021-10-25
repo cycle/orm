@@ -24,141 +24,95 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\JTI\JtiBaseTest;
 
 abstract class HierarchyInRelationTest extends JtiBaseTest
 {
-    protected const
-        DEFAULT_MAPPER = PromiseMapper::class;
-    protected const
-        HUMAN_ROLE = 'human';
-    protected const
-        EMPLOYEE_ROLE = 'employee';
-    protected const
-        ENGINEER_ROLE = 'engineer';
-    protected const
-        MANAGER_ROLE = 'manager';
-    protected const
-        PROGRAMATOR_ROLE = 'programator';
-    protected const
-        BOOK_ROLE = 'book';
-    protected const
-        EBOOK_ROLE = 'ebook';
-    protected const
-        PAGE_ROLE = 'page';
-    protected const
-        HTML_PAGE_ROLE = 'html_page';
-    protected const
-        MARKDOWN_PAGE_ROLE = 'markdown_page';
-    protected const
-        TOOL_ROLE = 'tool';
-    protected const
-        HUMAN_1 = ['id' => 1, 'birthday' => null];
-    protected const
-        HUMAN_2 = ['id' => 2, 'birthday' => null];
-    protected const
-        HUMAN_3 = ['id' => 3, 'birthday' => null];
-    protected const
-        HUMAN_4 = ['id' => 4, 'birthday' => null];
-    protected const
-        EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'book_id' => 3];
-    protected const
-        EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'book_id' => 4];
-    protected const
-        EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'book_id' => 1];
-    protected const
-        EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'book_id' => null];
-    protected const
-        ENGINEER_2 = ['id' => 2, 'level' => 8, 'tech_book_id' => 3];
-    protected const
-        ENGINEER_4 = ['id' => 4, 'level' => 10, 'tech_book_id' => 4];
-    protected const
-        PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'];
-    protected const
-        PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'];
-    protected const
-        MANAGER_1 = ['id' => 1, 'rank' => 'top'];
-    protected const
-        MANAGER_3 = ['id' => 3, 'rank' => 'bottom'];
-    protected const
-        BOOK_1 = ['id' => 1, 'title' => 'PHP manual'];
-    protected const
-        BOOK_2 = ['id' => 2, 'title' => 'Best mentor'];
-    protected const
-        BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'];
-    protected const
-        BOOK_4 = ['id' => 4, 'title' => 'How to be Foo when you are Bar'];
-    protected const
-        EBOOK_3 = ['id' => 3, 'block_id' => 1, 'url' => 'https://wikipedia.org/ebook/42'];
-    protected const
-        EBOOK_4 = ['id' => 4, 'block_id' => null, 'url' => 'localhost'];
-    protected const
-        PAGE_1 = ['id' => 1, 'title' => 'Page 1', 'content' => 'Some content...', 'owner_id' => 2, 'block_id' => 1];
-    protected const
-        PAGE_2 = ['id' => 2, 'title' => 'Page 2', 'content' => 'Some content...', 'owner_id' => null, 'block_id' => 1];
-    protected const
-        PAGE_3 = ['id' => 3, 'title' => 'Page 3', 'content' => 'Some content...', 'owner_id' => 2, 'block_id' => 1];
-    protected const
-        PAGE_4 = ['id' => 4, 'title' => 'Page 4', 'content' => 'Some content...', 'owner_id' => 1, 'block_id' => null];
-    protected const
-        PAGE_5 = ['id' => 5, 'title' => 'Page 5', 'content' => 'Some content...', 'owner_id' => 1, 'block_id' => null];
-    protected const
-        MARKDOWN_PAGE_1 = ['id' => 1];
-    protected const
-        MARKDOWN_PAGE_5 = ['id' => 5];
-    protected const
-        HTML_PAGE_2 = ['id' => 2];
-    protected const
-        TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'];
-    protected const
-        TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'];
-    protected const
-        TOOL_3 = ['id' => 3, 'engineer_id' => 2, 'title' => 'Notepad'];
-    protected const
-        TOOL_4 = ['id' => 4, 'engineer_id' => 2, 'title' => 'IDE'];
-    protected const
-        EMPLOYEE_1_LOADED = self::EMPLOYEE_1 + ['book' => self::BOOK_3];
-    protected const
-        EMPLOYEE_2_LOADED = self::EMPLOYEE_2 + ['book' => self::BOOK_2];
-    protected const
-        EMPLOYEE_3_LOADED = self::EMPLOYEE_3 + ['book' => self::BOOK_1];
-    protected const
-        EMPLOYEE_4_LOADED = self::EMPLOYEE_4 + ['book' => null];
-    protected const
-        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
-    protected const
-        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
-    protected const
-        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
-    protected const
-        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
-    protected const
-        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
-    protected const
-        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
-    protected const
-        EMPLOYEE_ALL_LOADED = [
+    protected const DEFAULT_MAPPER = PromiseMapper::class;
+    protected const HUMAN_ROLE = 'human';
+    protected const EMPLOYEE_ROLE = 'employee';
+    protected const ENGINEER_ROLE = 'engineer';
+    protected const MANAGER_ROLE = 'manager';
+    protected const PROGRAMATOR_ROLE = 'programator';
+    protected const BOOK_ROLE = 'book';
+    protected const EBOOK_ROLE = 'ebook';
+    protected const PAGE_ROLE = 'page';
+    protected const HTML_PAGE_ROLE = 'html_page';
+    protected const MARKDOWN_PAGE_ROLE = 'markdown_page';
+    protected const TOOL_ROLE = 'tool';
+    protected const HUMAN_1 = ['id' => 1, 'birthday' => null];
+    protected const HUMAN_2 = ['id' => 2, 'birthday' => null];
+    protected const HUMAN_3 = ['id' => 3, 'birthday' => null];
+    protected const HUMAN_4 = ['id' => 4, 'birthday' => null];
+    protected const EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'book_id' => 3];
+    protected const EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'book_id' => 4];
+    protected const EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'book_id' => 1];
+    protected const EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'book_id' => null];
+    protected const ENGINEER_2 = ['id' => 2, 'level' => 8, 'tech_book_id' => 3];
+    protected const ENGINEER_4 = ['id' => 4, 'level' => 10, 'tech_book_id' => 4];
+    protected const PROGRAMATOR_2 = ['id' => 2, 'language' => 'php'];
+    protected const PROGRAMATOR_4 = ['id' => 4, 'language' => 'go'];
+    protected const MANAGER_1 = ['id' => 1, 'rank' => 'top'];
+    protected const MANAGER_3 = ['id' => 3, 'rank' => 'bottom'];
+    protected const BOOK_1 = ['id' => 1, 'title' => 'PHP manual'];
+    protected const BOOK_2 = ['id' => 2, 'title' => 'Best mentor'];
+    protected const BOOK_3 = ['id' => 3, 'title' => 'Wikipedia vol.42'];
+    protected const BOOK_4 = ['id' => 4, 'title' => 'How to be Foo when you are Bar'];
+    protected const EBOOK_3 = ['id' => 3, 'block_id' => 1, 'url' => 'https://wikipedia.org/ebook/42'];
+    protected const EBOOK_4 = ['id' => 4, 'block_id' => null, 'url' => 'localhost'];
+    protected const PAGE_1 = ['id' => 1, 'title' => 'Page 1', 'content' => 'Some content...', 'owner_id' => 2, 'block_id' => 1];
+    protected const PAGE_2 = ['id' => 2, 'title' => 'Page 2', 'content' => 'Some content...', 'owner_id' => null, 'block_id' => 1];
+    protected const PAGE_3 = ['id' => 3, 'title' => 'Page 3', 'content' => 'Some content...', 'owner_id' => 2, 'block_id' => 1];
+    protected const PAGE_4 = ['id' => 4, 'title' => 'Page 4', 'content' => 'Some content...', 'owner_id' => 1, 'block_id' => null];
+    protected const PAGE_5 = ['id' => 5, 'title' => 'Page 5', 'content' => 'Some content...', 'owner_id' => 1, 'block_id' => null];
+    protected const MARKDOWN_PAGE_1 = ['id' => 1];
+    protected const MARKDOWN_PAGE_5 = ['id' => 5];
+    protected const HTML_PAGE_2 = ['id' => 2];
+    protected const TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'];
+    protected const TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'];
+    protected const TOOL_3 = ['id' => 3, 'engineer_id' => 2, 'title' => 'Notepad'];
+    protected const TOOL_4 = ['id' => 4, 'engineer_id' => 2, 'title' => 'IDE'];
+    protected const EMPLOYEE_1_LOADED = self::EMPLOYEE_1 + ['book' => self::BOOK_3];
+    protected const EMPLOYEE_2_LOADED = self::EMPLOYEE_2 + ['book' => self::BOOK_2];
+    protected const EMPLOYEE_3_LOADED = self::EMPLOYEE_3 + ['book' => self::BOOK_1];
+    protected const EMPLOYEE_4_LOADED = self::EMPLOYEE_4 + ['book' => null];
+    protected const ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
+    protected const ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
+    protected const PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
+    protected const PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
+    protected const MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
+    protected const MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
+    protected const EMPLOYEE_ALL_LOADED = [
             self::EMPLOYEE_1_LOADED,
             self::EMPLOYEE_2_LOADED,
             self::EMPLOYEE_3_LOADED,
             self::EMPLOYEE_4_LOADED,
         ];
-    protected const
-        EMPLOYEE_INHERITED_LOADED = [
+    protected const EMPLOYEE_INHERITED_LOADED = [
             self::MANAGER_1_LOADED,
             self::PROGRAMATOR_2_LOADED,
             self::MANAGER_3_LOADED,
             self::PROGRAMATOR_4_LOADED,
         ];
-    protected const
-        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
-    protected const
-        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
-    protected const
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+    protected const ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
+    protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
+    protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
 
     public function setUp(): void
     {
         JtiBaseTest::setUp();
 
-        $this->makeTable('human_table', [
+        $this->makeTable('book_table', [
+            'id' => 'primary',
+            'title' => 'string',
+        ]);
+        $this->makeTable('ebook_table', [
             'id' => 'integer',
+            'block_id' => 'integer, nullable',
+            'url' => 'string',
+        ], fk: [
+            'id' => ['table' => 'book_table', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeIndex('ebook_table', ['block_id'], true);
+
+        $this->makeTable('human_table', [
+            'id' => 'primary',
             'birthday' => 'date,nullable',
         ], pk: ['id']);
         $this->makeTable('employee_table', [
@@ -169,6 +123,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             'id' => ['table' => 'human_table', 'column' => 'id'],
             'book_id' => ['table' => 'book_table', 'column' => 'id'],
         ], pk: ['id']);
+
         $this->makeTable('engineer_table', [
             'id' => 'integer',
             'level' => 'integer',
@@ -176,6 +131,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         ], fk: [
             'id' => ['table' => 'employee_table', 'column' => 'id'],
         ], pk: ['id']);
+
         $this->makeTable('programator_table', [
             'id' => 'integer',
             'language' => 'string',
@@ -188,26 +144,16 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         ], fk: [
             'id' => ['table' => 'employee_table', 'column' => 'id'],
         ], pk: ['id']);
-        $this->makeTable('book_table', [
-            'id' => 'integer',
-            'title' => 'string',
-        ], pk: ['id']);
-        $this->makeTable('ebook_table', [
-            'id' => 'integer',
-            'block_id' => 'integer, nullable',
-            'url' => 'string',
-        ], fk: [
-            'id' => ['table' => 'book_table', 'column' => 'id'],
-        ], pk: ['id']);
         $this->makeTable('page_table', [
-            'id' => 'integer',
+            'id' => 'primary',
             'block_id' => 'integer,nullable',
             'owner_id' => 'integer,nullable',
             'title' => 'string',
             'content' => 'string',
         ], fk: [
-            'id' => ['table' => 'book_table', 'column' => 'id'],
-        ], pk: ['id']);
+            'block_id' => ['table' => 'ebook_table', 'column' => 'block_id', 'onDelete' => 'SET NULL'],
+        ]);
+
         $this->makeTable('html_page_table', [
             'id' => 'integer',
         ], fk: [
@@ -219,19 +165,35 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             'id' => ['table' => 'page_table', 'column' => 'id'],
         ], pk: ['id']);
         $this->makeTable('tool_table', [
-            'id' => 'integer, primary',
+            'id' => 'primary',
             'engineer_id' => 'integer',
             'title' => 'string',
-        ], pk: ['id']);
+        ]);
 
-        $this->getDatabase()->table('human_table')->insertMultiple(
-            array_keys(static::HUMAN_1),
+        $this->getDatabase()->table('book_table')->insertMultiple(
+            \array_values(\array_diff(\array_keys(static::BOOK_1), ['id'])),
+            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
+                self::BOOK_1,
+                self::BOOK_2,
+                self::BOOK_3,
+                self::BOOK_4,
+            ])
+        );
+        $this->getDatabase()->table('ebook_table')->insertMultiple(
+            array_keys(static::EBOOK_3),
             [
+                self::EBOOK_3,
+                self::EBOOK_4,
+            ]
+        );
+        $this->getDatabase()->table('human_table')->insertMultiple(
+            \array_values(\array_diff(\array_keys(static::HUMAN_1), ['id'])),
+            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::HUMAN_1,
                 self::HUMAN_2,
                 self::HUMAN_3,
                 self::HUMAN_4,
-            ]
+            ])
         );
         $this->getDatabase()->table('employee_table')->insertMultiple(
             array_keys(static::EMPLOYEE_1),
@@ -263,31 +225,15 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
                 self::MANAGER_3,
             ]
         );
-        $this->getDatabase()->table('book_table')->insertMultiple(
-            array_keys(static::BOOK_1),
-            [
-                self::BOOK_1,
-                self::BOOK_2,
-                self::BOOK_3,
-                self::BOOK_4,
-            ]
-        );
-        $this->getDatabase()->table('ebook_table')->insertMultiple(
-            array_keys(static::EBOOK_3),
-            [
-                self::EBOOK_3,
-                self::EBOOK_4,
-            ]
-        );
         $this->getDatabase()->table('page_table')->insertMultiple(
-            array_keys(static::PAGE_1),
-            [
+            \array_values(\array_diff(\array_keys(static::PAGE_1), ['id'])),
+            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::PAGE_1,
                 self::PAGE_2,
                 self::PAGE_3,
                 self::PAGE_4,
                 self::PAGE_5,
-            ]
+            ])
         );
         $this->getDatabase()->table('html_page_table')->insertMultiple(
             array_keys(static::HTML_PAGE_2),
@@ -303,13 +249,13 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             ]
         );
         $this->getDatabase()->table('tool_table')->insertMultiple(
-            array_keys(static::TOOL_1),
-            [
+            \array_values(\array_diff(\array_keys(static::TOOL_1), ['id'])),
+            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::TOOL_1,
                 self::TOOL_2,
                 self::TOOL_3,
                 self::TOOL_4,
-            ]
+            ])
         );
     }
 
@@ -426,7 +372,11 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
 
     public function testPersistRelatedHierarchy(): void
     {
-        $entity = $this->orm->make(EBook::class, ['title' => 'awesome book', 'url' => 'awesome-book.com']);
+        $entity = $this->orm->make(EBook::class, [
+            'title' => 'awesome book',
+            'url' => 'awesome-book.com',
+            'block_id' => 100,
+        ]);
         $entity->pages = [
             $this->orm->make(Page::class, ['title' => 'page 1', 'content' => '...', 'owner_id' => 1]),
             $this->orm->make(Page::class, ['title' => 'page 2', 'content' => '...', 'owner_id' => 1]),

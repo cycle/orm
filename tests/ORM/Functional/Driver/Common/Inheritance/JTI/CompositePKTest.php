@@ -15,6 +15,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture\Programator;
 
 abstract class CompositePKTest extends SimpleCasesTest
 {
+    protected const EMPLOYEE_DEFAULT_SORTING = ['id' => 'ASC', 'employee_id' => 'ASC'];
     protected const
         EMPLOYEE_1 = ['id' => 1, 'employee_id' => 2, 'name' => 'John', 'age' => 38];
     protected const
@@ -97,6 +98,8 @@ abstract class CompositePKTest extends SimpleCasesTest
             'name_column' => 'string',
             'age' => 'integer,nullable',
         ], pk: ['id', 'employee_id']);
+        $this->makeIndex('employee', ['employee_id'], false);
+
         $this->makeTable('role', [
             'id' => 'integer',
             'role_id' => 'integer',
@@ -104,16 +107,16 @@ abstract class CompositePKTest extends SimpleCasesTest
             'level' => 'integer,nullable',
             'rank' => 'string,nullable',
         ], fk: [
-            'id' => ['table' => 'employee', 'column' => 'id'],
-            'role_id' => ['table' => 'employee', 'column' => 'employee_id'],
+            ['from' => ['id', 'role_id'], 'table' => 'employee', 'column' => ['id', 'employee_id']],
         ], pk: ['id', 'role_id']);
+        $this->makeIndex('role', ['role_id', 'id'], true);
+
         $this->makeTable('programator', [
             'id' => 'integer',
             'subrole_id' => 'integer',
             'language' => 'string',
         ], fk: [
-            'id' => ['table' => 'engineer', 'column' => 'role_id'],
-            'subrole_id' => ['table' => 'engineer', 'column' => 'id'],
+            ['from' => ['id', 'subrole_id'], 'table' => 'role', 'column' => ['role_id', 'id']],
         ], pk: ['id', 'subrole_id']);
 
         $this->getDatabase()->table('employee')->insertMultiple(

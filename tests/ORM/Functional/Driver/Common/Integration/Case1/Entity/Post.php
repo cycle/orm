@@ -50,7 +50,7 @@ class Post
 
     public function resetSlug(): void
     {
-        $this->slug = \random_bytes(128);
+        $this->slug = \bin2hex(\random_bytes(32));
     }
 
     public function getTitle(): string

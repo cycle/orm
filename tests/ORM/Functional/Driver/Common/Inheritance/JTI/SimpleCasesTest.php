@@ -16,6 +16,7 @@ use Cycle\ORM\Transaction;
 
 abstract class SimpleCasesTest extends JtiBaseTest
 {
+    protected const EMPLOYEE_DEFAULT_SORTING = ['id' => 'ASC'];
     protected const EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38];
     protected const EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'age' => 35];
     protected const EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'age' => 27];
@@ -134,7 +135,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEmployeeAllDataWithInheritance(): void
     {
-        $selector = new Select($this->orm, static::EMPLOYEE_ROLE);
+        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))->orderBy(static::EMPLOYEE_DEFAULT_SORTING);
 
         $this->assertEquals(static::EMPLOYEE_INHERITED_LOADED, $selector->fetchData());
     }
@@ -149,7 +150,9 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEmployeeDataFirstWithInheritance(): void
     {
-        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))->limit(1);
+        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))
+            ->orderBy(static::EMPLOYEE_DEFAULT_SORTING)
+            ->limit(1);
 
         $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);
     }

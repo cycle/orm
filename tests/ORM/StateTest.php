@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use PHPUnit\Framework\TestCase;
 
 class StateTest extends TestCase
@@ -23,6 +24,25 @@ class StateTest extends TestCase
         $s->register('user_id', 1);
 
         $this->assertSame(1, $s->getData()['user_id']);
+    }
+
+    public function testTransactionData(): void
+    {
+        $credentials = new UserCredentials();
+        $credentials->username = 'test';
+        $credentials->password = 'hash';
+
+        $s = new Node(Node::MANAGED, [], 'parent');
+
+        $s->register('credentials', $credentials);
+
+        $credentials->username = 'test_changed';
+        $credentials->password = 'hash_changed';
+
+        $transactionData = $s->getState()->getTransactionData();
+
+        $this->assertSame('test', $transactionData['credentials']->username);
+        $this->assertSame('hash', $transactionData['credentials']->password);
     }
 
     public function testForward(): void

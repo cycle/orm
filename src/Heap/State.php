@@ -18,6 +18,8 @@ use Cycle\ORM\Heap\Traits\ClaimTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Heap\Traits\VisitorTrait;
 
+use function is_object;
+
 /**
  * Current node state.
  */
@@ -184,7 +186,7 @@ final class State implements ConsumerInterface, ProducerInterface
         }
 
         if (!array_key_exists($key, $this->transactionData)) {
-            $this->transactionData[$key] = $value;
+            $this->transactionData[$key] = is_object($value) ? clone $value : $value;
         }
 
         $this->data[$key] = $value;

@@ -15,6 +15,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture\Programator;
 
 abstract class SingleTableTest extends SimpleCasesTest
 {
+    protected const EMPLOYEE_DEFAULT_SORTING = ['employee_id' => 'ASC'];
     protected const EMPLOYEE_1 = ['employee_id' => 1, 'name' => 'John', 'age' => 38];
     protected const EMPLOYEE_2 = ['employee_id' => 2, 'name' => 'Anton', 'age' => 35];
     protected const EMPLOYEE_3 = ['employee_id' => 3, 'name' => 'Kentarius', 'age' => 27];
@@ -65,10 +66,10 @@ abstract class SingleTableTest extends SimpleCasesTest
         JtiBaseTest::setUp();
 
         $this->makeTable('employee_table', [
-            'employee_id_column' => 'integer',
+            'employee_id_column' => 'primary',
             'name_column' => 'string',
             'age' => 'integer,nullable',
-        ], pk: ['employee_id_column']);
+        ]);
 
         $this->makeTable('role_table', [
             'role_id_column' => 'integer,nullable',
@@ -81,16 +82,23 @@ abstract class SingleTableTest extends SimpleCasesTest
             'role_id_column' => ['table' => 'employee_table', 'column' => 'employee_id_column'],
         ]);
         $this->makeIndex('role_table', ['role_id_column', 'subrole_id_column'], true);
-        $this->makeFK('role_table', ['subrole_id_column', 'role_id_column'], 'role_table', ['role_id_column', 'subrole_id_column'], 'NO ACTION', 'NO ACTION');
+        $this->makeFK(
+            'role_table',
+            ['subrole_id_column', 'role_id_column'],
+            'role_table',
+            ['role_id_column', 'subrole_id_column'],
+            'NO ACTION',
+            'NO ACTION'
+        );
 
         $this->getDatabase()->table('employee_table')->insertMultiple(
-            ['employee_id_column', 'name_column', 'age'],
-            [
+            ['name_column', 'age'],
+            \array_map(static fn (array $value): array => \array_diff_key($value, ['employee_id' => 1]), [
                 self::EMPLOYEE_1,
                 self::EMPLOYEE_2,
                 self::EMPLOYEE_3,
                 self::EMPLOYEE_4,
-            ]
+            ])
         );
         $this->getDatabase()->table('role_table')->insertMultiple(
             ['discriminator', 'role_id_column', 'level', 'rank'],

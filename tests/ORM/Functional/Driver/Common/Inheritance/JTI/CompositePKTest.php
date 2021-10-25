@@ -15,6 +15,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture\Programator;
 
 abstract class CompositePKTest extends SimpleCasesTest
 {
+    protected const EMPLOYEE_DEFAULT_SORTING = ['id' => 'ASC', 'employee_id' => 'ASC'];
     protected const
         EMPLOYEE_1 = ['id' => 1, 'employee_id' => 2, 'name' => 'John', 'age' => 38];
     protected const

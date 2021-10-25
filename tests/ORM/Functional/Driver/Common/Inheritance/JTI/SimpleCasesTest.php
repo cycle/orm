@@ -150,7 +150,9 @@ abstract class SimpleCasesTest extends JtiBaseTest
 
     public function testSelectEmployeeDataFirstWithInheritance(): void
     {
-        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))->limit(1);
+        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))
+            ->orderBy(static::EMPLOYEE_DEFAULT_SORTING)
+            ->limit(1);
 
         $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);
     }

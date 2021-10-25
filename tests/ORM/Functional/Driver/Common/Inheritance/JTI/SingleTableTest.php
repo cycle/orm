@@ -121,7 +121,7 @@ abstract class SingleTableTest extends SimpleCasesTest
     public function testFetchAllChildren(): void
     {
         /** @var Engineer[]|Manager[] $entities */
-        $entities = (new Select($this->orm, 'role'))->fetchAll();
+        $entities = (new Select($this->orm, 'role'))->orderBy('role_id', 'ASC')->fetchAll();
 
         $this->assertSame(1, $entities[0]->role_id);
         $this->assertInstanceOf(Manager::class, $entities[0]);
@@ -137,6 +137,7 @@ abstract class SingleTableTest extends SimpleCasesTest
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))
             // todo: this condition should be added automatically by STI
+            ->orderBy('role_id', 'ASC')
             ->where('discriminator', '=', 'engineer');
 
         $this->assertEquals(static::PROGRAMATOR_ALL_LOADED, $selector->fetchData());

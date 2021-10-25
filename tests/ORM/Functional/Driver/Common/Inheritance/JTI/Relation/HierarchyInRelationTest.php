@@ -79,17 +79,17 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
     protected const MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
     protected const MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
     protected const EMPLOYEE_ALL_LOADED = [
-            self::EMPLOYEE_1_LOADED,
-            self::EMPLOYEE_2_LOADED,
-            self::EMPLOYEE_3_LOADED,
-            self::EMPLOYEE_4_LOADED,
-        ];
+        self::EMPLOYEE_1_LOADED,
+        self::EMPLOYEE_2_LOADED,
+        self::EMPLOYEE_3_LOADED,
+        self::EMPLOYEE_4_LOADED,
+    ];
     protected const EMPLOYEE_INHERITED_LOADED = [
-            self::MANAGER_1_LOADED,
-            self::PROGRAMATOR_2_LOADED,
-            self::MANAGER_3_LOADED,
-            self::PROGRAMATOR_4_LOADED,
-        ];
+        self::MANAGER_1_LOADED,
+        self::PROGRAMATOR_2_LOADED,
+        self::MANAGER_3_LOADED,
+        self::PROGRAMATOR_4_LOADED,
+    ];
     protected const ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
     protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
     protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];

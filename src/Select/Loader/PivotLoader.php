@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -11,7 +18,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Cycle\Database\Query\SelectQuery;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Loads given entity table without any specific condition.
@@ -22,8 +29,10 @@ class PivotLoader extends JoinableLoader
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
+     *
+     * @var array
      */
-    protected array $options = [
+    protected $options = [
         'load' => false,
         'scope' => true,
         'method' => self::JOIN,
@@ -32,11 +41,17 @@ class PivotLoader extends JoinableLoader
         'using' => null,
     ];
 
+    /**
+     * @return string
+     */
     public function getTable(): string
     {
         return $this->define(Schema::TABLE);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         // user specified WHERE conditions
@@ -50,13 +65,16 @@ class PivotLoader extends JoinableLoader
         return parent::configureQuery($query, $outerKeys);
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function initNode(): AbstractNode
     {
         $node = new ArrayNode(
             $this->columnNames(),
-            (array)$this->define(Schema::PRIMARY_KEY),
-            (array)$this->schema[Relation::THROUGH_INNER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            $this->define(Schema::PRIMARY_KEY),
+            $this->schema[Relation::THROUGH_INNER_KEY],
+            $this->schema[Relation::INNER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

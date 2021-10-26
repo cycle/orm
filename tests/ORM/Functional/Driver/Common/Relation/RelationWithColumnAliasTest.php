@@ -1,8 +1,16 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
+declare(strict_types=1);
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
@@ -11,14 +19,13 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
-use Cycle\Database\Injection\Expression;
+use Spiral\Database\Injection\Expression;
 
 abstract class RelationWithColumnAliasTest extends BaseTest
 {
@@ -89,7 +96,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
                 Schema::COLUMNS => ['id' => 'id_int', 'user_id' => 'user_id_int', 'message' => 'message_str'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
     }

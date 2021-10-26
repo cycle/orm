@@ -1,17 +1,25 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Classless;
+namespace Cycle\ORM\Tests\Classless;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\BaseTest;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Transaction;
 
 abstract class ClasslessInverseRelationTest extends BaseTest
 {
@@ -71,7 +79,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
             'profile' => [
                 Schema::MAPPER => StdMapper::class,
@@ -91,7 +99,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
     }
@@ -158,16 +166,18 @@ abstract class ClasslessInverseRelationTest extends BaseTest
         $u->profile->user = $u;
 
         $this->captureWriteQueries();
-        $this->save($u);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+
         $this->assertNumWrites(2);
 
         $this->assertEquals(3, $u->id);
         $this->assertEquals(4, $u->profile->id);
 
-        $u = (new Select($this->orm->withHeap(new Heap()), 'user'))
-            ->load('profile.user')
-            ->wherePK(3)
-            ->fetchOne();
+        $selector = new Select($this->orm->withHeap(new Heap()), 'user');
+        $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
 
         $this->assertSame($u, $u->profile->user);
 

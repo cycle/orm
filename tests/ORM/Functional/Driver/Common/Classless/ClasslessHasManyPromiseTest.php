@@ -1,20 +1,27 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Classless;
+namespace Cycle\ORM\Tests\Classless;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\StdMapper;
-use Cycle\ORM\Reference\Promise;
-use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Promise\Collection\CollectionPromise;
+use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\BaseTest;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Doctrine\Common\Collections\ArrayCollection;
+use Cycle\ORM\Transaction;
 
 abstract class ClasslessHasManyPromiseTest extends BaseTest
 {
@@ -83,16 +90,16 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
                 Schema::COLUMNS => ['id', 'user_id', 'message'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
     }
 
-    public function testInitRelation(): void
-    {
-        $u = $this->orm->make('user');
-        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
-    }
+//    public function testInitRelation()
+//    {
+//        $u = $this->orm->make('user');
+//        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
+//    }
 
     public function testFetchRelation(): void
     {
@@ -137,16 +144,11 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(Promise::class, $u->comments);
-        $this->assertFalse($u->comments->hasValue());
-        $this->assertNumReads(0);
-
-        // Resolve promise
-        $resolved = $u->comments->getCollection();
+        $this->assertInstanceOf(CollectionPromise::class, $u->comments);
+        $this->assertCount(3, $u->comments);
         $this->assertNumReads(1);
 
-        $this->assertTrue($u->comments->hasValue());
-        $this->assertCount(3, $resolved);
+        $this->assertInstanceOf(PromiseInterface::class, $u->comments->getPromise());
     }
 
     public function testHasManyPromiseLoaded(): void
@@ -155,14 +157,13 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(Promise::class, $p = $u->comments);
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
         $this->assertNumReads(0);
 
-        /** @var Promise $p */
-        $this->assertFalse($p->hasValue());
-        $p->resolve();
-        $this->assertIsArray($p->getValue());
-        $this->assertTrue($p->hasValue());
+        /** @var PromiseInterface $p */
+        $this->assertFalse($p->__loaded());
+        $this->assertIsArray($p->__resolve());
+        $this->assertTrue($p->__loaded());
     }
 
     public function testHasManyPromiseRole(): void
@@ -171,26 +172,26 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(Promise::class, $p = $u->comments);
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
         $this->assertNumReads(0);
 
-        /** @var Promise $p */
-        $this->assertSame('comment', $p->getRole());
+        /** @var PromiseInterface $p */
+        $this->assertSame('comment', $p->__role());
     }
 
     public function testHasManyPromiseScope(): void
     {
-        $u = (new Select($this->orm, 'user'))
-            ->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, 'user');
+        $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(ReferenceInterface::class, $r = $u->comments);
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
         $this->assertNumReads(0);
 
-        /** @var ReferenceInterface $r */
+        /** @var PromiseInterface $p */
         $this->assertEquals([
             'user_id' => 1,
-        ], $r->getScope());
+        ], $p->__scope());
     }
 
     public function testPromisedEmpty(): void
@@ -199,21 +200,22 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $u = $selector->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(Promise::class, $u->comments);
-        $this->assertFalse($u->comments->hasValue());
-        $this->assertNumReads(0);
-
-        $this->assertCount(0, $u->comments->getCollection());
+        $this->assertInstanceOf(CollectionPromise::class, $u->comments);
+        $this->assertCount(0, $u->comments);
         $this->assertNumReads(1);
     }
 
     public function testNoChanges(): void
     {
-        $u = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, 'user');
+        $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
     }
@@ -225,24 +227,30 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
     }
 
     public function testRemoveChildren(): void
     {
-        $e = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, 'user');
 
-        $e->comments = $e->comments->getCollection();
+        $e = $selector->wherePK(1)->fetchOne();
+
         $e->comments->remove(1);
 
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
 
-        $e = (new Select($this->orm->withHeap(new Heap()), 'user'))
-            ->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm->withHeap(new Heap()), 'user');
 
-        $e->comments = $e->comments->getCollection();
+        $e = $selector->wherePK(1)->fetchOne();
+
         $this->assertCount(2, $e->comments);
 
         $this->assertSame('msg 1', $e->comments[0]->message);
@@ -251,21 +259,24 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
     public function testAddAndRemoveChildren(): void
     {
-        $e = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, 'user');
 
-        $e->comments = $e->comments->getCollection();
+        $e = $selector->wherePK(1)->fetchOne();
+
         $e->comments->remove(1);
 
         $c = $this->orm->make('comment');
         $c->message = 'msg 4';
         $e->comments->add($c);
 
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
 
-        $e = (new Select($this->orm->withHeap(new Heap()), 'user'))
-            ->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm->withHeap(new Heap()), 'user');
 
-        $e->comments = $e->comments->getCollection();
+        $e = $selector->wherePK(1)->fetchOne();
+
         $this->assertCount(3, $e->comments);
 
         $this->assertSame('msg 1', $e->comments[0]->message);
@@ -277,9 +288,6 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, 'user');
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
-
-        $a->comments = $a->comments->getCollection();
-        $b->comments = $b->comments->getCollection();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -295,20 +303,26 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertCount(2, $b->comments);
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
         $this->assertNumWrites(0);
 
-        [$a, $b] = (new Select($this->orm->withHeap(new Heap()), 'user'))
-            ->load('comments', [
-                'method' => Select\JoinableLoader::INLOAD,
-                'as' => 'comment',
-            ])
-            ->orderBy('user.id')->fetchAll();
+        $selector = new Select($this->orm->withHeap(new Heap()), 'user');
+
+        [$a, $b] = $selector->load('comments', [
+            'method' => Select\JoinableLoader::INLOAD,
+            'as' => 'comment',
+        ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(1, $a->comments);
         $this->assertCount(2, $b->comments);

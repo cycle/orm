@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -12,37 +19,46 @@ interface SchemaInterface
      * Various segments of schema.
      */
     public const ROLE = 0;
-    public const ENTITY = 1; // Entity Class
-    public const MAPPER = 2; // Classname that implements MapperInterface
+    public const ENTITY = 1;
+    public const MAPPER = 2;
     public const SOURCE = 3;
-    public const REPOSITORY = 4; // Classname that implements RepositoryInterface
-    public const DATABASE = 5; // Database name
-    public const TABLE = 6; // Table name in the database
+    public const REPOSITORY = 4;
+    public const DATABASE = 5;
+    public const TABLE = 6;
     public const PRIMARY_KEY = 7;
     public const FIND_BY_KEYS = 8;
     public const COLUMNS = 9;
     public const RELATIONS = 10;
-    public const CHILDREN = 11; // List of entity sub-roles and their types
+    public const CHILDREN = 11;
     public const SCOPE = 12;
     public const TYPECAST = 13;
     public const SCHEMA = 14;
-    public const PARENT = 15; // Parent role in the inheritance hierarchy
-    public const PARENT_KEY = 16;
-    public const DISCRIMINATOR = 17; // Discriminator column name for single table inheritance
-    public const MACROS = 18;
+
+    /** @deprecated Use {@see SchemaInterface::SCOPE} instead. */
+    public const CONSTRAIN = self::SCOPE;
 
     /**
      * Return all roles defined within the schema.
+     *
+     * @return array
      */
     public function getRoles(): array;
 
     /**
      * Get name of relations associated with given entity role.
+     *
+     * @param string $role
+     *
+     * @return array
      */
     public function getRelations(string $role): array;
 
     /**
      * Check if the given role has a definition within the schema.
+     *
+     * @param string $role
+     *
+     * @return bool
      */
     public function defines(string $role): bool;
 
@@ -51,30 +67,33 @@ interface SchemaInterface
      *
      * Example: $schema->define(User::class, SchemaInterface::DATABASE);
      *
-     * @param int $property See ORM constants.
+     * @param string $role
+     * @param int    $property See ORM constants.
      *
      * @throws SchemaException
+     *
+     * @return mixed
      */
-    public function define(string $role, int $property): mixed;
+    public function define(string $role, int $property);
 
     /**
      * Define options associated with specific entity relation.
      *
+     * @param string $role
+     * @param string $relation
+     *
      * @throws SchemaException
+     *
+     * @return array
      */
     public function defineRelation(string $role, string $relation): array;
 
     /**
      * Resolve the role name using entity class name.
+     *
+     * @param string $role
+     *
+     * @return string|null
      */
     public function resolveAlias(string $role): ?string;
-
-    /**
-     * Get children roles for JTI resolving
-     *
-     * @param string $parent Parent role
-     *
-     * @return array<string, array> Tree of children
-     */
-    public function getInheritedRoles(string $parent): array;
 }

@@ -1,28 +1,30 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
 use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
-use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\RelationMap;
-use JetBrains\PhpStorm\ExpectedValues;
-
-use const FILTER_NULL_ON_FAILURE;
-use const FILTER_VALIDATE_BOOLEAN;
-use const SORT_STRING;
 
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
  * inner states.
  */
-final class Node implements ConsumerInterface
+final class Node implements ProducerInterface, ConsumerInterface
 {
     use RelationTrait;
 
     // Different entity states in a pool
+    public const PROMISED = 0;
     public const NEW = 1;
     public const MANAGED = 2;
     public const SCHEDULED_INSERT = 3;
@@ -30,14 +32,28 @@ final class Node implements ConsumerInterface
     public const SCHEDULED_DELETE = 5;
     public const DELETED = 6;
 
-    private ?State $state = null;
+    /** @var string */
+    private $role;
 
-    public function __construct(
-        #[ExpectedValues(valuesFromClass: self::class)]
-        private int $status,
-        private array $data,
-        private string $role
-    ) {
+    /** @var int */
+    private $status;
+
+    /** @var array */
+    private $data;
+
+    /** @var State|null */
+    private $state;
+
+    /**
+     * @param int    $status
+     * @param array  $data
+     * @param string $role
+     */
+    public function __construct(int $status, array $data, string $role)
+    {
+        $this->status = $status;
+        $this->data = $data;
+        $this->role = $role;
     }
 
     /**
@@ -45,9 +61,14 @@ final class Node implements ConsumerInterface
      */
     public function __destruct()
     {
-        unset($this->data, $this->state, $this->relations);
+        $this->data = [];
+        $this->state = null;
+        $this->relations = [];
     }
 
+    /**
+     * @return string
+     */
     public function getRole(): string
     {
         return $this->role;
@@ -55,6 +76,8 @@ final class Node implements ConsumerInterface
 
     /**
      * Current point state (set of changes).
+     *
+     * @return State
      */
     public function getState(): State
     {
@@ -72,6 +95,8 @@ final class Node implements ConsumerInterface
 
     /**
      * Set new state value.
+     *
+     * @param int $state
      */
     public function setStatus(int $state): void
     {
@@ -80,14 +105,22 @@ final class Node implements ConsumerInterface
 
     /**
      * Get current state.
+     *
+     * @return int
      */
     public function getStatus(): int
     {
-        return $this->state?->getStatus() ?? $this->status;
+        if ($this->state !== null) {
+            return $this->state->getStatus();
+        }
+
+        return $this->status;
     }
 
     /**
      * Set new state data (will trigger state handlers).
+     *
+     * @param array $data
      */
     public function setData(array $data): void
     {
@@ -96,69 +129,71 @@ final class Node implements ConsumerInterface
 
     /**
      * Get current state data. Mutalbe inside the transaction.
+     *
+     * @return array
      */
     public function getData(): array
     {
-        return $this->state?->getData() ?? $this->data;
+        if ($this->state !== null) {
+            return $this->state->getData();
+        }
+
+        return $this->data;
     }
 
     /**
      * The intial (post-load) node date. Does not change during the transaction.
+     *
+     * @return array
      */
     public function getInitialData(): array
     {
         return $this->data;
     }
 
-    public function register(string $key, mixed $value, int $stream = self::DATA): void
+    /**
+     * @inheritdoc
+     */
+    public function forward(
+        string $key,
+        ConsumerInterface $consumer,
+        string $target,
+        bool $trigger = false,
+        int $stream = self::DATA
+    ): void {
+        $this->getState()->forward($key, $consumer, $target, $trigger, $stream);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
-        $this->getState()->register($key, $value, $stream);
+        $this->getState()->register($key, $value, $fresh, $stream);
     }
 
     /**
      * Sync the point state and return data diff.
+     *
+     * @return array
      */
-    public function syncState(RelationMap $relMap): array
+    public function syncState(): array
     {
         if ($this->state === null) {
             return [];
         }
 
-        $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
-
-        $relations = $relMap->getRelations();
+        $changes = array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']);
         foreach ($this->state->getRelations() as $name => $relation) {
-            if ($relation instanceof ReferenceInterface
-                && isset($relations[$name])
-                && (isset($this->relations[$name]) xor $this->state->getRelation($name) !== null)
-            ) {
-                $changes[$name] = $relation->hasValue() ? $relation->getValue() : $relation;
-            }
             $this->setRelation($name, $relation);
         }
 
         // DELETE handled separately
         $this->status = self::MANAGED;
-        $this->data = $this->state->getTransactionData();
-        $this->state->__destruct();
+        $this->data = $this->state->getData();
         $this->state = null;
-        $this->relationStatus = [];
 
         return $changes;
-    }
-
-    public function hasChanges(): bool
-    {
-        return ($this->state !== null && $this->state->getStatus() === self::NEW)
-            || $this->state->getChanges() !== [];
-    }
-
-    public function getChanges(): array
-    {
-        if ($this->state === null) {
-            return $this->status === self::NEW ? $this->data : [];
-        }
-        return $this->state->getChanges();
     }
 
     /**
@@ -166,42 +201,25 @@ final class Node implements ConsumerInterface
      */
     public function resetState(): void
     {
-        if (isset($this->state)) {
-            $this->state->__destruct();
-        }
         $this->state = null;
-        $this->relationStatus = [];
     }
 
-    public static function compare(mixed $a, mixed $b): int
+    /**
+     * @param mixed $a
+     * @param mixed $b
+     *
+     * @return int
+     */
+    public static function compare($a, $b): int
     {
-        if ($a === $b) {
+        if ($a == $b) {
+            if (($a === null) !== ($b === null)) {
+                return 1;
+            }
+
             return 0;
         }
-        if ($a != $b || $a === null || $b === null) {
-            return 1;
-        }
 
-        $ta = [\gettype($a), \gettype($b)];
-
-        // array, boolean, double, integer, string
-        \sort($ta, SORT_STRING);
-
-        if ($ta[1] === 'string') {
-            if ($a === '' || $b === '') {
-                return -1;
-            }
-            if (\in_array($ta[0], ['integer', 'double'], true)) {
-                return (int)((string)$a !== (string)$b);
-            }
-        }
-
-        if ($ta[0] === 'boolean') {
-            $a = \filter_var($a, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            $b = \filter_var($b, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            return (int)($a !== $b);
-        }
-
-        return 1;
+        return ($a > $b) ? 1 : -1;
     }
 }

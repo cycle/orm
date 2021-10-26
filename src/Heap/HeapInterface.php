@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
@@ -11,32 +18,51 @@ interface HeapInterface
 {
     /**
      * Check if entity known to the heap.
+     *
+     * @param object $entity
+     *
+     * @return bool
      */
-    public function has(object $entity): bool;
+    public function has($entity): bool;
 
     /**
      * Get Node associated with given entity.
+     *
+     * @param object $entity
+     *
+     * @return Node|null
      */
-    public function get(object $entity): ?Node;
+    public function get($entity): ?Node;
 
     /**
      * Find object by key=>value scope. Attention, since all the keys are expected to be unique and indexed
      * the search will be completed on first value match.
+     *
+     * @param string $role
+     * @param array  $scope
+     *
+     * @return object|null
      */
-    public function find(string $role, array $scope): ?object;
+    public function find(string $role, array $scope);
 
     /**
      * Attach entity to the heap and create index path.
+     *
+     * @param object $entity
+     * @param Node   $node
+     * @param array  $index
      */
-    public function attach(object $entity, Node $node, array $index = []): void;
+    public function attach($entity, Node $node, array $index = []);
 
     /**
      * Detach entity from the Heap.
+     *
+     * @param object $entity
      */
-    public function detach(object $entity): void;
+    public function detach($entity);
 
     /**
      * Detach all objects from the heap.
      */
-    public function clean(): void;
+    public function clean();
 }

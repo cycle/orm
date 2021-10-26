@@ -1,23 +1,29 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasOne;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
-abstract class HasOneProxyMapperTest extends BaseTest
+abstract class HasOnePromiseTest extends BaseTest
 {
     use TableTrait;
 
@@ -156,87 +162,82 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        $aData = $this->extractEntity($a);
-        $bData = $this->extractEntity($b);
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
-
-        $this->assertInstanceOf(Profile::class, $a->profile);
-        $this->assertNull($b->profile);
+        $this->assertInstanceOf(Profile::class, $a->profile->__resolve());
+        $this->assertNull($b->profile->__resolve());
 
         $this->captureReadQueries();
-        $this->assertSame($a->profile, $a->profile);
-        $this->assertNull($b->profile);
+        $this->assertSame($a->profile->__resolve(), $a->profile->__resolve());
+        $this->assertNull($b->profile->__resolve());
         $this->assertNumReads(0);
 
-        $this->assertEquals('image.png', $a->profile->image);
+        $this->assertEquals('image.png', $a->profile->__resolve()->image);
     }
 
     public function testOnePromiseLoaded(): void
     {
-        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('user.id');
+        [$a, $b] = $selector->fetchAll();
 
-        $aData = $this->extractEntity($a);
-        $bData = $this->extractEntity($b);
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
-
-        $this->assertFalse($aData['profile']->hasValue());
-        $this->assertInstanceOf(Profile::class, $a->profile);
-        $this->assertTrue($aData['profile']->hasValue());
+        $this->assertFalse($a->profile->__loaded());
+        $this->assertInstanceOf(Profile::class, $a->profile->__resolve());
+        $this->assertTrue($a->profile->__loaded());
     }
 
     public function testOnePromiseRole(): void
     {
-        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('user.id');
+        [$a, $b] = $selector->fetchAll();
 
-        $aData = $this->extractEntity($a);
-        $bData = $this->extractEntity($b);
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
-
-        $this->assertSame('profile', $aData['profile']->getRole());
+        $this->assertSame('profile', $a->profile->__role());
     }
 
     public function testOnePromiseScope(): void
     {
-        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('user.id');
+        [$a, $b] = $selector->fetchAll();
 
-        $aData = $this->extractEntity($a);
-        $bData = $this->extractEntity($b);
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
-
-        $this->assertEquals(['user_id' => 1], $aData['profile']->getScope());
+        $this->assertEquals([
+            'user_id' => 1,
+        ], $a->profile->__scope());
     }
 
     public function testFetchPromisesFromHeap(): void
     {
-        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('user.id');
+        [$a, $b] = $selector->fetchAll();
 
-        $aData = $this->extractEntity($a);
-        $bData = $this->extractEntity($b);
-
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
+        $this->assertInstanceOf(PromiseInterface::class, $a->profile);
+        $this->assertInstanceOf(PromiseInterface::class, $b->profile);
 
         // warm up
         (new Select($this->orm, Profile::class))->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertSame($a->profile, $a->profile);
+        $this->assertSame($a->profile->__resolve(), $a->profile->__resolve());
         $this->assertNumReads(0);
 
         // invalid object can't be cached
         $this->captureReadQueries();
-        $this->assertNull($b->profile);
+        $this->assertNull($b->profile->__resolve());
         $this->assertNumReads(1);
 
-        $this->assertEquals('image.png', $a->profile->image);
+        $this->assertEquals('image.png', $a->profile->__resolve()->image);
     }
 
     public function testNoWriteOperations(): void
@@ -261,20 +262,22 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $this->captureWriteQueries();
         $this->captureReadQueries();
 
-        $this->save($a);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->run();
 
         // load related entity
         $this->assertNumReads(1);
 
-        // Delete related entity
+        // delete related entity
         $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
-        $this->assertNull($a->profile);
-        $this->assertNull($b->profile);
+        $this->assertNull($a->profile->__resolve());
+        $this->assertNull($b->profile->__resolve());
     }
 
     public function testMoveToAnotherUser(): void
@@ -288,11 +291,13 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $this->captureWriteQueries();
         $this->captureReadQueries();
 
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
 
         // load both promises
-        // todo decide this:
-        // $this->assertNumReads(2);
+        $this->assertNumReads(2);
 
         // delete related entity
         $this->assertNumWrites(1);
@@ -321,8 +326,7 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $tr->run();
 
         // load both promises
-        // todo decide assertNumReads
-        // $this->assertNumReads(2);
+        $this->assertNumReads(2);
 
         // delete related entity
         $this->assertNumWrites(1);

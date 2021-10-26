@@ -1,10 +1,17 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Cycle\Database\DatabaseInterface;
+use Spiral\Database\DatabaseInterface;
 
 /**
  * Defines the access to the SQL database.
@@ -13,21 +20,31 @@ interface SourceInterface
 {
     /**
      * Get database associated with the entity.
+     *
+     * @return DatabaseInterface
      */
     public function getDatabase(): DatabaseInterface;
 
     /**
      * Get table associated with the entity.
+     *
+     * @return string
      */
     public function getTable(): string;
 
     /**
-     * Associate query scope (or remove association).
+     * @deprecated Will be renamed to `withScope` in the Cycle ORM v2.
+     *
+     * @param ConstrainInterface|null $constrain
+     *
+     * @return SourceInterface
      */
-    public function withScope(?ScopeInterface $scope): self;
+    public function withConstrain(?ConstrainInterface $constrain): self;
 
     /**
-     * Return associated query scope.
+     * @deprecated Will be renamed to `getScope` in the Cycle ORM v2.
+     *
+     * @return ConstrainInterface|null
      */
-    public function getScope(): ?ScopeInterface;
+    public function getConstrain(): ?ConstrainInterface;
 }

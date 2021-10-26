@@ -1,83 +1,104 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Relation\Traits\HasSomeTrait;
-use Cycle\ORM\Relation\Traits\ToOneTrait;
-use Cycle\ORM\Transaction\Pool;
-use Cycle\ORM\Transaction\Tuple;
+use Cycle\ORM\Command\Branch\Condition;
+use Cycle\ORM\Command\Branch\ContextSequence;
+use Cycle\ORM\Command\Branch\Nil;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface as CC;
+use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Promise\ReferenceInterface;
+use Cycle\ORM\Relation\Traits\PromiseOneTrait;
 
 /**
  * Provides the ability to own and forward context values to child entity.
  */
 class HasOne extends AbstractRelation
 {
-    use HasSomeTrait;
-    use ToOneTrait;
+    use PromiseOneTrait;
 
-    public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
+    /**
+     * @inheritdoc
+     */
+    public function queue(CC $store, $entity, Node $node, $related, $original): CommandInterface
     {
-        $node = $tuple->node;
-        $original = $node->getRelation($this->getName());
-        $tuple->state->setRelation($this->getName(), $related);
-
         if ($original instanceof ReferenceInterface) {
-            if (!$load && $this->compareReferences($original, $related)) {
-                $original = $related instanceof ReferenceInterface ? $this->resolve($related, false) : $related;
-                if ($original === null) {
-                    // not found in heap
-                    $node->setRelation($this->getName(), $related);
-                    $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-                    return;
-                }
-            } else {
-                $original = $this->resolve($original, true);
-            }
-            $node->setRelation($this->getName(), $original);
+            $original = $this->resolve($original);
         }
 
         if ($related instanceof ReferenceInterface) {
-            $related = $this->resolve($related, true);
-            $tuple->state->setRelation($this->getName(), $related);
+            $related = $this->resolve($related);
         }
 
         if ($related === null) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-            if ($original === null) {
-                return;
+            if ($related === $original) {
+                // no changes
+                return new Nil();
             }
-            $this->deleteChild($pool, $original);
-            return;
-        }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
-        $rTuple = $pool->attachStore($related, true);
-        $this->assertValid($rTuple->node);
-
-        if ($original !== null && $original !== $related) {
-            $this->deleteChild($pool, $original);
+            if ($original !== null) {
+                return $this->deleteOriginal($original);
+            }
         }
+
+        $rStore = $this->orm->queueStore($related);
+        $rNode = $this->getNode($related, +1);
+        $this->assertValid($rNode);
+
+        // store command with mounted context paths
+        $rStore = $this->forwardContext(
+            $node,
+            $this->innerKey,
+            $rStore,
+            $rNode,
+            $this->outerKey
+        );
+
+        if ($original === null) {
+            return $rStore;
+        }
+
+        $sequence = new ContextSequence();
+        $sequence->addCommand($this->deleteOriginal($original));
+        $sequence->addPrimary($rStore);
+
+        return $sequence;
     }
 
-    public function queue(Pool $pool, Tuple $tuple): void
+    /**
+     * Delete original related entity of no other objects reference to it.
+     *
+     * @param object $original
+     *
+     * @return CommandInterface
+     */
+    protected function deleteOriginal($original): CommandInterface
     {
-        if ($tuple->task !== Tuple::TASK_STORE) {
-            return;
+        $rNode = $this->getNode($original);
+
+        if ($this->isNullable()) {
+            $store = $this->orm->queueStore($original);
+            $store->register($this->columnName($rNode, $this->outerKey), null, true);
+            $rNode->getState()->decClaim();
+
+            return new Condition($store, function () use ($rNode) {
+                return !$rNode->getState()->hasClaims();
+            });
         }
-        $related = $tuple->state->getRelation($this->getName());
-        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
-        if ($related instanceof ReferenceInterface && !$related->hasValue()) {
-            return;
-        }
-
-        $rTuple = $pool->offsetGet($related);
-        $rNode = $rTuple->node;
-
-        $this->applyChanges($tuple, $rTuple);
-        $rNode->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
+        // only delete original child when no other objects claim it
+        return new Condition($this->orm->queueDelete($original), function () use ($rNode) {
+            return !$rNode->getState()->hasClaims();
+        });
     }
 }

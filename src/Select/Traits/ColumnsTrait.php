@@ -1,10 +1,17 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
 
-use Cycle\Database\Query\SelectQuery;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Provides ability to add aliased columns into SelectQuery.
@@ -12,27 +19,27 @@ use Cycle\Database\Query\SelectQuery;
 trait ColumnsTrait
 {
     /**
-     * List of columns associated with the loader.
-     *
-     * @var string[]
-     */
-    protected array $columns;
-
-    /**
      * Return column name associated with given field.
+     *
+     * @param string $field
+     *
+     * @return string
      */
     public function fieldAlias(string $field): string
     {
-        return $this->columns[$field] ?? $field;
+        return $this->getColumns()[$field] ?? $field;
     }
 
     /**
      * Set columns into SelectQuery.
      *
+     * @param SelectQuery $query
      * @param bool        $minify    Minify column names (will work in case when query parsed in
      *                               FETCH_NUM mode).
      * @param string      $prefix    Prefix to be added for each column name.
      * @param bool        $overwrite When set to true existed columns will be removed.
+     *
+     * @return SelectQuery
      */
     protected function mountColumns(
         SelectQuery $query,
@@ -43,9 +50,9 @@ trait ColumnsTrait
         $alias = $this->getAlias();
         $columns = $overwrite ? [] : $query->getColumns();
 
-        foreach ($this->columns as $internal => $external) {
+        foreach ($this->getColumns() as $internal => $external) {
             $name = $external;
-            if (!\is_numeric($internal)) {
+            if (!is_numeric($internal)) {
                 $name = $internal;
             }
 
@@ -53,7 +60,7 @@ trait ColumnsTrait
 
             if ($minify) {
                 //Let's use column number instead of full name
-                $column = 'c' . \count($columns);
+                $column = 'c' . count($columns);
             }
 
             $columns[] = "{$alias}.{$external} AS {$prefix}{$column}";
@@ -64,12 +71,14 @@ trait ColumnsTrait
 
     /**
      * Return original column names.
+     *
+     * @return array
      */
     protected function columnNames(): array
     {
         $result = [];
-        foreach ($this->columns as $internal => $external) {
-            if (!\is_numeric($internal)) {
+        foreach ($this->getColumns() as $internal => $external) {
+            if (!is_numeric($internal)) {
                 $result[] = $internal;
             } else {
                 $result[] = $external;
@@ -81,6 +90,15 @@ trait ColumnsTrait
 
     /**
      * Table alias of the loader.
+     *
+     * @return string
      */
     abstract protected function getAlias(): string;
+
+    /**
+     * List of columns associated with the loader.
+     *
+     * @return array
+     */
+    abstract protected function getColumns(): array;
 }

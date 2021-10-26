@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
@@ -14,7 +21,11 @@ interface TypecastInterface
     /**
      * Typecast key-values into internal representation.
      *
+     * @param array $values
+     *
      * @throws TypecastException
+     *
+     * @return array
      */
     public function cast(array $values): array;
 }

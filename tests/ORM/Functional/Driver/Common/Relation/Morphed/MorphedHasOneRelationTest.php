@@ -1,15 +1,22 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\Morphed;
+namespace Cycle\ORM\Tests\Morphed;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
+use Cycle\ORM\Tests\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -73,7 +80,69 @@ abstract class MorphedHasOneRelationTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'image' => [
+                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
+                        Relation::TARGET => Image::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type',
+                        ],
+                    ],
+                    'posts' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Post::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'image' => [
+                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
+                        Relation::TARGET => Image::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type',
+                        ],
+                    ],
+                ],
+            ],
+            Image::class => [
+                Schema::ROLE => 'image',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'image',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'url'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 
     public function testFetchRelation(): void
@@ -366,10 +435,6 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
     public function testCreateWithRelated(): void
     {
-        $schemaArray = $this->getSchemaArray();
-        $schemaArray[User::class][Schema::RELATIONS]['posts'][Relation::SCHEMA][Relation::NULLABLE] = true;
-        $this->orm = $this->withSchema(new Schema($schemaArray));
-
         $p = new Post();
         $p->title = 'post title';
         $p->content = 'post content';
@@ -378,61 +443,22 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $p->image->url = 'new-post.png';
 
         $this->captureWriteQueries();
-        $this->save($p);
+        $tr = new Transaction($this->orm);
+        $tr->persist($p);
+        $tr->run();
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
-        $this->save($p);
+        $tr = new Transaction($this->orm);
+        $tr->persist($p);
+        $tr->run();
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $p = (new Select($this->orm, Post::class))
-            ->load('image')
-            ->wherePK(5)->fetchOne();
-
-        $this->assertSame('post title', $p->title);
-        $this->assertSame('new-post.png', $p->image->url);
-    }
-
-    public function testCreateWithRelatedAndBelongsToUser(): void
-    {
-        $schemaArray = $this->getSchemaArray();
-        $schemaArray[Post::class][Schema::RELATIONS]['user'] = [
-            Relation::TYPE => Relation::BELONGS_TO,
-            Relation::TARGET => User::class,
-            Relation::SCHEMA => [
-                Relation::CASCADE => true,
-                Relation::INNER_KEY => 'user_id',
-                Relation::OUTER_KEY => 'id',
-            ],
-        ];
-        $this->orm = $this->withSchema(new Schema($schemaArray));
-
-        $p = new Post();
-        $p->title = 'post title';
-        $p->content = 'post content';
-
-        $p->user = new User();
-        $p->user->balance = 100;
-        $p->user->email = 'email';
-
-        $p->image = new Image();
-        $p->image->url = 'new-post.png';
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(3);
-
-        // consecutive
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(0);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-        $p = (new Select($this->orm, Post::class))
-            ->load('image')
-            ->wherePK(5)->fetchOne();
+        $selector = new Select($this->orm, Post::class);
+        $selector->load('image');
+        $p = $selector->wherePK(5)->fetchOne();
 
         $this->assertSame('post title', $p->title);
         $this->assertSame('new-post.png', $p->image->url);
@@ -491,72 +517,5 @@ abstract class MorphedHasOneRelationTest extends BaseTest
 
         $this->assertSame('post-2-image.png', $u->image->url);
         $this->assertSame('user-image.png', $p->image->url);
-    }
-
-    private function getSchemaArray(): array
-    {
-        return [
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'image' => [
-                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
-                        Relation::TARGET => Image::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type',
-                        ],
-                    ],
-                    'posts' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Post::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Post::class => [
-                Schema::ROLE => 'post',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'post',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'image' => [
-                        Relation::TYPE => Relation::MORPHED_HAS_ONE,
-                        Relation::TARGET => Image::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type',
-                        ],
-                    ],
-                ],
-            ],
-            Image::class => [
-                Schema::ROLE => 'image',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'image',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'url'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ];
     }
 }

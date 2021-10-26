@@ -1,24 +1,29 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\Database\Exception\StatementException;
+use Spiral\Database\Exception\StatementException;
 
-abstract class HasManyScopeTest extends BaseTest
+abstract class HasManyConstrainTest extends BaseTest
 {
     use TableTrait;
 
@@ -63,10 +68,10 @@ abstract class HasManyScopeTest extends BaseTest
         );
     }
 
-    public function testScopeOrdered(): void
+    public function testConstrainOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -84,10 +89,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[2]->message);
     }
 
-    public function testScopeOrderedAsc(): void
+    public function testConstrainOrderedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
@@ -105,10 +110,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testScopeOrderedAscInLoad(): void
+    public function testConstrainOrderedAscInLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', [
@@ -128,10 +133,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testScopeOrderedPromisedAsc(): void
+    public function testConstrainOrderedPromisedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
@@ -149,10 +154,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testScopeOrderedAndWhere(): void
+    public function testConstrainOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
         ]);
 
@@ -168,10 +173,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
-    public function testScopeOrderedAndWherePromised(): void
+    public function testConstrainOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
         ]);
 
@@ -187,10 +192,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[0]->message);
     }
 
-    public function testScopeOrderedAndWhereReversed(): void
+    public function testConstrainOrderedAndWhereReversed(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
         ]);
 
@@ -206,10 +211,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testScopeOrderedAndWhereReversedInload(): void
+    public function testConstrainOrderedAndWhereReversedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
         ]);
 
@@ -227,10 +232,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testScopeOrderedAndWhereReversedPromised(): void
+    public function testConstrainOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
         ]);
 
@@ -246,10 +251,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.2', $b->comments[1]->message);
     }
 
-    public function testScopeOrderedAndCustomWhere(): void
+    public function testConstrainOrderedAndCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
         ]);
 
@@ -265,10 +270,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testScopeOrderedAndCustomWhereInload(): void
+    public function testConstrainOrderedAndCustomWhereInload(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
         ]);
 
@@ -285,10 +290,10 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
-    public function testOrderByWithScopeOrdered(): void
+    public function testOrderByWithConstrainOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [
                 Relation::ORDER_BY => ['@.level' => 'DESC'],
             ],
@@ -313,7 +318,7 @@ abstract class HasManyScopeTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Relation::SCHEMA => [
-                Relation::ORDER_BY => ['@.level' => 'DESC'],
+                Relation::ORDER_BY => ['@.level' => 'ASC'],
             ],
         ]);
 
@@ -324,37 +329,14 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 1', $a->comments[3]->message);
+        $this->assertSame('msg 4', $a->comments[3]->message);
+        $this->assertSame('msg 3', $a->comments[2]->message);
+        $this->assertSame('msg 2', $a->comments[1]->message);
+        $this->assertSame('msg 1', $a->comments[0]->message);
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        $this->assertSame('msg 2.3', $b->comments[2]->message);
         $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[2]->message);
-    }
-
-    public function testWithOrderByLazyLoad(): void
-    {
-        $this->orm = $this->withCommentsSchema([
-            Relation::SCHEMA => [
-                Relation::ORDER_BY => ['@.level' => 'DESC'],
-            ],
-        ]);
-
-        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
-
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
-
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 1', $a->comments[3]->message);
-
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[2]->message);
+        $this->assertSame('msg 2.1', $b->comments[0]->message);
     }
 
     public function testWithOrderByAltered(): void
@@ -459,11 +441,11 @@ abstract class HasManyScopeTest extends BaseTest
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
-    public function testInloadWithScopeOrderedAndWhere(): void
+    public function testInloadWithConstrainOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
@@ -489,7 +471,7 @@ abstract class HasManyScopeTest extends BaseTest
 
         $this->orm = $this->withCommentsSchema([
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
-            Schema::SCOPE => new Select\QueryScope([], ['@.column' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'DESC']),
         ]);
 
         // sort by users and then by comments and only include comments with level > 3
@@ -498,11 +480,11 @@ abstract class HasManyScopeTest extends BaseTest
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
 
-    protected function withCommentsSchema(array $relationSchema): ORMInterface
+    protected function withCommentsSchema(array $relationSchema)
     {
         $eSchema = [];
-        if (isset($relationSchema[Schema::SCOPE])) {
-            $eSchema[Schema::SCOPE] = $relationSchema[Schema::SCOPE];
+        if (isset($relationSchema[Schema::CONSTRAIN])) {
+            $eSchema[Schema::CONSTRAIN] = $relationSchema[Schema::CONSTRAIN];
         }
 
         $rSchema = $relationSchema[Relation::SCHEMA] ?? [];
@@ -527,7 +509,7 @@ abstract class HasManyScopeTest extends BaseTest
                         ] + $rSchema,
                     ],
                 ],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
             Comment::class => [
                 Schema::ROLE => 'comment',

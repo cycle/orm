@@ -1,15 +1,21 @@
 <?php
 
+/**
+ * Spiral Framework.
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
@@ -112,7 +118,7 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
             'version_distribution' => [
                 Schema::ROLE => 'version_context',
@@ -146,7 +152,7 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
             'module' => [
                 Schema::ROLE => 'module',
@@ -158,7 +164,7 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
                 Schema::TYPECAST => ['id' => 'int'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
     }

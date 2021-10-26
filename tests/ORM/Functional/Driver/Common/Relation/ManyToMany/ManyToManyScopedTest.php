@@ -1,22 +1,28 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Fixtures\SortByLevelScope;
-use Cycle\ORM\Tests\Fixtures\SortByLevelDESCScope;
+use Cycle\ORM\Tests\Fixtures\SortByLevelConstrain;
+use Cycle\ORM\Tests\Fixtures\SortByLevelDESCConstrain;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
-abstract class ManyToManyScopedTest extends BaseTest
+abstract class ManyToManyConstrainedTest extends BaseTest
 {
     use TableTrait;
 
@@ -85,7 +91,7 @@ abstract class ManyToManyScopedTest extends BaseTest
     public function testOrderedByScope(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -120,7 +126,7 @@ abstract class ManyToManyScopedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'scope' => new Select\QueryScope([], ['@.level' => 'DESC']),
+            'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ])->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -148,7 +154,7 @@ abstract class ManyToManyScopedTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD,
-            'scope' => new Select\QueryScope([], ['@.level' => 'ASC']),
+            'constrain' => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -176,7 +182,7 @@ abstract class ManyToManyScopedTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD,
-            'scope' => new Select\QueryScope([], ['@.level' => 'DESC']),
+            'constrain' => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ])->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
@@ -192,7 +198,7 @@ abstract class ManyToManyScopedTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testGlobalScope(): void
+    public function testGlobalConstrain(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -227,7 +233,7 @@ abstract class ManyToManyScopedTest extends BaseTest
                 Schema::COLUMNS => ['id', 'name', 'level'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByLevelScope::class,
+                Schema::CONSTRAIN => SortByLevelConstrain::class,
             ],
             TagContext::class => [
                 Schema::ROLE => 'tag_context',
@@ -265,7 +271,7 @@ abstract class ManyToManyScopedTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testGlobalScopeDESC(): void
+    public function testGlobalConstrainDESC(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -300,7 +306,7 @@ abstract class ManyToManyScopedTest extends BaseTest
                 Schema::COLUMNS => ['id', 'name', 'level'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByLevelDESCScope::class,
+                Schema::CONSTRAIN => SortByLevelDESCConstrain::class,
             ],
             TagContext::class => [
                 Schema::ROLE => 'tag_context',
@@ -338,7 +344,7 @@ abstract class ManyToManyScopedTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testGlobalScopeDESCButASC(): void
+    public function testGlobalConstrainDESCButASC(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -373,7 +379,7 @@ abstract class ManyToManyScopedTest extends BaseTest
                 Schema::COLUMNS => ['id', 'name', 'level'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByLevelDESCScope::class,
+                Schema::CONSTRAIN => SortByLevelDESCConstrain::class,
             ],
             TagContext::class => [
                 Schema::ROLE => 'tag_context',
@@ -395,7 +401,7 @@ abstract class ManyToManyScopedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags', [
-            'scope' => new SortByLevelScope(),
+            'constrain' => new SortByLevelConstrain(),
         ])->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
@@ -413,7 +419,7 @@ abstract class ManyToManyScopedTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testGlobalScopePromised(): void
+    public function testGlobalConstrainPromised(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -449,7 +455,7 @@ abstract class ManyToManyScopedTest extends BaseTest
                 Schema::COLUMNS => ['id', 'name', 'level'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByLevelScope::class,
+                Schema::CONSTRAIN => SortByLevelConstrain::class,
             ],
             TagContext::class => [
                 Schema::ROLE => 'tag_context',
@@ -487,7 +493,7 @@ abstract class ManyToManyScopedTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testGlobalScopeDESCPromised(): void
+    public function testGlobalConstrainDESCPromised(): void
     {
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -523,7 +529,7 @@ abstract class ManyToManyScopedTest extends BaseTest
                 Schema::COLUMNS => ['id', 'name', 'level'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByLevelDESCScope::class,
+                Schema::CONSTRAIN => SortByLevelDESCConstrain::class,
             ],
             TagContext::class => [
                 Schema::ROLE => 'tag_context',

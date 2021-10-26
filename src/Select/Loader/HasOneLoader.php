@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -10,9 +17,9 @@ use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Cycle\Database\Query\SelectQuery;
+use Spiral\Database\Injection\Parameter;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
@@ -23,13 +30,14 @@ use Cycle\Database\Query\SelectQuery;
  */
 class HasOneLoader extends JoinableLoader
 {
-    use JoinOneTableTrait;
     use WhereTrait;
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
+     *
+     * @var array
      */
-    protected array $options = [
+    protected $options = [
         'load' => false,
         'scope' => true,
         'method' => self::INLOAD,
@@ -39,6 +47,9 @@ class HasOneLoader extends JoinableLoader
         'where' => null,
     ];
 
+    /**
+     * {@inheritdoc}
+     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->options['using'] !== null) {
@@ -46,7 +57,20 @@ class HasOneLoader extends JoinableLoader
             return parent::configureQuery($query, $outerKeys);
         }
 
-        $this->configureParentQuery($query, $outerKeys);
+        $localKey = $this->localKey(Relation::OUTER_KEY);
+
+        if ($this->isJoined()) {
+            $query->join(
+                $this->getJoinMethod(),
+                $this->getJoinTable()
+            )->on(
+                $localKey,
+                $this->parentKey(Relation::INNER_KEY)
+            );
+        } else {
+            // relation is loaded using external query
+            $query->where($localKey, 'IN', new Parameter($outerKeys));
+        }
 
         // user specified WHERE conditions
         $this->setWhere(
@@ -59,13 +83,16 @@ class HasOneLoader extends JoinableLoader
         return parent::configureQuery($query);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function initNode(): AbstractNode
     {
         $node = new SingularNode(
             $this->columnNames(),
-            (array)$this->define(Schema::PRIMARY_KEY),
-            (array)$this->schema[Relation::OUTER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            $this->define(Schema::PRIMARY_KEY),
+            $this->schema[Relation::OUTER_KEY],
+            $this->schema[Relation::INNER_KEY]
         );
 
         $typecast = $this->define(Schema::TYPECAST);

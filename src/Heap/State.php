@@ -1,67 +1,65 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
+use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Context\ConsumerInterface;
-use Cycle\ORM\Heap\Traits\WaitFieldTrait;
+use Cycle\ORM\Context\ProducerInterface;
+use Cycle\ORM\Heap\Traits\ClaimTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
-use JetBrains\PhpStorm\ExpectedValues;
+use Cycle\ORM\Heap\Traits\VisitorTrait;
 
 /**
  * Current node state.
  */
-final class State implements ConsumerInterface
+final class State implements ConsumerInterface, ProducerInterface
 {
+    use ClaimTrait;
     use RelationTrait;
-    use WaitFieldTrait;
+    use VisitorTrait;
 
-    /** @var array<string, mixed> */
-    private array $data;
+    /** @var int */
+    private $state;
 
-    private array $transactionData;
+    /** @var array */
+    private $data;
 
-    /** @var array<string, Node[]> */
-    private array $storage = [];
+    /** @var array */
+    private $transactionData = [];
 
-    public function __construct(
-        #[ExpectedValues(valuesFromClass: Node::class)]
-        private int $state,
-        array $data
-    ) {
-        $this->data = $data;
-        $this->transactionData = $state === Node::NEW ? [] : $data;
-    }
+    /** @var ContextCarrierInterface|null */
+    private $command;
+
+    /** @var ContextCarrierInterface[] */
+    private $consumers;
+
+    /** @var \SplObjectStorage[] */
+    private $storage = [];
 
     /**
-     * Storage to store temporary cross entity nodes.
-     *
-     * @return Node[]
-     *
-     * @internal
+     * @param int   $state
+     * @param array $data
      */
-    public function getStorage(string $type): array
+    public function __construct(int $state, array $data)
     {
-        return $this->storage[$type] ?? ($this->storage[$type] = []);
-    }
-
-    public function addToStorage(string $type, Node $node): void
-    {
-        $this->storage[$type][] = $node;
-    }
-
-    public function clearStorage(string $type = null): void
-    {
-        if ($type === null) {
-            $this->storage = [];
-        } else {
-            unset($this->storage[$type]);
-        }
+        $this->state = $state;
+        $this->data = $data;
+        $this->transactionData = $data;
     }
 
     /**
      * Set new state value.
+     *
+     * @param int $state
      */
     public function setStatus(int $state): void
     {
@@ -70,6 +68,8 @@ final class State implements ConsumerInterface
 
     /**
      * Get current state.
+     *
+     * @return int
      */
     public function getStatus(): int
     {
@@ -78,9 +78,15 @@ final class State implements ConsumerInterface
 
     /**
      * Set new state data (will trigger state handlers).
+     *
+     * @param array $data
      */
     public function setData(array $data): void
     {
+        if ($data === []) {
+            return;
+        }
+
         foreach ($data as $column => $value) {
             $this->register($column, $value);
         }
@@ -88,6 +94,8 @@ final class State implements ConsumerInterface
 
     /**
      * Get current state data.
+     *
+     * @return array
      */
     public function getData(): array
     {
@@ -96,80 +104,99 @@ final class State implements ConsumerInterface
 
     /**
      * Get current state data.
+     *
+     * @return array
      */
     public function getTransactionData(): array
     {
         return $this->transactionData;
     }
 
-    public function updateTransactionData(array $fields = null): void
+    /**
+     * Set the reference to the object creation command (non executed).
+     *
+     * @param ContextCarrierInterface|null $cmd
+     *
+     * @internal
+     */
+    public function setCommand(ContextCarrierInterface $cmd = null): void
     {
-        if ($fields === null) {
-            $this->transactionData = array_merge($this->transactionData, $this->data);
-            $this->state = Node::MANAGED;
-            return;
-        }
-        $changes = false;
-        foreach ($this->data as $field => $value) {
-            if (in_array($field, $fields, true)) {
-                $this->transactionData[$field] = $this->data[$field];
-                continue;
-            }
-            $changes = $changes || Node::compare($value, $this->transactionData[$field] ?? null) !== 0;
-        }
-        if (!$changes) {
-            $this->state = Node::MANAGED;
-        }
-    }
-
-    public function getChanges(): array
-    {
-        if ($this->state === Node::NEW) {
-            return $this->data;
-        }
-
-        return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
+        $this->command = $cmd;
     }
 
     /**
-     * @return mixed|null
+     * @return ContextCarrierInterface|null
+     *
+     * @internal
      */
-    public function getValue(string $key): mixed
+    public function getCommand(): ?ContextCarrierInterface
     {
-        return array_key_exists($key, $this->data) ? $this->data[$key] : ($this->transactionData[$key] ?? null);
+        return $this->command;
     }
 
-    public function hasValue(string $key, bool $allowNull = true): bool
+    /**
+     * Storage to store temporary cross entity links.
+     *
+     * @param string $type
+     *
+     * @return \SplObjectStorage
+     *
+     * @internal
+     */
+    public function getStorage(string $type): \SplObjectStorage
     {
-        if (!$allowNull) {
-            return isset($this->data[$key]) || isset($this->transactionData[$key]);
+        if (!isset($this->storage[$type])) {
+            $this->storage[$type] = new \SplObjectStorage();
         }
-        return array_key_exists($key, $this->data) || array_key_exists($key, $this->transactionData);
+
+        return $this->storage[$type];
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function forward(
+        string $key,
+        ConsumerInterface $consumer,
+        string $target,
+        bool $trigger = false,
+        int $stream = ConsumerInterface::DATA
+    ): void {
+        $this->consumers[$key][] = [$consumer, $target, $stream];
+
+        if ($trigger || !empty($this->data[$key])) {
+            $this->register($key, $this->data[$key] ?? null, false, $stream);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function register(
         string $key,
-        mixed $value,
+        $value,
+        bool $fresh = false,
         int $stream = self::DATA
     ): void {
-        $this->freeWaitingField($key);
+        if (!$fresh) {
+            // custom, non value objects can be supported here
+            $fresh = ($this->data[$key] ?? null) != $value;
+        }
 
-        \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
-            "State(%s):Register {$key} => %s\n",
-            spl_object_id($this),
-            var_export($value, true)
-        );
+        if (!array_key_exists($key, $this->transactionData)) {
+            $this->transactionData[$key] = $value;
+        }
 
         $this->data[$key] = $value;
-    }
 
-    public function isReady(): bool
-    {
-        return $this->waitingFields === [];
-    }
-
-    public function __destruct()
-    {
-        unset($this->relations, $this->storage);
+        // cascade
+        if (!empty($this->consumers[$key])) {
+            foreach ($this->consumers[$key] as $id => $consumer) {
+                /** @var ConsumerInterface $acc */
+                $acc = $consumer[0];
+                $acc->register($consumer[1], $value, $fresh, $consumer[2]);
+                $fresh = false;
+            }
+        }
     }
 }

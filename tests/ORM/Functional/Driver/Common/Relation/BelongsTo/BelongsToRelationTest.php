@@ -1,8 +1,15 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\BelongsTo;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Heap;
@@ -11,13 +18,12 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Cycle\Database\Injection\Parameter;
+use Spiral\Database\Injection\Parameter;
 
 abstract class BelongsToRelationTest extends BaseTest
 {
@@ -72,7 +78,58 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->makeFK('profile', 'user_id', 'user', 'id');
         $this->makeFK('nested', 'profile_id', 'profile', 'id');
 
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+            Profile::class => [
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'user' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => User::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                ],
+            ],
+            Nested::class => [
+                Schema::ROLE => 'nested',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'nested',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'profile_id', 'label'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'profile' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'profile_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                ],
+            ],
+        ]));
     }
 
     public function testFetchRelation(): void
@@ -218,7 +275,9 @@ abstract class BelongsToRelationTest extends BaseTest
         $p->image = 'magic.gif';
         $p->user = $u;
 
-        $this->save($p);
+        $tr = new Transaction($this->orm);
+        $tr->persist($p);
+        $tr->run();
 
         $this->assertEquals(3, $u->id);
         $this->assertEquals(4, $p->id);
@@ -258,13 +317,18 @@ abstract class BelongsToRelationTest extends BaseTest
         $p->image = 'magic.gif';
         $p->user = $u;
 
-        $this->save($p);
+        $tr = new Transaction($this->orm);
+        $tr->persist($p);
+        $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
-        $p = (new Select($this->orm, Profile::class))->load('user')->wherePK(4)->fetchOne();
+        $selector = new Select($this->orm, Profile::class);
+        $p = $selector->load('user')->wherePK(4)->fetchOne();
 
         $this->captureWriteQueries();
-        $this->save($p);
+        $tr = new Transaction($this->orm);
+        $tr->persist($p);
+        $tr->run();
         $this->assertNumWrites(0);
     }
 
@@ -338,21 +402,24 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testExchangeParents(): void
     {
-        /**
-         * @var Profile $a
-         * @var Profile $b
-         */
-        [$a, $b] = (new Select($this->orm, Profile::class))
-            ->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-            ->load('user')->fetchAll();
+        $s = new Select($this->orm, Profile::class);
+        [$a, $b] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
+                     ->load('user')->fetchAll();
 
         [$a->user, $b->user] = [$b->user, $a->user];
+
         $this->captureWriteQueries();
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
         $this->assertNumWrites(2);
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
         $this->assertNumWrites(0);
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
@@ -394,15 +461,19 @@ abstract class BelongsToRelationTest extends BaseTest
         $n->profile->user->balance = 999;
 
         $this->captureWriteQueries();
-        $this->save($n);
+        $tr = new Transaction($this->orm);
+        $tr->persist($n);
+        $tr->run();
         $this->assertNumWrites(3);
 
         $this->captureWriteQueries();
-        $this->save($n);
+        $tr = new Transaction($this->orm);
+        $tr->persist($n);
+        $tr->run();
         $this->assertNumWrites(0);
 
-        $n = (new Select($this->orm->withHeap(new Heap()), Nested::class))
-            ->wherePK(2)->load('profile.user')->fetchOne();
+        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
+        $n = $s->wherePK(2)->load('profile.user')->fetchOne();
 
         $this->assertSame('profile', $n->profile->image);
         $this->assertSame('new@email.com', $n->profile->user->email);
@@ -427,76 +498,5 @@ abstract class BelongsToRelationTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame('nested-label', $n->label);
-    }
-
-    /**
-     * Nullable BelongsTo relation should not be transformed to RefersTo
-     */
-    public function testSetNullable(): void
-    {
-        $schema = $this->getSchemaArray();
-        $schema[Profile::class][Schema::RELATIONS]['user'][Relation::SCHEMA][Relation::NULLABLE] = true;
-        $this->orm = $this->withSchema(new Schema($schema));
-
-        $this->assertInstanceOf(
-            Relation\BelongsTo::class,
-            $this->orm->getRelationMap(Profile::class)->getRelations()['user']
-        );
-    }
-
-    private function getSchemaArray(): array
-    {
-        return [
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-            Profile::class => [
-                Schema::ROLE => 'profile',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'profile',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'image'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'user' => [
-                        Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => User::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'user_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                ],
-            ],
-            Nested::class => [
-                Schema::ROLE => 'nested',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'nested',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'profile_id', 'label'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'profile' => [
-                        Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => Profile::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'profile_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                ],
-            ],
-        ];
     }
 }

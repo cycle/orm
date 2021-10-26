@@ -1,19 +1,25 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Select;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\Database\Injection\Parameter;
+use Spiral\Database\Injection\Parameter;
 
 abstract class QueryBuilderTest extends BaseTest
 {
@@ -93,7 +99,7 @@ abstract class QueryBuilderTest extends BaseTest
                 ],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
     }

@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Spiral Framework.
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
@@ -12,7 +19,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\JoinableInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
-use Cycle\Database\Query\SelectQuery;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Loads object sub-section (column subset).
@@ -21,21 +28,37 @@ final class EmbeddedLoader implements JoinableInterface
 {
     use ColumnsTrait;
 
-    private ?LoaderInterface $parent = null;
+    /** @var ORMInterface @internal */
+    private $orm;
 
-    private array $options = [
+    /** @var string */
+    private $target;
+
+    /** @var LoaderInterface */
+    private $parent;
+
+    /** @var array */
+    private $options = [
         'load' => false,
         'minify' => true,
     ];
 
-    public function __construct(
-        private ORMInterface $orm,
-        private string $target
-    ) {
+    /** @var array */
+    private $columns = [];
+
+    /**
+     * @param ORMInterface $orm
+     * @param string       $target
+     */
+    public function __construct(ORMInterface $orm, string $target)
+    {
+        $this->orm = $orm;
+        $this->target = $target;
+
         // never duplicate primary key in data selection
-        $primaryKey = (array)$this->define(Schema::PRIMARY_KEY);
+        $primaryKey = $this->define(Schema::PRIMARY_KEY);
         foreach ($this->define(Schema::COLUMNS) as $internal => $external) {
-            if (!in_array($internal, $primaryKey, true) && !in_array($external, $primaryKey, true)) {
+            if ($internal !== $primaryKey && $external !== $primaryKey) {
                 $this->columns[$internal] = $external;
             }
         }
@@ -46,7 +69,7 @@ final class EmbeddedLoader implements JoinableInterface
      */
     public function __destruct()
     {
-        unset($this->parent);
+        $this->parent = null;
     }
 
     /**
@@ -57,17 +80,26 @@ final class EmbeddedLoader implements JoinableInterface
         $this->parent = null;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getAlias(): string
     {
         // always fallback to parent table name
         return $this->parent->getAlias();
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getTarget(): string
     {
         return $this->target;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
         $loader = clone $this;
@@ -77,6 +109,9 @@ final class EmbeddedLoader implements JoinableInterface
         return $loader;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function isJoined(): bool
     {
         return true;
@@ -84,12 +119,17 @@ final class EmbeddedLoader implements JoinableInterface
 
     /**
      * Indication that loader want to load data.
+     *
+     * @return bool
      */
     public function isLoaded(): bool
     {
         return $this->options['load'] ?? false;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded() && $this->parent->isLoaded()) {
@@ -99,11 +139,14 @@ final class EmbeddedLoader implements JoinableInterface
         return $query;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function createNode(): AbstractNode
     {
         $node = new EmbeddedNode(
             $this->columnNames(),
-            (array)$this->orm->getSchema()->define($this->parent->getTarget(), Schema::PRIMARY_KEY)
+            $this->orm->getSchema()->define($this->parent->getTarget(), Schema::PRIMARY_KEY)
         );
 
         $typecast = $this->define(Schema::TYPECAST);
@@ -119,28 +162,31 @@ final class EmbeddedLoader implements JoinableInterface
         return $node;
     }
 
-    public function loadData(AbstractNode $node, bool $includeRole = false): void
+    /**
+     * @inheritDoc
+     */
+    public function loadData(AbstractNode $node): void
     {
         // embedded entities does not support inner loaders... for now! :)
     }
 
     /**
+     * @return array
+     */
+    protected function getColumns(): array
+    {
+        return $this->columns;
+    }
+
+    /**
      * Define schema option associated with the entity.
+     *
+     * @param int $property
      *
      * @return mixed
      */
     protected function define(int $property)
     {
         return $this->orm->getSchema()->define($this->target, $property);
-    }
-
-    public function setSubclassesLoading(bool $enabled): void
-    {
-    }
-
-    public function isHierarchical(): bool
-    {
-        // Embedded can't be hierarchical
-        return false;
     }
 }

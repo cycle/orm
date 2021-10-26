@@ -1,71 +1,97 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
 
+use Cycle\ORM\Command\ContextCarrierInterface;
+use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
-use Cycle\ORM\Command\StoreCommand;
+use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
-use Cycle\ORM\Heap\State;
-use Cycle\Database\DatabaseInterface;
+use Spiral\Database\DatabaseInterface;
 
 /**
  * Update data CAN be modified by parent commands using context.
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-final class Update extends StoreCommand implements ScopeCarrierInterface
+final class Update extends DatabaseCommand implements ContextCarrierInterface, ScopeCarrierInterface
 {
+    use ContextTrait;
     use ErrorTrait;
     use ScopeTrait;
 
-    /** @var callable|null */
-    private $mapper;
+    /** @var array */
+    protected $data = [];
 
-    public function __construct(
-        DatabaseInterface $db,
-        string $table,
-        State $state,
-        array $primaryKeys,
-        callable $mapper = null
-    ) {
-        parent::__construct($db, $table, $state);
-        $this->waitScope(...$primaryKeys);
-        $this->mapper = $mapper;
+    /** @var array */
+    protected $appendix = [];
+
+    /**
+     * @param DatabaseInterface $db
+     * @param string            $table
+     * @param array             $data
+     * @param array             $where
+     */
+    public function __construct(DatabaseInterface $db, string $table, array $data = [], array $where = [])
+    {
+        parent::__construct($db, $table);
+        $this->data = $data;
+        $this->scope = $where;
+    }
+
+    /**
+     * Wait for the context value.
+     *
+     * @param string $key
+     * @param bool   $required
+     */
+    public function waitContext(string $key, bool $required = true): void
+    {
+        // update command are always "soft" and must wait for all incoming keys
+        $this->waitContext[$key] = null;
     }
 
     /**
      * Avoid opening transaction when no changes are expected.
+     *
+     * @return DatabaseInterface|null
      */
     public function getDatabase(): ?DatabaseInterface
     {
-        if ($this->scope === [] || $this->state->getChanges() === []) {
+        if ($this->isEmpty()) {
             return null;
         }
 
         return parent::getDatabase();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function isReady(): bool
     {
-        return $this->isScopeReady();
+        return $this->waitContext === [] && $this->waitScope === [];
     }
 
-    public function hasData(): bool
+    /**
+     * Update values, context not included.
+     *
+     * @return array
+     */
+    public function getData(): array
     {
-        return $this->columns !== [] || $this->state->getChanges() !== [];
-    }
-
-    public function getStoreData(): array
-    {
-        if ($this->appendix !== []) {
-            $this->state->setData($this->appendix);
-        }
-        $data = $this->state->getChanges();
-        return array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data));
+        return array_merge($this->data, $this->context, $this->appendix);
     }
 
     /**
@@ -74,41 +100,62 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
     public function execute(): void
     {
         if ($this->scope === []) {
-            throw new CommandException('Unable to execute update command without a scope.');
+            throw new CommandException('Unable to execute update command without a scope');
         }
 
-        if ($this->appendix !== []) {
-            $this->state->setData($this->appendix);
+        if (!$this->isEmpty()) {
+            $this->db->update($this->table, $this->getData(), $this->scope)->run();
         }
-
-        $allChanges = $changes = $this->state->getChanges();
-        $data = $changes !== [] && $this->mapper !== null ? ($this->mapper)($changes) : $changes;
-        $fields = array_keys($changes);
-        if ($data !== [] || $this->columns !== []) {
-            $this->affectedRows = $this->db
-                ->update(
-                    $this->table,
-                    array_merge($this->columns, $data),
-                    $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
-                )
-                ->run();
-        }
-        $this->state->updateTransactionData($fields !== [] && \count($fields) === \count($allChanges) ? null : $fields);
 
         parent::execute();
     }
 
-    public function register(string $key, mixed $value, int $stream = self::DATA): void
+    /**
+     * {@inheritdoc}
+     */
+    public function isEmpty(): bool
     {
-        if ($stream === self::SCOPE) {
+        return ($this->data === [] && $this->context === []) || $this->scope === [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
+    {
+        if ($stream == self::SCOPE) {
             if (empty($value)) {
                 return;
             }
 
+            $this->freeScope($key);
             $this->setScope($key, $value);
 
             return;
         }
-        $this->state->register($key, $value);
+
+        if ($fresh || $value !== null) {
+            $this->freeContext($key);
+        }
+
+        if ($fresh) {
+            // we only accept context when context has changed to avoid un-necessary
+            // update commands
+            $this->setContext($key, $value);
+        }
+    }
+
+    /**
+     * Register optional value to store in database. Having this value would not cause command to be executed
+     * if data or context is empty.
+     *
+     * Example: $update->registerAppendix("updated_at", new DateTime());
+     *
+     * @param string $key
+     * @param mixed  $value
+     */
+    public function registerAppendix(string $key, $value): void
+    {
+        $this->appendix[$key] = $value;
     }
 }

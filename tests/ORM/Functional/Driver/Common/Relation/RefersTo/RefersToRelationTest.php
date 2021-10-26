@@ -1,8 +1,15 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\RefersTo;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Heap;
@@ -10,7 +17,6 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -39,7 +45,47 @@ abstract class RefersToRelationTest extends BaseTest
             'user_id' => ['table' => 'user', 'column' => 'id'],
         ]);
 
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance', 'comment_id'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::RELATIONS => [
+                    'lastComment' => [
+                        Relation::TYPE => Relation::REFERS_TO,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'comment_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 
     public function testCreateUserWithDoubleReference(): void
@@ -54,7 +100,11 @@ abstract class RefersToRelationTest extends BaseTest
         $u->addComment($c);
 
         $this->captureWriteQueries();
-        $this->save($u);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+
         $this->assertNumWrites(3);
 
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
@@ -76,7 +126,11 @@ abstract class RefersToRelationTest extends BaseTest
         $u->addComment($c);
 
         $this->captureWriteQueries();
-        $this->save($u);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+
         $this->assertNumWrites(3);
 
         $u2 = new User();
@@ -85,15 +139,13 @@ abstract class RefersToRelationTest extends BaseTest
         $u2->lastComment = $c;
 
         $this->captureWriteQueries();
-        $this->save($u2);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u2);
+        $tr->run();
         $this->assertNumWrites(1);
 
-        $this->captureWriteQueries();
-        $this->save($u2);
-        $this->assertNumWrites(0);
-
-        $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
-            ->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u3 = $s->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
 
         $this->assertNotNull($u3->lastComment);
         $this->assertEquals($u3->lastComment->id, $u->comments[0]->id);
@@ -105,7 +157,9 @@ abstract class RefersToRelationTest extends BaseTest
         $u->email = 'email@email.com';
         $u->balance = 100;
 
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
 
         $c = new Comment();
         $c->message = 'last comment';
@@ -113,13 +167,15 @@ abstract class RefersToRelationTest extends BaseTest
         $u->addComment($c);
 
         $this->captureWriteQueries();
-        $this->save($u);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+
         $this->assertNumWrites(2);
 
-        $u = (new Select($this->orm->withHeap(new Heap()), User::class))
-            ->load('lastComment')
-            ->load('comments')
-            ->wherePK(1)->fetchOne();
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
         $this->assertSame($u->lastComment, $u->comments[0]);
@@ -223,65 +279,5 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->assertNull($u->lastComment);
         $this->assertCount(1, $u->comments);
-    }
-
-    /**
-     * Not nullable RefersTo relation should be transformed to BelongsTo
-     */
-    public function testSetNotNullable(): void
-    {
-        $schema = $this->getSchemaArray();
-        $schema[User::class][Schema::RELATIONS]['lastComment'][Relation::SCHEMA][Relation::NULLABLE] = false;
-        $this->orm = $this->withSchema(new Schema($schema));
-
-        $this->assertInstanceOf(
-            Relation\BelongsTo::class,
-            $this->orm->getRelationMap(User::class)->getRelations()['lastComment']
-        );
-    }
-
-    private function getSchemaArray(): array
-    {
-        return [
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance', 'comment_id'],
-                Schema::TYPECAST => ['id' => 'int'],
-                Schema::RELATIONS => [
-                    'lastComment' => [
-                        Relation::TYPE => Relation::REFERS_TO,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'comment_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ];
     }
 }

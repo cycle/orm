@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Traits;
@@ -22,6 +29,6 @@ trait ErrorTrait
             }
         }
 
-        return sprintf('%s(%s)', $this::class, implode(', ', $missing));
+        return sprintf('%s(%s)', static::class, implode(', ', $missing));
     }
 }

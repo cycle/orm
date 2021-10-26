@@ -1,8 +1,15 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
@@ -11,9 +18,8 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
@@ -89,7 +95,7 @@ abstract class HasManyRelationTest extends BaseTest
                 Schema::COLUMNS => ['id', 'user_id', 'message'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
     }
@@ -230,15 +236,19 @@ abstract class HasManyRelationTest extends BaseTest
         $e->comments[1]->message = 'msg B';
 
         $this->captureWriteQueries();
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
         $this->assertNumWrites(3);
 
         // consecutive test
         $this->captureWriteQueries();
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
         $this->assertNumWrites(0);
 
-        // $this->assertEquals(3, $e->id); todo ?
+        $this->assertEquals(3, $e->id);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
@@ -334,25 +344,27 @@ abstract class HasManyRelationTest extends BaseTest
                 Schema::COLUMNS => ['id', 'user_id', 'message'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
 
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('user.id')->load('comments');
+
         /** @var User $e */
-        $e = (new Select($this->orm, User::class))
-            ->orderBy('user.id')
-            ->load('comments')
-            ->wherePK(1)
-            ->fetchOne();
+        $e = $selector->wherePK(1)->fetchOne();
 
         $e->comments->remove(1);
 
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector->orderBy('user.id')->load('comments');
+
         /** @var User $e */
-        $e = (new Select($this->orm, User::class))
-            ->orderBy('user.id')->load('comments')->wherePK(1)->fetchOne();
+        $e = $selector->wherePK(1)->fetchOne();
 
         $this->assertCount(2, $e->comments);
 
@@ -458,24 +470,5 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertEquals(2, $b->comments[1]->id);
 
         $this->assertEquals('new b', $b->comments[0]->message);
-    }
-
-    public function testNotTriggersRehydrate(): void
-    {
-        $comment = (new Select($this->orm, Comment::class))->wherePK(1)->fetchOne();
-
-        self::assertInstanceOf(Comment::class, $comment);
-
-        $comment->message = 'updated message';
-        self::assertSame('updated message', $comment->message);
-
-        $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
-
-        // Trigger loading of user comments
-        $comments = \iterator_to_array($user->comments);
-        self::assertContains($comment, $comments);
-        self::assertSame('updated message', $comment->message);
-
-        $this->orm = $this->orm->withHeap(new Heap());
     }
 }

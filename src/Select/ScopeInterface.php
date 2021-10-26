@@ -12,5 +12,5 @@ interface ScopeInterface
     /**
      * Configure query and loader pair using proxy strategy.
      */
-    public function apply(QueryBuilder $query): void;
+    public function apply(QueryBuilder $query);
 }

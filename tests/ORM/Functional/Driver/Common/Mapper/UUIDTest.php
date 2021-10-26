@@ -1,17 +1,23 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByMsgScope;
+use Cycle\ORM\Tests\Fixtures\SortByMsgConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UUIDMapper;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -101,7 +107,7 @@ abstract class UUIDTest extends BaseTest
                 Schema::COLUMNS => ['id', 'user_id', 'message'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByMsgScope::class,
+                Schema::CONSTRAIN => SortByMsgConstrain::class,
             ],
         ]));
     }
@@ -210,7 +216,10 @@ abstract class UUIDTest extends BaseTest
         [$a, $b] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
         $this->assertNumWrites(0);
     }
 
@@ -226,12 +235,16 @@ abstract class UUIDTest extends BaseTest
         $e->comments[1]->message = 'msg B';
 
         $this->captureWriteQueries();
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
         $this->assertNumWrites(3);
 
         // consecutive test
         $this->captureWriteQueries();
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
         $this->assertNumWrites(0);
 
         $this->assertIsString($e->id);

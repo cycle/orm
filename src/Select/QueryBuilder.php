@@ -1,14 +1,20 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
 use Closure;
 use Cycle\ORM\Exception\BuilderException;
-use JetBrains\PhpStorm\ExpectedValues;
-use Cycle\Database\Driver\Compiler;
-use Cycle\Database\Query\SelectQuery;
+use Spiral\Database\Driver\Compiler;
+use Spiral\Database\Query\SelectQuery;
 
 /**
  * Mocks SelectQuery and automatically resolves identifiers for the loaded relations.
@@ -30,23 +36,36 @@ use Cycle\Database\Query\SelectQuery;
  */
 final class QueryBuilder
 {
-    private ?string $forward = null;
+    /** @var SelectQuery */
+    private $query;
 
-    public function __construct(
-        private SelectQuery $query,
-        /** @internal */
-        private AbstractLoader $loader
-    ) {
+    /** @var AbstractLoader @internal */
+    private $loader;
+
+    /** @var string|null */
+    private $forward;
+
+    /**
+     * @param SelectQuery    $query
+     * @param AbstractLoader $loader
+     */
+    public function __construct(SelectQuery $query, AbstractLoader $loader)
+    {
+        $this->query = $query;
+        $this->loader = $loader;
     }
 
     /**
      * Forward call to underlying target.
      *
+     * @param string $func
+     * @param array  $args
+     *
      * @return mixed|SelectQuery
      */
     public function __call(string $func, array $args)
     {
-        $result = \call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
+        $result = call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
         if ($result === $this->query) {
             return $this;
         }
@@ -56,6 +75,8 @@ final class QueryBuilder
 
     /**
      * Get currently associated query. Immutable.
+     *
+     * @return SelectQuery|null
      */
     public function getQuery(): ?SelectQuery
     {
@@ -64,6 +85,8 @@ final class QueryBuilder
 
     /**
      * Access to underlying loader. Immutable.
+     *
+     * @return AbstractLoader
      */
     public function getLoader(): AbstractLoader
     {
@@ -72,17 +95,24 @@ final class QueryBuilder
 
     /**
      * Select query method prefix for all "where" queries. Can route "where" to "onWhere".
+     *
+     * @param string $forward "where", "onWhere"
+     *
+     * @return QueryBuilder
      */
-    public function withForward(
-        #[ExpectedValues(values: ['where', 'onWhere'])]
-        string $forward = null
-    ): self {
+    public function withForward(string $forward = null): self
+    {
         $builder = clone $this;
         $builder->forward = $forward;
 
         return $builder;
     }
 
+    /**
+     * @param SelectQuery $query
+     *
+     * @return QueryBuilder
+     */
     public function withQuery(SelectQuery $query): self
     {
         $builder = clone $this;
@@ -97,9 +127,12 @@ final class QueryBuilder
      *
      * Use this method for complex relation queries in combination with Expression()
      *
-     * @param bool $autoload If set to true (default) target relation will be automatically loaded.
+     * @param string $identifier
+     * @param bool   $autoload If set to true (default) target relation will be automatically loaded.
      *
      * @throws BuilderException
+     *
+     * @return string
      */
     public function resolve(string $identifier, bool $autoload = true): string
     {
@@ -107,7 +140,7 @@ final class QueryBuilder
             return '*';
         }
 
-        if (!str_contains($identifier, '.')) {
+        if (strpos($identifier, '.') === false) {
             // parent element
             return sprintf(
                 '%s.%s',
@@ -132,6 +165,11 @@ final class QueryBuilder
 
     /**
      * Join relation without loading it's data.
+     *
+     * @param string $relation
+     * @param array  $options
+     *
+     * @return QueryBuilder
      */
     public function with(string $relation, array $options = []): self
     {
@@ -143,9 +181,12 @@ final class QueryBuilder
     /**
      * Find loader associated with given entity/relation alias.
      *
-     * @param bool $autoload When set to true relation will be automatically loaded.
+     * @param string $name
+     * @param bool   $autoload When set to true relation will be automatically loaded.
+     *
+     * @return AbstractLoader|null
      */
-    private function findLoader(string $name, bool $autoload = true): ?LoaderInterface
+    protected function findLoader(string $name, bool $autoload = true): ?LoaderInterface
     {
         if (strpos($name, '(')) {
             // expressions are not allowed
@@ -163,8 +204,12 @@ final class QueryBuilder
 
     /**
      * Replace target where call with another compatible method (for example join or having).
+     *
+     * @param string $call
+     *
+     * @return callable
      */
-    private function targetFunc(string $call): callable
+    protected function targetFunc(string $call): callable
     {
         if ($this->forward != null) {
             switch (strtolower($call)) {
@@ -186,18 +231,22 @@ final class QueryBuilder
     /**
      * Automatically modify all identifiers to mount table prefix. Provide ability to automatically resolve
      * relations.
+     *
+     * @param array $args
+     *
+     * @return array
      */
-    private function proxyArgs(array $args): array
+    protected function proxyArgs(array $args): array
     {
         if (!isset($args[0])) {
             return $args;
         }
 
-        if (\is_string($args[0])) {
+        if (is_string($args[0])) {
             $args[0] = $this->resolve($args[0]);
         }
 
-        if (\is_array($args[0])) {
+        if (is_array($args[0])) {
             $args[0] = $this->walkRecursive($args[0], [$this, 'wrap']);
         }
 
@@ -213,11 +262,12 @@ final class QueryBuilder
     /**
      * Automatically resolve identifier value or wrap the expression.
      *
+     * @param mixed $identifier
      * @param mixed $value
      */
-    private function wrap(int|string &$identifier, &$value): void
+    private function wrap(&$identifier, &$value): void
     {
-        if (!\is_numeric($identifier)) {
+        if (!is_numeric($identifier)) {
             $identifier = $this->resolve($identifier);
         }
 
@@ -230,13 +280,19 @@ final class QueryBuilder
 
     /**
      * Walk through method arguments using given function.
+     *
+     * @param array    $input
+     * @param callable $func
+     * @param bool     $complex
+     *
+     * @return array
      */
     private function walkRecursive(array $input, callable $func, bool $complex = false): array
     {
         $result = [];
         foreach ($input as $k => $v) {
-            if (\is_array($v)) {
-                if (!\is_numeric($k) && \in_array(strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR], true)) {
+            if (is_array($v)) {
+                if (!is_numeric($k) && in_array(strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR])) {
                     // complex expression like @OR and @AND
                     $result[$k] = $this->walkRecursive($v, $func, true);
                     continue;

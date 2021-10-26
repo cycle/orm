@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -11,16 +18,14 @@ use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
-use Cycle\Database\Query\SelectQuery;
-use Cycle\Database\StatementInterface;
+use Spiral\Database\Query\SelectQuery;
+use Spiral\Database\StatementInterface;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
  * and etc based on nested loaders.
  *
  * Root load does not load constrain from ORM by default.
- *
- * @method RootNode createNode()
  */
 final class RootLoader extends AbstractLoader
 {
@@ -28,22 +33,26 @@ final class RootLoader extends AbstractLoader
     use ScopeTrait;
 
     /** @var array */
-    protected array $options = [
+    protected $options = [
         'load' => true,
         'scope' => true,
     ];
 
-    private SelectQuery $query;
+    /** @var SelectQuery */
+    private $query;
 
+    /**
+     * @param ORMInterface $orm
+     * @param string       $target
+     */
     public function __construct(ORMInterface $orm, string $target)
     {
         parent::__construct($orm, $target);
         $this->query = $this->getSource()->getDatabase()->select()->from(
             sprintf('%s AS %s', $this->getSource()->getTable(), $this->getAlias())
         );
-        $this->columns = $this->define(Schema::COLUMNS);
 
-        foreach ($this->getEagerLoaders() as $relation) {
+        foreach ($this->getEagerRelations() as $relation) {
             $this->loadRelation($relation, [], false, true);
         }
     }
@@ -57,6 +66,9 @@ final class RootLoader extends AbstractLoader
         parent::__clone();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getAlias(): string
     {
         return $this->target;
@@ -65,24 +77,17 @@ final class RootLoader extends AbstractLoader
     /**
      * Get primary key column identifier (aliased).
      *
-     * @return string|string[]
+     * @return string
      */
-    public function getPK(): array|string
+    public function getPK(): string
     {
-        $pk = $this->define(Schema::PRIMARY_KEY);
-        if (\is_array($pk)) {
-            $result = [];
-            foreach ($pk as $key) {
-                $result[] = $this->getAlias() . '.' . $this->fieldAlias($key);
-            }
-            return $result;
-        }
-
-        return $this->getAlias() . '.' . $this->fieldAlias($pk);
+        return $this->getAlias() . '.' . $this->fieldAlias($this->define(Schema::PRIMARY_KEY));
     }
 
     /**
      * Return base query associated with the loader.
+     *
+     * @return SelectQuery
      */
     public function getQuery(): SelectQuery
     {
@@ -91,13 +96,18 @@ final class RootLoader extends AbstractLoader
 
     /**
      * Compile query with all needed conditions, columns and etc.
+     *
+     * @return SelectQuery
      */
     public function buildQuery(): SelectQuery
     {
         return $this->configureQuery(clone $this->query);
     }
 
-    public function loadData(AbstractNode $node, bool $includeRole = false): void
+    /**
+     * {@inheritdoc}
+     */
+    public function loadData(AbstractNode $node): void
     {
         $statement = $this->buildQuery()->run();
 
@@ -109,18 +119,22 @@ final class RootLoader extends AbstractLoader
 
         // loading child datasets
         foreach ($this->load as $relation => $loader) {
-            $loader->loadData($node->getNode($relation), $includeRole);
+            $loader->loadData($node->getNode($relation));
         }
-
-        $this->loadIerarchy($node, $includeRole);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function isLoaded(): bool
     {
         // root loader is always loaded
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         return parent::configureQuery(
@@ -128,9 +142,12 @@ final class RootLoader extends AbstractLoader
         );
     }
 
-    protected function initNode(): RootNode
+    /**
+     * @inheritdoc
+     */
+    protected function initNode(): AbstractNode
     {
-        $node = new RootNode($this->columnNames(), (array)$this->define(Schema::PRIMARY_KEY));
+        $node = new RootNode($this->columnNames(), $this->define(Schema::PRIMARY_KEY));
 
         $typecast = $this->define(Schema::TYPECAST);
         if ($typecast !== null) {
@@ -138,5 +155,15 @@ final class RootLoader extends AbstractLoader
         }
 
         return $node;
+    }
+
+    /**
+     * Relation columns.
+     *
+     * @return array
+     */
+    protected function getColumns(): array
+    {
+        return $this->define(Schema::COLUMNS);
     }
 }

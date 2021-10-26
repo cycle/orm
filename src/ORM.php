@@ -1,38 +1,74 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Command\Branch\Nil;
+use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\Reference;
-use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\Reference;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Select\SourceInterface;
-use Cycle\ORM\Transaction\CommandGenerator;
-use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
  */
 final class ORM implements ORMInterface
 {
-    private HeapInterface $heap;
+    /** @var CommandGenerator */
+    private $generator;
 
-    private CommandGeneratorInterface $commandGenerator;
+    /** @var FactoryInterface */
+    private $factory;
 
-    private EntityRegistryInterface $entityRegistry;
+    /** @var PromiseFactoryInterface|null */
+    private $promiseFactory;
 
-    public function __construct(
-        private FactoryInterface $factory,
-        private SchemaInterface $schema,
-        CommandGeneratorInterface $commandGenerator = null
-    ) {
+    /** @var HeapInterface */
+    private $heap;
+
+    /** @var SchemaInterface|null */
+    private $schema;
+
+    /** @var MapperInterface[] */
+    private $mappers = [];
+
+    /** @var RepositoryInterface[] */
+    private $repositories = [];
+
+    /** @var RelationMap[] */
+    private $relmaps = [];
+
+    /** @var array */
+    private $indexes = [];
+
+    /** @var SourceInterface[] */
+    private $sources = [];
+
+    /**
+     * @param FactoryInterface     $factory
+     * @param SchemaInterface|null $schema
+     */
+    public function __construct(FactoryInterface $factory, SchemaInterface $schema = null)
+    {
+        $this->factory = $factory;
+        $this->schema = $schema ?? new Schema([]);
+
         $this->heap = new Heap();
-        $this->commandGenerator = $commandGenerator ?? new CommandGenerator();
-        $this->resetEntityRegister();
+        $this->generator = new CommandGenerator();
     }
 
     /**
@@ -41,45 +77,53 @@ final class ORM implements ORMInterface
     public function __clone()
     {
         $this->heap = new Heap();
-        $this->resetEntityRegister();
+        $this->mappers = [];
+        $this->relmaps = [];
+        $this->indexes = [];
+        $this->sources = [];
+        $this->repositories = [];
     }
 
-    public function __debugInfo(): array
+    /**
+     * @return array
+     */
+    public function __debugInfo()
     {
         return [
             'schema' => $this->schema,
         ];
     }
 
-    public function resolveRole(string|object $entity): string
+    /**
+     * Automatically resolve role based on object name or instance.
+     *
+     * @param object|string $entity
+     *
+     * @return string
+     */
+    public function resolveRole($entity): string
     {
-        if (\is_object($entity)) {
+        if (is_object($entity)) {
             $node = $this->getHeap()->get($entity);
             if ($node !== null) {
                 return $node->getRole();
             }
 
-            $class = $entity::class;
+            $class = get_class($entity);
             if (!$this->schema->defines($class)) {
-                // todo: redesign
-                // temporary solution for proxy objects
-                $parentClass = get_parent_class($entity);
-                if ($parentClass === false
-                    || substr($class, -6) !== chr(160) . 'Proxy'
-                    || !$this->schema->defines($parentClass)
-                ) {
-                    throw new ORMException("Unable to resolve role of `$class`.");
-                }
-                $class = $parentClass;
+                throw new ORMException("Unable to resolve role of `$class`");
             }
 
             $entity = $class;
         }
 
-        return $this->schema->resolveAlias($entity) ?? throw new ORMException("Unable to resolve role `$entity`.");
+        return $this->schema->resolveAlias($entity);
     }
 
-    public function get(string $role, array $scope, bool $load = true): ?object
+    /**
+     * @inheritdoc
+     */
+    public function get(string $role, array $scope, bool $load = true)
     {
         $role = $this->resolveRole($role);
         $e = $this->heap->find($role, $scope);
@@ -95,146 +139,91 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    public function make(string $role, array $data = [], int $status = Node::NEW): object
+    /**
+     * @inheritdoc
+     */
+    public function make(string $role, array $data = [], int $node = Node::NEW)
     {
-        $role = $data[LoaderInterface::ROLE_KEY] ?? $role;
-        unset($data[LoaderInterface::ROLE_KEY]);
-        $relMap = $this->getRelationMap($role);
-        $mapper = $this->getMapper($role);
-        if ($status !== Node::NEW) {
-            // unique entity identifier
-            $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
-            if (\is_array($pk)) {
-                $ids = [];
-                foreach ($pk as $key) {
-                    if (!isset($data[$key])) {
-                        $ids = null;
-                        break;
-                    }
-                    $ids[$key] = $data[$key];
-                }
-            } else {
-                $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
-            }
+        $role = $this->resolveRole($role);
+        $m = $this->getMapper($role);
 
-            if ($ids !== null) {
-                $e = $this->heap->find($role, $ids);
+        // unique entity identifier
+        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+        $id = $data[$pk] ?? null;
 
-                if ($e !== null) {
-                    $node = $this->heap->get($e);
-                    \assert($node !== null);
-                    $data = $relMap->init($node, $data);
+        if ($node !== Node::NEW && $id !== null) {
+            $e = $this->heap->find($role, [$pk => $id]);
 
-                    return $mapper->hydrate($e, $data);
-                }
+            if ($e !== null) {
+                $node = $this->heap->get($e);
+
+                // new set of data and relations always overwrite entity state
+                return $m->hydrate(
+                    $e,
+                    $this->getRelationMap($role)->init($node, $data)
+                );
             }
         }
 
-        $node = new Node($status, $data, $role);
-        $e = $mapper->init($data, $role);
+        // init entity class and prepared (typecasted) data
+        [$e, $prepared] = $m->init($data);
 
-        /** Entity should be attached before {@see RelationMap::init()} running */
-        $this->heap->attach($e, $node, $this->getIndexes($role));
+        $node = new Node($node, $prepared, $m->getRole());
 
-        $data = $relMap->init($node, $data);
-        return $mapper->hydrate($e, $data);
+        $this->heap->attach($e, $node, $this->getIndexes($m->getRole()));
+
+        // hydrate entity with it's data, relations and proxies
+        return $m->hydrate(
+            $e,
+            $this->getRelationMap($role)->init($node, $prepared)
+        );
     }
 
-    public function getCommandGenerator(): CommandGeneratorInterface
+    /**
+     * @inheritdoc
+     */
+    public function withFactory(FactoryInterface $factory): ORMInterface
     {
-        return $this->commandGenerator;
+        $orm = clone $this;
+        $orm->factory = $factory;
+
+        return $orm;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getFactory(): FactoryInterface
     {
         return $this->factory;
     }
 
-    public function getSchema(): SchemaInterface
-    {
-        return $this->schema;
-    }
-
-    public function getHeap(): HeapInterface
-    {
-        return $this->heap;
-    }
-
-    public function getEntityRegistry(): EntityRegistryInterface
-    {
-        return $this->entityRegistry;
-    }
-
-    public function getMapper(string|object $entity): MapperInterface
-    {
-        return $this->entityRegistry->getMapper(
-            $this->resolveRole($entity)
-        );
-    }
-
-    public function getRepository(string|object $entity): RepositoryInterface
-    {
-        return $this->entityRegistry->getRepository(
-            $this->resolveRole($entity)
-        );
-    }
-
-    public function getSource(string $entity): SourceInterface
-    {
-        return $this->entityRegistry->getSource(
-            $this->resolveRole($entity)
-        );
-    }
-
-    public function promise(string $role, array $scope): object
-    {
-        if (\count($scope) === 1) {
-            $e = $this->heap->find($role, $scope);
-            if ($e !== null) {
-                return $e;
-            }
-        }
-
-        return new Reference($role, $scope);
-    }
-
-    public function getIndexes(string $entity): array
-    {
-        return $this->entityRegistry->getIndexes(
-            $this->resolveRole($entity)
-        );
-    }
-
     /**
-     * Get relation map associated with the given class.
-     *
-     * todo: the ORMInterface hasn't this method
+     * @inheritdoc
      */
-    public function getRelationMap(string $entity): RelationMap
-    {
-        return $this->entityRegistry->getRelationMap(
-            $this->resolveRole($entity)
-        );
-    }
-
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
         $orm = clone $this;
         $orm->schema = $schema;
-        $orm->resetEntityRegister();
 
         return $orm;
     }
 
-    public function withFactory(FactoryInterface $factory): ORMInterface
+    /**
+     * @inheritdoc
+     */
+    public function getSchema(): SchemaInterface
     {
-        $orm = clone $this;
-        $orm->factory = $factory;
-        $orm->resetEntityRegister();
+        if ($this->schema === null) {
+            throw new ORMException('ORM is not configured, schema is missing');
+        }
 
-        return $orm;
+        return $this->schema;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
         $orm = clone $this;
@@ -243,8 +232,195 @@ final class ORM implements ORMInterface
         return $orm;
     }
 
-    private function resetEntityRegister(): void
+    /**
+     * @inheritdoc
+     */
+    public function getHeap(): HeapInterface
     {
-        $this->entityRegistry = new EntityRegistry($this, $this->schema, $this->factory);
+        return $this->heap;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMapper($entity): MapperInterface
+    {
+        $role = $this->resolveRole($entity);
+        if (isset($this->mappers[$role])) {
+            return $this->mappers[$role];
+        }
+
+        return $this->mappers[$role] = $this->factory->mapper($this, $this->schema, $role);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getRepository($entity): RepositoryInterface
+    {
+        $role = $this->resolveRole($entity);
+        if (isset($this->repositories[$role])) {
+            return $this->repositories[$role];
+        }
+
+        $select = null;
+
+        if ($this->schema->define($role, Schema::TABLE) !== null) {
+            $select = new Select($this, $role);
+            $select->scope($this->getSource($role)->getConstrain());
+        }
+
+        return $this->repositories[$role] = $this->factory->repository($this, $this->schema, $role, $select);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSource(string $role): SourceInterface
+    {
+        if (isset($this->sources[$role])) {
+            return $this->sources[$role];
+        }
+
+        return $this->sources[$role] = $this->factory->source($this, $this->schema, $role);
+    }
+
+    /**
+     * Overlay existing promise factory.
+     *
+     * @param PromiseFactoryInterface $promiseFactory
+     *
+     * @return ORM
+     */
+    public function withPromiseFactory(PromiseFactoryInterface $promiseFactory = null): self
+    {
+        $orm = clone $this;
+        $orm->promiseFactory = $promiseFactory;
+
+        return $orm;
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * Returns references by default.
+     */
+    public function promise(string $role, array $scope)
+    {
+        if (\count($scope) === 1) {
+            $e = $this->heap->find($role, $scope);
+            if ($e !== null) {
+                return $e;
+            }
+        }
+
+        if ($this->promiseFactory !== null) {
+            return $this->promiseFactory->promise($this, $role, $scope);
+        }
+
+        return new Reference($role, $scope);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function queueStore($entity, int $mode = TransactionInterface::MODE_CASCADE): ContextCarrierInterface
+    {
+        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
+            $entity = $entity->__resolve();
+        }
+
+        if ($entity instanceof ReferenceInterface) {
+            // we do not expect to store promises
+            return new Nil();
+        }
+
+        $mapper = $this->getMapper($entity);
+
+        $node = $this->heap->get($entity);
+        if ($node === null) {
+            // automatic entity registration
+            $node = new Node(Node::NEW, [], $mapper->getRole());
+            $this->heap->attach($entity, $node);
+        }
+
+        $cmd = $this->generator->generateStore($mapper, $entity, $node);
+        if ($mode !== TransactionInterface::MODE_CASCADE) {
+            return $cmd;
+        }
+
+        if ($this->schema->define($node->getRole(), Schema::RELATIONS) === []) {
+            return $cmd;
+        }
+
+        // generate set of commands required to store entity relations
+        return $this->getRelationMap($node->getRole())->queueRelations(
+            $cmd,
+            $entity,
+            $node,
+            $mapper->extract($entity)
+        );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function queueDelete($entity, int $mode = TransactionInterface::MODE_CASCADE): CommandInterface
+    {
+        if ($entity instanceof PromiseInterface && $entity->__loaded()) {
+            $entity = $entity->__resolve();
+        }
+
+        $node = $this->heap->get($entity);
+        if ($entity instanceof ReferenceInterface || $node === null) {
+            // nothing to do, what about promises?
+            return new Nil();
+        }
+
+        // currently we rely on db to delete all nested records (or soft deletes)
+        return $this->generator->generateDelete($this->getMapper($node->getRole()), $entity, $node);
+    }
+
+    /**
+     * Get list of keys entity must be indexed in a Heap by.
+     *
+     * @param string $role
+     *
+     * @return array
+     */
+    protected function getIndexes(string $role): array
+    {
+        if (isset($this->indexes[$role])) {
+            return $this->indexes[$role];
+        }
+
+        $pk = $this->schema->define($role, Schema::PRIMARY_KEY);
+        $keys = $this->schema->define($role, Schema::FIND_BY_KEYS) ?? [];
+
+        return $this->indexes[$role] = array_unique(array_merge([$pk], $keys));
+    }
+
+    /**
+     * Get relation map associated with the given class.
+     *
+     * @param string $entity
+     *
+     * @return RelationMap
+     */
+    protected function getRelationMap($entity): RelationMap
+    {
+        $role = $this->resolveRole($entity);
+        if (isset($this->relmaps[$role])) {
+            return $this->relmaps[$role];
+        }
+
+        $relations = [];
+
+        $names = array_keys($this->schema->define($role, Schema::RELATIONS));
+        foreach ($names as $relation) {
+            $relations[$relation] = $this->factory->relation($this, $this->schema, $role, $relation);
+        }
+
+        return $this->relmaps[$role] = new RelationMap($this, $relations);
     }
 }

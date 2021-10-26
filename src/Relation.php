@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM;
@@ -14,7 +21,6 @@ final class Relation
     public const TARGET = 1;
     public const SCHEMA = 2;
     public const LOAD = 3;
-    public const COLLECTION_TYPE = 4;
 
     // Composite relation type without usage of external table.
     public const EMBEDDED = 1;
@@ -39,7 +45,6 @@ final class Relation
     public const NULLABLE = 31;
     public const OUTER_KEY = 32;
     public const INNER_KEY = 33;
-    public const INVERSION = 34;
 
     // Selections
     public const WHERE = 41;
@@ -50,6 +55,18 @@ final class Relation
     public const THROUGH_OUTER_KEY = 51;
     public const THROUGH_ENTITY = 52;
     public const THROUGH_WHERE = 54;
+
+    /** @deprecated use THROUGH_INNER_KEY instead */
+    public const THOUGH_INNER_KEY = 50;
+
+    /** @deprecated use THROUGH_OUTER_KEY instead */
+    public const THOUGH_OUTER_KEY = 51;
+
+    /** @deprecated use THROUGH_ENTITY instead */
+    public const THOUGH_ENTITY = 52;
+
+    /** @deprecated use THROUGH_WHERE instead */
+    public const THOUGH_WHERE = 54;
 
     // Relation pre-fetch mode
     public const LOAD_PROMISE = 10;

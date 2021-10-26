@@ -1,21 +1,27 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Favorite;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Cycle\Database\ForeignKeyInterface;
+use Spiral\Database\ForeignKeyInterface;
 
 abstract class CyclicReferencesTest extends BaseTest
 {
@@ -217,21 +223,30 @@ abstract class CyclicReferencesTest extends BaseTest
         $u2->favorites->add($c);
 
         $this->captureWriteQueries();
-        $this->save($u, $u2);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($u2);
+        $tr->run();
+
         $this->assertNumWrites(6);
 
         // no changes!
         $this->captureWriteQueries();
-        $this->save($u, $u2);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($u2);
+        $tr->run();
         $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Select($this->orm, User::class);
+        $selector->load('lastComment.user')
+                 ->load('comments.user')
+                 ->load('comments.favoredBy')
+                 ->load('favorites');
 
-        $u1 = (new Select($this->orm, User::class))->load('lastComment.user')
-            ->load('comments.user')
-            ->load('comments.favoredBy')
-            ->load('favorites')
-            ->wherePK($u->id)->fetchOne();
+        $u1 = $selector->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u1->id);
         $this->assertEquals($u->lastComment->id, $u1->lastComment->id);
@@ -242,22 +257,24 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
 
         $fav = [
-            (string)$u1->favorites[0]->favoredBy[0]->id,
-            (string)$u1->favorites[0]->favoredBy[1]->id,
+            $u1->favorites[0]->favoredBy[0]->id,
+            $u1->favorites[0]->favoredBy[1]->id,
         ];
 
-        $this->assertContains((string)$u->id, $fav);
-        $this->assertContains((string)$u2->id, $fav);
+        $this->assertCount(2, $fav);
+        $this->assertContains($u->id, $fav);
+        $this->assertContains($u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Select($this->orm, User::class);
+        $selector->load('lastComment.user')
+                 ->load('comments.user')
+                 ->load('comments.favoredBy')
+                 ->load('favorites');
 
-        $u1 = (new Select($this->orm, User::class))
-            ->load('lastComment.user')
-            ->load('comments.user')
-            ->load('comments.favoredBy')
-            ->load('favorites')
-            ->wherePK($u2->id)->fetchOne();
+        $u1 = $selector->wherePK(2)->fetchOne();
 
+        $this->assertEquals($u1->id, $u2->id);
         $this->assertEquals($u1->favorites[0]->id, $u2->favorites[0]->id);
     }
 

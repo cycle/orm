@@ -1,24 +1,31 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
-use Cycle\ORM\Mapper\PromiseMapper as Mapper;
-use Cycle\ORM\Reference\Promise;
-use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Promise\Collection\CollectionPromise;
+use Cycle\ORM\Promise\PromiseInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Transaction;
 
-abstract class HasManyPromiseMapperTest extends BaseTest
+abstract class HasManyPromiseTest extends BaseTest
 {
     use TableTrait;
 
@@ -88,7 +95,7 @@ abstract class HasManyPromiseMapperTest extends BaseTest
                 Schema::COLUMNS => ['id', 'user_id', 'message'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
         ]));
     }
@@ -136,16 +143,12 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(Promise::class, $u->comments);
-        $this->assertNumReads(0);
-
-        /** @var Promise $promise */
-        $promise = $u->comments;
-        $promise->resolve();
+        $this->assertInstanceOf(CollectionPromise::class, $u->comments);
+        $this->assertCount(3, $u->comments);
+        $this->assertInstanceOf(Comment::class, $u->comments[0]);
         $this->assertNumReads(1);
 
-        $this->assertCount(3, $promise->getValue());
-        $this->assertInstanceOf(Comment::class, $promise->getValue()[0]);
+        $this->assertInstanceOf(PromiseInterface::class, $u->comments->getPromise());
     }
 
     public function testHasManyPromiseLoaded(): void
@@ -154,59 +157,64 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(Promise::class, $p = $u->comments);
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
         $this->assertNumReads(0);
 
-        /** @var Promise $p */
-        $this->assertFalse($p->hasValue());
-        $p->resolve();
-        $this->assertTrue($p->hasValue());
-        $this->assertIsArray($p->getValue());
+        /** @var PromiseInterface $p */
+        $this->assertFalse($p->__loaded());
+        $this->assertIsArray($p->__resolve());
+        $this->assertTrue($p->__loaded());
     }
 
     public function testHasManyPromiseRole(): void
     {
-        $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->wherePK(1)->fetchOne();
 
-        /** @var Promise $p */
-        $p = $u->comments;
+        $this->captureReadQueries();
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
+        $this->assertNumReads(0);
 
-        $this->assertSame('comment', $p->getRole());
+        /** @var PromiseInterface $p */
+        $this->assertSame('comment', $p->__role());
     }
 
     public function testHasManyPromiseScope(): void
     {
-        $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->wherePK(1)->fetchOne();
 
-        /** @var Promise $p */
-        $p = $u->comments;
+        $this->captureReadQueries();
+        $this->assertInstanceOf(PromiseInterface::class, $p = $u->comments->getPromise());
+        $this->assertNumReads(0);
 
+        /** @var PromiseInterface $p */
         $this->assertEquals([
             'user_id' => 1,
-        ], $p->getScope());
+        ], $p->__scope());
     }
 
     public function testPromisedEmpty(): void
     {
-        $u = (new Select($this->orm, User::class))->wherePK(2)->fetchOne();
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(ReferenceInterface::class, $p = $u->comments);
-        $this->assertNumReads(0);
-        /** @var Promise $p */
-        $p->resolve();
-        $this->assertCount(0, $p->getValue());
+        $this->assertInstanceOf(CollectionPromise::class, $u->comments);
+        $this->assertCount(0, $u->comments);
         $this->assertNumReads(1);
     }
 
     public function testNoChanges(): void
     {
-        $u = (new Select($this->orm, User::class))
-            ->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->wherePK(1)->fetchOne();
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
 
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
@@ -214,12 +222,14 @@ abstract class HasManyPromiseMapperTest extends BaseTest
 
     public function testNoChangesWithNoChildren(): void
     {
-        $u = (new Select($this->orm, User::class))
-            ->wherePK(2)->fetchOne();
+        $selector = new Select($this->orm, User::class);
+        $u = $selector->wherePK(2)->fetchOne();
 
         $this->captureReadQueries();
         $this->captureWriteQueries();
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
 
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
@@ -232,20 +242,17 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
 
-        /** @var Promise $p */
-        $p = $e->comments;
-        $e->comments = $p->getCollection();
-        $this->assertCount(3, $e->comments);
         $e->comments->remove(1);
 
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
         /** @var User $e */
-        $e = (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne();
+        $e = $selector->wherePK(1)->fetchOne();
 
-        /** @var Promise $p */
-        $p = $e->comments;
-        $e->comments = $p->getCollection();
         $this->assertCount(2, $e->comments);
 
         $this->assertSame('msg 1', $e->comments[0]->message);
@@ -254,29 +261,28 @@ abstract class HasManyPromiseMapperTest extends BaseTest
 
     public function testAddAndRemoveChildren(): void
     {
-        /** @var User $e */
-        $e = (new Select($this->orm, User::class))
-            ->wherePK(1)->fetchOne();
+        $selector = new Select($this->orm, User::class);
 
-        /** @var Promise $p */
-        $p = $e->comments;
-        $e->comments = $p->getCollection();
+        /** @var User $e */
+        $e = $selector->wherePK(1)->fetchOne();
+
         $e->comments->remove(1);
 
         $c = new Comment();
         $c->message = 'msg 4';
         $e->comments->add($c);
 
-        $this->save($e);
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
         /** @var User $e */
-        $e = (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne();
-
-        /** @var Promise $p */
-        $p = $e->comments;
-        $e->comments = $p->getCollection();
+        $e = $selector->wherePK(1)->fetchOne();
 
         $this->assertCount(3, $e->comments);
+
         $this->assertSame('msg 1', $e->comments[0]->message);
         $this->assertSame('msg 3', $e->comments[1]->message);
         $this->assertSame('msg 4', $e->comments[2]->message);
@@ -284,18 +290,12 @@ abstract class HasManyPromiseMapperTest extends BaseTest
 
     public function testSliceAndSaveToAnotherParent(): void
     {
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
-
-        /** @var Promise $p */
-        $p = $a->comments;
-        $a->comments = $p->getCollection();
-        /** @var Promise $p */
-        $p = $b->comments;
-        $b->comments = $p->getCollection();
+        [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(0, $b->comments);
@@ -311,19 +311,27 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         $this->assertCount(2, $b->comments);
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
         $this->assertNumWrites(2);
 
         // consecutive
         $this->captureWriteQueries();
-        $this->save($a, $b);
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
         $this->assertNumWrites(0);
+
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = (new Select($this->orm->withHeap(new Heap()), User::class))->load('comments', [
+        [$a, $b] = $selector->load('comments', [
             'method' => JoinableLoader::INLOAD,
             'as' => 'comment',
         ])->orderBy('user.id')->fetchAll();
@@ -336,5 +344,24 @@ abstract class HasManyPromiseMapperTest extends BaseTest
         $this->assertEquals(2, $b->comments[1]->id);
 
         $this->assertEquals('new b', $b->comments[0]->message);
+    }
+
+    public function testNotTriggersRehydrate(): void
+    {
+        $comment = (new Select($this->orm, Comment::class))->wherePK(1)->fetchOne();
+
+        self::assertInstanceOf(Comment::class, $comment);
+
+        $comment->message = 'updated message';
+        self::assertSame('updated message', $comment->message);
+
+        $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+
+        // Trigger loading of user comments
+        $comments = \iterator_to_array($user->comments);
+        self::assertContains($comment, $comments);
+        self::assertSame('updated message', $comment->message);
+
+        $this->orm = $this->orm->withHeap(new Heap());
     }
 }

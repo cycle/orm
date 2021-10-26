@@ -1,20 +1,26 @@
 <?php
 
+/**
+ * Spiral Framework.
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\Database\Injection\Expression;
+use Spiral\Database\Injection\Expression;
 
 abstract class HasManyNestedConditionTest extends BaseTest
 {
@@ -115,7 +121,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
                         ],
                     ],
                 ],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
             Comment::class => [
                 Schema::ROLE => 'comment',

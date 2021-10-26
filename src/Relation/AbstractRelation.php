@@ -1,87 +1,132 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Heap\State;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Promise\PromiseInterface;
+use Cycle\ORM\Promise\ReferenceInterface;
 use Cycle\ORM\Relation;
-use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Schema;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 
-abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
+abstract class AbstractRelation implements RelationInterface, ChangesCheckerInterface
 {
+    use Traits\ContextTrait;
+    use Traits\HasChangesTrait;
+    use Traits\NodeTrait;
+
+    /** @var ORMInterface|SourceProviderInterface @internal */
+    protected $orm;
+
+    /** @var string */
+    protected $name;
+
+    /** @var string */
+    protected $target;
+
+    /** @var array */
+    protected $schema;
+
+    /** @var string */
+    protected $innerKey;
+
+    /** @var string */
+    protected $outerKey;
+
     /**
-     * Additional target roles: class-name of the primary role, roles and classes of primary role parents if the primary
-     * role has parents
-     *
-     * @var class-string[]|string[]
+     * @param ORMInterface $orm
+     * @param string       $name
+     * @param string       $target
+     * @param array        $schema
      */
-    protected array $targets = [];
-
-    /** @var string[] */
-    protected array $innerKeys;
-
-    /** @var string[] */
-    protected array $outerKeys;
-
-    /**
-     * @param string $target Primary target role
-     */
-    public function __construct(
-        /** @internal */
-        protected ORMInterface $orm,
-        private string $role,
-        protected string $name,
-        protected string $target,
-        protected array $schema
-    ) {
-        $this->innerKeys = (array)$schema[Relation::INNER_KEY];
-        $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
-    }
-
-    public function getInnerKeys(): array
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
     {
-        return $this->innerKeys;
+        $this->orm = $orm;
+        $this->name = $name;
+        $this->target = $target;
+        $this->schema = $schema;
+        $this->innerKey = $schema[Relation::INNER_KEY];
+        $this->outerKey = $schema[Relation::OUTER_KEY];
     }
 
-    public function __toString(): string
+    /**
+     * @return string
+     */
+    public function __toString()
     {
         // this is incorrect class
-        return sprintf('`%s` (%s)->%s', $this->name, $this::class, $this->target);
+        return sprintf('%s(%s)->%s', $this->name, static::class, $this->target);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @return string
+     */
     public function getTarget(): string
     {
         return $this->target;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function isCascade(): bool
     {
         return $this->schema[Relation::CASCADE] ?? false;
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function init(Node $node, array $data): array
+    {
+        $item = $this->orm->make($this->target, $data, Node::MANAGED);
+
+        return [$item, $item];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function extract($data)
+    {
+        return $data;
+    }
+
+    /**
+     * @inheritDoc
+     */
     protected function isNullable(): bool
     {
         return !empty($this->schema[Relation::NULLABLE]);
     }
 
-    protected function getTargetRelationName(): string
-    {
-        return $this->role . '.' . $this->name . ':' . $this->target;
-    }
-
     /**
      * Get the source associated with the role.
+     *
+     * @param string|null $role
+     *
+     * @return SourceInterface
      */
     protected function getSource(string $role = null): SourceInterface
     {
@@ -89,47 +134,55 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     }
 
     /**
+     * Get the mapper associated with a role.
+     *
+     * @param string|null $role
+     *
+     * @return MapperInterface
+     */
+    protected function getMapper(string $role = null): MapperInterface
+    {
+        return $this->orm->getMapper($role ?? $this->target);
+    }
+
+    /**
+     * @param Node   $node
+     * @param string $field
+     *
+     * @return string
+     */
+    protected function columnName(Node $node, string $field): string
+    {
+        return $this->orm->getSchema()->define($node->getRole(), Schema::COLUMNS)[$field] ?? $field;
+    }
+
+    /**
      * Assert that given entity is allowed for the relation.
+     *
+     * @param Node $related
      *
      * @throws RelationException
      */
     protected function assertValid(Node $related): void
     {
-        if ($related->getRole() === $this->target || in_array($related->getRole(), $this->targets, true)) {
-            return;
-        }
-        $role = $this->orm->getSchema()->resolveAlias($related->getRole());
-        if ($role === $this->target) {
-            $this->targets[] = $related->getRole();
-            return;
-        }
-        // Check parents
-        do {
-            $parent = $this->orm->getSchema()->define($role, SchemaInterface::PARENT);
-            if ($parent === $this->target) {
-                $this->targets[] = $related->getRole();
-                return;
-            }
-            $role = $parent;
-        } while ($parent !== null);
-        throw new RelationException(sprintf('Unable to link %s, given `%s`.', (string)$this, $related->getRole()));
-    }
-
-    protected function registerWaitingFields(State $state, bool $required = true): void
-    {
-        foreach ($this->innerKeys as $key) {
-            $state->waitField($key, $required);
+        if ($related->getRole() != $this->target) {
+            throw new RelationException(sprintf('Unable to link %s, given `%s`', $this, $related->getRole()));
         }
     }
 
-    protected function compareReferences(ReferenceInterface $original, mixed $related): bool
+    /**
+     * Resolve the reference to the object.
+     *
+     * @param ReferenceInterface $reference
+     *
+     * @return mixed|null
+     */
+    protected function resolve(ReferenceInterface $reference)
     {
-        if ($original === $related) {
-            return true;
+        if ($reference instanceof PromiseInterface) {
+            return $reference->__resolve();
         }
-        if ($related instanceof ReferenceInterface) {
-            return $related->getScope() === $original->getScope();
-        }
-        return false;
+
+        return $this->orm->get($reference->__role(), $reference->__scope(), true);
     }
 }

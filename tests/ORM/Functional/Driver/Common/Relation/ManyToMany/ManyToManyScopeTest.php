@@ -1,22 +1,28 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\Database\Exception\StatementException;
+use Spiral\Database\Exception\StatementException;
 
-abstract class ManyToManyScopeTest extends BaseTest
+abstract class ManyToManyConstrainTest extends BaseTest
 {
     use TableTrait;
 
@@ -82,10 +88,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         );
     }
 
-    public function testScopeOrdered(): void
+    public function testConstrainOrdered(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -109,10 +115,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testScopeOrderedDesc(): void
+    public function testConstrainOrderedDesc(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -136,10 +142,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testScopeOrderedInload(): void
+    public function testConstrainOrderedInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -165,10 +171,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testWithOrderByAndScopeOrdered(): void
+    public function testWithOrderByAndConstrainOrdered(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
         ]);
 
@@ -276,35 +282,6 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testWithOrderByPostload(): void
-    {
-        $this->orm = $this->withTagSchema([
-            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
-        ]);
-
-        $selector = new Select($this->orm, User::class);
-
-        /**
-         * @var User $a
-         * @var User $b
-         */
-        [$a, $b] = $selector->load('tags', [
-            'method' => Select\JoinableLoader::POSTLOAD,
-        ])->orderBy('user.id')->fetchAll();
-
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
-
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
-
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
-    }
-
     public function testWithOrderByPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
@@ -361,10 +338,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testScopeOrderedDESCInload(): void
+    public function testConstrainOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -390,10 +367,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testScopeOrderedPromisedASC(): void
+    public function testConstrainOrderedPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -419,10 +396,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testScopeOrderedPromisedDESC(): void
+    public function testConstrainOrderedPromisedDESC(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -448,10 +425,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testScopeOrderedAndWhere(): void
+    public function testConstrainOrderedAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -502,10 +479,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testScopeOrderedDESCAndWhere(): void
+    public function testConstrainOrderedDESCAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -528,10 +505,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testScopeOrderedAndWhereInload(): void
+    public function testConstrainOrderedAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -556,10 +533,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[2]->name);
     }
 
-    public function testScopeOrderedDESCAndWhereInload(): void
+    public function testConstrainOrderedDESCAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -584,10 +561,10 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->assertSame('tag f', $b->tags[0]->name);
     }
 
-    public function testScopeOrderedAndWherePromise(): void
+    public function testConstrainOrderedAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -615,7 +592,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testOrderedDESCAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -643,7 +620,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testCustomWhere(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -666,7 +643,7 @@ abstract class ManyToManyScopeTest extends BaseTest
     public function testCustomWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'DESC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.level' => 'DESC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
@@ -754,7 +731,7 @@ abstract class ManyToManyScopeTest extends BaseTest
         $this->expectException(StatementException::class);
 
         $this->orm = $this->withTagSchema([
-            Schema::SCOPE => new Select\QueryScope([], ['@.column' => 'ASC']),
+            Schema::CONSTRAIN => new Select\QueryConstrain([], ['@.column' => 'ASC']),
         ]);
 
         $selector = new Select($this->orm, User::class);
@@ -765,8 +742,8 @@ abstract class ManyToManyScopeTest extends BaseTest
     protected function withTagSchema(array $relationSchema)
     {
         $eSchema = [];
-        if (isset($relationSchema[Schema::SCOPE])) {
-            $eSchema[Schema::SCOPE] = $relationSchema[Schema::SCOPE];
+        if (isset($relationSchema[Schema::CONSTRAIN])) {
+            $eSchema[Schema::CONSTRAIN] = $relationSchema[Schema::CONSTRAIN];
         }
 
         $rSchema = $relationSchema[Relation::SCHEMA] ?? [];

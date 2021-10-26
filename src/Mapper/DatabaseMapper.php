@@ -1,146 +1,194 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
 use Cycle\ORM\Command\CommandInterface;
+use Cycle\ORM\Command\ContextCarrierInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Schema;
+use Cycle\ORM\Select;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.
  */
 abstract class DatabaseMapper implements MapperInterface
 {
-    protected SourceInterface $source;
+    /** @var Select\SourceInterface */
+    protected $source;
 
-    protected array $columns = [];
+    /** @var ORMInterface */
+    protected $orm;
 
-    protected array $parentColumns = [];
+    /** @var string */
+    protected $role;
 
-    /** @var string[] */
-    protected array $primaryColumns = [];
+    /** @var array */
+    protected $columns;
 
-    /** @var string[] */
-    protected array $primaryKeys;
+    /** @var array */
+    protected $fields;
 
-    public function __construct(
-        protected ORMInterface $orm,
-        protected string $role
-    ) {
+    /** @var string */
+    protected $primaryKey;
+
+    /** @var string */
+    protected $primaryColumn;
+
+    /**
+     * @param ORMInterface $orm
+     * @param string       $role
+     */
+    public function __construct(ORMInterface $orm, string $role)
+    {
+        if (!$orm instanceof Select\SourceProviderInterface) {
+            throw new MapperException('Source factory is missing');
+        }
+
+        $this->orm = $orm;
+        $this->role = $role;
+
         $this->source = $orm->getSource($role);
-        foreach ($orm->getSchema()->define($role, SchemaInterface::COLUMNS) as $property => $column) {
-            $this->columns[\is_int($property) ? $column : $property] = $column;
-        }
+        $this->columns = $orm->getSchema()->define($role, Schema::COLUMNS);
+        $this->primaryKey = $orm->getSchema()->define($role, Schema::PRIMARY_KEY);
+        $this->primaryColumn = $this->columns[$this->primaryKey] ?? $this->primaryKey;
 
-        // Parent's fields
-        $parent = $orm->getSchema()->define($role, SchemaInterface::PARENT);
-        while ($parent !== null) {
-            foreach ($orm->getSchema()->define($parent, SchemaInterface::COLUMNS) as $property => $column) {
-                $this->parentColumns[\is_int($property) ? $column : $property] = $column;
-            }
-            $parent = $orm->getSchema()->define($parent, SchemaInterface::PARENT);
-        }
-
-        $this->primaryKeys = (array)$orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
-        foreach ($this->primaryKeys as $PK) {
-            $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
+        // Resolve field names
+        foreach ($this->columns as $name => $column) {
+            $this->fields[] = is_numeric($name) ? $column : $name;
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getRole(): string
     {
         return $this->role;
     }
 
-    public function queueCreate(object $entity, Node $node, State $state): CommandInterface
+    /**
+     * @inheritdoc
+     */
+    public function queueCreate($entity, Node $node, State $state): ContextCarrierInterface
     {
-        $values = $node->getData();
+        $columns = $this->fetchFields($entity);
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);
+        $state->setData($columns);
 
-        foreach ($this->primaryKeys as $key) {
-            if (!isset($values[$key])) {
-                foreach ($this->nextPrimaryKey() ?? [] as $pk => $value) {
-                    $state->register($pk, $value);
-                }
-                break;
-            }
+        $columns[$this->primaryKey] = $columns[$this->primaryKey] ?? $this->nextPrimaryKey();
+        if ($columns[$this->primaryKey] === null) {
+            unset($columns[$this->primaryKey]);
         }
 
-        return new Insert(
+        $insert = new Insert(
             $this->source->getDatabase(),
             $this->source->getTable(),
-            $state,
-            $this->primaryKeys,
-            \count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
-            [$this, 'mapColumns']
+            $this->mapColumns($columns),
+            $this->primaryColumn
         );
+
+        $key = isset($columns[$this->primaryKey]) ? $this->primaryColumn : Insert::INSERT_ID;
+        $insert->forward($key, $state, $this->primaryKey);
+
+        return $insert;
     }
 
-    public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
+    /**
+     * @inheritdoc
+     */
+    public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface
     {
         $fromData = $state->getTransactionData();
-        \Cycle\ORM\Transaction\Pool::DEBUG && print 'changes count: ' . \count($node->getChanges()) . "\n";
+        $data = $this->fetchFields($entity);
 
-        $update = new Update(
-            $this->source->getDatabase(),
-            $this->source->getTable(),
-            $state,
-            $this->primaryKeys,
-            [$this, 'mapColumns']
-        );
+        // in a future mapper must support solid states
+        $changes = array_udiff_assoc($data, $fromData, [Node::class, 'compare']);
+        $state->setStatus(Node::SCHEDULED_UPDATE);
+        $state->setData($changes);
 
-        foreach ($this->primaryKeys as $pk) {
+        $update = new Update($this->source->getDatabase(), $this->source->getTable(), $this->mapColumns($changes));
+        if (isset($fromData[$this->primaryKey])) {
             // set update criteria right now
-            $update->register($pk, $fromData[$pk], ConsumerInterface::SCOPE);
+            $update->register($this->primaryColumn, $fromData[$this->primaryKey], false, ConsumerInterface::SCOPE);
+        } else {
+            // subscribe to PK update
+            $state->forward($this->primaryKey, $update, $this->primaryColumn, true, ConsumerInterface::SCOPE);
         }
 
         return $update;
     }
 
-    public function queueDelete(object $entity, Node $node, State $state): CommandInterface
+    /**
+     * @inheritdoc
+     */
+    public function queueDelete($entity, Node $node, State $state): CommandInterface
     {
-        $delete = new Delete($this->source->getDatabase(), $this->source->getTable(), $state, [$this, 'mapColumns']);
+        $delete = new Delete($this->source->getDatabase(), $this->source->getTable());
         $state->setStatus(Node::SCHEDULED_DELETE);
+        $state->decClaim();
 
-        $delete->waitScope(...$this->primaryKeys);
-        $fromData = $node->getInitialData();
-        foreach ($this->primaryKeys as $pk) {
-            // set update criteria right now
-            $delete->register($pk, $fromData[$pk], ConsumerInterface::SCOPE);
-        }
+        $delete->waitScope($this->primaryColumn);
+        $state->forward(
+            $this->primaryKey,
+            $delete,
+            $this->primaryColumn,
+            true,
+            ConsumerInterface::SCOPE
+        );
 
         return $delete;
     }
 
     /**
      * Generate next sequential entity ID. Return null to use autoincrement value.
+     *
+     * @return mixed|null
      */
-    protected function nextPrimaryKey(): ?array
+    protected function nextPrimaryKey()
     {
         return null;
     }
 
-    public function mapColumns(array &$values): array
+    /**
+     * Get entity columns.
+     *
+     * @param object $entity
+     *
+     * @return array
+     */
+    abstract protected function fetchFields($entity): array;
+
+    /**
+     * Map internal field names to database specific column names.
+     *
+     * @param array $columns
+     *
+     * @return array
+     */
+    protected function mapColumns(array $columns): array
     {
         $result = [];
-        foreach ($values as $column => $value) {
-            if (isset($this->columns[$column])) {
-                $result[$this->columns[$column]] = $value;
-            } else {
-                unset($values[$column]);
-            }
+        foreach ($columns as $column => $value) {
+            $result[$this->columns[$column] ?? $column] = $value;
         }
 
         return $result;

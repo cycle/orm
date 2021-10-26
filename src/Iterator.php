@@ -1,45 +1,56 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Select\LoaderInterface;
-use Generator;
-use IteratorAggregate;
 
 /**
  * Iterates over given data-set and instantiates objects.
- *
- * @psalm-template TEntity of object
- *
- * @template-implements IteratorAggregate<array-key|array, TEntity>
  */
-final class Iterator implements IteratorAggregate
+final class Iterator implements \IteratorAggregate
 {
-    private string $role;
+    /** @var ORMInterface */
+    private $orm;
+
+    /** @var string */
+    private $role;
+
+    /** @var iterable */
+    private $source;
+
+    /** @var bool */
+    private $tryToFindInHeap;
 
     /**
-     * @param class-string<TEntity> $class
-     * @param iterable<array-key, array> $source
+     * @param ORMInterface $orm
+     * @param string $class
+     * @param iterable $source
+     * @param bool $tryToFindInHeap
      */
-    public function __construct(
-        private ORMInterface $orm,
-        string $class,
-        private iterable $source,
-        private bool $findInHeap = false
-    ) {
-        $this->role = $orm->resolveRole($class);
+    public function __construct(ORMInterface $orm, string $class, iterable $source, bool $tryToFindInHeap = false)
+    {
+        $this->orm = $orm;
+        $this->role = $this->orm->resolveRole($class);
+        $this->source = $source;
+        $this->tryToFindInHeap = $tryToFindInHeap;
     }
 
     /**
      * Generate entities using incoming data stream. Pivoted data would be
      * returned as key value if set.
      *
-     * @return Generator<array, array-key|TEntity, mixed, void>
+     * @return \Generator
      */
-    public function getIterator(): Generator
+    public function getIterator(): \Generator
     {
         foreach ($this->source as $index => $data) {
             // through-like relations
@@ -49,35 +60,25 @@ final class Iterator implements IteratorAggregate
                 $data = $data['@'];
             }
 
-            // get role from joined table inheritance
-            $role = $data[LoaderInterface::ROLE_KEY] ?? $this->role;
-
             // add pipeline filter support?
 
-            yield $index => $this->getEntity($data, $role);
+            yield $index => $this->getEntity($data);
         }
     }
 
-    /**
-     * @param class-string<TEntity>|string $role
-     *
-     * @return TEntity
-     */
-    private function getEntity(array $data, string $role): object
+    private function getEntity(array $data)
     {
-        if ($this->findInHeap) {
-            $pk = $this->orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
-            if (\is_array($pk)) {
-                $e = $this->orm->getHeap()->find($role, $data);
-            } else {
-                $id = $data[$pk] ?? null;
+        if ($this->tryToFindInHeap) {
+            $pk = $this->orm->getSchema()->define($this->role, SchemaInterface::PRIMARY_KEY);
+            $id = $data[$pk] ?? null;
 
-                if ($id !== null) {
-                    $e = $this->orm->getHeap()->find($role, [$pk => $id]);
-                }
+            if (null !== $id) {
+                $e = $this->orm->getHeap()->find($this->role, [
+                    $pk => $id,
+                ]);
             }
         }
 
-        return $e ?? $this->orm->make($role, $data, Node::MANAGED);
+        return $e ?? $this->orm->make($this->role, $data, Node::MANAGED);
     }
 }

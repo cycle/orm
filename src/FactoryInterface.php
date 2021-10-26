@@ -1,34 +1,51 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Cycle\Database\DatabaseProviderInterface;
+use Spiral\Database\DatabaseProviderInterface;
 
 /**
  * Must provide access to generic DI.
  */
 interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
-    public const PARENT_LOADER = '::parent::';
-    public const CHILD_LOADER = '::child::';
-
     /**
      * Create mapper associated with given role.
+     *
+     * @param ORMInterface    $orm
+     * @param SchemaInterface $schema
+     * @param string          $role
+     *
+     * @return MapperInterface
      */
     public function mapper(
         ORMInterface $orm,
+        SchemaInterface $schema,
         string $role
     ): MapperInterface;
 
     /**
      * Create loader associated with specific entity and relation.
+     *
+     * @param ORMInterface    $orm
+     * @param SchemaInterface $schema
+     * @param string          $role
+     * @param string          $relation
+     *
+     * @return LoaderInterface
      */
     public function loader(
         ORMInterface $orm,
@@ -38,7 +55,14 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): LoaderInterface;
 
     /**
-     * Create repository associated with given role.
+     * Create repository associated with given role,
+     *
+     * @param ORMInterface    $orm
+     * @param SchemaInterface $schema
+     * @param string          $role
+     * @param Select          $select
+     *
+     * @return RepositoryInterface
      */
     public function repository(
         ORMInterface $orm,
@@ -48,7 +72,13 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): RepositoryInterface;
 
     /**
-     * Create source associated with given role.
+     * Create source associated with given role
+     *
+     * @param ORMInterface    $orm
+     * @param SchemaInterface $schema
+     * @param string          $role
+     *
+     * @return SourceInterface
      */
     public function source(
         ORMInterface $orm,
@@ -57,16 +87,14 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): SourceInterface;
 
     /**
-     * @param class-string|string|null $name Collection factory name.
-     *        Can be class name or alias that can be configured in the {@see withCollectionFactory()} method.
-     */
-    public function collection(
-        ORMInterface $orm,
-        string $name = null
-    ): CollectionFactoryInterface;
-
-    /**
      * Create relation associated with specific entity and relation.
+     *
+     * @param ORMInterface    $orm
+     * @param SchemaInterface $schema
+     * @param string          $role
+     * @param string          $relation
+     *
+     * @return RelationInterface
      */
     public function relation(
         ORMInterface $orm,
@@ -74,18 +102,4 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $role,
         string $relation
     ): RelationInterface;
-
-    public function withDefaultSchemaClasses(array $defaults): self;
-
-    /**
-     * Configure additional collection factories.
-     *
-     * @param string $alias Collection alias name that can be used in {@see Relation::COLLECTION_TYPE} parameter.
-     * @param class-string|null $interface An interface or base class that is common to the collections produced.
-     */
-    public function withCollectionFactory(
-        string $alias,
-        CollectionFactoryInterface $factory,
-        string $interface = null
-    ): self;
 }

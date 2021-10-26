@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
@@ -28,68 +35,95 @@ abstract class AbstractNode
     /**
      * Indicates that node data is joined to parent row and must receive part of incoming row
      * subset.
+     *
+     * @var bool
      */
-    protected bool $joined = false;
+    protected $joined = false;
 
     /**
-     * Declared column list which must be aggregated in a parent node. i.e. Parent Key
+     * List of columns node must fetch from the row.
      *
-     * @var string[]
+     * @var array
      */
-    protected array $outerKeys;
+    protected $columns = [];
+
+    /**
+     * Declared column which must be aggregated in a parent node. i.e. Parent Key
+     *
+     * @var string|null
+     */
+    protected $outerKey;
 
     /**
      * Node location in a tree. Set when node is registered.
      *
      * @internal
+     *
+     * @var string
      */
-    protected ?string $container = null;
-
-    /** @internal */
-    protected ?self $parent = null;
-
-    /** @internal */
-    protected ?TypecastInterface $typecast = null;
-
-    /** @var array<string, AbstractNode> */
-    protected array $nodes = [];
-
-    protected ?ParentMergeNode $mergeParent = null;
-
-    /** @var SubclassMergeNode[]  */
-    protected array $mergeSubclass = [];
-
-    protected ?string $indexName;
+    protected $container;
 
     /**
-     * Indexed keys and values associated with references
+     * @internal
+     *
+     * @var AbstractNode
+     */
+    protected $parent;
+
+    /**
+     * @internal
+     *
+     * @var TypecastInterface|null
+     */
+    protected $typecast;
+
+    /** @var AbstractNode[] */
+    protected $nodes = [];
+
+    /**
+     * Tree parts associated with reference keys and key values:
+     * $this->collectedReferences[id][ID_VALUE] = [ITEM1, ITEM2, ...].
      *
      * @internal
+     *
+     * @var array
      */
-    protected ?MultiKeyCollection $indexedData = null;
+    protected $references = [];
 
     /**
-     * @param string[] $columns  List of columns node must fetch from the row.
-     *                           When columns are empty original line will be returned as result.
-     * @param string[]|null $outerKeys Defines column name in parent Node to be aggregated.
+     * Set of keys to be aggregated by Parser while parsing results.
+     *
+     * @internal
+     *
+     * @var array
      */
-    public function __construct(
-        protected array $columns,
-        array $outerKeys = null
-    ) {
-        $this->indexName = empty($outerKeys) ? null : implode(':', $outerKeys);
-        $this->outerKeys = $outerKeys ?? [];
-        $this->indexedData = new MultiKeyCollection();
+    protected $trackReferences = [];
+
+    /**
+     * @param array       $columns  When columns are empty original line will be returned as result.
+     * @param string|null $outerKey Defines column name in parent Node to be aggregated.
+     */
+    public function __construct(array $columns, string $outerKey = null)
+    {
+        $this->columns = $columns;
+        $this->outerKey = $outerKey;
     }
 
+    /**
+     * Destructing.
+     */
     public function __destruct()
     {
         $this->parent = null;
         $this->nodes = [];
-        $this->indexedData = null;
+        $this->references = [];
+        $this->trackReferences = [];
         $this->duplicates = [];
     }
 
+    /**
+     * @param TypecastInterface $typecast
+     */
     public function setTypecast(TypecastInterface $typecast): void
     {
         $this->typecast = $typecast;
@@ -98,6 +132,9 @@ abstract class AbstractNode
     /**
      * Parse given row of data and populate reference tree.
      *
+     * @param int   $offset
+     * @param array $row
+     *
      * @return int Must return number of parsed columns.
      */
     public function parseRow(int $offset, array $row): int
@@ -105,18 +142,14 @@ abstract class AbstractNode
         $data = $this->fetchData($offset, $row);
 
         if ($this->deduplicate($data)) {
-            foreach ($this->indexedData->getIndexes() as $index) {
-                try {
-                    $this->indexedData->addItem($index, $data);
-                } catch (Throwable) {
+            foreach ($this->trackReferences as $key) {
+                if (!empty($data[$key])) {
+                    $this->references[$key][(string)$data[$key]][] = &$data;
                 }
             }
 
             //Let's force placeholders for every sub loaded
             foreach ($this->nodes as $name => $node) {
-                if ($node instanceof ParentMergeNode) {
-                    continue;
-                }
                 $data[$name] = $node instanceof ArrayNode ? [] : null;
             }
 
@@ -127,12 +160,7 @@ abstract class AbstractNode
         }
 
         $innerOffset = 0;
-        $iterate = array_merge(
-            $this->mergeParent === null ? [] : [$this->mergeParent],
-            $this->nodes,
-            $this->mergeSubclass
-        );
-        foreach ($iterate as $node) {
+        foreach ($this->nodes as $container => $node) {
             if (!$node->joined) {
                 continue;
             }
@@ -147,7 +175,7 @@ abstract class AbstractNode
              *
              * This means offset has to be calculated using all nested nodes
              */
-            $innerColumns = $node->parseRow(\count($this->columns) + $offset, $row);
+            $innerColumns = $node->parseRow(count($this->columns) + $offset, $row);
 
             //Counting next selection offset
             $offset += $innerColumns;
@@ -156,56 +184,53 @@ abstract class AbstractNode
             $innerOffset += $innerColumns;
         }
 
-        return \count($this->columns) + $innerOffset;
+        return count($this->columns) + $innerOffset;
     }
 
     /**
      * Get list of reference key values aggregated by parent.
      *
      * @throws ParserException
+     *
+     * @return array
      */
-    public function getReferenceValues(): array
+    public function getReferences(): array
     {
         if ($this->parent === null) {
-            throw new ParserException('Unable to aggregate reference values, parent is missing.');
+            throw new ParserException('Unable to aggregate reference values, parent is missing');
         }
-        if (!$this->parent->indexedData->hasIndex($this->indexName)) {
+
+        if (empty($this->parent->references[$this->outerKey])) {
             return [];
         }
 
-        return $this->parent->indexedData->getCriteria($this->indexName, true);
+        return array_keys($this->parent->references[$this->outerKey]);
     }
 
     /**
      * Register new node into NodeTree. Nodes used to convert flat results into tree representation
      * using reference aggregations. Node would not be used to parse incoming row results.
      *
+     * @param string       $container
+     * @param AbstractNode $node
+     *
      * @throws ParserException
      */
-    public function linkNode(?string $container, self $node): void
+    public function linkNode(string $container, self $node): void
     {
+        $this->nodes[$container] = $node;
+        $node->container = $container;
         $node->parent = $this;
-        if ($container !== null) {
-            $this->nodes[$container] = $node;
-            $node->container = $container;
-        } else {
-            if ($node instanceof ParentMergeNode) {
-                $this->mergeParent = $node;
-            }
-            if ($node instanceof SubclassMergeNode) {
-                $this->mergeSubclass[] = $node;
-            }
-        }
 
-        if ($node->indexName !== null) {
-            foreach ($node->outerKeys as $key) {
-                // foreach ($node->indexValues->getIndex($this->indexName) as $key) {
-                if (!in_array($key, $this->columns, true)) {
-                    throw new ParserException("Unable to create reference, key `{$key}` does not exist.");
-                }
+        if ($node->outerKey !== null) {
+            if (!in_array($node->outerKey, $this->columns, true)) {
+                throw new ParserException(
+                    "Unable to create reference, key `{$node->outerKey}` does not exist"
+                );
             }
-            if (!$this->indexedData->hasIndex($node->indexName)) {
-                $this->indexedData->createIndex($node->indexName, $node->outerKeys);
+
+            if (!in_array($node->outerKey, $this->trackReferences, true)) {
+                $this->trackReferences[] = $node->outerKey;
             }
         }
     }
@@ -214,9 +239,12 @@ abstract class AbstractNode
      * Register new node into NodeTree. Nodes used to convert flat results into tree representation
      * using reference aggregations. Node will used to parse row results.
      *
+     * @param string       $container
+     * @param AbstractNode $node
+     *
      * @throws ParserException
      */
-    public function joinNode(?string $container, self $node): void
+    public function joinNode(string $container, self $node): void
     {
         $node->joined = true;
         $this->linkNode($container, $node);
@@ -225,36 +253,19 @@ abstract class AbstractNode
     /**
      * Fetch sub node.
      *
+     * @param string $container
+     *
      * @throws ParserException
+     *
+     * @return AbstractNode
      */
     public function getNode(string $container): self
     {
         if (!isset($this->nodes[$container])) {
-            throw new ParserException("Undefined node `{$container}`.");
+            throw new ParserException("Undefined node `{$container}`");
         }
 
         return $this->nodes[$container];
-    }
-
-    public function getParentMergeNode(): ParentMergeNode
-    {
-        return $this->mergeParent;
-    }
-
-    /**
-     * @return SubclassMergeNode[]
-     */
-    public function getSubclassMergeNodes(): array
-    {
-        return $this->mergeSubclass;
-    }
-
-    public function mergeInheritanceNodes(bool $includeRole = false): void
-    {
-        $this->mergeParent?->mergeInheritanceNodes();
-        foreach ($this->mergeSubclass as $subclassNode) {
-            $subclassNode->mergeInheritanceNodes($includeRole);
-        }
     }
 
     /**
@@ -273,22 +284,31 @@ abstract class AbstractNode
      *
      * Attention, data WILL be referenced to new memory location!
      *
+     * @param string $container
+     * @param string $key
+     * @param mixed  $criteria
+     * @param array  $data
+     *
      * @throws ParserException
      */
-    protected function mount(string $container, string $index, array $criteria, array &$data): void
+    protected function mount(string $container, string $key, $criteria, array &$data): void
     {
         if ($criteria === self::LAST_REFERENCE) {
-            if (!$this->indexedData->hasIndex($index)) {
+            if (!isset($this->references[$key])) {
                 return;
             }
-            $criteria = $this->indexedData->getLastItemKeys($index);
+
+            end($this->references[$key]);
+            $criteria = key($this->references[$key]);
         }
 
-        if ($this->indexedData->getItemsCount($index, $criteria) === 0) {
-            throw new ParserException(sprintf('Undefined reference `%s` "%s".', $index, implode(':', $criteria)));
+        $criteria = (string)$criteria;
+
+        if (!array_key_exists($criteria, $this->references[$key])) {
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }
 
-        foreach ($this->indexedData->getItemsSubset($index, $criteria) as &$subset) {
+        foreach ($this->references[$key][$criteria] as &$subset) {
             if (isset($subset[$container])) {
                 // back reference!
                 $data = &$subset[$container];
@@ -316,59 +336,53 @@ abstract class AbstractNode
      *
      * Add added records will be added as array items.
      *
+     * @param string $container
+     * @param string $key
+     * @param mixed  $criteria
+     * @param array  $data
+     *
      * @throws ParserException
      */
-    protected function mountArray(string $container, string $index, mixed $criteria, array &$data): void
+    protected function mountArray(string $container, string $key, $criteria, array &$data): void
     {
-        if (!$this->indexedData->hasIndex($index)) {
-            throw new ParserException("Undefined index `{$index}`.");
+        $criteria = (string) $criteria;
+
+        if (!array_key_exists($criteria, $this->references[$key])) {
+            throw new ParserException("Undefined reference `{$key}`.`{$criteria}`");
         }
 
-        foreach ($this->indexedData->getItemsSubset($index, $criteria) as &$subset) {
+        foreach ($this->references[$key][$criteria] as &$subset) {
             if (!in_array($data, $subset[$container], true)) {
                 $subset[$container][] = &$data;
             }
-        }
-        unset($subset);
-    }
 
-    /**
-     * @throws ParserException
-     */
-    protected function mergeData(string $index, array $criteria, array $data, bool $overwrite): void
-    {
-        if ($criteria === self::LAST_REFERENCE) {
-            if (!$this->indexedData->hasIndex($index)) {
-                return;
-            }
-            $criteria = $this->indexedData->getLastItemKeys($index);
-        }
-
-        if ($this->indexedData->getItemsCount($index, $criteria) === 0) {
-            throw new ParserException(sprintf('Undefined reference `%s` "%s".', $index, implode(':', $criteria)));
-        }
-
-        foreach ($this->indexedData->getItemsSubset($index, $criteria) as &$subset) {
-            $subset = $overwrite ? array_merge($subset, $data) : array_merge($data, $subset);
             unset($subset);
+            continue;
         }
     }
 
     /**
      * Register data result.
+     *
+     * @param array $data
      */
     abstract protected function push(array &$data);
 
     /**
      * Fetch record columns from query row, must use data offset to slice required part of query.
+     *
+     * @param int   $dataOffset
+     * @param array $line
+     *
+     * @return array
      */
     protected function fetchData(int $dataOffset, array $line): array
     {
         try {
             //Combine column names with sliced piece of row
-            $result = \array_combine(
+            $result = array_combine(
                 $this->columns,
-                \array_slice($line, $dataOffset, \count($this->columns))
+                array_slice($line, $dataOffset, count($this->columns))
             );
 
             if ($this->typecast !== null) {
@@ -383,14 +397,5 @@ abstract class AbstractNode
                 $e
             );
         }
-    }
-
-    protected function intersectData(array $keys, array $data): array
-    {
-        $result = [];
-        foreach ($keys as $key) {
-            $result[$key] = $data[$key];
-        }
-        return $result;
     }
 }

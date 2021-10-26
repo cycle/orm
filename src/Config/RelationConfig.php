@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Config;
@@ -7,7 +14,6 @@ namespace Cycle\ORM\Config;
 use Cycle\ORM\Exception\ConfigException;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
-use JetBrains\PhpStorm\Pure;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\InjectableConfig;
 
@@ -17,10 +23,17 @@ final class RelationConfig extends InjectableConfig
     public const RELATION = 'relation';
     public const SCHEMA = 'schema';
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $config = [];
 
-    public function getLoader(int|string $type): Autowire
+    /**
+     * @param int|string $type
+     *
+     * @return Autowire
+     */
+    public function getLoader($type): Autowire
     {
         if (!isset($this->config[$type][self::LOADER])) {
             throw new ConfigException("Unable to get relation loader `{$type}`.");
@@ -29,7 +42,12 @@ final class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::LOADER]);
     }
 
-    public function getRelation(int|string $type): Autowire
+    /**
+     * @param int|string $type
+     *
+     * @return Autowire
+     */
+    public function getRelation($type): Autowire
     {
         if (!isset($this->config[$type][self::RELATION])) {
             throw new ConfigException("Unable to get relation `{$type}`.");
@@ -38,8 +56,10 @@ final class RelationConfig extends InjectableConfig
         return new Autowire($this->config[$type][self::RELATION]);
     }
 
-    #[Pure]
-    public static function getDefault(): self
+    /**
+     * @return RelationConfig
+     */
+    public static function getDefault()
     {
         return new self([
             Relation::EMBEDDED => [

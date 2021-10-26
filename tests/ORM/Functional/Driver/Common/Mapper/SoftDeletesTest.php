@@ -1,14 +1,20 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Fixtures\NotDeletedScope;
+use Cycle\ORM\Tests\Fixtures\NotDeletedConstrain;
 use Cycle\ORM\Tests\Fixtures\SoftDeletedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -44,7 +50,7 @@ abstract class SoftDeletesTest extends BaseTest
                 ],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => NotDeletedScope::class,
+                Schema::CONSTRAIN => NotDeletedConstrain::class,
             ],
         ]));
     }
@@ -72,7 +78,8 @@ abstract class SoftDeletesTest extends BaseTest
         (new Transaction($this->orm))->persist($u)->run();
 
         $orm = $this->orm->withHeap(new Heap());
-        $u = (new Select($orm, User::class))->fetchOne();
+        $s = new Select($orm, User::class);
+        $u = $s->fetchOne();
 
         (new Transaction($orm))->delete($u)->run();
 
@@ -85,12 +92,12 @@ abstract class SoftDeletesTest extends BaseTest
 
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
-        $s->scope(new NotDeletedScope());
+        $s->constrain(new NotDeletedConstrain());
         $this->assertNull($s->fetchOne());
 
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
-        $s->scope(null);
+        $s->constrain(null);
         $this->assertNotNull($s->fetchOne());
     }
 }

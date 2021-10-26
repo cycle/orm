@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -7,12 +14,11 @@ namespace Cycle\ORM\Select;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
-use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Select\Loader\SubQueryLoader;
+use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
-use Cycle\Database\Query\SelectQuery;
-use Cycle\Database\StatementInterface;
+use Spiral\Database\Query\SelectQuery;
+use Spiral\Database\StatementInterface;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
@@ -24,8 +30,10 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Default set of relation options. Child implementation might defined their of default options.
+     *
+     * @var array
      */
-    protected array $options = [
+    protected $options = [
         // load relation data
         'load' => false,
 
@@ -50,23 +58,30 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         // where conditions (if any)
     ];
 
-    /**
-     * Eager relations and inheritance hierarchies has been loaded
-     */
-    private bool $eagerLoaded = false;
+    /** @var string */
+    protected $name;
 
-    public function __construct(
-        ORMInterface $orm,
-        protected string $name,
-        string $target,
-        protected array $schema
-    ) {
+    /** @var array */
+    protected $schema;
+
+    /**
+     * @param ORMInterface $orm
+     * @param string       $name
+     * @param string       $target
+     * @param array        $schema
+     */
+    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
+    {
         parent::__construct($orm, $target);
-        $this->columns = $this->define(SchemaInterface::COLUMNS);
+
+        $this->name = $name;
+        $this->schema = $schema;
     }
 
     /**
      * Relation table alias.
+     *
+     * @return string
      */
     public function getAlias(): string
     {
@@ -79,14 +94,19 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return $this->options['as'];
         }
 
-        throw new LoaderException('Unable to resolve loader alias.');
+        throw new LoaderException('Unable to resolve loader alias');
     }
 
-    public function withContext(LoaderInterface $parent, array $options = []): static
+    /**
+     * {@inheritdoc}
+     */
+    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
+        $options = $this->prepareOptions($options);
+
         /**
-         * @var AbstractLoader $parent todo: should move withContext into LoaderInterface?
-         * @var self $loader
+         * @var AbstractLoader $parent
+         * @var self           $loader
          */
         $loader = parent::withContext($parent, $options);
 
@@ -107,18 +127,15 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         if (array_key_exists('scope', $options)) {
             if ($loader->options['scope'] instanceof ScopeInterface) {
                 $loader->setScope($loader->options['scope']);
-            } elseif (\is_string($loader->options['scope'])) {
+            } elseif (is_string($loader->options['scope'])) {
                 $loader->setScope($this->orm->getFactory()->make($loader->options['scope']));
             }
         } else {
-            $loader->setScope($this->getSource()->getScope());
+            $loader->setScope($this->getSource()->getConstrain());
         }
 
-        if (!$loader->eagerLoaded && $loader->isLoaded()) {
-            $loader->eagerLoaded = true;
-            $loader->inherit = null;
-            $loader->subclasses = [];
-            foreach ($loader->getEagerLoaders() as $relation) {
+        if ($loader->isLoaded()) {
+            foreach ($loader->getEagerRelations() as $relation) {
                 $loader->loadRelation($relation, [], false, true);
             }
         }
@@ -126,17 +143,19 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         return $loader;
     }
 
-    public function loadData(AbstractNode $node, bool $includeRole = false): void
+    /**
+     * {@inheritdoc}
+     */
+    public function loadData(AbstractNode $node): void
     {
         if ($this->isJoined() || !$this->isLoaded()) {
             // load data for all nested relations
-            parent::loadData($node, $includeRole);
+            parent::loadData($node);
 
             return;
         }
 
-        // Get list of reference key values aggregated by parent.
-        $references = $node->getReferenceValues();
+        $references = $node->getReferences();
         if ($references === []) {
             // nothing found at parent level, unable to create sub query
             return;
@@ -156,11 +175,13 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         $statement->close();
 
         // load data for all nested relations
-        parent::loadData($node, $includeRole);
+        parent::loadData($node);
     }
 
     /**
      * Indicated that loaded must generate JOIN statement.
+     *
+     * @return bool
      */
     public function isJoined(): bool
     {
@@ -172,40 +193,27 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     }
 
     /**
-     * Indicated that loaded must generate JOIN statement.
-     */
-    public function isSubQueried(): bool
-    {
-        return $this->getMethod() === self::SUBQUERY;
-    }
-
-    /**
      * Indication that loader want to load data.
+     *
+     * @return bool
      */
     public function isLoaded(): bool
     {
-        return $this->options['load'] || in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD], true);
-    }
-
-    protected function configureSubQuery(SelectQuery $query): SelectQuery
-    {
-        if (!$this->isJoined()) {
-            return $this->configureQuery($query);
-        }
-
-        $loader = new SubQueryLoader($this->orm, $this, $this->options);
-        return $loader->configureQuery($query);
+        return $this->options['load'] || in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD]);
     }
 
     /**
      * Configure query with conditions, joins and columns.
      *
-     * @param array $outerKeys Set of OUTER_KEY values collected by parent loader.
+     * @param SelectQuery $query
+     * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
+     *
+     * @return SelectQuery
      */
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isLoaded()) {
-            if ($this->isJoined() || $this->isSubQueried()) {
+            if ($this->isJoined()) {
                 // mounting the columns to parent query
                 $this->mountColumns($query, $this->options['minify']);
             } else {
@@ -217,7 +225,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 $this->options['load']->apply($this->makeQueryBuilder($query));
             }
 
-            if (\is_callable($this->options['load'], true)) {
+            if (is_callable($this->options['load'], true)) {
                 ($this->options['load'])($this->makeQueryBuilder($query));
             }
         }
@@ -225,15 +233,24 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         return parent::configureQuery($query);
     }
 
-    protected function applyScope(SelectQuery $query): SelectQuery
+    /**
+     * @param SelectQuery $query
+     *
+     * @return SelectQuery
+     */
+    protected function applyConstrain(SelectQuery $query): SelectQuery
     {
-        $this->scope?->apply($this->makeQueryBuilder($query));
+        if ($this->constrain !== null) {
+            $this->constrain->apply($this->makeQueryBuilder($query));
+        }
 
         return $query;
     }
 
     /**
      * Get load method.
+     *
+     * @return int
      */
     protected function getMethod(): int
     {
@@ -242,6 +259,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Create relation specific select query.
+     *
+     * @return SelectQuery
      */
     protected function initQuery(): SelectQuery
     {
@@ -250,6 +269,10 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Calculate table alias.
+     *
+     * @param AbstractLoader $parent
+     *
+     * @return string
      */
     protected function calculateAlias(AbstractLoader $parent): string
     {
@@ -273,8 +296,12 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      *
      * Example:
      * $this->getKey(Relation::OUTER_KEY);
+     *
+     * @param mixed $key
+     *
+     * @return string|null
      */
-    protected function localKey(string|int $key): ?string
+    protected function localKey($key): ?string
     {
         if (empty($this->schema[$key])) {
             return null;
@@ -285,12 +312,19 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Get parent identifier based on relation configuration key.
+     *
+     * @param mixed $key
+     *
+     * @return string
      */
-    protected function parentKey(string|int $key): string
+    protected function parentKey($key): string
     {
         return $this->parent->getAlias() . '.' . $this->parent->fieldAlias($this->schema[$key]);
     }
 
+    /**
+     * @return string
+     */
     protected function getJoinMethod(): string
     {
         return $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT';
@@ -298,12 +332,29 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     /**
      * Joined table name and alias.
+     *
+     * @return string
      */
     protected function getJoinTable(): string
     {
-        return "{$this->define(SchemaInterface::TABLE)} AS {$this->getAlias()}";
+        return "{$this->define(Schema::TABLE)} AS {$this->getAlias()}";
     }
 
+    /**
+     * Relation columns.
+     *
+     * @return array
+     */
+    protected function getColumns(): array
+    {
+        return $this->define(Schema::COLUMNS);
+    }
+
+    /**
+     * @param SelectQuery $query
+     *
+     * @return QueryBuilder
+     */
     private function makeQueryBuilder(SelectQuery $query): QueryBuilder
     {
         $builder = new QueryBuilder($query, $this);

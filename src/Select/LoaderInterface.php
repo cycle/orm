@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -13,49 +20,55 @@ use Cycle\ORM\Parser\AbstractNode;
  */
 interface LoaderInterface
 {
-    public const ROLE_KEY = '@role';
-
     /**
      * Return the relation alias.
+     *
+     * @return string
      */
     public function getAlias(): string;
 
     /**
      * Loader specific entity class.
+     *
+     * @return string
      */
     public function getTarget(): string;
 
     /**
      * Get column name related to internal key.
+     *
+     * @param string $key
+     *
+     * @return string
      */
     public function fieldAlias(string $key): string;
 
     /**
      * Initiate loader with it's position and options in dependency tree.
      *
+     * @param LoaderInterface $parent
+     * @param array           $options
+     *
      * @throws LoaderException
+     *
+     * @return LoaderInterface
      */
     public function withContext(self $parent, array $options = []): self;
 
     /**
      * Create node to represent collected data in a tree form. Nodes can declare dependencies
      * to parent and automatically put collected data in a proper place.
+     *
+     * @return AbstractNode
      */
     public function createNode(): AbstractNode;
 
     /**
      * Load data into previously created node.
      *
-     * @param bool $includeRole Turn on to include {@see LoaderInterface::ROLE_KEY} key in the result data
+     * @param AbstractNode $node
      *
      * @throws LoaderException
      */
-    public function loadData(AbstractNode $node, bool $includeRole = false): void;
-
-    public function setSubclassesLoading(bool $enabled): void;
-
-    /**
-     * @return bool True if this loader loads parents or children for JTI
-     */
-    public function isHierarchical(): bool;
+    public function loadData(AbstractNode $node);
 }

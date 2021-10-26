@@ -1,8 +1,15 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-use Cycle\Database;
+use Spiral\Database;
 
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', '1');
@@ -42,7 +49,7 @@ $drivers = [
 ];
 
 $db = getenv('DB') ?: null;
-\Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::$config = [
+\Cycle\ORM\Tests\BaseTest::$config = [
     'debug' => false,
     'strict' => true,
     'benchmark' => true,

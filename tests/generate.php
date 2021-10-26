@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 use Spiral\Tokenizer;
@@ -11,104 +18,68 @@ ini_set('display_errors', '1');
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
-    'directories' => [__DIR__ . '/ORM/Functional/Driver/Common'],
+    'directories' => [__DIR__],
     'exclude' => [],
 ]));
 
 $databases = [
     'sqlite' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLite',
-        'directory' => __DIR__ . '/ORM/Functional/Driver/SQLite/',
+        'namespace' => 'Cycle\ORM\Tests\Driver\SQLite',
+        'directory' => __DIR__ . '/ORM/Driver/SQLite/',
     ],
     'mysql' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\MySQL',
-        'directory' => __DIR__ . '/ORM/Functional/Driver/MySQL/',
+        'namespace' => 'Cycle\ORM\Tests\Driver\MySQL',
+        'directory' => __DIR__ . '/ORM/Driver/MySQL/',
     ],
     'postgres' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\Postgres',
-        'directory' => __DIR__ . '/ORM/Functional/Driver/Postgres/',
+        'namespace' => 'Cycle\ORM\Tests\Driver\Postgres',
+        'directory' => __DIR__ . '/ORM/Driver/Postgres/',
     ],
     'sqlserver' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLServer',
-        'directory' => __DIR__ . '/ORM/Functional/Driver/SQLServer/',
+        'namespace' => 'Cycle\ORM\Tests\Driver\SQLServer',
+        'directory' => __DIR__ . '/ORM/Driver/SQLServer/',
     ],
 ];
 
 echo "Generating test classes for all database types...\n";
 
-$classes = $tokenizer
-    ->classLocator()
-    ->getClasses(\Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class);
+$classes = $tokenizer->classLocator()->getClasses(\Cycle\ORM\Tests\BaseTest::class);
 
 foreach ($classes as $class) {
-    foreach ($class->getMethods() as $method) {
-        if ($method->isAbstract()) {
-            echo "Skip class {$class->getName()} with abstract methods.\n";
-            continue 2;
-        }
-    }
-
-    if (
-        !$class->isAbstract()
-        // Has abstract methods
-        || $class->getName() == \Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class
-    ) {
+    if (!$class->isAbstract() || $class->getName() == \Cycle\ORM\Tests\BaseTest::class) {
         continue;
     }
 
     echo "Found {$class->getName()}\n";
-
-    $path = str_replace(
-        [str_replace('\\', '/', __DIR__), 'ORM/Functional/Driver/Common/'],
-        '',
-        str_replace('\\', '/', $class->getFileName())
-    );
-
-    $path = ltrim($path, '/');
-
     foreach ($databases as $driver => $details) {
-        $filename = sprintf('%s%s', $details['directory'], $path);
-        $dir = pathinfo($filename, PATHINFO_DIRNAME);
-
-        $namespace = str_replace(
-            'Cycle\\ORM\\Tests\\Functional\\Driver\\Common',
-            $details['namespace'],
-            $class->getNamespaceName()
-        );
-
-        if (!is_dir($dir)) {
-            mkdir($dir, recursive: true);
-        }
+        $filename = sprintf('%s/%s.php', $details['directory'], $class->getShortName());
 
         file_put_contents(
             $filename,
             sprintf(
-                <<<PHP
-<?php
-
+                '<?php
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
 declare(strict_types=1);
 
 namespace %s;
 
-// phpcs:ignore
-use %s as CommonTest;
-
-/**
- * @group driver
- * @group driver-%s
- */
-class %s extends CommonTest
+class %s extends \%s
 {
-    public const DRIVER = '%s';
-}
-
-PHP,
-                $namespace,
-                $class->getName(),
-                $driver,
+    const DRIVER = "%s";
+}',
+                $details['namespace'],
                 $class->getShortName(),
+                $class->getName(),
                 $driver
             )
         );
     }
 }
+
+// helper to validate the selection results
+// file_put_contents('out.php', '<?php ' . var_export($selector->fetchData(), true));

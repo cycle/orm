@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
@@ -10,8 +17,11 @@ use Cycle\ORM\Select\LoaderInterface;
 
 trait ChainTrait
 {
+    /**
+     * @inheritdoc
+     */
     abstract public function loadRelation(
-        string|LoaderInterface $relation,
+        string $relation,
         array $options,
         bool $join = false,
         bool $load = false
@@ -19,17 +29,24 @@ trait ChainTrait
 
     /**
      * Check if given relation points to the relation chain.
+     *
+     * @param string $relation
+     *
+     * @return bool
      */
     protected function isChain(string $relation): bool
     {
-        return str_contains($relation, '.');
+        return strpos($relation, '.') !== false;
     }
 
     /**
-     * @param array $options Final loader options.
-     * @param bool  $join    See loadRelation().
+     * @param string $chain
+     * @param array  $options Final loader options.
+     * @param bool   $join    See loadRelation().
      *
      * @throws LoaderException When one of the elements can not be chained.
+     *
+     * @return LoaderInterface
      *
      * @see joinRelation()
      * @see loadRelation()
@@ -43,7 +60,7 @@ trait ChainTrait
 
         if (!$child instanceof AbstractLoader) {
             throw new LoaderException(
-                sprintf('Loader `%s` does not support chain relation loading.', $child::class)
+                sprintf("Loader '%s' does not support chain relation loading", get_class($child))
             );
         }
 

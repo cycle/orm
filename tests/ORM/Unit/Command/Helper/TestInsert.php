@@ -2,15 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Unit\Command\Helper;
+namespace Cycle\ORM\Tests\Command\Helper;
 
 use Cycle\ORM\Command\DatabaseCommand;
+use Cycle\ORM\Command\InitCarrierInterface;
+use Cycle\ORM\Command\Traits\ContextTrait;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Context\ConsumerInterface;
-use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\Context\ProducerInterface;
+use Cycle\ORM\Exception\CommandException;
+use Spiral\Database\DatabaseInterface;
 
-class TestInsert extends DatabaseCommand implements ConsumerInterface
+class TestInsert extends DatabaseCommand implements InitCarrierInterface, ProducerInterface
 {
+    use ContextTrait;
     use ErrorTrait;
 
     // Special identifier to forward insert key into
@@ -38,11 +43,38 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
      */
     public function isReady(): bool
     {
-        return true;
+        return $this->waitContext === [];
     }
 
-    public function register(string $key, mixed $value, int $stream = self::DATA): void
+    /**
+     * @inheritdoc
+     *
+     * Triggers only after command execution!
+     */
+    public function forward(
+        string $key,
+        ConsumerInterface $consumer,
+        string $target,
+        bool $trigger = false,
+        int $stream = ConsumerInterface::DATA
+    ): void {
+        if ($trigger) {
+            throw new CommandException('Insert command can only forward keys after the execution');
+        }
+
+        $this->consumers[$key][] = [$consumer, $target, $stream];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function register(string $key, $value, bool $fresh = false, int $stream = self::DATA): void
     {
+        if ($fresh || null !== $value) {
+            $this->freeContext($key);
+        }
+
+        $this->setContext($key, $value);
     }
 
     /**
@@ -52,7 +84,7 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
      */
     public function getData(): array
     {
-        return $this->data;
+        return array_merge($this->data, $this->context);
     }
 
     /**
@@ -60,6 +92,7 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
      */
     public function execute(): void
     {
+        $update = true;
         $data = $this->getData();
         $insertID = $this->db->insert($this->table)->values($data)->run();
 
@@ -74,7 +107,8 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
                     $value = $data[$key] ?? null;
                 }
 
-                $cn->register($consumer[1], $value, $consumer[2]);
+                $cn->register($consumer[1], $value, $update, $consumer[2]);
+                $update = false;
             }
         }
 

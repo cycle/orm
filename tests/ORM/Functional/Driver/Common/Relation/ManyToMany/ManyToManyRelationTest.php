@@ -1,15 +1,21 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -73,13 +79,60 @@ abstract class ManyToManyRelationTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::TYPECAST => ['id' => 'int', 'balance' => 'float'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'tags' => [
+                        Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::TARGET => Tag::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => TagContext::class,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::THROUGH_INNER_KEY => 'user_id',
+                            Relation::THROUGH_OUTER_KEY => 'tag_id',
+                        ],
+                    ],
+                ],
+            ],
+            Tag::class => [
+                Schema::ROLE => 'tag',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'name'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+            TagContext::class => [
+                Schema::ROLE => 'tag_context',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'tag_user_map',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'tag_id', 'as'],
+                Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 
     public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
-        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $u->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $u->tags);
     }
 
     public function testLoadRelation(): void
@@ -148,7 +201,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('tags', [
             'method' => Select\JoinableLoader::INLOAD,
-            'scope' => new Select\QueryScope([], ['id' => 'ASC']),
+            'constrain' => new Select\QueryConstrain([], ['id' => 'ASC']),
         ])->orderBy(['id' => 'ASC']);
 
         $this->assertSame([
@@ -212,8 +265,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertCount(2, $a->tags);
         $this->assertCount(1, $b->tags);
 
-        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $b->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
 
         $this->assertTrue($a->tags->hasPivot($a->tags[0]));
         $this->assertTrue($a->tags->hasPivot($a->tags[1]));
@@ -243,48 +296,16 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $u->tags->add($t);
 
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
 
-        $u = (new Select($this->orm->withHeap(new Heap()), User::class))
-            ->load('tags')->wherePK(3)->fetchOne();
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->assertSame('many@email.com', $u->email);
         $this->assertCount(1, $u->tags);
         $this->assertSame('my tag', $u->tags[0]->name);
-
-        $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
-    }
-
-    public function testCreateWithManyToMany2(): void
-    {
-        $schemaArray = $this->getSchemaArray();
-        $schemaArray[User::class][Schema::RELATIONS]['tags'][Relation::SCHEMA][Relation::NULLABLE] = true;
-        $this->orm = $this->orm->withSchema(new Schema($schemaArray));
-
-        $u = new User();
-        $u->email = 'many@email.com';
-        $u->balance = 900;
-
-        $t1 = new Tag();
-        $t1->name = 'my tag 1';
-        $t2 = new Tag();
-        $t2->name = 'my tag 2';
-        $u->tags = new \Doctrine\Common\Collections\ArrayCollection(
-            [
-                $t1,
-                $t2,
-            ]
-        );
-
-        $this->save($u);
-
-        $u = (new Select($this->orm->withHeap(new Heap()), User::class))
-            ->load('tags')->wherePK(3)->fetchOne();
-
-        $this->assertSame('many@email.com', $u->email);
-        $this->assertCount(2, $u->tags);
-        $this->assertSame('my tag 1', $u->tags[0]->name);
-        $this->assertSame('my tag 2', $u->tags[1]->name);
 
         $this->assertInstanceOf(TagContext::class, $u->tags->getPivot($u->tags[0]));
     }
@@ -301,7 +322,9 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
         $u->tags->setPivot($t, ['as' => 'super']);
 
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
@@ -326,14 +349,18 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->tags->add($t);
         $u->tags->setPivot($t, ['as' => 'super']);
 
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
         $this->captureWriteQueries();
-        $this->save($u);
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
         $this->assertNumWrites(0);
     }
 
@@ -398,11 +425,21 @@ abstract class ManyToManyRelationTest extends BaseTest
         $b->tags->setPivot($t, $pc);
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+
         $this->assertNumWrites(6);
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+
         $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
@@ -471,57 +508,5 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertCount(2, $user->tags);
         $this->assertSame('tag a', $user->tags[0]->name);
         $this->assertSame('tag c', $user->tags[1]->name);
-    }
-
-    private function getSchemaArray(): array
-    {
-        return [
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::TYPECAST => ['id' => 'int', 'balance' => 'float'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'tags' => [
-                        Relation::TYPE => Relation::MANY_TO_MANY,
-                        Relation::TARGET => Tag::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::THROUGH_ENTITY => TagContext::class,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'id',
-                            Relation::THROUGH_INNER_KEY => 'user_id',
-                            Relation::THROUGH_OUTER_KEY => 'tag_id',
-                        ],
-                    ],
-                ],
-            ],
-            Tag::class => [
-                Schema::ROLE => 'tag',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'tag',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'name'],
-                Schema::TYPECAST => ['id' => 'int'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-            TagContext::class => [
-                Schema::ROLE => 'tag_context',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'tag_user_map',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'tag_id', 'as'],
-                Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ];
     }
 }

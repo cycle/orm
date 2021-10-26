@@ -1,17 +1,22 @@
 <?php
 
+/**
+ * Cycle DataMapper ORM
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ */
+
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany;
+namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Fixtures\SortByIDScope;
+use Cycle\ORM\Tests\Fixtures\SortByIDConstrain;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -111,7 +116,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
                 Schema::TYPECAST => ['id' => 'int'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                Schema::CONSTRAIN => SortByIDConstrain::class,
             ],
             TagContext::class => [
                 Schema::ROLE => 'tag_context',
@@ -197,8 +202,8 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
         $this->captureReadQueries();
 
-        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(\Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class, $b->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $a->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionInterface::class, $b->tags);
 
         $this->assertTrue($a->tags->hasPivot($a->tags[0]));
         $this->assertTrue($a->tags->hasPivot($a->tags[1]));
@@ -220,29 +225,37 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
     public function testNoQueries(): void
     {
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = (new Select($this->orm, User::class))
-            ->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $this->captureReadQueries();
-        $this->save($a, $b);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+
         $this->assertNumReads(0);
     }
 
     public function testUnlinkManyToManyAndReplaceSome(): void
     {
+        $tagSelector = new Select($this->orm, Tag::class);
+
+        $selector = new Select($this->orm, User::class);
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
+        [$a, $b] = $selector->fetchAll();
 
         $a->tags->remove(0);
 
-        $a->tags->add((new Select($this->orm, Tag::class))->wherePK(3)->fetchOne());
+        $a->tags->add($tagSelector->wherePK(3)->fetchOne());
         $a->tags->getPivot($a->tags[1])->as = 'new';
 
         // remove all
@@ -258,19 +271,29 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $b->tags->setPivot($t, $pc);
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+
         $this->assertNumWrites(6);
 
         $this->captureWriteQueries();
-        $this->save($a, $b);
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         /**
          * @var User $a
          * @var User $b
          */
-        [$a, $b] = (new Select($this->orm, User::class))->load('tags')->fetchAll();
+        [$a, $b] = $selector->load('tags')->fetchAll();
 
         $this->assertSame('tag b', $a->tags[0]->name);
         $this->assertSame('new', $a->tags->getPivot($a->tags[0])->as);
@@ -337,9 +360,8 @@ abstract class ManyToManyPromiseTest extends BaseTest
     {
         /** @var User $u */
         $u = $this->orm->get('user', ['id' => 1]);
-        $uData = $this->extractEntity($u);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $uData['tags']);
-        $this->assertCount(2, $u->tags);
+        $this->assertInstanceOf(Relation\Pivoted\PivotedCollectionPromise::class, $u->tags);
+        $this->assertCount(2, $u->tags->toArray());
     }
 }

@@ -88,7 +88,7 @@ class ClosureHydrator
 
                             foreach ($types as $type) {
                                 $c = $type->getName();
-                                if ($value instanceof $c) {
+                                if ($c === 'object' || $value instanceof $c) {
                                     $object->{$property} = $value;
                                     unset($data[$property]);
 

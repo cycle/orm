@@ -90,8 +90,8 @@ class User
         return $this->comments;
     }
 
-    public function addComment(Comment $post): void
+    public function addComment(Comment $comment): void
     {
-        $this->comments[] = $post;
+        $this->comments[] = $comment;
     }
 }

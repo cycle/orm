@@ -29,7 +29,7 @@ abstract class ObjectsCompareTest extends BaseTest
             'id' => 'primary',
             'states' => 'string',
             'nested_states' => 'string',
-            'published_at' => 'datetime'
+            'published_at' => 'datetime',
         ]);
 
         $this->orm = $this->withSchema(new Schema([

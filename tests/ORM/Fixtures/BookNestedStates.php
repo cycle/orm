@@ -26,6 +26,8 @@ final class BookNestedStates
 
     private function create(array $states)
     {
-        return array_map(static function(string $state) {return new BookState($state);}, $states);
+        return array_map(static function (string $state) {
+            return new BookState($state);
+        }, $states);
     }
 }

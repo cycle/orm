@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
@@ -36,20 +37,20 @@ abstract class AutoTimestampsTest extends BaseTest
             new Schema(
                 [
                     User::class => [
-                        Schema::ROLE => 'user',
-                        Schema::MAPPER => TimestampedMapper::class,
-                        Schema::DATABASE => 'default',
-                        Schema::TABLE => 'user',
-                        Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS => ['id', 'email', 'balance', 'created_at', 'updated_at'],
-                        Schema::TYPECAST => [
+                        SchemaInterface::ROLE => 'user',
+                        SchemaInterface::MAPPER => TimestampedMapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'email', 'balance', 'created_at', 'updated_at'],
+                        SchemaInterface::TYPECAST => [
                             'id' => 'int',
                             'balance' => 'float',
                             'created_at' => 'datetime',
                             'updated_at' => 'datetime',
                         ],
-                        Schema::SCHEMA => [],
-                        Schema::RELATIONS => [],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
                     ],
                 ]
             )
@@ -62,16 +63,13 @@ abstract class AutoTimestampsTest extends BaseTest
         $u->email = 'test@email.com';
         $u->balance = 199;
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $data = $s->fetchData();
 
         $this->assertNotNull($data[0]['created_at']);
         $this->assertNotNull($data[0]['updated_at']);
-
-        $this->assertInstanceOf(\DateTimeInterface::class, $data[0]['created_at']);
-        $this->assertInstanceOf(\DateTimeInterface::class, $data[0]['updated_at']);
     }
 
     public function testNoWrites(): void
@@ -80,7 +78,7 @@ abstract class AutoTimestampsTest extends BaseTest
         $u->email = 'test@email.com';
         $u->balance = 199;
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);

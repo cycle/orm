@@ -105,6 +105,7 @@ final class ORM implements ORMInterface
         $mapper = $this->entityRegistry->getMapper($rRole);
 
         $caster = $typecast ? $this->entityRegistry->getTypecast($rRole) : null;
+        $castedData = $caster?->castAll($data) ?? $data;
 
         if ($status !== Node::NEW) {
             // unique entity identifier
@@ -128,21 +129,19 @@ final class ORM implements ORMInterface
                 if ($e !== null) {
                     $node = $this->heap->get($e);
                     \assert($node !== null);
-                    $data = $relMap->init($node, $data);
 
-                    return $mapper->hydrate($e, $caster?->castAll($data) ?? $data);
+                    return $mapper->hydrate($e, $relMap->init($node, $castedData));
                 }
             }
         }
 
-        $node = new Node($status, $data, $rRole);
+        $node = new Node($status, $castedData, $rRole);
         $e = $mapper->init($data, $role);
 
         /** Entity should be attached before {@see RelationMap::init()} running */
         $this->heap->attach($e, $node, $this->entityRegistry->getIndexes($rRole));
 
-        $data = $relMap->init($node, $data);
-        return $mapper->hydrate($e, $caster?->castAll($data) ?? $data);
+        return $mapper->hydrate($e, $relMap->init($node, $castedData));
     }
 
     public function getCommandGenerator(): CommandGeneratorInterface

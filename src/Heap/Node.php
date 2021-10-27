@@ -8,6 +8,8 @@ use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
+use DateTimeImmutable;
+use DateTimeInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 
 use const FILTER_NULL_ON_FAILURE;
@@ -32,12 +34,40 @@ final class Node implements ConsumerInterface
 
     private ?State $state = null;
 
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $rawData
+     */
     public function __construct(
         #[ExpectedValues(valuesFromClass: self::class)]
         private int $status,
         private array $data,
-        private string $role
+        private string $role,
+        private array $rawData = []
     ) {
+        $this->updateRawData();
+        // foreach ($data as $field => $element) {
+        //     if (!\is_object($element)) {
+        //         unset($this->rawData[$field]);
+        //         continue;
+        //     }
+        //     if ($element instanceof DateTimeInterface) {
+        //         $this->rawData[$field] = $element instanceof DateTimeImmutable
+        //             ? $element
+        //             : DateTimeImmutable::createFromInterface($element);
+        //     }
+        // }
+    }
+
+    private function updateRawData(): void
+    {
+        $this->rawData = [];
+        foreach ($this->data as $field => $value) {
+            if (!\is_object($value)) {
+                continue;
+            }
+            $this->rawData[$field] = self::convertToSolid($value);
+        }
     }
 
     /**
@@ -45,7 +75,7 @@ final class Node implements ConsumerInterface
      */
     public function __destruct()
     {
-        unset($this->data, $this->state, $this->relations);
+        unset($this->data, $this->rawData, $this->state, $this->relations);
     }
 
     public function getRole(): string
@@ -59,7 +89,7 @@ final class Node implements ConsumerInterface
     public function getState(): State
     {
         if ($this->state === null) {
-            $this->state = new State($this->status, $this->data);
+            $this->state = new State($this->status, $this->data, $this->rawData);
         }
 
         return $this->state;
@@ -140,6 +170,7 @@ final class Node implements ConsumerInterface
         // DELETE handled separately
         $this->status = self::MANAGED;
         $this->data = $this->state->getTransactionData();
+        $this->updateRawData();
         $this->state->__destruct();
         $this->state = null;
         $this->relationStatus = [];
@@ -173,6 +204,17 @@ final class Node implements ConsumerInterface
         $this->relationStatus = [];
     }
 
+    public static function convertToSolid(mixed $value): mixed
+    {
+        if (!\is_object($value)) {
+            return $value;
+        }
+        if ($value instanceof DateTimeInterface) {
+            return $value instanceof DateTimeImmutable ? $value : DateTimeImmutable::createFromInterface($value);
+        }
+        return $value->__toString();
+    }
+
     public static function compare(mixed $a, mixed $b): int
     {
         if ($a === $b) {
@@ -191,8 +233,11 @@ final class Node implements ConsumerInterface
             if ($a === '' || $b === '') {
                 return -1;
             }
-            if (\in_array($ta[0], ['integer', 'double'], true)) {
-                return (int)((string)$a !== (string)$b);
+            if ($ta[0] === 'integer') {
+                return \is_numeric($a) && \is_numeric($b) ? (int)((string)$a !== (string)$b) : -1;
+            }
+            if ($ta[0] === 'double') {
+                return \is_numeric($a) && \is_numeric($b) ? (int)((float)$a !== (float)$b) : -1;
             }
         }
 
@@ -200,6 +245,10 @@ final class Node implements ConsumerInterface
             $a = \filter_var($a, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             $b = \filter_var($b, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             return (int)($a !== $b);
+        }
+
+        if ($ta === ['double', 'integer']) {
+            return (int)((float)$a !== (float)$b);
         }
 
         return 1;

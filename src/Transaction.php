@@ -108,6 +108,7 @@ final class Transaction implements TransactionInterface
         // foreach ($iterator as $e) {
         $iterator = $heap->getIterator();
         $iterator->rewind();
+        $entityRegistry = $this->orm->getEntityRegistry();
         while ($iterator->valid()) {
             $e = $iterator->current();
             $iterator->next();
@@ -124,14 +125,15 @@ final class Transaction implements TransactionInterface
                 $heap->detach($e);
                 continue;
             }
+            $role = $node->getRole();
 
             // reindex the entity while it has old data
-            $heap->attach($e, $node, $this->orm->getIndexes($node->getRole()));
+            $heap->attach($e, $node, $entityRegistry->getIndexes($role));
 
             // sync the current entity data with newly generated data
-            $mapper = $this->orm->getMapper($node->getRole());
+            $mapper = $entityRegistry->getMapper($role);
             // $entityRelations = $mapper->fetchRelations($e);
-            $syncData = $node->syncState($this->orm->getRelationMap($node->getRole()));
+            $syncData = $node->syncState($entityRegistry->getRelationMap($role));
             $mapper->hydrate($e, $syncData);
         }
     }

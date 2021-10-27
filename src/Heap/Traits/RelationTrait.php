@@ -10,15 +10,9 @@ use JetBrains\PhpStorm\ExpectedValues;
 trait RelationTrait
 {
     private array $relations = [];
+
     /** @var array<string, int> */
     private array $relationStatus = [];
-
-    // private array $resolvedRelations = [];
-    //
-    // public function isRelationResolved(string $name): bool
-    // {
-    //     return $this->resolvedRelations[$name] ?? false;
-    // }
 
     public function setRelationStatus(
         string $name,
@@ -37,10 +31,7 @@ trait RelationTrait
         return $this->relationStatus[$name] ?? RelationInterface::STATUS_PREPARE;
     }
 
-    /**
-     * @param mixed  $context
-     */
-    public function setRelation(string $name, $context): void
+    public function setRelation(string $name, mixed $context): void
     {
         $this->relations[$name] = $context;
         unset($this->data[$name]);
@@ -51,10 +42,7 @@ trait RelationTrait
         return array_key_exists($name, $this->relations);
     }
 
-    /**
-     * @return mixed
-     */
-    public function getRelation(string $name)
+    public function getRelation(string $name): mixed
     {
         return $this->relations[$name] ?? null;
     }

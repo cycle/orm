@@ -11,6 +11,7 @@ class NodeComparisonTest extends TestCase
 {
     public function valuesProvider(): array
     {
+        // todo add comparision with object
         return [
             // same:
             [true, true, true],
@@ -26,6 +27,9 @@ class NodeComparisonTest extends TestCase
             [true, null, null],
             [true, '', b''],
             [true, 2.1, '2.1'],
+            [true, 3, 3.0],
+            [true, 199, 199.0],
+            [true, '199.0', 199.0],
             // not same:
             [false, 0, "\0"],
             [false, null, "\0"],
@@ -41,7 +45,6 @@ class NodeComparisonTest extends TestCase
             [false, [], ''],
             [false, true, false],
             [false, 2, '1'],
-            [false, 3, 3.0],
             [false, -1, true],
             [false, -1, false],
             [false, '-1', true],

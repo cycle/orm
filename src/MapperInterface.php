@@ -32,6 +32,12 @@ interface MapperInterface
     /**
      * Hydrate entity with dataset.
      *
+     * @template T
+     *
+     * @param T $entity
+     * @param array $data Prepared (typecasted) data
+     *
+     * @return T
      * @throws MapperException
      */
     public function hydrate(object $entity, array $data): object;

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\SQLServer\Schema\Typecast;
+namespace Cycle\ORM\Tests\Functional\Driver\SQLServer\Typecast;
 
 // phpcs:ignore
-use Cycle\ORM\Tests\Functional\Driver\Common\Schema\Typecast\UUIDTest as CommonTest;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\UUIDTest as CommonTest;
 
 /**
  * @group driver

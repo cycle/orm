@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\MySQL\Schema\Typecast;
+namespace Cycle\ORM\Tests\Functional\Driver\MySQL\Typecast;
 
 // phpcs:ignore
-use Cycle\ORM\Tests\Functional\Driver\Common\Schema\Typecast\DatetimeTest as CommonTest;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\DatetimeTest as CommonTest;
 
 /**
  * @group driver

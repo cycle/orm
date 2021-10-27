@@ -236,7 +236,6 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->save($user);
 
         $this->assertSame($user, $profile->getUser());
-
     }
 
     public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled()

@@ -14,6 +14,11 @@ namespace Cycle\ORM\Heap;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
+use DateTime;
+use DateTimeImmutable;
+
+use function is_object;
+use function is_string;
 
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
@@ -44,6 +49,8 @@ final class Node implements ProducerInterface, ConsumerInterface
     /** @var State|null */
     private $state;
 
+    private $dataObjectsState = [];
+
     /**
      * @param int    $status
      * @param array  $data
@@ -54,6 +61,8 @@ final class Node implements ProducerInterface, ConsumerInterface
         $this->status = $status;
         $this->data = $data;
         $this->role = $role;
+
+        $this->setObjectsState($data);
     }
 
     /**
@@ -183,7 +192,7 @@ final class Node implements ProducerInterface, ConsumerInterface
             return [];
         }
 
-        $changes = array_udiff_assoc($this->state->getData(), $this->data, [self::class, 'compare']);
+        $changes = $this->getChanges($this->state->getData(), $this->data);
         foreach ($this->state->getRelations() as $name => $relation) {
             $this->setRelation($name, $relation);
         }
@@ -221,5 +230,39 @@ final class Node implements ProducerInterface, ConsumerInterface
         }
 
         return ($a > $b) ? 1 : -1;
+    }
+
+    public function getChanges(array $current, array $from): array
+    {
+        foreach ($this->dataObjectsState as $field => $value) {
+            if (is_string($value) && $this->isStringable($current[$field])) {
+                if ((string) $current[$field] !== $value) {
+                    unset($from[$field]);
+                }
+            }
+            if ($value instanceof DateTimeImmutable && $value->getTimestamp() !== $current[$field]->getTimestamp()) {
+                unset($from[$field]);
+            }
+        }
+
+        // in a future mapper must support solid states
+        return array_udiff_assoc($current, $from, [self::class, 'compare']);
+    }
+
+    protected function setObjectsState(array $data): void
+    {
+        foreach ($data as $field => $value) {
+            if ($this->isStringable($value)) {
+                $this->dataObjectsState[$field] = (string) $value;
+            }
+            if ($value instanceof DateTime) {
+                $this->dataObjectsState[$field] = DateTimeImmutable::createFromMutable($value);
+            }
+        }
+    }
+
+    protected function isStringable($value): bool
+    {
+        return is_object($value) && method_exists($value, '__toString');
     }
 }

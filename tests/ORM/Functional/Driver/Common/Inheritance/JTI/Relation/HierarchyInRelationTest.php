@@ -376,6 +376,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             'title' => 'awesome book',
             'url' => 'awesome-book.com',
             'block_id' => 100,
+            'pages' => [],
         ]);
         $entity->pages = [
             $this->orm->make(Page::class, ['title' => 'page 1', 'content' => '...', 'owner_id' => 1]),

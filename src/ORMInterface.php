@@ -28,17 +28,18 @@ interface ORMInterface extends SourceProviderInterface
     public function get(string $role, array $scope, bool $load = true): ?object;
 
     /**
-     * OnCreate new entity based on given role and input data. Method will attempt to re-use
+     * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      *
      * @template T
      *
-     * @param class-string<T>|string $role
+     * @param class-string<T>|string $role Entity role or class name.
+     * @param bool $typecast Indicates that data is raw, and typecasting should be applied.
      *
      * @return T
      * @psalm-return ($role is class-string ? T : object)
      */
-    public function make(string $role, array $data = [], int $status = Node::NEW): object;
+    public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = true): object;
 
     /**
      * Promise object reference, proxy or object from memory heap.

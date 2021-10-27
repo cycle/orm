@@ -95,12 +95,17 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    public function make(string $role, array $data = [], int $status = Node::NEW): object
+    public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = true): object
     {
         $role = $data[LoaderInterface::ROLE_KEY] ?? $role;
         unset($data[LoaderInterface::ROLE_KEY]);
-        $relMap = $this->getRelationMap($role);
-        $mapper = $this->getMapper($role);
+        // Resolved role
+        $rRole = $this->resolveRole($role);
+        $relMap = $this->entityRegistry->getRelationMap($rRole);
+        $mapper = $this->entityRegistry->getMapper($rRole);
+
+        $caster = $typecast ? $this->entityRegistry->getTypecast($rRole) : null;
+
         if ($status !== Node::NEW) {
             // unique entity identifier
             $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
@@ -118,26 +123,26 @@ final class ORM implements ORMInterface
             }
 
             if ($ids !== null) {
-                $e = $this->heap->find($role, $ids);
+                $e = $this->heap->find($rRole, $ids);
 
                 if ($e !== null) {
                     $node = $this->heap->get($e);
                     \assert($node !== null);
                     $data = $relMap->init($node, $data);
 
-                    return $mapper->hydrate($e, $data);
+                    return $mapper->hydrate($e, $caster?->castAll($data) ?? $data);
                 }
             }
         }
 
-        $node = new Node($status, $data, $role);
+        $node = new Node($status, $data, $rRole);
         $e = $mapper->init($data, $role);
 
         /** Entity should be attached before {@see RelationMap::init()} running */
-        $this->heap->attach($e, $node, $this->getIndexes($role));
+        $this->heap->attach($e, $node, $this->entityRegistry->getIndexes($rRole));
 
         $data = $relMap->init($node, $data);
-        return $mapper->hydrate($e, $data);
+        return $mapper->hydrate($e, $caster?->castAll($data) ?? $data);
     }
 
     public function getCommandGenerator(): CommandGeneratorInterface

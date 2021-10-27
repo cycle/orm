@@ -178,13 +178,13 @@ final class Node implements ConsumerInterface
         if ($a === $b) {
             return 0;
         }
-        if ($a != $b || $a === null || $b === null) {
+        if ($a === null xor $b === null) {
             return 1;
         }
 
         $ta = [\gettype($a), \gettype($b)];
 
-        // array, boolean, double, integer, string
+        // array, boolean, double, integer, object, string
         \sort($ta, SORT_STRING);
 
         if ($ta[1] === 'string') {

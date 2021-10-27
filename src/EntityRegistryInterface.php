@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Select\SourceProviderInterface;
 
@@ -21,6 +22,11 @@ interface EntityRegistryInterface extends SourceProviderInterface
      * Get repository associated with given entity role.
      */
     public function getRepository(string $role): RepositoryInterface;
+
+    /**
+     * Get typecast implementation associated with given entity role.
+     */
+    public function getTypecast(string $role): ?TypecastInterface;
 
     /**
      * Get database source associated with given entity role.

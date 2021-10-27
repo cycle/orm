@@ -28,7 +28,8 @@ final class Iterator implements IteratorAggregate
         private ORMInterface $orm,
         string $class,
         private iterable $source,
-        private bool $findInHeap = false
+        private bool $findInHeap = false,
+        private bool $typecast = false
     ) {
         $this->role = $orm->resolveRole($class);
     }
@@ -78,6 +79,6 @@ final class Iterator implements IteratorAggregate
             }
         }
 
-        return $e ?? $this->orm->make($role, $data, Node::MANAGED);
+        return $e ?? $this->orm->make($role, $data, Node::MANAGED, typecast: $this->typecast);
     }
 }

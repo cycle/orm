@@ -372,7 +372,7 @@ abstract class AbstractNode
             );
 
             if ($this->typecast !== null) {
-                return $this->typecast->cast($result);
+                return $this->typecast->castAll($result);
             }
 
             return $result;

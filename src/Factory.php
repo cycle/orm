@@ -6,9 +6,12 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
+use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Cycle\ORM\Parser\Typecast;
+use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
@@ -62,6 +65,38 @@ final class Factory implements FactoryInterface
         array $parameters = []
     ): mixed {
         return $this->factory->make($alias, $parameters);
+    }
+
+    public function typecast(ORMInterface $orm, string $role): ?TypecastInterface
+    {
+        $ts = $orm->getSchema()->define($role, SchemaInterface::TYPECAST);
+        $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
+
+        if ($ts === null) {
+            return null;
+        }
+
+        // Create basic typecast implementation
+        if (\is_array($ts)) {
+            return new Typecast($ts, $database);
+        }
+
+        if (\is_string($ts)) {
+            $ts = $this->factory->make(
+                $ts,
+                [
+                    'database' => $database,
+                    'orm' => $orm,
+                    'role' => $role,
+                ]
+            );
+        }
+
+        if (!$ts instanceof TypecastInterface) {
+            throw new FactoryException(\sprintf('Bad typecast declaration for the `%s` role.', $role));
+        }
+
+        return $ts;
     }
 
     public function mapper(ORMInterface $orm, string $role): MapperInterface

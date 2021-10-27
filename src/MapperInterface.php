@@ -25,6 +25,11 @@ interface MapperInterface
     public function init(array $data, string $role = null): object;
 
     /**
+     * Cast raw data to configured types.
+     */
+    public function cast(array $data): array;
+
+    /**
      * Hydrate entity with dataset.
      *
      * @throws MapperException

@@ -12,9 +12,14 @@ use Cycle\ORM\Exception\TypecastException;
 interface TypecastInterface
 {
     /**
+     * @throws TypecastException
+     */
+    public function castOne(string $field, mixed $value): mixed;
+
+    /**
      * Typecast key-values into internal representation.
      *
      * @throws TypecastException
      */
-    public function cast(array $values): array;
+    public function castAll(array $values): array;
 }

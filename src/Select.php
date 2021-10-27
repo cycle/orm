@@ -394,7 +394,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             return null;
         }
 
-        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED);
+        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: false);
     }
 
     /**
@@ -418,7 +418,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return new Iterator(
             $this->orm,
             $this->loader->getTarget(),
-            $node->getResult()
+            $node->getResult(),
+            typecast: true
         );
     }
 

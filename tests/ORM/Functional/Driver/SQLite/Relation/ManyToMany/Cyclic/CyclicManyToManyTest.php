@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\SQLite\Relation\ManyToMany\Cyclic;
 
 // phpcs:ignore
-use Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany\Cyclic\CyclicManyToManyTest as CommonTest;
+use Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany\Cyclic\CyclicManyToManyTest as CommonClass;
 
 /**
  * @group driver
  * @group driver-sqlite
  */
-class CyclicManyToManyTest extends CommonTest
+class CyclicManyToManyTest extends CommonClass
 {
     public const DRIVER = 'sqlite';
 }

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\SQLServer\Relation\ManyToMany;
 
 // phpcs:ignore
-use Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany\ManyToManyPromiseEagerLoadTest as CommonTest;
+use Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany\ManyToManyPromiseEagerLoadTest as CommonClass;
 
 /**
  * @group driver
  * @group driver-sqlserver
  */
-class ManyToManyPromiseEagerLoadTest extends CommonTest
+class ManyToManyPromiseEagerLoadTest extends CommonClass
 {
     public const DRIVER = 'sqlserver';
 }

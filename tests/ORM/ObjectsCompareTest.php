@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\Book;
 use Cycle\ORM\Tests\Fixtures\BookNestedStates;
 use Cycle\ORM\Tests\Fixtures\BookStates;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 use DateInterval;
 use DateTime;
 
@@ -58,9 +57,7 @@ abstract class ObjectsCompareTest extends BaseTest
         $book->states = new BookStates(['foo']);
         $book->nested_states = new BookNestedStates(['bar']);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($book);
-        $tr->run();
+        $this->save($book);
 
         $this->assertEquals(1, $book->id);
 
@@ -74,9 +71,7 @@ abstract class ObjectsCompareTest extends BaseTest
         $fetched->states->states = ['foo', 'bar'];
         $fetched->nested_states->states[0]->title = 'baz';
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($fetched);
-        $tr->run();
+        $this->save($fetched);
 
         $selector = new Select($this->orm->withHeap(new Heap()), Book::class);
         $changed = $selector->fetchOne();
@@ -93,9 +88,7 @@ abstract class ObjectsCompareTest extends BaseTest
         $book->states = new BookStates(['foo']);
         $book->nested_states = new BookNestedStates(['bar']);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($book);
-        $tr->run();
+        $this->save($book);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Book::class);
@@ -105,9 +98,7 @@ abstract class ObjectsCompareTest extends BaseTest
         $fetched = $this->orm->make('book', $data[0], Node::MANAGED);
         $fetched->published_at->setDate(2010, 1, 1);
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($fetched);
-        $tr->run();
+        $this->save($fetched);
 
         $selector = new Select($this->orm->withHeap(new Heap()), Book::class);
         $changed = $selector->fetchOne();

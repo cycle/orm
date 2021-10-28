@@ -17,9 +17,6 @@ use Cycle\ORM\Heap\Traits\RelationTrait;
 use DateTime;
 use DateTimeImmutable;
 
-use function is_object;
-use function is_string;
-
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
  * inner states.
@@ -235,7 +232,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     public function getChanges(array $current, array $from): array
     {
         foreach ($this->dataObjectsState as $field => $value) {
-            if (is_string($value) && $this->isStringable($current[$field])) {
+            if (\is_string($value) && $this->isStringable($current[$field])) {
                 if ((string) $current[$field] !== $value) {
                     unset($from[$field]);
                 }
@@ -247,7 +244,7 @@ final class Node implements ProducerInterface, ConsumerInterface
         }
 
         // in a future mapper must support solid states
-        return array_udiff_assoc($current, $from, [self::class, 'compare']);
+        return \array_udiff_assoc($current, $from, [self::class, 'compare']);
     }
 
     protected function setObjectsState(array $data): void
@@ -265,6 +262,6 @@ final class Node implements ProducerInterface, ConsumerInterface
 
     protected function isStringable($value): bool
     {
-        return is_object($value) && method_exists($value, '__toString');
+        return \is_object($value) && \method_exists($value, '__toString');
     }
 }

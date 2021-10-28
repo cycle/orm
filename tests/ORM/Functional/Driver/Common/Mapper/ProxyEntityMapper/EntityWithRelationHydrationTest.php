@@ -381,6 +381,11 @@ class EntityWithRelationHydrationProfile
     {
         return $this->refers_user;
     }
+
+    public function __set(string $name, $value): void
+    {
+        throw new \Exception('Value shouldn\'t hydrate via __set method.');
+    }
 }
 
 class EntityWithRelationHydrationTag

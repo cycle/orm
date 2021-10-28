@@ -239,8 +239,9 @@ final class Node implements ProducerInterface, ConsumerInterface
                 if ((string) $current[$field] !== $value) {
                     unset($from[$field]);
                 }
+                continue;
             }
-            if ($value instanceof DateTimeImmutable && $value->getTimestamp() !== $current[$field]->getTimestamp()) {
+            if ($value instanceof DateTimeImmutable && ($value <=> $current[$field]) !== 0) {
                 unset($from[$field]);
             }
         }
@@ -254,6 +255,7 @@ final class Node implements ProducerInterface, ConsumerInterface
         foreach ($data as $field => $value) {
             if ($this->isStringable($value)) {
                 $this->dataObjectsState[$field] = (string) $value;
+                continue;
             }
             if ($value instanceof DateTime) {
                 $this->dataObjectsState[$field] = DateTimeImmutable::createFromMutable($value);

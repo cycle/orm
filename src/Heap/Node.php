@@ -11,6 +11,7 @@ use Cycle\ORM\RelationMap;
 use DateTimeImmutable;
 use DateTimeInterface;
 use JetBrains\PhpStorm\ExpectedValues;
+use Stringable;
 
 use const FILTER_NULL_ON_FAILURE;
 use const FILTER_VALIDATE_BOOLEAN;
@@ -204,6 +205,9 @@ final class Node implements ConsumerInterface
         $this->relationStatus = [];
     }
 
+    /**
+     * @internal
+     */
     public static function convertToSolid(mixed $value): mixed
     {
         if (!\is_object($value)) {
@@ -212,7 +216,7 @@ final class Node implements ConsumerInterface
         if ($value instanceof DateTimeInterface) {
             return $value instanceof DateTimeImmutable ? $value : DateTimeImmutable::createFromInterface($value);
         }
-        return $value->__toString();
+        return $value instanceof \Stringable ? $value->__toString() : $value;
     }
 
     public static function compare(mixed $a, mixed $b): int
@@ -228,6 +232,26 @@ final class Node implements ConsumerInterface
 
         // array, boolean, double, integer, object, string
         \sort($ta, SORT_STRING);
+
+        if ($ta[0] === 'object' || $ta[1] === 'object') {
+            // Both are objects
+            if ($ta[0] === $ta[1]) {
+                if ($a instanceof DateTimeInterface && $b instanceof DateTimeInterface) {
+                    return $a <=> $b;
+                }
+                if ($a instanceof \Stringable && $b instanceof \Stringable) {
+                    return $a->__toString() <=> $b->__toString();
+                }
+                return (int)($a::class !== $b::class || (array)$a !== (array)$b);
+            }
+            // Object and string/int
+            if ($ta[1] === 'string' || $ta[0] === 'integer') {
+                $a = $a instanceof Stringable ? $a->__toString() : (string)$a;
+                $b = $b instanceof Stringable ? $b->__toString() : (string)$b;
+                return $a <=> $b;
+            }
+            return -1;
+        }
 
         if ($ta[1] === 'string') {
             if ($a === '' || $b === '') {

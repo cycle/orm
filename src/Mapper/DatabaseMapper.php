@@ -118,10 +118,8 @@ abstract class DatabaseMapper implements MapperInterface
     public function queueUpdate($entity, Node $node, State $state): ContextCarrierInterface
     {
         $fromData = $state->getTransactionData();
-        $data = $this->fetchFields($entity);
+        $changes = $node->getChanges($this->fetchFields($entity), $fromData);
 
-        // in a future mapper must support solid states
-        $changes = array_udiff_assoc($data, $fromData, [Node::class, 'compare']);
         $state->setStatus(Node::SCHEDULED_UPDATE);
         $state->setData($changes);
 

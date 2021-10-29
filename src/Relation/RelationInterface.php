@@ -26,6 +26,11 @@ interface RelationInterface
     public function getName(): string;
 
     /**
+     * Target role.
+     */
+    public function getTarget(): string;
+
+    /**
      * Must return true to trigger queue.
      */
     public function isCascade(): bool;

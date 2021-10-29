@@ -126,7 +126,7 @@ final class State implements ConsumerInterface
                 }
                 continue;
             }
-            $changes = $changes || Node::compare($value, $this->transactionData[$field] ?? null) !== 0;
+            $changes = $changes || Node::compare($value, $this->transactionRaw[$field] ?? $this->transactionData[$field] ?? null) !== 0;
         }
         if (!$changes) {
             $this->state = Node::MANAGED;

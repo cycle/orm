@@ -21,6 +21,8 @@ interface MapperInterface
 
     /**
      * Init empty entity object. Returns empty entity.
+     *
+     * @param array $data Raw data. You shouldn't apply typecasting to it.
      */
     public function init(array $data, string $role = null): object;
 

@@ -45,7 +45,7 @@ trait ToOneTrait
         return $result;
     }
 
-    public function collect($data): ?object
+    public function collect(mixed $data): ?object
     {
         return $data;
     }

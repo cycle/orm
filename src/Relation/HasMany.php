@@ -155,7 +155,7 @@ class HasMany extends AbstractRelation
         return $result;
     }
 
-    public function collect($data): iterable
+    public function collect(mixed $data): iterable
     {
         if (!\is_iterable($data)) {
             throw new \InvalidArgumentException('Collected data in the HasMany relation should be iterable.');

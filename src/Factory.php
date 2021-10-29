@@ -10,6 +10,7 @@ use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Relation\RelationInterface;
@@ -69,16 +70,23 @@ final class Factory implements FactoryInterface
 
     public function typecast(ORMInterface $orm, string $role): ?TypecastInterface
     {
-        $ts = $orm->getSchema()->define($role, SchemaInterface::TYPECAST);
-        $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
+        $schema = $orm->getSchema();
+        // Get parent's typecast
+        $parent = $schema->define($role, SchemaInterface::PARENT);
+        $parentTypecast = $parent === null ? null : $this->typecast($orm, $parent);
 
+        // Schema's `typecast` option
+        $ts = $schema->define($role, SchemaInterface::TYPECAST);
         if ($ts === null) {
-            return null;
+            return $parentTypecast;
         }
 
         // Create basic typecast implementation
+        $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
         if (\is_array($ts)) {
-            return new Typecast($ts, $database);
+            return $parentTypecast === null
+                ? new Typecast($ts, $database)
+                : new CompositeTypecast($parentTypecast, new Typecast($ts, $database));
         }
 
         if (\is_string($ts)) {
@@ -96,7 +104,7 @@ final class Factory implements FactoryInterface
             throw new FactoryException(\sprintf('Bad typecast declaration for the `%s` role.', $role));
         }
 
-        return $ts;
+        return $parentTypecast === null ? $ts : new CompositeTypecast($parentTypecast, $ts);
     }
 
     public function mapper(ORMInterface $orm, string $role): MapperInterface

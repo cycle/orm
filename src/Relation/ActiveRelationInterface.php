@@ -32,5 +32,5 @@ interface ActiveRelationInterface extends RelationInterface
     /**
      * @param iterable|object|null $data
      */
-    public function collect($data): object|iterable|null;
+    public function collect(mixed $data): object|iterable|null;
 }

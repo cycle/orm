@@ -109,7 +109,7 @@ final class ObjectsCompareTest extends BaseTest
         $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
-        $data = (new Select($this->orm, Book::class))->fetchData(typecast: true);
+        $data = (new Select($this->orm, Book::class))->fetchData();
         $data[0]['published_at'] = new DateTime();
 
         $fetched = $this->orm->make('book', $data[0], Node::MANAGED, typecast: false);

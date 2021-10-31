@@ -6,10 +6,17 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast;
 
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookNestedStates;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookStates;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\IDCaster;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Wrapper;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class TypecastTest extends BaseTest
@@ -35,8 +42,8 @@ abstract class TypecastTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                SchemaInterface::ROLE => 'user',
+            'user' => [
+                SchemaInterface::ENTITY => User::class,
                 SchemaInterface::MAPPER => Mapper::class,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'user',
@@ -47,6 +54,35 @@ abstract class TypecastTest extends BaseTest
                     'balance' => [IDCaster::class, 'wrap'],
                 ],
                 SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [
+                    'books' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Book::class,
+                        Relation::LOAD => Relation::LOAD_EAGER,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => false,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            'book' => [
+                SchemaInterface::ENTITY => Book::class,
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'user_id', 'states', 'nested_states', 'published_at'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'int',
+                    'user_id' => 'int',
+                    'states' => [BookStates::class, 'cast'],
+                    'nested_states' => [BookNestedStates::class, 'cast'],
+                    'published_at' => 'datetime',
+                ],
                 SchemaInterface::RELATIONS => [],
             ],
         ]));
@@ -68,21 +104,6 @@ abstract class TypecastTest extends BaseTest
 
     // ORM::make()
 
-    public function testOrmMakeRawDataCastFlag(): void
-    {
-        $user = $this->orm->make(User::class, [
-            'id' => 100,
-            'email' => 'Merlin',
-            'balance' => 50,
-        ], typecast: true);
-
-        $this->assertNotNull($user->id);
-        $this->assertIsInt($user->id->value);
-
-        // no exceptions thrown
-        $this->save($user);
-    }
-
     public function testOrmMakePreparedDataCastFlag(): void
     {
         $idValue = new Wrapper(100);
@@ -100,27 +121,61 @@ abstract class TypecastTest extends BaseTest
         $this->save($user);
     }
 
-    public function testOrmMakeRehydrateRawDataCastFlag(): void
-    {
-        $user1 = $this->orm->make(User::class, [
-            'id' => 100,
-            'email' => 'Merlin',
-            'balance' => 50,
-        ], typecast: true);
-
-        $user2 = $this->orm->make(User::class, [
-            'id' => 100,
-            'email' => 'Merlin',
-            'balance' => 200,
-        ], status: Node::MANAGED, typecast: true);
-
-        $this->assertSame($user1, $user2);
-        $this->assertNotNull($user1->id);
-        $this->assertSame(200, $user1->balance->value);
-
-        // no exceptions thrown
-        $this->save($user1);
-    }
+    // public function testOrmMakeRawDataCastFlag(): void
+    // {
+    //     $user = $this->orm->make(User::class, [
+    //         'id' => 100,
+    //         'email' => 'Merlin',
+    //         'balance' => 50,
+    //     ], typecast: true);
+    //
+    //     $this->assertNotNull($user->id);
+    //     $this->assertIsInt($user->id->value);
+    //
+    //     // no exceptions thrown
+    //     $this->save($user);
+    // }
+    //
+    // public function testOrmMakeRehydrateRawDataCastFlag(): void
+    // {
+    //     $user1 = $this->orm->make(User::class, [
+    //         'id' => 100,
+    //         'email' => 'Merlin',
+    //         'balance' => 50,
+    //     ], typecast: true);
+    //
+    //     $user2 = $this->orm->make(User::class, [
+    //         'id' => 100,
+    //         'email' => 'Merlin',
+    //         'balance' => 200,
+    //     ], status: Node::MANAGED, typecast: true);
+    //
+    //     $this->assertSame($user1, $user2);
+    //     $this->assertNotNull($user1->id);
+    //     $this->assertSame(200, $user1->balance->value);
+    //
+    //     // no exceptions thrown
+    //     $this->save($user1);
+    // }
+    //
+    // public function testCreateFromRawDataWithRelations(): void
+    // {
+    //     $user = $this->orm->make('user', [
+    //         'id' => '10',
+    //         'email' => 'new@mail.box',
+    //         'balance' => '1000.0',
+    //         'books' => [
+    //             [
+    //                 'id' => '15',
+    //                 'user_id' => '10',
+    //                 'states' => 'foo|bar',
+    //                 'nested_states' => 'buz|fiz',
+    //                 'published_at' => '2012-12-12 12:12:12',
+    //             ],
+    //         ],
+    //     ], typecast: true);
+    //
+    // }
 
     // Select
 
@@ -140,33 +195,5 @@ abstract class TypecastTest extends BaseTest
         $this->assertNotNull($users[0]->id);
         $this->assertIsNotObject($users[0]->id->value);
         $this->assertEquals(1, $users[0]->id->value);
-    }
-}
-
-class User
-{
-    public ?Wrapper $id = null;
-    public string $email;
-    public Wrapper $balance;
-}
-
-class Wrapper
-{
-    public function __construct(
-        public mixed $value
-    ) {
-    }
-
-    public function __toString(): string
-    {
-        return (string)$this->value;
-    }
-}
-
-class IDCaster
-{
-    public static function wrap(mixed $value): Wrapper
-    {
-        return new Wrapper($value);
     }
 }

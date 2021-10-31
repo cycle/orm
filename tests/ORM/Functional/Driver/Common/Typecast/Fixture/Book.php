@@ -9,7 +9,8 @@ use DateTimeInterface;
 
 class Book
 {
-    public $id;
+    public ?int $id = null;
+    public ?int $user_id = null;
 
     public BookStates $states;
 

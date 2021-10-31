@@ -15,18 +15,10 @@ final class CompositeTypecast implements TypecastInterface
         $this->casters = $typecasts;
     }
 
-    public function castOne(string $field, mixed $value): mixed
+    public function cast(array $values): array
     {
         foreach ($this->casters as $caster) {
-            $value = $caster->castOne($field, $value);
-        }
-        return $value;
-    }
-
-    public function castAll(array $values): array
-    {
-        foreach ($this->casters as $caster) {
-            $values = $caster->castAll($values);
+            $values = $caster->cast($values);
         }
         return $values;
     }

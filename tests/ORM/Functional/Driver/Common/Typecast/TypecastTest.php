@@ -61,7 +61,6 @@ abstract class TypecastTest extends BaseTest
                     'id' => [IDCaster::class, 'wrap'],
                     'balance' => [IDCaster::class, 'wrap'],
                 ],
-                SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [
                     'books' => [
                         Relation::TYPE => Relation::HAS_MANY,
@@ -83,7 +82,6 @@ abstract class TypecastTest extends BaseTest
                 SchemaInterface::TABLE => 'book',
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'user_id', 'states', 'nested_states', 'published_at'],
-                SchemaInterface::SCHEMA => [],
                 SchemaInterface::TYPECAST => [
                     'id' => 'int',
                     'user_id' => 'int',

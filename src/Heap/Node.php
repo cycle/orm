@@ -297,7 +297,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     protected function setObjectsState(array $data): void
     {
         foreach ($data as $field => $value) {
-            if (static::isStringable($value)) {
+            if (self::isStringable($value)) {
                 $this->dataObjectsState[$field] = (string) $value;
                 continue;
             }

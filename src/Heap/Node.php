@@ -237,15 +237,15 @@ final class Node implements ProducerInterface, ConsumerInterface
                 if ($a instanceof DateTimeInterface && $b instanceof DateTimeInterface) {
                     return $a <=> $b;
                 }
-                if (static::isStringable($a) && static::isStringable($b)) {
+                if (self::isStringable($a) && self::isStringable($b)) {
                     return $a->__toString() <=> $b->__toString();
                 }
                 return (int)(\get_class($a) !== \get_class($b) || (array)$a !== (array)$b);
             }
             // Object and string/int
             if ($ta[1] === 'string' || $ta[0] === 'integer') {
-                $a = static::isStringable($a) ? $a->__toString() : (!is_object($a) ? (string) $a : $a);
-                $b = static::isStringable($b) ? $b->__toString() : (!is_object($b) ? (string) $b : $b);
+                $a = self::isStringable($a) ? $a->__toString() : (!is_object($a) ? (string) $a : $a);
+                $b = self::isStringable($b) ? $b->__toString() : (!is_object($b) ? (string) $b : $b);
                 return $a <=> $b;
             }
             return -1;
@@ -279,7 +279,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     public function getChanges(array $current, array $from): array
     {
         foreach ($this->dataObjectsState as $field => $value) {
-            if (\is_string($value) && static::isStringable($current[$field])) {
+            if (\is_string($value) && self::isStringable($current[$field])) {
                 if ((string) $current[$field] !== $value) {
                     unset($from[$field]);
                 }

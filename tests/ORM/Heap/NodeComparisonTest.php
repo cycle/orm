@@ -77,7 +77,7 @@ class NodeComparisonTest extends TestCase
             // Numeric
             [0, '00'],
             [0, "\0"],
-            [0, "0x0"],
+            [0, '0x0'],
             [2, '1'],
             [300.0, 400],
             // Array
@@ -116,7 +116,7 @@ class NodeComparisonTest extends TestCase
         ];
         yield 'not Stringable object and string' => [
             $this->createNotStringableObject(null, 'foo'),
-            'bar'
+            'bar',
         ];
     }
 
@@ -149,10 +149,11 @@ class NodeComparisonTest extends TestCase
 
     private function createStringableObject(string ...$toConcat): object
     {
-        return new class($toConcat) implements Stringable {
+        return new class ($toConcat) implements Stringable {
             private $toConcat;
 
-            public function __construct(array $toConcat) {
+            public function __construct(array $toConcat)
+            {
                 $this->toConcat = $toConcat;
             }
 
@@ -165,11 +166,12 @@ class NodeComparisonTest extends TestCase
 
     private function createNotStringableObject($a = null, $b = null): object
     {
-        return new class($a, $b) {
+        return new class ($a, $b) {
             private $a;
             private $b;
 
-            public function __construct($a, $b) {
+            public function __construct($a, $b)
+            {
                 $this->a = $a;
                 $this->b = $b;
             }
@@ -178,11 +180,12 @@ class NodeComparisonTest extends TestCase
 
     private function createNotStringableObject2($a = null, $b = null): object
     {
-        return new class($a, $b) {
+        return new class ($a, $b) {
             private $a;
             private $b;
 
-            public function __construct($a, $b) {
+            public function __construct($a, $b)
+            {
                 $this->a = $a;
                 $this->b = $b;
             }

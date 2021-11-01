@@ -63,7 +63,7 @@ final class Embedded implements SameRowRelationInterface
         return true;
     }
 
-    public function init(Node $node, array $data): object
+    public function init(Node $node, array $data, bool $typecast = false): object
     {
         foreach ($this->primaryKeys as $key) {
             // ensure proper object reference
@@ -74,6 +74,13 @@ final class Embedded implements SameRowRelationInterface
         $node->setRelation($this->getName(), $item);
 
         return $item;
+    }
+
+    public function cast(?array $data): ?array
+    {
+        return $data === null
+            ? null
+            : ($this->orm->getEntityRegistry()->getMapper($this->target)?->cast($data) ?? $data);
     }
 
     public function collect($source): ?object

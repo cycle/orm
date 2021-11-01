@@ -78,15 +78,14 @@ abstract class DatabaseMapper implements MapperInterface
 
         // Cast relations
         foreach ($this->entityRegistry->getRelationMap($this->role)->getRelations() as $field => $relation) {
-            if (!array_key_exists($field, $data) || !is_array($data[$field])) {
+            if (!array_key_exists($field, $data)) {
                 continue;
             }
-            $callback = [$this->entityRegistry->getMapper($relation->getTarget()), 'cast'];
-            if (\array_is_list($data[$field])) {
-                $data[$field] = array_map($callback, $data[$field]);
-            } else {
-                $data[$field] = $callback($data[$field]);
+            $value = $data[$field];
+            if (!is_array($value) && !is_null($value)) {
+                continue;
             }
+            $data[$field] = $relation->cast($value);
         }
 
         return $data;

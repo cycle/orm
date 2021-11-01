@@ -428,7 +428,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @return array<array-key, array<string, mixed>>
      */
-    public function fetchData(bool $typecast = false): array
+    public function fetchData(bool $typecast = true): array
     {
         $node = $this->loader->createNode();
         $this->loader->loadData($node, false);

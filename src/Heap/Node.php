@@ -16,6 +16,7 @@ use Cycle\ORM\Context\ProducerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
@@ -218,21 +219,67 @@ final class Node implements ProducerInterface, ConsumerInterface
      */
     public static function compare($a, $b): int
     {
-        if ($a == $b) {
-            if (($a === null) !== ($b === null)) {
-                return 1;
-            }
-
+        if ($a === $b) {
             return 0;
         }
+        if ($a === null xor $b === null) {
+            return 1;
+        }
 
-        return ($a > $b) ? 1 : -1;
+        $ta = [\gettype($a), \gettype($b)];
+
+        // array, boolean, double, integer, object, string
+        \sort($ta, SORT_STRING);
+
+        if ($ta[0] === 'object' || $ta[1] === 'object') {
+            // Both are objects
+            if ($ta[0] === $ta[1]) {
+                if ($a instanceof DateTimeInterface && $b instanceof DateTimeInterface) {
+                    return $a <=> $b;
+                }
+                if (self::isStringable($a) && self::isStringable($b)) {
+                    return $a->__toString() <=> $b->__toString();
+                }
+                return (int)(\get_class($a) !== \get_class($b) || (array)$a !== (array)$b);
+            }
+            // Object and string/int
+            if ($ta[1] === 'string' || $ta[0] === 'integer') {
+                $a = self::isStringable($a) ? $a->__toString() : (!is_object($a) ? (string) $a : $a);
+                $b = self::isStringable($b) ? $b->__toString() : (!is_object($b) ? (string) $b : $b);
+                return $a <=> $b;
+            }
+            return -1;
+        }
+
+        if ($ta[1] === 'string') {
+            if ($a === '' || $b === '') {
+                return -1;
+            }
+            if ($ta[0] === 'integer') {
+                return \is_numeric($a) && \is_numeric($b) ? (int)((string)$a !== (string)$b) : -1;
+            }
+            if ($ta[0] === 'double') {
+                return \is_numeric($a) && \is_numeric($b) ? (int)((float)$a !== (float)$b) : -1;
+            }
+        }
+
+        if ($ta[0] === 'boolean') {
+            $a = \filter_var($a, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            $b = \filter_var($b, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            return (int)($a !== $b);
+        }
+
+        if ($ta === ['double', 'integer']) {
+            return (int)((float)$a !== (float)$b);
+        }
+
+        return 1;
     }
 
     public function getChanges(array $current, array $from): array
     {
         foreach ($this->dataObjectsState as $field => $value) {
-            if (\is_string($value) && $this->isStringable($current[$field])) {
+            if (\is_string($value) && self::isStringable($current[$field])) {
                 if ((string) $current[$field] !== $value) {
                     unset($from[$field]);
                 }
@@ -250,7 +297,7 @@ final class Node implements ProducerInterface, ConsumerInterface
     protected function setObjectsState(array $data): void
     {
         foreach ($data as $field => $value) {
-            if ($this->isStringable($value)) {
+            if (static::isStringable($value)) {
                 $this->dataObjectsState[$field] = (string) $value;
                 continue;
             }
@@ -260,7 +307,7 @@ final class Node implements ProducerInterface, ConsumerInterface
         }
     }
 
-    protected function isStringable($value): bool
+    protected static function isStringable($value): bool
     {
         return \is_object($value) && \method_exists($value, '__toString');
     }

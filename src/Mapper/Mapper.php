@@ -35,7 +35,7 @@ class Mapper extends DatabaseMapper
 
         $this->entity = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
         $this->children = $orm->getSchema()->define($role, SchemaInterface::CHILDREN) ?? [];
-        $this->relationMap = $orm->getRelationMap($role);
+        $this->relationMap = $this->entityRegistry->getRelationMap($role);
         $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
     }
 

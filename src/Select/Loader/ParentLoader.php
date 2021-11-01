@@ -70,21 +70,14 @@ class ParentLoader extends JoinableLoader
 
     protected function initNode(): AbstractNode
     {
-        // throw new \RuntimeException('This method should not be called.');
+        // todo? throw new \RuntimeException('This method should not be called.');
 
-        $node = new ParentMergeNode(
+        return new ParentMergeNode(
             $this->target,
             $this->columnNames(),
             (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],
             (array)$this->schema[Relation::INNER_KEY]
         );
-
-        $typecast = $this->define(SchemaInterface::TYPECAST);
-        if ($typecast !== null) {
-            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
-        }
-
-        return $node;
     }
 }

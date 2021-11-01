@@ -95,7 +95,7 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = true): object
+    public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object
     {
         $role = $data[LoaderInterface::ROLE_KEY] ?? $role;
         unset($data[LoaderInterface::ROLE_KEY]);
@@ -104,8 +104,7 @@ final class ORM implements ORMInterface
         $relMap = $this->entityRegistry->getRelationMap($rRole);
         $mapper = $this->entityRegistry->getMapper($rRole);
 
-        $caster = $typecast ? $this->entityRegistry->getTypecast($rRole) : null;
-        $castedData = $caster?->castAll($data) ?? $data;
+        $castedData = $typecast ? $mapper->cast($data) : $data;
 
         if ($status !== Node::NEW) {
             // unique entity identifier
@@ -135,7 +134,7 @@ final class ORM implements ORMInterface
             }
         }
 
-        $node = new Node($status, $castedData, $rRole);
+        $node = new Node($status, $castedData, $rRole, $data);
         $e = $mapper->init($data, $role);
 
         /** Entity should be attached before {@see RelationMap::init()} running */

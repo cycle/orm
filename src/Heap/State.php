@@ -32,7 +32,7 @@ final class State implements ConsumerInterface
         #[ExpectedValues(valuesFromClass: Node::class)]
         private int $state,
         private array $data,
-        private array $transactionRaw
+        private array $transactionRaw = []
     ) {
         $this->transactionData = $state === Node::NEW ? [] : $data;
     }

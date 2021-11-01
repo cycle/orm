@@ -39,7 +39,7 @@ interface ORMInterface extends SourceProviderInterface
      * @return T
      * @psalm-return ($role is class-string ? T : object)
      */
-    public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = true): object;
+    public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object;
 
     /**
      * Promise object reference, proxy or object from memory heap.

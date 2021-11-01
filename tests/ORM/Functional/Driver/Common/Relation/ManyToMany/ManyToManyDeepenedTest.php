@@ -9,6 +9,7 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Image;
@@ -157,14 +158,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ], $selector->fetchData(typecast: true));
     }
 
     public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector
-            ->load('tags', ['method' => Select\JoinableLoader::INLOAD])
+            ->load('tags', ['method' => Select\AbstractLoader::INLOAD])
             ->load('tags.@.image')
             ->orderBy('id', 'ASC');
 
@@ -231,8 +232,8 @@ abstract class ManyToManyDeepenedTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector
-            ->load('tags', ['method' => Select\JoinableLoader::INLOAD])
-            ->load('tags.@.image', ['method' => Select\JoinableLoader::POSTLOAD])
+            ->load('tags', ['method' => Select\AbstractLoader::INLOAD])
+            ->load('tags.@.image', ['method' => Select\AbstractLoader::POSTLOAD])
             ->orderBy('id', 'ASC');
 
         $this->assertSame([
@@ -406,15 +407,18 @@ abstract class ManyToManyDeepenedTest extends BaseTest
     {
         return [
             User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::TYPECAST => ['id' => 'int', 'balance' => 'float'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'email', 'balance'],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'int',
+                    'balance' => 'float',
+                ],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [
                     'tags' => [
                         Relation::TYPE => Relation::MANY_TO_MANY,
                         Relation::TARGET => Tag::class,
@@ -430,27 +434,27 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 ],
             ],
             Tag::class => [
-                Schema::ROLE => 'tag',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'tag',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'name'],
-                Schema::TYPECAST => ['id' => 'int'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                SchemaInterface::ROLE => 'tag',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'tag',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'name'],
+                SchemaInterface::TYPECAST => ['id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+                SchemaInterface::SCOPE => SortByIDScope::class,
             ],
             TagContext::class => [
-                Schema::ROLE => 'tag_context',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'tag_user_map',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'tag_id', 'as'],
-                Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                SchemaInterface::ROLE => 'tag_context',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'tag_user_map',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'user_id', 'tag_id', 'as'],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'user_id' => 'int', 'tag_id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [
                     'image' => [
                         Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Image::class,
@@ -463,15 +467,15 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                 ],
             ],
             Image::class => [
-                Schema::ROLE => 'image',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'images',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'url', 'parent_id'],
-                Schema::TYPECAST => ['id' => 'int', 'parent_id' => 'int'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
+                SchemaInterface::ROLE => 'image',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'images',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'url', 'parent_id'],
+                SchemaInterface::TYPECAST => ['id' => 'int', 'parent_id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
         ];
     }

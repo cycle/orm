@@ -66,20 +66,13 @@ class SubclassLoader extends JoinableLoader
 
     protected function initNode(): AbstractNode
     {
-        $node = new SubclassMergeNode(
+        return new SubclassMergeNode(
             $this->target,
             $this->columnNames(),
             (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],
             (array)$this->schema[Relation::INNER_KEY]
         );
-
-        $typecast = $this->define(SchemaInterface::TYPECAST);
-        if ($typecast !== null) {
-            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
-        }
-
-        return $node;
     }
 
     protected function generateParentLoader(string $role): ?LoaderInterface

@@ -34,6 +34,7 @@ final class Node implements ConsumerInterface
     public const DELETED = 6;
 
     private ?State $state = null;
+    private array $rawData = [];
 
     /**
      * @param array<string, mixed> $data
@@ -43,21 +44,9 @@ final class Node implements ConsumerInterface
         #[ExpectedValues(valuesFromClass: self::class)]
         private int $status,
         private array $data,
-        private string $role,
-        private array $rawData = []
+        private string $role
     ) {
         $this->updateRawData();
-        // foreach ($data as $field => $element) {
-        //     if (!\is_object($element)) {
-        //         unset($this->rawData[$field]);
-        //         continue;
-        //     }
-        //     if ($element instanceof DateTimeInterface) {
-        //         $this->rawData[$field] = $element instanceof DateTimeImmutable
-        //             ? $element
-        //             : DateTimeImmutable::createFromInterface($element);
-        //     }
-        // }
     }
 
     private function updateRawData(): void

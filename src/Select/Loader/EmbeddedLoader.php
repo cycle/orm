@@ -9,6 +9,7 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\EmbeddedNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
@@ -33,8 +34,8 @@ final class EmbeddedLoader implements JoinableInterface
         private string $target
     ) {
         // never duplicate primary key in data selection
-        $primaryKey = (array)$this->define(Schema::PRIMARY_KEY);
-        foreach ($this->define(Schema::COLUMNS) as $internal => $external) {
+        $primaryKey = (array)$this->define(SchemaInterface::PRIMARY_KEY);
+        foreach ($this->define(SchemaInterface::COLUMNS) as $internal => $external) {
             if (!in_array($internal, $primaryKey, true) && !in_array($external, $primaryKey, true)) {
                 $this->columns[$internal] = $external;
             }
@@ -101,22 +102,10 @@ final class EmbeddedLoader implements JoinableInterface
 
     public function createNode(): AbstractNode
     {
-        $node = new EmbeddedNode(
+        return new EmbeddedNode(
             $this->columnNames(),
-            (array)$this->orm->getSchema()->define($this->parent->getTarget(), Schema::PRIMARY_KEY)
+            (array)$this->orm->getSchema()->define($this->parent->getTarget(), SchemaInterface::PRIMARY_KEY)
         );
-
-        $typecast = $this->define(Schema::TYPECAST);
-        if ($typecast !== null) {
-            $node->setTypecast(
-                new Typecast(
-                    $typecast,
-                    $this->orm->getSource($this->parent->getTarget())->getDatabase()
-                )
-            );
-        }
-
-        return $node;
     }
 
     public function loadData(AbstractNode $node, bool $includeRole = false): void

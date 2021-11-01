@@ -9,6 +9,7 @@ use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
 use Cycle\Database\Query\SelectQuery;
@@ -41,7 +42,7 @@ final class RootLoader extends AbstractLoader
         $this->query = $this->getSource()->getDatabase()->select()->from(
             sprintf('%s AS %s', $this->getSource()->getTable(), $this->getAlias())
         );
-        $this->columns = $this->define(Schema::COLUMNS);
+        $this->columns = $this->define(SchemaInterface::COLUMNS);
 
         foreach ($this->getEagerLoaders() as $relation) {
             $this->loadRelation($relation, [], false, true);
@@ -69,7 +70,7 @@ final class RootLoader extends AbstractLoader
      */
     public function getPK(): array|string
     {
-        $pk = $this->define(Schema::PRIMARY_KEY);
+        $pk = $this->define(SchemaInterface::PRIMARY_KEY);
         if (\is_array($pk)) {
             $result = [];
             foreach ($pk as $key) {
@@ -130,13 +131,6 @@ final class RootLoader extends AbstractLoader
 
     protected function initNode(): RootNode
     {
-        $node = new RootNode($this->columnNames(), (array)$this->define(Schema::PRIMARY_KEY));
-
-        $typecast = $this->define(Schema::TYPECAST);
-        if ($typecast !== null) {
-            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
-        }
-
-        return $node;
+        return new RootNode($this->columnNames(), (array)$this->define(SchemaInterface::PRIMARY_KEY));
     }
 }

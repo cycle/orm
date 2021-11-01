@@ -394,7 +394,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             return null;
         }
 
-        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: false);
+        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true);
     }
 
     /**
@@ -428,12 +428,19 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @return array<array-key, array<string, mixed>>
      */
-    public function fetchData(): array
+    public function fetchData(bool $typecast = false): array
     {
         $node = $this->loader->createNode();
         $this->loader->loadData($node, false);
 
-        return $node->getResult();
+        if (!$typecast) {
+            return $node->getResult();
+        }
+        $mapper = $this->orm
+            ->getEntityRegistry()
+            ->getMapper($this->loader->getTarget());
+
+        return array_map([$mapper, 'cast'], $node->getResult());
     }
 
     /**

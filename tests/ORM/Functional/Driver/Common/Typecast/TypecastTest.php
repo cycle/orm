@@ -33,6 +33,14 @@ abstract class TypecastTest extends BaseTest
             'balance' => 'float',
         ]);
 
+        $this->makeTable('book', [
+            'id' => 'primary',
+            'user_id' => 'int',
+            'states' => 'string',
+            'nested_states' => 'string',
+            'published_at' => 'datetime',
+        ]);
+
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],
             [
@@ -121,61 +129,61 @@ abstract class TypecastTest extends BaseTest
         $this->save($user);
     }
 
-    // public function testOrmMakeRawDataCastFlag(): void
-    // {
-    //     $user = $this->orm->make(User::class, [
-    //         'id' => 100,
-    //         'email' => 'Merlin',
-    //         'balance' => 50,
-    //     ], typecast: true);
-    //
-    //     $this->assertNotNull($user->id);
-    //     $this->assertIsInt($user->id->value);
-    //
-    //     // no exceptions thrown
-    //     $this->save($user);
-    // }
-    //
-    // public function testOrmMakeRehydrateRawDataCastFlag(): void
-    // {
-    //     $user1 = $this->orm->make(User::class, [
-    //         'id' => 100,
-    //         'email' => 'Merlin',
-    //         'balance' => 50,
-    //     ], typecast: true);
-    //
-    //     $user2 = $this->orm->make(User::class, [
-    //         'id' => 100,
-    //         'email' => 'Merlin',
-    //         'balance' => 200,
-    //     ], status: Node::MANAGED, typecast: true);
-    //
-    //     $this->assertSame($user1, $user2);
-    //     $this->assertNotNull($user1->id);
-    //     $this->assertSame(200, $user1->balance->value);
-    //
-    //     // no exceptions thrown
-    //     $this->save($user1);
-    // }
-    //
-    // public function testCreateFromRawDataWithRelations(): void
-    // {
-    //     $user = $this->orm->make('user', [
-    //         'id' => '10',
-    //         'email' => 'new@mail.box',
-    //         'balance' => '1000.0',
-    //         'books' => [
-    //             [
-    //                 'id' => '15',
-    //                 'user_id' => '10',
-    //                 'states' => 'foo|bar',
-    //                 'nested_states' => 'buz|fiz',
-    //                 'published_at' => '2012-12-12 12:12:12',
-    //             ],
-    //         ],
-    //     ], typecast: true);
-    //
-    // }
+    public function testOrmMakeRawDataCastFlag(): void
+    {
+        $user = $this->orm->make(User::class, [
+            'id' => 100,
+            'email' => 'Merlin',
+            'balance' => 50,
+        ], typecast: true);
+
+        $this->assertNotNull($user->id);
+        $this->assertIsInt($user->id->value);
+
+        // no exceptions thrown
+        $this->save($user);
+    }
+
+    public function testOrmMakeRehydrateRawDataCastFlag(): void
+    {
+        $user1 = $this->orm->make(User::class, [
+            'id' => 100,
+            'email' => 'Merlin',
+            'balance' => 50,
+        ], typecast: true);
+
+        $user2 = $this->orm->make(User::class, [
+            'id' => 100,
+            'email' => 'Merlin',
+            'balance' => 200,
+        ], status: Node::MANAGED, typecast: true);
+
+        $this->assertSame($user1, $user2);
+        $this->assertNotNull($user1->id);
+        $this->assertSame(200, $user1->balance->value);
+
+        // no exceptions thrown
+        $this->save($user1);
+    }
+
+    public function testCreateFromRawDataWithRelations(): void
+    {
+        $user = $this->orm->make('user', [
+            'id' => '10',
+            'email' => 'new@mail.box',
+            'balance' => '1000.0',
+            'books' => [
+                [
+                    'id' => '15',
+                    'user_id' => '10',
+                    'states' => 'foo|bar',
+                    'nested_states' => 'buz|fiz',
+                    'published_at' => '2012-12-12 12:12:12',
+                ],
+            ],
+        ], typecast: true);
+
+    }
 
     // Select
 

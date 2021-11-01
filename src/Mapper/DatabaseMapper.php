@@ -9,6 +9,7 @@ use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
@@ -33,6 +34,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     /** @var string[] */
     protected array $primaryKeys;
+    protected EntityRegistryInterface $entityRegistry;
     private ?TypecastInterface $typecast;
 
     public function __construct(
@@ -40,7 +42,8 @@ abstract class DatabaseMapper implements MapperInterface
         protected string $role
     ) {
         $this->source = $orm->getSource($role);
-        $this->typecast = $orm->getEntityRegistry()->getTypecast($role);
+        $this->entityRegistry = $orm->getEntityRegistry();
+        $this->typecast = $this->entityRegistry->getTypecast($role);
 
         $schema = $orm->getSchema();
         foreach ($schema->define($role, SchemaInterface::COLUMNS) as $property => $column) {
@@ -69,7 +72,24 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function cast(array $data): array
     {
-        return $this->typecast === null ? $data : $this->typecast->castAll($data);
+        if ($this->typecast !== null) {
+            $data = $this->typecast->cast($data);
+        }
+
+        // Cast relations
+        foreach ($this->entityRegistry->getRelationMap($this->role)->getRelations() as $field => $relation) {
+            if (!array_key_exists($field, $data) || !is_array($data[$field])) {
+                continue;
+            }
+            $callback = [$this->entityRegistry->getMapper($relation->getTarget()), 'cast'];
+            if (\array_is_list($data[$field])) {
+                $data[$field] = array_map($callback, $data[$field]);
+            } else {
+                $data[$field] = $callback($data[$field]);
+            }
+        }
+
+        return $data;
     }
 
     public function queueCreate(object $entity, Node $node, State $state): CommandInterface
@@ -95,8 +115,8 @@ abstract class DatabaseMapper implements MapperInterface
             $this->primaryKeys,
             \count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
             [$this, 'mapColumns'],
-            /** @see TypecastInterface::castOne() */
-            $this->typecast === null ? null : [$this->typecast, 'castOne']
+            /** @see TypecastInterface::cast() */
+            $this->typecast === null ? null : [$this->typecast, 'cast']
         );
     }
 

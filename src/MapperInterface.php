@@ -39,8 +39,9 @@ interface MapperInterface
      * @param T $entity
      * @param array $data Prepared (typecasted) data
      *
-     * @return T
      * @throws MapperException
+     *
+     * @return T
      */
     public function hydrate(object $entity, array $data): object;
 

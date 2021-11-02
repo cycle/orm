@@ -11,7 +11,8 @@ final class CompositeTypecast implements TypecastInterface
      */
     private array $casters;
 
-    public function __construct(TypecastInterface ...$typecasts) {
+    public function __construct(TypecastInterface ...$typecasts)
+    {
         $this->casters = $typecasts;
     }
 

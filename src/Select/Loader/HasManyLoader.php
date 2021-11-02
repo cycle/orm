@@ -8,7 +8,6 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ArrayNode;
-use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;

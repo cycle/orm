@@ -7,7 +7,6 @@ namespace Cycle\ORM\Select\Loader;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ParentMergeNode;
-use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;

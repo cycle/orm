@@ -77,7 +77,7 @@ class NodeComparisonTest extends TestCase
             // Numeric
             [0, '00'],
             [0, "\0"],
-            [0, "0x0"],
+            [0, '0x0'],
             [2, '1'],
             [300.0, 400],
             // Array
@@ -145,8 +145,9 @@ class NodeComparisonTest extends TestCase
 
     private function createStringableObject(string ...$toConcat): object
     {
-        return new class($toConcat) implements Stringable {
-            public function __construct(private array $toConcat) {
+        return new class ($toConcat) implements Stringable {
+            public function __construct(private array $toConcat)
+            {
             }
 
             public function __toString(): string
@@ -158,7 +159,7 @@ class NodeComparisonTest extends TestCase
 
     private function createNotStringableObject(mixed $a = null, mixed $b = null): object
     {
-        return new class($a, $b) {
+        return new class ($a, $b) {
             public function __construct(
                 private mixed $a,
                 private mixed $b,
@@ -169,7 +170,7 @@ class NodeComparisonTest extends TestCase
 
     private function createNotStringableObject2(mixed $a = null, mixed $b = null): object
     {
-        return new class($a, $b) {
+        return new class ($a, $b) {
             public function __construct(
                 private mixed $a,
                 private mixed $b,

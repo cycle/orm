@@ -6,9 +6,7 @@ namespace Cycle\ORM\Select\Loader;
 
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ArrayNode;
-use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
-use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;

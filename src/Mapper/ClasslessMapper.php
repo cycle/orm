@@ -6,7 +6,6 @@ namespace Cycle\ORM\Mapper;
 
 use Cycle\ORM\Mapper\Proxy\ClasslessProxyFactory;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\RelationMap;
 
 final class ClasslessMapper extends DatabaseMapper
 {

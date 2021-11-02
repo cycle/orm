@@ -24,8 +24,8 @@ final class Insert extends StoreCommand
     private $caster;
 
     /**
-     * @param null|callable $mapper Optional callable that calls {@see MapperInterface::mapColumns()} method.
-     * @param null|callable $caster Optional callable that calls {@see TypecastInterface::cast()} method.
+     * @param callable|null $mapper Optional callable that calls {@see MapperInterface::mapColumns()} method.
+     * @param callable|null $caster Optional callable that calls {@see TypecastInterface::cast()} method.
      */
     public function __construct(
         DatabaseInterface $db,
@@ -96,7 +96,9 @@ final class Insert extends StoreCommand
         if ($insertID !== null && \count($this->primaryKeys) === 1) {
             $fpk = $this->primaryKeys[0]; // first PK
             if (!isset($data[$fpk])) {
-                $state->register($fpk, $this->caster === null
+                $state->register(
+                    $fpk,
+                    $this->caster === null
                     ? $insertID
                     : ($this->caster)([$fpk => $insertID])[$fpk]
                 );

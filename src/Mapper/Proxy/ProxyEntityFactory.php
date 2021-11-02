@@ -8,7 +8,6 @@ use Closure;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClosureHydrator;
 use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RelationMap;
 use Doctrine\Instantiator\Instantiator;
 

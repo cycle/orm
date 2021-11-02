@@ -22,8 +22,8 @@ final class SimpleFactory implements FactoryInterface
     {
         $this->definitions = $definitions;
         $this->factory = $factory ?? static function (string $alias, array $parameters = []): void {
-                throw new AutowireException("Factory can't make `$alias`.");
-            };
+            throw new AutowireException("Factory can't make `$alias`.");
+        };
     }
 
     public function make(string $alias, array $parameters = []): mixed

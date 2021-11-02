@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy;
 
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RelationMap;
 
 class ClasslessProxyFactory

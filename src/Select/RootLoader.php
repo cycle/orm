@@ -7,8 +7,6 @@ namespace Cycle\ORM\Select;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
-use Cycle\ORM\Parser\Typecast;
-use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;

@@ -180,7 +180,6 @@ abstract class TypecastTest extends BaseTest
                 ],
             ],
         ], typecast: true);
-
     }
 
     // Select

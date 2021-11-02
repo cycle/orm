@@ -11,7 +11,7 @@ use Cycle\ORM\SchemaInterface;
 final class Typecaster implements TypecastInterface
 {
     /**
-     * @param array<string, string|callable> $rules
+     * @param array<string, callable|string> $rules
      */
     public function __construct(
         ORMInterface $orm,

@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\UserWithUUIDPrimaryKey;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction;
 use Ramsey\Uuid\Uuid;
 
 abstract class UUIDTest extends BaseTest

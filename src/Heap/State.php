@@ -7,8 +7,6 @@ namespace Cycle\ORM\Heap;
 use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
-use DateTimeImmutable;
-use DateTimeInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
@@ -153,12 +151,8 @@ final class State implements ConsumerInterface
             }
         }
         return $result;
-        // return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
     }
 
-    /**
-     * @return mixed|null
-     */
     public function getValue(string $key): mixed
     {
         return array_key_exists($key, $this->data) ? $this->data[$key] : ($this->transactionData[$key] ?? null);
@@ -195,6 +189,6 @@ final class State implements ConsumerInterface
 
     public function __destruct()
     {
-        unset($this->relations, $this->storage);
+        unset($this->relations, $this->storage, $this->data, $this->transactionData);
     }
 }

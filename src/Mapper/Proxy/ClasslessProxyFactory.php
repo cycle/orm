@@ -19,14 +19,13 @@ class ClasslessProxyFactory
      * Create empty entity
      */
     public function create(
-        ORMInterface $orm,
+        RelationMap $relMap,
         string $role,
-        array $fields
+        array $data
     ): object {
-        $relMap = $orm->getRelationMap($role);
         $class = array_key_exists($role, $this->classMap)
             ? $this->classMap[$role]
-            : $this->defineClass($role, $relMap, $fields);
+            : $this->defineClass($role, $relMap, $data);
 
         $proxy = new $class();
         $proxy->__cycle_orm_rel_map = $relMap;

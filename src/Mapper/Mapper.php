@@ -7,7 +7,6 @@ namespace Cycle\ORM\Mapper;
 use Cycle\ORM\Mapper\Traits\SingleTableTrait;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
-use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 
 /**
@@ -24,7 +23,7 @@ class Mapper extends DatabaseMapper
 
     protected array $children = [];
 
-    private RelationMap $relationMap;
+    private SchemaInterface $schema;
 
     public function __construct(
         ORMInterface $orm,
@@ -33,16 +32,16 @@ class Mapper extends DatabaseMapper
     ) {
         parent::__construct($orm, $role);
 
-        $this->entity = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
-        $this->children = $orm->getSchema()->define($role, SchemaInterface::CHILDREN) ?? [];
-        $this->relationMap = $this->entityRegistry->getRelationMap($role);
-        $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
+        $this->schema = $orm->getSchema();
+        $this->entity = $this->schema->define($role, SchemaInterface::ENTITY);
+        $this->children = $this->schema->define($role, SchemaInterface::CHILDREN) ?? [];
+        $this->discriminator = $this->schema->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
     }
 
     public function init(array $data, string $role = null): object
     {
         $class = $this->resolveClass($data, $role);
-        return $this->entityFactory->create($this->orm, $class, $data, $class);
+        return $this->entityFactory->create($this->relationMap, $class, $data);
     }
 
     public function hydrate(object $entity, array $data): object

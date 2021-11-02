@@ -15,6 +15,7 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
 
@@ -36,14 +37,16 @@ abstract class DatabaseMapper implements MapperInterface
     protected array $primaryKeys;
     protected EntityRegistryInterface $entityRegistry;
     private ?TypecastInterface $typecast;
+    protected RelationMap $relationMap;
 
     public function __construct(
-        protected ORMInterface $orm,
+        ORMInterface $orm,
         protected string $role
     ) {
         $this->source = $orm->getSource($role);
         $this->entityRegistry = $orm->getEntityRegistry();
         $this->typecast = $this->entityRegistry->getTypecast($role);
+        $this->relationMap = $this->entityRegistry->getRelationMap($role);
 
         $schema = $orm->getSchema();
         foreach ($schema->define($role, SchemaInterface::COLUMNS) as $property => $column) {
@@ -77,7 +80,7 @@ abstract class DatabaseMapper implements MapperInterface
         }
 
         // Cast relations
-        foreach ($this->entityRegistry->getRelationMap($this->role)->getRelations() as $field => $relation) {
+        foreach ($this->relationMap->getRelations() as $field => $relation) {
             if (!array_key_exists($field, $data)) {
                 continue;
             }

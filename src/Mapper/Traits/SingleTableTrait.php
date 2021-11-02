@@ -42,7 +42,7 @@ trait SingleTableTrait
 
     private function resolveChildClassByRole(string $role): string
     {
-        $class = $this->orm->getSchema()->define($role, SchemaInterface::ENTITY);
+        $class = $this->schema->define($role, SchemaInterface::ENTITY);
         if (!in_array($class, $this->children, true)) {
             throw new \InvalidArgumentException(
                 sprintf('Role `%s` does not have a child role `%s`.', $this->role, $role)

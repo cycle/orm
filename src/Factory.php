@@ -76,35 +76,37 @@ final class Factory implements FactoryInterface
         $parentTypecast = $parent === null ? null : $this->typecast($orm, $parent);
 
         // Schema's `typecast` option
-        $ts = $schema->define($role, SchemaInterface::TYPECAST);
-        if ($ts === null) {
-            return $parentTypecast;
-        }
+        $rules = (array)$schema->define($role, SchemaInterface::TYPECAST);
+        $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER);
 
         // Create basic typecast implementation
         $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
-        if (\is_array($ts)) {
+        if ($handler === null) {
+            if (!$rules) {
+                return null;
+            }
             return $parentTypecast === null
-                ? new Typecast($ts, $database)
-                : new CompositeTypecast($parentTypecast, new Typecast($ts, $database));
+                ? new Typecast($rules, $database)
+                : new CompositeTypecast($parentTypecast, new Typecast($rules, $database));
         }
 
-        if (\is_string($ts)) {
-            $ts = $this->factory->make(
-                $ts,
+        if (\is_string($handler)) {
+            $handler = $this->factory->make(
+                $handler,
                 [
                     'database' => $database,
                     'orm' => $orm,
                     'role' => $role,
+                    'rules' => $rules,
                 ]
             );
         }
 
-        if (!$ts instanceof TypecastInterface) {
-            throw new FactoryException(\sprintf('Bad typecast declaration for the `%s` role.', $role));
+        if (!$handler instanceof TypecastInterface) {
+            throw new FactoryException(\sprintf('Bad typecast handler declaration for the `%s` role.', $role));
         }
 
-        return $parentTypecast === null ? $ts : new CompositeTypecast($parentTypecast, $ts);
+        return $parentTypecast === null ? $handler : new CompositeTypecast($parentTypecast, $handler);
     }
 
     public function mapper(ORMInterface $orm, string $role): MapperInterface

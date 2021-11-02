@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture;
 
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\SchemaInterface;
 
 final class Typecaster implements TypecastInterface
 {
-    /** @var array<string, callable> */
-    private array $rules = [];
-
+    /**
+     * @param array<string, string|callable> $rules
+     */
     public function __construct(
-        \Cycle\ORM\ORMInterface $orm,
-        string $role
+        ORMInterface $orm,
+        public string $role,
+        public array $rules = []
     ) {
         $class = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
         // Some magic with reflection to prepare callables

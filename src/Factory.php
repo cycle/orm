@@ -6,9 +6,13 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
+use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Cycle\ORM\Parser\CompositeTypecast;
+use Cycle\ORM\Parser\Typecast;
+use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
@@ -62,6 +66,47 @@ final class Factory implements FactoryInterface
         array $parameters = []
     ): mixed {
         return $this->factory->make($alias, $parameters);
+    }
+
+    public function typecast(ORMInterface $orm, string $role): ?TypecastInterface
+    {
+        $schema = $orm->getSchema();
+        // Get parent's typecast
+        $parent = $schema->define($role, SchemaInterface::PARENT);
+        $parentTypecast = $parent === null ? null : $this->typecast($orm, $parent);
+
+        // Schema's `typecast` option
+        $rules = (array)$schema->define($role, SchemaInterface::TYPECAST);
+        $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER);
+
+        // Create basic typecast implementation
+        $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
+        if ($handler === null) {
+            if (!$rules) {
+                return null;
+            }
+            return $parentTypecast === null
+                ? new Typecast($rules, $database)
+                : new CompositeTypecast($parentTypecast, new Typecast($rules, $database));
+        }
+
+        if (\is_string($handler)) {
+            $handler = $this->factory->make(
+                $handler,
+                [
+                    'database' => $database,
+                    'orm' => $orm,
+                    'role' => $role,
+                    'rules' => $rules,
+                ]
+            );
+        }
+
+        if (!$handler instanceof TypecastInterface) {
+            throw new FactoryException(\sprintf('Bad typecast handler declaration for the `%s` role.', $role));
+        }
+
+        return $parentTypecast === null ? $handler : new CompositeTypecast($parentTypecast, $handler);
     }
 
     public function mapper(ORMInterface $orm, string $role): MapperInterface

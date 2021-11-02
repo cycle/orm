@@ -19,7 +19,7 @@ final class StdMapper extends DatabaseMapper
 
     public function hydrate($entity, array $data): object
     {
-        $relations = $this->orm->getRelationMap($this->role)->getRelations();
+        $relations = $this->relationMap->getRelations();
         foreach ($data as $k => $v) {
             if ($v instanceof ReferenceInterface && array_key_exists($k, $relations)) {
                 $relation = $relations[$k];
@@ -56,7 +56,7 @@ final class StdMapper extends DatabaseMapper
     {
         return array_intersect_key(
             $this->extract($entity),
-            $this->orm->getRelationMap($this->role)->getRelations()
+            $this->relationMap->getRelations()
         );
     }
 }

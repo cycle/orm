@@ -95,12 +95,17 @@ final class ORM implements ORMInterface
         return $this->getRepository($role)->findOne($scope);
     }
 
-    public function make(string $role, array $data = [], int $status = Node::NEW): object
+    public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object
     {
         $role = $data[LoaderInterface::ROLE_KEY] ?? $role;
         unset($data[LoaderInterface::ROLE_KEY]);
-        $relMap = $this->getRelationMap($role);
-        $mapper = $this->getMapper($role);
+        // Resolved role
+        $rRole = $this->resolveRole($role);
+        $relMap = $this->entityRegistry->getRelationMap($rRole);
+        $mapper = $this->entityRegistry->getMapper($rRole);
+
+        $castedData = $typecast ? $mapper->cast($data) : $data;
+
         if ($status !== Node::NEW) {
             // unique entity identifier
             $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
@@ -118,26 +123,24 @@ final class ORM implements ORMInterface
             }
 
             if ($ids !== null) {
-                $e = $this->heap->find($role, $ids);
+                $e = $this->heap->find($rRole, $ids);
 
                 if ($e !== null) {
                     $node = $this->heap->get($e);
                     \assert($node !== null);
-                    $data = $relMap->init($node, $data);
 
-                    return $mapper->hydrate($e, $data);
+                    return $mapper->hydrate($e, $relMap->init($node, $castedData));
                 }
             }
         }
 
-        $node = new Node($status, $data, $role);
+        $node = new Node($status, $castedData, $rRole, $data);
         $e = $mapper->init($data, $role);
 
         /** Entity should be attached before {@see RelationMap::init()} running */
-        $this->heap->attach($e, $node, $this->getIndexes($role));
+        $this->heap->attach($e, $node, $this->entityRegistry->getIndexes($rRole));
 
-        $data = $relMap->init($node, $data);
-        return $mapper->hydrate($e, $data);
+        return $mapper->hydrate($e, $relMap->init($node, $castedData));
     }
 
     public function getCommandGenerator(): CommandGeneratorInterface

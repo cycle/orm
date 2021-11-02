@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Select\SourceInterface;
 use WeakReference;
 
@@ -11,6 +12,9 @@ final class EntityRegistry implements EntityRegistryInterface
 {
     /** @var MapperInterface[] */
     private array $mappers = [];
+
+    /** @var TypecastInterface[] */
+    private array $typecasts = [];
 
     /** @var RepositoryInterface[] */
     private array $repositories = [];
@@ -67,6 +71,13 @@ final class EntityRegistry implements EntityRegistryInterface
         }
 
         return $this->repositories[$role] = $this->factory->repository($this->orm->get(), $this->schema, $role, $select);
+    }
+
+    public function getTypecast(string $role): ?TypecastInterface
+    {
+        return \array_key_exists($role, $this->typecasts)
+            ? $this->typecasts[$role]
+            : ($this->typecasts[$role] = $this->factory->typecast($this->orm->get(), $role));
     }
 
     public function getSource(string $role): SourceInterface

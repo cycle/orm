@@ -91,13 +91,13 @@ declare(strict_types=1);
 namespace %s;
 
 // phpcs:ignore
-use %s as CommonTest;
+use %s as CommonClass;
 
 /**
  * @group driver
  * @group driver-%s
  */
-class %s extends CommonTest
+class %s extends CommonClass
 {
     public const DRIVER = '%s';
 }

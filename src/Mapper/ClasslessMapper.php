@@ -12,19 +12,16 @@ final class ClasslessMapper extends DatabaseMapper
 {
     protected ClasslessProxyFactory $entityFactory;
 
-    private RelationMap $relationMap;
-
     public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct($orm, $role);
 
         $this->entityFactory = new ClasslessProxyFactory();
-        $this->relationMap = $orm->getRelationMap($role);
     }
 
     public function init(array $data, string $role = null): object
     {
-        return $this->entityFactory->create($this->orm, $this->role, array_keys($this->columns + $this->parentColumns));
+        return $this->entityFactory->create($this->relationMap, $this->role, array_keys($this->columns + $this->parentColumns));
     }
 
     public function hydrate($entity, array $data): object

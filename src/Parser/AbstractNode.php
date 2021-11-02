@@ -48,9 +48,6 @@ abstract class AbstractNode
     /** @internal */
     protected ?self $parent = null;
 
-    /** @internal */
-    protected ?TypecastInterface $typecast = null;
-
     /** @var array<string, AbstractNode> */
     protected array $nodes = [];
 
@@ -88,11 +85,6 @@ abstract class AbstractNode
         $this->nodes = [];
         $this->indexedData = null;
         $this->duplicates = [];
-    }
-
-    public function setTypecast(TypecastInterface $typecast): void
-    {
-        $this->typecast = $typecast;
     }
 
     /**
@@ -366,16 +358,10 @@ abstract class AbstractNode
     {
         try {
             //Combine column names with sliced piece of row
-            $result = \array_combine(
+            return \array_combine(
                 $this->columns,
                 \array_slice($line, $dataOffset, \count($this->columns))
             );
-
-            if ($this->typecast !== null) {
-                return $this->typecast->cast($result);
-            }
-
-            return $result;
         } catch (Throwable $e) {
             throw new ParserException(
                 'Unable to parse incoming row: ' . $e->getMessage(),

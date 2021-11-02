@@ -18,6 +18,13 @@ trait ToOneTrait
         return $item;
     }
 
+    public function cast(?array $data): ?array
+    {
+        return $data === null
+            ? null
+            : ($this->orm->getEntityRegistry()->getMapper($this->target)?->cast($data) ?? $data);
+    }
+
     public function initReference(Node $node): ReferenceInterface
     {
         $scope = $this->getReferenceScope($node);
@@ -45,7 +52,7 @@ trait ToOneTrait
         return $result;
     }
 
-    public function collect($data): ?object
+    public function collect(mixed $data): ?object
     {
         return $data;
     }

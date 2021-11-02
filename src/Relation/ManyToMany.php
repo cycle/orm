@@ -32,14 +32,14 @@ class ManyToMany extends Relation\AbstractRelation
     /** @var string[] */
     protected array $throughOuterKeys;
 
-    protected string $pivotEntity;
+    protected string $pivotRole;
 
     protected ?string $inversion;
 
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
-        $this->pivotEntity = $this->schema[Relation::THROUGH_ENTITY];
+        $this->pivotRole = $this->schema[Relation::THROUGH_ENTITY];
         $this->inversion = $this->schema[Relation::INVERSION] ?? null;
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
@@ -106,7 +106,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
         // $relationName = $this->getTargetRelationName();
-        $relationName = $tuple->node->getRole() . '.' . $this->name . ':' . $this->pivotEntity;
+        $relationName = $tuple->node->getRole() . '.' . $this->name . ':' . $this->pivotRole;
         $pNodes = [];
         foreach ($related as $item) {
             $pivot = $related->get($item);
@@ -130,7 +130,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
     }
 
-    public function init(Node $node, array $data): iterable
+    public function init(Node $node, array $data, bool $typecast = false): iterable
     {
         $elements = [];
         $pivotData = new SplObjectStorage();
@@ -142,7 +142,7 @@ class ManyToMany extends Relation\AbstractRelation
                 continue;
             }
 
-            $pivotData[$entity] = $this->orm->make($this->pivotEntity, $pivot, Node::MANAGED);
+            $pivotData[$entity] = $this->orm->make($this->pivotRole, $pivot, Node::MANAGED);
             $elements[] = $entity;
         }
         $collection = new PivotedStorage($elements, $pivotData);
@@ -151,7 +151,25 @@ class ManyToMany extends Relation\AbstractRelation
         return $this->collect($collection);
     }
 
-    public function collect($data): iterable
+    public function cast(?array $data): array
+    {
+        if (!$data) {
+            return [];
+        }
+        $pivotMapper = $this->orm->getEntityRegistry()->getMapper($this->pivotRole);
+        $targetMapper = $this->orm->getEntityRegistry()->getMapper($this->target);
+
+        foreach ($data as &$pivot) {
+            if (isset($pivot['@'])) {
+                $pivot['@'] = $targetMapper->cast($pivot['@']);
+            }
+            $pivot = $pivotMapper->cast($pivot);
+        }
+
+        return $data;
+    }
+
+    public function collect(mixed $data): iterable
     {
         return $this->orm->getFactory()->collection(
             $this->orm,
@@ -264,11 +282,12 @@ class ManyToMany extends Relation\AbstractRelation
 
         $elements = [];
         $pivotData = new SplObjectStorage();
-        foreach (new Iterator($this->orm, $this->target, $root->getResult()[0]['output'], true) as $pivot => $entity) {
+        foreach (new Iterator($this->orm, $this->target, $root->getResult()[0]['output'], true, typecast: true) as $pivot => $entity) {
             $pivotData[$entity] = $this->orm->make(
                 $this->schema[Relation::THROUGH_ENTITY],
                 $pivot,
-                Node::MANAGED
+                Node::MANAGED,
+                typecast: true
             );
 
             $elements[] = $entity;
@@ -341,7 +360,7 @@ class ManyToMany extends Relation\AbstractRelation
             }
         }
 
-        $entity = $this->orm->make($this->pivotEntity, $pivot ?? []);
+        $entity = $this->orm->make($this->pivotRole, $pivot ?? []);
         $storage->set($rTuple->entity, $entity);
         return $entity;
     }

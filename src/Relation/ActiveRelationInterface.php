@@ -19,6 +19,15 @@ interface ActiveRelationInterface extends RelationInterface
      */
     public function init(Node $node, array $data): object|iterable;
 
+    /**
+     * Cast raw data
+     *
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    public function cast(?array $data): ?array;
+
     public function initReference(Node $node): ReferenceInterface;
 
     /**
@@ -32,5 +41,5 @@ interface ActiveRelationInterface extends RelationInterface
     /**
      * @param iterable|object|null $data
      */
-    public function collect($data): object|iterable|null;
+    public function collect(mixed $data): object|iterable|null;
 }

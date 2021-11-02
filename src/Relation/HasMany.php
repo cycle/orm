@@ -95,7 +95,7 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      */
-    public function init(Node $node, array $data): iterable
+    public function init(Node $node, array $data, bool $typecast = false): iterable
     {
         $elements = [];
         foreach ($data as $item) {
@@ -104,6 +104,18 @@ class HasMany extends AbstractRelation
 
         $node->setRelation($this->getName(), $elements);
         return $this->collect($elements);
+    }
+
+    public function cast(?array $data): array
+    {
+        if (!$data) {
+            return [];
+        }
+        $mapper = $this->orm->getEntityRegistry()->getMapper($this->target);
+        foreach ($data as &$item) {
+            $item = $mapper->cast($item);
+        }
+        return $data;
     }
 
     public function initReference(Node $node): ReferenceInterface
@@ -155,7 +167,7 @@ class HasMany extends AbstractRelation
         return $result;
     }
 
-    public function collect($data): iterable
+    public function collect(mixed $data): iterable
     {
         if (!\is_iterable($data)) {
             throw new \InvalidArgumentException('Collected data in the HasMany relation should be iterable.');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
@@ -46,6 +47,14 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $role,
         ?Select $select
     ): RepositoryInterface;
+
+    /**
+     * Create typecast implementation associated with given role.
+     */
+    public function typecast(
+        ORMInterface $orm,
+        string $role
+    ): ?TypecastInterface;
 
     /**
      * Create source associated with given role.

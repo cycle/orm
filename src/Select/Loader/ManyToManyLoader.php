@@ -13,6 +13,7 @@ use Cycle\ORM\Parser\SingularNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\OrderByTrait;
@@ -215,18 +216,11 @@ class ManyToManyLoader extends JoinableLoader
 
     protected function initNode(): AbstractNode
     {
-        $node = new SingularNode(
+        return new SingularNode(
             $this->columnNames(),
-            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::OUTER_KEY],
             (array)$this->schema[Relation::THROUGH_OUTER_KEY]
         );
-
-        $typecast = $this->define(Schema::TYPECAST);
-        if ($typecast !== null) {
-            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
-        }
-
-        return $node;
     }
 }

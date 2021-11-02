@@ -24,12 +24,13 @@ interface SchemaInterface
     public const RELATIONS = 10;
     public const CHILDREN = 11; // List of entity sub-roles and their types
     public const SCOPE = 12;
-    public const TYPECAST = 13;
+    public const TYPECAST = 13; // Typecast rules
     public const SCHEMA = 14;
     public const PARENT = 15; // Parent role in the inheritance hierarchy
     public const PARENT_KEY = 16;
     public const DISCRIMINATOR = 17; // Discriminator column name for single table inheritance
     public const MACROS = 18;
+    public const TYPECAST_HANDLER = 19; // Typecast handler definition that implements TypecastInterface
 
     /**
      * Return all roles defined within the schema.

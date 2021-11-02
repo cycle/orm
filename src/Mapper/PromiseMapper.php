@@ -30,13 +30,16 @@ class PromiseMapper extends DatabaseMapper
 
     protected Instantiator\Instantiator $instantiator;
 
+    private SchemaInterface $schema;
+
     public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct($orm, $role);
 
-        $this->entity = $orm->getSchema()->define($role, Schema::ENTITY);
-        $this->children = $orm->getSchema()->define($role, Schema::CHILDREN) ?? [];
-        $this->discriminator = $orm->getSchema()->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
+        $this->schema = $orm->getSchema();
+        $this->entity = $this->schema->define($role, Schema::ENTITY);
+        $this->children = $this->schema->define($role, Schema::CHILDREN) ?? [];
+        $this->discriminator = $this->schema->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
 
         if (!isset($this->hydrator)) {
             $this->hydrator = new ReflectionHydrator();
@@ -54,7 +57,7 @@ class PromiseMapper extends DatabaseMapper
     public function hydrate(object $entity, array $data): object
     {
         // Force searching related entities in the Heap
-        $relations = $this->orm->getRelationMap($this->role)->getRelations();
+        $relations = $this->relationMap->getRelations();
         foreach ($data as $k => $v) {
             if (!$v instanceof ReferenceInterface || !array_key_exists($k, $relations)) {
                 continue;
@@ -88,7 +91,7 @@ class PromiseMapper extends DatabaseMapper
     {
         return array_intersect_key(
             $this->extract($entity),
-            $this->orm->getRelationMap($this->role)->getRelations()
+            $this->relationMap->getRelations()
         );
     }
 }

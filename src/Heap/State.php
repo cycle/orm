@@ -17,20 +17,21 @@ final class State implements ConsumerInterface
     use RelationTrait;
     use WaitFieldTrait;
 
-    /** @var array<string, mixed> */
-    private array $data;
-
     private array $transactionData;
 
     /** @var array<string, Node[]> */
     private array $storage = [];
 
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $transactionRaw
+     */
     public function __construct(
         #[ExpectedValues(valuesFromClass: Node::class)]
         private int $state,
-        array $data
+        private array $data,
+        private array $transactionRaw = []
     ) {
-        $this->data = $data;
         $this->transactionData = $state === Node::NEW ? [] : $data;
     }
 
@@ -105,7 +106,12 @@ final class State implements ConsumerInterface
     public function updateTransactionData(array $fields = null): void
     {
         if ($fields === null) {
-            $this->transactionData = array_merge($this->transactionData, $this->data);
+            foreach ($this->data as $field => $value) {
+                $this->transactionData[$field] = $value;
+                if (isset($this->transactionRaw[$field])) {
+                    $this->transactionRaw[$field] = Node::convertToSolid($this->data[$field]);
+                }
+            }
             $this->state = Node::MANAGED;
             return;
         }
@@ -113,9 +119,12 @@ final class State implements ConsumerInterface
         foreach ($this->data as $field => $value) {
             if (in_array($field, $fields, true)) {
                 $this->transactionData[$field] = $this->data[$field];
+                if (\array_key_exists($field, $this->transactionRaw)) {
+                    $this->transactionRaw[$field] = Node::convertToSolid($this->data[$field]);
+                }
                 continue;
             }
-            $changes = $changes || Node::compare($value, $this->transactionData[$field] ?? null) !== 0;
+            $changes = $changes || Node::compare($value, $this->transactionRaw[$field] ?? $this->transactionData[$field] ?? null) !== 0;
         }
         if (!$changes) {
             $this->state = Node::MANAGED;
@@ -127,13 +136,23 @@ final class State implements ConsumerInterface
         if ($this->state === Node::NEW) {
             return $this->data;
         }
-
-        return array_udiff_assoc($this->data, $this->transactionData, [Node::class, 'compare']);
+        $result = [];
+        foreach ($this->data as $field => $value) {
+            if (!\array_key_exists($field, $this->transactionData)) {
+                $result[$field] = $value;
+                continue;
+            }
+            $c = Node::compare(
+                $value,
+                \array_key_exists($field, $this->transactionRaw) ? $this->transactionRaw[$field] : $this->transactionData[$field]
+            );
+            if ($c !== 0) {
+                $result[$field] = $value;
+            }
+        }
+        return $result;
     }
 
-    /**
-     * @return mixed|null
-     */
     public function getValue(string $key): mixed
     {
         return array_key_exists($key, $this->data) ? $this->data[$key] : ($this->transactionData[$key] ?? null);
@@ -170,6 +189,6 @@ final class State implements ConsumerInterface
 
     public function __destruct()
     {
-        unset($this->relations, $this->storage);
+        unset($this->relations, $this->storage, $this->data, $this->transactionData);
     }
 }

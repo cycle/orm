@@ -21,12 +21,25 @@ interface MapperInterface
 
     /**
      * Init empty entity object. Returns empty entity.
+     *
+     * @param array $data Raw data. You shouldn't apply typecasting to it.
      */
     public function init(array $data, string $role = null): object;
 
     /**
+     * Cast raw data to configured types.
+     */
+    public function cast(array $data): array;
+
+    /**
      * Hydrate entity with dataset.
      *
+     * @template T
+     *
+     * @param T $entity
+     * @param array $data Prepared (typecasted) data
+     *
+     * @return T
      * @throws MapperException
      */
     public function hydrate(object $entity, array $data): object;

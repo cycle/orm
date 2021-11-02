@@ -8,7 +8,10 @@ use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
+use DateTimeImmutable;
+use DateTimeInterface;
 use JetBrains\PhpStorm\ExpectedValues;
+use Stringable;
 
 use const FILTER_NULL_ON_FAILURE;
 use const FILTER_VALIDATE_BOOLEAN;
@@ -31,13 +34,30 @@ final class Node implements ConsumerInterface
     public const DELETED = 6;
 
     private ?State $state = null;
+    private array $rawData = [];
 
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $rawData
+     */
     public function __construct(
         #[ExpectedValues(valuesFromClass: self::class)]
         private int $status,
         private array $data,
         private string $role
     ) {
+        $this->updateRawData();
+    }
+
+    private function updateRawData(): void
+    {
+        $this->rawData = [];
+        foreach ($this->data as $field => $value) {
+            if (!\is_object($value)) {
+                continue;
+            }
+            $this->rawData[$field] = self::convertToSolid($value);
+        }
     }
 
     /**
@@ -45,7 +65,7 @@ final class Node implements ConsumerInterface
      */
     public function __destruct()
     {
-        unset($this->data, $this->state, $this->relations);
+        unset($this->data, $this->rawData, $this->state, $this->relations);
     }
 
     public function getRole(): string
@@ -59,7 +79,7 @@ final class Node implements ConsumerInterface
     public function getState(): State
     {
         if ($this->state === null) {
-            $this->state = new State($this->status, $this->data);
+            $this->state = new State($this->status, $this->data, $this->rawData);
         }
 
         return $this->state;
@@ -140,6 +160,7 @@ final class Node implements ConsumerInterface
         // DELETE handled separately
         $this->status = self::MANAGED;
         $this->data = $this->state->getTransactionData();
+        $this->updateRawData();
         $this->state->__destruct();
         $this->state = null;
         $this->relationStatus = [];
@@ -173,26 +194,63 @@ final class Node implements ConsumerInterface
         $this->relationStatus = [];
     }
 
+    /**
+     * @internal
+     */
+    public static function convertToSolid(mixed $value): mixed
+    {
+        if (!\is_object($value)) {
+            return $value;
+        }
+        if ($value instanceof DateTimeInterface) {
+            return $value instanceof DateTimeImmutable ? $value : DateTimeImmutable::createFromInterface($value);
+        }
+        return $value instanceof \Stringable ? $value->__toString() : $value;
+    }
+
     public static function compare(mixed $a, mixed $b): int
     {
         if ($a === $b) {
             return 0;
         }
-        if ($a != $b || $a === null || $b === null) {
+        if ($a === null xor $b === null) {
             return 1;
         }
 
         $ta = [\gettype($a), \gettype($b)];
 
-        // array, boolean, double, integer, string
+        // array, boolean, double, integer, object, string
         \sort($ta, SORT_STRING);
+
+        if ($ta[0] === 'object' || $ta[1] === 'object') {
+            // Both are objects
+            if ($ta[0] === $ta[1]) {
+                if ($a instanceof DateTimeInterface && $b instanceof DateTimeInterface) {
+                    return $a <=> $b;
+                }
+                if ($a instanceof \Stringable && $b instanceof \Stringable) {
+                    return $a->__toString() <=> $b->__toString();
+                }
+                return (int)($a::class !== $b::class || (array)$a !== (array)$b);
+            }
+            // Object and string/int
+            if ($ta[1] === 'string' || $ta[0] === 'integer') {
+                $a = $a instanceof Stringable ? $a->__toString() : (string)$a;
+                $b = $b instanceof Stringable ? $b->__toString() : (string)$b;
+                return $a <=> $b;
+            }
+            return -1;
+        }
 
         if ($ta[1] === 'string') {
             if ($a === '' || $b === '') {
                 return -1;
             }
-            if (\in_array($ta[0], ['integer', 'double'], true)) {
-                return (int)((string)$a !== (string)$b);
+            if ($ta[0] === 'integer') {
+                return \is_numeric($a) && \is_numeric($b) ? (int)((string)$a !== (string)$b) : -1;
+            }
+            if ($ta[0] === 'double') {
+                return \is_numeric($a) && \is_numeric($b) ? (int)((float)$a !== (float)$b) : -1;
             }
         }
 
@@ -200,6 +258,10 @@ final class Node implements ConsumerInterface
             $a = \filter_var($a, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             $b = \filter_var($b, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             return (int)($a !== $b);
+        }
+
+        if ($ta === ['double', 'integer']) {
+            return (int)((float)$a !== (float)$b);
         }
 
         return 1;

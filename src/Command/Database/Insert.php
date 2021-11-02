@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
 
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\Driver\Postgres\Query\PostgresInsertQuery;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Heap\State;
-use Cycle\Database\DatabaseInterface;
-use Cycle\Database\Driver\Postgres\Query\PostgresInsertQuery;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
@@ -20,6 +20,13 @@ final class Insert extends StoreCommand
     /** @var callable|null */
     private $mapper;
 
+    /** @var callable|null */
+    private $caster;
+
+    /**
+     * @param null|callable $mapper Optional callable that calls {@see MapperInterface::mapColumns()} method.
+     * @param null|callable $caster Optional callable that calls {@see TypecastInterface::cast()} method.
+     */
     public function __construct(
         DatabaseInterface $db,
         string $table,
@@ -27,10 +34,12 @@ final class Insert extends StoreCommand
         /** @var string[] */
         private array $primaryKeys = [],
         private ?string $pkColumn = null,
-        callable $mapper = null
+        callable $mapper = null,
+        callable $caster = null
     ) {
         parent::__construct($db, $table, $state);
         $this->mapper = $mapper;
+        $this->caster = $caster;
     }
 
     public function isReady(): bool
@@ -84,14 +93,16 @@ final class Insert extends StoreCommand
         }
         $insertID = $insert->run();
 
-        $state->updateTransactionData();
-        if ($this->primaryKeys !== []) {
+        if ($insertID !== null && \count($this->primaryKeys) === 1) {
             $fpk = $this->primaryKeys[0]; // first PK
-            if ($insertID !== null && \count($this->primaryKeys) === 1 && !isset($data[$fpk])) {
-                $state->register($fpk, $insertID);
-                $state->updateTransactionData();
+            if (!isset($data[$fpk])) {
+                $state->register($fpk, $this->caster === null
+                    ? $insertID
+                    : ($this->caster)([$fpk => $insertID])[$fpk]
+                );
             }
         }
+        $state->updateTransactionData();
 
         parent::execute();
     }

@@ -24,22 +24,29 @@ final class Typecast implements TypecastInterface
                 if (!isset($values[$key])) {
                     continue;
                 }
-
-                $values[$key] = match ($rule) {
-                    'int' => (int)$values[$key],
-                    'bool' => (bool)$values[$key],
-                    'float' => (float)$values[$key],
-                    'datetime' => new DateTimeImmutable(
-                        $values[$key],
-                        $this->database->getDriver()->getTimezone()
-                    ),
-                    default => $rule($values[$key], $this->database),
-                };
+                $values[$key] = $this->castOne($rule, $values[$key]);
             }
         } catch (Throwable $e) {
-            throw new TypecastException("Unable to typecast `$key`", $e->getCode(), $e);
+            throw new TypecastException("Unable to typecast the `$key` field.", $e->getCode(), $e);
         }
 
         return $values;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function castOne(mixed $rule, mixed $value): mixed
+    {
+        return match ($rule) {
+            'int' => (int)$value,
+            'bool' => (bool)$value,
+            'float' => (float)$value,
+            'datetime' => new DateTimeImmutable(
+                $value,
+                $this->database->getDriver()->getTimezone()
+            ),
+            default => $rule($value, $this->database),
+        };
     }
 }

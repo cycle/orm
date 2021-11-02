@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Schema\Typecast;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -56,19 +57,19 @@ abstract class DatetimeTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'time_created', 'balance'],
-                Schema::TYPECAST => [
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'email', 'time_created', 'balance'],
+                SchemaInterface::TYPECAST => [
                     'id' => 'int',
                     'balance' => 'float',
                     'time_created' => 'datetime',
                 ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
         ]));
     }

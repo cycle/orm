@@ -28,9 +28,10 @@ class WrappedCommand implements CommandInterface
         State $state,
         array $primaryKeys = [],
         string $pkColumn = null,
-        callable $mapper = null
+        callable $mapper = null,
+        callable $caster = null
     ): WrappedStoreCommand {
-        return new WrappedStoreCommand(new Insert($db, $table, $state, $primaryKeys, $pkColumn, $mapper));
+        return new WrappedStoreCommand(new Insert($db, $table, $state, $primaryKeys, $pkColumn, $mapper, $caster));
     }
 
     public static function createUpdate(

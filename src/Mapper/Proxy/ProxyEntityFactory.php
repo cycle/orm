@@ -42,13 +42,10 @@ class ProxyEntityFactory
      * Create empty entity
      */
     public function create(
-        ORMInterface $orm,
-        string $role,
-        array $data,
-        string $sourceClass
+        RelationMap $relMap,
+        string $sourceClass,
+        array $data
     ): object {
-        $relMap = $orm->getRelationMap($role);
-
         $class = array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
             : $this->defineClass($relMap, $sourceClass);

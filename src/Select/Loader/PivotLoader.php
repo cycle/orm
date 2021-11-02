@@ -9,6 +9,7 @@ use Cycle\ORM\Parser\ArrayNode;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Cycle\Database\Query\SelectQuery;
@@ -34,7 +35,7 @@ class PivotLoader extends JoinableLoader
 
     public function getTable(): string
     {
-        return $this->define(Schema::TABLE);
+        return $this->define(SchemaInterface::TABLE);
     }
 
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
@@ -52,18 +53,11 @@ class PivotLoader extends JoinableLoader
 
     protected function initNode(): AbstractNode
     {
-        $node = new ArrayNode(
+        return new ArrayNode(
             $this->columnNames(),
-            (array)$this->define(Schema::PRIMARY_KEY),
+            (array)$this->define(SchemaInterface::PRIMARY_KEY),
             (array)$this->schema[Relation::THROUGH_INNER_KEY],
             (array)$this->schema[Relation::INNER_KEY]
         );
-
-        $typecast = $this->define(Schema::TYPECAST);
-        if ($typecast !== null) {
-            $node->setTypecast(new Typecast($typecast, $this->getSource()->getDatabase()));
-        }
-
-        return $node;
     }
 }

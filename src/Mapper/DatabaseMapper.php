@@ -9,10 +9,13 @@ use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Context\ConsumerInterface;
+use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
 
@@ -32,26 +35,34 @@ abstract class DatabaseMapper implements MapperInterface
 
     /** @var string[] */
     protected array $primaryKeys;
+    protected EntityRegistryInterface $entityRegistry;
+    private ?TypecastInterface $typecast;
+    protected RelationMap $relationMap;
 
     public function __construct(
-        protected ORMInterface $orm,
+        ORMInterface $orm,
         protected string $role
     ) {
         $this->source = $orm->getSource($role);
-        foreach ($orm->getSchema()->define($role, SchemaInterface::COLUMNS) as $property => $column) {
+        $this->entityRegistry = $orm->getEntityRegistry();
+        $this->typecast = $this->entityRegistry->getTypecast($role);
+        $this->relationMap = $this->entityRegistry->getRelationMap($role);
+
+        $schema = $orm->getSchema();
+        foreach ($schema->define($role, SchemaInterface::COLUMNS) as $property => $column) {
             $this->columns[\is_int($property) ? $column : $property] = $column;
         }
 
         // Parent's fields
-        $parent = $orm->getSchema()->define($role, SchemaInterface::PARENT);
+        $parent = $schema->define($role, SchemaInterface::PARENT);
         while ($parent !== null) {
-            foreach ($orm->getSchema()->define($parent, SchemaInterface::COLUMNS) as $property => $column) {
+            foreach ($schema->define($parent, SchemaInterface::COLUMNS) as $property => $column) {
                 $this->parentColumns[\is_int($property) ? $column : $property] = $column;
             }
-            $parent = $orm->getSchema()->define($parent, SchemaInterface::PARENT);
+            $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
 
-        $this->primaryKeys = (array)$orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
+        $this->primaryKeys = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
         foreach ($this->primaryKeys as $PK) {
             $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
         }
@@ -60,6 +71,27 @@ abstract class DatabaseMapper implements MapperInterface
     public function getRole(): string
     {
         return $this->role;
+    }
+
+    public function cast(array $data): array
+    {
+        if ($this->typecast !== null) {
+            $data = $this->typecast->cast($data);
+        }
+
+        // Cast relations
+        foreach ($this->relationMap->getRelations() as $field => $relation) {
+            if (!array_key_exists($field, $data)) {
+                continue;
+            }
+            $value = $data[$field];
+            if (!is_array($value) && !is_null($value)) {
+                continue;
+            }
+            $data[$field] = $relation->cast($value);
+        }
+
+        return $data;
     }
 
     public function queueCreate(object $entity, Node $node, State $state): CommandInterface
@@ -84,7 +116,9 @@ abstract class DatabaseMapper implements MapperInterface
             $state,
             $this->primaryKeys,
             \count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
-            [$this, 'mapColumns']
+            [$this, 'mapColumns'],
+            /** @see TypecastInterface::cast() */
+            $this->typecast === null ? null : [$this->typecast, 'cast']
         );
     }
 

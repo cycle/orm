@@ -142,17 +142,7 @@ abstract class BaseTest extends TestCase
 
         $config = self::$config[static::DRIVER];
         if (!isset($this->driver)) {
-            $class = $config['driver'];
-
-            $this->driver = new $class(
-                [
-                    'connection' => $config['conn'],
-                    'username' => $config['user'],
-                    'password' => $config['pass'],
-                    'options' => [],
-                    'queryCache' => true,
-                ]
-            );
+            $this->driver = $config->driver::create($config);
         }
 
         return static::$driverCache[static::DRIVER] = $this->driver;

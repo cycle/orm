@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Cycle\Database;
+use Cycle\Database\Config;
 
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', '1');
@@ -11,11 +11,11 @@ ini_set('display_errors', '1');
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $drivers = [
-    'sqlite' => new Database\Config\SQLiteDriverConfig(
+    'sqlite' => new Config\SQLiteDriverConfig(
         queryCache: true,
     ),
-    'mysql' => new Database\Config\MySQLDriverConfig(
-        connection: new Database\Config\MySQL\TcpConnectionConfig(
+    'mysql' => new Config\MySQLDriverConfig(
+        connection: new Config\MySQL\TcpConnectionConfig(
             database: 'spiral',
             host: '127.0.0.1',
             port: 13306,
@@ -24,8 +24,8 @@ $drivers = [
         ),
         queryCache: true
     ),
-    'postgres' => new Database\Config\PostgresDriverConfig(
-        connection: new Database\Config\Postgres\TcpConnectionConfig(
+    'postgres' => new Config\PostgresDriverConfig(
+        connection: new Config\Postgres\TcpConnectionConfig(
             database: 'spiral',
             host: '127.0.0.1',
             port: 15432,
@@ -35,8 +35,8 @@ $drivers = [
         schema: 'public',
         queryCache: true,
     ),
-    'sqlserver' => new Database\Config\SQLServerDriverConfig(
-        connection: new Database\Config\SQLServer\TcpConnectionConfig(
+    'sqlserver' => new Config\SQLServerDriverConfig(
+        connection: new Config\SQLServer\TcpConnectionConfig(
             database: 'tempdb',
             host: '127.0.0.1',
             port: 11433,

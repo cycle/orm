@@ -133,4 +133,20 @@ abstract class SelectorTest extends BaseTest
             ],
         ], $result);
     }
+
+    public function testCount(): void
+    {
+        $s = new Select($this->orm, User::class);
+
+        $this->assertSame(2, $s->count());
+    }
+
+    public function testCountWithJoin(): void
+    {
+        $s = new Select($this->orm, User::class);
+
+        $s->with('comments');
+
+        $this->assertSame(2, $s->count());
+    }
 }

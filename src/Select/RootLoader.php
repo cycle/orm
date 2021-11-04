@@ -85,6 +85,21 @@ final class RootLoader extends AbstractLoader
     }
 
     /**
+     * Returns PK or DISTINCT(PK) if query has any join.
+     *
+     * @return string
+     */
+    public function getCountField(): string
+    {
+        if (0 < count($this->join)) {
+            // @tuneyourserver solves the issue with counting on queries with joins.
+            return sprintf('DISTINCT(%s)', $this->getPK());
+        }
+
+        return $this->getPK();
+    }
+
+    /**
      * Return base query associated with the loader.
      *
      * @return SelectQuery

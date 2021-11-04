@@ -279,6 +279,9 @@ final class Node implements ProducerInterface, ConsumerInterface
     public function getChanges(array $current, array $from): array
     {
         foreach ($this->dataObjectsState as $field => $value) {
+            if (!\array_key_exists($field, $current)) {
+                continue;
+            }
             if (\is_string($value) && self::isStringable($current[$field])) {
                 if ((string) $current[$field] !== $value) {
                     unset($from[$field]);

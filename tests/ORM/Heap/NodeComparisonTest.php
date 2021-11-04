@@ -136,6 +136,13 @@ class NodeComparisonTest extends TestCase
         $this->assertSame(0, Node::compare($a, $b), 'Should be same: ' . $this->exportVars($a, $b));
     }
 
+    public function testGetChangesNotFullNewData(): void
+    {
+        $node = new Node(Node::NEW, ['field1' => $this->createStringableObject('foo')], 'test');
+
+        $this->assertSame(['field2' => 'bar'], $node->getChanges(['field2' => 'bar'], $node->getInitialData()));
+    }
+
     private function exportVars($a, $b): string
     {
         return sprintf(

@@ -223,12 +223,18 @@ abstract class SelectorTest extends BaseTest
         $this->assertSame($pk, $this->joinRelation(new RootLoader($this->orm, $role), 'lastComment', [
             'method' => Select\AbstractLoader::LEFT_JOIN,
         ])->getCountField());
-        $this->assertSame($distinct, $this->joinRelation(new RootLoader($this->orm, $role), 'comments')->getCountField());
+        $this->assertSame(
+            $distinct,
+            $this->joinRelation(new RootLoader($this->orm, $role), 'comments')->getCountField()
+        );
 
         $schema = $this->getSchemaDefinition();
         unset($schema[Profile::class][Schema::FIND_BY_KEYS]);
         $this->orm = $this->withSchema(new Schema($schema));
-        $this->assertSame($distinct, $this->joinRelation(new RootLoader($this->orm, $role), 'profile')->getCountField());
+        $this->assertSame(
+            $distinct,
+            $this->joinRelation(new RootLoader($this->orm, $role), 'profile')->getCountField()
+        );
     }
 
     private function joinRelation(RootLoader $loader, string $relation, array $options = []): RootLoader

@@ -388,7 +388,7 @@ final class ORM implements ORMInterface
      *
      * @return array
      */
-    protected function getIndexes(string $role): array
+    public function getIndexes(string $role): array
     {
         if (isset($this->indexes[$role])) {
             return $this->indexes[$role];

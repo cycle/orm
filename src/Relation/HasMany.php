@@ -65,15 +65,6 @@ class HasMany extends AbstractRelation
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
-        if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStoreAll($pool, $tuple);
-        }
-        // todo
-            // $this->queueDelete($pool, $tuple, $related);
-    }
-
-    private function queueStoreAll(Pool $pool, Tuple $tuple): void
-    {
         $node = $tuple->node;
         $related = $tuple->state->getRelation($this->getName());
         $related = $this->extract($related);

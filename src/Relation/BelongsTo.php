@@ -52,28 +52,24 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
     {
         $node = $tuple->node;
         $original = $node->getRelation($this->getName());
-        $tuple->state->setRelation($this->getName(), $related);
+        $state = $tuple->state;
+        $state->setRelation($this->getName(), $related);
 
         if ($related === null) {
             if (!$this->isNullable()) {
                 // set null unchanged fields
-                $changes = $tuple->state->getChanges();
+                $changes = $state->getChanges();
                 foreach ($this->innerKeys as $innerKey) {
                     if (!isset($changes[$innerKey])) {
-                        $tuple->state->register($innerKey, null);
+                        $state->register($innerKey, null);
+                        $state->waitField($innerKey, true);
                     }
                 }
-                $this->registerWaitingFields($tuple->state);
-
-                // if ($this->checkNullValuePossibility($tuple)) {
                 return;
-                // }
-                // throw new NullException("Relation {$this} can not be null.");
             }
 
             if ($original !== null) {
                 // reset keys
-                $state = $node->getState();
                 foreach ($this->innerKeys as $innerKey) {
                     $state->register($innerKey, null);
                 }

@@ -372,14 +372,12 @@ abstract class BelongsToRelationTest extends BaseTest
         $p->user = null;
 
         try {
-            $tr = new Transaction($this->orm);
-            $tr->persist($p);
-            $tr->run();
+            $this->save($p);
         } catch (\Throwable $e) {
             throw $e;
         } finally {
             // we do not expect state to be consistent as transaction failed, see rollback tests
-            $this->orm = $this->orm->withHeap(new Heap());
+            $this->orm->getHeap()->clean();
         }
     }
 

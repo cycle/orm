@@ -372,6 +372,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
 
     public function testPersistRelatedHierarchy(): void
     {
+        /** @var Ebook $entity */
         $entity = $this->orm->make(EBook::class, [
             'title' => 'awesome book',
             'url' => 'awesome-book.com',
@@ -387,6 +388,12 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         $this->captureWriteQueries();
         $this->save($entity);
         $this->assertNumWrites(6);
+
+        // Relations are not non-rewritable on sync hydration
+        // This behavior can be changed
+        $this->assertNull($entity->pages[0]->ebook);
+        $this->assertNull($entity->pages[1]->ebook);
+        $this->assertNull($entity->pages[2]->ebook);
 
         $this->captureWriteQueries();
         $this->save($entity);

@@ -300,11 +300,11 @@ abstract class UUIDTest extends BaseTest
 
     public function testAddAndRemoveChildren(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $selector->load('comments');
-
         /** @var User $e */
-        $e = $selector->wherePK($this->u1)->fetchOne();
+        $e = (new Select($this->orm, User::class))
+            ->load('comments')
+            ->wherePK($this->u1)
+            ->fetchOne();
 
         $e->comments->remove(1);
 
@@ -313,16 +313,12 @@ abstract class UUIDTest extends BaseTest
         $e->comments->add($c);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(2);
 
         // consecutive test
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);

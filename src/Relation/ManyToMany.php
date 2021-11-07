@@ -34,13 +34,10 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected string $pivotRole;
 
-    protected ?string $inversion;
-
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
         $this->pivotRole = $this->schema[Relation::THROUGH_ENTITY];
-        $this->inversion = $this->schema[Relation::INVERSION] ?? null;
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];

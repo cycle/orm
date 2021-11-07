@@ -261,51 +261,48 @@ final class Schema implements SchemaInterface
                 }
                 $targetSchema = $result[$target];
                 $targetRelations = $targetSchema[self::RELATIONS] ?? [];
-                $handshake = $relation[Relation::SCHEMA][Relation::INVERSION] ?? null;
-                if ($handshake !== null) {
-                    if (!array_key_exists($handshake, $targetRelations)) {
+                $inversion = $relation[Relation::SCHEMA][Relation::INVERSION] ?? null;
+                if ($inversion !== null) {
+                    if (!array_key_exists($inversion, $targetRelations)) {
                         throw new SchemaException(
                             sprintf(
-                                'Relation `%s` for handshake with `%s.%s` not found in the `%s` role.',
-                                $handshake,
+                                'Relation `%s` as inversion of `%s.%s` not found in the `%s` role.',
+                                $inversion,
                                 $role,
                                 $container,
                                 $target
                             )
                         );
                     }
-                    $targetHandshake = $targetRelations[$handshake][Relation::SCHEMA][Relation::INVERSION] ?? null;
+                    $targetHandshake = $targetRelations[$inversion][Relation::SCHEMA][Relation::INVERSION] ?? null;
                     if ($targetHandshake !== null && $container !== $targetHandshake) {
                         throw new SchemaException(
                             sprintf(
-                                'Relation `%s.%s` links to `%s.%s` for handshake but `%s.%s` have different handshake value.',
+                                'Relation `%s.%s` can\'t be inversion of `%s.%s` because they have different relation values.',
                                 $role,
                                 $container,
                                 $target,
-                                $handshake,
-                                $target,
-                                $handshake,
+                                $inversion,
                             )
                         );
                     }
-                    // $targetSchema[self::RELATIONS][$handshake][Relation::SCHEMA][Relation::HANDSHAKE] = $container;
-                    $result[$target][self::RELATIONS][$handshake][Relation::SCHEMA][Relation::INVERSION] = $container;
+                    $result[$target][self::RELATIONS][$inversion][Relation::SCHEMA][Relation::INVERSION] = $container;
                     continue;
                 }
-                // find relation for handshake
-                $handshake = $this->findRelationForHandshake($role, $container, $relation, $targetRelations);
-                if ($handshake === null) {
+                // find inverted relation
+                $inversion = $this->findInvertedRelation($role, $container, $relation, $targetRelations);
+                if ($inversion === null) {
                     continue;
                 }
-                $result[$role][self::RELATIONS][$container][Relation::SCHEMA][Relation::INVERSION] = $handshake;
-                $result[$target][self::RELATIONS][$handshake][Relation::SCHEMA][Relation::INVERSION] = $container;
+                $result[$role][self::RELATIONS][$container][Relation::SCHEMA][Relation::INVERSION] = $inversion;
+                $result[$target][self::RELATIONS][$inversion][Relation::SCHEMA][Relation::INVERSION] = $container;
             }
         }
 
         return $result;
     }
 
-    private function findRelationForHandshake(
+    private function findInvertedRelation(
         string $role,
         string $container,
         array $relation,
@@ -315,6 +312,7 @@ final class Schema implements SchemaInterface
         /** @var callable $compareCallback */
         $compareCallback = match ($relation[Relation::TYPE]) {
             Relation::MANY_TO_MANY => [$this, 'compareManyToMany'],
+            Relation::BELONGS_TO => [$this, 'checkBelongsToInversion'],
             // Relation::HAS_ONE, Relation::HAS_MANY => $nullable === true ? Relation::REFERS_TO : Relation::BELONGS_TO,
             default => null,
         };
@@ -359,10 +357,24 @@ final class Schema implements SchemaInterface
         }
         // Optional fields
         return ! (($schema[Relation::WHERE] ?? []) !== ($targetSchema[Relation::WHERE] ?? [])
-            || ($schema[Relation::THROUGH_WHERE] ?? []) !== ($targetSchema[Relation::THROUGH_WHERE] ?? []))
+            || ($schema[Relation::THROUGH_WHERE] ?? []) !== ($targetSchema[Relation::THROUGH_WHERE] ?? []));
+    }
 
-
-         ;
+    private function checkBelongsToInversion(array $relation, array $targetRelation): bool
+    {
+        $schema = $relation[Relation::SCHEMA];
+        $targetSchema = $targetRelation[Relation::SCHEMA];
+        // MTM connects with MTM only
+        if (!in_array($targetRelation[Relation::TYPE],  [Relation::HAS_MANY, Relation::HAS_ONE], true)) {
+            return false;
+        }
+        // Same keys
+        if ((array)$schema[Relation::INNER_KEY] !== (array)$targetSchema[Relation::OUTER_KEY]
+            || (array)$schema[Relation::OUTER_KEY] !== (array)$targetSchema[Relation::INNER_KEY]) {
+            return false;
+        }
+        // Optional fields
+        return empty($schema[Relation::WHERE]) && empty($targetSchema[Relation::WHERE]);
     }
 
     /**

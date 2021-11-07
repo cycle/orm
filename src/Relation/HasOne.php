@@ -49,7 +49,7 @@ class HasOne extends AbstractRelation
             if ($original === null) {
                 return;
             }
-            $this->deleteChild($pool, $original);
+            $this->deleteChild($pool, $tuple, $original);
             return;
         }
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
@@ -58,7 +58,7 @@ class HasOne extends AbstractRelation
         $this->assertValid($rTuple->node);
 
         if ($original !== null && $original !== $related) {
-            $this->deleteChild($pool, $original);
+            $this->deleteChild($pool, $tuple, $original);
         }
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Traits;
 
+use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -12,15 +13,19 @@ trait HasSomeTrait
     /**
      * Delete original related entity of no other objects reference to it.
      */
-    protected function deleteChild(Pool $pool, object $child): Tuple
+    protected function deleteChild(Pool $pool, Tuple $tuple, object $child): Tuple
     {
         if ($this->isNullable()) {
             $rTuple = $pool->attachStore($child, false);
-            foreach ($this->outerKeys as $outerKey) {
-                $rTuple->state->register($outerKey, null);
+            $relName = $this->getTargetRelationName();
+            // Related state
+            $state = $rTuple->state;
+            if (!$state->hasRelation($relName) || $state->getRelation($relName) === $tuple->entity) {
+                foreach ($this->outerKeys as $outerKey) {
+                    $state->register($outerKey, null);
+                }
+                $state->setRelation($relName, null);
             }
-            // todo: is it needed?
-            // $rTuple->node->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
             return $rTuple;
         }
         return $pool->attachDelete($child, $this->isCascade());

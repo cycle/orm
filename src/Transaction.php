@@ -289,8 +289,9 @@ final class Transaction implements TransactionInterface
                 continue;
             }
 
-            $isWaitingKeys = array_intersect($relation->getInnerKeys(), $tuple->state->getWaitingFields(true)) !== [];
-            $hasChangedKeys = array_intersect($relation->getInnerKeys(), $changedFields) !== [];
+            $innerKeys = $relation->getInnerKeys();
+            $isWaitingKeys = array_intersect($innerKeys, $tuple->state->getWaitingFields(true)) !== [];
+            $hasChangedKeys = array_intersect($innerKeys, $changedFields) !== [];
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
                 // $relData ??= $tuple->mapper->extract($tuple->entity);
                 $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
@@ -304,9 +305,11 @@ final class Transaction implements TransactionInterface
                 $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             }
 
-            if ($relationStatus !== RelationInterface::STATUS_PREPARE && $relationStatus !== RelationInterface::STATUS_RESOLVED && !$isWaitingKeys
+            if ($relationStatus !== RelationInterface::STATUS_PREPARE
+                && $relationStatus !== RelationInterface::STATUS_RESOLVED
+                && !$isWaitingKeys
                 && !$hasChangedKeys
-                && \count(array_intersect($relation->getInnerKeys(), array_keys($transactData))) === \count($relation->getInnerKeys())
+                && \count(array_intersect($innerKeys, array_keys($transactData))) === \count($innerKeys)
             ) {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
                 $child ??= $tuple->state->getRelation($name);

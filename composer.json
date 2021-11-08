@@ -6,7 +6,7 @@
   "require": {
     "php": ">=7.2",
     "ext-pdo": "*",
-    "spiral/database": "^2.8.4",
+    "cycle/database": "^1.0.1",
     "doctrine/inflector": "^1.4|^2.0",
     "doctrine/collections": "^1.5",
     "doctrine/instantiator": "^1.2",

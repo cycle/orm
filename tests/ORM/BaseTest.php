@@ -27,11 +27,11 @@ use Cycle\ORM\Tests\Fixtures\TestLogger;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
-use Spiral\Database\Config\DatabaseConfig;
-use Spiral\Database\Database;
-use Spiral\Database\DatabaseManager;
-use Spiral\Database\Driver\Driver;
-use Spiral\Database\Driver\HandlerInterface;
+use Cycle\Database\Config\DatabaseConfig;
+use Cycle\Database\Database;
+use Cycle\Database\DatabaseManager;
+use Cycle\Database\Driver\Driver;
+use Cycle\Database\Driver\HandlerInterface;
 
 abstract class BaseTest extends TestCase
 {

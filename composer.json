@@ -8,7 +8,7 @@
   "require": {
     "php": ">=8.0",
     "ext-pdo": "*",
-    "cycle/database": "dev-master as 1.0.0",
+    "cycle/database": "dev-master#99a857789170baf6b47c5dde85115aef5c381728 as 1.0.0",
     "doctrine/inflector": "^1.4|^2.0",
     "doctrine/instantiator": "^1.3.1",
     "laminas/laminas-hydrator": "^4.0"

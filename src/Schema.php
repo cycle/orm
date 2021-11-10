@@ -365,7 +365,7 @@ final class Schema implements SchemaInterface
         $schema = $relation[Relation::SCHEMA];
         $targetSchema = $targetRelation[Relation::SCHEMA];
         // MTM connects with MTM only
-        if (!in_array($targetRelation[Relation::TYPE],  [Relation::HAS_MANY, Relation::HAS_ONE], true)) {
+        if (!in_array($targetRelation[Relation::TYPE], [Relation::HAS_MANY, Relation::HAS_ONE], true)) {
             return false;
         }
         // Same keys

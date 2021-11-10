@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation\Traits;
 
-use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 

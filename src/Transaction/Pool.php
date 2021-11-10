@@ -258,7 +258,7 @@ final class Pool implements \Countable
                 }
                 $hasUnresolved = $this->unprocessed !== [];
                 if ($this->happens !== 0 && $hasUnresolved) {
-                    \Cycle\ORM\Transaction\Pool::DEBUG && print
+                    self::DEBUG && print
                         "+-------------------------------\n" .
                         "| \033[32m  LOOP UNRESOLVED :: " . count($this->unprocessed) . " \033[0m\n" .
                         "+-------------------------------\n";

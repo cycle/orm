@@ -258,6 +258,10 @@ final class Pool implements \Countable
                 }
                 $hasUnresolved = $this->unprocessed !== [];
                 if ($this->happens !== 0 && $hasUnresolved) {
+                    self::DEBUG && print
+                        "+-------------------------------\n" .
+                        "| \033[32m  LOOP UNRESOLVED :: " . count($this->unprocessed) . " \033[0m\n" .
+                        "+-------------------------------\n";
                     foreach ($this->unprocessed as $item) {
                         $this->storage->attach($item->entity, $item);
                     }

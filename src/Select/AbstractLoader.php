@@ -60,6 +60,9 @@ abstract class AbstractLoader implements LoaderInterface
     /** @var AbstractLoader[] */
     protected array $join = [];
 
+    /**
+     * Parent in class inheritance hierarchy
+     */
     protected ?AbstractLoader $inherit = null;
 
     /** @var SubclassLoader[] */
@@ -67,6 +70,9 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected bool $loadSubclasses = true;
 
+    /**
+     * Loader that contains current loader
+     */
     protected ?LoaderInterface $parent = null;
 
     /**

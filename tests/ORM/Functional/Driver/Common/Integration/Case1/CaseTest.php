@@ -92,7 +92,9 @@ abstract class CaseTest extends BaseTest
     {
         return [
             '1 item' => [1],
+            '2 items' => [2],
             '10 items' => [10],
+            '20 items' => [20],
             // '50 items' => [50],
         ];
     }

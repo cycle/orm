@@ -27,7 +27,11 @@ final class Typecast implements TypecastInterface
                 $values[$key] = $this->castOne($rule, $values[$key]);
             }
         } catch (Throwable $e) {
-            throw new TypecastException("Unable to typecast the `$key` field.", $e->getCode(), $e);
+            throw new TypecastException(
+                sprintf('Unable to typecast the `%s` field. %s', $key, $e->getMessage()),
+                $e->getCode(),
+                $e
+            );
         }
 
         return $values;

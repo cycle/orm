@@ -34,13 +34,10 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected string $pivotRole;
 
-    protected ?string $inversion;
-
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
         $this->pivotRole = $this->schema[Relation::THROUGH_ENTITY];
-        $this->inversion = $this->schema[Relation::INVERSION] ?? null;
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
         $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
@@ -130,7 +127,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
     }
 
-    public function init(Node $node, array $data, bool $typecast = false): iterable
+    public function init(Node $node, array $data): iterable
     {
         $elements = [];
         $pivotData = new SplObjectStorage();
@@ -159,11 +156,16 @@ class ManyToMany extends Relation\AbstractRelation
         $pivotMapper = $this->orm->getEntityRegistry()->getMapper($this->pivotRole);
         $targetMapper = $this->orm->getEntityRegistry()->getMapper($this->target);
 
-        foreach ($data as &$pivot) {
+        foreach ($data as $key => $pivot) {
             if (isset($pivot['@'])) {
-                $pivot['@'] = $targetMapper->cast($pivot['@']);
+                $d = $pivot['@'];
+                // break link
+                unset($pivot['@']);
+                $pivot['@'] = $targetMapper->cast($d);
             }
-            $pivot = $pivotMapper->cast($pivot);
+            // break link
+            unset($data[$key]);
+            $data[$key] = $pivotMapper->cast($pivot);
         }
 
         return $data;

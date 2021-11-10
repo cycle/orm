@@ -29,6 +29,8 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     /** @var string[] */
     protected array $outerKeys;
 
+    protected ?string $inversion;
+
     /**
      * @param string $target Primary target role
      */
@@ -42,6 +44,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     ) {
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
+        $this->inversion = $schema[Relation::INVERSION] ?? null;
     }
 
     public function getInnerKeys(): array
@@ -72,12 +75,13 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
 
     protected function isNullable(): bool
     {
+        // return $this->schema[Relation::NULLABLE] ?? false;
         return !empty($this->schema[Relation::NULLABLE]);
     }
 
     protected function getTargetRelationName(): string
     {
-        return $this->role . '.' . $this->name . ':' . $this->target;
+        return $this->inversion ?? $this->role . '.' . $this->name . ':' . $this->target;
     }
 
     /**

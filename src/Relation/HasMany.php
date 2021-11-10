@@ -42,7 +42,7 @@ class HasMany extends AbstractRelation
             $tuple->state->setRelation($this->getName(), $related);
         }
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $this->deleteChild($pool, $item);
+            $this->deleteChild($pool, $tuple, $item);
         }
 
         if (\count($related) === 0) {
@@ -65,15 +65,6 @@ class HasMany extends AbstractRelation
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
-        if ($tuple->task === Tuple::TASK_STORE) {
-            $this->queueStoreAll($pool, $tuple);
-        }
-        // todo
-            // $this->queueDelete($pool, $tuple, $related);
-    }
-
-    private function queueStoreAll(Pool $pool, Tuple $tuple): void
-    {
         $node = $tuple->node;
         $related = $tuple->state->getRelation($this->getName());
         $related = $this->extract($related);
@@ -84,9 +75,23 @@ class HasMany extends AbstractRelation
             return;
         }
 
+        // Fill related
         $relationName = $this->getTargetRelationName();
         foreach ($related as $item) {
+            /** @var Tuple $rTuple */
             $rTuple = $pool->offsetGet($item);
+
+            if ($this->inversion !== null) {
+                if ($rTuple->node->getStatus() === Node::NEW) {
+                    // For existing entities it can be unwanted
+                    // if Reference to Parent will be rewritten by Parent Entity
+                    $rTuple->state->setRelation($relationName, $tuple->entity);
+                }
+
+                if ($rTuple->node->getRelationStatus($relationName) === RelationInterface::STATUS_PREPARE) {
+                    continue;
+                }
+            }
             $this->applyChanges($tuple, $rTuple);
             $rTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
         }
@@ -95,7 +100,7 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      */
-    public function init(Node $node, array $data, bool $typecast = false): iterable
+    public function init(Node $node, array $data): iterable
     {
         $elements = [];
         foreach ($data as $item) {
@@ -112,8 +117,10 @@ class HasMany extends AbstractRelation
             return [];
         }
         $mapper = $this->orm->getEntityRegistry()->getMapper($this->target);
-        foreach ($data as &$item) {
-            $item = $mapper->cast($item);
+        foreach ($data as $key => $item) {
+            // break link
+            unset($data[$key]);
+            $data[$key] = $mapper->cast($item);
         }
         return $data;
     }

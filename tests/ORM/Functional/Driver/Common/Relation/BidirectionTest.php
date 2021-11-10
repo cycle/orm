@@ -157,7 +157,10 @@ abstract class BidirectionTest extends BaseTest
 
     public function testRemoveFromCommentEnd(): void
     {
-        $u = (new Select($this->orm, User::class))->load('comments')->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertCount(2, $u->comments);
 
@@ -166,30 +169,33 @@ abstract class BidirectionTest extends BaseTest
         $this->captureWriteQueries();
         $this->save($u);
         $this->assertNumWrites(1);
-        $this->logger->hide();
 
-        $select = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u = $select->load('comments')->wherePK(1)->fetchOne();
+        $this->orm->getHeap()->clean();
+        $u = (new Select($this->orm, User::class))
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertCount(1, $u->comments);
     }
 
     public function testRemoveFromCommentEndDoublePersist(): void
     {
-        $select = new Select($this->orm, User::class);
-        $u = $select->load('comments')->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertCount(2, $u->comments);
 
         $u->comments[0]->user = null;
 
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->persist($u->comments[0]);
-        $t->run();
+        $this->save($u, $u->comments[0]);
 
-        $select = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u = $select->load('comments')->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertCount(1, $u->comments);
     }

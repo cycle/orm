@@ -127,7 +127,7 @@ class ManyToMany extends Relation\AbstractRelation
         }
     }
 
-    public function init(Node $node, array $data, bool $typecast = false): iterable
+    public function init(Node $node, array $data): iterable
     {
         $elements = [];
         $pivotData = new SplObjectStorage();
@@ -156,11 +156,16 @@ class ManyToMany extends Relation\AbstractRelation
         $pivotMapper = $this->orm->getEntityRegistry()->getMapper($this->pivotRole);
         $targetMapper = $this->orm->getEntityRegistry()->getMapper($this->target);
 
-        foreach ($data as &$pivot) {
+        foreach ($data as $key => $pivot) {
             if (isset($pivot['@'])) {
-                $pivot['@'] = $targetMapper->cast($pivot['@']);
+                $d = $pivot['@'];
+                // break link
+                unset($pivot['@']);
+                $pivot['@'] = $targetMapper->cast($d);
             }
-            $pivot = $pivotMapper->cast($pivot);
+            // break link
+            unset($data[$key]);
+            $data[$key] = $pivotMapper->cast($pivot);
         }
 
         return $data;

@@ -100,7 +100,7 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      */
-    public function init(Node $node, array $data, bool $typecast = false): iterable
+    public function init(Node $node, array $data): iterable
     {
         $elements = [];
         foreach ($data as $item) {
@@ -117,8 +117,10 @@ class HasMany extends AbstractRelation
             return [];
         }
         $mapper = $this->orm->getEntityRegistry()->getMapper($this->target);
-        foreach ($data as &$item) {
-            $item = $mapper->cast($item);
+        foreach ($data as $key => $item) {
+            // break link
+            unset($data[$key]);
+            $data[$key] = $mapper->cast($item);
         }
         return $data;
     }

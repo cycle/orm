@@ -63,7 +63,7 @@ final class Embedded implements SameRowRelationInterface
         return true;
     }
 
-    public function init(Node $node, array $data, bool $typecast = false): object
+    public function init(Node $node, array $data): object
     {
         foreach ($this->primaryKeys as $key) {
             // ensure proper object reference

@@ -85,26 +85,13 @@ final class Factory implements FactoryInterface
             if (!$rules) {
                 return null;
             }
-            return $parentTypecast === null
-                ? new Typecast($rules, $database)
-                : new CompositeTypecast($parentTypecast, new Typecast($rules, $database));
-        }
 
-        if (\is_string($handler)) {
-            $handler = $this->factory->make($handler, [
-                'database' => $database,
-                'orm' => $orm,
-                'role' => $role,
-                'rules' => $rules,
-            ]);
-        } elseif (\is_array($handler)) {
+            $handler = new Typecast($rules, $database);
+        } else if (\is_string($handler)) {
+            $handler = $this->makeTypecastHandler($handler, $database, $orm, $role, $rules);
+        } elseif (\is_array($handler)) { // We need to use composite typecast for array
             foreach ($handler as &$type) {
-                $type = $this->factory->make($type, [
-                    'database' => $database,
-                    'orm' => $orm,
-                    'role' => $role,
-                    'rules' => $rules,
-                ]);
+                $type = $this->makeTypecastHandler($type, $database, $orm, $role, $rules);
             }
 
             $handler = new CompositeTypecast(...$handler);
@@ -291,5 +278,30 @@ final class Factory implements FactoryInterface
             $clone->collectionFactoryInterface[$interface] = $factory;
         }
         return $clone;
+    }
+
+    /**
+     * Make typecast handler from giver string or object
+     *
+     * @return TypecastInterface
+     */
+    private function makeTypecastHandler(
+        string|object $handler,
+        DatabaseInterface $database,
+        ORMInterface $orm,
+        string $role,
+        array $rules
+    ): object {
+        // If handler is an object we don't need to use factory, we should return it as is
+        if (is_object($handler)) {
+            return $handler;
+        }
+
+        return $this->factory->make($handler, [
+            'database' => $database,
+            'orm' => $orm,
+            'role' => $role,
+            'rules' => $rules,
+        ]);
     }
 }

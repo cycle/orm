@@ -88,6 +88,8 @@ abstract class DatabaseMapper implements MapperInterface
             if (!is_array($value) && null !== $value) {
                 continue;
             }
+            // break links
+            unset($data[$field]);
             $data[$field] = $relation->cast($value);
         }
 

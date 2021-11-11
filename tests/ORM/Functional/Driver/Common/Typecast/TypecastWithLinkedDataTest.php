@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast;
 
+use Cycle\ORM\Iterator;
 use Cycle\ORM\Mapper\ClasslessMapper;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
@@ -18,7 +19,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\IDCaster;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
-abstract class TypecastIteratorTest extends BaseTest
+abstract class TypecastWithLinkedDataTest extends BaseTest
 {
     use TableTrait;
 
@@ -41,6 +42,7 @@ abstract class TypecastIteratorTest extends BaseTest
 
         $this->makeTable('book', [
             'id' => 'primary',
+            'user_id' => 'int,nullable',
             'states' => 'string',
             'nested_states' => 'string',
             'published_at' => 'datetime',
@@ -102,6 +104,17 @@ abstract class TypecastIteratorTest extends BaseTest
                             Relation::THROUGH_OUTER_KEY => 'book_id',
                         ],
                     ],
+                    'book' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => 'book',
+                        Relation::LOAD => Relation::LOAD_PROMISE,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
                 ],
             ],
             'pivot' => [
@@ -123,9 +136,10 @@ abstract class TypecastIteratorTest extends BaseTest
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'book',
                 SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'states', 'nested_states', 'published_at'],
+                SchemaInterface::COLUMNS => ['id', 'user_id', 'states', 'nested_states', 'published_at'],
                 SchemaInterface::TYPECAST => [
                     'id' => 'int',
+                    'user_id' => 'int',
                     'states' => [BookStates::class, 'cast'],
                     'nested_states' => [BookNestedStates::class, 'cast'],
                     'published_at' => 'datetime',
@@ -156,5 +170,40 @@ abstract class TypecastIteratorTest extends BaseTest
         $this->assertNotNull($users[0]->id);
         $this->assertIsNotObject($users[0]->id->value);
         $this->assertEquals(1, $users[0]->id->value);
+    }
+
+    /**
+     * Test the Typecaster doesn't type casting twice when data passed via links
+     */
+    public function testCustomArrayInIterator(): void
+    {
+        $mapper = $this->orm->getEntityRegistry()->getMapper('user');
+        $bookData = [
+            'id' => '1',
+            'states' => 'foo|bar',
+            'nested_states' => 'foo|bar',
+            'published_at' => '2020-12-07',
+        ];
+        $pivotData = [
+            'book_id' => '1',
+            'user_id' => '1',
+            'created_at' => '2020-12-09',
+            '@' => &$bookData,
+        ];
+        $userData = [
+            'email' => 'foo@bar',
+            'balance' => '42',
+            'created_at' => '2020-12-09',
+            'books' => [&$pivotData, &$pivotData, &$pivotData],
+            'book' => &$bookData,
+        ];
+
+        $data = [&$userData, &$userData, &$userData];
+
+        $iterator = new Iterator($this->orm, User::class, $data, typecast: true);
+        /** @var User $user */
+        $users = \iterator_to_array($iterator);
+
+        $this->assertCount(3, $users);
     }
 }

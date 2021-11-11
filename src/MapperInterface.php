@@ -36,7 +36,7 @@ interface MapperInterface
      *
      * @template T
      *
-     * @param T $entity
+     * @param object<T> $entity
      * @param array $data Prepared (typecasted) data
      *
      * @throws MapperException

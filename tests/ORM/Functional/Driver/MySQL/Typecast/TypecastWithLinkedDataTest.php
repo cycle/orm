@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\MySQL\Typecast;
 
 // phpcs:ignore
-use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\TypecastIteratorTest as CommonClass;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\TypecastWithLinkedDataTest as CommonClass;
 
 /**
  * @group driver
  * @group driver-mysql
  */
-class TypecastIteratorTest extends CommonClass
+class TypecastWithLinkedDataTest extends CommonClass
 {
     public const DRIVER = 'mysql';
 }

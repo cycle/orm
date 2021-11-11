@@ -170,6 +170,9 @@ final class SchemaTest extends BaseTest
         $this->assertSame(CompositeTypecast::class, $baz::class);
     }
 
+    /**
+     * @covers CompositeTypecast::cast()
+     */
     public function testUseCompositeTypecast(): void
     {
         $containerTypecast = $this->createMock(TypecastInterface::class);
@@ -197,13 +200,13 @@ final class SchemaTest extends BaseTest
             SchemaInterface::TYPECAST_HANDLER => [
                 'bar-foo', // container
                 'test-alias', // alias
-                $typecast // class string
+                $typecast, // class string
             ],
         ], [
-            'test-alias' => $aliasTypecast
+            'test-alias' => $aliasTypecast,
         ]);
 
-        $this->container->bindSingleton('bar-foo', fn() => $containerTypecast);
+        $this->container->bindSingleton('bar-foo', fn () => $containerTypecast);
 
         $typecast = $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
 

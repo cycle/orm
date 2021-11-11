@@ -87,7 +87,7 @@ final class Factory implements FactoryInterface
             }
 
             $handler = new Typecast($rules, $database);
-        } else if (\is_string($handler)) {
+        } elseif (\is_string($handler)) {
             $handler = $this->makeTypecastHandler($handler, $database, $orm, $role, $rules);
         } elseif (\is_array($handler)) { // We need to use composite typecast for array
             foreach ($handler as &$type) {

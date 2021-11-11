@@ -91,15 +91,23 @@ final class Factory implements FactoryInterface
         }
 
         if (\is_string($handler)) {
-            $handler = $this->factory->make(
-                $handler,
-                [
+            $handler = $this->factory->make($handler, [
+                'database' => $database,
+                'orm' => $orm,
+                'role' => $role,
+                'rules' => $rules,
+            ]);
+        } elseif (\is_array($handler)) {
+            foreach ($handler as &$type) {
+                $type = $this->factory->make($type, [
                     'database' => $database,
                     'orm' => $orm,
                     'role' => $role,
                     'rules' => $rules,
-                ]
-            );
+                ]);
+            }
+
+            $handler = new CompositeTypecast(...$handler);
         }
 
         if (!$handler instanceof TypecastInterface) {

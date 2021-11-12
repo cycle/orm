@@ -89,7 +89,7 @@ final class SchemaTest extends BaseTest
         ]);
 
         $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Undefined class or binding \'\'`.');
+        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Undefined class or binding \'\'.');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
     }
@@ -101,7 +101,7 @@ final class SchemaTest extends BaseTest
         ]);
 
         $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned`');
+        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
     }
@@ -118,7 +118,7 @@ final class SchemaTest extends BaseTest
         $this->container->bind('bar-foo', Typecaster::class);
 
         $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned`');
+        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
     }

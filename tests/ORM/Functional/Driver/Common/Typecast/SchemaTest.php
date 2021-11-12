@@ -6,7 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast;
 
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
-use Cycle\ORM\Exception\FactoryException;
+use Cycle\ORM\Exception\TypecastHandlerException;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
@@ -20,7 +20,6 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Typecaster;
 use Cycle\ORM\Tests\Util\SimpleFactory;
-use Psr\Container\NotFoundExceptionInterface;
 use Spiral\Core\Container;
 
 final class SchemaTest extends BaseTest
@@ -89,7 +88,8 @@ final class SchemaTest extends BaseTest
             SchemaInterface::TYPECAST_HANDLER => '',
         ]);
 
-        $this->expectException(NotFoundExceptionInterface::class);
+        $this->expectException(TypecastHandlerException::class);
+        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Undefined class or binding \'\'`.');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
     }
@@ -100,8 +100,25 @@ final class SchemaTest extends BaseTest
             SchemaInterface::TYPECAST_HANDLER => InvalidTypecaster::class,
         ]);
 
-        $this->expectException(FactoryException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role.');
+        $this->expectException(TypecastHandlerException::class);
+        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned`');
+
+        $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+    }
+
+    public function testHandlerWithWrongInterfaceAmongArrayShouldThrowAnException(): void
+    {
+        $this->setUpOrm([
+            SchemaInterface::TYPECAST_HANDLER => [
+                InvalidTypecaster::class,
+                'bar-foo',
+            ],
+        ]);
+
+        $this->container->bind('bar-foo', Typecaster::class);
+
+        $this->expectException(TypecastHandlerException::class);
+        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned`');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
     }

@@ -6,8 +6,8 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
-use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\TypecastException;
+use Cycle\ORM\Exception\TypecastHandlerException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Parser\CompositeTypecast;
@@ -81,24 +81,31 @@ final class Factory implements FactoryInterface
 
         // Create basic typecast implementation
         $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
-        if ($handler === null) {
-            if (!$rules) {
-                return null;
+
+        try {
+            if ($handler === null) {
+                if (!$rules) {
+                    return null;
+                }
+
+                $handler = new Typecast($rules, $database);
+            } elseif (\is_string($handler)) {
+                $handler = $this->makeTypecastHandler($handler, $database, $orm, $role, $rules);
+            } elseif (\is_array($handler)) { // We need to use composite typecast for array
+                foreach ($handler as &$type) {
+                    $type = $this->makeTypecastHandler($type, $database, $orm, $role, $rules);
+                }
+
+                $handler = new CompositeTypecast(...$handler);
             }
-
-            $handler = new Typecast($rules, $database);
-        } elseif (\is_string($handler)) {
-            $handler = $this->makeTypecastHandler($handler, $database, $orm, $role, $rules);
-        } elseif (\is_array($handler)) { // We need to use composite typecast for array
-            foreach ($handler as &$type) {
-                $type = $this->makeTypecastHandler($type, $database, $orm, $role, $rules);
-            }
-
-            $handler = new CompositeTypecast(...$handler);
-        }
-
-        if (!$handler instanceof TypecastInterface) {
-            throw new FactoryException(\sprintf('Bad typecast handler declaration for the `%s` role.', $role));
+        } catch (\Throwable $e) {
+            throw new TypecastHandlerException(
+                message: \sprintf(
+                    'Bad typecast handler declaration for the `%s` role. Error `%s`.', $role, $e->getMessage()
+                ),
+                code: $e->getCode(),
+                previous: $e,
+            );
         }
 
         return $parentTypecast === null ? $handler : new CompositeTypecast($parentTypecast, $handler);
@@ -286,12 +293,12 @@ final class Factory implements FactoryInterface
      * @return TypecastInterface
      */
     private function makeTypecastHandler(
-        string|object $handler,
+        string|TypecastInterface $handler,
         DatabaseInterface $database,
         ORMInterface $orm,
         string $role,
         array $rules
-    ): object {
+    ): TypecastInterface {
         // If handler is an object we don't need to use factory, we should return it as is
         if (is_object($handler)) {
             return $handler;

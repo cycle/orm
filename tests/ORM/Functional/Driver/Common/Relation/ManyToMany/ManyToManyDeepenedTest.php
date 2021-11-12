@@ -113,14 +113,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 1,
                         'tag_id' => 1,
                         'as' => 'primary',
+                        '@' => [
+                            'id' => 1,
+                            'name' => 'tag a',
+                        ],
                         'image' => [
                             'id' => 1,
                             'url' => 'first.jpg',
                             'parent_id' => 1,
-                        ],
-                        '@' => [
-                            'id' => 1,
-                            'name' => 'tag a',
                         ],
                     ],
                     [
@@ -128,11 +128,11 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 1,
                         'tag_id' => 2,
                         'as' => 'secondary',
-                        'image' => null,
                         '@' => [
                             'id' => 2,
                             'name' => 'tag b',
                         ],
+                        'image' => null,
                     ],
                 ],
             ],
@@ -146,14 +146,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 2,
                         'tag_id' => 3,
                         'as' => 'primary',
+                        '@' => [
+                            'id' => 3,
+                            'name' => 'tag c',
+                        ],
                         'image' => [
                             'id' => 2,
                             'url' => 'second.png',
                             'parent_id' => 3,
-                        ],
-                        '@' => [
-                            'id' => 3,
-                            'name' => 'tag c',
                         ],
                     ],
                 ],
@@ -180,14 +180,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 1,
                         'tag_id' => 1,
                         'as' => 'primary',
+                        '@' => [
+                            'id' => 1,
+                            'name' => 'tag a',
+                        ],
                         'image' => [
                             'id' => 1,
                             'url' => 'first.jpg',
                             'parent_id' => 1,
-                        ],
-                        '@' => [
-                            'id' => 1,
-                            'name' => 'tag a',
                         ],
                     ],
                     [
@@ -195,11 +195,11 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 1,
                         'tag_id' => 2,
                         'as' => 'secondary',
-                        'image' => null,
                         '@' => [
                             'id' => 2,
                             'name' => 'tag b',
                         ],
+                        'image' => null,
                     ],
                 ],
             ],
@@ -213,14 +213,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 2,
                         'tag_id' => 3,
                         'as' => 'primary',
+                        '@' => [
+                            'id' => 3,
+                            'name' => 'tag c',
+                        ],
                         'image' => [
                             'id' => 2,
                             'url' => 'second.png',
                             'parent_id' => 3,
-                        ],
-                        '@' => [
-                            'id' => 3,
-                            'name' => 'tag c',
                         ],
                     ],
                 ],
@@ -247,14 +247,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 1,
                         'tag_id' => 1,
                         'as' => 'primary',
+                        '@' => [
+                            'id' => 1,
+                            'name' => 'tag a',
+                        ],
                         'image' => [
                             'id' => 1,
                             'url' => 'first.jpg',
                             'parent_id' => 1,
-                        ],
-                        '@' => [
-                            'id' => 1,
-                            'name' => 'tag a',
                         ],
                     ],
                     [
@@ -262,11 +262,11 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 1,
                         'tag_id' => 2,
                         'as' => 'secondary',
-                        'image' => null,
                         '@' => [
                             'id' => 2,
                             'name' => 'tag b',
                         ],
+                        'image' => null,
                     ],
                 ],
             ],
@@ -280,14 +280,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 2,
                         'tag_id' => 3,
                         'as' => 'primary',
+                        '@' => [
+                            'id' => 3,
+                            'name' => 'tag c',
+                        ],
                         'image' => [
                             'id' => 2,
                             'url' => 'second.png',
                             'parent_id' => 3,
-                        ],
-                        '@' => [
-                            'id' => 3,
-                            'name' => 'tag c',
                         ],
                     ],
                 ],
@@ -388,14 +388,14 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                         'user_id' => 2,
                         'tag_id' => 3,
                         'as' => 'primary',
+                        '@' => [
+                            'id' => 3,
+                            'name' => 'tag c',
+                        ],
                         'image' => [
                             'id' => 2,
                             'url' => 'second.png',
                             'parent_id' => 3,
-                        ],
-                        '@' => [
-                            'id' => 3,
-                            'name' => 'tag c',
                         ],
                     ],
                 ],

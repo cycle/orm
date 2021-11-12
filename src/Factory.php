@@ -101,7 +101,7 @@ final class Factory implements FactoryInterface
         } catch (\Throwable $e) {
             throw new FactoryTypecastException(
                 message: \sprintf(
-                    'Bad typecast handler declaration for the `%s` role. Error `%s`.',
+                    'Bad typecast handler declaration for the `%s` role. %s',
                     $role,
                     $e->getMessage()
                 ),

@@ -26,11 +26,16 @@ final class SimpleFactory implements FactoryInterface
         };
     }
 
-    public function make(string $alias, array $parameters = []): mixed
+    public function make(string|object $alias, array $parameters = []): mixed
     {
+        if (is_object($alias)) {
+            return $alias;
+        }
+
         if (!\array_key_exists($alias, $this->definitions)) {
             $this->definitions[$alias] = ($this->factory)($alias, $parameters);
         }
+
         return clone $this->definitions[$alias];
     }
 }

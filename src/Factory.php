@@ -7,7 +7,7 @@ namespace Cycle\ORM;
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Exception\TypecastException;
-use Cycle\ORM\Exception\TypecastHandlerException;
+use Cycle\ORM\Exception\FactoryTypecastException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Parser\CompositeTypecast;
@@ -99,7 +99,7 @@ final class Factory implements FactoryInterface
                 $handler = new CompositeTypecast(...$handler);
             }
         } catch (\Throwable $e) {
-            throw new TypecastHandlerException(
+            throw new FactoryTypecastException(
                 message: \sprintf(
                     'Bad typecast handler declaration for the `%s` role. Error `%s`.', $role, $e->getMessage()
                 ),

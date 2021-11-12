@@ -6,7 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast;
 
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
-use Cycle\ORM\Exception\TypecastHandlerException;
+use Cycle\ORM\Exception\FactoryTypecastException;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
@@ -88,7 +88,7 @@ final class SchemaTest extends BaseTest
             SchemaInterface::TYPECAST_HANDLER => '',
         ]);
 
-        $this->expectException(TypecastHandlerException::class);
+        $this->expectException(FactoryTypecastException::class);
         $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Undefined class or binding \'\'`.');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
@@ -100,7 +100,7 @@ final class SchemaTest extends BaseTest
             SchemaInterface::TYPECAST_HANDLER => InvalidTypecaster::class,
         ]);
 
-        $this->expectException(TypecastHandlerException::class);
+        $this->expectException(FactoryTypecastException::class);
         $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned`');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
@@ -117,7 +117,7 @@ final class SchemaTest extends BaseTest
 
         $this->container->bind('bar-foo', Typecaster::class);
 
-        $this->expectException(TypecastHandlerException::class);
+        $this->expectException(FactoryTypecastException::class);
         $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Error `Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned`');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);

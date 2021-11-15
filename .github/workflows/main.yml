@@ -27,6 +27,7 @@ jobs:
     name: Test PHP ${{ matrix.php-version }} with Code Coverage
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest

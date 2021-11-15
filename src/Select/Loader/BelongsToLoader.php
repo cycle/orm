@@ -46,7 +46,6 @@ class BelongsToLoader extends JoinableLoader
         // user specified WHERE conditions
         $this->setWhere(
             $query,
-            $this->getAlias(),
             $this->isJoined() ? 'onWhere' : 'where',
             $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
         );

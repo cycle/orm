@@ -50,7 +50,9 @@ final class Typecast implements TypecastInterface
                 $value,
                 $this->database->getDriver()->getTimezone()
             ),
-            default => $rule($value, $this->database),
+            default => \is_array($rule) && \is_callable($rule)
+                ? $rule($value, $this->database)
+                : $value,
         };
     }
 }

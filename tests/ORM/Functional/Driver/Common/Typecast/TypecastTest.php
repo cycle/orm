@@ -12,6 +12,7 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book2;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\IDCaster;
@@ -88,6 +89,20 @@ abstract class TypecastTest extends BaseTest
                     'states' => [BookStates::class, 'cast'],
                     'nested_states' => [BookNestedStates::class, 'cast'],
                     'published_at' => 'datetime',
+                ],
+                SchemaInterface::RELATIONS => [],
+            ],
+            'book2' => [
+                SchemaInterface::ENTITY => Book2::class,
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'title', 'description'],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'uuid',
+                    'title' => ['foo' => 'bar'],
+                    'description' => fn() => 'wrong description'
                 ],
                 SchemaInterface::RELATIONS => [],
             ],
@@ -180,6 +195,19 @@ abstract class TypecastTest extends BaseTest
                 ],
             ],
         ], typecast: true);
+    }
+
+    public function testWrongTypecastShouldBeSkipped(): void
+    {
+        $book = $this->orm->make('book2', [
+            'id' => '15',
+            'title' => 'hello world',
+            'description' => 'Super long description'
+        ], typecast: true);
+
+        $this->assertSame('15', $book->id);
+        $this->assertSame('hello world', $book->title);
+        $this->assertSame('Super long description', $book->description);
     }
 
     // Select

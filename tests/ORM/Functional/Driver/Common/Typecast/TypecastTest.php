@@ -102,7 +102,7 @@ abstract class TypecastTest extends BaseTest
                 SchemaInterface::TYPECAST => [
                     'id' => 'uuid',
                     'title' => ['foo' => 'bar'],
-                    'description' => fn() => 'wrong description'
+                    'description' => fn () => 'wrong description',
                 ],
                 SchemaInterface::RELATIONS => [],
             ],
@@ -202,7 +202,7 @@ abstract class TypecastTest extends BaseTest
         $book = $this->orm->make('book2', [
             'id' => '15',
             'title' => 'hello world',
-            'description' => 'Super long description'
+            'description' => 'Super long description',
         ], typecast: true);
 
         $this->assertSame('15', $book->id);

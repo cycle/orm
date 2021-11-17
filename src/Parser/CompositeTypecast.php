@@ -6,14 +6,19 @@ namespace Cycle\ORM\Parser;
 
 final class CompositeTypecast implements TypecastInterface
 {
-    /**
-     * @var TypecastInterface[]
-     */
+    /** @var TypecastInterface[] */
     private array $casters;
 
     public function __construct(TypecastInterface ...$typecasts)
     {
         $this->casters = $typecasts;
+    }
+
+    public function setRules(array &$rules): void
+    {
+        foreach ($this->casters as $typecast) {
+            $typecast->setRules($rules);
+        }
     }
 
     public function cast(array $values): array

@@ -10,13 +10,14 @@ use Cycle\ORM\SchemaInterface;
 
 final class Typecaster implements TypecastInterface
 {
+    public array $rules = [];
+
     /**
      * @param array<string, callable|string> $rules
      */
     public function __construct(
         ORMInterface $orm,
-        public string $role,
-        public array $rules = []
+        public string $role
     ) {
         $class = $orm->getSchema()->define($role, SchemaInterface::ENTITY);
         // Some magic with reflection to prepare callables
@@ -35,5 +36,10 @@ final class Typecaster implements TypecastInterface
             $values[$field] = $rule($values[$field]);
         }
         return $values;
+    }
+
+    public function setRules(array &$rules): void
+    {
+        $this->rules = $rules;
     }
 }

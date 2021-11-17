@@ -88,12 +88,12 @@ final class Factory implements FactoryInterface
                     return null;
                 }
 
-                $handler = new Typecast($rules, $database);
+                $handler = new Typecast($database);
             } elseif (\is_string($handler)) {
-                $handler = $this->makeTypecastHandler($handler, $database, $orm, $role, $rules);
+                $handler = $this->makeTypecastHandler($handler, $database, $orm, $role);
             } elseif (\is_array($handler)) { // We need to use composite typecast for array
                 foreach ($handler as &$type) {
-                    $type = $this->makeTypecastHandler($type, $database, $orm, $role, $rules);
+                    $type = $this->makeTypecastHandler($type, $database, $orm, $role);
                 }
 
                 $handler = new CompositeTypecast(...$handler);
@@ -110,7 +110,10 @@ final class Factory implements FactoryInterface
             );
         }
 
-        return $parentTypecast === null ? $handler : new CompositeTypecast($parentTypecast, $handler);
+        $handler = $parentTypecast === null ? $handler : new CompositeTypecast($parentTypecast, $handler);
+        $handler->setRules($rules);
+
+        return $handler;
     }
 
     public function mapper(ORMInterface $orm, string $role): MapperInterface
@@ -298,8 +301,7 @@ final class Factory implements FactoryInterface
         string|TypecastInterface $handler,
         DatabaseInterface $database,
         ORMInterface $orm,
-        string $role,
-        array $rules
+        string $role
     ): TypecastInterface {
         // If handler is an object we don't need to use factory, we should return it as is
         if (is_object($handler)) {
@@ -310,7 +312,6 @@ final class Factory implements FactoryInterface
             'database' => $database,
             'orm' => $orm,
             'role' => $role,
-            'rules' => $rules,
         ]);
     }
 }

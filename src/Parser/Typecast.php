@@ -11,10 +11,26 @@ use Throwable;
 
 final class Typecast implements TypecastInterface
 {
+    /** @var array<non-empty-string, bool> */
+    private array $callableRules = [];
+
+    /** @var array<non-empty-string, mixed> */
+    private array $rules = [];
+
     public function __construct(
-        private array $rules,
         private DatabaseInterface $database
     ) {
+    }
+
+    public function setRules(array &$rules): void
+    {
+        foreach ($rules as $key => $rule) {
+            if (\is_callable($rule)) {
+                $this->callableRules[$key] = true;
+            }
+
+            $this->rules[$key] = $rule;
+        }
     }
 
     public function cast(array $values): array
@@ -24,7 +40,13 @@ final class Typecast implements TypecastInterface
                 if (!isset($values[$key])) {
                     continue;
                 }
-                $values[$key] = $this->castOne($rule, $values[$key]);
+
+                if (isset($this->callableRules[$key])) {
+                    $values[$key] = $this->castCallable($rule, $values[$key]);
+                    continue;
+                }
+
+                $values[$key] = $this->castPrimitive($rule, $values[$key]);
             }
         } catch (Throwable $e) {
             throw new TypecastException(
@@ -40,7 +62,7 @@ final class Typecast implements TypecastInterface
     /**
      * @throws \Exception
      */
-    private function castOne(mixed $rule, mixed $value): mixed
+    private function castPrimitive(mixed $rule, mixed $value): mixed
     {
         return match ($rule) {
             'int' => (int)$value,
@@ -50,9 +72,12 @@ final class Typecast implements TypecastInterface
                 $value,
                 $this->database->getDriver()->getTimezone()
             ),
-            default => \is_array($rule) && \is_callable($rule)
-                ? $rule($value, $this->database)
-                : $value,
+            default => $value,
         };
+    }
+
+    private function castCallable(mixed $rule, mixed $value): mixed
+    {
+        return $rule($value, $this->database);
     }
 }

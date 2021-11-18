@@ -49,6 +49,14 @@ final class Schema implements SchemaInterface
     }
 
     /**
+     * Return all defined roles with the schema.
+     */
+    public function toArray(): array
+    {
+        return $this->schema;
+    }
+
+    /**
      * @return array [role => [relation name => relation schema]]
      */
     public function getOuterRelations(string $role): array

@@ -89,7 +89,7 @@ final class SchemaTest extends BaseTest
         ]);
 
         $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Undefined class or binding \'\'.');
+        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Undefined class or binding \'\'');
 
         $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
     }

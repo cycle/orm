@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast;
 
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
@@ -16,7 +17,10 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book2;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\IDCaster;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\JsonTypecast;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\ParentTypecast;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\UuidTypecast;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Wrapper;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -99,10 +103,29 @@ abstract class TypecastTest extends BaseTest
                 SchemaInterface::TABLE => 'book',
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'title', 'description'],
+                SchemaInterface::TYPECAST_HANDLER => [
+                    ParentTypecast::class,
+                    Typecast::class,
+                ],
                 SchemaInterface::TYPECAST => [
                     'id' => 'uuid',
                     'title' => ['foo' => 'bar'],
                     'description' => fn () => 'wrong description',
+                ],
+                SchemaInterface::RELATIONS => [],
+            ],
+            'book3' => [
+                SchemaInterface::ENTITY => Book2::class,
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::PARENT => 'book2',
+                SchemaInterface::TABLE => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'title'],
+                SchemaInterface::TYPECAST_HANDLER => [JsonTypecast::class, UuidTypecast::class],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'uuid',
+                    'title' => 'json',
                 ],
                 SchemaInterface::RELATIONS => [],
             ],
@@ -207,7 +230,25 @@ abstract class TypecastTest extends BaseTest
 
         $this->assertSame('15', $book->id);
         $this->assertSame('hello world', $book->title);
-        $this->assertSame('Super long description', $book->description);
+        $this->assertSame('wrong description', $book->description);
+    }
+
+    public function testCompositeTypecastWith(): void
+    {
+        $book1 = $this->orm->make('book3', [
+            'id' => 100,
+            'title' => 'Merlin',
+        ], typecast: true);
+
+        $book2 = $this->orm->make('book3', [
+            'id' => 100,
+        ], typecast: true);
+
+        $this->assertSame('uuid', $book1->id);
+        $this->assertSame('json', $book1->title);
+
+        $this->assertSame('uuid', $book2->id);
+        $this->assertNull($book2->title);
     }
 
     // Select

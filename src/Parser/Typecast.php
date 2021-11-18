@@ -11,10 +11,33 @@ use Throwable;
 
 final class Typecast implements TypecastInterface
 {
+    private const RULES = ['int', 'bool', 'float', 'datetime'];
+
+    /** @var array<non-empty-string, bool> */
+    private array $callableRules = [];
+
+    /** @var array<non-empty-string, mixed> */
+    private array $rules = [];
+
     public function __construct(
-        private array $rules,
         private DatabaseInterface $database
     ) {
+    }
+
+    public function setRules(array $rules): array
+    {
+        foreach ($rules as $key => $rule) {
+            if (in_array($rule, self::RULES, true)) {
+                $this->rules[$key] = $rule;
+                unset($rules[$key]);
+            } elseif (\is_callable($rule)) {
+                $this->callableRules[$key] = true;
+                $this->rules[$key] = $rule;
+                unset($rules[$key]);
+            }
+        }
+
+        return $rules;
     }
 
     public function cast(array $values): array
@@ -24,7 +47,13 @@ final class Typecast implements TypecastInterface
                 if (!isset($values[$key])) {
                     continue;
                 }
-                $values[$key] = $this->castOne($rule, $values[$key]);
+
+                if (isset($this->callableRules[$key])) {
+                    $values[$key] = $rule($values[$key], $this->database);
+                    continue;
+                }
+
+                $values[$key] = $this->castPrimitive($rule, $values[$key]);
             }
         } catch (Throwable $e) {
             throw new TypecastException(
@@ -40,7 +69,7 @@ final class Typecast implements TypecastInterface
     /**
      * @throws \Exception
      */
-    private function castOne(mixed $rule, mixed $value): mixed
+    private function castPrimitive(mixed $rule, mixed $value): mixed
     {
         return match ($rule) {
             'int' => (int)$value,
@@ -50,9 +79,7 @@ final class Typecast implements TypecastInterface
                 $value,
                 $this->database->getDriver()->getTimezone()
             ),
-            default => \is_array($rule) && \is_callable($rule)
-                ? $rule($value, $this->database)
-                : $value,
+            default => $value,
         };
     }
 }

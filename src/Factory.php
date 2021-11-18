@@ -220,7 +220,7 @@ final class Factory implements FactoryInterface
         $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
 
         if (!\is_subclass_of($class, RepositoryInterface::class)) {
-            throw new TypecastException($class.' does not implement '.RepositoryInterface::class);
+            throw new TypecastException($class . ' does not implement ' . RepositoryInterface::class);
         }
 
         return $this->factory->make(
@@ -241,7 +241,7 @@ final class Factory implements FactoryInterface
         $source = $schema->define($role, Schema::SOURCE) ?? $this->defaults[Schema::SOURCE];
 
         if (!\is_subclass_of($source, SourceInterface::class)) {
-            throw new TypecastException($source.' does not implement '.SourceInterface::class);
+            throw new TypecastException($source . ' does not implement ' . SourceInterface::class);
         }
 
         if ($source !== Source::class) {
@@ -260,7 +260,7 @@ final class Factory implements FactoryInterface
         }
 
         if (!\is_subclass_of($scope, ScopeInterface::class)) {
-            throw new TypecastException($scope.' does not implement '.ScopeInterface::class);
+            throw new TypecastException($scope . ' does not implement ' . ScopeInterface::class);
         }
 
         return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));

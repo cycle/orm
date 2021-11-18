@@ -34,7 +34,7 @@ final class Typecaster implements TypecastInterface
         return $values;
     }
 
-    public function applyRules(array $rules): array
+    public function setRules(array $rules): array
     {
         $this->rules = $rules;
 

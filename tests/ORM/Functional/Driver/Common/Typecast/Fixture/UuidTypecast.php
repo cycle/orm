@@ -10,7 +10,7 @@ class UuidTypecast implements TypecastInterface
 {
     private array $rules = [];
 
-    public function applyRules(array $rules): array
+    public function setRules(array $rules): array
     {
         if (count($rules) > 1) {
             throw new \Exception('UuidTypecast contains more than 1 rule');

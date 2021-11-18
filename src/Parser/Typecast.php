@@ -24,7 +24,7 @@ final class Typecast implements TypecastInterface
     ) {
     }
 
-    public function applyRules(array $rules): array
+    public function setRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
             if (in_array($rule, self::RULES, true)) {

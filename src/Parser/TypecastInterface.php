@@ -19,7 +19,7 @@ interface TypecastInterface
      *
      * @return array<non-empty-string, mixed> Cleaned rules
      */
-    public function applyRules(array $rules): array;
+    public function setRules(array $rules): array;
 
     /**
      * Typecast key-values into an internal representation.

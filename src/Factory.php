@@ -108,7 +108,7 @@ final class Factory implements FactoryInterface
             );
         }
         $handler = count($handlers) === 1 ? reset($handlers) : new CompositeTypecast(...$handlers);
-        $handler->applyRules($rules);
+        $handler->setRules($rules);
         return $parentHandler === null
             ? $handler
             : new CompositeTypecast($parentHandler, $handler);

@@ -35,6 +35,6 @@ class TypecastTest extends TestCase
             'uuid' => 'uuid',
         ];
 
-        $this->assertSame(['uuid' => 'uuid'], $this->typecast->applyRules($rules));
+        $this->assertSame(['uuid' => 'uuid'], $this->typecast->setRules($rules));
     }
 }

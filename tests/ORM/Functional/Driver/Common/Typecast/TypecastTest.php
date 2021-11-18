@@ -17,6 +17,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\IDCaster;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\JsonTypecast;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\ParentTypecast;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\User;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\UuidTypecast;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Wrapper;
@@ -101,6 +102,7 @@ abstract class TypecastTest extends BaseTest
                 SchemaInterface::TABLE => 'book',
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'title', 'description'],
+                SchemaInterface::TYPECAST_HANDLER => ParentTypecast::class,
                 SchemaInterface::TYPECAST => [
                     'id' => 'uuid',
                     'title' => ['foo' => 'bar'],
@@ -112,6 +114,7 @@ abstract class TypecastTest extends BaseTest
                 SchemaInterface::ENTITY => Book2::class,
                 SchemaInterface::MAPPER => Mapper::class,
                 SchemaInterface::DATABASE => 'default',
+                SchemaInterface::PARENT => 'book2',
                 SchemaInterface::TABLE => 'book',
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'title'],

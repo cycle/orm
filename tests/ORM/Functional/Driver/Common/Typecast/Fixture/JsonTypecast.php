@@ -10,7 +10,7 @@ class JsonTypecast implements TypecastInterface
 {
     private array $rules = [];
 
-    public function applyRules(array $rules): array
+    public function setRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
             if ($rule === 'json') {

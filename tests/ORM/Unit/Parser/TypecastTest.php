@@ -29,7 +29,7 @@ class TypecastTest extends TestCase
             'guest' => 'bool',
             'bonus' => 'float',
             'date' => 'datetime',
-            'slug' => fn(string $value) => strtolower($value),
+            'slug' => fn (string $value) => strtolower($value),
             'title' => 'strtoupper',
             'test' => [Uuid::class, 'create'],
             'uuid' => 'uuid',

@@ -11,6 +11,8 @@ use Throwable;
 
 final class Typecast implements TypecastInterface
 {
+    private const RULES = ['int', 'bool', 'float', 'datetime'];
+
     /** @var array<non-empty-string, bool> */
     private array $callableRules = [];
 
@@ -25,11 +27,14 @@ final class Typecast implements TypecastInterface
     public function applyRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
-            if (\is_callable($rule)) {
+            if (in_array($rule, self::RULES, true)) {
+                $this->rules[$key] = $rule;
+                unset($rules[$key]);
+            } elseif (\is_callable($rule)) {
                 $this->callableRules[$key] = true;
+                $this->rules[$key] = $rule;
+                unset($rules[$key]);
             }
-
-            $this->rules[$key] = $rule;
         }
 
         return $rules;
@@ -44,7 +49,7 @@ final class Typecast implements TypecastInterface
                 }
 
                 if (isset($this->callableRules[$key])) {
-                    $values[$key] = $this->castCallable($rule, $values[$key]);
+                    $values[$key] = $rule($values[$key], $this->database);
                     continue;
                 }
 
@@ -76,10 +81,5 @@ final class Typecast implements TypecastInterface
             ),
             default => $value,
         };
-    }
-
-    private function castCallable(mixed $rule, mixed $value): mixed
-    {
-        return $rule($value, $this->database);
     }
 }

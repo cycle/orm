@@ -61,4 +61,20 @@ class SchemaTest extends TestCase
 
         $this->assertNull($schema->define(User::class, SchemaInterface::MAPPER));
     }
+
+    public function testToArray()
+    {
+        $schema = new Schema([
+            User::class => [
+                SchemaInterface::ENTITY => User::class,
+                SchemaInterface::ROLE => 'user',
+            ],
+        ]);
+
+        $this->assertSame([
+            'user' => [
+                SchemaInterface::ENTITY => User::class,
+            ],
+        ], $schema->toArray());
+    }
 }

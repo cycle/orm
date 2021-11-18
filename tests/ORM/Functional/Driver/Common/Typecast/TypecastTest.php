@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast;
 
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
@@ -102,7 +103,10 @@ abstract class TypecastTest extends BaseTest
                 SchemaInterface::TABLE => 'book',
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'title', 'description'],
-                SchemaInterface::TYPECAST_HANDLER => ParentTypecast::class,
+                SchemaInterface::TYPECAST_HANDLER => [
+                    ParentTypecast::class,
+                    Typecast::class,
+                ],
                 SchemaInterface::TYPECAST => [
                     'id' => 'uuid',
                     'title' => ['foo' => 'bar'],

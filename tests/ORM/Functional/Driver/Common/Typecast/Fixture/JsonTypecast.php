@@ -10,7 +10,7 @@ class JsonTypecast implements TypecastInterface
 {
     private array $rules = [];
 
-    public function setRules(array &$rules): void
+    public function applyRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
             if ($rule === 'json') {
@@ -18,6 +18,8 @@ class JsonTypecast implements TypecastInterface
                 $this->rules[$key] = $rule;
             }
         }
+
+        return $rules;
     }
 
     public function cast(array $values): array

@@ -73,7 +73,8 @@ final class Factory implements FactoryInterface
         $schema = $orm->getSchema();
         // Get parent's typecast
         $parent = $schema->define($role, SchemaInterface::PARENT);
-        $parentTypecast = $parent === null ? null : $this->typecast($orm, $parent);
+        $parentHandler = $parent === null ? null : $this->typecast($orm, $parent);
+        $handlers = $parentHandler === null ? [] : [$parentHandler];
 
         // Schema's `typecast` option
         $rules = (array)$schema->define($role, SchemaInterface::TYPECAST);
@@ -88,15 +89,13 @@ final class Factory implements FactoryInterface
                     return null;
                 }
 
-                $handler = new Typecast($database);
+                $handlers[] = new Typecast($database);
             } elseif (\is_string($handler)) {
-                $handler = $this->makeTypecastHandler($handler, $database, $orm, $role);
+                $handlers[] = $this->makeTypecastHandler($handler, $database, $orm, $role);
             } elseif (\is_array($handler)) { // We need to use composite typecast for array
-                foreach ($handler as &$type) {
-                    $type = $this->makeTypecastHandler($type, $database, $orm, $role);
+                foreach ($handler as $type) {
+                    $handlers[] = $this->makeTypecastHandler($type, $database, $orm, $role);
                 }
-
-                $handler = new CompositeTypecast(...$handler);
             }
         } catch (\Throwable $e) {
             throw new FactoryTypecastException(
@@ -110,8 +109,8 @@ final class Factory implements FactoryInterface
             );
         }
 
-        $handler = $parentTypecast === null ? $handler : new CompositeTypecast($parentTypecast, $handler);
-        $handler->setRules($rules);
+        $handler = count($handlers) === 1 ? reset($handlers) : new CompositeTypecast(...$handlers);
+        $handler->applyRules($rules);
 
         return $handler;
     }
@@ -221,7 +220,7 @@ final class Factory implements FactoryInterface
         $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
 
         if (!\is_subclass_of($class, RepositoryInterface::class)) {
-            throw new TypecastException($class . ' does not implement ' . RepositoryInterface::class);
+            throw new TypecastException($class.' does not implement '.RepositoryInterface::class);
         }
 
         return $this->factory->make(
@@ -242,7 +241,7 @@ final class Factory implements FactoryInterface
         $source = $schema->define($role, Schema::SOURCE) ?? $this->defaults[Schema::SOURCE];
 
         if (!\is_subclass_of($source, SourceInterface::class)) {
-            throw new TypecastException($source . ' does not implement ' . SourceInterface::class);
+            throw new TypecastException($source.' does not implement '.SourceInterface::class);
         }
 
         if ($source !== Source::class) {
@@ -261,7 +260,7 @@ final class Factory implements FactoryInterface
         }
 
         if (!\is_subclass_of($scope, ScopeInterface::class)) {
-            throw new TypecastException($scope . ' does not implement ' . ScopeInterface::class);
+            throw new TypecastException($scope.' does not implement '.ScopeInterface::class);
         }
 
         return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));

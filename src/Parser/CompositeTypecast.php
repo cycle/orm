@@ -14,11 +14,13 @@ final class CompositeTypecast implements TypecastInterface
         $this->casters = $typecasts;
     }
 
-    public function setRules(array &$rules): void
+    public function applyRules(array $rules): array
     {
         foreach ($this->casters as $typecast) {
-            $typecast->setRules($rules);
+            $rules = $typecast->applyRules($rules);
         }
+
+        return $rules;
     }
 
     public function cast(array $values): array

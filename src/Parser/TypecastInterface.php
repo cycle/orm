@@ -13,10 +13,13 @@ interface TypecastInterface
 {
     /**
      * Passes columns rules to a typecast object.
+     * The rules can be cleaned there and returned to the next typecast.
      *
      * @param array<non-empty-string, mixed> $rules
+     *
+     * @return array<non-empty-string, mixed> Cleaned rules
      */
-    public function setRules(array &$rules): void;
+    public function applyRules(array $rules): array;
 
     /**
      * Typecast key-values into an internal representation.

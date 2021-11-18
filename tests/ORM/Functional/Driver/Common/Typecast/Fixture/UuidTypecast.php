@@ -10,7 +10,7 @@ class UuidTypecast implements TypecastInterface
 {
     private array $rules = [];
 
-    public function setRules(array &$rules): void
+    public function applyRules(array $rules): array
     {
         if (count($rules) > 1) {
             throw new \Exception('UuidTypecast contains more than 1 rule');
@@ -22,6 +22,8 @@ class UuidTypecast implements TypecastInterface
                 $this->rules[$key] = $rule;
             }
         }
+
+        return $rules;
     }
 
     public function cast(array $values): array

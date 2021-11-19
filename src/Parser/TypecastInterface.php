@@ -7,12 +7,22 @@ namespace Cycle\ORM\Parser;
 use Cycle\ORM\Exception\TypecastException;
 
 /**
- * Typecaster provides ability to cast column values into their internal representation.
+ * Typecaster provides an ability to cast entity column values into their internal representation.
  */
 interface TypecastInterface
 {
     /**
-     * Typecast key-values into internal representation.
+     * Passes columns rules to a typecast object.
+     * The rules can be cleaned there and returned to the next typecast.
+     *
+     * @param array<non-empty-string, mixed> $rules
+     *
+     * @return array<non-empty-string, mixed> Cleaned rules
+     */
+    public function setRules(array $rules): array;
+
+    /**
+     * Typecast key-values into an internal representation.
      *
      * @throws TypecastException
      */

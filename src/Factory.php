@@ -73,7 +73,8 @@ final class Factory implements FactoryInterface
         $schema = $orm->getSchema();
         // Get parent's typecast
         $parent = $schema->define($role, SchemaInterface::PARENT);
-        $parentTypecast = $parent === null ? null : $this->typecast($orm, $parent);
+        $parentHandler = $parent === null ? null : $this->typecast($orm, $parent);
+        $handlers = [];
 
         // Schema's `typecast` option
         $rules = (array)$schema->define($role, SchemaInterface::TYPECAST);
@@ -81,22 +82,19 @@ final class Factory implements FactoryInterface
 
         // Create basic typecast implementation
         $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
-
         try {
             if ($handler === null) {
                 if (!$rules) {
-                    return null;
+                    return $parentHandler;
                 }
 
-                $handler = new Typecast($rules, $database);
-            } elseif (\is_string($handler)) {
-                $handler = $this->makeTypecastHandler($handler, $database, $orm, $role, $rules);
+                $handlers[] = new Typecast($database);
             } elseif (\is_array($handler)) { // We need to use composite typecast for array
-                foreach ($handler as &$type) {
-                    $type = $this->makeTypecastHandler($type, $database, $orm, $role, $rules);
+                foreach ($handler as $type) {
+                    $handlers[] = $this->makeTypecastHandler($type, $database, $orm, $role);
                 }
-
-                $handler = new CompositeTypecast(...$handler);
+            } else {
+                $handlers[] = $this->makeTypecastHandler($handler, $database, $orm, $role);
             }
         } catch (\Throwable $e) {
             throw new FactoryTypecastException(
@@ -109,8 +107,11 @@ final class Factory implements FactoryInterface
                 previous: $e,
             );
         }
-
-        return $parentTypecast === null ? $handler : new CompositeTypecast($parentTypecast, $handler);
+        $handler = count($handlers) === 1 ? reset($handlers) : new CompositeTypecast(...$handlers);
+        $handler->setRules($rules);
+        return $parentHandler === null
+            ? $handler
+            : new CompositeTypecast($parentHandler, $handler);
     }
 
     public function mapper(ORMInterface $orm, string $role): MapperInterface
@@ -298,8 +299,7 @@ final class Factory implements FactoryInterface
         string|TypecastInterface $handler,
         DatabaseInterface $database,
         ORMInterface $orm,
-        string $role,
-        array $rules
+        string $role
     ): TypecastInterface {
         // If handler is an object we don't need to use factory, we should return it as is
         if (is_object($handler)) {
@@ -310,7 +310,6 @@ final class Factory implements FactoryInterface
             'database' => $database,
             'orm' => $orm,
             'role' => $role,
-            'rules' => $rules,
         ]);
     }
 }

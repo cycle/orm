@@ -69,8 +69,6 @@ class ParentLoader extends JoinableLoader
 
     protected function initNode(): AbstractNode
     {
-        // todo? throw new \RuntimeException('This method should not be called.');
-
         return new ParentMergeNode(
             $this->target,
             $this->columnNames(),

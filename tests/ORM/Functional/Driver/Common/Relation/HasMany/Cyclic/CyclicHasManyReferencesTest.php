@@ -186,8 +186,8 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
 
         $this->captureWriteQueries();
         $this->save($p);
-        // todo: belongsTo should wait when all entities will be prepared
-        // $this->assertNumWrites(1);
+        // Insert new comment, update post.lastComment
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

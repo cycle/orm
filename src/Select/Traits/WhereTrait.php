@@ -14,18 +14,15 @@ use Cycle\Database\Query\SelectQuery;
 trait WhereTrait
 {
     /**
-     * @param string        $table  Table name to be automatically inserted into where conditions at place of {@}.
      * @param string        $target Query target section (accepts: where, having, onWhere, on)
      * @param array|Closure $where  Where conditions in a form or short array form.
      */
     private function setWhere(
         SelectQuery $query,
-        /** todo: can be deleted */
-        string $table,
         string $target,
         array|Closure $where = null
     ): SelectQuery {
-        if (empty($where)) {
+        if ($where === []) {
             // no conditions, nothing to do
             return $query;
         }

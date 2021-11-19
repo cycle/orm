@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\Relation\NullException;
-use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\ToOneTrait;
@@ -109,10 +109,11 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             }
             return;
         }
-        $rTuple = $pool->offsetGet($related) ?? $pool->attachStore($related, true, null, null, true);
+        /** @var Tuple $rTuple */
+        $rTuple = $pool->offsetGet($related);
 
         if ($this->shouldPull($tuple, $rTuple)) {
-            $this->pullValues($node, $rTuple->node);
+            $this->pullValues($tuple->state, $rTuple->state);
             $node->getState()->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         }
@@ -120,7 +121,19 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
     private function shouldPull(Tuple $tuple, Tuple $rTuple): bool
     {
-        if ($rTuple->status <= Tuple::STATUS_PROPOSED || \count(array_intersect($this->outerKeys, $rTuple->state->getWaitingFields())) > 0) {
+        $minStatus = Tuple::STATUS_PREPROCESSED;
+        if ($this->inversion !== null) {
+            $relName = $this->getTargetRelationName();
+            if ($rTuple->node->getRelationStatus($relName) === RelationInterface::STATUS_RESOLVED) {
+                $minStatus = Tuple::STATUS_DEFERRED;
+            }
+        }
+        if ($rTuple->status < $minStatus) {
+            return false;
+        }
+        $faitFields = \array_intersect($this->outerKeys, $rTuple->state->getWaitingFields());
+        // Skip waited fields they are not required hard
+        if ($faitFields !== [] && \array_sum($faitFields) > 0) {
             return false;
         }
         // Check bidirected relation: when related entity has been removed from HasSome relation
@@ -153,12 +166,12 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         return false;
     }
 
-    private function pullValues(Node $node, Node $related): void
+    private function pullValues(State $state, State $related): void
     {
-        $changes = $related->getState()->getTransactionData();
+        $changes = $related->getTransactionData();
         foreach ($this->outerKeys as $i => $outerKey) {
             if (isset($changes[$outerKey])) {
-                $node->register($this->innerKeys[$i], $changes[$outerKey]);
+                $state->register($this->innerKeys[$i], $changes[$outerKey]);
             }
         }
     }

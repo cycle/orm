@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasMany\Cyclic;
 
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Tenant;
@@ -49,18 +50,18 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             Tenant::class => [
-                Schema::ROLE => 'tenant',
-                Schema::MAPPER => TimestampedMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'tenants',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'name', 'preference_id', 'created_at', 'updated_at'],
-                Schema::TYPECAST => [
+                SchemaInterface::ROLE => 'tenant',
+                SchemaInterface::MAPPER => TimestampedMapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'tenants',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'name', 'preference_id', 'created_at', 'updated_at'],
+                SchemaInterface::TYPECAST => [
                     'id' => 'int',
                     'preference_id' => 'int',
                 ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [
                     'preference' => [
                         Relation::TYPE => Relation::REFERS_TO,
                         Relation::TARGET => Preference::class,
@@ -85,18 +86,18 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
                 ],
             ],
             Preference::class => [
-                Schema::ROLE => 'preference',
-                Schema::MAPPER => TimestampedMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'preferences',
-                Schema::PRIMARY_KEY => ['id'],
-                Schema::COLUMNS => ['tenant_id', 'id', 'flag', 'option', 'created_at', 'updated_at'],
-                Schema::SCHEMA => [],
-                Schema::TYPECAST => [
+                SchemaInterface::ROLE => 'preference',
+                SchemaInterface::MAPPER => TimestampedMapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'preferences',
+                SchemaInterface::PRIMARY_KEY => ['id'],
+                SchemaInterface::COLUMNS => ['tenant_id', 'id', 'flag', 'option', 'created_at', 'updated_at'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::TYPECAST => [
                     'id' => 'int',
                     'tenant_id' => 'int',
                 ],
-                Schema::RELATIONS => [
+                SchemaInterface::RELATIONS => [
                     'tenant' => [
                         Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => Tenant::class,
@@ -110,20 +111,20 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
                 ],
             ],
             Document::class => [
-                Schema::ROLE => 'documents',
-                Schema::MAPPER => TimestampedMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'post',
+                SchemaInterface::ROLE => 'documents',
+                SchemaInterface::MAPPER => TimestampedMapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'post',
                 //                Schema::PRIMARY_KEY => ['id'],
-                Schema::PRIMARY_KEY => ['tenant_id', 'id'],
-                Schema::COLUMNS => ['tenant_id', 'id', 'preference_id', 'body', 'created_at', 'updated_at'],
-                Schema::SCHEMA => [],
-                Schema::TYPECAST => [
+                SchemaInterface::PRIMARY_KEY => ['tenant_id', 'id'],
+                SchemaInterface::COLUMNS => ['tenant_id', 'id', 'preference_id', 'body', 'created_at', 'updated_at'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::TYPECAST => [
                     'id' => 'int',
                     'tenant_id' => 'int',
                     'preference_id' => 'int',
                 ],
-                Schema::RELATIONS => [
+                SchemaInterface::RELATIONS => [
                     'tenant' => [
                         Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => Tenant::class,
@@ -159,10 +160,13 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
         $p->option = 'option1';
 
         $t->setPreference($p);
+        $p->tenant = $t;
 
         $this->captureWriteQueries();
         $this->save($t);
         $this->assertNumWrites(3);
+
+        $this->assertNotNull($p->tenant_id);
 
         // no changes!
         $this->captureWriteQueries();

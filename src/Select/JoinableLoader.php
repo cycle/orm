@@ -85,7 +85,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     public function withContext(LoaderInterface $parent, array $options = []): static
     {
         /**
-         * @var AbstractLoader $parent todo: should move withContext into LoaderInterface?
+         * @var AbstractLoader $parent
          * @var self $loader
          */
         $loader = parent::withContext($parent, $options);

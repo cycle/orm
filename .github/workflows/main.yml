@@ -23,7 +23,7 @@ jobs:
       - name: Check CS
         run: vendor/bin/spiral-cs check src tests
   test:
-    needs: lint
+    needs: sqlite
     name: Test PHP ${{ matrix.php-version }} with Code Coverage
     runs-on: ${{ matrix.os }}
     strategy:

@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Fixtures\CyclicRef2;
 
 class Preference
 {
+    public $tenant;
     public $tenant_id;
     public $id;
 

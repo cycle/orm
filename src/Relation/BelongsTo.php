@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\Relation\NullException;
-use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;

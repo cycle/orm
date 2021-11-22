@@ -248,7 +248,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -276,7 +276,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
 
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
@@ -325,7 +325,7 @@ abstract class HasManyPromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
 
         /**
          * @var User $a
@@ -362,6 +362,6 @@ abstract class HasManyPromiseTest extends BaseTest
         self::assertContains($comment, $comments);
         self::assertSame('updated message', $comment->message);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
     }
 }

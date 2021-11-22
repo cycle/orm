@@ -299,7 +299,7 @@ abstract class UUIDTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $selector->orderBy('user.id')->load('comments');
 
         /** @var User $e */
@@ -338,7 +338,7 @@ abstract class UUIDTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $selector->load('comments');
 
         /** @var User $e */
@@ -388,7 +388,7 @@ abstract class UUIDTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
 
         /**
          * @var User $a

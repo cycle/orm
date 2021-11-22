@@ -179,9 +179,7 @@ final class ORM implements ORMInterface
         );
     }
 
-    /**
-     * @inheritdoc
-     */
+    /** @deprecated since Cycle ORM v1.7.2, this method will be removed in future releases. Use method with instead. */
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
@@ -198,9 +196,7 @@ final class ORM implements ORMInterface
         return $this->factory;
     }
 
-    /**
-     * @inheritdoc
-     */
+    /** @deprecated since Cycle ORM v1.7.2, this method will be removed in future releases. Use method with instead. */
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
         $orm = clone $this;
@@ -221,13 +217,31 @@ final class ORM implements ORMInterface
         return $this->schema;
     }
 
-    /**
-     * @inheritdoc
-     */
+    /** @deprecated since Cycle ORM v1.7.2, this method will be removed in future releases. Use method with instead. */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
+
+        return $orm;
+    }
+
+    public function with(
+        ?SchemaInterface $schema = null,
+        ?FactoryInterface $factory = null,
+        ?HeapInterface $heap = null
+    ): ORMInterface {
+        $orm = clone $this;
+
+        if ($schema) {
+            $orm->schema = $schema;
+        }
+        if ($factory) {
+            $orm->factory = $factory;
+        }
+        if ($heap instanceof HeapInterface) {
+            $orm->heap = $heap;
+        }
 
         return $orm;
     }

@@ -158,7 +158,7 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
+        $s = new Select($this->withHeap(new Heap()), Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
 
         $this->assertSame(null, $p->user);

@@ -70,7 +70,7 @@ abstract class AutoTimestampsTest extends BaseTest
 
         (new Transaction($this->orm))->persist($u)->run();
 
-        $s = new Select($this->orm->withHeap(new Heap()), User::class);
+        $s = new Select($this->withHeap(new Heap()), User::class);
         $data = $s->fetchData();
 
         $this->assertNotNull($data[0]['created_at']);
@@ -88,7 +88,7 @@ abstract class AutoTimestampsTest extends BaseTest
 
         (new Transaction($this->orm))->persist($u)->run();
 
-        $orm = $this->orm->withHeap(new Heap());
+        $orm = $this->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $u = $s->fetchOne();
 
@@ -105,7 +105,7 @@ abstract class AutoTimestampsTest extends BaseTest
 
         (new Transaction($this->orm))->persist($u)->run();
 
-        $orm = $this->orm->withHeap(new Heap());
+        $orm = $this->withHeap(new Heap());
         $s = new Select($orm, User::class);
 
         $u = $s->fetchOne();

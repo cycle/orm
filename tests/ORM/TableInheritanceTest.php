@@ -122,13 +122,13 @@ abstract class TableInheritanceTest extends BaseTest
         $tr->persist($a);
         $tr->run();
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $this->assertInstanceOf(User::class, $selector->wherePK(4)->fetchOne());
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $this->assertNotInstanceOf(Admin::class, $selector->wherePK(4)->fetchOne());
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $this->assertInstanceOf(Admin::class, $selector->wherePK(5)->fetchOne());
     }
 }

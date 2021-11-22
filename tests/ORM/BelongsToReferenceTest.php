@@ -177,7 +177,7 @@ abstract class BelongsToReferenceTest extends BaseTest
         $this->assertNumReads(0);
 
         // new orm isolated part of memory
-        $orm = $this->orm->withHeap(new Heap());
+        $orm = $this->withHeap(new Heap());
 
         $select = new Select($orm, Profile::class);
         $pp = $select->wherePK($p->id)->load('user')->fetchOne();

@@ -61,7 +61,7 @@ abstract class ObjectsCompareTest extends BaseTest
 
         $this->assertEquals(1, $book->id);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, Book::class);
         $fetched = $selector->fetchOne();
 
@@ -73,7 +73,7 @@ abstract class ObjectsCompareTest extends BaseTest
 
         $this->save($fetched);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), Book::class);
+        $selector = new Select($this->withHeap(new Heap()), Book::class);
         $changed = $selector->fetchOne();
 
         $this->assertEquals($fetched->states, $changed->states);
@@ -82,7 +82,7 @@ abstract class ObjectsCompareTest extends BaseTest
 
     public function testCompareDateTime(): void
     {
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $book = new Book();
         $book->states = new BookStates(['foo']);
@@ -90,7 +90,7 @@ abstract class ObjectsCompareTest extends BaseTest
 
         $this->save($book);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, Book::class);
         $data = $selector->fetchData();
         $data[0]['published_at'] = new DateTime();
@@ -100,7 +100,7 @@ abstract class ObjectsCompareTest extends BaseTest
 
         $this->save($fetched);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), Book::class);
+        $selector = new Select($this->withHeap(new Heap()), Book::class);
         $changed = $selector->fetchOne();
 
         $interval = $changed->published_at->diff($fetched->published_at);

@@ -66,7 +66,7 @@ abstract class ORMTest extends BaseTest
 
     public function testORMClone(): void
     {
-        $orm = $this->orm->withFactory($this->orm->getFactory());
+        $orm = $this->orm->with(null, $this->orm->getFactory());
         $this->assertNotSame($orm, $this->orm);
     }
 

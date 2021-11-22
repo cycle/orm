@@ -8,7 +8,6 @@
  */
 
 declare(strict_types=1);
-declare(strict_types=1);
 
 namespace Cycle\ORM\Tests;
 
@@ -452,7 +451,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $selector->orderBy('user.id_int')->load('comments');
 
         /** @var User $e */
@@ -491,7 +490,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $selector->load('comments');
 
         /** @var User $e */
@@ -541,7 +540,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
 
         /**
          * @var User $a

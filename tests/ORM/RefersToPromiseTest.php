@@ -214,7 +214,7 @@ abstract class RefersToPromiseTest extends BaseTest
         $this->assertNumWrites(1);
         $this->assertNumReads(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), Profile::class);
+        $selector = new Select($this->withHeap(new Heap()), Profile::class);
         $p = $selector->wherePK(4)->fetchOne();
 
         $this->assertInstanceOf(User::class, $p->user->__resolve());

@@ -190,7 +190,7 @@ abstract class LinkedTreeTest extends BaseTest
             ],
         ], $selector->fetchData());
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 

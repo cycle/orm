@@ -409,7 +409,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -448,7 +448,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -488,7 +488,7 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $a = (new Select($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
         $b = (new Select($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
 

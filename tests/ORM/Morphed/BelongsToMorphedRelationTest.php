@@ -247,7 +247,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $c = $this->orm->getRepository(Image::class)->findByPK(6);
         $this->assertInstanceOf(PromiseInterface::class, $c->parent);
@@ -280,7 +280,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $c = $this->orm->getRepository(Image::class)->findByPK(6);
         $this->assertInstanceOf(PromiseInterface::class, $c->parent);
@@ -312,7 +312,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $c = $this->orm->getRepository(Image::class)->findByPK(6);
         $this->assertInstanceOf(PromiseInterface::class, $c->parent);
@@ -341,7 +341,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
@@ -363,7 +363,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
@@ -388,7 +388,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
@@ -407,7 +407,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $this->assertNull($c->parent);
     }

@@ -482,7 +482,7 @@ abstract class HasManyScopeTest extends BaseTest
 
         $rSchema = $relationSchema[Relation::SCHEMA] ?? [];
 
-        return $this->orm->withSchema(new Schema([
+        return $this->orm->with(new Schema([
             User::class => [
                 Schema::ROLE => 'user',
                 Schema::MAPPER => Mapper::class,

@@ -77,7 +77,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
 
     public function testClean(): void
     {
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
         for ($i = 0; $i < 10000; $i++) {
@@ -93,7 +93,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
 
     public function testMemoryUsage(): void
     {
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
         for ($i = 0; $i < 10000; $i++) {
@@ -110,7 +110,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
 
     public function testMemoryUsageOther(): void
     {
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
         for ($i = 0; $i < 10000; $i++) {
@@ -127,7 +127,7 @@ abstract class BenchmarkDoubleLinkedTest extends BaseTest
 
     public function testMemoryUsageDouble(): void
     {
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $tr = new Transaction($this->orm);
 
         for ($i = 0; $i < 10000; $i++) {

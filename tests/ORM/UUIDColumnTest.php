@@ -78,7 +78,7 @@ abstract class UUIDColumnTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $result = $selector->fetchOne();
 
         $this->assertInstanceOf(Uuid::class, $result->uuid);
@@ -98,7 +98,7 @@ abstract class UUIDColumnTest extends BaseTest
 
         $this->assertEquals(1, $e->id);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchData();
 
@@ -119,7 +119,7 @@ abstract class UUIDColumnTest extends BaseTest
 
         $this->assertEquals(1, $e->id);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
 
@@ -132,7 +132,7 @@ abstract class UUIDColumnTest extends BaseTest
         $tr->persist($result);
         $tr->run();
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $result2 = $selector->fetchOne();
 
         $this->assertInstanceOf(Uuid::class, $result2->uuid);

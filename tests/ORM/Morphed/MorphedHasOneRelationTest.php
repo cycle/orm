@@ -359,7 +359,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -391,7 +391,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -424,7 +424,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('image');
         $u = $selector->wherePK(1)->fetchOne();
@@ -455,7 +455,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, Post::class);
         $selector->load('image');
         $p = $selector->wherePK(5)->fetchOne();
@@ -479,7 +479,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
@@ -510,7 +510,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);

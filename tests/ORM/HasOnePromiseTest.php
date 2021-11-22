@@ -272,7 +272,7 @@ abstract class HasOnePromiseTest extends BaseTest
         // delete related entity
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
@@ -302,7 +302,7 @@ abstract class HasOnePromiseTest extends BaseTest
         // delete related entity
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
@@ -331,7 +331,7 @@ abstract class HasOnePromiseTest extends BaseTest
         // delete related entity
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 

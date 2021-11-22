@@ -78,7 +78,7 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
         $this->assertNumWrites(1);
 
-        $s = new Select($this->orm->withHeap(new Heap()), Comment::class);
+        $s = new Select($this->withHeap(new Heap()), Comment::class);
         $cd = $s->fetchData();
 
         $this->assertSame(['id' => 1], $cd[0]);
@@ -100,7 +100,7 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
         $this->assertNumWrites(3);
 
-        $cd = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
+        $cd = (new Select($this->withHeap(new Heap()), Comment::class))->fetchData();
 
         $this->assertSame(['id' => 1], $cd[0]);
         $this->assertSame(['id' => 2], $cd[1]);
@@ -119,7 +119,7 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
         $this->assertNumWrites(1);
 
-        $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
+        $userData = (new Select($this->withHeap(new Heap()), User::class))->fetchData();
 
         $this->assertSame(['id' => 1, 'comment_id' => null], $userData[0]);
     }
@@ -139,8 +139,8 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
         $this->assertNumWrites(3);
 
-        $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
-        $commentData = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
+        $userData = (new Select($this->withHeap(new Heap()), User::class))->fetchData();
+        $commentData = (new Select($this->withHeap(new Heap()), Comment::class))->fetchData();
 
         $this->assertSame(['id' => 1, 'comment_id' => 1], $userData[0]);
         $this->assertSame(['id' => 1], $commentData[0]);

@@ -431,7 +431,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $selector->load('tags.@.image')->orderBy('id', 'ASC');
 
         /**

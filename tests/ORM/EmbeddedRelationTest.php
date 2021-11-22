@@ -147,7 +147,7 @@ abstract class EmbeddedRelationTest extends BaseTest
 
         $this->assertSame(3, $u->id);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);
@@ -196,7 +196,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $t->run();
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);
@@ -239,7 +239,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);
@@ -267,7 +267,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);
@@ -306,13 +306,13 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(1);
         $this->assertNumReads(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u3->id);
         $this->assertSame('user2', $u3->credentials->username);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u4 = $selector->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
@@ -338,13 +338,13 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(1);
         $this->assertNumReads(0);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u3->id);
         $this->assertSame('user2', $u3->credentials->username);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u4 = $selector->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
@@ -375,7 +375,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);
@@ -398,7 +398,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
+        $selector = new Select($this->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);

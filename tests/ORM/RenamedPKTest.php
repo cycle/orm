@@ -38,7 +38,7 @@ abstract class RenamedPKTest extends BaseTest
 
         $this->save($u);
 
-        $s = new Select($this->orm->withHeap(new Heap()), Identity::class);
+        $s = new Select($this->withHeap(new Heap()), Identity::class);
         $data = $s->fetchData();
 
         $this->assertIsInt(current($data)['id']);
@@ -57,7 +57,7 @@ abstract class RenamedPKTest extends BaseTest
 
         $this->save($u);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
         $this->assertCount(1, $data);

@@ -140,7 +140,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
@@ -165,7 +165,7 @@ abstract class DatetimeTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 1)->fetchOne();

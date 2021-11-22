@@ -181,7 +181,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
         $selector->load('lastComment.user')
                  ->load('comments.user')
@@ -236,7 +236,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
         $selector->load('lastComment.user')
                  ->load('comments.user')
@@ -262,7 +262,7 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->assertContains($u->id, $fav);
         $this->assertContains($u2->id, $fav);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm = $this->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
         $selector->load('lastComment.user')
                  ->load('comments.user')

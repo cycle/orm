@@ -13,6 +13,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
+use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
@@ -131,8 +132,13 @@ abstract class BaseTest extends TestCase
      */
     public function withSchema(SchemaInterface $schema)
     {
-        $this->orm = $this->orm->withSchema($schema);
+        $this->orm = $this->orm->with($schema);
         return $this->orm;
+    }
+
+    public function withHeap(HeapInterface $heap): ORMInterface
+    {
+        return $this->orm->with(null, null, $heap);
     }
 
     /**

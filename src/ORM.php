@@ -179,7 +179,10 @@ final class ORM implements ORMInterface
         );
     }
 
-    /** @deprecated since Cycle ORM v1.8, this method will be removed in future releases. Use method with instead. */
+    /**
+     * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
+     * Use method {@see with} instead.
+     */
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         return $this->with(null, $factory);
@@ -193,7 +196,10 @@ final class ORM implements ORMInterface
         return $this->factory;
     }
 
-    /** @deprecated since Cycle ORM v1.8, this method will be removed in future releases. Use method with instead. */
+    /**
+     * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
+     * Use method {@see with} instead.
+     */
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
         return $this->with($schema);
@@ -211,7 +217,10 @@ final class ORM implements ORMInterface
         return $this->schema;
     }
 
-    /** @deprecated since Cycle ORM v1.8, this method will be removed in future releases. Use method with instead. */
+    /**
+     * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
+     * Use method {@see with} instead.
+     */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
         return $this->with(null, null, $heap);

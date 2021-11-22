@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Unit\Command;
 
 use Cycle\ORM\Command\Database\Update;
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
@@ -70,20 +69,6 @@ class UpdateCommandTest extends TestCase
         $this->assertTrue($cmd->hasData());
     }
 
-    public function testScopeRegister(): void
-    {
-        $state = new State(Node::SCHEDULED_UPDATE, []);
-        $cmd = new Update(
-            m::mock(DatabaseInterface::class),
-            'table',
-            $state,
-            []
-        );
-
-        $cmd->register('key', 'value', ConsumerInterface::SCOPE);
-        $this->assertSame(['key' => 'value'], $cmd->getScope());
-    }
-
     public function testScopeSetter(): void
     {
         $state = new State(Node::SCHEDULED_UPDATE, []);
@@ -93,9 +78,26 @@ class UpdateCommandTest extends TestCase
             $state,
             []
         );
+        $cmd->waitScope('key');
 
         $cmd->setScope('key', 'value');
         $this->assertSame(['key' => 'value'], $cmd->getScope());
+        $this->assertTrue($cmd->isScopeReady());
+    }
+
+    public function testSetNullScope(): void
+    {
+        $state = new State(Node::SCHEDULED_UPDATE, []);
+        $cmd = new Update(
+            m::mock(DatabaseInterface::class),
+            'table',
+            $state,
+            []
+        );
+        $cmd->waitScope('key');
+
+        $cmd->setScope('key', null);
+        $this->assertFalse($cmd->isScopeReady());
     }
 
     public function testNoScope(): void

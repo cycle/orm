@@ -6,6 +6,9 @@ namespace Cycle\ORM\Command\Traits;
 
 use Cycle\ORM\Exception\CommandException;
 
+/**
+ * @internal
+ */
 trait ScopeTrait
 {
     protected array $scope = [];
@@ -45,6 +48,9 @@ trait ScopeTrait
 
     public function setScope(string $key, mixed $value): void
     {
+        if ($value === null) {
+            return;
+        }
         $this->scope[$key] = $value;
         // Indicate that context value is not required anymore.
         unset($this->waitScope[$key]);

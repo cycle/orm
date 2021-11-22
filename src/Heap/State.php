@@ -166,11 +166,7 @@ final class State implements ConsumerInterface
         return array_key_exists($key, $this->data) || array_key_exists($key, $this->transactionData);
     }
 
-    public function register(
-        string $key,
-        mixed $value,
-        int $stream = self::DATA
-    ): void {
+    public function register(string $key, mixed $value): void {
         $this->freeWaitingField($key);
 
         \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(

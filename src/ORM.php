@@ -220,28 +220,48 @@ final class ORM implements ORMInterface
         );
     }
 
+    /**
+     * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
+     * Use method {@see with} instead.
+     */
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
-        $orm = clone $this;
-        $orm->schema = $schema;
-        $orm->resetEntityRegister();
-
-        return $orm;
+        return $this->with($schema);
     }
 
+    /**
+     * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
+     * Use method {@see with} instead.
+     */
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
-        $orm = clone $this;
-        $orm->factory = $factory;
-        $orm->resetEntityRegister();
-
-        return $orm;
+        return $this->with(factory: $factory);
     }
 
+    /**
+     * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
+     * Use method {@see with} instead.
+     */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
+        return $this->with(heap: $heap);
+    }
+
+    public function with(
+        ?SchemaInterface $schema = null,
+        ?FactoryInterface $factory = null,
+        ?HeapInterface $heap = null
+    ): ORMInterface {
         $orm = clone $this;
-        $orm->heap = $heap;
+
+        $orm->heap = $heap ?? $orm->heap;
+
+        if ($schema !== null || $factory !== null) {
+            $orm->schema = $schema ?? $orm->schema;
+            $orm->factory = $factory ?? $orm->factory;
+
+            $orm->resetEntityRegister();
+        }
 
         return $orm;
     }

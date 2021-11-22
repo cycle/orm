@@ -73,9 +73,11 @@ interface ORMInterface extends SourceProviderInterface
      */
     public function getHeap(): HeapInterface;
 
-    public function withSchema(SchemaInterface $schema): self;
-
-    public function withHeap(HeapInterface $heap): self;
+    public function with(
+        ?SchemaInterface $schema = null,
+        ?FactoryInterface $factory = null,
+        ?HeapInterface $heap = null
+    ): self;
 
     /**
      * Get mapper associated with given entity class, role or instance.

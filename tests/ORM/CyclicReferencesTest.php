@@ -185,7 +185,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('lastComment.user')
                  ->load('comments.user')
@@ -239,7 +239,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('lastComment.user')
                  ->load('comments.user')
@@ -265,7 +265,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertContains($u->id, $fav);
         $this->assertContains($u2->id, $fav);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load('lastComment.user')
                  ->load('comments.user')

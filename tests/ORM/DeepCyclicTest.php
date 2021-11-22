@@ -99,7 +99,7 @@ abstract class DeepCyclicTest extends BaseTest
         // 5 inserts and 2 loops
         $this->assertNumWrites(7);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')
@@ -148,7 +148,7 @@ abstract class DeepCyclicTest extends BaseTest
         // 5 inserts and 2 loops
         $this->assertNumWrites(7);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')
@@ -197,7 +197,7 @@ abstract class DeepCyclicTest extends BaseTest
         // 5 inserts and 2 loops
         $this->assertNumWrites(7);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')
@@ -251,7 +251,7 @@ abstract class DeepCyclicTest extends BaseTest
         // 5 inserts and 2 loops
         $this->assertNumWrites(7);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$c1, $c2, $c3, $c4, $c5] = $selector
             ->load('cyclic')

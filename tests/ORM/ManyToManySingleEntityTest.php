@@ -109,7 +109,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
         $tr->persist($role);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), 'rbac_item');
+        $selector = new Select($this->orm->withHeap(new Heap()), 'rbac_item');
         /** @var RbacRole $fetchedRole */
         $fetchedRole = $selector->wherePK('superAdmin')->fetchOne();
 
@@ -134,7 +134,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
 
         unset($role, $permission);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
         /** @var RbacRole $fetchedRole */
         $fetchedRole = (new Select($this->orm, 'rbac_item'))->wherePK('superAdmin')->fetchOne();
@@ -171,7 +171,7 @@ abstract class ManyToManySingleEntityTest extends BaseTest
 
         unset($role, $permission);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
         /** @var RbacRole $fetchedRole */
         $fetchedRole = (new Select($this->orm, 'rbac_item'))->wherePK('superAdmin')->fetchOne();
@@ -186,6 +186,6 @@ abstract class ManyToManySingleEntityTest extends BaseTest
 
         self::assertSame('updated description', $fetchedRole->description);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
     }
 }

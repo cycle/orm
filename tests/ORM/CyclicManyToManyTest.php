@@ -232,7 +232,7 @@ abstract class CyclicManyToManyTest extends BaseTest
         $t->persist($u);
         $t->run();
 
-        $u2 = $this->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
+        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
         $this->assertSame($tag->id, $u2->tags->get(0)->id);
         $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
@@ -253,7 +253,7 @@ abstract class CyclicManyToManyTest extends BaseTest
         $t->persist($tag);
         $t->run();
 
-        $u2 = $this->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
+        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
         $this->assertSame($tag->id, $u2->tags->get(0)->id);
         $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
@@ -275,7 +275,7 @@ abstract class CyclicManyToManyTest extends BaseTest
         $t->persist($tag);
         $t->run();
 
-        $u2 = $this->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
+        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
         $this->assertSame($tag->id, $u2->tags->get(0)->id);
         $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
@@ -297,7 +297,7 @@ abstract class CyclicManyToManyTest extends BaseTest
         $t->persist($tag);
         $t->run();
 
-        $u2 = $this->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
+        $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
         // mb these assertions are incorrect
         $this->assertSame($tag->id, $u2->tags->get(0)->id);

@@ -152,7 +152,7 @@ abstract class BidirectionTest extends BaseTest
         $t->persist($u);
         $t->run();
 
-        $select = new Select($this->withHeap(new Heap()), User::class);
+        $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertCount(1, $u->comments);
@@ -171,7 +171,7 @@ abstract class BidirectionTest extends BaseTest
         $t->persist($u);
         $t->run();
 
-        $select = new Select($this->withHeap(new Heap()), User::class);
+        $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertCount(1, $u->comments);
@@ -191,7 +191,7 @@ abstract class BidirectionTest extends BaseTest
         $t->persist($u->comments[0]);
         $t->run();
 
-        $select = new Select($this->withHeap(new Heap()), User::class);
+        $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertCount(1, $u->comments);
@@ -215,7 +215,7 @@ abstract class BidirectionTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
-        $select = new Select($this->withHeap(new Heap()), User::class);
+        $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertCount(1, $u->comments);

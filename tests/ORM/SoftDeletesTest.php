@@ -63,7 +63,7 @@ abstract class SoftDeletesTest extends BaseTest
 
         (new Transaction($this->orm))->persist($u)->run();
 
-        $s = new Select($this->withHeap(new Heap()), User::class);
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $data = $s->fetchData();
 
         $this->assertNull($data[0]['deleted_at']);
@@ -77,25 +77,25 @@ abstract class SoftDeletesTest extends BaseTest
 
         (new Transaction($this->orm))->persist($u)->run();
 
-        $orm = $this->withHeap(new Heap());
+        $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $u = $s->fetchOne();
 
         (new Transaction($orm))->delete($u)->run();
 
         // must be deleted
-        $orm = $this->withHeap(new Heap());
+        $orm = $this->orm->withHeap(new Heap());
         $s = $orm->getRepository(User::class);
         $this->assertNull($s->findOne());
 
         $this->assertSame($s, $orm->getRepository(User::class));
 
-        $orm = $this->withHeap(new Heap());
+        $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $s->constrain(new NotDeletedConstrain());
         $this->assertNull($s->fetchOne());
 
-        $orm = $this->withHeap(new Heap());
+        $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $s->constrain(null);
         $this->assertNotNull($s->fetchOne());

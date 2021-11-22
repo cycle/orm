@@ -126,7 +126,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $tr->persist($c);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), Cyclic::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
 
         $this->assertEquals('updated', $c->name);
@@ -153,7 +153,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $selector = new Select($this->withHeap(new Heap()), Cyclic::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(4)->fetchOne();
         $this->assertEquals('new', $c->name);
         $this->assertSame($c, $c->cyclic);

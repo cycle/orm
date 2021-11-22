@@ -205,7 +205,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -244,7 +244,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -284,7 +284,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $a = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
         $b = (new Select($this->orm, Post::class))->wherePK(1)->fetchOne();
 

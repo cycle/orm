@@ -107,7 +107,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->assertNumWrites(3);
 
-        $s = new Select($this->withHeap(new Heap()), User::class);
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
@@ -144,7 +144,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(1);
 
-        $s = new Select($this->withHeap(new Heap()), User::class);
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u3 = $s->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
 
         $this->assertNotNull($u3->lastComment);
@@ -174,7 +174,7 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->assertNumWrites(2);
 
-        $s = new Select($this->withHeap(new Heap()), User::class);
+        $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
         $this->assertNotNull($u->lastComment);
@@ -200,7 +200,7 @@ abstract class RefersToRelationTest extends BaseTest
         } catch (\Throwable $e) {
             throw $e;
         } finally {
-            $this->orm = $this->withHeap(new Heap());
+            $this->orm = $this->orm->withHeap(new Heap());
         }
     }
 
@@ -218,7 +218,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->persist($u);
         $tr->run();
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
@@ -256,7 +256,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(3);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
@@ -272,7 +272,7 @@ abstract class RefersToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(1);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $s = new Select($this->orm, User::class);
 
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();

@@ -200,7 +200,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -236,7 +236,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertNumReads(0);
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
@@ -268,7 +268,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
@@ -298,7 +298,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Post::class);
         $p = $selector->wherePK(5)->fetchOne();
 
@@ -323,7 +323,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertNumWrites(2);
         $this->assertNumReads(2);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
@@ -358,7 +358,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertNumWrites(0);
         $this->assertNumReads(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);

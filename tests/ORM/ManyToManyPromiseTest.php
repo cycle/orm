@@ -288,7 +288,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
 
         $this->assertNumWrites(0);
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         /**
          * @var User $a
          * @var User $b
@@ -348,7 +348,7 @@ abstract class ManyToManyPromiseTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
         $user = (new Select($this->orm, User::class))->fetchOne(['id' => 1]);
         $this->assertCount(2, $user->tags);

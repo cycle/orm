@@ -92,7 +92,7 @@ abstract class DoubleLinkedTest extends BaseTest
         // 2 inserts + 1 update
         $this->assertNumWrites(3);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
@@ -133,7 +133,7 @@ abstract class DoubleLinkedTest extends BaseTest
         // 2 inserts, 2 updates
         $this->assertNumWrites(4);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
@@ -158,7 +158,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(2);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         $a = $selector->orderBy('id')->fetchOne();
 

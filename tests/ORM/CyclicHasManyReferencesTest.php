@@ -149,7 +149,7 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Post::class);
         $selector->load('lastComment.user')
                  ->load('comments.user');
@@ -209,7 +209,7 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
 
         //$this->assertNumWrites(1);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Post::class);
         $selector->load('lastComment.user')
                  ->load('comments.user');

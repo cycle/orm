@@ -283,7 +283,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->run();
 
         // Re-select
-        $orm = $this->withHeap(new Heap());
+        $orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($orm, User::class);
         $e = $selector->wherePK($e->id)->load('profile')->fetchOne();
@@ -305,7 +305,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
 
         // Re-select
-        $orm = $this->withHeap(new Heap());
+        $orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($orm, User::class);
         $e = $selector->wherePK($e->id)->load('profile')->fetchOne();
@@ -323,7 +323,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
         $this->assertSame(null, $e->profile);
@@ -393,7 +393,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
         $this->assertSame(null, $e->profile);
@@ -416,7 +416,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertFalse($this->orm->getHeap()->has($oP));
         $this->assertTrue($this->orm->getHeap()->has($e->profile));
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
         $this->assertNotEquals($oP, $e->profile->id);
@@ -441,7 +441,7 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertTrue($this->orm->getHeap()->has($b->profile));
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
         $this->assertNull($a->profile);
@@ -462,7 +462,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->run();
 
         // reset state
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
@@ -477,7 +477,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->run();
 
         // reset state
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
@@ -557,7 +557,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
 
         $this->assertSame('new-label', $e->profile->nested->label);
@@ -575,7 +575,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
 
         $this->assertSame('another', $e->profile->nested->label);
@@ -593,7 +593,7 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
 
@@ -665,7 +665,7 @@ abstract class HasOneRelationTest extends BaseTest
         $u2 = $this->orm->getRepository(User::class)->findByPK(1);
         $this->assertSame('new', $u2->profile->image);
 
-        $u3 = $this->withHeap(new Heap())->getRepository(User::class)
+        $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
                         ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('image.png', $u3->profile->image);
@@ -674,7 +674,7 @@ abstract class HasOneRelationTest extends BaseTest
         $t->persist($u);
         $t->run();
 
-        $u4 = $this->withHeap(new Heap())->getRepository(User::class)
+        $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
                         ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('new', $u4->profile->image);
@@ -697,7 +697,7 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertSame('image.png', $u2->profile->image);
 
-        $u3 = $this->withHeap(new Heap())->getRepository(User::class)
+        $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
                         ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('image.png', $u3->profile->image);
@@ -707,7 +707,7 @@ abstract class HasOneRelationTest extends BaseTest
         $t->run();
 
         // ovewrite values
-        $u4 = $this->withHeap(new Heap())->getRepository(User::class)
+        $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
                         ->select()->load('profile')->wherePK(1)->fetchOne();
 
         $this->assertSame('image.png', $u4->profile->image);

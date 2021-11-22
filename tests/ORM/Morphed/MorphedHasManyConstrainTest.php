@@ -594,7 +594,7 @@ abstract class MorphedHasManyConstrainTest extends BaseTest
             $rSchema[Relation::WHERE] = $relationSchema[Relation::WHERE];
         }
 
-        return $this->orm->with(new Schema([
+        return $this->orm->withSchema(new Schema([
             User::class => [
                 Schema::ROLE => 'user',
                 Schema::MAPPER => Mapper::class,

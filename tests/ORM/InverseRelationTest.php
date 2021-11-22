@@ -179,11 +179,11 @@ abstract class InverseRelationTest extends BaseTest
         $this->assertEquals(3, $u->id);
         $this->assertEquals(4, $u->profile->id);
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
 
         $this->assertSame($u, $u->profile->user);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
     }
 }

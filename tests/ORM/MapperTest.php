@@ -190,7 +190,7 @@ abstract class MapperTest extends BaseTest
         $tr->delete($result);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $this->assertNull($selector->where('id', 2)->fetchOne());
 
         $selector = new Select($this->orm, User::class);
@@ -265,7 +265,7 @@ abstract class MapperTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);
@@ -318,7 +318,7 @@ abstract class MapperTest extends BaseTest
         $u2 = $this->orm->getRepository(User::class)->findByPK(1);
         $this->assertSame('hello@world.com', $u2->email);
 
-        $u3 = $this->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
+        $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
         $this->assertSame('hello@world.com', $u3->email);
 
         $this->captureWriteQueries();
@@ -327,7 +327,7 @@ abstract class MapperTest extends BaseTest
         $t->run();
         $this->assertNumWrites(0);
 
-        $u4 = $this->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
+        $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
         $this->assertSame('hello@world.com', $u4->email);
     }
 
@@ -343,7 +343,7 @@ abstract class MapperTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         $this->assertEquals(0.0, (float) $u->balance);
 
@@ -355,7 +355,7 @@ abstract class MapperTest extends BaseTest
         $t->run();
         $this->assertNumWrites(1);
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         $this->assertNull($u->balance);
     }

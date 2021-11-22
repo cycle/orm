@@ -321,7 +321,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $tr->persist($p);
         $tr->run();
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->load('user')->wherePK(4)->fetchOne();
 
@@ -422,7 +422,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $s = new Select($this->withHeap(new Heap()), Profile::class);
+        $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
                        ->load('user')->fetchAll();
 
@@ -446,7 +446,7 @@ abstract class BelongsToRelationTest extends BaseTest
             throw $e;
         } finally {
             // we do not expect state to be consistent as transaction failed, see rollback tests
-            $this->orm = $this->withHeap(new Heap());
+            $this->orm = $this->orm->withHeap(new Heap());
         }
     }
 
@@ -472,7 +472,7 @@ abstract class BelongsToRelationTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $s = new Select($this->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s->wherePK(2)->load('profile.user')->fetchOne();
 
         $this->assertSame('profile', $n->profile->image);
@@ -481,7 +481,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testWhereNested(): void
     {
-        $s = new Select($this->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s->with('profile.user')
                ->where('profile.user.id', 1)
                ->fetchOne();
@@ -491,7 +491,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testWhereNestedWithAlias(): void
     {
-        $s = new Select($this->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s
             ->with('profile.user', ['as' => 'u'])
             ->where('u.id', 1)

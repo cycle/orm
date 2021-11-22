@@ -139,7 +139,7 @@ abstract class TypecastTest extends BaseTest
         $tr->delete($result);
         $tr->run();
 
-        $selector = new Select($this->withHeap(new Heap()), User::class);
+        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $this->assertNull($selector->where('id', 2)->fetchOne());
 
         $selector = new Select($this->orm, User::class);
@@ -216,7 +216,7 @@ abstract class TypecastTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
-        $this->orm = $this->withHeap(new Heap());
+        $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
         $this->assertEquals(400, $result->balance);

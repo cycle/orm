@@ -8,7 +8,6 @@ use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Config\RelationConfig;
-use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
@@ -326,17 +325,29 @@ abstract class BaseTest extends TestCase
                 continue;
             }
 
-            try {
-                $relation = $this->orm->getSchema()->defineRelation($eName, $name);
-                if ($relation[Relation::TYPE] === Relation::EMBEDDED) {
-                    // do not run integrity check for embedded nodes, they do not have their own node
-                    continue;
+            $parent = $eName;
+            $relation = null;
+            $parentChain = [];
+            do {
+                $parentChain[] = $parent;
+                $relationSchema = (array)$this->orm->getSchema()->define($parent, SchemaInterface::RELATIONS);
+                if (array_key_exists($name, $relationSchema)) {
+                    $relation = $relationSchema[$name];
+                    break;
                 }
-            } catch (SchemaException) {
-                // todo what should i do with JTI?
-            }
+
+                $parent = $this->orm->getSchema()->define($parent, SchemaInterface::PARENT);
+            } while ($parent);
+
+            $roles = implode('`, `', $parentChain);
+            $this->assertNotNull($relation, "Relation `{$name}` is not found among roles `{$roles}`. Check `{$eName}` and its parent roles.");
 
             $rValue = $relations[$name];
+
+            if ($relation[Relation::TYPE] === Relation::EMBEDDED) {
+                // do not run integrity check for embedded nodes, they do not have their own node
+                continue;
+            }
 
             if ($rValue === $eValue) {
                 return;

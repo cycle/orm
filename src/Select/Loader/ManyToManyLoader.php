@@ -17,6 +17,9 @@ use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 
+/**
+ * @internal
+ */
 class ManyToManyLoader extends JoinableLoader
 {
     use OrderByTrait;

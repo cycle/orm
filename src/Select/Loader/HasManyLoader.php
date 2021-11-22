@@ -16,6 +16,9 @@ use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Cycle\Database\Query\SelectQuery;
 
+/**
+ * @internal
+ */
 class HasManyLoader extends JoinableLoader
 {
     use JoinOneTableTrait;

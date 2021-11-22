@@ -15,6 +15,8 @@ use Cycle\Database\Query\SelectQuery;
 
 /**
  * Load parent data. Similar to HasOne but use POSTLOAD as default method.
+ *
+ * @internal
  */
 class BelongsToLoader extends JoinableLoader
 {

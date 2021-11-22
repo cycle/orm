@@ -15,7 +15,9 @@ use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 
 /**
- * Load parent data.
+ * Load children data.
+ *
+ * @internal
  */
 class SubclassLoader extends JoinableLoader
 {

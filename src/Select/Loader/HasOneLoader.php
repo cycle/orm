@@ -19,6 +19,8 @@ use Cycle\Database\Query\SelectQuery;
  *
  * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
  * purposes).
+ *
+ * @internal
  */
 class HasOneLoader extends JoinableLoader
 {

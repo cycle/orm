@@ -10,6 +10,8 @@ use Cycle\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to assign the scope to the AbstractLoader.
+ *
+ * @internal
  */
 trait ScopeTrait
 {

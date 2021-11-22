@@ -12,6 +12,8 @@ use Cycle\Database\Query\SelectQuery;
 
 /**
  * Wrap JoinableLoader with subquery
+ *
+ * @internal
  */
 final class SubQueryLoader extends JoinableLoader
 {

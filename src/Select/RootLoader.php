@@ -20,6 +20,8 @@ use Cycle\Database\StatementInterface;
  * Root load does not load constrain from ORM by default.
  *
  * @method RootNode createNode()
+ *
+ * @internal
  */
 final class RootLoader extends AbstractLoader
 {

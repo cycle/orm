@@ -14,6 +14,8 @@ use Cycle\Database\Query\SelectQuery;
 
 /**
  * Loads given entity table without any specific condition.
+ *
+ * @internal
  */
 class PivotLoader extends JoinableLoader
 {

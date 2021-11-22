@@ -259,7 +259,7 @@ abstract class ManyToManyRelationTest extends BaseTest
     {
         $schemaArray = $this->getSchemaArray();
         $schemaArray[User::class][Schema::RELATIONS]['tags'][Relation::SCHEMA][Relation::NULLABLE] = true;
-        $this->orm = $this->orm->with(new Schema($schemaArray));
+        $this->orm = $this->orm->withSchema(new Schema($schemaArray));
 
         $u = new User();
         $u->email = 'many@email.com';

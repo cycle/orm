@@ -220,33 +220,22 @@ final class ORM implements ORMInterface
         );
     }
 
-    /** @deprecated since Cycle ORM v2.0, this method will be removed in future releases. Use method with instead. */
+    /** @deprecated since Cycle ORM v1.8, this method will be removed in future releases. Use method with instead. */
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
-        $orm = clone $this;
-        $orm->schema = $schema;
-        $orm->resetEntityRegister();
-
-        return $orm;
+        return $this->with($schema);
     }
 
-    /** @deprecated since Cycle ORM v2.0, this method will be removed in future releases. Use method with instead. */
+    /** @deprecated since Cycle ORM v1.8, this method will be removed in future releases. Use method with instead. */
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
-        $orm = clone $this;
-        $orm->factory = $factory;
-        $orm->resetEntityRegister();
-
-        return $orm;
+        return $this->with(factory: $factory);
     }
 
-    /** @deprecated since Cycle ORM v2.0, this method will be removed in future releases. Use method with instead. */
+    /** @deprecated since Cycle ORM v1.8, this method will be removed in future releases. Use method with instead. */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
-        $orm = clone $this;
-        $orm->heap = $heap;
-
-        return $orm;
+        return $this->with(heap: $heap);
     }
 
     public function with(
@@ -256,17 +245,17 @@ final class ORM implements ORMInterface
     ): ORMInterface {
         $orm = clone $this;
 
-        if ($schema) {
+        if ($schema !== null) {
             $orm->schema = $schema;
         }
-        if ($factory) {
+        if ($factory !== null) {
             $orm->factory = $factory;
         }
-        if ($heap) {
+        if ($heap !== null) {
             $orm->heap = $heap;
         }
 
-        if ($schema || $factory) {
+        if ($schema !== null || $factory !== null) {
             $orm->resetEntityRegister();
         }
 

@@ -85,7 +85,7 @@ abstract class CaseTest extends BaseTest
 
         $schema = include __DIR__ . '/schema.php';
         assert(\is_array($schema));
-        $this->orm = $this->orm->with(new Schema($schema));
+        $this->orm = $this->orm->withSchema(new Schema($schema));
     }
 
     public function countProvider(): array

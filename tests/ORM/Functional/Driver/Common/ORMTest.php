@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\Common;
 
 use Cycle\ORM\Factory;
+use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
@@ -64,6 +65,30 @@ abstract class ORMTest extends BaseTest
     {
         $orm = $this->orm->withFactory($this->orm->getFactory());
         $this->assertNotSame($orm, $this->orm);
+    }
+
+    public function testORMCloneWithSchema(): void
+    {
+        $orm = $this->orm->with(new Schema([]));
+
+        $this->assertNotSame($orm, $this->orm);
+        $this->assertNotSame($orm->getSchema(), $this->orm->getSchema());
+    }
+
+    public function testORMCloneWithFactory(): void
+    {
+        $orm = $this->orm->with(factory: new Factory($this->dbal));
+
+        $this->assertNotSame($orm, $this->orm);
+        $this->assertNotSame($orm->getFactory(), $this->orm->getFactory());
+    }
+
+    public function testORMCloneWithHeap(): void
+    {
+        $orm = $this->orm->with(heap: new Heap());
+
+        $this->assertNotSame($orm, $this->orm);
+        $this->assertNotSame($orm->getHeap(), $this->orm->getHeap());
     }
 
     public function testORMCloneGarbage(): void

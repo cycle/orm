@@ -177,9 +177,9 @@ class ProxyEntityFactory
     /**
      * Gets property map (primitive fields, relations) for given Entity.
      *
-     * @return PropertyMap[]
-     *
      * @throws \ReflectionException
+     *
+     * @return PropertyMap[]
      */
     private function getEntityProperties(object $entity, RelationMap $relMap): array
     {

@@ -15,6 +15,8 @@ use Traversable;
 
 /**
  * @internal
+ * @psalm-suppress TypeDoesNotContainType
+ * @psalm-suppress RedundantCondition
  */
 final class Pool implements \Countable
 {
@@ -29,7 +31,10 @@ final class Pool implements \Countable
     /** @var SplObjectStorage<object, Tuple> */
     private SplObjectStorage $priorityStorage;
 
-    /** @var Tuple[] */
+    /**
+     * @var Tuple[]
+     * @psalm-var list<Tuple>
+     */
     private array $unprocessed;
 
     private bool $priorityEnabled = false;
@@ -70,7 +75,14 @@ final class Pool implements \Countable
             return $tuple;
         }
 
-        $tuple = new Tuple($task, $entity, $cascade, $node, $state, $status ?? Tuple::STATUS_PREPARING);
+        $tuple = new Tuple($task, $entity, $cascade, $status ?? Tuple::STATUS_PREPARING);
+        if ($node !== null) {
+            $tuple->node = $node;
+        }
+        if ($state !== null) {
+            $tuple->state = $state;
+        }
+
         return $this->smartAttachTuple($tuple, $highPriority);
     }
 
@@ -99,15 +111,13 @@ final class Pool implements \Countable
         if ($this->iterating) {
             $this->snap($tuple);
         }
-        if ($tuple->node !== null) {
-            switch ($tuple->task) {
-                case Tuple::TASK_DELETE:
-                    $tuple->node->setStatus(Node::SCHEDULED_DELETE);
-            }
+
+        if (isset($tuple->node) && $tuple->task === Tuple::TASK_DELETE) {
+            $tuple->node->setStatus(Node::SCHEDULED_DELETE);
         }
         $string = sprintf(
             "pool:attach %s, task: %s, status: %s\n",
-            $tuple->node === null ? $tuple->entity::class : $tuple->node->getRole(),
+            isset($tuple->node) ? $tuple->node->getRole() : $tuple->entity::class,
             $tuple->task,
             $tuple->status
         );
@@ -164,7 +174,7 @@ final class Pool implements \Countable
             /** @var Tuple $tuple */
             $tuple = $this->storage->getInfo();
             $this->snap($tuple);
-            if ($tuple->node === null) {
+            if (!isset($tuple->node)) {
                 $this->storage->detach($this->storage->current());
             } else {
                 $this->storage->next();
@@ -262,6 +272,7 @@ final class Pool implements \Countable
                         "+-------------------------------\n" .
                         "| \033[32m  LOOP UNRESOLVED :: " . count($this->unprocessed) . " \033[0m\n" .
                         "+-------------------------------\n";
+                    /** @psalm-suppress InvalidIterator */
                     foreach ($this->unprocessed as $item) {
                         $this->storage->attach($item->entity, $item);
                     }
@@ -300,20 +311,26 @@ final class Pool implements \Countable
     private function snap(Tuple $tuple): void
     {
         $entity = $tuple->entity;
-        $tuple->node ??= $this->orm->getHeap()->get($entity);
-        if (($tuple->node === null && $tuple->task !== Tuple::TASK_STORE) || $entity instanceof ReferenceInterface) {
+        /** @var Node|null $node */
+        $node = $tuple->node ?? $this->orm->getHeap()->get($entity);
+
+        if (($node === null && $tuple->task !== Tuple::TASK_STORE) || $entity instanceof ReferenceInterface) {
             return;
         }
-        $tuple->mapper ??= $this->orm->getMapper($tuple->node?->getRole() ?? $entity);
-        if ($tuple->node === null) {
+        $tuple->mapper ??= $this->orm->getMapper($node?->getRole() ?? $entity);
+        if ($node === null) {
+            // Create new Node
             $node = new Node(Node::NEW, [], $tuple->mapper->getRole());
             $this->orm->getHeap()->attach($entity, $node);
             $node->setData($tuple->mapper->fetchFields($entity));
-            $tuple->node = $node;
-        } elseif (!$tuple->node->hasState()) {
-            $tuple->node->setData($tuple->mapper->fetchFields($entity));
+        } elseif (!$node->hasState()) {
+            $node->setData($tuple->mapper->fetchFields($entity));
         }
-        $tuple->state ??= $tuple->node->getState();
+        $tuple->node = $node;
+
+        if (!isset($tuple->state)) {
+            $tuple->state = $tuple->node->getState();
+        }
     }
 
     private function trashIt(object $entity, Tuple $tuple, SplObjectStorage $storage): void

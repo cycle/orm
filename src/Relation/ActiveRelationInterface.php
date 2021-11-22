@@ -9,6 +9,8 @@ use Cycle\ORM\Reference\ReferenceInterface;
 
 /**
  * Manages single branch type between parent entity and other objects.
+ *
+ * @internal
  */
 interface ActiveRelationInterface extends RelationInterface
 {

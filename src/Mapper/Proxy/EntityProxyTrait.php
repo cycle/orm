@@ -10,6 +10,9 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 use RuntimeException;
 
+/**
+ * @internal
+ */
 trait EntityProxyTrait
 {
     public RelationMap $__cycle_orm_rel_map;

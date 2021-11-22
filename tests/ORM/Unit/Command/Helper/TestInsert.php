@@ -41,7 +41,7 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
         return true;
     }
 
-    public function register(string $key, mixed $value, int $stream = self::DATA): void
+    public function register(string $key, mixed $value): void
     {
     }
 

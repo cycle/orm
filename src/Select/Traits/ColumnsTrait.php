@@ -8,6 +8,8 @@ use Cycle\Database\Query\SelectQuery;
 
 /**
  * Provides ability to add aliased columns into SelectQuery.
+ *
+ * @internal
  */
 trait ColumnsTrait
 {

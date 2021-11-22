@@ -12,6 +12,9 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\SchemaInterface;
 
+/**
+ * @internal
+ */
 class CommandGenerator implements CommandGeneratorInterface
 {
     public function generateStoreCommand(ORMInterface $orm, Tuple $tuple): ?CommandInterface

@@ -27,13 +27,15 @@ final class Tuple
     public const STATUS_PROCESSED = 6;
     public const STATUS_UNPROCESSED = 7;
 
+    public Node $node;
+    public State $state;
+    public MapperInterface $mapper;
+
     public function __construct(
         #[ExpectedValues(values: [self::TASK_STORE, self::TASK_DELETE, self::TASK_FORCE_DELETE])]
         public int $task,
         public object $entity,
         public bool $cascade,
-        public ?Node $node,
-        public ?State $state,
         #[ExpectedValues(values: [
             self::STATUS_PREPARING,
             self::STATUS_WAITING,
@@ -45,7 +47,6 @@ final class Tuple
             self::STATUS_UNPROCESSED,
         ])]
         public int $status,
-        public ?MapperInterface $mapper = null
     ) {
     }
 }

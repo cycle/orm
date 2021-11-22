@@ -238,7 +238,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(0);
 
-        // $this->assertEquals(3, $e->id); todo ?
+        $this->assertEquals(3, $e->id);
 
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());

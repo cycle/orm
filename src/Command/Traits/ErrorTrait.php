@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Traits;
 
-// describes why command has been locked up
+/**
+ * Describes why command has been locked up
+ *
+ * @internal
+ */
 trait ErrorTrait
 {
     public function __toError()

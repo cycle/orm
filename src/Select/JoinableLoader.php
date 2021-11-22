@@ -16,6 +16,8 @@ use Cycle\Database\StatementInterface;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
+ *
+ * @internal
  */
 abstract class JoinableLoader extends AbstractLoader implements JoinableInterface
 {

@@ -279,8 +279,9 @@ abstract class HasOneProxyMapperTest extends BaseTest
 
     public function testMoveToAnotherUser(): void
     {
-        $selector = new Select($this->orm, User::class);
-        [$a, $b] = $selector->orderBy('id')->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->orderBy('id')
+            ->fetchAll();
 
         $b->profile = $a->profile;
         $a->profile = null;
@@ -290,14 +291,13 @@ abstract class HasOneProxyMapperTest extends BaseTest
 
         $this->save($a, $b);
 
-        // load both promises
-        // todo decide this:
-        // $this->assertNumReads(2);
+        // Load profile 2
+        $this->assertNumReads(1);
 
         // delete related entity
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm->getHeap()->clean();
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
@@ -307,8 +307,9 @@ abstract class HasOneProxyMapperTest extends BaseTest
 
     public function testMoveToAnotherUserPartial(): void
     {
-        $selector = new Select($this->orm, User::class);
-        [$a, $b] = $selector->orderBy('id')->fetchAll();
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->orderBy('id')
+            ->fetchAll();
 
         $b->profile = $a->profile;
         $a->profile = null;
@@ -316,13 +317,10 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $this->captureWriteQueries();
         $this->captureReadQueries();
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($b);
 
-        // load both promises
-        // todo decide assertNumReads
-        // $this->assertNumReads(2);
+        // Load profile 2
+        $this->assertNumReads(1);
 
         // delete related entity
         $this->assertNumWrites(1);

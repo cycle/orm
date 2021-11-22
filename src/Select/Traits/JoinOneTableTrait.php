@@ -8,6 +8,9 @@ use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Relation;
 
+/**
+ * @internal
+ */
 trait JoinOneTableTrait
 {
     private function configureParentQuery(SelectQuery $query, array $outerKeys = []): void

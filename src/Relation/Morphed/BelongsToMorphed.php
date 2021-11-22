@@ -15,6 +15,9 @@ use Cycle\ORM\Relation\BelongsTo;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
+/**
+ * @internal
+ */
 class BelongsToMorphed extends BelongsTo
 {
     private string $morphKey;

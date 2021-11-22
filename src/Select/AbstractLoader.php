@@ -36,6 +36,8 @@ use Cycle\Database\Query\SelectQuery;
  *
  * @see Select::load()
  * @see Select::with()
+ *
+ * @internal
  */
 abstract class AbstractLoader implements LoaderInterface
 {

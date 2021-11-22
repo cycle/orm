@@ -14,6 +14,8 @@ use Cycle\ORM\Relation\ShadowHasMany;
 
 /**
  * Manages the position of node in the relation graph and provide access to neighbours.
+ *
+ * @internal
  */
 final class RelationMap
 {

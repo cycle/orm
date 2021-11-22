@@ -15,6 +15,8 @@ use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 
 /**
  * Load parent data.
+ *
+ * @internal
  */
 class ParentLoader extends JoinableLoader
 {

@@ -53,19 +53,4 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 
         parent::execute();
     }
-
-    public function register(
-        string $key,
-        mixed $value,
-        int $stream = self::DATA
-    ): void {
-        if ($stream !== self::SCOPE) {
-            return;
-        }
-        if (empty($value)) {
-            return;
-        }
-
-        $this->setScope($key, $value);
-    }
 }

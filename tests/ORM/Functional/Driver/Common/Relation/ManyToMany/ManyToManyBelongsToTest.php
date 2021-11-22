@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Post;
@@ -131,7 +132,6 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $this->assertSame('name 2', $p->comments[1]->name);
     }
 
-    // todo check bench to debug this case
     public function testUpdate(): void
     {
         $user = new User();
@@ -152,12 +152,6 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $this->save($post);
 
         $postId = $post->id;
-
-        // /** @var Post $p */
-        // $p = (new Select($this->orm, Post::class))
-        //     ->load('user', ['method' => Select\JoinableLoader::INLOAD])
-        //     ->wherePK(1)->fetchOne();
-
         $post->user->email = 'new-email';
         $post->title = 'new title';
         $post->comments[0]->name = 'new name';
@@ -168,7 +162,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $this->orm->getHeap()->clean();
         /** @var Post $p */
         $p = (new Select($this->orm, Post::class))
-            ->load('user', ['method' => Select\JoinableLoader::INLOAD])
+            ->load('user', ['method' => Select\AbstractLoader::INLOAD])
             ->wherePK($postId)->fetchOne();
 
         $this->assertSame('new-email', $p->user->email);
@@ -180,31 +174,31 @@ abstract class ManyToManyBelongsToTest extends BaseTest
     {
         return [
             User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email'],
-                Schema::TYPECAST => [
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'email'],
+                SchemaInterface::TYPECAST => [
                     'id' => 'int',
                 ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
             Post::class => [
-                Schema::ROLE => 'post',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'post',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'title'],
-                Schema::TYPECAST => [
+                SchemaInterface::ROLE => 'post',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'post',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'user_id', 'title'],
+                SchemaInterface::TYPECAST => [
                     'id' => 'int',
-                    'user_id' => 'int', // todo: in the benches it crashes if comment same line in BelongsTo relation
+                    'user_id' => 'int',
                 ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [
                     'user' => [
                         Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
@@ -231,31 +225,31 @@ abstract class ManyToManyBelongsToTest extends BaseTest
                 ],
             ],
             Tag::class => [
-                Schema::ROLE => 'tag',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'tag',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'name'],
-                Schema::TYPECAST => ['id' => 'int'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
+                SchemaInterface::ROLE => 'tag',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'tag',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'name'],
+                SchemaInterface::TYPECAST => ['id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+                SchemaInterface::SCOPE => SortByIDScope::class,
             ],
             TagContext::class => [
-                Schema::ROLE => 'tag_context',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'tag_post_map',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'post_id', 'tag_id'],
-                Schema::TYPECAST => [
+                SchemaInterface::ROLE => 'tag_context',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'tag_post_map',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'post_id', 'tag_id'],
+                SchemaInterface::TYPECAST => [
                     'id' => 'int',
                     'post_id' => 'int',
                     'tag_id' => 'int',
                 ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
         ];
     }

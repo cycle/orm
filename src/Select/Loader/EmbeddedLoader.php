@@ -16,6 +16,8 @@ use Cycle\Database\Query\SelectQuery;
 
 /**
  * Loads object sub-section (column subset).
+ *
+ * @internal
  */
 final class EmbeddedLoader implements JoinableInterface
 {

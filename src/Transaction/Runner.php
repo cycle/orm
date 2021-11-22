@@ -11,6 +11,9 @@ use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\Database\Driver\DriverInterface;
 use Traversable;
 
+/**
+ * @internal
+ */
 final class Runner implements RunnerInterface
 {
     /** @var DriverInterface[] */

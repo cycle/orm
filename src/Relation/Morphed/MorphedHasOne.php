@@ -16,6 +16,8 @@ use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Inverted version of belongs to morphed.
+ *
+ * @internal
  */
 class MorphedHasOne extends HasOne
 {

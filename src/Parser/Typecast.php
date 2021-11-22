@@ -9,6 +9,9 @@ use DateTimeImmutable;
 use Cycle\Database\DatabaseInterface;
 use Throwable;
 
+/**
+ * @internal
+ */
 final class Typecast implements TypecastInterface
 {
     private const RULES = ['int', 'bool', 'float', 'datetime'];

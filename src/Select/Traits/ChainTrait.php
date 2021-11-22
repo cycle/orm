@@ -8,6 +8,9 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\LoaderInterface;
 
+/**
+ * @internal
+ */
 trait ChainTrait
 {
     abstract public function loadRelation(

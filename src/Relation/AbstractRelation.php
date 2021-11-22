@@ -13,6 +13,9 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
 
+/**
+ * @internal
+ */
 abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
 {
     /**

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
+/**
+ * @internal
+ */
 class PropertyMap
 {
     public const PUBLIC_CLASS = '';

@@ -13,6 +13,8 @@ use Cycle\ORM\Transaction\Tuple;
 /**
  * Variation of belongs-to relation which provides the ability to be self linked. Relation can be used
  * to create cyclic references. Relation does not trigger store operation of referenced object!
+ *
+ * @internal
  */
 class RefersTo extends AbstractRelation implements DependencyInterface
 {

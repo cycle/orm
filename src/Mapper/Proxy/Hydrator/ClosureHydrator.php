@@ -8,6 +8,9 @@ use Closure;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 
+/**
+ * @internal
+ */
 class ClosureHydrator
 {
     /**

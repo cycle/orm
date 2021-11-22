@@ -10,6 +10,8 @@ use Cycle\Database\Query\SelectQuery;
 
 /**
  * Provides the ability to configure relation specific where conditions.
+ *
+ * @internal
  */
 trait WhereTrait
 {

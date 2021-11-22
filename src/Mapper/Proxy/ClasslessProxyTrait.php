@@ -8,6 +8,9 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 use RuntimeException;
 
+/**
+ * @internal
+ */
 trait ClasslessProxyTrait
 {
     public RelationMap $__cycle_orm_rel_map;

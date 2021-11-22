@@ -9,6 +9,8 @@ use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Base interface for all relations between entities
+ *
+ * @internal
  */
 interface RelationInterface
 {

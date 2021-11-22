@@ -8,7 +8,6 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
@@ -139,7 +138,7 @@ abstract class DatabaseMapper implements MapperInterface
 
         foreach ($this->primaryKeys as $pk) {
             // set update criteria right now
-            $update->register($pk, $fromData[$pk], ConsumerInterface::SCOPE);
+            $update->setScope($pk, $fromData[$pk]);
         }
 
         return $update;
@@ -154,7 +153,7 @@ abstract class DatabaseMapper implements MapperInterface
         $fromData = $node->getInitialData();
         foreach ($this->primaryKeys as $pk) {
             // set update criteria right now
-            $delete->register($pk, $fromData[$pk], ConsumerInterface::SCOPE);
+            $delete->setScope($pk, $fromData[$pk]);
         }
 
         return $delete;

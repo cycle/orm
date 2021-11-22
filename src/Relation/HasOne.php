@@ -12,6 +12,8 @@ use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Provides the ability to own and forward context values to child entity.
+ *
+ * @internal
  */
 class HasOne extends AbstractRelation
 {

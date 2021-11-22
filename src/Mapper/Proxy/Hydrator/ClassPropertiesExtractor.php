@@ -7,6 +7,9 @@ namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 use ReflectionClass;
 use ReflectionProperty;
 
+/**
+ * @internal
+ */
 class ClassPropertiesExtractor
 {
     public const KEY_FIELDS = 'class';

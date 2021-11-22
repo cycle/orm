@@ -7,6 +7,9 @@ namespace Cycle\ORM\Relation\Traits;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
+/**
+ * @internal
+ */
 trait HasSomeTrait
 {
     /**

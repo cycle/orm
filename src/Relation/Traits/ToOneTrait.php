@@ -9,6 +9,9 @@ use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 
+/**
+ * @internal
+ */
 trait ToOneTrait
 {
     public function init(Node $node, array $data): object

@@ -254,17 +254,12 @@ final class ORM implements ORMInterface
     ): ORMInterface {
         $orm = clone $this;
 
-        if ($schema !== null) {
-            $orm->schema = $schema;
-        }
-        if ($factory !== null) {
-            $orm->factory = $factory;
-        }
-        if ($heap !== null) {
-            $orm->heap = $heap;
-        }
+        $orm->heap = $heap ?? $orm->heap;
 
         if ($schema !== null || $factory !== null) {
+            $orm->schema = $schema ?? $orm->schema;
+            $orm->factory = $factory ?? $orm->factory;
+
             $orm->resetEntityRegister();
         }
 

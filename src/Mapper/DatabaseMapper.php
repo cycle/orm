@@ -8,7 +8,6 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;

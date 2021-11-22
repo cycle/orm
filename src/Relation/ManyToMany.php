@@ -24,6 +24,9 @@ use Cycle\ORM\Transaction\Tuple;
 use SplObjectStorage;
 use Traversable;
 
+/**
+ * @internal
+ */
 class ManyToMany extends Relation\AbstractRelation
 {
     /** @var string[] */

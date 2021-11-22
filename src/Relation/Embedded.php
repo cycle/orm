@@ -19,6 +19,8 @@ use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Embeds one object to another.
+ *
+ * @internal
  */
 final class Embedded implements SameRowRelationInterface
 {

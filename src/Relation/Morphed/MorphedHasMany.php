@@ -11,6 +11,9 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\HasMany;
 use Cycle\ORM\Transaction\Tuple;
 
+/**
+ * @internal
+ */
 class MorphedHasMany extends HasMany
 {
     private string $morphKey;

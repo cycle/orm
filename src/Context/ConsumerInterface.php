@@ -6,8 +6,6 @@ namespace Cycle\ORM\Context;
 
 /**
  * Provides the ability to accept the forwarded key value.
- *
- * @internal
  */
 interface ConsumerInterface
 {

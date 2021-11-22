@@ -16,6 +16,8 @@ use Cycle\ORM\Transaction\Tuple;
  * Provides ability to link to the parent object.
  * Will claim branch up to the parent object and it's relations. To disable
  * branch walk-through use RefersTo relation.
+ * 
+ * @internal
  */
 class BelongsTo extends AbstractRelation implements DependencyInterface
 {

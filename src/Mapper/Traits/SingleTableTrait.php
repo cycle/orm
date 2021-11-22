@@ -6,6 +6,9 @@ namespace Cycle\ORM\Mapper\Traits;
 
 use Cycle\ORM\SchemaInterface;
 
+/**
+ * @internal
+ */
 trait SingleTableTrait
 {
     protected string $discriminator = '_type';

@@ -17,6 +17,8 @@ use Cycle\ORM\Transaction\Tuple;
 
 /**
  * Provides the ability to own the collection of entities.
+ *
+ * @internal
  */
 class HasMany extends AbstractRelation
 {

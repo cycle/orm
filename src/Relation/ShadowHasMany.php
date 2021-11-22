@@ -8,6 +8,9 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
+/**
+ * @internal
+ */
 class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
 {
     private string $targetContainer;

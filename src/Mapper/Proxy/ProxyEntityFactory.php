@@ -11,6 +11,9 @@ use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
 use Cycle\ORM\RelationMap;
 use Doctrine\Instantiator\Instantiator;
 
+/**
+ * @internal
+ */
 class ProxyEntityFactory
 {
     /**

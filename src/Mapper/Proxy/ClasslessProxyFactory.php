@@ -6,6 +6,9 @@ namespace Cycle\ORM\Mapper\Proxy;
 
 use Cycle\ORM\RelationMap;
 
+/**
+ * @internal
+ */
 class ClasslessProxyFactory
 {
     /**

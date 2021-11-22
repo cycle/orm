@@ -7,6 +7,8 @@ namespace Cycle\ORM\Parser\Traits;
 /**
  * Trait provides ability for Node to ensure that given data is unique in selection. Primary key
  * would be used to tie duplicate nodes together.
+ *
+ * @internal
  */
 trait DuplicateTrait
 {

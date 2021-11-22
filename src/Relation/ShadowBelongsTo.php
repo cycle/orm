@@ -9,6 +9,9 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
+/**
+ * @internal
+ */
 class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
 {
     private string $name;

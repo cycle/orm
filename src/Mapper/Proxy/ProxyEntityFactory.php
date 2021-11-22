@@ -15,7 +15,7 @@ class ProxyEntityFactory
 {
     /**
      * @var string[]
-     * @psalm-var class-string
+     * @psalm-var class-string[]
      */
     private array $classMap = [];
 
@@ -30,15 +30,15 @@ class ProxyEntityFactory
         private ClassPropertiesExtractor $propertiesExtractor
     ) {
         $this->instantiator = new Instantiator();
-        $this->initializer = static function (object $self, array $properties): void {
+        $this->initializer = static function (object $entity, array $properties): void {
             foreach ($properties as $name) {
-                unset($self->$name);
+                unset($entity->$name);
             }
         };
     }
 
     /**
-     * Create empty entity
+     * Creates an empty Entity and sets column values from data.
      */
     public function create(
         RelationMap $relMap,
@@ -65,6 +65,11 @@ class ProxyEntityFactory
         return $proxy;
     }
 
+    /**
+     * Sets an Entity's column values from data.
+     *
+     * @return object Entity with hydrated data
+     */
     public function upgrade(
         RelationMap $relMap,
         object $entity,
@@ -81,11 +86,17 @@ class ProxyEntityFactory
         );
     }
 
+    /**
+     * Get an entity relation column values as array, except primitive columns.
+     *
+     * @return array array<string, mixed>
+     */
     public function extractRelations(RelationMap $relMap, object $entity): array
     {
         if (!property_exists($entity, '__cycle_orm_rel_data')) {
             return array_intersect_key($this->entityToArray($entity), $relMap->getRelations());
         }
+
         $currentData = $entity->__cycle_orm_rel_data;
         foreach ($relMap->getRelations() as $key => $relation) {
             if (!array_key_exists($key, $currentData)) {
@@ -93,9 +104,15 @@ class ProxyEntityFactory
                 $currentData[$key] = $arrayData[$key];
             }
         }
+
         return $currentData;
     }
 
+    /**
+     * Get an entity column values as array, except relations.
+     *
+     * @return array<string, mixed>
+     */
     public function extractData(RelationMap $relMap, object $entity): array
     {
         return array_diff_key($this->entityToArray($entity), $relMap->getRelations());
@@ -107,14 +124,13 @@ class ProxyEntityFactory
         foreach ((array)$entity as $key => $value) {
             $result[$key[0] === "\0" ? substr($key, strrpos($key, "\0", 1) + 1) : $key] = $value;
         }
-        // todo test this case. Presumably relations data not extracted to array
-        // $relations = $result['__cycle_orm_rel_data'] ?? [];
+
         unset(
             $result['__cycle_orm_rel_map'],
             $result['__cycle_orm_rel_data'],
             $result['__cycle_orm_relation_props']
         );
-        // return $relations + $result;
+
         return $result;
     }
 
@@ -159,9 +175,11 @@ class ProxyEntityFactory
     }
 
     /**
-     * @throws \ReflectionException
+     * Gets property map (primitive fields, relations) for given Entity.
      *
      * @return PropertyMap[]
+     *
+     * @throws \ReflectionException
      */
     private function getEntityProperties(object $entity, RelationMap $relMap): array
     {

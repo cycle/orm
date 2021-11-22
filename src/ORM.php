@@ -220,6 +220,7 @@ final class ORM implements ORMInterface
         );
     }
 
+    /** @deprecated since Cycle ORM v2.0, this method will be removed in future releases. Use method with instead. */
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
         $orm = clone $this;
@@ -229,6 +230,7 @@ final class ORM implements ORMInterface
         return $orm;
     }
 
+    /** @deprecated since Cycle ORM v2.0, this method will be removed in future releases. Use method with instead. */
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         $orm = clone $this;
@@ -238,10 +240,35 @@ final class ORM implements ORMInterface
         return $orm;
     }
 
+    /** @deprecated since Cycle ORM v2.0, this method will be removed in future releases. Use method with instead. */
     public function withHeap(HeapInterface $heap): ORMInterface
     {
         $orm = clone $this;
         $orm->heap = $heap;
+
+        return $orm;
+    }
+
+    public function with(
+        ?SchemaInterface $schema = null,
+        ?FactoryInterface $factory = null,
+        ?HeapInterface $heap = null
+    ): ORMInterface {
+        $orm = clone $this;
+
+        if ($schema) {
+            $orm->schema = $schema;
+        }
+        if ($factory) {
+            $orm->factory = $factory;
+        }
+        if ($heap) {
+            $orm->heap = $heap;
+        }
+
+        if ($schema || $factory) {
+            $orm->resetEntityRegister();
+        }
 
         return $orm;
     }

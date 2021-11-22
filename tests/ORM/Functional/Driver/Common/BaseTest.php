@@ -127,7 +127,7 @@ abstract class BaseTest extends TestCase
      */
     public function withSchema(SchemaInterface $schema)
     {
-        $this->orm = $this->orm->withSchema($schema);
+        $this->orm = $this->orm->with($schema);
         return $this->orm;
     }
 

@@ -79,7 +79,7 @@ abstract class HasManyCollectionsTest extends BaseTest
      */
     public function testCustomCollectionLoad(?string $factory, bool $lazy, string $class): void
     {
-        $this->orm = $this->createOrm()->withSchema(
+        $this->orm = $this->createOrm()->with(
             new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory))
         );
 
@@ -97,7 +97,7 @@ abstract class HasManyCollectionsTest extends BaseTest
      */
     public function testCustomCollectionPersist(string $factory, string $type): void
     {
-        $this->orm = $this->createOrm()->withSchema(
+        $this->orm = $this->createOrm()->with(
             new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory))
         );
         $comments = $this->collectionFactory[$factory]->collect([

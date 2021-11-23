@@ -11,5 +11,5 @@ namespace Cycle\ORM\Tests\Driver\Postgres;
 
 class TransactionTest extends \Cycle\ORM\Tests\TransactionTest
 {
-    const DRIVER = "postgres";
+    public const DRIVER = 'postgres';
 }

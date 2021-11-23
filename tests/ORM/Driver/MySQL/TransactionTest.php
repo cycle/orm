@@ -11,5 +11,5 @@ namespace Cycle\ORM\Tests\Driver\MySQL;
 
 class TransactionTest extends \Cycle\ORM\Tests\TransactionTest
 {
-    const DRIVER = "mysql";
+    public const DRIVER = 'mysql';
 }

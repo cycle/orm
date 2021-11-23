@@ -82,7 +82,6 @@ abstract class TransactionTest extends BaseTest
             $this->captureWriteQueries();
             $t->run();
         } catch (\Exception $e) {
-
             $this->assertNumWrites(3);
             $this->assertNull($u->id);
         }
@@ -112,8 +111,7 @@ class TransactionTestMapper extends Mapper
     public function queueDelete($entity, Node $node, State $state): CommandInterface
     {
         if ($entity->id == '3') {
-            return new class implements CommandInterface {
-
+            return new class() implements CommandInterface {
                 public function isReady(): bool
                 {
                     return true;

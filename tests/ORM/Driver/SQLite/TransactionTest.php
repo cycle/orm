@@ -11,5 +11,5 @@ namespace Cycle\ORM\Tests\Driver\SQLite;
 
 class TransactionTest extends \Cycle\ORM\Tests\TransactionTest
 {
-    const DRIVER = "sqlite";
+    public const DRIVER = 'sqlite';
 }

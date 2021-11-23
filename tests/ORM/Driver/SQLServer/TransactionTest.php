@@ -11,5 +11,5 @@ namespace Cycle\ORM\Tests\Driver\SQLServer;
 
 class TransactionTest extends \Cycle\ORM\Tests\TransactionTest
 {
-    const DRIVER = "sqlserver";
+    public const DRIVER = 'sqlserver';
 }

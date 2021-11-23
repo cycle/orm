@@ -35,6 +35,8 @@ abstract class CompositePKTest extends SimpleCasesTest
     protected const
         ENGINEER_2_PK = ['id' => 2, 'role_id' => 3];
     protected const
+        EMPLOYEE_2_PK = ['id' => 2, 'employee_id' => 3];
+    protected const
         PROGRAMATOR_2_PK = ['second_id' => 3, 'subrole_id' => 2];
     protected const
         PROGRAMATOR_2 = ['second_id' => 3, 'subrole_id' => 2, 'language' => 'php'];

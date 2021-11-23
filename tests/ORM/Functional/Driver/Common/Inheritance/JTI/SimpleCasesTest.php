@@ -28,6 +28,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     protected const MANAGER_1 = ['id' => 1, 'rank' => 'top'];
     protected const MANAGER_3 = ['id' => 3, 'rank' => 'bottom'];
     protected const ENGINEER_2_PK = 2;
+    protected const EMPLOYEE_2_PK = self::ENGINEER_2_PK;
     protected const PROGRAMATOR_2_PK = self::ENGINEER_2_PK;
     protected const EMPLOYEE_1_LOADED = self::EMPLOYEE_1;
     protected const EMPLOYEE_2_LOADED = self::EMPLOYEE_2;
@@ -127,7 +128,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
     public function testSelectEmployeeHierarchyByPK(): void
     {
         $entity = (new Select($this->orm, static::EMPLOYEE_ROLE))
-            ->wherePK(static::ENGINEER_2_PK)
+            ->wherePK(static::EMPLOYEE_2_PK)
             ->fetchOne();
 
         $this->assertInstanceOf(Programator::class, $entity);
@@ -332,7 +333,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
         // todo load without inheritance
         $this->assertNull(
             (new Select($this->orm, static::PROGRAMATOR_ROLE))
-                ->wherePK(static::ENGINEER_2_PK)
+                ->wherePK(static::PROGRAMATOR_2_PK)
                 ->fetchOne()
         );
         $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))
@@ -340,7 +341,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
             ->wherePK(static::ENGINEER_2_PK)->fetchOne());
         $this->assertNotNull((new Select($this->orm, static::EMPLOYEE_ROLE))
             ->loadSubclasses(false)
-            ->wherePK(static::ENGINEER_2_PK)->fetchOne());
+            ->wherePK(static::EMPLOYEE_2_PK)->fetchOne());
     }
 
     protected function getSchemaArray(): array

@@ -156,6 +156,59 @@ abstract class CompositePKTest extends BaseTest
         $this->assertSame($data2, $data3);
     }
 
+    public function testFetchByPKWithCompositePK(): void
+    {
+        $this->createTable1();
+
+        $u1 = new CompositePK();
+        $u1->key1 = 1;
+        $u1->key2 = 2;
+
+        $u2 = new CompositePK();
+        $u2->key1 = 3;
+        $u2->key2 = 4;
+
+        $u3 = new CompositePK();
+        $u3->key1 = 5;
+        $u3->key2 = 6;
+
+        (new Transaction($this->orm))
+            ->persist($u1)
+            ->persist($u2)
+            ->persist($u3)
+            ->run();
+
+        // one entity with assoc PK. Keys - fields in db
+        $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['field2' => 2, 'field1' => 1])->fetchOne();
+
+        // several entities with assoc PK and different keys order. Keys - properties
+        $data2 = (new Select($this->orm, CompositePK::class))
+            ->wherePK(['key1' => 3, 'key2' => 4], ['key2' => 6, 'key1' => 5])
+            ->fetchAll();
+
+        // one entity with array PK
+        $data3 = (new Select($this->orm, CompositePK::class))->wherePK([5, 6])->fetchOne();
+
+        $this->assertSame($u1->key1, $data1->key1);
+        $this->assertSame($u1->key2, $data1->key2);
+        $this->assertSame($u1->key3, $data1->key3);
+
+        $this->assertSame($u2->key1, $data2[0]->key1);
+        $this->assertSame($u2->key2, $data2[0]->key2);
+        $this->assertSame($u2->key3, $data2[0]->key3);
+        $this->assertSame($u3->key1, $data2[1]->key1);
+        $this->assertSame($u3->key2, $data2[1]->key2);
+        $this->assertSame($u3->key3, $data2[1]->key3);
+
+        $this->assertSame($u3->key1, $data3->key1);
+        $this->assertSame($u3->key2, $data3->key2);
+        $this->assertSame($u3->key3, $data3->key3);
+
+        // wrong keys
+        $this->expectException(\InvalidArgumentException::class);
+        (new Select($this->orm, CompositePK::class))->wherePK(['foo' => 2, 'bar' => 1])->fetchOne();
+    }
+
     protected function createTable1(): void
     {
         $this->makeTable(

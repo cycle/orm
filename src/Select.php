@@ -131,43 +131,17 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Shortcut to where method to set AND condition for entity primary key.
      *
-     * todo Stringable
-     *
-     * @psalm-param string|int|list<string|int>|Parameter ...$ids
+     * @psalm-param string|int|list<string|int>|object ...$ids
      *
      * @return $this
      */
-    public function wherePK(string|int|array|Parameter ...$ids): self
+    public function wherePK(string|int|array|object ...$ids): self
     {
         $pk = $this->loader->getPK();
         $pk = \is_array($pk) && \count($pk) > 1 ? $pk : ((array)$pk)[0];
-        // todo: support assoc ids [key1 => value1, ...]
-        if (\is_array($pk) && \count($pk) > 1) {
-            $assoc = [];
-            foreach ($ids as $id) {
-                $id = $id instanceof Parameter ? $id->getValue() : $id;
-                if (!\is_array($id)) {
-                    throw new InvalidArgumentException('Composite primary key must be defined using an array.');
-                }
-                if (\count($pk) !== \count($id)) {
-                    throw new InvalidArgumentException(sprintf('Primary key should contain %d values.', \count($pk)));
-                }
 
-                $values = \array_values($id);
-                $i = 0;
-                $set = [];
-                foreach ($pk as $key) {
-                    $set[$key] = $values[$i];
-                    ++$i;
-                }
-                $assoc[] = $set;
-            }
-            $this->__call('where', [function (Select\QueryBuilder $q) use ($assoc) {
-                foreach ($assoc as $set) {
-                    $q->orWhere($set);
-                }
-            }]);
-            return $this;
+        if (\is_array($pk) && \count($pk) > 1) {
+            return $this->buildCompositePKQuery($pk, $ids);
         }
         return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
@@ -454,6 +428,43 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function loadSubclasses(bool $load = true): self
     {
         $this->loader->setSubclassesLoading($load);
+        return $this;
+    }
+
+    private function buildCompositePKQuery(array $primaryKeys, array $args): self
+    {
+        $prepared = [];
+        foreach ($args as $index => $values) {
+            $values = $values instanceof Parameter ? $values->getValue() : $values;
+            if (!\is_array($values)) {
+                throw new InvalidArgumentException('Composite primary key must be defined using an array.');
+            }
+            if (\count($primaryKeys) !== \count($values)) {
+                throw new InvalidArgumentException(
+                    sprintf('Primary key should contain %d values.', \count($primaryKeys))
+                );
+            }
+
+            $isAssoc = !array_is_list($values);
+            foreach ($values as $pk => $value) {
+                $isAssoc ?
+                    $pk = $this->loader->getAlias() . '.' . $this->loader->fieldAlias($pk) :
+                    $pk = $primaryKeys[$pk];
+
+                if (!\in_array($pk, $primaryKeys, true)) {
+                    throw new InvalidArgumentException(sprintf('Primary key %s not found.', $pk));
+                }
+
+                $prepared[$index][$pk] = $value;
+            }
+        }
+
+        $this->__call('where', [function (Select\QueryBuilder $q) use ($prepared) {
+            foreach ($prepared as $set) {
+                $q->orWhere($set);
+            }
+        }]);
+
         return $this;
     }
 }

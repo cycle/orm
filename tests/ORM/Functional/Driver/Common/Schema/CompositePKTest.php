@@ -156,7 +156,7 @@ abstract class CompositePKTest extends BaseTest
         $this->assertSame($data2, $data3);
     }
 
-    public function testFetchByPKWithCompositePK(): void
+    public function testFindByPK(): void
     {
         $this->createTable1();
 
@@ -203,11 +203,34 @@ abstract class CompositePKTest extends BaseTest
         $this->assertSame($u3->key1, $data3->key1);
         $this->assertSame($u3->key2, $data3->key2);
         $this->assertSame($u3->key3, $data3->key3);
+    }
 
-        // wrong keys
+    /**
+     * @dataProvider wrongDataProvider
+     */
+    public function testFindByPKExceptions(array|string $pk, string $exceptionMsg): void
+    {
+        $this->createTable1();
+
+        $this->expectExceptionMessage($exceptionMsg);
         $this->expectException(\InvalidArgumentException::class);
-        (new Select($this->orm, CompositePK::class))->wherePK(['foo' => 2, 'bar' => 1])->fetchOne();
-        (new Select($this->orm, CompositePK::class))->wherePK(['key1' => 1, 'key2' => 2, 'key3' => 3])->fetchOne();
+
+        (new Select($this->orm, CompositePK::class))->wherePK($pk)->fetchOne();
+    }
+
+    public function wrongDataProvider(): array
+    {
+        return [
+            'Incorrect type' => [
+                'foo', 'Composite primary key must be defined using an array.'
+            ],
+            'Incorrect count' => [
+                ['key1' => 1, 'key2' => 2, 'key3' => 3], 'Primary key should contain 2 values.'
+            ],
+            'Don\'t exist' => [
+                ['foo' => 2, 'bar' => 1], 'Primary key simple_entity.foo not found.'
+            ],
+        ];
     }
 
     protected function createTable1(): void

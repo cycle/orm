@@ -16,20 +16,13 @@ use Cycle\ORM\Transaction\CommandGeneratorInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\RunnerInterface;
+use Cycle\ORM\Transaction\State;
+use Cycle\ORM\Transaction\StateInterface;
 use Cycle\ORM\Transaction\Tuple;
 
-/**
- * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
- * can operate as UnitOfWork. Multiple transactions can co-exists in one application.
- *
- * Internally, upon "run", transaction will request mappers to generate graph of linked commands to create, update or
- * delete entities.
- *
- * @deprecated since 2.1 use Cycle\ORM\EntityManager
- */
-final class Transaction implements TransactionInterface
+class EntityManager implements EntityManagerInterface
 {
-    private const RELATIONS_NOT_RESOLVED = 0;
+    private const RELATIONS_NOT_RESOLVED = 0; // todo: not used
     private const RELATIONS_RESOLVED = 1;
     private const RELATIONS_DEFERRED = 2;
 
@@ -46,20 +39,26 @@ final class Transaction implements TransactionInterface
         $this->commandGenerator = $orm->getCommandGenerator();
     }
 
-    public function persist(object $entity, int $mode = self::MODE_CASCADE): self
+    public function persist(object $entity, bool $cascade = true): static
     {
-        $this->pool->attachStore($entity, $mode === self::MODE_CASCADE);
-        return $this;
-    }
-
-    public function delete(object $entity, int $mode = self::MODE_CASCADE): self
-    {
-        $this->pool->attach($entity, Tuple::TASK_FORCE_DELETE, $mode === self::MODE_CASCADE);
+        $this->pool->attachStore($entity, $cascade);
 
         return $this;
     }
 
-    public function run(): void
+    public function persistDeferred(object $entity, bool $cascade = true): static
+    {
+        // TODO: Implement persistDeferred() method.
+    }
+
+    public function delete(object $entity, bool $cascade = true): static
+    {
+        $this->pool->attach($entity, Tuple::TASK_FORCE_DELETE, $cascade);
+
+        return $this;
+    }
+
+    public function run(): StateInterface
     {
         try {
             try {
@@ -78,7 +77,7 @@ final class Transaction implements TransactionInterface
             // this will keep entity data as it was before transaction run
             $this->resetHeap();
 
-            throw $e;
+            return new State(clone $this, $e);
         } finally {
             if (!isset($e)) {
                 // we are ready to commit all changes to our representation layer
@@ -87,6 +86,8 @@ final class Transaction implements TransactionInterface
         }
 
         $this->runner->complete();
+
+        return new State(clone $this);
     }
 
     private function runCommand(?CommandInterface $command): void
@@ -189,8 +190,8 @@ final class Transaction implements TransactionInterface
                 $tuple->node === null
                     ? '(has no Node)'
                     : implode('|', array_map(static fn ($x) => \is_object($x)
-                        ? $x::class
-                        : (string)$x, $tuple->node->getData()))
+                    ? $x::class
+                    : (string)$x, $tuple->node->getData()))
             );
 
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
@@ -234,7 +235,7 @@ final class Transaction implements TransactionInterface
                 // if ($tuple->status < Tuple::STATUS_PROPOSED) {
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
-            // }
+                // }
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
@@ -253,7 +254,7 @@ final class Transaction implements TransactionInterface
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
                 $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
-            // $waitKeys[] = $relation->getInnerKeys();
+                // $waitKeys[] = $relation->getInnerKeys();
             } else {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }

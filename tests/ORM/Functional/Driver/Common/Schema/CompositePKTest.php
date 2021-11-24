@@ -207,6 +207,7 @@ abstract class CompositePKTest extends BaseTest
         // wrong keys
         $this->expectException(\InvalidArgumentException::class);
         (new Select($this->orm, CompositePK::class))->wherePK(['foo' => 2, 'bar' => 1])->fetchOne();
+        (new Select($this->orm, CompositePK::class))->wherePK(['key1' => 1, 'key2' => 2, 'key3' => 3])->fetchOne();
     }
 
     protected function createTable1(): void

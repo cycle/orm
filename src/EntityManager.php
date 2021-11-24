@@ -235,7 +235,7 @@ class EntityManager implements EntityManagerInterface
                 // if ($tuple->status < Tuple::STATUS_PROPOSED) {
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
-                // }
+            // }
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
@@ -254,7 +254,7 @@ class EntityManager implements EntityManagerInterface
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
                 $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
-                // $waitKeys[] = $relation->getInnerKeys();
+            // $waitKeys[] = $relation->getInnerKeys();
             } else {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }

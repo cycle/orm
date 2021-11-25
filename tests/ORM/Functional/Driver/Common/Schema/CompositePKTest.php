@@ -222,13 +222,13 @@ abstract class CompositePKTest extends BaseTest
     {
         return [
             'Incorrect type' => [
-                'foo', 'Composite primary key must be defined using an array.'
+                'foo', 'Composite primary key must be defined using an array.',
             ],
             'Incorrect count' => [
-                ['key1' => 1, 'key2' => 2, 'key3' => 3], 'Primary key should contain 2 values.'
+                ['key1' => 1, 'key2' => 2, 'key3' => 3], 'Primary key should contain 2 values.',
             ],
             'Don\'t exist' => [
-                ['foo' => 2, 'bar' => 1], 'Primary key simple_entity.foo not found.'
+                ['foo' => 2, 'bar' => 1], 'Primary key simple_entity.foo not found.',
             ],
         ];
     }

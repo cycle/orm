@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 class Image
 {
+    public $id;
     public $parent;
 
     public $url;

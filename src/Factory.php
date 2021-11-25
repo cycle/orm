@@ -179,7 +179,7 @@ final class Factory implements FactoryInterface
                 }
             }
         }
-        return $this->collectionFactoryAlias[$name] = $this->make($name);
+        return $this->collectionFactoryAlias[$name] = $this->factory->make($name);
     }
 
     public function relation(

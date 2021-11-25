@@ -2,33 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM;
+namespace Cycle\ORM\Transaction;
 
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Special\Sequence;
 use Cycle\ORM\Exception\PoolException;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
-use Cycle\ORM\Transaction\CommandGeneratorInterface;
-use Cycle\ORM\Transaction\Pool;
-use Cycle\ORM\Transaction\Runner;
-use Cycle\ORM\Transaction\RunnerInterface;
-use Cycle\ORM\Transaction\StateInterface;
-use Cycle\ORM\Transaction\Tuple;
+use Cycle\ORM\RelationMap;
 
-/**
- * Transaction provides ability to define set of entities to be stored or deleted within one transaction. Transaction
- * can operate as UnitOfWork. Multiple transactions can co-exists in one application.
- *
- * Internally, upon "run", transaction will request mappers to generate graph of linked commands to create, update or
- * delete entities.
- *
- * @deprecated since 2.1 use Cycle\ORM\EntityManager
- */
-final class Transaction implements TransactionInterface, StateInterface
+final class UnitOfWork implements StateInterface
 {
     private const RELATIONS_NOT_RESOLVED = 0;
     private const RELATIONS_RESOLVED = 1;
@@ -37,6 +24,7 @@ final class Transaction implements TransactionInterface, StateInterface
     private Pool $pool;
     private RunnerInterface $runner;
     private CommandGeneratorInterface $commandGenerator;
+    private ?\Throwable $error = null;
 
     public function __construct(
         private ORMInterface $orm,
@@ -47,20 +35,21 @@ final class Transaction implements TransactionInterface, StateInterface
         $this->commandGenerator = $orm->getCommandGenerator();
     }
 
-    public function persist(object $entity, int $mode = self::MODE_CASCADE): self
+    public function persist(object $entity, bool $cascade = true): self
     {
-        $this->pool->attachStore($entity, $mode === self::MODE_CASCADE);
-        return $this;
-    }
-
-    public function delete(object $entity, int $mode = self::MODE_CASCADE): self
-    {
-        $this->pool->attach($entity, Tuple::TASK_FORCE_DELETE, $mode === self::MODE_CASCADE);
+        $this->pool->attachStore($entity, $cascade);
 
         return $this;
     }
 
-    public function run(): void
+    public function delete(object $entity, bool $cascade = true): self
+    {
+        $this->pool->attach($entity, Tuple::TASK_FORCE_DELETE, $cascade);
+
+        return $this;
+    }
+
+    public function run(): StateInterface
     {
         try {
             try {
@@ -79,16 +68,18 @@ final class Transaction implements TransactionInterface, StateInterface
             // this will keep entity data as it was before transaction run
             $this->resetHeap();
 
+            $uow = clone $this;
+            $uow->error = $e;
 
-            throw $e;
-        } finally {
-            if (!isset($e)) {
-                // we are ready to commit all changes to our representation layer
-                $this->syncHeap();
-            }
+            return $uow;
         }
 
+        // we are ready to commit all changes to our representation layer
+        $this->syncHeap();
+
         $this->runner->complete();
+
+        return new SuccessfulState();
     }
 
     private function runCommand(?CommandInterface $command): void
@@ -118,7 +109,7 @@ final class Transaction implements TransactionInterface, StateInterface
             /** @var Node $node */
             $node = $heap->get($e);
 
-            if (!$node->hasState()) {
+            if (! $node->hasState()) {
                 continue;
             }
 
@@ -174,7 +165,7 @@ final class Transaction implements TransactionInterface, StateInterface
                 }
             }
 
-            if (!$tuple->node || !$tuple->state || !$tuple->mapper) {
+            if (! $tuple->node || ! $tuple->state || ! $tuple->mapper) {
                 throw new \Exception();
             }
             // we do not expect to store promises
@@ -184,18 +175,21 @@ final class Transaction implements TransactionInterface, StateInterface
             }
             \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
                 "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
-                ['preparing','waiting','waited','deferred','proposed','preprocessed','processed'][$tuple->status],
+                ['preparing', 'waiting', 'waited', 'deferred', 'proposed', 'preprocessed', 'processed'][$tuple->status],
                 ['store', 'delete', 'force delete'][$tuple->task],
                 $tuple->node === null ? $entity::class : $tuple->node->getRole(),
                 spl_object_id($entity),
                 $tuple->node === null
                     ? '(has no Node)'
-                    : implode('|', array_map(static fn ($x) => \is_object($x)
+                    : implode(
+                    '|',
+                    array_map(static fn($x) => \is_object($x)
                         ? $x::class
-                        : (string)$x, $tuple->node->getData()))
+                        : (string)$x, $tuple->node->getData())
+                )
             );
 
-            if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
+            if ($tuple->task === Tuple::TASK_FORCE_DELETE && ! $tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
                 // todo delete cascaded
                 $command = $this->commandGenerator->generateDeleteCommand($this->orm, $tuple);
@@ -210,7 +204,7 @@ final class Transaction implements TransactionInterface, StateInterface
 
     private function resolveMasterRelations(Tuple $tuple, RelationMap $map): int
     {
-        if (!$map->hasDependencies()) {
+        if (! $map->hasDependencies()) {
             return self::RELATIONS_RESOLVED;
         }
 
@@ -218,10 +212,10 @@ final class Transaction implements TransactionInterface, StateInterface
         $resolved = true;
         $waitKeys = [];
         foreach ($map->getMasters() as $name => $relation) {
-            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
+            $className = "\033[33m".substr($relation::class, strrpos($relation::class, '\\') + 1)."\033[0m";
             $role = $tuple->node->getRole();
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-            if (/*!$relation->isCascade() || */$relationStatus === RelationInterface::STATUS_RESOLVED) {
+            if (/*!$relation->isCascade() || */ $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
             }
@@ -236,7 +230,7 @@ final class Transaction implements TransactionInterface, StateInterface
                 // if ($tuple->status < Tuple::STATUS_PROPOSED) {
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
-            // }
+                // }
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
@@ -255,7 +249,7 @@ final class Transaction implements TransactionInterface, StateInterface
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
                 $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
-            // $waitKeys[] = $relation->getInnerKeys();
+                // $waitKeys[] = $relation->getInnerKeys();
             } else {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }
@@ -267,7 +261,7 @@ final class Transaction implements TransactionInterface, StateInterface
 
     private function resolveSlaveRelations(Tuple $tuple, RelationMap $map): int
     {
-        if (!$map->hasSlaves()) {
+        if (! $map->hasSlaves()) {
             return self::RELATIONS_RESOLVED;
         }
         $changedFields = array_keys($tuple->state->getChanges());
@@ -283,9 +277,9 @@ final class Transaction implements TransactionInterface, StateInterface
         }
         foreach ($map->getSlaves() as $name => $relation) {
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
+            $className = "\033[33m".substr($relation::class, strrpos($relation::class, '\\') + 1)."\033[0m";
             $role = $tuple->node->getRole();
-            if (!$relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
+            if (! $relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 // todo check changes for not cascaded relations?
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
@@ -309,8 +303,8 @@ final class Transaction implements TransactionInterface, StateInterface
 
             if ($relationStatus !== RelationInterface::STATUS_PREPARE
                 && $relationStatus !== RelationInterface::STATUS_RESOLVED
-                && !$isWaitingKeys
-                && !$hasChangedKeys
+                && ! $isWaitingKeys
+                && ! $hasChangedKeys
                 && \count(array_intersect($innerKeys, array_keys($transactData))) === \count($innerKeys)
             ) {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
@@ -331,16 +325,17 @@ final class Transaction implements TransactionInterface, StateInterface
 
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map, bool $hasDeferredRelations): void
     {
-        if (!$map->hasEmbedded() && !$tuple->node->hasChanges()) {
+        if (! $map->hasEmbedded() && ! $tuple->node->hasChanges()) {
             \Cycle\ORM\Transaction\Pool::DEBUG && print "No changes, no embedded \n";
-            $tuple->status = !$hasDeferredRelations
+            $tuple->status = ! $hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED
                 : max(Tuple::STATUS_DEFERRED, $tuple->status);
+
             return;
         }
         $command = $this->commandGenerator->generateStoreCommand($this->orm, $tuple);
 
-        if (!$map->hasEmbedded()) {
+        if (! $map->hasEmbedded()) {
             // Not embedded but has changes
             $this->runCommand($command);
 
@@ -349,6 +344,7 @@ final class Transaction implements TransactionInterface, StateInterface
             } else {
                 $tuple->status = Tuple::STATUS_PROCESSED;
             }
+
             return;
         }
 
@@ -370,7 +366,7 @@ final class Transaction implements TransactionInterface, StateInterface
         }
         $this->runCommand($command);
 
-        $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED || !$hasDeferredRelations
+        $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED || ! $hasDeferredRelations
             ? Tuple::STATUS_PROCESSED
             : max(Tuple::STATUS_DEFERRED, $tuple->status);
     }
@@ -410,8 +406,23 @@ final class Transaction implements TransactionInterface, StateInterface
                 : $this->resolveMasterRelations($tuple, $map);
         }
 
-        if (!$isDependenciesResolved && $tuple->status === Tuple::STATUS_PREPROCESSED) {
+        if (! $isDependenciesResolved && $tuple->status === Tuple::STATUS_PREPROCESSED) {
             $tuple->status = Tuple::STATUS_UNPROCESSED;
         }
+    }
+
+    public function isSuccess(): bool
+    {
+        return $this->getError() === null;
+    }
+
+    public function getError(): ?\Throwable
+    {
+        return $this->error;
+    }
+
+    public function retry(): static
+    {
+        return $this->run();
     }
 }

@@ -13,6 +13,7 @@ interface StateInterface
 
     /**
      * The reason of failed transaction
+     *
      * @return \Throwable|null
      */
     public function getError(): ?\Throwable;

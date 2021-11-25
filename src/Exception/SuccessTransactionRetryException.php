@@ -6,5 +6,4 @@ namespace Cycle\ORM\Exception;
 
 class SuccessTransactionRetryException extends TransactionException
 {
-
 }

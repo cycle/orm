@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common;
 
+use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\TransactionTestMapper;
@@ -129,10 +130,11 @@ abstract class TransactionTest extends BaseTest
 
             $t->run();
 
-            throw new \Exception('Something went wrong');
+            throw new \Exception('Something went wrong outside transaction');
 
             $dbal->commit();
         } catch (\Throwable $e) {
+            $this->assertSame('Something went wrong outside transaction', $e->getMessage());
             $dbal->rollback();
         }
 
@@ -183,6 +185,8 @@ abstract class TransactionTest extends BaseTest
 
             $dbal->commit();
         } catch (\Throwable $e) {
+            $this->assertSame('Something went wrong', $e->getMessage());
+
             $dbal->rollback();
         }
 

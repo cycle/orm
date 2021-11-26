@@ -25,11 +25,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         $node = $tuple->node;
         $tuple->state->setRelation($this->getName(), $related);
 
-        if ($related instanceof ReferenceInterface) {
-            if ($related->hasValue() || $this->resolve($related, false) !== null) {
-                $related = $related->getValue();
-                $tuple->state->setRelation($this->getName(), $related);
-            }
+        if ($related instanceof ReferenceInterface && $this->resolve($related, false) !== null) {
+            $related = $related->getValue();
+            $tuple->state->setRelation($this->getName(), $related);
         }
         if ($this->checkNullValue($node, $related)) {
             return;
@@ -39,6 +37,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
             return;
         }
+
         $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
         $rTuple = $pool->offsetGet($related);
         if ($rTuple === null && $this->isCascade()) {

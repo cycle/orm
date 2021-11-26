@@ -84,7 +84,6 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                         Relation::TARGET => EntityWithRelationHydrationUser::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
-                            Relation::NULLABLE => false,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
@@ -94,7 +93,6 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                         Relation::TARGET => EntityWithRelationHydrationTag::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
-                            Relation::NULLABLE => false,
                             Relation::INNER_KEY => 'tag_id',
                             Relation::OUTER_KEY => 'id',
                         ],
@@ -167,7 +165,6 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                         Relation::TARGET => EntityWithRelationHydrationUser::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
-                            Relation::NULLABLE => false,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],
@@ -177,8 +174,6 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                         Relation::TARGET => EntityWithRelationHydrationUser::class,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
-                            // TODO: If we get rid of nullable then value is uninitialized
-                            Relation::NULLABLE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',
                         ],

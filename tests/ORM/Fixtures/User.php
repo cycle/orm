@@ -19,7 +19,7 @@ class User implements ImagedInterface
 {
     public $id;
     public $email;
-    public int $balance;
+    public $balance;
     public $user_code;
 
     /** @var Profile */

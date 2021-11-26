@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common;
 
-use Cycle\Database\DatabaseInterface;
-use Cycle\ORM\Command\CommandInterface;
-use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Heap\State;
-use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
+use Cycle\ORM\Tests\Fixtures\TransactionTestMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
@@ -42,6 +38,7 @@ abstract class TransactionTest extends BaseTest
                     Schema::TABLE => 'user',
                     Schema::PRIMARY_KEY => 'id',
                     Schema::COLUMNS => ['id', 'email', 'balance'],
+                    Schema::TYPECAST => ['id' => 'int', 'balance' => 'int'],
                     Schema::SCHEMA => [],
                     Schema::RELATIONS => [],
                 ],
@@ -101,41 +98,136 @@ abstract class TransactionTest extends BaseTest
 
         $this->orm->getHeap()->clean();
     }
-}
 
-class TransactionTestMapper extends Mapper
-{
-    public function queueDelete($entity, Node $node, State $state): CommandInterface
+    public function testRollbackDatabaseTransactionAfterRunORMTransaction()
     {
-        if ($entity->id == '3') {
-            return new class($this->source->getDatabase()) implements CommandInterface {
+        $dbal = $this->orm->getFactory()->database();
 
-                public function __construct(private DatabaseInterface $database)
-                {
-                }
+        $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $u->balance = 150;
 
-                public function isReady(): bool
-                {
-                    return true;
-                }
+        $u3 = (new Select($this->orm, User::class))->wherePK(2)->fetchOne();
 
-                public function isExecuted(): bool
-                {
-                    return false;
-                }
+        $newU = new User();
+        $newU->email = 'foo@site.com';
+        $newU->balance = 300;
 
-                public function execute(): void
-                {
-                    throw new \Exception('Something went wrong');
-                }
+        $dbal->begin();
 
-                public function getDatabase(): ?DatabaseInterface
-                {
-                    return $this->database;
-                }
-            };
+        try {
+            $t = new Transaction($this->orm);
+
+            $t->persist($u);
+            $t->persist($newU);
+
+            $t->run();
+
+            $t->delete($u3);
+
+            $newU->balance = 350;
+            $t->persist($newU);
+
+            $t->run();
+
+            throw new \Exception('Something went wrong');
+
+            $dbal->commit();
+        } catch (\Throwable $e) {
+            $dbal->rollback();
         }
 
-        return parent::queueDelete($entity, $node, $state);
+        $this->orm->getHeap()->clean();
+
+        $this->assertSame(100, (new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance);
+        $this->assertNotNull((new Select($this->orm, User::class))->wherePK(2)->fetchOne());
+        $this->assertNull((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne());
+    }
+
+    public function testRollbackDatabaseTransactionDuringRunORMTransaction()
+    {
+        $dbal = $this->orm->getFactory()->database();
+
+        $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $u->balance = 150;
+
+        $u3 = (new Select($this->orm, User::class))->wherePK(3)->fetchOne();
+
+        $newU = new User();
+        $newU->email = 'foo@site.com';
+        $newU->balance = 300;
+
+        $dbal->begin();
+
+        try {
+            $t = new Transaction($this->orm);
+
+            $t->persist($u);
+            $t->persist($newU);
+
+            $t->run();
+
+            $this->assertSame(
+                150,
+                (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne()->balance
+            );
+
+            // For user with ID 3 Mapper should throw an exception
+            $t->delete($u3);
+
+            $newU->balance = 350;
+            $t->persist($newU);
+
+            $t->run();
+
+            $this->fail('Exception should be thrown.');
+
+            $dbal->commit();
+        } catch (\Throwable $e) {
+            $dbal->rollback();
+        }
+
+        $this->orm->getHeap()->clean();
+
+        $this->assertSame(100, (new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance);
+        $this->assertNotNull((new Select($this->orm, User::class))->wherePK(3)->fetchOne());
+        $this->assertNull((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne());
+    }
+
+    public function testCommitDatabaseTransactionAfterORMTransaction()
+    {
+        $dbal = $this->orm->getFactory()->database();
+
+        $dbal->begin();
+
+        $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $u->balance = 150;
+
+        $u2 = (new Select($this->orm, User::class))->wherePK(2)->fetchOne();
+
+        $newU = new User();
+        $newU->email = 'foo@site.com';
+        $newU->balance = 300;
+
+        $t = new Transaction($this->orm);
+
+        $t->persist($u);
+        $t->persist($newU);
+
+        $t->run();
+
+        $t->delete($u2);
+
+        $newU->balance = 350;
+        $t->persist($newU);
+
+        $t->run();
+
+        $dbal->commit();
+
+        $this->orm->getHeap()->clean();
+
+        $this->assertSame(150, (new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance);
+        $this->assertNull((new Select($this->orm, User::class))->wherePK(2)->fetchOne());
+        $this->assertSame(350, (new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne()->balance);
     }
 }

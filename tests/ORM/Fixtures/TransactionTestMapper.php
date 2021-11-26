@@ -14,7 +14,7 @@ class TransactionTestMapper extends Mapper
     public function queueDelete($entity, Node $node, State $state): CommandInterface
     {
         if ($entity->id == '3') {
-            return new class() implements CommandInterface {
+            return new class () implements CommandInterface {
                 public function isReady(): bool
                 {
                     return true;

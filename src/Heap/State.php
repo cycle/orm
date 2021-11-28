@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use JetBrains\PhpStorm\ExpectedValues;
@@ -12,7 +11,7 @@ use JetBrains\PhpStorm\ExpectedValues;
 /**
  * Current node state.
  */
-final class State implements ConsumerInterface
+final class State
 {
     use RelationTrait;
     use WaitFieldTrait;

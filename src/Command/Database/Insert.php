@@ -108,4 +108,9 @@ final class Insert extends StoreCommand
 
         parent::execute();
     }
+
+    public function register(string $key, mixed $value): void
+    {
+        $this->state->register($key, $value);
+    }
 }

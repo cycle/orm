@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:ignoreFile
+
 declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
@@ -14,4 +16,5 @@ interface ScopeInterface
      */
     public function apply(QueryBuilder $query);
 }
-interface_exists(ConstrainInterface::class); // phpcs:ignore
+
+interface_exists(ConstrainInterface::class);

@@ -14,3 +14,4 @@ interface ScopeInterface
      */
     public function apply(QueryBuilder $query);
 }
+interface_exists(ConstrainInterface::class);

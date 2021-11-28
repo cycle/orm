@@ -14,4 +14,4 @@ interface ScopeInterface
      */
     public function apply(QueryBuilder $query);
 }
-interface_exists(ConstrainInterface::class);
+interface_exists(ConstrainInterface::class); // phpcs:ignore

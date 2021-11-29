@@ -182,11 +182,11 @@ final class UnitOfWork implements StateInterface
                 $tuple->node === null
                     ? '(has no Node)'
                     : implode(
-                    '|',
-                    array_map(static fn($x) => \is_object($x)
+                        '|',
+                        array_map(static fn ($x) => \is_object($x)
                         ? $x::class
                         : (string)$x, $tuple->node->getData())
-                )
+                    )
             );
 
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && ! $tuple->cascade) {
@@ -212,7 +212,7 @@ final class UnitOfWork implements StateInterface
         $resolved = true;
         $waitKeys = [];
         foreach ($map->getMasters() as $name => $relation) {
-            $className = "\033[33m".substr($relation::class, strrpos($relation::class, '\\') + 1)."\033[0m";
+            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
             if (/*!$relation->isCascade() || */ $relationStatus === RelationInterface::STATUS_RESOLVED) {
@@ -230,7 +230,7 @@ final class UnitOfWork implements StateInterface
                 // if ($tuple->status < Tuple::STATUS_PROPOSED) {
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
-                // }
+            // }
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
@@ -249,7 +249,7 @@ final class UnitOfWork implements StateInterface
             if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
                 $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
-                // $waitKeys[] = $relation->getInnerKeys();
+            // $waitKeys[] = $relation->getInnerKeys();
             } else {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
             }
@@ -277,7 +277,7 @@ final class UnitOfWork implements StateInterface
         }
         foreach ($map->getSlaves() as $name => $relation) {
             $relationStatus = $tuple->node->getRelationStatus($relation->getName());
-            $className = "\033[33m".substr($relation::class, strrpos($relation::class, '\\') + 1)."\033[0m";
+            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
             if (! $relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 // todo check changes for not cascaded relations?

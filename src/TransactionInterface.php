@@ -7,7 +7,7 @@ namespace Cycle\ORM;
 /**
  * Transaction aggregates set of commands declared by entities and executes them all together.
  *
- * @deprecated since 2.1 use Cycle\ORM\EntityManagerInterface
+ * @deprecated since 2.0 use {@see \Cycle\ORM\EntityManagerInterface}
  */
 interface TransactionInterface
 {

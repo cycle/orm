@@ -4,21 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Transaction\Runner;
-use Cycle\ORM\Transaction\RunnerInterface;
 use Cycle\ORM\Transaction\StateInterface;
 use Cycle\ORM\Transaction\UnitOfWork;
 
 class EntityManager implements EntityManagerInterface
 {
     private UnitOfWork $unitOfWork;
-    private RunnerInterface $runner;
 
-    public function __construct(
-        private ORMInterface $orm,
-        ?RunnerInterface $runner = null
-    ) {
-        $this->runner = $runner ?? new Runner();
+    public function __construct(private ORMInterface $orm) {
         $this->clean();
     }
 
@@ -49,8 +42,10 @@ class EntityManager implements EntityManagerInterface
         return $state;
     }
 
-    private function clean()
+    public function clean(): static
     {
-        $this->unitOfWork = new UnitOfWork($this->orm, $this->runner);
+        $this->unitOfWork = new UnitOfWork($this->orm);
+
+        return $this;
     }
 }

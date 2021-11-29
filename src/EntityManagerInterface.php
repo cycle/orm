@@ -44,4 +44,9 @@ interface EntityManagerInterface
      * Synchronizes the in-memory state of managed entities with the database.
      */
     public function run(): StateInterface;
+
+    /**
+     * Clean state.
+     */
+    public function clean(): static;
 }

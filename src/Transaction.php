@@ -45,10 +45,8 @@ final class Transaction implements TransactionInterface
         if ($this->uow === null) {
             return;
         }
-        $uow = $this->uow;
+        $uow = $this->uow->run();
         $this->uow = null;
-
-        $uow->run();
 
         if (!$uow->isSuccess()) {
             throw $uow->getError();

@@ -19,6 +19,7 @@ use Cycle\ORM\Transaction\UnitOfWork;
 final class Transaction implements TransactionInterface
 {
     private ?UnitOfWork $uow = null;
+
     public function __construct(
         private ORMInterface $orm,
         private ?RunnerInterface $runner = null

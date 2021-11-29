@@ -11,7 +11,8 @@ class EntityManager implements EntityManagerInterface
 {
     private UnitOfWork $unitOfWork;
 
-    public function __construct(private ORMInterface $orm) {
+    public function __construct(private ORMInterface $orm)
+    {
         $this->clean();
     }
 

@@ -8,7 +8,6 @@ use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\State;
 use Cycle\Database\DatabaseInterface;
@@ -18,7 +17,7 @@ use Cycle\Database\DatabaseInterface;
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-final class Update extends StoreCommand implements ScopeCarrierInterface, ConsumerInterface
+final class Update extends StoreCommand implements ScopeCarrierInterface
 {
     use ErrorTrait;
     use ScopeTrait;
@@ -97,10 +96,5 @@ final class Update extends StoreCommand implements ScopeCarrierInterface, Consum
         $this->state->updateTransactionData($fields !== [] && \count($fields) === \count($allChanges) ? null : $fields);
 
         parent::execute();
-    }
-
-    public function register(string $key, mixed $value): void
-    {
-        $this->state->register($key, $value);
     }
 }

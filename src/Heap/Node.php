@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
@@ -21,7 +20,7 @@ use const SORT_STRING;
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
  * inner states.
  */
-final class Node implements ConsumerInterface
+final class Node
 {
     use RelationTrait;
 

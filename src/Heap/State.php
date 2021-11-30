@@ -50,7 +50,7 @@ final class State
         return $this->storage[$type] ?? ($this->storage[$type] = []);
     }
 
-    public function addToStorage(string $type, State $node): void
+    public function addToStorage(string $type, self $node): void
     {
         $this->storage[$type][] = $node;
     }

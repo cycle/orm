@@ -83,7 +83,7 @@ class BelongsToMorphed extends BelongsTo
         $role = $related instanceof ReferenceInterface
             ? $related->getRole()
             : $pool->offsetGet($related)?->node->getRole();
-        $tuple->node->register($this->morphKey, $role);
+        $tuple->state->register($this->morphKey, $role);
     }
 
     /**

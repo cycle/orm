@@ -154,7 +154,7 @@ final class Embedded implements SameRowRelationInterface
         $changes = $this->getChanges($related, $rTuple->state);
         foreach ($this->primaryKeys as $key) {
             if (isset($changes[$key])) {
-                $rTuple->node->register($key, $changes[$key]);
+                $rTuple->state->register($key, $changes[$key]);
             }
         }
 

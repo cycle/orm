@@ -8,6 +8,7 @@ use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\RootNode;
@@ -112,7 +113,7 @@ class ManyToMany extends Relation\AbstractRelation
             $pivot = $related->get($item);
             if ($pivot !== null) {
                 $pTuple = $pool->offsetGet($pivot);
-                $this->applyPivotChanges($node, $pTuple->node);
+                $this->applyPivotChanges($tuple->state, $pTuple->state);
                 $pNodes[] = $pTuple->node;
                 $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
@@ -123,7 +124,7 @@ class ManyToMany extends Relation\AbstractRelation
                 if (in_array($pNode, $pNodes, true)) {
                     continue;
                 }
-                $this->applyPivotChanges($node, $pNode);
+                $this->applyPivotChanges($tuple->state, $pNode->getState());
                 $pNode->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
             $tuple->state->clearStorage($this->name);
@@ -302,10 +303,10 @@ class ManyToMany extends Relation\AbstractRelation
         return $result;
     }
 
-    protected function applyPivotChanges(Node $parentNode, Node $node): void
+    protected function applyPivotChanges(State $parentState, State $state): void
     {
         foreach ($this->innerKeys as $i => $innerKey) {
-            $node->register($this->throughInnerKeys[$i], $parentNode->getState()->getValue($innerKey));
+            $state->register($this->throughInnerKeys[$i], $parentState->getValue($innerKey));
         }
     }
 

@@ -130,6 +130,11 @@ final class State
         }
     }
 
+    public function hasChanges(): bool
+    {
+        return $this->state === Node::NEW || $this->getChanges() !== [];
+    }
+
     public function getChanges(): array
     {
         if ($this->state === Node::NEW) {

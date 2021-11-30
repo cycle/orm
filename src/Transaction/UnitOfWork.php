@@ -325,7 +325,7 @@ final class UnitOfWork implements StateInterface
 
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map, bool $hasDeferredRelations): void
     {
-        if (! $map->hasEmbedded() && ! $tuple->node->hasChanges()) {
+        if (! $map->hasEmbedded() && ! $tuple->state->hasChanges()) {
             \Cycle\ORM\Transaction\Pool::DEBUG && print "No changes, no embedded \n";
             $tuple->status = ! $hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED

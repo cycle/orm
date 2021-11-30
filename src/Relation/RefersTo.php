@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\ToOneTrait;
 use Cycle\ORM\Transaction\Pool;
@@ -58,7 +59,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $scope = $related->getScope();
             if (array_intersect($this->outerKeys, array_keys($scope))) {
                 foreach ($this->outerKeys as $i => $outerKey) {
-                    $node->register($this->innerKeys[$i], $scope[$outerKey]);
+                    $tuple->state->register($this->innerKeys[$i], $scope[$outerKey]);
                 }
                 $node->setRelation($this->getName(), $related);
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
@@ -91,7 +92,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 && $rTuple->state->getStatus() !== node::NEW
                 && array_intersect($this->outerKeys, $rTuple->state->getWaitingFields()) === [])
         ) {
-            $this->pullValues($node, $rTuple->node);
+            $this->pullValues($tuple->state, $rTuple->state);
             $node->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
@@ -102,12 +103,12 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         }
     }
 
-    private function pullValues(Node $node, Node $related): void
+    private function pullValues(State $state, State $rState): void
     {
-        $changes = $related->getState()->getTransactionData();
+        $changes = $rState->getTransactionData();
         foreach ($this->outerKeys as $i => $outerKey) {
             if (isset($changes[$outerKey])) {
-                $node->register($this->innerKeys[$i], $changes[$outerKey]);
+                $state->register($this->innerKeys[$i], $changes[$outerKey]);
             }
         }
     }

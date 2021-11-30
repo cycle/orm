@@ -129,24 +129,20 @@ final class Node
         return $this->data;
     }
 
-    public function register(string $key, mixed $value): void
-    {
-        $this->getState()->register($key, $value);
-    }
-
     /**
      * Sync the point state and return data diff.
      */
-    public function syncState(RelationMap $relMap): array
+    public function syncState(RelationMap $relMap, State $state = null): array
     {
-        if ($this->state === null) {
+        $state ??= $this->state;
+        if ($state === null) {
             return [];
         }
 
-        $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
+        $changes = array_udiff_assoc($state->getTransactionData(), $this->data, [self::class, 'compare']);
 
         $relations = $relMap->getRelations();
-        foreach ($this->state->getRelations() as $name => $relation) {
+        foreach ($state->getRelations() as $name => $relation) {
             if ($relation instanceof ReferenceInterface
                 && isset($relations[$name])
                 && (isset($this->relations[$name]) xor isset($relation))
@@ -158,27 +154,12 @@ final class Node
 
         // DELETE handled separately
         $this->status = self::MANAGED;
-        $this->data = $this->state->getTransactionData();
+        $this->data = $state->getTransactionData();
         $this->updateRawData();
-        $this->state->__destruct();
         $this->state = null;
         $this->relationStatus = [];
 
         return $changes;
-    }
-
-    public function hasChanges(): bool
-    {
-        return ($this->state !== null && $this->state->getStatus() === self::NEW)
-            || $this->state->getChanges() !== [];
-    }
-
-    public function getChanges(): array
-    {
-        if ($this->state === null) {
-            return $this->status === self::NEW ? $this->data : [];
-        }
-        return $this->state->getChanges();
     }
 
     /**
@@ -186,9 +167,6 @@ final class Node
      */
     public function resetState(): void
     {
-        if (isset($this->state)) {
-            $this->state->__destruct();
-        }
         $this->state = null;
         $this->relationStatus = [];
     }

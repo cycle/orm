@@ -64,11 +64,11 @@ class MorphedHasOne extends HasOne
             return;
         }
 
-        $nodeData = $rTuple->node->getData();
+        $data = $rTuple->state->getData();
 
         $role = $tuple->node->getRole();
-        if (($nodeData[$this->morphKey] ?? null) !== $role) {
-            $rTuple->node->register($this->morphKey, $role);
+        if (($data[$this->morphKey] ?? null) !== $role) {
+            $rTuple->state->register($this->morphKey, $role);
         }
     }
 

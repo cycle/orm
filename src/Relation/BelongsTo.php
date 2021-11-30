@@ -87,11 +87,12 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
     public function queue(Pool $pool, Tuple $tuple): void
     {
         $node = $tuple->node;
-        $related = $tuple->state->getRelation($this->getName());
+        $state = $tuple->state;
+        $related = $state->getRelation($this->getName());
 
         if ($related instanceof ReferenceInterface && $related->hasValue()) {
             $related = $related->getValue();
-            $tuple->state->setRelation($this->getName(), $related);
+            $state->setRelation($this->getName(), $related);
         }
         if ($related === null) {
             $this->setNullFromRelated($tuple, false);
@@ -101,7 +102,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $scope = $related->getScope();
             if (array_intersect($this->outerKeys, array_keys($scope))) {
                 foreach ($this->outerKeys as $i => $outerKey) {
-                    $node->register($this->innerKeys[$i], $scope[$outerKey]);
+                    $state->register($this->innerKeys[$i], $scope[$outerKey]);
                 }
                 $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
@@ -115,8 +116,8 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $rTuple = $pool->offsetGet($related);
 
         if ($this->shouldPull($tuple, $rTuple)) {
-            $this->pullValues($tuple->state, $rTuple->state);
-            $node->getState()->setRelation($this->getName(), $related);
+            $this->pullValues($state, $rTuple->state);
+            $state->setRelation($this->getName(), $related);
             $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         }
     }

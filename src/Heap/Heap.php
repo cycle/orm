@@ -105,10 +105,10 @@ final class Heap implements HeapInterface, IteratorAggregate
         $role = $node->getRole();
 
         if ($node->hasState()) {
-            $this->eraseIndexes($role, $node->getInitialData(), $entity);
+            $this->eraseIndexes($role, $node->getData(), $entity);
             $data = $node->getState()->getData();
         } else {
-            $data = $node->getInitialData();
+            $data = $node->getData();
         }
 
         if ($data === []) {
@@ -163,7 +163,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         $role = $node->getRole();
 
         // erase all the indexes
-        $this->eraseIndexes($role, $node->getInitialData(), $entity);
+        $this->eraseIndexes($role, $node->getData(), $entity);
         if ($node->hasState()) {
             $this->eraseIndexes($role, $node->getState()->getData(), $entity);
         }

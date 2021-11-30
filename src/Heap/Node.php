@@ -103,14 +103,6 @@ final class Node
     }
 
     /**
-     * The intial (post-load) node date. Does not change during the transaction.
-     */
-    public function getInitialData(): array
-    {
-        return $this->data;
-    }
-
-    /**
      * Sync the point state and return data diff.
      */
     public function syncState(RelationMap $relMap, State $state): array

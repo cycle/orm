@@ -150,7 +150,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_DELETE);
 
         $delete->waitScope(...$this->primaryKeys);
-        $fromData = $node->getInitialData();
+        $fromData = $node->getData();
         foreach ($this->primaryKeys as $pk) {
             // set update criteria right now
             $delete->setScope($pk, $fromData[$pk]);

@@ -147,7 +147,7 @@ final class UnitOfWork implements StateInterface
                 spl_object_id($entity),
                 implode('|', array_map(static fn ($x) => \is_object($x)
                     ? $x::class
-                    : (string)$x, $tuple->node->getInitialData()))
+                    : (string)$x, $tuple->node->getData()))
             );
 
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && ! $tuple->cascade) {

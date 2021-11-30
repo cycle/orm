@@ -140,7 +140,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             return false;
         }
         // Check bidirected relation: when related entity has been removed from HasSome relation
-        $oldData = $tuple->node->getInitialData();
+        $oldData = $tuple->node->getData();
         $newData = $rTuple->state->getTransactionData();
         $current = $tuple->state->getData();
         $noChanges = true;

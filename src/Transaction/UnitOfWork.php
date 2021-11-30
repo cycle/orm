@@ -120,14 +120,14 @@ final class UnitOfWork implements StateInterface
             }
             $role = $node->getRole();
 
-            // reindex the entity while it has old data
-            $heap->attach($e, $node, $entityRegistry->getIndexes($role));
-
             // sync the current entity data with newly generated data
             $mapper = $entityRegistry->getMapper($role);
             // $entityRelations = $mapper->fetchRelations($e);
             $syncData = $node->syncState($entityRegistry->getRelationMap($role));
             $mapper->hydrate($e, $syncData);
+
+            // reindex the entity in the heap
+            $heap->attach($e, $node, $entityRegistry->getIndexes($role));
         }
     }
 

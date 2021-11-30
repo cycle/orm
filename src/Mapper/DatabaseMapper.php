@@ -97,7 +97,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueCreate(object $entity, Node $node, State $state): CommandInterface
     {
-        $values = $node->getData();
+        $values = $state->getData();
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);

@@ -30,7 +30,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
         }
-        if ($this->checkNullValue($node, $related)) {
+        if ($this->checkNullValue($node, $tuple->state, $related)) {
             return;
         }
         $this->registerWaitingFields($tuple->state, false);
@@ -66,7 +66,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 return;
             }
         }
-        if ($this->checkNullValue($tuple->node, $related)) {
+        if ($this->checkNullValue($tuple->node, $tuple->state, $related)) {
             return;
         }
         $rTuple = $pool->offsetGet($related);
@@ -113,7 +113,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         }
     }
 
-    private function checkNullValue(Node $node, mixed $value): bool
+    private function checkNullValue(Node $node, State $state, mixed $value): bool
     {
         if ($value !== null) {
             return false;
@@ -122,7 +122,6 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         // Original is not null
         if ($original !== null) {
             // Reset keys
-            $state = $node->getState();
             foreach ($this->innerKeys as $innerKey) {
                 $state->register($innerKey, null);
             }

@@ -113,7 +113,7 @@ final class Pool implements \Countable
         }
 
         if (isset($tuple->node) && $tuple->task === Tuple::TASK_DELETE) {
-            $tuple->node->setStatus(Node::SCHEDULED_DELETE);
+            $tuple->state->setStatus(Node::SCHEDULED_DELETE);
         }
         $string = sprintf(
             "pool:attach %s, task: %s, status: %s\n",
@@ -322,14 +322,14 @@ final class Pool implements \Countable
             // Create new Node
             $node = new Node(Node::NEW, [], $tuple->mapper->getRole());
             $this->orm->getHeap()->attach($entity, $node);
-            $node->setData($tuple->mapper->fetchFields($entity));
-        } elseif (!$node->hasState()) {
-            $node->setData($tuple->mapper->fetchFields($entity));
+            if (isset($tuple->state)) {
+                $tuple->state->setData($tuple->mapper->fetchFields($entity));
+            }
         }
         $tuple->node = $node;
-
         if (!isset($tuple->state)) {
-            $tuple->state = $tuple->node->getState();
+            $tuple->state = $tuple->node->createState();
+            $tuple->state->setData($tuple->mapper->fetchFields($entity));
         }
     }
 

@@ -267,7 +267,8 @@ class HeapTest extends TestCase
         $entity2 = new User();
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
-        $node1->setData(static::ENTITY_SET_2);
+        $node1->setState($state1 = $node1->createState());
+        $state1->setData(static::ENTITY_SET_2);
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
 
         // entity2 has been overwritten
@@ -287,7 +288,9 @@ class HeapTest extends TestCase
         foreach (static::ENTITY_SET_1 as $field => $value) {
             $values[$field] = null;
         }
-        $node->setData($values);
+
+        $node->setState($state = $node->createState());
+        $state->setData($values);
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
         $this->assertTrue($heap->has($entity));
@@ -305,7 +308,8 @@ class HeapTest extends TestCase
         foreach (static::ENTITY_SET_1 as $field => $value) {
             $values[$field] = null;
         }
-        $node->setData($values);
+        $node->setState($state = $node->createState());
+        $state->setData($values);
         $heap->detach($entity);
 
         $this->assertFalse($heap->has($entity));

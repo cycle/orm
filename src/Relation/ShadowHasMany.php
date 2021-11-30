@@ -58,7 +58,8 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
 
         foreach ($related as $item) {
             $rTuple = $pool->offsetGet($item);
-            $this->applyChanges($tuple->state, $rTuple->node->getState());
+            assert($rTuple !== null);
+            $this->applyChanges($tuple->state, $rTuple->state);
             $rTuple->node->setRelationStatus($this->targetContainer, RelationInterface::STATUS_RESOLVED);
         }
     }

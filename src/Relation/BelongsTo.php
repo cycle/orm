@@ -163,7 +163,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                     return false;
                 }
             }
-            $tuple->node->getState()->setRelation($this->getName(), null);
+            $tuple->state->setRelation($this->getName(), null);
             $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         }
         return false;

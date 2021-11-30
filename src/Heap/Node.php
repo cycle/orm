@@ -48,17 +48,6 @@ final class Node
         $this->updateRawData();
     }
 
-    private function updateRawData(): void
-    {
-        $this->rawData = [];
-        foreach ($this->data as $field => $value) {
-            if (!\is_object($value)) {
-                continue;
-            }
-            $this->rawData[$field] = self::convertToSolid($value);
-        }
-    }
-
     /**
      * Reset state.
      */
@@ -72,29 +61,28 @@ final class Node
         return $this->role;
     }
 
+    public function createState(): State
+    {
+        return $this->state = new State($this->status, $this->data, $this->rawData);
+    }
+
+    public function setState(State $state): self
+    {
+        $this->state = $state;
+        return $this;
+    }
+
     /**
      * Current point state (set of changes).
      */
-    public function getState(): State
+    public function getState(): ?State
     {
-        if ($this->state === null) {
-            $this->state = new State($this->status, $this->data, $this->rawData);
-        }
-
-        return $this->state;
+        return $this->state ?? $this->createState();
     }
 
     public function hasState(): bool
     {
         return $this->state !== null;
-    }
-
-    /**
-     * Set new state value.
-     */
-    public function setStatus(int $state): void
-    {
-        $this->getState()->setStatus($state);
     }
 
     /**
@@ -106,19 +94,11 @@ final class Node
     }
 
     /**
-     * Set new state data (will trigger state handlers).
-     */
-    public function setData(array $data): void
-    {
-        $this->getState()->setData($data);
-    }
-
-    /**
-     * Get current state data. Mutalbe inside the transaction.
+     * The intial (post-load) node date. Does not change during the transaction.
      */
     public function getData(): array
     {
-        return $this->state?->getData() ?? $this->data;
+        return $this->data;
     }
 
     /**
@@ -242,5 +222,16 @@ final class Node
         }
 
         return 1;
+    }
+
+    private function updateRawData(): void
+    {
+        $this->rawData = [];
+        foreach ($this->data as $field => $value) {
+            if (!\is_object($value)) {
+                continue;
+            }
+            $this->rawData[$field] = self::convertToSolid($value);
+        }
     }
 }

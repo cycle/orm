@@ -41,7 +41,7 @@ class OptimisticLockMapper extends Mapper
             throw new \RuntimeException(sprintf('The `%s` field is not set.', $this->lockField));
         }
 
-        if ($command instanceof Update && $node->getData()[$this->lockField] === $scopeValue) {
+        if ($command instanceof Update && $state->getData()[$this->lockField] === $scopeValue) {
             $state->register($this->lockField, $this->getLockingValue($node));
         }
 

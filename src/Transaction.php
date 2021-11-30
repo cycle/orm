@@ -28,7 +28,7 @@ final class Transaction implements TransactionInterface
 
     public function persist(object $entity, int $mode = self::MODE_CASCADE): self
     {
-        $this->initUow()->persist($entity, $mode === self::MODE_CASCADE);
+        $this->initUow()->persistDeferred($entity, $mode === self::MODE_CASCADE);
 
         return $this;
     }

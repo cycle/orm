@@ -40,7 +40,7 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
     {
         $value = $tuple->state->getRelation($this->getName());
         $tuple->state->setRelation($this->getName(), $value ?? []);
-        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
     }
 
     public function queue(Pool $pool, Tuple $tuple): void
@@ -48,7 +48,7 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
         if ($tuple->status <= Tuple::STATUS_WAITED) {
             return;
         }
-        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
         $related = $tuple->state->getRelation($this->getName());
 
@@ -58,8 +58,9 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
 
         foreach ($related as $item) {
             $rTuple = $pool->offsetGet($item);
-            $this->applyChanges($tuple->state, $rTuple->node->getState());
-            $rTuple->node->setRelationStatus($this->targetContainer, RelationInterface::STATUS_RESOLVED);
+            assert($rTuple !== null);
+            $this->applyChanges($tuple->state, $rTuple->state);
+            $rTuple->state->setRelationStatus($this->targetContainer, RelationInterface::STATUS_RESOLVED);
         }
     }
 

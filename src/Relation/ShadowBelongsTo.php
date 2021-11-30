@@ -39,19 +39,19 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
     {
         $tuple->state->setRelation($this->getName(), $related);
         $this->registerWaitingFields($tuple->state, !$this->isNullable());
-        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
     }
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
-        $status = $tuple->node->getRelationStatus($this->getName());
+        $status = $tuple->state->getRelationStatus($this->getName());
         if ($status === RelationInterface::STATUS_PREPARE && $this->isNullable()) {
-            $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
         }
         if ($tuple->status >= Tuple::STATUS_WAITED) {
             // Check fields
             if ($this->isNullable() || $this->checkFieldsExists($tuple->state)) {
-                $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             }
         }
     }

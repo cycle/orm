@@ -43,7 +43,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
 
         $tuple->state->setRelation($this->getName(), new Reference($this->target, $values));
-        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         return true;
     }
 
@@ -74,7 +74,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $tuple->state->setRelation($relName, $related);
         }
 
-        $tuple->node->setRelationStatus($relName, RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($relName, RelationInterface::STATUS_PROCESS);
         if ($related instanceof ReferenceInterface) {
             return;
         }
@@ -87,11 +87,12 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
     public function queue(Pool $pool, Tuple $tuple): void
     {
         $node = $tuple->node;
-        $related = $tuple->state->getRelation($this->getName());
+        $state = $tuple->state;
+        $related = $state->getRelation($this->getName());
 
         if ($related instanceof ReferenceInterface && $related->hasValue()) {
             $related = $related->getValue();
-            $tuple->state->setRelation($this->getName(), $related);
+            $state->setRelation($this->getName(), $related);
         }
         if ($related === null) {
             $this->setNullFromRelated($tuple, false);
@@ -101,13 +102,13 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             $scope = $related->getScope();
             if (array_intersect($this->outerKeys, array_keys($scope))) {
                 foreach ($this->outerKeys as $i => $outerKey) {
-                    $node->register($this->innerKeys[$i], $scope[$outerKey]);
+                    $state->register($this->innerKeys[$i], $scope[$outerKey]);
                 }
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                $state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
             if ($tuple->status >= Tuple::STATUS_WAITED) {
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                $state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             }
             return;
         }
@@ -115,9 +116,9 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $rTuple = $pool->offsetGet($related);
 
         if ($this->shouldPull($tuple, $rTuple)) {
-            $this->pullValues($tuple->state, $rTuple->state);
-            $node->getState()->setRelation($this->getName(), $related);
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $this->pullValues($state, $rTuple->state);
+            $state->setRelation($this->getName(), $related);
+            $state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         }
     }
 
@@ -126,7 +127,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $minStatus = Tuple::STATUS_PREPROCESSED;
         if ($this->inversion !== null) {
             $relName = $this->getTargetRelationName();
-            if ($rTuple->node->getRelationStatus($relName) === RelationInterface::STATUS_RESOLVED) {
+            if ($rTuple->state->getRelationStatus($relName) === RelationInterface::STATUS_RESOLVED) {
                 $minStatus = Tuple::STATUS_DEFERRED;
             }
         }
@@ -139,7 +140,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             return false;
         }
         // Check bidirected relation: when related entity has been removed from HasSome relation
-        $oldData = $tuple->node->getInitialData();
+        $oldData = $tuple->node->getData();
         $newData = $rTuple->state->getTransactionData();
         $current = $tuple->state->getData();
         $noChanges = true;
@@ -152,7 +153,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
         // If no changes
         if ($noChanges) {
-            $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return false;
         }
         // Nullable relation and null values
@@ -162,8 +163,8 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                     return false;
                 }
             }
-            $tuple->node->getState()->setRelation($this->getName(), null);
-            $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $tuple->state->setRelation($this->getName(), null);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         }
         return false;
     }
@@ -193,7 +194,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                         $state->waitField($innerKey, true);
                     }
                 }
-                $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
             } elseif (!$this->checkNullValuePossibility($tuple)) {
                 throw new NullException(sprintf('Relation `%s`.%s can not be null.', $node->getRole(), (string)$this));
             }
@@ -207,6 +208,6 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 $state->register($innerKey, null);
             }
         }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
     }
 }

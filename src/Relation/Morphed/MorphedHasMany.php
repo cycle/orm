@@ -39,10 +39,10 @@ class MorphedHasMany extends HasMany
     {
         parent::applyChanges($parentTuple, $rTuple);
 
-        $rNode = $rTuple->node;
-        $node = $parentTuple->node;
-        if (($rNode->getData()[$this->morphKey] ?? null) !== $node->getRole()) {
-            $rNode->register($this->morphKey, $node->getRole());
+        $rState = $rTuple->state;
+        $role = $parentTuple->node->getRole();
+        if (($rState->getData()[$this->morphKey] ?? null) !== $role) {
+            $rState->register($this->morphKey, $role);
         }
     }
 

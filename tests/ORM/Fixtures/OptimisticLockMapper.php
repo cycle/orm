@@ -36,12 +36,12 @@ class OptimisticLockMapper extends Mapper
 
     protected function lock(Node $node, State $state, Update|Delete $command): WrappedCommand
     {
-        $scopeValue = $node->getInitialData()[$this->lockField] ?? null;
+        $scopeValue = $node->getData()[$this->lockField] ?? null;
         if ($scopeValue === null) {
             throw new \RuntimeException(sprintf('The `%s` field is not set.', $this->lockField));
         }
 
-        if ($command instanceof Update && $node->getData()[$this->lockField] === $scopeValue) {
+        if ($command instanceof Update && $state->getData()[$this->lockField] === $scopeValue) {
             $state->register($this->lockField, $this->getLockingValue($node));
         }
 

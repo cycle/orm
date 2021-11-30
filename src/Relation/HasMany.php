@@ -32,7 +32,7 @@ class HasMany extends AbstractRelation
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $this->compareReferences($original, $related) && !$original->hasValue()) {
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
             $original = $this->resolve($original, true);
@@ -48,10 +48,10 @@ class HasMany extends AbstractRelation
         }
 
         if (\count($related) === 0) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
         // $relationName = $this->getTargetRelationName()
         // Store new and existing items
@@ -71,7 +71,7 @@ class HasMany extends AbstractRelation
         $related = $tuple->state->getRelation($this->getName());
         $related = $this->extract($related);
 
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
         if ($related instanceof ReferenceInterface && !$related->hasValue()) {
             return;
@@ -90,12 +90,12 @@ class HasMany extends AbstractRelation
                     $rTuple->state->setRelation($relationName, $tuple->entity);
                 }
 
-                if ($rTuple->node->getRelationStatus($relationName) === RelationInterface::STATUS_PREPARE) {
+                if ($rTuple->state->getRelationStatus($relationName) === RelationInterface::STATUS_PREPARE) {
                     continue;
                 }
             }
             $this->applyChanges($tuple, $rTuple);
-            $rTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+            $rTuple->state->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
         }
     }
 

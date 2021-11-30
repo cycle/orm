@@ -10,7 +10,6 @@ use Cycle\ORM\Exception\PoolException;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\RelationMap;
@@ -36,6 +35,13 @@ final class UnitOfWork implements StateInterface
     }
 
     public function persist(object $entity, bool $cascade = true): self
+    {
+        $this->pool->attachStore($entity, $cascade, persist: true);
+
+        return $this;
+    }
+
+    public function persistDeferred(object $entity, bool $cascade = true): self
     {
         $this->pool->attachStore($entity, $cascade);
 
@@ -97,21 +103,9 @@ final class UnitOfWork implements StateInterface
     private function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
-        // $iterator = (clone $heap)->getIterator();
-        // foreach ($iterator as $e) {
-        $iterator = $heap->getIterator();
-        $iterator->rewind();
         $entityRegistry = $this->orm->getEntityRegistry();
-        while ($iterator->valid()) {
-            $e = $iterator->current();
-            $iterator->next();
-            // optimize to only scan over affected entities
-            /** @var Node $node */
-            $node = $heap->get($e);
-
-            if (! $node->hasState()) {
-                continue;
-            }
+        foreach ($this->pool->getAllTuples() as $e => $tuple) {
+            $node = $tuple->node;
 
             // marked as being deleted and has no external claims (GC like approach)
             if (in_array($node->getStatus(), [Node::DELETED, Node::SCHEDULED_DELETE], true)) {
@@ -121,13 +115,21 @@ final class UnitOfWork implements StateInterface
             $role = $node->getRole();
 
             // reindex the entity while it has old data
+            $node->setState($tuple->state);
             $heap->attach($e, $node, $entityRegistry->getIndexes($role));
 
-            // sync the current entity data with newly generated data
-            $mapper = $entityRegistry->getMapper($role);
-            // $entityRelations = $mapper->fetchRelations($e);
-            $syncData = $node->syncState($entityRegistry->getRelationMap($role));
-            $mapper->hydrate($e, $syncData);
+            if ($tuple->persist !== null) {
+                $syncData = array_udiff_assoc(
+                    $tuple->state->getData(),
+                    $tuple->persist->getData(),
+                    [Node::class, 'compare']
+                );
+            } else {
+                // $entityRelations = $mapper->fetchRelations($e);
+                $syncData = $node->syncState($entityRegistry->getRelationMap($role), $tuple->state);
+            }
+
+            $tuple->mapper->hydrate($e, $syncData);
         }
     }
 
@@ -152,46 +154,19 @@ final class UnitOfWork implements StateInterface
          * @var Tuple $tuple
          */
         foreach ($this->pool->openIterator() as $entity => $tuple) {
-            if ($entity instanceof ReferenceInterface) {
-                if ($entity->hasValue()) {
-                    $entity = $entity->getValue();
-                    if ($entity === null) {
-                        \Cycle\ORM\Transaction\Pool::DEBUG && print "pool: skip unresolved promise\n";
-                        continue;
-                    }
-                    $tuple->entity = $entity;
-                } else {
-                    continue;
-                }
-            }
-
-            if (! $tuple->node || ! $tuple->state || ! $tuple->mapper) {
-                throw new \Exception();
-            }
-            // we do not expect to store promises
-            if ($tuple->task === Tuple::TASK_FORCE_DELETE && $tuple->node === null) {
-                $tuple->status = Tuple::STATUS_PROCESSED;
-                continue;
-            }
             \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
                 "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
                 ['preparing', 'waiting', 'waited', 'deferred', 'proposed', 'preprocessed', 'processed'][$tuple->status],
                 ['store', 'delete', 'force delete'][$tuple->task],
-                $tuple->node === null ? $entity::class : $tuple->node->getRole(),
+                $tuple->node->getRole(),
                 spl_object_id($entity),
-                $tuple->node === null
-                    ? '(has no Node)'
-                    : implode(
-                        '|',
-                        array_map(static fn ($x) => \is_object($x)
-                        ? $x::class
-                        : (string)$x, $tuple->node->getData())
-                    )
+                implode('|', array_map(static fn ($x) => \is_object($x)
+                    ? $x::class
+                    : (string)$x, $tuple->node->getData()))
             );
 
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && ! $tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
-                // todo delete cascaded
                 $command = $this->commandGenerator->generateDeleteCommand($this->orm, $tuple);
                 $this->runCommand($command);
                 $tuple->status = Tuple::STATUS_PROCESSED;
@@ -214,7 +189,7 @@ final class UnitOfWork implements StateInterface
         foreach ($map->getMasters() as $name => $relation) {
             $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
-            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             if (/*!$relation->isCascade() || */ $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
@@ -225,7 +200,7 @@ final class UnitOfWork implements StateInterface
                 // Connected -> $parentNode->getRelationStatus()
                 // Disconnected -> WAIT if Tuple::STATUS_PREPARING
                 $relation->queue($this->pool, $tuple);
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
 
                 // if ($tuple->status < Tuple::STATUS_PROPOSED) {
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
@@ -237,11 +212,11 @@ final class UnitOfWork implements StateInterface
                         $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
                         // $tuple->state->setRelation($name, $entityData[$name] ?? null);
                         $relation->prepare($this->pool, $tuple, $entityData[$name] ?? null);
-                        $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                        $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                     }
                 } else {
                     $relation->queue($this->pool, $tuple);
-                    $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                    $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                 }
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
@@ -276,7 +251,7 @@ final class UnitOfWork implements StateInterface
             $relData = $tuple->mapper->fetchRelations($tuple->entity);
         }
         foreach ($map->getSlaves() as $name => $relation) {
-            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
             if (! $relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
@@ -298,7 +273,7 @@ final class UnitOfWork implements StateInterface
                     $relData[$name] ?? null,
                     $isWaitingKeys || $hasChangedKeys
                 );
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             }
 
             if ($relationStatus !== RelationInterface::STATUS_PREPARE
@@ -310,7 +285,7 @@ final class UnitOfWork implements StateInterface
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
                 $child ??= $tuple->state->getRelation($name);
                 $relation->queue($this->pool, $tuple);
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             } elseif ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolved {$className}\n";
             } else {
@@ -325,7 +300,7 @@ final class UnitOfWork implements StateInterface
 
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map, bool $hasDeferredRelations): void
     {
-        if (! $map->hasEmbedded() && ! $tuple->node->hasChanges()) {
+        if (! $map->hasEmbedded() && ! $tuple->state->hasChanges()) {
             \Cycle\ORM\Transaction\Pool::DEBUG && print "No changes, no embedded \n";
             $tuple->status = ! $hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED
@@ -353,7 +328,7 @@ final class UnitOfWork implements StateInterface
         $entityData = $tuple->mapper->extract($tuple->entity);
         // todo: use class MergeCommand here
         foreach ($map->getEmbedded() as $name => $relation) {
-            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }

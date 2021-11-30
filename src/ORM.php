@@ -134,7 +134,7 @@ final class ORM implements ORMInterface
             }
         }
 
-        $node = new Node($status, $castedData, $rRole, $data);
+        $node = new Node($status, $castedData, $rRole);
         $e = $mapper->init($data, $role);
 
         /** Entity should be attached before {@see RelationMap::init()} running */

@@ -97,7 +97,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueCreate(object $entity, Node $node, State $state): CommandInterface
     {
-        $values = $node->getData();
+        $values = $state->getData();
 
         // sync the state
         $state->setStatus(Node::SCHEDULED_INSERT);
@@ -126,7 +126,7 @@ abstract class DatabaseMapper implements MapperInterface
     public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
         $fromData = $state->getTransactionData();
-        \Cycle\ORM\Transaction\Pool::DEBUG && print 'changes count: ' . \count($node->getChanges()) . "\n";
+        \Cycle\ORM\Transaction\Pool::DEBUG && print 'changes count: ' . \count($state->getChanges()) . "\n";
 
         $update = new Update(
             $this->source->getDatabase(),
@@ -150,7 +150,7 @@ abstract class DatabaseMapper implements MapperInterface
         $state->setStatus(Node::SCHEDULED_DELETE);
 
         $delete->waitScope(...$this->primaryKeys);
-        $fromData = $node->getInitialData();
+        $fromData = $node->getData();
         foreach ($this->primaryKeys as $pk) {
             // set update criteria right now
             $delete->setScope($pk, $fromData[$pk]);

@@ -39,7 +39,7 @@ trait HasSomeTrait
     protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {
         foreach ($this->innerKeys as $i => $innerKey) {
-            $tuple->node->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
+            $tuple->state->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
         }
     }
 }

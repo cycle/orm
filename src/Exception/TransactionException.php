@@ -26,7 +26,7 @@ class TransactionException extends ORMException
                 };
             $message = "$status `$role`";
             foreach ($map->getMasters() as $name => $relation) {
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                 if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                     continue;
                 }

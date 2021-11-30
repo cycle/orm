@@ -66,12 +66,16 @@ final class Pool implements \Countable
         Node $node = null,
         State $state = null,
         int $status = null,
-        bool $highPriority = false
+        bool $highPriority = false,
+        bool $persist = false
     ): Tuple {
         // Find existing
         $tuple = $this->offsetGet($entity);
         if ($tuple !== null) {
             $this->updateTuple($tuple, $task, $status, $cascade, $node, $state);
+            if ($persist) {
+                $this->snap($tuple);
+            }
             return $tuple;
         }
 
@@ -83,21 +87,21 @@ final class Pool implements \Countable
             $tuple->state = $state;
         }
 
-        return $this->smartAttachTuple($tuple, $highPriority);
+        return $this->smartAttachTuple($tuple, $highPriority, $persist);
     }
 
-    public function attachTuple(Tuple $tuple): void
-    {
-        // Find existing
-        $found = $this->findTuple($tuple->entity);
-        if ($found !== null) {
-            $this->updateTuple($found, $tuple->task, $tuple->status, $tuple->cascade, $tuple->node, $tuple->state);
-            return;
-        }
-        $this->smartAttachTuple($tuple);
-    }
+    // public function attachTuple(Tuple $tuple): void
+    // {
+    //     // Find existing
+    //     $found = $this->findTuple($tuple->entity);
+    //     if ($found !== null) {
+    //         $this->updateTuple($found, $tuple->task, $tuple->status, $tuple->cascade, $tuple->node, $tuple->state);
+    //         return;
+    //     }
+    //     $this->smartAttachTuple($tuple);
+    // }
 
-    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false): Tuple
+    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false, bool $snap = false): Tuple
     {
         if ($tuple->status === Tuple::STATUS_PROCESSED) {
             $this->all->attach($tuple->entity, $tuple);
@@ -108,7 +112,7 @@ final class Pool implements \Countable
         }
         $this->all->attach($tuple->entity, $tuple);
 
-        if ($this->iterating) {
+        if ($this->iterating || $snap) {
             $this->snap($tuple);
         }
 
@@ -136,9 +140,10 @@ final class Pool implements \Countable
         bool $cascade,
         ?Node $node = null,
         ?State $state = null,
-        bool $highPriority = false
+        bool $highPriority = false,
+        bool $persist = false
     ): Tuple {
-        return $this->attach($entity, Tuple::TASK_STORE, $cascade, $node, $state, null, $highPriority);
+        return $this->attach($entity, Tuple::TASK_STORE, $cascade, $node, $state, null, $highPriority, $persist);
     }
 
     public function attachDelete(
@@ -345,6 +350,11 @@ final class Pool implements \Countable
             $tuple->state = $tuple->node->createState();
             $tuple->state->setData($tuple->mapper->fetchFields($entity));
         }
+
+        // Backup State
+        if (!$this->iterating) {
+            $tuple->persist = clone $tuple->state;
+        }
     }
 
     private function trashIt(object $entity, Tuple $tuple, SplObjectStorage $storage): void
@@ -403,16 +413,16 @@ final class Pool implements \Countable
         $tuple->state = $tuple->state ?? $state;
     }
 
-    private function findTuple(object $entity): ?Tuple
-    {
-        if ($this->priorityEnabled && $this->priorityStorage->contains($entity)) {
-            return $this->priorityStorage->offsetGet($entity);
-        }
-        if ($this->storage->contains($entity)) {
-            return $this->storage->offsetGet($entity);
-        }
-        return null;
-    }
+    // private function findTuple(object $entity): ?Tuple
+    // {
+    //     if ($this->priorityEnabled && $this->priorityStorage->contains($entity)) {
+    //         return $this->priorityStorage->offsetGet($entity);
+    //     }
+    //     if ($this->storage->contains($entity)) {
+    //         return $this->storage->offsetGet($entity);
+    //     }
+    //     return null;
+    // }
 
     private function closeIterator(): void
     {

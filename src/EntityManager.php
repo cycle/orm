@@ -25,7 +25,7 @@ class EntityManager implements EntityManagerInterface
 
     public function persistDeferred(object $entity, bool $cascade = true): static
     {
-        $this->unitOfWork->persist($entity, $cascade);
+        $this->unitOfWork->persistDeferred($entity, $cascade);
 
         return $this;
     }

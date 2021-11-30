@@ -36,6 +36,13 @@ final class UnitOfWork implements StateInterface
 
     public function persist(object $entity, bool $cascade = true): self
     {
+        $this->pool->attachStore($entity, $cascade, persist: true);
+
+        return $this;
+    }
+
+    public function persistDeferred(object $entity, bool $cascade = true): self
+    {
         $this->pool->attachStore($entity, $cascade);
 
         return $this;
@@ -111,8 +118,17 @@ final class UnitOfWork implements StateInterface
             $node->setState($tuple->state);
             $heap->attach($e, $node, $entityRegistry->getIndexes($role));
 
-            // $entityRelations = $mapper->fetchRelations($e);
-            $syncData = $node->syncState($entityRegistry->getRelationMap($role), $tuple->state);
+            if ($tuple->persist !== null) {
+                $syncData = array_udiff_assoc(
+                    $tuple->state->getData(),
+                    $tuple->persist->getData(),
+                    [Node::class, 'compare']
+                );
+            } else {
+                // $entityRelations = $mapper->fetchRelations($e);
+                $syncData = $node->syncState($entityRegistry->getRelationMap($role), $tuple->state);
+            }
+
             $tuple->mapper->hydrate($e, $syncData);
         }
     }

@@ -118,6 +118,7 @@ abstract class EntityManagerTest extends BaseTest
 
         $this->assertTrue($result->isSuccess());
         $this->assertNumWrites(1);
+        $this->assertNotNull($entity->id);
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();

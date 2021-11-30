@@ -30,6 +30,10 @@ final class Tuple
     public Node $node;
     public State $state;
     public MapperInterface $mapper;
+    /**
+     * `Null` in case when Entity persisted not deferred. Else cloned State object.
+     */
+    public ?State $persist = null;
 
     public function __construct(
         #[ExpectedValues(values: [self::TASK_STORE, self::TASK_DELETE, self::TASK_FORCE_DELETE])]

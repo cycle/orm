@@ -57,7 +57,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$original->hasValue()) {
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
             $this->resolve($original, true);
@@ -84,10 +84,10 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
         if ($this->inversion === null && \count($related) === 0) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
@@ -99,8 +99,7 @@ class ManyToMany extends Relation\AbstractRelation
     {
         $related = $tuple->state->getRelation($this->getName());
 
-        $node = $tuple->node;
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
         if ($related instanceof ReferenceInterface && !$related->hasValue()) {
             return;
@@ -115,7 +114,7 @@ class ManyToMany extends Relation\AbstractRelation
                 $pTuple = $pool->offsetGet($pivot);
                 $this->applyPivotChanges($tuple->state, $pTuple->state);
                 $pStates[] = $pTuple->state;
-                $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+                $pTuple->state->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
         }
         if ($this->inversion !== null) {

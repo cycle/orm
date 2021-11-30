@@ -6,6 +6,7 @@ namespace Cycle\ORM\Heap;
 
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\RelationMap;
 use DateTimeImmutable;
 use DateTimeInterface;

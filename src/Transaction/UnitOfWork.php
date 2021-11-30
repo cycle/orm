@@ -174,7 +174,7 @@ final class UnitOfWork implements StateInterface
         foreach ($map->getMasters() as $name => $relation) {
             $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
-            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             if (/*!$relation->isCascade() || */ $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m skip {$className}\n";
                 continue;
@@ -185,7 +185,7 @@ final class UnitOfWork implements StateInterface
                 // Connected -> $parentNode->getRelationStatus()
                 // Disconnected -> WAIT if Tuple::STATUS_PREPARING
                 $relation->queue($this->pool, $tuple);
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
 
                 // if ($tuple->status < Tuple::STATUS_PROPOSED) {
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
@@ -197,11 +197,11 @@ final class UnitOfWork implements StateInterface
                         $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
                         // $tuple->state->setRelation($name, $entityData[$name] ?? null);
                         $relation->prepare($this->pool, $tuple, $entityData[$name] ?? null);
-                        $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                        $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                     }
                 } else {
                     $relation->queue($this->pool, $tuple);
-                    $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                    $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                 }
                 $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
                 $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
@@ -236,7 +236,7 @@ final class UnitOfWork implements StateInterface
             $relData = $tuple->mapper->fetchRelations($tuple->entity);
         }
         foreach ($map->getSlaves() as $name => $relation) {
-            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
             $role = $tuple->node->getRole();
             if (! $relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
@@ -258,7 +258,7 @@ final class UnitOfWork implements StateInterface
                     $relData[$name] ?? null,
                     $isWaitingKeys || $hasChangedKeys
                 );
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             }
 
             if ($relationStatus !== RelationInterface::STATUS_PREPARE
@@ -270,7 +270,7 @@ final class UnitOfWork implements StateInterface
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
                 $child ??= $tuple->state->getRelation($name);
                 $relation->queue($this->pool, $tuple);
-                $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             } elseif ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                 \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolved {$className}\n";
             } else {
@@ -313,7 +313,7 @@ final class UnitOfWork implements StateInterface
         $entityData = $tuple->mapper->extract($tuple->entity);
         // todo: use class MergeCommand here
         foreach ($map->getEmbedded() as $name => $relation) {
-            $relationStatus = $tuple->node->getRelationStatus($relation->getName());
+            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }

@@ -35,11 +35,11 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         }
         $this->registerWaitingFields($tuple->state, false);
         if ($related instanceof ReferenceInterface) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
             return;
         }
 
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
         $rTuple = $pool->offsetGet($related);
         if ($rTuple === null && $this->isCascade()) {
             $pool->attachStore($related, false, null, null, false);
@@ -62,7 +62,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                     $tuple->state->register($this->innerKeys[$i], $scope[$outerKey]);
                 }
                 $node->setRelation($this->getName(), $related);
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
         }
@@ -75,10 +75,10 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 // todo: cascade true?
                 $rTuple = $pool->attachStore($related, false, null, null, false);
             } elseif (
-                $node->getRelationStatus($this->getName()) !== RelationInterface::STATUS_DEFERRED
+                $tuple->state->getRelationStatus($this->getName()) !== RelationInterface::STATUS_DEFERRED
                 || $tuple->status !== Tuple::STATUS_PROPOSED
             ) {
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
                 return;
             }
         }
@@ -94,12 +94,12 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         ) {
             $this->pullValues($tuple->state, $rTuple->state);
             $node->setRelation($this->getName(), $related);
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
 
         if ($tuple->status !== Tuple::STATUS_PREPARING) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
         }
     }
 
@@ -128,7 +128,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         }
 
         $node->setRelation($this->getName(), null);
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
         return true;
     }
 }

@@ -6,6 +6,7 @@ namespace Cycle\ORM\Heap;
 
 use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
+use Cycle\ORM\Relation\RelationInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
@@ -17,6 +18,9 @@ final class State
     use WaitFieldTrait;
 
     private array $transactionData;
+
+    /** @var array<string, int> */
+    private array $relationStatus = [];
 
     /** @var array<string, State[]> */
     private array $storage = [];
@@ -191,5 +195,19 @@ final class State
     public function __destruct()
     {
         unset($this->relations, $this->storage, $this->data, $this->transactionData);
+    }
+
+    public function setRelationStatus(
+        string $name,
+        #[ExpectedValues(valuesFromClass: RelationInterface::class)]
+        int $status
+    ): void {
+        $this->relationStatus[$name] = $status;
+    }
+
+    #[ExpectedValues(valuesFromClass: RelationInterface::class)]
+    public function getRelationStatus(string $name): int
+    {
+        return $this->relationStatus[$name] ?? RelationInterface::STATUS_PREPARE;
     }
 }

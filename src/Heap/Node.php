@@ -77,7 +77,7 @@ final class Node
      */
     public function getState(): ?State
     {
-        return $this->state ?? $this->createState();
+        return $this->state;
     }
 
     public function hasState(): bool
@@ -112,13 +112,8 @@ final class Node
     /**
      * Sync the point state and return data diff.
      */
-    public function syncState(RelationMap $relMap, State $state = null): array
+    public function syncState(RelationMap $relMap, State $state): array
     {
-        $state ??= $this->state;
-        if ($state === null) {
-            return [];
-        }
-
         $changes = array_udiff_assoc($state->getTransactionData(), $this->data, [self::class, 'compare']);
 
         $relations = $relMap->getRelations();

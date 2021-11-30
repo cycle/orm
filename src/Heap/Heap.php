@@ -106,9 +106,14 @@ final class Heap implements HeapInterface, IteratorAggregate
 
         if ($node->hasState()) {
             $this->eraseIndexes($role, $node->getInitialData(), $entity);
+            $data = $node->getState()->getData();
+        } else {
+            $data = $node->getInitialData();
         }
 
-        $data = $node->getData();
+        if ($data === []) {
+            return;
+        }
         foreach ($index as $key) {
             $isComposite = false;
             if (\is_array($key)) {
@@ -158,9 +163,9 @@ final class Heap implements HeapInterface, IteratorAggregate
         $role = $node->getRole();
 
         // erase all the indexes
-        $this->eraseIndexes($role, $node->getData(), $entity);
+        $this->eraseIndexes($role, $node->getInitialData(), $entity);
         if ($node->hasState()) {
-            $this->eraseIndexes($role, $node->getInitialData(), $entity);
+            $this->eraseIndexes($role, $node->getState()->getData(), $entity);
         }
 
         $this->storage->offsetUnset($entity);

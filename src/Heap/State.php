@@ -18,7 +18,7 @@ final class State
 
     private array $transactionData;
 
-    /** @var array<string, Node[]> */
+    /** @var array<string, State[]> */
     private array $storage = [];
 
     /**
@@ -37,7 +37,7 @@ final class State
     /**
      * Storage to store temporary cross entity nodes.
      *
-     * @return Node[]
+     * @return State[]
      *
      * @internal
      */
@@ -46,7 +46,7 @@ final class State
         return $this->storage[$type] ?? ($this->storage[$type] = []);
     }
 
-    public function addToStorage(string $type, Node $node): void
+    public function addToStorage(string $type, State $node): void
     {
         $this->storage[$type][] = $node;
     }

@@ -207,8 +207,9 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
+        $state = $node->createState();
         foreach (static::ENTITY_SET_2 as $key => $value) {
-            $node->getState()->register($key, $value);
+            $state->register($key, $value);
         }
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
@@ -226,11 +227,13 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
+        $state1 = $node1->createState();
         foreach (static::ENTITY_SET_2 as $key => $value) {
-            $node1->getState()->register($key, $value);
+            $state1->register($key, $value);
         }
+        $state2 = $node2->createState();
         foreach (static::ENTITY_SET_1 as $key => $value) {
-            $node2->getState()->register($key, $value);
+            $state2->register($key, $value);
         }
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
@@ -359,8 +362,11 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
+        $states = [];
         foreach (static::ENTITY_SET_2 as $key => $value) {
-            $node->getState()->register($key, $value);
+            $state = $node->createState();
+            $state->register($key, $value);
+            $states[] = $state;
         }
         $heap->attach($entity, $node, [static::INDEX_FIELDS_2]);
 

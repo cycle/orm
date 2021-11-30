@@ -97,21 +97,9 @@ final class UnitOfWork implements StateInterface
     private function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
-        // $iterator = (clone $heap)->getIterator();
-        // foreach ($iterator as $e) {
-        $iterator = $heap->getIterator();
-        $iterator->rewind();
         $entityRegistry = $this->orm->getEntityRegistry();
-        while ($iterator->valid()) {
-            $e = $iterator->current();
-            $iterator->next();
-            // optimize to only scan over affected entities
-            /** @var Node $node */
-            $node = $heap->get($e);
-
-            if (! $node->hasState()) {
-                continue;
-            }
+        foreach ($this->pool->getAllTuples() as $e => $tuple) {
+            $node = $tuple->node;
 
             // marked as being deleted and has no external claims (GC like approach)
             if (in_array($node->getStatus(), [Node::DELETED, Node::SCHEDULED_DELETE], true)) {
@@ -120,14 +108,13 @@ final class UnitOfWork implements StateInterface
             }
             $role = $node->getRole();
 
-            // sync the current entity data with newly generated data
-            $mapper = $entityRegistry->getMapper($role);
-            // $entityRelations = $mapper->fetchRelations($e);
-            $syncData = $node->syncState($entityRegistry->getRelationMap($role));
-            $mapper->hydrate($e, $syncData);
-
-            // reindex the entity in the heap
+            // reindex the entity while it has old data
+            $node->setState($tuple->state);
             $heap->attach($e, $node, $entityRegistry->getIndexes($role));
+
+            // $entityRelations = $mapper->fetchRelations($e);
+            $syncData = $node->syncState($entityRegistry->getRelationMap($role), $tuple->state);
+            $tuple->mapper->hydrate($e, $syncData);
         }
     }
 
@@ -152,46 +139,19 @@ final class UnitOfWork implements StateInterface
          * @var Tuple $tuple
          */
         foreach ($this->pool->openIterator() as $entity => $tuple) {
-            if ($entity instanceof ReferenceInterface) {
-                if ($entity->hasValue()) {
-                    $entity = $entity->getValue();
-                    if ($entity === null) {
-                        \Cycle\ORM\Transaction\Pool::DEBUG && print "pool: skip unresolved promise\n";
-                        continue;
-                    }
-                    $tuple->entity = $entity;
-                } else {
-                    continue;
-                }
-            }
-
-            if (! $tuple->node || ! $tuple->state || ! $tuple->mapper) {
-                throw new \Exception();
-            }
-            // we do not expect to store promises
-            if ($tuple->task === Tuple::TASK_FORCE_DELETE && $tuple->node === null) {
-                $tuple->status = Tuple::STATUS_PROCESSED;
-                continue;
-            }
             \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
                 "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
                 ['preparing', 'waiting', 'waited', 'deferred', 'proposed', 'preprocessed', 'processed'][$tuple->status],
                 ['store', 'delete', 'force delete'][$tuple->task],
-                $tuple->node === null ? $entity::class : $tuple->node->getRole(),
+                $tuple->node->getRole(),
                 spl_object_id($entity),
-                $tuple->node === null
-                    ? '(has no Node)'
-                    : implode(
-                        '|',
-                        array_map(static fn ($x) => \is_object($x)
-                        ? $x::class
-                        : (string)$x, $tuple->node->getData())
-                    )
+                implode('|', array_map(static fn ($x) => \is_object($x)
+                    ? $x::class
+                    : (string)$x, $tuple->node->getInitialData()))
             );
 
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && ! $tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
-                // todo delete cascaded
                 $command = $this->commandGenerator->generateDeleteCommand($this->orm, $tuple);
                 $this->runCommand($command);
                 $tuple->status = Tuple::STATUS_PROCESSED;

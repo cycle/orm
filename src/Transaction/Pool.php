@@ -158,7 +158,7 @@ final class Pool implements \Countable
     /**
      * Smart iterator
      *
-     * @return Traversable<mixed, Tuple>
+     * @return Traversable<object, Tuple>
      */
     public function openIterator(): Traversable
     {
@@ -306,6 +306,19 @@ final class Pool implements \Countable
     }
 
     /**
+     * @return iterable<object, Tuple> All valid tuples
+     */
+    public function getAllTuples(): iterable
+    {
+        foreach ($this->all as $entity) {
+            $tuple = $this->all->offsetGet($entity);
+            if (isset($tuple->node)) {
+                yield $entity => $tuple;
+            }
+        }
+    }
+
+    /**
      * Make snapshot: create Node, State if not exists. Also attach Mapper
      */
     private function snap(Tuple $tuple): void
@@ -321,10 +334,11 @@ final class Pool implements \Countable
         if ($node === null) {
             // Create new Node
             $node = new Node(Node::NEW, [], $tuple->mapper->getRole());
-            $this->orm->getHeap()->attach($entity, $node);
             if (isset($tuple->state)) {
                 $tuple->state->setData($tuple->mapper->fetchFields($entity));
+                $node->setState($tuple->state);
             }
+            $this->orm->getHeap()->attach($entity, $node);
         }
         $tuple->node = $node;
         if (!isset($tuple->state)) {
@@ -405,8 +419,7 @@ final class Pool implements \Countable
         $this->iterating = false;
         $this->priorityEnabled = false;
         $this->priorityAutoAttach = false;
-        $this->unprocessed = [];
         unset($this->priorityStorage, $this->unprocessed);
-        $this->all = new SplObjectStorage();
+        // $this->all = new SplObjectStorage();
     }
 }

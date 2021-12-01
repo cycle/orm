@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Unit\Mapper\Proxy;
 
+use Cycle\ORM\EntityProxyInterface;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClosureHydrator;
 use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
-use Cycle\ORM\Mapper\Proxy\ProxyEntityInterface;
 use Cycle\ORM\ORM;
 use Cycle\ORM\RelationMap;
 use Cycle\ORM\Schema;
@@ -52,14 +52,18 @@ class ProxyEntityFactoryTest extends TestCase
 
     public function testCreatesObject()
     {
-        $user = $this->factory->create(RelationMap::build($this->orm, 'user'), User::class, [
-            'id' => 1,
-            'email' => 'test@site.com',
-        ]);
+        $user = $this->factory->create(RelationMap::build($this->orm, 'user'), User::class);
 
-        $this->assertInstanceOf(ProxyEntityInterface::class, $user);
-        $this->assertSame(1, $user->id);
-        $this->assertSame('test@site.com', $user->email);
-        $this->assertNull($user->balance);
+        $this->assertInstanceOf(EntityProxyInterface::class, $user);
+    }
+
+    public function testCreatesNonExistingObjectShouldThrowException()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectErrorMessage(
+            'The entity `hello-world` class does not exist. Proxy factory can not create classless entities.'
+        );
+
+        $this->factory->create(RelationMap::build($this->orm, 'user'), 'hello-world');
     }
 }

@@ -41,19 +41,15 @@ class ProxyEntityFactory
     }
 
     /**
-     * Creates an empty Entity and sets column values from data.
+     * Creates an empty Entity.
      */
     public function create(
         RelationMap $relMap,
         string $sourceClass,
-        array $data
     ): object {
         $class = array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
             : $this->defineClass($relMap, $sourceClass);
-        if ($class === null) {
-            return (object)$data;
-        }
 
         $proxy = $this->instantiator->instantiate($class);
         $proxy->__cycle_orm_rel_map = $relMap;
@@ -65,7 +61,7 @@ class ProxyEntityFactory
             Closure::bind($this->initializer, null, $scope === '' ? $class : $scope)($proxy, $properties);
         }
 
-        return $this->upgrade($relMap, $proxy, $data);
+        return $proxy;
     }
 
     /**
@@ -137,15 +133,19 @@ class ProxyEntityFactory
         return $result;
     }
 
-    private function defineClass(RelationMap $relMap, string $class): ?string
+    private function defineClass(RelationMap $relMap, string $class): string
     {
         if (!class_exists($class, true)) {
-            $this->classMap[$class] = null;
-            return null;
+            throw new \RuntimeException(sprintf(
+                'The entity `%s` class does not exist. Proxy factory can not create classless entities.',
+                $class
+            ));
         }
+
         if (array_key_exists($class, $this->classMap)) {
             return $this->classMap[$class];
         }
+
         $reflection = new \ReflectionClass($class);
         if ($reflection->isFinal()) {
             throw new \RuntimeException(sprintf('The entity `%s` class is final and can\'t be extended.', $class));
@@ -166,7 +166,7 @@ class ProxyEntityFactory
             /** @see \Cycle\ORM\Mapper\Proxy\EntityProxyTrait */
             $classStr = <<<PHP
                 {$namespaceStr}
-                class {$classNameStr} extends \\{$class} implements \\Cycle\\ORM\\Mapper\\Proxy\\ProxyEntityInterface {
+                class {$classNameStr} extends \\{$class} implements \\Cycle\\ORM\\EntityProxyInterface {
                     use \\Cycle\ORM\\Mapper\\Proxy\\EntityProxyTrait;
                 }
                 PHP;

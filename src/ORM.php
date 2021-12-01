@@ -8,7 +8,6 @@ use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Mapper\Proxy\ProxyEntityInterface;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
@@ -65,7 +64,7 @@ final class ORM implements ORMInterface
                 $parentClass = get_parent_class($entity);
 
                 if ($parentClass === false
-                    || !$entity instanceof ProxyEntityInterface
+                    || !$entity instanceof EntityProxyInterface
                     || !$this->schema->defines($parentClass)
                 ) {
                     throw new ORMException("Unable to resolve role of `$class`.");

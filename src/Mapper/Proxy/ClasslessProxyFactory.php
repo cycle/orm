@@ -102,7 +102,7 @@ class ClasslessProxyFactory
         /** @see \Cycle\ORM\Mapper\Proxy\ClasslessProxyTrait */
         $classStr = <<<PHP
             namespace {$namespace};
-            class {$className} {
+            class {$className} implements \\Cycle\\ORM\\Mapper\\Proxy\\ProxyEntityInterface {
                 use \\Cycle\ORM\\Mapper\\Proxy\\ClasslessProxyTrait;
 
                 {$properties}

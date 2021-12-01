@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
 use Closure;
+use Cycle\ORM\Mapper\Proxy\ProxyEntityInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 
@@ -18,7 +19,7 @@ class ClosureHydrator
      */
     public function hydrate(RelationMap $relMap, array $propertyMaps, object $object, array $data): object
     {
-        $isProxy = str_ends_with($object::class, ' ORM Proxy');
+        $isProxy = $object instanceof ProxyEntityInterface;
 
         $properties = $propertyMaps[ClassPropertiesExtractor::KEY_FIELDS]->getProperties();
         $this->setEntityProperties($properties, $object, $data);

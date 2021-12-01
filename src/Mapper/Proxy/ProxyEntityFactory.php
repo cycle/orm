@@ -166,7 +166,7 @@ class ProxyEntityFactory
             /** @see \Cycle\ORM\Mapper\Proxy\EntityProxyTrait */
             $classStr = <<<PHP
                 {$namespaceStr}
-                class {$classNameStr} extends \\{$class} {
+                class {$classNameStr} extends \\{$class} implements \\Cycle\\ORM\\Mapper\\Proxy\\ProxyEntityInterface {
                     use \\Cycle\ORM\\Mapper\\Proxy\\EntityProxyTrait;
                 }
                 PHP;

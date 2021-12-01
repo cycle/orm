@@ -142,7 +142,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         if (\is_array($pk) && \count($pk) > 1) {
             return $this->buildCompositePKQuery($pk, $ids);
         }
-        $pk = \current((array)$pk[0]);
+        $pk = \current((array)$pk);
 
         return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])

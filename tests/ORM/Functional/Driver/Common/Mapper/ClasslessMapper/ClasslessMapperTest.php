@@ -132,8 +132,9 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 
         $this->save($u);
 
-        $selector = new Select($this->orm, 'user');
-        $result = $selector->orderBy('id', 'DESC')->fetchOne();
+        $result = (new Select($this->orm, 'user'))
+            ->orderBy('id', 'DESC')
+            ->fetchOne();
 
         $this->assertIsObject($result);
         $this->assertEquals($u->id, $result->id);
@@ -187,8 +188,7 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 
     public function testHeap(): void
     {
-        $selector = new Select($this->orm, 'user');
-        $result = $selector->fetchOne();
+        $result = (new Select($this->orm, 'user'))->fetchOne();
 
         $this->assertEquals(1, $result->id);
 

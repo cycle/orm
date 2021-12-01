@@ -28,34 +28,6 @@ class BelongsToMorphed extends BelongsTo
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
-    public function initPromise(Node $node): array
-    {
-        $innerValues = [];
-        $nodeData = $node->getData();
-        foreach ($this->innerKeys as $innerKey) {
-            if (!isset($nodeData[$innerKey])) {
-                return [null, null];
-            }
-            $innerValues[] = $nodeData[$innerKey];
-        }
-
-
-        if (!isset($nodeData[$this->morphKey])) {
-            return [null, null];
-        }
-        /** @var string $target */
-        $target = $nodeData[$this->morphKey];
-
-        $e = $this->orm->getHeap()->find($target, array_combine($this->outerKeys, $innerValues));
-        if ($e !== null) {
-            return [$e, $e];
-        }
-
-        $e = $this->orm->promise($target, array_combine($this->outerKeys, $innerValues));
-
-        return [$e, $e];
-    }
-
     public function initReference(Node $node): ReferenceInterface
     {
         $scope = $this->getReferenceScope($node);
@@ -83,7 +55,7 @@ class BelongsToMorphed extends BelongsTo
         $role = $related instanceof ReferenceInterface
             ? $related->getRole()
             : $pool->offsetGet($related)?->node->getRole();
-        $tuple->node->register($this->morphKey, $role);
+        $tuple->state->register($this->morphKey, $role);
     }
 
     /**

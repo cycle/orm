@@ -32,7 +32,7 @@ class HasOne extends AbstractRelation
                 if ($original === null) {
                     // not found in heap
                     $node->setRelation($this->getName(), $related);
-                    $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                    $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                     return;
                 }
             } else {
@@ -47,14 +47,14 @@ class HasOne extends AbstractRelation
         }
 
         if ($related === null) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             if ($original === null) {
                 return;
             }
             $this->deleteChild($pool, $tuple, $original);
             return;
         }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
         $rTuple = $pool->attachStore($related, true);
         $this->assertValid($rTuple->node);
@@ -70,16 +70,14 @@ class HasOne extends AbstractRelation
             return;
         }
         $related = $tuple->state->getRelation($this->getName());
-        $tuple->node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
         if ($related instanceof ReferenceInterface && !$related->hasValue()) {
             return;
         }
 
         $rTuple = $pool->offsetGet($related);
-        $rNode = $rTuple->node;
-
         $this->applyChanges($tuple, $rTuple);
-        $rNode->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
+        $rTuple->state->setRelationStatus($this->getTargetRelationName(), RelationInterface::STATUS_RESOLVED);
     }
 }

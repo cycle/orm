@@ -17,7 +17,7 @@ interface RelationInterface
     // Relation statuses in an unfinished transaction
     public const STATUS_PREPARE = 0;
     public const STATUS_PROCESS = 1;
-    public const STATUS_DEFERRED = 2;
+    public const STATUS_DEFERRED = 2; // entity can be saved with resolved fields and updated with deferred fields later
     public const STATUS_RESOLVED = 3;
 
     public function getInnerKeys(): array;

@@ -29,23 +29,6 @@ class MorphedHasOne extends HasOne
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
-    public function initPromise(Node $node): array
-    {
-        $innerValues = [];
-        $nodeData = $node->getData();
-        foreach ($this->innerKeys as $innerKey) {
-            if (!isset($nodeData[$innerKey])) {
-                return [null, null];
-            }
-            $innerValues[] = $nodeData[$innerKey];
-        }
-
-        $scope = array_combine($this->outerKeys, $innerValues) + [$this->morphKey => $node->getRole()];
-
-        $r = $this->orm->promise($this->target, $scope);
-        return [$r, $r];
-    }
-
     protected function getReferenceScope(Node $node): ?array
     {
         return parent::getReferenceScope($node) + [$this->morphKey => $node->getRole()];
@@ -64,11 +47,11 @@ class MorphedHasOne extends HasOne
             return;
         }
 
-        $nodeData = $rTuple->node->getData();
+        $data = $rTuple->state->getData();
 
         $role = $tuple->node->getRole();
-        if (($nodeData[$this->morphKey] ?? null) !== $role) {
-            $rTuple->node->register($this->morphKey, $role);
+        if (($data[$this->morphKey] ?? null) !== $role) {
+            $rTuple->state->register($this->morphKey, $role);
         }
     }
 

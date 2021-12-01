@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
+use Cycle\ORM\Relation\RelationInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
  * Current node state.
  */
-final class State implements ConsumerInterface
+final class State
 {
     use RelationTrait;
     use WaitFieldTrait;
 
     private array $transactionData;
 
-    /** @var array<string, Node[]> */
+    /** @var array<string, int> */
+    private array $relationStatus = [];
+
+    /** @var array<string, State[]> */
     private array $storage = [];
 
     /**
@@ -38,7 +41,7 @@ final class State implements ConsumerInterface
     /**
      * Storage to store temporary cross entity nodes.
      *
-     * @return Node[]
+     * @return State[]
      *
      * @internal
      */
@@ -47,7 +50,7 @@ final class State implements ConsumerInterface
         return $this->storage[$type] ?? ($this->storage[$type] = []);
     }
 
-    public function addToStorage(string $type, Node $node): void
+    public function addToStorage(string $type, self $node): void
     {
         $this->storage[$type][] = $node;
     }
@@ -131,6 +134,11 @@ final class State implements ConsumerInterface
         }
     }
 
+    public function hasChanges(): bool
+    {
+        return $this->state === Node::NEW || $this->getChanges() !== [];
+    }
+
     public function getChanges(): array
     {
         if ($this->state === Node::NEW) {
@@ -187,5 +195,19 @@ final class State implements ConsumerInterface
     public function __destruct()
     {
         unset($this->relations, $this->storage, $this->data, $this->transactionData);
+    }
+
+    public function setRelationStatus(
+        string $name,
+        #[ExpectedValues(valuesFromClass: RelationInterface::class)]
+        int $status
+    ): void {
+        $this->relationStatus[$name] = $status;
+    }
+
+    #[ExpectedValues(valuesFromClass: RelationInterface::class)]
+    public function getRelationStatus(string $name): int
+    {
+        return $this->relationStatus[$name] ?? RelationInterface::STATUS_PREPARE;
     }
 }

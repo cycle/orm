@@ -6,10 +6,9 @@ namespace Cycle\ORM\Tests\Unit\Command\Helper;
 
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\Database\DatabaseInterface;
 
-class TestInsert extends DatabaseCommand implements ConsumerInterface
+class TestInsert extends DatabaseCommand
 {
     use ErrorTrait;
 
@@ -18,9 +17,6 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
 
     /** @var array */
     protected $data;
-
-    /** @var ConsumerInterface[] */
-    protected $consumers = [];
 
     /**
      * @param DatabaseInterface $db
@@ -41,10 +37,6 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
         return true;
     }
 
-    public function register(string $key, mixed $value): void
-    {
-    }
-
     /**
      * Insert values, context not included.
      *
@@ -61,23 +53,7 @@ class TestInsert extends DatabaseCommand implements ConsumerInterface
     public function execute(): void
     {
         $data = $this->getData();
-        $insertID = $this->db->insert($this->table)->values($data)->run();
-
-        foreach ($this->consumers as $key => $consumers) {
-            foreach ($consumers as $id => $consumer) {
-                /** @var ConsumerInterface $cn */
-                $cn = $consumer[0];
-
-                if ($key == self::INSERT_ID) {
-                    $value = $insertID;
-                } else {
-                    $value = $data[$key] ?? null;
-                }
-
-                $cn->register($consumer[1], $value, $consumer[2]);
-            }
-        }
-
+        $this->db->insert($this->table)->values($data)->run();
         parent::execute();
     }
 }

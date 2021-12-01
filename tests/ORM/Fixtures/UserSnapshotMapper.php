@@ -21,7 +21,7 @@ class UserSnapshotMapper extends Mapper
 
         $cs = new Sequence();
         $cs->addCommand($cc);
-        $cs->addCommand($this->snap($node, 'create'));
+        $cs->addCommand($this->snap($state, 'create'));
 
         return $cs;
     }
@@ -32,14 +32,14 @@ class UserSnapshotMapper extends Mapper
 
         $cs = new Sequence();
         $cs->addCommand($cc);
-        $cs->addCommand($this->snap($node, 'update'));
+        $cs->addCommand($this->snap($state, 'update'));
 
         return $cs;
     }
 
-    protected function snap(Node $node, string $action): StoreCommandInterface
+    protected function snap(State $origin, string $action): StoreCommandInterface
     {
-        $data = $node->getData();
+        $data = $origin->getData();
         unset($data['id']);
         $state = new State(Node::SCHEDULED_INSERT, $data + [
             'at' => new \DateTimeImmutable(),
@@ -50,8 +50,8 @@ class UserSnapshotMapper extends Mapper
             $this->source->getDatabase(),
             'user_snapshots',
             $state
-        )->withBeforeExecution(static function (StoreCommandInterface $command) use ($node, $state): void {
-            $state->register('user_id', $node->getData()['id']);
+        )->withBeforeExecution(static function (StoreCommandInterface $command) use ($origin, $state): void {
+            $state->register('user_id', $origin->getData()['id']);
         });
     }
 }

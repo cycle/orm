@@ -284,21 +284,21 @@ abstract class BaseTest extends TestCase
 
         $heap = $orm->getHeap();
         foreach ($heap as $entity) {
-            $state = $heap->get($entity);
-            $this->assertNotNull($state);
+            $node = $heap->get($entity);
+            $this->assertNotNull($node);
 
             $this->assertEntitySynced(
                 $orm,
-                $state->getRole(),
+                $node->getRole(),
                 $orm->getMapper($entity)->extract($entity),
-                $state->getData(),
-                $rel->getValue($state)
+                $node->getData(),
+                $rel->getValue($node)
             );
 
             // all the states must be closed
-            $this->assertNotEquals(Node::SCHEDULED_INSERT, $state);
-            $this->assertNotEquals(Node::SCHEDULED_UPDATE, $state);
-            $this->assertNotEquals(Node::SCHEDULED_DELETE, $state);
+            $this->assertNotEquals(Node::SCHEDULED_INSERT, $node);
+            $this->assertNotEquals(Node::SCHEDULED_UPDATE, $node);
+            $this->assertNotEquals(Node::SCHEDULED_DELETE, $node);
         }
     }
 

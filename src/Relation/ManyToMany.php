@@ -8,6 +8,7 @@ use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\RootNode;
@@ -56,7 +57,7 @@ class ManyToMany extends Relation\AbstractRelation
 
         if ($original instanceof ReferenceInterface) {
             if (!$load && $related === $original && !$original->hasValue()) {
-                $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
             $this->resolve($original, true);
@@ -83,10 +84,10 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
         if ($this->inversion === null && \count($related) === 0) {
-            $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
             return;
         }
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_PROCESS);
 
         // link/sync new and existed elements
         foreach ($related->getElements() as $item) {
@@ -98,8 +99,7 @@ class ManyToMany extends Relation\AbstractRelation
     {
         $related = $tuple->state->getRelation($this->getName());
 
-        $node = $tuple->node;
-        $node->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
 
         if ($related instanceof ReferenceInterface && !$related->hasValue()) {
             return;
@@ -107,24 +107,24 @@ class ManyToMany extends Relation\AbstractRelation
 
         // $relationName = $this->getTargetRelationName();
         $relationName = $tuple->node->getRole() . '.' . $this->name . ':' . $this->pivotRole;
-        $pNodes = [];
+        $pStates = [];
         foreach ($related as $item) {
             $pivot = $related->get($item);
             if ($pivot !== null) {
                 $pTuple = $pool->offsetGet($pivot);
-                $this->applyPivotChanges($node, $pTuple->node);
-                $pNodes[] = $pTuple->node;
-                $pTuple->node->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+                $this->applyPivotChanges($tuple->state, $pTuple->state);
+                $pStates[] = $pTuple->state;
+                $pTuple->state->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
         }
         if ($this->inversion !== null) {
             $storage = $tuple->state->getStorage($this->name);
-            foreach ($storage as $pNode) {
-                if (in_array($pNode, $pNodes, true)) {
+            foreach ($storage as $pState) {
+                if (in_array($pState, $pStates, true)) {
                     continue;
                 }
-                $this->applyPivotChanges($node, $pNode);
-                $pNode->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
+                $this->applyPivotChanges($tuple->state, $pState);
+                $pState->setRelationStatus($relationName, RelationInterface::STATUS_RESOLVED);
             }
             $tuple->state->clearStorage($this->name);
         }
@@ -302,10 +302,10 @@ class ManyToMany extends Relation\AbstractRelation
         return $result;
     }
 
-    protected function applyPivotChanges(Node $parentNode, Node $node): void
+    protected function applyPivotChanges(State $parentState, State $state): void
     {
         foreach ($this->innerKeys as $i => $innerKey) {
-            $node->register($this->throughInnerKeys[$i], $parentNode->getState()->getValue($innerKey));
+            $state->register($this->throughInnerKeys[$i], $parentState->getValue($innerKey));
         }
     }
 
@@ -348,7 +348,7 @@ class ManyToMany extends Relation\AbstractRelation
             $pivots[] = $pivot;
             $rTuple->state->setRelation($relName, $pivots);
         } else {
-            $rTuple->state->addToStorage($this->inversion, $pTuple->node);
+            $rTuple->state->addToStorage($this->inversion, $pTuple->state);
         }
     }
 

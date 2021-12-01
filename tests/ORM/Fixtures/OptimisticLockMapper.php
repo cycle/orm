@@ -23,7 +23,7 @@ class OptimisticLockMapper extends Mapper
         /** @var Update $cc */
         $cc = parent::queueUpdate($entity, $node, $state);
 
-        return $this->lock($node, $cc);
+        return $this->lock($node, $state, $cc);
     }
 
     public function queueDelete($entity, Node $node, State $state): CommandInterface
@@ -31,18 +31,18 @@ class OptimisticLockMapper extends Mapper
         /** @var Delete $cc */
         $cc = parent::queueDelete($entity, $node, $state);
 
-        return $this->lock($node, $cc);
+        return $this->lock($node, $state, $cc);
     }
 
-    protected function lock(Node $node, Update|Delete $command): WrappedCommand
+    protected function lock(Node $node, State $state, Update|Delete $command): WrappedCommand
     {
-        $scopeValue = $node->getInitialData()[$this->lockField] ?? null;
+        $scopeValue = $node->getData()[$this->lockField] ?? null;
         if ($scopeValue === null) {
             throw new \RuntimeException(sprintf('The `%s` field is not set.', $this->lockField));
         }
 
-        if ($command instanceof Update && $node->getData()[$this->lockField] === $scopeValue) {
-            $command->register($this->lockField, $this->getLockingValue($node));
+        if ($command instanceof Update && $state->getData()[$this->lockField] === $scopeValue) {
+            $state->register($this->lockField, $this->getLockingValue($node));
         }
 
         $command->setScope($this->lockField, $scopeValue);

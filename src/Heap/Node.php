@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use Cycle\ORM\Context\ConsumerInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
@@ -21,7 +20,7 @@ use const SORT_STRING;
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
  * inner states.
  */
-final class Node implements ConsumerInterface
+final class Node
 {
     use RelationTrait;
 
@@ -49,17 +48,6 @@ final class Node implements ConsumerInterface
         $this->updateRawData();
     }
 
-    private function updateRawData(): void
-    {
-        $this->rawData = [];
-        foreach ($this->data as $field => $value) {
-            if (!\is_object($value)) {
-                continue;
-            }
-            $this->rawData[$field] = self::convertToSolid($value);
-        }
-    }
-
     /**
      * Reset state.
      */
@@ -73,29 +61,28 @@ final class Node implements ConsumerInterface
         return $this->role;
     }
 
+    public function createState(): State
+    {
+        return $this->state = new State($this->status, $this->data, $this->rawData);
+    }
+
+    public function setState(State $state): self
+    {
+        $this->state = $state;
+        return $this;
+    }
+
     /**
      * Current point state (set of changes).
      */
-    public function getState(): State
+    public function getState(): ?State
     {
-        if ($this->state === null) {
-            $this->state = new State($this->status, $this->data, $this->rawData);
-        }
-
         return $this->state;
     }
 
     public function hasState(): bool
     {
         return $this->state !== null;
-    }
-
-    /**
-     * Set new state value.
-     */
-    public function setStatus(int $state): void
-    {
-        $this->getState()->setStatus($state);
     }
 
     /**
@@ -107,47 +94,22 @@ final class Node implements ConsumerInterface
     }
 
     /**
-     * Set new state data (will trigger state handlers).
-     */
-    public function setData(array $data): void
-    {
-        $this->getState()->setData($data);
-    }
-
-    /**
-     * Get current state data. Mutalbe inside the transaction.
+     * The intial (post-load) node date. Does not change during the transaction.
      */
     public function getData(): array
     {
-        return $this->state?->getData() ?? $this->data;
-    }
-
-    /**
-     * The intial (post-load) node date. Does not change during the transaction.
-     */
-    public function getInitialData(): array
-    {
         return $this->data;
-    }
-
-    public function register(string $key, mixed $value): void
-    {
-        $this->getState()->register($key, $value);
     }
 
     /**
      * Sync the point state and return data diff.
      */
-    public function syncState(RelationMap $relMap): array
+    public function syncState(RelationMap $relMap, State $state): array
     {
-        if ($this->state === null) {
-            return [];
-        }
-
-        $changes = array_udiff_assoc($this->state->getTransactionData(), $this->data, [self::class, 'compare']);
+        $changes = array_udiff_assoc($state->getTransactionData(), $this->data, [self::class, 'compare']);
 
         $relations = $relMap->getRelations();
-        foreach ($this->state->getRelations() as $name => $relation) {
+        foreach ($state->getRelations() as $name => $relation) {
             if ($relation instanceof ReferenceInterface
                 && isset($relations[$name])
                 && (isset($this->relations[$name]) xor isset($relation))
@@ -159,27 +121,12 @@ final class Node implements ConsumerInterface
 
         // DELETE handled separately
         $this->status = self::MANAGED;
-        $this->data = $this->state->getTransactionData();
+        $this->data = $state->getTransactionData();
         $this->updateRawData();
-        $this->state->__destruct();
         $this->state = null;
         $this->relationStatus = [];
 
         return $changes;
-    }
-
-    public function hasChanges(): bool
-    {
-        return ($this->state !== null && $this->state->getStatus() === self::NEW)
-            || $this->state->getChanges() !== [];
-    }
-
-    public function getChanges(): array
-    {
-        if ($this->state === null) {
-            return $this->status === self::NEW ? $this->data : [];
-        }
-        return $this->state->getChanges();
     }
 
     /**
@@ -187,9 +134,6 @@ final class Node implements ConsumerInterface
      */
     public function resetState(): void
     {
-        if (isset($this->state)) {
-            $this->state->__destruct();
-        }
         $this->state = null;
         $this->relationStatus = [];
     }
@@ -265,5 +209,16 @@ final class Node implements ConsumerInterface
         }
 
         return 1;
+    }
+
+    private function updateRawData(): void
+    {
+        $this->rawData = [];
+        foreach ($this->data as $field => $value) {
+            if (!\is_object($value)) {
+                continue;
+            }
+            $this->rawData[$field] = self::convertToSolid($value);
+        }
     }
 }

@@ -186,14 +186,13 @@ abstract class CommonTest extends BaseTest
 
     public function testHeap(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $result = $selector->wherePK(1)->fetchOne();
+        $result = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertEquals(1, $result->id);
-
         $this->assertTrue($this->orm->getHeap()->has($result));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($result)->getStatus());
-
         $this->assertSame(
             [
                 'id' => 1,

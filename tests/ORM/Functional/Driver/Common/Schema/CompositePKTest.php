@@ -156,13 +156,27 @@ abstract class CompositePKTest extends BaseTest
         $this->assertSame($data2, $data3);
     }
 
-    public function testFindByPK(): void
+    public function testFindByPKAssoc(): void
     {
         $this->createTable1();
 
         $u1 = new CompositePK();
         $u1->key1 = 1;
         $u1->key2 = 2;
+
+        $this->save($u1);
+
+        // one entity with assoc PK. Keys - fields in db
+        $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['field2' => 2, 'field1' => 1])->fetchOne();
+
+        $this->assertSame($u1->key1, $data1->key1);
+        $this->assertSame($u1->key2, $data1->key2);
+        $this->assertSame($u1->key3, $data1->key3);
+    }
+
+    public function testFindByPKAssocMultiple(): void
+    {
+        $this->createTable1();
 
         $u2 = new CompositePK();
         $u2->key1 = 3;
@@ -172,14 +186,7 @@ abstract class CompositePKTest extends BaseTest
         $u3->key1 = 5;
         $u3->key2 = 6;
 
-        (new Transaction($this->orm))
-            ->persist($u1)
-            ->persist($u2)
-            ->persist($u3)
-            ->run();
-
-        // one entity with assoc PK. Keys - fields in db
-        $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['field2' => 2, 'field1' => 1])->fetchOne();
+        $this->save($u2, $u3);
 
         // several entities with assoc PK and different keys order. Keys - properties
         $data2 = (new Select($this->orm, CompositePK::class))
@@ -188,10 +195,6 @@ abstract class CompositePKTest extends BaseTest
 
         // one entity with array PK
         $data3 = (new Select($this->orm, CompositePK::class))->wherePK([5, 6])->fetchOne();
-
-        $this->assertSame($u1->key1, $data1->key1);
-        $this->assertSame($u1->key2, $data1->key2);
-        $this->assertSame($u1->key3, $data1->key3);
 
         $this->assertSame($u2->key1, $data2[0]->key1);
         $this->assertSame($u2->key2, $data2[0]->key2);

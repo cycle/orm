@@ -138,11 +138,12 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function wherePK(string|int|array|object ...$ids): self
     {
         $pk = $this->loader->getPK();
-        $pk = \is_array($pk) && \count($pk) > 1 ? $pk : ((array)$pk)[0];
 
         if (\is_array($pk) && \count($pk) > 1) {
             return $this->buildCompositePKQuery($pk, $ids);
         }
+        $pk = \current((array)$pk[0]);
+
         return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
             : $this->__call('where', [$pk, current($ids)]);
@@ -431,7 +432,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         return $this;
     }
 
-    private function buildCompositePKQuery(array $primaryKeys, array $args): self
+    private function buildCompositePKQuery(array $pk, array $args): self
     {
         $prepared = [];
         foreach ($args as $index => $values) {
@@ -439,27 +440,27 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             if (!\is_array($values)) {
                 throw new InvalidArgumentException('Composite primary key must be defined using an array.');
             }
-            if (\count($primaryKeys) !== \count($values)) {
+            if (\count($pk) !== \count($values)) {
                 throw new InvalidArgumentException(
-                    sprintf('Primary key should contain %d values.', \count($primaryKeys))
+                    sprintf('Primary key should contain %d values.', \count($pk))
                 );
             }
 
             $isAssoc = !array_is_list($values);
-            foreach ($values as $pk => $value) {
-                $isAssoc ?
-                    $pk = $this->loader->getAlias() . '.' . $this->loader->fieldAlias($pk) :
-                    $pk = $primaryKeys[$pk];
+            foreach ($values as $key => $value) {
+                $key = $isAssoc
+                    ? $this->loader->getAlias() . '.' . $this->loader->fieldAlias($key)
+                    : $pk[$key];
 
-                if (!\in_array($pk, $primaryKeys, true)) {
-                    throw new InvalidArgumentException(sprintf('Primary key %s not found.', $pk));
+                if (!\in_array($key, $pk, true)) {
+                    throw new InvalidArgumentException(sprintf('Primary key %s not found.', $key));
                 }
 
-                $prepared[$index][$pk] = $value;
+                $prepared[$index][$key] = $value;
             }
         }
 
-        $this->__call('where', [function (Select\QueryBuilder $q) use ($prepared) {
+        $this->__call('where', [static function (Select\QueryBuilder $q) use ($prepared) {
             foreach ($prepared as $set) {
                 $q->orWhere($set);
             }

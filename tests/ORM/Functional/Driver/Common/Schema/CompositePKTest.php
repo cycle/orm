@@ -25,10 +25,10 @@ abstract class CompositePKTest extends BaseTest
         $u->key1 = 1;
         $u->key2 = 1;
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
-        $s = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-        $data = $s->fetchData()[0];
+        $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->fetchData()[0];
 
         $this->assertSame(1, $data['key1']);
         $this->assertSame(1, $data['key2']);

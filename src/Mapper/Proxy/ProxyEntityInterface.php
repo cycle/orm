@@ -6,5 +6,4 @@ namespace Cycle\ORM\Mapper\Proxy;
 
 interface ProxyEntityInterface
 {
-
 }

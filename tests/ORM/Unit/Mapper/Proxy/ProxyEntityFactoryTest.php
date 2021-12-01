@@ -34,7 +34,8 @@ class ProxyEntityFactoryTest extends TestCase
         $factory = $this->createMock(FactoryInterface::class);
 
         $this->orm = new ORM(
-            $factory, new Schema([
+            $factory,
+            new Schema([
                 'user' => [
                     SchemaInterface::ENTITY => User::class,
                     SchemaInterface::MAPPER => Mapper::class,

@@ -65,7 +65,7 @@ class ProxyEntityFactory
             Closure::bind($this->initializer, null, $scope === '' ? $class : $scope)($proxy, $properties);
         }
 
-        return $proxy;
+        return $this->upgrade($relMap, $proxy, $data);
     }
 
     /**

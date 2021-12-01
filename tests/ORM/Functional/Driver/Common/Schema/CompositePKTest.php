@@ -25,10 +25,10 @@ abstract class CompositePKTest extends BaseTest
         $u->key1 = 1;
         $u->key2 = 1;
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
-        $s = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
-        $data = $s->fetchData()[0];
+        $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
+            ->fetchData()[0];
 
         $this->assertSame(1, $data['key1']);
         $this->assertSame(1, $data['key2']);
@@ -154,6 +154,86 @@ abstract class CompositePKTest extends BaseTest
         $this->assertSame($u2, $data1);
         $this->assertSame($data2, $data1);
         $this->assertSame($data2, $data3);
+    }
+
+    public function testFindByPKAssoc(): void
+    {
+        $this->createTable1();
+
+        $u1 = new CompositePK();
+        $u1->key1 = 1;
+        $u1->key2 = 2;
+
+        $this->save($u1);
+
+        // one entity with assoc PK. Keys - fields in db
+        $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['field2' => 2, 'field1' => 1])->fetchOne();
+
+        $this->assertSame($u1->key1, $data1->key1);
+        $this->assertSame($u1->key2, $data1->key2);
+        $this->assertSame($u1->key3, $data1->key3);
+    }
+
+    public function testFindByPKAssocMultiple(): void
+    {
+        $this->createTable1();
+
+        $u2 = new CompositePK();
+        $u2->key1 = 3;
+        $u2->key2 = 4;
+
+        $u3 = new CompositePK();
+        $u3->key1 = 5;
+        $u3->key2 = 6;
+
+        $this->save($u2, $u3);
+
+        // several entities with assoc PK and different keys order. Keys - properties
+        $data2 = (new Select($this->orm, CompositePK::class))
+            ->wherePK(['key1' => 3, 'key2' => 4], ['key2' => 6, 'key1' => 5])
+            ->fetchAll();
+
+        // one entity with array PK
+        $data3 = (new Select($this->orm, CompositePK::class))->wherePK([5, 6])->fetchOne();
+
+        $this->assertSame($u2->key1, $data2[0]->key1);
+        $this->assertSame($u2->key2, $data2[0]->key2);
+        $this->assertSame($u2->key3, $data2[0]->key3);
+        $this->assertSame($u3->key1, $data2[1]->key1);
+        $this->assertSame($u3->key2, $data2[1]->key2);
+        $this->assertSame($u3->key3, $data2[1]->key3);
+
+        $this->assertSame($u3->key1, $data3->key1);
+        $this->assertSame($u3->key2, $data3->key2);
+        $this->assertSame($u3->key3, $data3->key3);
+    }
+
+    /**
+     * @dataProvider wrongDataProvider
+     */
+    public function testFindByPKExceptions(array|string $pk, string $exceptionMsg): void
+    {
+        $this->createTable1();
+
+        $this->expectExceptionMessage($exceptionMsg);
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new Select($this->orm, CompositePK::class))->wherePK($pk)->fetchOne();
+    }
+
+    public function wrongDataProvider(): array
+    {
+        return [
+            'Incorrect type' => [
+                'foo', 'Composite primary key must be defined using an array.',
+            ],
+            'Incorrect count' => [
+                ['key1' => 1, 'key2' => 2, 'key3' => 3], 'Primary key should contain 2 values.',
+            ],
+            'Don\'t exist' => [
+                ['foo' => 2, 'bar' => 1], 'Primary key simple_entity.foo not found.',
+            ],
+        ];
     }
 
     protected function createTable1(): void

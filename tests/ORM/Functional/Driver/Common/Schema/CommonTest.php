@@ -10,11 +10,14 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
+use Cycle\ORM\Tests\Fixtures\UserWithUUIDPrimaryKey;
+use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Ramsey\Uuid\Uuid;
 
 abstract class CommonTest extends BaseTest
 {
@@ -30,6 +33,15 @@ abstract class CommonTest extends BaseTest
             'email' => 'string',
             'balance' => 'float',
         ]);
+
+        $this->makeTable(
+            'user_with_uuid_primary_key',
+            [
+                'uuid' => 'string(36),primary',
+                'email' => 'string',
+                'balance' => 'float',
+            ]
+        );
 
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'active', 'balance'],
@@ -55,6 +67,19 @@ abstract class CommonTest extends BaseTest
                 SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [],
                 SchemaInterface::SCOPE => SortByIDScope::class,
+            ],
+            UserWithUUIDPrimaryKey::class => [
+                SchemaInterface::ROLE => 'user_with_uuid_primary_key',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user_with_uuid_primary_key',
+                SchemaInterface::PRIMARY_KEY => 'uuid',
+                SchemaInterface::COLUMNS => ['uuid', 'email', 'balance'],
+                SchemaInterface::TYPECAST => [
+                    'uuid' => [UuidPrimaryKey::class, 'typecast'],
+                ],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
         ]));
     }
@@ -112,6 +137,22 @@ abstract class CommonTest extends BaseTest
         $this->assertSame(1, $result->id);
         $this->assertSame('hello@world.com', $result->email);
         $this->assertSame(100.0, $result->balance);
+    }
+
+    public function testFetchByStringablePK(): void
+    {
+        $uuid = Uuid::uuid4();
+        $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey($uuid->toString()), 'uuid@world.com', 500);
+
+        $this->save($e);
+
+        $selector = new Select($this->orm, UserWithUUIDPrimaryKey::class);
+
+        $result = $selector->wherePK($uuid)->fetchOne();
+
+        $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $result);
+        $this->assertSame($uuid->toString(), $result->getID()->getId());
+        $this->assertSame('uuid@world.com', $result->getEmail());
     }
 
     public function testWhere(): void

@@ -61,11 +61,10 @@ final class ORM implements ORMInterface
 
             $class = $entity::class;
             if (!$this->schema->defines($class)) {
-                // todo: redesign
-                // temporary solution for proxy objects
                 $parentClass = get_parent_class($entity);
+
                 if ($parentClass === false
-                    || substr($class, -6) !== chr(160) . 'Proxy'
+                    || !$entity instanceof EntityProxyInterface
                     || !$this->schema->defines($parentClass)
                 ) {
                     throw new ORMException("Unable to resolve role of `$class`.");

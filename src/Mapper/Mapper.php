@@ -41,7 +41,7 @@ class Mapper extends DatabaseMapper
     public function init(array $data, string $role = null): object
     {
         $class = $this->resolveClass($data, $role);
-        return $this->entityFactory->create($this->relationMap, $class, $data);
+        return $this->entityFactory->create($this->relationMap, $class);
     }
 
     public function hydrate(object $entity, array $data): object

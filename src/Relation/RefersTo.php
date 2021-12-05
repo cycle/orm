@@ -83,10 +83,6 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             }
         }
 
-        /**
-         * todo refactor
-         * {@see \Cycle\ORM\Relation\BelongsTo::checkNullValuePossibility()}
-         */
         if ($rTuple->status === Tuple::STATUS_PROCESSED
             || ($rTuple->status > Tuple::STATUS_PREPARING
                 && $rTuple->state->getStatus() !== node::NEW

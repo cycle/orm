@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\ORM;
 
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use WeakReference;
 
 abstract class ORMTest extends BaseTest
 {
@@ -37,14 +37,14 @@ abstract class ORMTest extends BaseTest
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'email', 'balance'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
             ],
         ]));
     }
@@ -89,28 +89,6 @@ abstract class ORMTest extends BaseTest
 
         $this->assertNotSame($orm, $this->orm);
         $this->assertNotSame($orm->getHeap(), $this->orm->getHeap());
-    }
-
-    public function testORMCloneGarbage(): void
-    {
-        $orm = new ORM(new Factory($this->dbal), new Schema([]));
-
-        $link = WeakReference::create($orm);
-
-        $orm = $this->orm->withFactory(new Factory($this->dbal));
-
-        $this->assertNull($link->get());
-    }
-
-    public function testORMUnsetGarbage(): void
-    {
-        $orm = new ORM(new Factory($this->dbal), new Schema([]));
-
-        $link = WeakReference::create($orm);
-
-        unset($orm);
-
-        $this->assertNull($link->get());
     }
 
     public function testORMGetByRole(): void

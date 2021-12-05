@@ -33,10 +33,10 @@ final class Factory implements FactoryInterface
 
     /** @var array<string, string> */
     private array $defaults = [
-        Schema::REPOSITORY => Repository::class,
-        Schema::SOURCE => Source::class,
-        Schema::MAPPER => Mapper::class,
-        Schema::SCOPE => null,
+        SchemaInterface::REPOSITORY => Repository::class,
+        SchemaInterface::SOURCE => Source::class,
+        SchemaInterface::MAPPER => Mapper::class,
+        SchemaInterface::SCOPE => null,
     ];
 
     /** @var array<string, CollectionFactoryInterface> */
@@ -117,7 +117,7 @@ final class Factory implements FactoryInterface
     public function mapper(ORMInterface $orm, string $role): MapperInterface
     {
         $schema = $orm->getSchema();
-        $class = $schema->define($role, Schema::MAPPER) ?? $this->defaults[Schema::MAPPER];
+        $class = $schema->define($role, SchemaInterface::MAPPER) ?? $this->defaults[SchemaInterface::MAPPER];
 
         if (!\is_subclass_of($class, MapperInterface::class)) {
             throw new TypecastException(sprintf('%s does not implement %s.', $class, MapperInterface::class));
@@ -128,7 +128,7 @@ final class Factory implements FactoryInterface
             [
                 'orm' => $orm,
                 'role' => $role,
-                'schema' => $schema->define($role, Schema::SCHEMA),
+                'schema' => $schema->define($role, SchemaInterface::SCHEMA),
             ]
         );
     }
@@ -216,7 +216,7 @@ final class Factory implements FactoryInterface
         string $role,
         ?Select $select
     ): RepositoryInterface {
-        $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
+        $class = $schema->define($role, SchemaInterface::REPOSITORY) ?? $this->defaults[SchemaInterface::REPOSITORY];
 
         if (!\is_subclass_of($class, RepositoryInterface::class)) {
             throw new TypecastException($class . ' does not implement ' . RepositoryInterface::class);
@@ -237,7 +237,7 @@ final class Factory implements FactoryInterface
         SchemaInterface $schema,
         string $role
     ): SourceInterface {
-        $source = $schema->define($role, Schema::SOURCE) ?? $this->defaults[Schema::SOURCE];
+        $source = $schema->define($role, SchemaInterface::SOURCE) ?? $this->defaults[SchemaInterface::SOURCE];
 
         if (!\is_subclass_of($source, SourceInterface::class)) {
             throw new TypecastException($source . ' does not implement ' . SourceInterface::class);
@@ -248,11 +248,11 @@ final class Factory implements FactoryInterface
         }
 
         $source = new Source(
-            $this->database($schema->define($role, Schema::DATABASE)),
-            $schema->define($role, Schema::TABLE)
+            $this->database($schema->define($role, SchemaInterface::DATABASE)),
+            $schema->define($role, SchemaInterface::TABLE)
         );
 
-        $scope = $schema->define($role, Schema::SCOPE) ?? $this->defaults[Schema::SCOPE];
+        $scope = $schema->define($role, SchemaInterface::SCOPE) ?? $this->defaults[SchemaInterface::SCOPE];
 
         if ($scope === null) {
             return $source;

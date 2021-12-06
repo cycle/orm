@@ -141,6 +141,11 @@ final class Schema implements SchemaInterface
                 $aliases[$item[self::ENTITY]] = $role;
             }
 
+            // Single Table Inheritance marker
+            if (isset($item[self::CHILDREN]) && !isset($item[self::COLUMNS]['_type'])) {
+                $item[self::COLUMNS]['_type'] = '_type';
+            }
+
             unset($item[self::ROLE]);
             $result[$role] = $item;
         }

@@ -92,11 +92,10 @@ final class RootLoader extends AbstractLoader
     public function getCountField(): string
     {
         if ($this->isDataDuplicationPossible()) {
-            // @tuneyourserver solves the issue with counting on queries with joins.
             return sprintf('DISTINCT(%s)', $this->getPK());
         }
 
-        return $this->getPK();
+        return '*';
     }
 
     /**

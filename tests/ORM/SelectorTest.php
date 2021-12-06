@@ -218,9 +218,9 @@ abstract class SelectorTest extends BaseTest
         $pk = \sprintf('%s.%s', $role, 'id');
         $distinct = \sprintf('DISTINCT(%s)', $pk);
 
-        $this->assertSame($pk, (new RootLoader($this->orm, $role))->getCountField());
-        $this->assertSame($pk, $this->joinRelation(new RootLoader($this->orm, $role), 'profile')->getCountField());
-        $this->assertSame($pk, $this->joinRelation(new RootLoader($this->orm, $role), 'lastComment', [
+        $this->assertSame('*', (new RootLoader($this->orm, $role))->getCountField());
+        $this->assertSame('*', $this->joinRelation(new RootLoader($this->orm, $role), 'profile')->getCountField());
+        $this->assertSame('*', $this->joinRelation(new RootLoader($this->orm, $role), 'lastComment', [
             'method' => Select\AbstractLoader::LEFT_JOIN,
         ])->getCountField());
         $this->assertSame(

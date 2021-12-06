@@ -88,6 +88,11 @@ final class UnitOfWork implements StateInterface
         return new SuccessfulState();
     }
 
+    public function setRunner(RunnerInterface $runner): void
+    {
+        $this->runner = $runner;
+    }
+
     private function runCommand(?CommandInterface $command): void
     {
         if ($command === null) {

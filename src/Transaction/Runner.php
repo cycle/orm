@@ -9,6 +9,7 @@ use Cycle\ORM\Command\CompleteMethodInterface;
 use Cycle\ORM\Command\RollbackMethodInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\Database\Driver\DriverInterface;
+use Cycle\ORM\Exception\RunnerException;
 use Traversable;
 
 /**
@@ -23,6 +24,8 @@ final class Runner implements RunnerInterface
     private array $executed = [];
 
     private int $countExecuted = 0;
+
+    private bool $continueTransaction = false;
 
     public function run(CommandInterface $command): void
     {
@@ -44,8 +47,17 @@ final class Runner implements RunnerInterface
         if ($command->getDatabase() !== null) {
             $driver = $command->getDatabase()->getDriver();
 
-            if ($driver !== null && !in_array($driver, $this->drivers, true)) {
-                $driver->beginTransaction();
+            if (!\in_array($driver, $this->drivers, true)) {
+                if ($this->continueTransaction) {
+                    if($driver->getTransactionLevel() === 0) {
+                        throw new RunnerException(
+                            sprintf('Driver `%s` has no open transactions. ', $driver->getType())
+                        );
+                    }
+                } else {
+                    $driver->beginTransaction();
+                }
+
                 $this->drivers[] = $driver;
             }
         }
@@ -99,5 +111,13 @@ final class Runner implements RunnerInterface
 
         $this->countExecuted = 0;
         $this->drivers = $this->executed = [];
+    }
+
+    public static function withTransaction(): self
+    {
+        $runner = new self();
+        $runner->continueTransaction = true;
+
+        return $runner;
     }
 }

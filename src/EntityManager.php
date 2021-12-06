@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Transaction\RunnerInterface;
 use Cycle\ORM\Transaction\StateInterface;
 use Cycle\ORM\Transaction\UnitOfWork;
 
@@ -37,8 +38,12 @@ class EntityManager implements EntityManagerInterface
         return $this;
     }
 
-    public function run(): StateInterface
+    public function run(?RunnerInterface $runner = null): StateInterface
     {
+        if ($runner !== null) {
+            $this->unitOfWork->setRunner($runner);
+        }
+
         $state = $this->unitOfWork->run();
         $this->clean();
 

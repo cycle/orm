@@ -8,5 +8,4 @@ use Cycle\Database\Query\InsertQuery;
 
 class TestInsertCommand extends InsertQuery
 {
-
 }

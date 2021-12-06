@@ -26,10 +26,10 @@ abstract class TableInheritanceWithoutTypeColumnTest extends BaseTest
         parent::setUp();
 
         $this->makeTable('user', [
-            'id'          => 'primary',
-            '_type'       => 'string,nullable',
-            'email'       => 'string',
-            'balance'     => 'float',
+            'id' => 'primary',
+            '_type' => 'string,nullable',
+            'email' => 'string',
+            'balance' => 'float',
             'permissions' => 'string,nullable',
         ]);
 
@@ -43,18 +43,18 @@ abstract class TableInheritanceWithoutTypeColumnTest extends BaseTest
         );
 
         $this->orm = $this->withSchema(new Schema([
-            User::class  => [
-                Schema::ROLE        => 'user',
-                Schema::CHILDREN    => [
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::CHILDREN => [
                     'admin' => Admin::class,
                 ],
-                Schema::MAPPER      => Mapper::class,
-                Schema::DATABASE    => 'default',
-                Schema::TABLE       => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS     => ['id', 'email', 'balance', 'permissions'],
-                Schema::SCHEMA      => [],
-                Schema::RELATIONS   => [],
+                Schema::COLUMNS => ['id', 'email', 'balance', 'permissions'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
             ],
             Admin::class => [Schema::ROLE => User::class],
         ]));
@@ -66,24 +66,24 @@ abstract class TableInheritanceWithoutTypeColumnTest extends BaseTest
 
         $this->assertEquals([
             [
-                'id'          => 1,
-                '_type'       => 'user',
-                'email'       => 'hello@world.com',
-                'balance'     => 100.0,
+                'id' => 1,
+                '_type' => 'user',
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
                 'permissions' => '',
             ],
             [
-                'id'          => 2,
-                '_type'       => 'admin',
-                'email'       => 'another@world.com',
-                'balance'     => 200.0,
+                'id' => 2,
+                '_type' => 'admin',
+                'email' => 'another@world.com',
+                'balance' => 200.0,
                 'permissions' => '*',
             ],
             [
-                'id'          => 3,
-                '_type'       => null,
-                'email'       => 'third@world.com',
-                'balance'     => 300.0,
+                'id' => 3,
+                '_type' => null,
+                'email' => 'third@world.com',
+                'balance' => 300.0,
                 'permissions' => '',
             ],
         ], $selector->fetchData());

@@ -50,9 +50,7 @@ final class Runner implements RunnerInterface
             if (!\in_array($driver, $this->drivers, true)) {
                 if ($this->continueTransaction) {
                     if ($driver->getTransactionLevel() === 0) {
-                        throw new RunnerException(
-                            sprintf('Driver `%s` has no open transactions. ', $driver->getType())
-                        );
+                        throw new RunnerException(sprintf('Driver `%s` has no open transactions.', $driver->getType()));
                     }
                 } else {
                     $driver->beginTransaction();

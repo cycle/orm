@@ -50,7 +50,10 @@ final class Runner implements RunnerInterface
             if (!\in_array($driver, $this->drivers, true)) {
                 if ($this->continueTransaction) {
                     if ($driver->getTransactionLevel() === 0) {
-                        throw new RunnerException(sprintf('Driver `%s` has no open transactions.', $driver->getType()));
+                        throw new RunnerException(sprintf(
+                            'The `%s` driver connection has no opened transaction.',
+                            $driver->getType()
+                        ));
                     }
                 } else {
                     $driver->beginTransaction();
@@ -75,47 +78,64 @@ final class Runner implements RunnerInterface
 
     public function complete(): void
     {
-        // commit all of the open and normalized database transactions
-        foreach (array_reverse($this->drivers) as $driver) {
-            /** @var DriverInterface $driver */
-            $driver->commitTransaction();
+        if (!$this->continueTransaction) {
+            // Commit all of the open and normalized database transactions
+            foreach (array_reverse($this->drivers) as $driver) {
+                /** @var DriverInterface $driver */
+                $driver->commitTransaction();
+            }
         }
 
-        // other type of transaction to close
+        // Other type of transaction to close
         foreach ($this->executed as $command) {
             if ($command instanceof CompleteMethodInterface) {
                 $command->complete();
             }
         }
-
-        $this->countExecuted = 0;
         $this->drivers = $this->executed = [];
     }
 
     public function rollback(): void
     {
-        // close all open and normalized database transactions
-        foreach (array_reverse($this->drivers) as $driver) {
-            /** @var DriverInterface $driver */
-            $driver->rollbackTransaction();
+        if (!$this->continueTransaction) {
+            // Close all open and normalized database transactions
+            foreach (array_reverse($this->drivers) as $driver) {
+                /** @var DriverInterface $driver */
+                $driver->rollbackTransaction();
+            }
         }
 
-        // close all of external types of transactions (revert changes)
+        // Close all of external types of transactions (revert changes)
         foreach (array_reverse($this->executed) as $command) {
             if ($command instanceof RollbackMethodInterface) {
                 $command->rollBack();
             }
         }
 
-        $this->countExecuted = 0;
         $this->drivers = $this->executed = [];
     }
 
-    public static function withTransaction(): self
+    /**
+     * Create Runner in the 'continue transaction' mode.
+     * In this case the Runner won't begin transactions, you should do it previously manually.
+     * In case when a transaction won't be opened the Runner will throw an Exception and stop Unit of Work.
+     *
+     * The 'continue transaction' mode also means the Runner WON'T commit or rollback opened transactions
+     * on success or fail.
+     * But commands that implement CompleteMethodInterface or RollbackMethodInterface will be called.
+     */
+    public static function continueTransaction(): self
     {
         $runner = new self();
         $runner->continueTransaction = true;
 
         return $runner;
     }
+
+    /**
+     * todo: ?
+     * Create Runner in the 'ignore transaction' mode.
+     * In this case the Runner won't begin/commit/rollback transactions and will ignore any transaction statuses.
+     */
+    // public static function ignoreTransaction(): self
 }

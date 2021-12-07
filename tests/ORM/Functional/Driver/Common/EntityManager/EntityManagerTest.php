@@ -141,7 +141,7 @@ abstract class EntityManagerTest extends BaseTest
         $entity->content = 'Test content';
 
         $em->persist($entity);
-        $result = $em->run(Runner::withTransaction());
+        $result = $em->run(Runner::continueTransaction());
 
         $this->assertTrue($result->isSuccess());
 
@@ -158,7 +158,7 @@ abstract class EntityManagerTest extends BaseTest
         $entity->content = 'Test content';
 
         $em->persist($entity);
-        $result = $em->run(Runner::withTransaction());
+        $result = $em->run(Runner::continueTransaction());
 
         $this->assertFalse($result->isSuccess());
         $exception = $result->getError();

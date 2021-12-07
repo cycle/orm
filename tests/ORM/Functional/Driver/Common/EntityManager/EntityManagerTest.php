@@ -161,7 +161,7 @@ abstract class EntityManagerTest extends BaseTest
         $result = $em->run(Runner::continueTransaction());
 
         $this->assertFalse($result->isSuccess());
-        $exception = $result->getError();
+        $exception = $result->getLastError();
 
         $this->assertInstanceOf(RunnerException::class, $exception);
     }

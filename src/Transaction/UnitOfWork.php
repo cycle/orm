@@ -74,10 +74,9 @@ final class UnitOfWork implements StateInterface
             // this will keep entity data as it was before transaction run
             $this->resetHeap();
 
-            $uow = clone $this;
-            $uow->error = $e;
+            $this->error = $e;
 
-            return $uow;
+            return $this;
         }
 
         // we are ready to commit all changes to our representation layer
@@ -85,7 +84,7 @@ final class UnitOfWork implements StateInterface
 
         $this->runner->complete();
 
-        return new SuccessfulState();
+        return $this;
     }
 
     public function setRunner(RunnerInterface $runner): void
@@ -393,10 +392,10 @@ final class UnitOfWork implements StateInterface
 
     public function isSuccess(): bool
     {
-        return $this->getError() === null;
+        return $this->getLastError() === null;
     }
 
-    public function getError(): ?\Throwable
+    public function getLastError(): ?\Throwable
     {
         return $this->error;
     }

@@ -49,7 +49,7 @@ final class Transaction implements TransactionInterface
         $this->uow = null;
 
         if (!$uow->isSuccess()) {
-            throw $uow->getError();
+            throw $uow->getLastError();
         }
     }
 

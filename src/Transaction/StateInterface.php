@@ -18,7 +18,7 @@ interface StateInterface
      *
      * @return \Throwable|null
      */
-    public function getError(): ?\Throwable;
+    public function getLastError(): ?\Throwable;
 
     /**
      * Try to rerun transaction if previous run has been failed.

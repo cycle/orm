@@ -9,6 +9,7 @@ use Cycle\ORM\Command\CompleteMethodInterface;
 use Cycle\ORM\Command\RollbackMethodInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\Database\Driver\DriverInterface;
+use Cycle\ORM\Exception\RunnerException;
 use Traversable;
 
 /**
@@ -23,6 +24,8 @@ final class Runner implements RunnerInterface
     private array $executed = [];
 
     private int $countExecuted = 0;
+
+    private bool $continueTransaction = false;
 
     public function run(CommandInterface $command): void
     {
@@ -44,8 +47,18 @@ final class Runner implements RunnerInterface
         if ($command->getDatabase() !== null) {
             $driver = $command->getDatabase()->getDriver();
 
-            if ($driver !== null && !in_array($driver, $this->drivers, true)) {
-                $driver->beginTransaction();
+            if (!\in_array($driver, $this->drivers, true)) {
+                if ($this->continueTransaction) {
+                    if ($driver->getTransactionLevel() === 0) {
+                        throw new RunnerException(sprintf(
+                            'The `%s` driver connection has no opened transaction.',
+                            $driver->getType()
+                        ));
+                    }
+                } else {
+                    $driver->beginTransaction();
+                }
+
                 $this->drivers[] = $driver;
             }
         }
@@ -65,39 +78,64 @@ final class Runner implements RunnerInterface
 
     public function complete(): void
     {
-        // commit all of the open and normalized database transactions
-        foreach (array_reverse($this->drivers) as $driver) {
-            /** @var DriverInterface $driver */
-            $driver->commitTransaction();
+        if (!$this->continueTransaction) {
+            // Commit all of the open and normalized database transactions
+            foreach (array_reverse($this->drivers) as $driver) {
+                /** @var DriverInterface $driver */
+                $driver->commitTransaction();
+            }
         }
 
-        // other type of transaction to close
+        // Other type of transaction to close
         foreach ($this->executed as $command) {
             if ($command instanceof CompleteMethodInterface) {
                 $command->complete();
             }
         }
-
-        $this->countExecuted = 0;
         $this->drivers = $this->executed = [];
     }
 
     public function rollback(): void
     {
-        // close all open and normalized database transactions
-        foreach (array_reverse($this->drivers) as $driver) {
-            /** @var DriverInterface $driver */
-            $driver->rollbackTransaction();
+        if (!$this->continueTransaction) {
+            // Close all open and normalized database transactions
+            foreach (array_reverse($this->drivers) as $driver) {
+                /** @var DriverInterface $driver */
+                $driver->rollbackTransaction();
+            }
         }
 
-        // close all of external types of transactions (revert changes)
+        // Close all of external types of transactions (revert changes)
         foreach (array_reverse($this->executed) as $command) {
             if ($command instanceof RollbackMethodInterface) {
                 $command->rollBack();
             }
         }
 
-        $this->countExecuted = 0;
         $this->drivers = $this->executed = [];
     }
+
+    /**
+     * Create Runner in the 'continue transaction' mode.
+     * In this case the Runner won't begin transactions, you should do it previously manually.
+     * In case when a transaction won't be opened the Runner will throw an Exception and stop Unit of Work.
+     *
+     * The 'continue transaction' mode also means the Runner WON'T commit or rollback opened transactions
+     * on success or fail.
+     * But commands that implement CompleteMethodInterface or RollbackMethodInterface will be called.
+     */
+    public static function continueTransaction(): self
+    {
+        $runner = new self();
+        $runner->continueTransaction = true;
+
+        return $runner;
+    }
+
+    /**
+     * todo: ?
+     * Create Runner in the 'ignore transaction' mode.
+     * In this case the Runner won't begin/commit/rollback transactions and will ignore any transaction statuses.
+     */
+    // public static function ignoreTransaction(): self
 }

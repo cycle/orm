@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\Common\EntityManager;
 
 use Cycle\ORM\EntityManager;
+use Cycle\ORM\Exception\RunnerException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
@@ -12,6 +13,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Transaction\Runner;
 
 abstract class EntityManagerTest extends BaseTest
 {
@@ -125,6 +127,63 @@ abstract class EntityManagerTest extends BaseTest
 
         $this->assertSame('Test title', $stored->title);
         $this->assertSame('changed title', $entity->title);
+    }
+
+    public function testRunContinueTransaction(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $this->getDriver()->beginTransaction();
+        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
+
+        $entity = new Post();
+        $entity->title = 'Test title';
+        $entity->content = 'Test content';
+
+        $em->persist($entity);
+        $result = $em->run(Runner::continueTransaction());
+
+        $this->assertTrue($result->isSuccess());
+
+        // No new transaction was opened. A previously opened manually transaction is closed
+        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
+    }
+
+    public function testRunContinueWrongTransaction(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $entity = new Post();
+        $entity->title = 'Test title';
+        $entity->content = 'Test content';
+
+        $em->persist($entity);
+        $result = $em->run(Runner::continueTransaction());
+
+        $this->assertFalse($result->isSuccess());
+        $exception = $result->getLastError();
+
+        $this->assertInstanceOf(RunnerException::class, $exception);
+    }
+
+    public function testRunNewTransaction(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $this->getDriver()->beginTransaction();
+        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
+
+        $entity = new Post();
+        $entity->title = 'Test title';
+        $entity->content = 'Test content';
+
+        $em->persist($entity);
+        $result = $em->run();
+
+        $this->assertTrue($result->isSuccess());
+
+        // Opened and closed new transaction. Transaction level not changed
+        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
     }
 
     // todo test parallel transactions running

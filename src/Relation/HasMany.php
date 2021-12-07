@@ -102,6 +102,10 @@ class HasMany extends AbstractRelation
             $original = $this->resolve($original);
         }
 
+        if ($original instanceof Collection) {
+            $original = $original->toArray();
+        }
+
         $sequence = new Sequence();
 
         foreach ($related as $item) {

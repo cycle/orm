@@ -146,7 +146,7 @@ abstract class EntityManagerTest extends BaseTest
         $this->assertTrue($result->isSuccess());
 
         // No new transaction was opened. A previously opened manually transaction is closed
-        $this->assertSame(0, $this->getDriver()->getTransactionLevel());
+        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
     }
 
     public function testRunContinueWrongTransaction(): void

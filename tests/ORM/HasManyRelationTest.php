@@ -285,6 +285,22 @@ abstract class HasManyRelationTest extends BaseTest
         ], $selector->wherePK(3)->fetchData());
     }
 
+    public function testSetCollectionDirectlyInNodeRelation(): void
+    {
+        $e = (new Select($this->orm, User::class))
+            ->orderBy('user.id', 'desc')
+            ->load('comments')
+            ->fetchOne();
+
+        $node = $this->orm->getHeap()->get($e);
+        // Anti-pattern. Don't do that!
+        $node->setRelation('comments', new ArrayCollection([]));
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
+    }
+
     public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Command\Database;
 
 use Cycle\Database\DatabaseInterface;
-use Cycle\Database\Driver\Postgres\Query\PostgresInsertQuery;
+use Cycle\Database\Query\ReturningInterface;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Heap\State;
@@ -88,9 +88,11 @@ final class Insert extends StoreCommand
                 $this->columns,
                 $this->mapper === null ? $data : ($this->mapper)($data)
             ));
-        if ($this->pkColumn !== null && $insert instanceof PostgresInsertQuery) {
+
+        if ($this->pkColumn !== null && $insert instanceof ReturningInterface) {
             $insert->returning($this->pkColumn);
         }
+
         $insertID = $insert->run();
 
         if ($insertID !== null && \count($this->primaryKeys) === 1) {

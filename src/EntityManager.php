@@ -57,7 +57,7 @@ class EntityManager implements EntityManagerInterface
     public function clean(bool $cleanHeap = false): static
     {
         $this->unitOfWork = new UnitOfWork($this->orm);
-        $cleanHeap and $this->orm->getHeap()->clean();
+        $cleanHeap && $this->orm->getHeap()->clean();
 
         return $this;
     }

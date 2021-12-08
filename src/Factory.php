@@ -134,25 +134,27 @@ final class Factory implements FactoryInterface
     }
 
     public function loader(
-        ORMInterface $orm,
         SchemaInterface $schema,
+        EntityRegistryInterface $registry,
         string $role,
         string $relation
     ): LoaderInterface {
         if ($relation === self::PARENT_LOADER) {
             $parent = $schema->define($role, SchemaInterface::PARENT);
-            return new ParentLoader($orm, $role, $parent);
+            return new ParentLoader($schema, $registry, $this, $role, $parent);
         }
         if ($relation === self::CHILD_LOADER) {
             $parent = $schema->define($role, SchemaInterface::PARENT);
-            return new SubclassLoader($orm, $parent, $role);
+            return new SubclassLoader($schema, $registry, $this, $parent, $role);
         }
         $definition = $schema->defineRelation($role, $relation);
 
         return $this->config->getLoader($definition[Relation::TYPE])->resolve(
             $this->factory,
             [
-                'orm' => $orm,
+                'ormSchema' => $schema,
+                'registry' => $registry,
+                'factory' => $this,
                 'role' => $role,
                 'name' => $relation,
                 'target' => $definition[Relation::TARGET],

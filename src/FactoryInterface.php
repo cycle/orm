@@ -32,8 +32,8 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * Create loader associated with specific entity and relation.
      */
     public function loader(
-        ORMInterface $orm,
         SchemaInterface $schema,
+        EntityRegistryInterface $registry,
         string $role,
         string $relation
     ): LoaderInterface;

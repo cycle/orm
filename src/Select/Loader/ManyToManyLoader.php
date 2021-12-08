@@ -6,8 +6,9 @@ namespace Cycle\ORM\Select\Loader;
 
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
+use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Exception\LoaderException;
-use Cycle\ORM\ORMInterface;
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\SingularNode;
 use Cycle\ORM\Relation;
@@ -42,10 +43,23 @@ class ManyToManyLoader extends JoinableLoader
 
     protected PivotLoader $pivot;
 
-    public function __construct(ORMInterface $orm, string $name, string $target, array $schema)
-    {
-        parent::__construct($orm, $name, $target, $schema);
-        $this->pivot = new PivotLoader($orm, 'pivot', $schema[Relation::THROUGH_ENTITY], $schema);
+    public function __construct(
+        SchemaInterface $ormSchema,
+        EntityRegistryInterface $registry,
+        FactoryInterface $factory,
+        string $name,
+        string $target,
+        array $schema
+    ) {
+        parent::__construct($ormSchema, $registry, $factory, $name, $target, $schema);
+        $this->pivot = new PivotLoader(
+            $ormSchema,
+            $registry,
+            $factory,
+            'pivot',
+            $schema[Relation::THROUGH_ENTITY],
+            $schema
+        );
         $this->options['where'] = $schema[Relation::WHERE] ?? [];
         $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
     }

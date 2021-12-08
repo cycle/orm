@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
-use Cycle\ORM\ORMInterface;
+use Cycle\Database\Query\SelectQuery;
+use Cycle\ORM\EntityRegistryInterface;
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\SubclassMergeNode;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
-use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 
 /**
@@ -35,17 +36,20 @@ class SubclassLoader extends JoinableLoader
         'using' => null,
     ];
 
-    public function __construct(ORMInterface $orm, string $role, string $target)
-    {
-        $schema = $orm->getSchema();
-
+    public function __construct(
+        SchemaInterface $ormSchema,
+        EntityRegistryInterface $registry,
+        FactoryInterface $factory,
+        string $role,
+        string $target
+    ) {
         $schemaArray = [
-            Relation::INNER_KEY => $schema->define($target, SchemaInterface::PARENT_KEY)
-                ?? $schema->define($role, SchemaInterface::PRIMARY_KEY),
-            Relation::OUTER_KEY => $schema->define($target, SchemaInterface::PRIMARY_KEY),
+            Relation::INNER_KEY => $ormSchema->define($target, SchemaInterface::PARENT_KEY)
+                ?? $ormSchema->define($role, SchemaInterface::PRIMARY_KEY),
+            Relation::OUTER_KEY => $ormSchema->define($target, SchemaInterface::PRIMARY_KEY),
         ];
         $this->options['as'] ??= $target;
-        parent::__construct($orm, $role, $target, $schemaArray);
+        parent::__construct($ormSchema, $registry, $factory, $role, $target, $schemaArray);
     }
 
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
+use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Exception\LoaderException;
-use Cycle\ORM\ORMInterface;
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Loader\SubQueryLoader;
@@ -58,12 +59,14 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
     private bool $eagerLoaded = false;
 
     public function __construct(
-        ORMInterface $orm,
+        SchemaInterface $ormSchema,
+        EntityRegistryInterface $registry,
+        FactoryInterface $factory,
         protected string $name,
         string $target,
         protected array $schema
     ) {
-        parent::__construct($orm, $target);
+        parent::__construct($ormSchema, $registry, $factory, $target);
         $this->columns = $this->define(SchemaInterface::COLUMNS);
     }
 
@@ -92,7 +95,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
          */
         $loader = parent::withContext($parent, $options);
 
-        if ($loader->getSource()->getDatabase() !== $parent->getSource()->getDatabase()) {
+        if ($loader->source->getDatabase() !== $parent->source->getDatabase()) {
             if ($loader->isJoined()) {
                 throw new LoaderException('Unable to join tables located in different databases');
             }
@@ -113,7 +116,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
                 $loader->setScope($this->factory->make($loader->options['scope']));
             }
         } else {
-            $loader->setScope($this->getSource()->getScope());
+            $loader->setScope($this->source->getScope());
         }
 
         if (!$loader->eagerLoaded && $loader->isLoaded()) {
@@ -195,7 +198,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return $this->configureQuery($query);
         }
 
-        $loader = new SubQueryLoader($this->orm, $this, $this->options);
+        $loader = new SubQueryLoader($this->ormSchema, $this->registry, $this->factory, $this, $this->options);
         return $loader->configureQuery($query);
     }
 
@@ -247,7 +250,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     protected function initQuery(): SelectQuery
     {
-        return $this->getSource()->getDatabase()->select()->from($this->getJoinTable());
+        return $this->source->getDatabase()->select()->from($this->getJoinTable());
     }
 
     /**

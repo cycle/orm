@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
-use Cycle\ORM\ORMInterface;
+use Cycle\Database\Query\SelectQuery;
+use Cycle\ORM\EntityRegistryInterface;
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Relation;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\Database\Query\SelectQuery;
 
 /**
  * Wrap JoinableLoader with subquery
@@ -25,9 +27,14 @@ final class SubQueryLoader extends JoinableLoader
 
     private JoinableLoader $loader;
 
-    public function __construct(ORMInterface $orm, JoinableLoader $loader, array $options)
-    {
-        parent::__construct($orm, $loader->name, $loader->getTarget(), $loader->schema);
+    public function __construct(
+        SchemaInterface $ormSchema,
+        EntityRegistryInterface $registry,
+        FactoryInterface $factory,
+        JoinableLoader $loader,
+        array $options
+    ) {
+        parent::__construct($ormSchema, $registry, $factory, $loader->name, $loader->getTarget(), $loader->schema);
 
         $this->loader = $loader->withContext($this, [
             'method' => self::SUBQUERY,
@@ -44,8 +51,8 @@ final class SubQueryLoader extends JoinableLoader
         $lAlias = $this->loader->getAlias();
         $queryColumns = $query->getColumns();
 
-        $body = $this->loader->getSource()->getDatabase()->select()->from(
-            sprintf('%s AS %s', $this->loader->getSource()->getTable(), $lAlias)
+        $body = $this->loader->source->getDatabase()->select()->from(
+            sprintf('%s AS %s', $this->loader->source->getTable(), $lAlias)
         )->columns($queryColumns);
         $body = $this->loader->configureQuery($body);
         $bodyColumns = array_slice($body->getColumns(), count($queryColumns));

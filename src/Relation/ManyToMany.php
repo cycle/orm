@@ -6,7 +6,6 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
-use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
@@ -233,10 +232,6 @@ class ManyToMany extends Relation\AbstractRelation
         if ($load === false) {
             return null;
         }
-        // todo replace with entity registry
-        if (!$this->orm instanceof SourceProviderInterface) {
-            throw new ORMException('PivotedPromise require ORM to implement SourceFactoryInterface');
-        }
         $scope = $reference->getScope();
         if ($scope === []) {
             $result = new PivotedStorage();
@@ -245,11 +240,18 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
         // getting scoped query
-        $query = (new RootLoader($this->orm, $this->target))->buildQuery();
+        $query = (new RootLoader(
+            $this->orm->getSchema(),
+            $this->orm->getEntityRegistry(),
+            $this->orm->getFactory(),
+            $this->target
+        ))->buildQuery();
 
         // responsible for all the scoping
         $loader = new ManyToManyLoader(
-            $this->orm,
+            $this->orm->getSchema(),
+            $this->orm->getEntityRegistry(),
+            $this->orm->getFactory(),
             $this->orm->getSource($this->target)->getTable(),
             $this->target,
             $this->schema

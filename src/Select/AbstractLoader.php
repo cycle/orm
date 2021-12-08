@@ -9,7 +9,6 @@ use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\FactoryInterface;
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
@@ -84,19 +83,16 @@ abstract class AbstractLoader implements LoaderInterface
      * @var array<string, array>
      */
     protected array $children;
-
-    protected SchemaInterface $ormSchema;
-    protected FactoryInterface $factory;
-    protected EntityRegistryInterface $registry;
+    protected SourceInterface $source;
 
     public function __construct(
-        protected ORMInterface $orm,
+        protected SchemaInterface $ormSchema,
+        protected EntityRegistryInterface $registry,
+        protected FactoryInterface $factory,
         protected string $target
     ) {
-        $this->registry = $orm->getEntityRegistry();
-        $this->ormSchema = $orm->getSchema();
-        $this->factory = $orm->getFactory();
         $this->children = $this->ormSchema->getInheritedRoles($target);
+        $this->source = $this->registry->getSource($target);
     }
 
     final public function __destruct()
@@ -139,14 +135,6 @@ abstract class AbstractLoader implements LoaderInterface
     public function getTarget(): string
     {
         return $this->target;
-    }
-
-    /**
-     * Data source associated with the loader.
-     */
-    public function getSource(): SourceInterface
-    {
-        return $this->orm->getSource($this->target);
     }
 
     public function withContext(LoaderInterface $parent, array $options = []): static
@@ -235,8 +223,8 @@ abstract class AbstractLoader implements LoaderInterface
         try {
             //Creating new loader.
             $loader = $this->factory->loader(
-                $this->orm,
                 $this->ormSchema,
+                $this->registry,
                 $this->target,
                 $relation
             );
@@ -384,19 +372,18 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected function generateParentLoader(string $role): ?LoaderInterface
     {
-        $schema = $this->ormSchema;
-        $parent = $schema->define($role, SchemaInterface::PARENT);
+        $parent = $this->ormSchema->define($role, SchemaInterface::PARENT);
         return $parent === null
             ? null
-            : $this->factory->loader($this->orm, $schema, $role, FactoryInterface::PARENT_LOADER);
+            : $this->factory->loader($this->ormSchema, $this->registry, $role, FactoryInterface::PARENT_LOADER);
     }
 
     protected function generateSublassLoaders(): iterable
     {
-        $schema = $this->ormSchema;
         if ($this->children !== []) {
             foreach ($this->children as $subRole => $children) {
-                yield $this->factory->loader($this->orm, $schema, $subRole, FactoryInterface::CHILD_LOADER);
+                yield $this->factory
+                    ->loader($this->ormSchema, $this->registry, $subRole, FactoryInterface::CHILD_LOADER);
             }
         }
     }

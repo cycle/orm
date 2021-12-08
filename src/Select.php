@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Countable;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
+use Cycle\ORM\Select\ScopeInterface;
 use InvalidArgumentException;
 use IteratorAggregate;
-use Cycle\Database\Injection\Parameter;
-use Cycle\Database\Query\SelectQuery;
 use Spiral\Pagination\PaginableInterface;
 
 /**
@@ -57,7 +57,12 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         private ORMInterface $orm,
         string $role
     ) {
-        $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
+        $this->loader = new RootLoader(
+            $orm->getSchema(),
+            $orm->getEntityRegistry(),
+            $orm->getFactory(),
+            $this->orm->resolveRole($role)
+        );
         $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
 

@@ -26,6 +26,7 @@ final class Runner implements RunnerInterface
     private int $countExecuted = 0;
 
     private bool $continueTransaction = false;
+    private bool $ignoreTransaction = false;
 
     public function run(CommandInterface $command): void
     {
@@ -48,16 +49,7 @@ final class Runner implements RunnerInterface
             $driver = $command->getDatabase()->getDriver();
 
             if (!\in_array($driver, $this->drivers, true)) {
-                if ($this->continueTransaction) {
-                    if ($driver->getTransactionLevel() === 0) {
-                        throw new RunnerException(sprintf(
-                            'The `%s` driver connection has no opened transaction.',
-                            $driver->getType()
-                        ));
-                    }
-                } else {
-                    $driver->beginTransaction();
-                }
+                $this->openTransaction($driver);
 
                 $this->drivers[] = $driver;
             }
@@ -78,7 +70,7 @@ final class Runner implements RunnerInterface
 
     public function complete(): void
     {
-        if (!$this->continueTransaction) {
+        if (!$this->continueTransaction && !$this->ignoreTransaction) {
             // Commit all of the open and normalized database transactions
             foreach (array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -97,7 +89,7 @@ final class Runner implements RunnerInterface
 
     public function rollback(): void
     {
-        if (!$this->continueTransaction) {
+        if (!$this->continueTransaction && !$this->ignoreTransaction) {
             // Close all open and normalized database transactions
             foreach (array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -133,9 +125,31 @@ final class Runner implements RunnerInterface
     }
 
     /**
-     * todo: ?
      * Create Runner in the 'ignore transaction' mode.
      * In this case the Runner won't begin/commit/rollback transactions and will ignore any transaction statuses.
      */
-    // public static function ignoreTransaction(): self
+    public static function ignoreTransaction(): self
+    {
+        $runner = new self();
+        $runner->ignoreTransaction = true;
+
+        return $runner;
+    }
+
+    private function openTransaction(DriverInterface $driver): void
+    {
+        if ($this->continueTransaction) {
+            if ($driver->getTransactionLevel() === 0) {
+                throw new RunnerException(sprintf(
+                    'The `%s` driver connection has no opened transaction.',
+                    $driver->getType()
+                ));
+            }
+            return;
+        }
+
+        if (!$this->ignoreTransaction) {
+            $driver->beginTransaction();
+        }
+    }
 }

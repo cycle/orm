@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\EntityManager;
 
+use Cycle\Database\Exception\StatementException\ConstrainException;
 use Cycle\ORM\EntityManager;
-use Cycle\ORM\Exception\RunnerException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
@@ -13,7 +13,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Transaction\Runner;
 
 abstract class EntityManagerTest extends BaseTest
 {
@@ -73,6 +72,35 @@ abstract class EntityManagerTest extends BaseTest
         $result = $em->run();
         $this->assertTrue($result->isSuccess());
         $this->assertNumWrites(0);
+        $this->assertTrue($this->orm->getHeap()->has($entity0));
+        $this->assertTrue($this->orm->getHeap()->has($entity1));
+    }
+
+    public function testCleanWithHeap(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $entity0 = (new Select($this->orm, Post::class))->wherePK(1)->fetchOne();
+        $entity1 = new Post();
+        $entity1->title = 'Test title';
+        $entity1->content = 'Test content';
+        $entity2 = new Post();
+        $entity2->title = 'Test title';
+        $entity2->content = 'Test content';
+
+        $em->delete($entity0);
+        $em->persist($entity1);
+        $em->persistDeferred($entity2);
+
+        $em->clean(true);
+
+        $this->captureWriteQueries();
+        $result = $em->run();
+        $this->assertTrue($result->isSuccess());
+        $this->assertNumWrites(0);
+
+        $this->assertFalse($this->orm->getHeap()->has($entity0));
+        $this->assertFalse($this->orm->getHeap()->has($entity1));
     }
 
     /**
@@ -129,61 +157,32 @@ abstract class EntityManagerTest extends BaseTest
         $this->assertSame('changed title', $entity->title);
     }
 
-    public function testRunContinueTransaction(): void
+    public function testRunException(): void
     {
         $em = new EntityManager($this->orm);
 
-        $this->getDriver()->beginTransaction();
-        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
-
         $entity = new Post();
         $entity->title = 'Test title';
-        $entity->content = 'Test content';
 
         $em->persist($entity);
-        $result = $em->run(Runner::continueTransaction());
 
-        $this->assertTrue($result->isSuccess());
-
-        // No new transaction was opened. A previously opened manually transaction is closed
-        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
+        $this->expectException(ConstrainException::class);
+        $em->run();
     }
 
-    public function testRunContinueWrongTransaction(): void
+    public function testRunError(): void
     {
         $em = new EntityManager($this->orm);
 
         $entity = new Post();
         $entity->title = 'Test title';
-        $entity->content = 'Test content';
 
         $em->persist($entity);
-        $result = $em->run(Runner::continueTransaction());
+
+        $result = $em->run(false);
 
         $this->assertFalse($result->isSuccess());
-        $exception = $result->getLastError();
-
-        $this->assertInstanceOf(RunnerException::class, $exception);
-    }
-
-    public function testRunNewTransaction(): void
-    {
-        $em = new EntityManager($this->orm);
-
-        $this->getDriver()->beginTransaction();
-        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
-
-        $entity = new Post();
-        $entity->title = 'Test title';
-        $entity->content = 'Test content';
-
-        $em->persist($entity);
-        $result = $em->run();
-
-        $this->assertTrue($result->isSuccess());
-
-        // Opened and closed new transaction. Transaction level not changed
-        $this->assertSame(1, $this->getDriver()->getTransactionLevel());
+        $this->assertInstanceOf(ConstrainException::class, $result->getLastError());
     }
 
     // todo test parallel transactions running

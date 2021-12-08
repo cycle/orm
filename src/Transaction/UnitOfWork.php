@@ -21,15 +21,13 @@ final class UnitOfWork implements StateInterface
     private const RELATIONS_DEFERRED = 2;
 
     private Pool $pool;
-    private RunnerInterface $runner;
     private CommandGeneratorInterface $commandGenerator;
     private ?\Throwable $error = null;
 
     public function __construct(
         private ORMInterface $orm,
-        RunnerInterface $runner = null
+        private ?RunnerInterface $runner = null
     ) {
-        $this->runner = $runner ?? new Runner();
         $this->pool = new Pool($orm);
         $this->commandGenerator = $orm->getCommandGenerator();
     }
@@ -57,6 +55,8 @@ final class UnitOfWork implements StateInterface
 
     public function run(): StateInterface
     {
+        $this->runner ??= new Runner();
+
         try {
             try {
                 $this->walkPool();

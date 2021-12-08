@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
+use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
@@ -84,11 +85,18 @@ abstract class AbstractLoader implements LoaderInterface
      */
     protected array $children;
 
+    protected SchemaInterface $ormSchema;
+    protected FactoryInterface $factory;
+    protected EntityRegistryInterface $registry;
+
     public function __construct(
         protected ORMInterface $orm,
         protected string $target
     ) {
-        $this->children = $orm->getSchema()->getInheritedRoles($target);
+        $this->registry = $orm->getEntityRegistry();
+        $this->ormSchema = $orm->getSchema();
+        $this->factory = $orm->getFactory();
+        $this->children = $this->ormSchema->getInheritedRoles($target);
     }
 
     final public function __destruct()
@@ -226,9 +234,9 @@ abstract class AbstractLoader implements LoaderInterface
 
         try {
             //Creating new loader.
-            $loader = $this->orm->getFactory()->loader(
+            $loader = $this->factory->loader(
                 $this->orm,
-                $this->orm->getSchema(),
+                $this->ormSchema,
                 $this->target,
                 $relation
             );
@@ -357,7 +365,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     protected function define(int $property)
     {
-        return $this->orm->getSchema()->define($this->target, $property);
+        return $this->ormSchema->define($this->target, $property);
     }
 
     /**
@@ -376,26 +384,26 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected function generateParentLoader(string $role): ?LoaderInterface
     {
-        $schema = $this->orm->getSchema();
+        $schema = $this->ormSchema;
         $parent = $schema->define($role, SchemaInterface::PARENT);
-        $factory = $this->orm->getFactory();
-        return $parent === null ? null : $factory->loader($this->orm, $schema, $role, FactoryInterface::PARENT_LOADER);
+        return $parent === null
+            ? null
+            : $this->factory->loader($this->orm, $schema, $role, FactoryInterface::PARENT_LOADER);
     }
 
     protected function generateSublassLoaders(): iterable
     {
-        $schema = $this->orm->getSchema();
-        $factory = $this->orm->getFactory();
+        $schema = $this->ormSchema;
         if ($this->children !== []) {
             foreach ($this->children as $subRole => $children) {
-                yield $factory->loader($this->orm, $schema, $subRole, FactoryInterface::CHILD_LOADER);
+                yield $this->factory->loader($this->orm, $schema, $subRole, FactoryInterface::CHILD_LOADER);
             }
         }
     }
 
     protected function generateEagerRelationLoaders(string $target): \Generator
     {
-        $relations = $this->orm->getSchema()->define($target, SchemaInterface::RELATIONS) ?? [];
+        $relations = $this->ormSchema->define($target, SchemaInterface::RELATIONS) ?? [];
         foreach ($relations as $relation => $schema) {
             if (($schema[Relation::LOAD] ?? null) === Relation::LOAD_EAGER) {
                 yield $relation;

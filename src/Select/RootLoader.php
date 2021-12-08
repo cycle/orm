@@ -6,7 +6,6 @@ namespace Cycle\ORM\Select;
 
 use Cycle\Database\Query\SelectQuery;
 use Cycle\Database\StatementInterface;
-use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
@@ -39,11 +38,11 @@ final class RootLoader extends AbstractLoader
 
     public function __construct(
         SchemaInterface $ormSchema,
-        EntityRegistryInterface $registry,
+        SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         string $target
     ) {
-        parent::__construct($ormSchema, $registry, $factory, $target);
+        parent::__construct($ormSchema, $sourceProvider, $factory, $target);
         $this->query = $this->source->getDatabase()->select()->from(
             sprintf('%s AS %s', $this->source->getTable(), $this->getAlias())
         );

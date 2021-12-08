@@ -9,6 +9,7 @@ use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Cycle\Database\DatabaseProviderInterface;
 
@@ -33,7 +34,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      */
     public function loader(
         SchemaInterface $schema,
-        EntityRegistryInterface $registry,
+        SourceProviderInterface $sourceProvider,
         string $role,
         string $relation
     ): LoaderInterface;

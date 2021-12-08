@@ -6,7 +6,6 @@ namespace Cycle\ORM\Select\Loader;
 
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
-use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
@@ -15,6 +14,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 
@@ -45,16 +45,16 @@ class ManyToManyLoader extends JoinableLoader
 
     public function __construct(
         SchemaInterface $ormSchema,
-        EntityRegistryInterface $registry,
+        SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         string $name,
         string $target,
         array $schema
     ) {
-        parent::__construct($ormSchema, $registry, $factory, $name, $target, $schema);
+        parent::__construct($ormSchema, $sourceProvider, $factory, $name, $target, $schema);
         $this->pivot = new PivotLoader(
             $ormSchema,
-            $registry,
+            $sourceProvider,
             $factory,
             'pivot',
             $schema[Relation::THROUGH_ENTITY],

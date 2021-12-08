@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
@@ -60,13 +59,13 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
 
     public function __construct(
         SchemaInterface $ormSchema,
-        EntityRegistryInterface $registry,
+        SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         protected string $name,
         string $target,
         protected array $schema
     ) {
-        parent::__construct($ormSchema, $registry, $factory, $target);
+        parent::__construct($ormSchema, $sourceProvider, $factory, $target);
         $this->columns = $this->define(SchemaInterface::COLUMNS);
     }
 
@@ -198,7 +197,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return $this->configureQuery($query);
         }
 
-        $loader = new SubQueryLoader($this->ormSchema, $this->registry, $this->factory, $this, $this->options);
+        $loader = new SubQueryLoader($this->ormSchema, $this->sourceProvider, $this->factory, $this, $this->options);
         return $loader->configureQuery($query);
     }
 

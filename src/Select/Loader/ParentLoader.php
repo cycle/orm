@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Cycle\ORM\Select\Loader;
 
 use Cycle\Database\Query\SelectQuery;
-use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ParentMergeNode;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 
 /**
@@ -37,7 +37,7 @@ class ParentLoader extends JoinableLoader
 
     public function __construct(
         SchemaInterface $ormSchema,
-        EntityRegistryInterface $registry,
+        SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         string $role,
         string $target
@@ -48,7 +48,7 @@ class ParentLoader extends JoinableLoader
                 ?? $ormSchema->define($target, SchemaInterface::PRIMARY_KEY),
         ];
         $this->options['as'] ??= $target;
-        parent::__construct($ormSchema, $registry, $factory, $role, $target, $schemaArray);
+        parent::__construct($ormSchema, $sourceProvider, $factory, $role, $target, $schemaArray);
     }
 
     protected function generateSublassLoaders(): iterable

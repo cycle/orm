@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
@@ -87,12 +86,12 @@ abstract class AbstractLoader implements LoaderInterface
 
     public function __construct(
         protected SchemaInterface $ormSchema,
-        protected EntityRegistryInterface $registry,
+        protected SourceProviderInterface $sourceProvider,
         protected FactoryInterface $factory,
         protected string $target
     ) {
         $this->children = $this->ormSchema->getInheritedRoles($target);
-        $this->source = $this->registry->getSource($target);
+        $this->source = $this->sourceProvider->getSource($target);
     }
 
     final public function __destruct()
@@ -224,7 +223,7 @@ abstract class AbstractLoader implements LoaderInterface
             //Creating new loader.
             $loader = $this->factory->loader(
                 $this->ormSchema,
-                $this->registry,
+                $this->sourceProvider,
                 $this->target,
                 $relation
             );
@@ -375,7 +374,7 @@ abstract class AbstractLoader implements LoaderInterface
         $parent = $this->ormSchema->define($role, SchemaInterface::PARENT);
         return $parent === null
             ? null
-            : $this->factory->loader($this->ormSchema, $this->registry, $role, FactoryInterface::PARENT_LOADER);
+            : $this->factory->loader($this->ormSchema, $this->sourceProvider, $role, FactoryInterface::PARENT_LOADER);
     }
 
     protected function generateSublassLoaders(): iterable
@@ -383,7 +382,7 @@ abstract class AbstractLoader implements LoaderInterface
         if ($this->children !== []) {
             foreach ($this->children as $subRole => $children) {
                 yield $this->factory
-                    ->loader($this->ormSchema, $this->registry, $subRole, FactoryInterface::CHILD_LOADER);
+                    ->loader($this->ormSchema, $this->sourceProvider, $subRole, FactoryInterface::CHILD_LOADER);
             }
         }
     }

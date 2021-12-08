@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Select\Loader;
 
 use Cycle\Database\Query\SelectQuery;
-use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
@@ -13,6 +12,7 @@ use Cycle\ORM\Parser\ArrayNode;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
@@ -42,13 +42,13 @@ class HasManyLoader extends JoinableLoader
 
     public function __construct(
         SchemaInterface $ormSchema,
-        EntityRegistryInterface $registry,
+        SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         string $name,
         string $target,
         array $schema
     ) {
-        parent::__construct($ormSchema, $registry, $factory, $name, $target, $schema);
+        parent::__construct($ormSchema, $sourceProvider, $factory, $name, $target, $schema);
         $this->options['where'] = $schema[Relation::WHERE] ?? [];
         $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
     }

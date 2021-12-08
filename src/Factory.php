@@ -21,6 +21,7 @@ use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Select\SourceProviderInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 use Cycle\Database\DatabaseInterface;
@@ -135,17 +136,17 @@ final class Factory implements FactoryInterface
 
     public function loader(
         SchemaInterface $schema,
-        EntityRegistryInterface $registry,
+        SourceProviderInterface $sourceProvider,
         string $role,
         string $relation
     ): LoaderInterface {
         if ($relation === self::PARENT_LOADER) {
             $parent = $schema->define($role, SchemaInterface::PARENT);
-            return new ParentLoader($schema, $registry, $this, $role, $parent);
+            return new ParentLoader($schema, $sourceProvider, $this, $role, $parent);
         }
         if ($relation === self::CHILD_LOADER) {
             $parent = $schema->define($role, SchemaInterface::PARENT);
-            return new SubclassLoader($schema, $registry, $this, $parent, $role);
+            return new SubclassLoader($schema, $sourceProvider, $this, $parent, $role);
         }
         $definition = $schema->defineRelation($role, $relation);
 
@@ -153,7 +154,7 @@ final class Factory implements FactoryInterface
             $this->factory,
             [
                 'ormSchema' => $schema,
-                'registry' => $registry,
+                'sourceProvider' => $sourceProvider,
                 'factory' => $this,
                 'role' => $role,
                 'name' => $relation,

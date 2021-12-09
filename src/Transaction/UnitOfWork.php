@@ -55,7 +55,7 @@ final class UnitOfWork implements StateInterface
 
     public function run(): StateInterface
     {
-        $this->runner ??= new Runner();
+        $this->runner ??= Runner::openTransaction();
 
         try {
             try {

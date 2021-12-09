@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Transaction;
 
+use Cycle\Database\Driver\DriverInterface;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\CompleteMethodInterface;
 use Cycle\ORM\Command\RollbackMethodInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
-use Cycle\Database\Driver\DriverInterface;
 use Cycle\ORM\Exception\RunnerException;
 use Traversable;
 
@@ -29,7 +29,10 @@ final class Runner implements RunnerInterface
 
     private int $countExecuted = 0;
 
-    private int $mode = self::MODE_OPEN_TRANSACTION;
+    private function __construct(
+        private int $mode
+    ) {
+    }
 
     public function run(CommandInterface $command): void
     {
@@ -111,6 +114,14 @@ final class Runner implements RunnerInterface
     }
 
     /**
+     * Create Runner in the 'create transaction' mode.
+     */
+    public static function openTransaction(): self
+    {
+        return new self(self::MODE_OPEN_TRANSACTION);
+    }
+
+    /**
      * Create Runner in the 'continue transaction' mode.
      * In this case the Runner won't begin transactions, you should do it previously manually.
      * In case when a transaction won't be opened the Runner will throw an Exception and stop Unit of Work.
@@ -121,10 +132,7 @@ final class Runner implements RunnerInterface
      */
     public static function continueTransaction(): self
     {
-        $runner = new self();
-        $runner->mode = self::MODE_CONTINUE_TRANSACTION;
-
-        return $runner;
+        return new self(self::MODE_CONTINUE_TRANSACTION);
     }
 
     /**
@@ -133,10 +141,7 @@ final class Runner implements RunnerInterface
      */
     public static function ignoreTransaction(): self
     {
-        $runner = new self();
-        $runner->mode = self::MODE_IGNORE_TRANSACTION;
-
-        return $runner;
+        return new self(self::MODE_IGNORE_TRANSACTION);
     }
 
     private function useTransaction(DriverInterface $driver): void

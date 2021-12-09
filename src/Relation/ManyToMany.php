@@ -18,7 +18,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
 use Cycle\ORM\Select\RootLoader;
-use Cycle\ORM\Select\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use SplObjectStorage;

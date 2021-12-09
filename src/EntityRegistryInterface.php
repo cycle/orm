@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Select\SourceInterface;
-use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * todo: optimize this interface in the {@see ORM} class

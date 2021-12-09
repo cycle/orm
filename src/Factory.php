@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\Collection\ArrayCollectionFactory;
-use Cycle\ORM\Config\RelationConfig;
-use Cycle\ORM\Exception\TypecastException;
-use Cycle\ORM\Exception\FactoryTypecastException;
-use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Cycle\ORM\Config\RelationConfig;
+use Cycle\ORM\Exception\FactoryTypecastException;
+use Cycle\ORM\Exception\TypecastException;
+use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Repository;
+use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
-use Cycle\ORM\Select\SourceProviderInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Cycle\Database\DatabaseInterface;
-use Cycle\Database\DatabaseProviderInterface;
 
 final class Factory implements FactoryInterface
 {

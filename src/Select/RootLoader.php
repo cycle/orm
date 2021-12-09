@@ -9,6 +9,7 @@ use Cycle\Database\StatementInterface;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;

@@ -7,7 +7,7 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Select\SourceProviderInterface;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**

@@ -7,10 +7,10 @@ namespace Cycle\ORM\Select\Loader;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\RootNode;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Select\SourceProviderInterface;
 
 /**
  * Wrap JoinableLoader with subquery

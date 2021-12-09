@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Select;
+namespace Cycle\ORM\Registry;
+
+use Cycle\ORM\Select\SourceInterface;
 
 interface SourceProviderInterface
 {

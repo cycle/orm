@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
-use Cycle\Database\Query\SelectQuery;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,

@@ -19,7 +19,7 @@ final class Runner implements RunnerInterface
 {
     private const MODE_IGNORE_TRANSACTION = 0;
     private const MODE_CONTINUE_TRANSACTION = 1;
-    private const MODE_OPEN_TRANSACTION = 1;
+    private const MODE_OPEN_TRANSACTION = 2;
 
     /** @var DriverInterface[] */
     private array $drivers = [];

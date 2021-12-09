@@ -14,6 +14,9 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\RelationMap;
 
+/**
+ * @internal
+ */
 final class UnitOfWork implements StateInterface
 {
     private const RELATIONS_NOT_RESOLVED = 0;
@@ -32,7 +35,7 @@ final class UnitOfWork implements StateInterface
         $this->commandGenerator = $orm->getCommandGenerator();
     }
 
-    public function persist(object $entity, bool $cascade = true): self
+    public function persistState(object $entity, bool $cascade = true): self
     {
         $this->pool->attachStore($entity, $cascade, persist: true);
 
@@ -55,7 +58,7 @@ final class UnitOfWork implements StateInterface
 
     public function run(): StateInterface
     {
-        $this->runner ??= Runner::openTransaction();
+        $this->runner ??= Runner::innerTransaction();
 
         try {
             try {
@@ -142,6 +145,7 @@ final class UnitOfWork implements StateInterface
      */
     private function resetHeap(): void
     {
+        // todo: refactor
         $heap = $this->orm->getHeap();
         foreach ($heap as $e) {
             $heap->get($e)->resetState();

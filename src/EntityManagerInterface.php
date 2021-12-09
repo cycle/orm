@@ -17,7 +17,7 @@ interface EntityManagerInterface
      * Note: The entity will be updated or inserted into the database at transaction
      * run or as a result of the run operation.
      */
-    public function persist(object $entity, bool $cascade = true): self;
+    public function persistState(object $entity, bool $cascade = true): self;
 
     /**
      * Tells the EntityManager to make an Entity managed and persistent with deferred state syncing.
@@ -28,7 +28,7 @@ interface EntityManagerInterface
      * Note: The entity will be updated or inserted into the database at transaction
      * run or as a result of the run operation.
      */
-    public function persistDeferred(object $entity, bool $cascade = true): self;
+    public function persist(object $entity, bool $cascade = true): self;
 
     /**
      * Delete an entity.

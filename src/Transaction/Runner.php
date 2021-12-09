@@ -115,6 +115,8 @@ final class Runner implements RunnerInterface
 
     /**
      * Create Runner in the 'create transaction' mode.
+     * In this case the Runner will open new transaction for each used driver connection
+     * and will close they on finish.
      */
     public static function openTransaction(): self
     {

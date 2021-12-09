@@ -152,6 +152,11 @@ final class ORM implements ORMInterface
         return $this->factory;
     }
 
+    public function getProvider(string $class): object
+    {
+        return $this->entityRegistry;
+    }
+
     public function getSchema(): SchemaInterface
     {
         return $this->schema;

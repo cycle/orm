@@ -64,6 +64,13 @@ interface ORMInterface extends SourceProviderInterface
     public function getEntityRegistry(): EntityRegistryInterface;
 
     /**
+     * @template Provider
+     * @param class-string<Provider> $class
+     * @return Provider
+     */
+    public function getProvider(string $class): object;
+
+    /**
      * Get ORM relation and entity schema provider.
      */
     public function getSchema(): SchemaInterface;

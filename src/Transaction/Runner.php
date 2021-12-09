@@ -17,6 +17,10 @@ use Traversable;
  */
 final class Runner implements RunnerInterface
 {
+    private const MODE_IGNORE_TRANSACTION = 0;
+    private const MODE_CONTINUE_TRANSACTION = 1;
+    private const MODE_OPEN_TRANSACTION = 1;
+
     /** @var DriverInterface[] */
     private array $drivers = [];
 
@@ -25,8 +29,7 @@ final class Runner implements RunnerInterface
 
     private int $countExecuted = 0;
 
-    private bool $continueTransaction = false;
-    private bool $ignoreTransaction = false;
+    private int $mode = self::MODE_OPEN_TRANSACTION;
 
     public function run(CommandInterface $command): void
     {
@@ -49,7 +52,7 @@ final class Runner implements RunnerInterface
             $driver = $command->getDatabase()->getDriver();
 
             if (!\in_array($driver, $this->drivers, true)) {
-                $this->openTransaction($driver);
+                $this->useTransaction($driver);
 
                 $this->drivers[] = $driver;
             }
@@ -70,7 +73,7 @@ final class Runner implements RunnerInterface
 
     public function complete(): void
     {
-        if (!$this->continueTransaction && !$this->ignoreTransaction) {
+        if ($this->mode === self::MODE_OPEN_TRANSACTION) {
             // Commit all of the open and normalized database transactions
             foreach (array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -89,7 +92,7 @@ final class Runner implements RunnerInterface
 
     public function rollback(): void
     {
-        if (!$this->continueTransaction && !$this->ignoreTransaction) {
+        if ($this->mode === self::MODE_OPEN_TRANSACTION) {
             // Close all open and normalized database transactions
             foreach (array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -119,7 +122,7 @@ final class Runner implements RunnerInterface
     public static function continueTransaction(): self
     {
         $runner = new self();
-        $runner->continueTransaction = true;
+        $runner->mode = self::MODE_CONTINUE_TRANSACTION;
 
         return $runner;
     }
@@ -131,14 +134,18 @@ final class Runner implements RunnerInterface
     public static function ignoreTransaction(): self
     {
         $runner = new self();
-        $runner->ignoreTransaction = true;
+        $runner->mode = self::MODE_IGNORE_TRANSACTION;
 
         return $runner;
     }
 
-    private function openTransaction(DriverInterface $driver): void
+    private function useTransaction(DriverInterface $driver): void
     {
-        if ($this->continueTransaction) {
+        if ($this->mode === self::MODE_IGNORE_TRANSACTION) {
+            return;
+        }
+
+        if ($this->mode === self::MODE_CONTINUE_TRANSACTION) {
             if ($driver->getTransactionLevel() === 0) {
                 throw new RunnerException(sprintf(
                     'The `%s` driver connection has no opened transaction.',
@@ -148,8 +155,6 @@ final class Runner implements RunnerInterface
             return;
         }
 
-        if (!$this->ignoreTransaction) {
-            $driver->beginTransaction();
-        }
+        $driver->beginTransaction();
     }
 }

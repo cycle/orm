@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Transaction;
 
+use Cycle\Database\Driver\DriverInterface;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\CompleteMethodInterface;
 use Cycle\ORM\Command\RollbackMethodInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
-use Cycle\Database\Driver\DriverInterface;
 use Cycle\ORM\Exception\RunnerException;
 use Traversable;
 
@@ -17,6 +17,10 @@ use Traversable;
  */
 final class Runner implements RunnerInterface
 {
+    private const MODE_IGNORE_TRANSACTION = 0;
+    private const MODE_CONTINUE_TRANSACTION = 1;
+    private const MODE_OPEN_TRANSACTION = 2;
+
     /** @var DriverInterface[] */
     private array $drivers = [];
 
@@ -25,7 +29,10 @@ final class Runner implements RunnerInterface
 
     private int $countExecuted = 0;
 
-    private bool $continueTransaction = false;
+    private function __construct(
+        private int $mode
+    ) {
+    }
 
     public function run(CommandInterface $command): void
     {
@@ -48,16 +55,7 @@ final class Runner implements RunnerInterface
             $driver = $command->getDatabase()->getDriver();
 
             if (!\in_array($driver, $this->drivers, true)) {
-                if ($this->continueTransaction) {
-                    if ($driver->getTransactionLevel() === 0) {
-                        throw new RunnerException(sprintf(
-                            'The `%s` driver connection has no opened transaction.',
-                            $driver->getType()
-                        ));
-                    }
-                } else {
-                    $driver->beginTransaction();
-                }
+                $this->useTransaction($driver);
 
                 $this->drivers[] = $driver;
             }
@@ -78,7 +76,7 @@ final class Runner implements RunnerInterface
 
     public function complete(): void
     {
-        if (!$this->continueTransaction) {
+        if ($this->mode === self::MODE_OPEN_TRANSACTION) {
             // Commit all of the open and normalized database transactions
             foreach (array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -97,7 +95,7 @@ final class Runner implements RunnerInterface
 
     public function rollback(): void
     {
-        if (!$this->continueTransaction) {
+        if ($this->mode === self::MODE_OPEN_TRANSACTION) {
             // Close all open and normalized database transactions
             foreach (array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
@@ -116,6 +114,16 @@ final class Runner implements RunnerInterface
     }
 
     /**
+     * Create Runner in the 'create transaction' mode.
+     * In this case the Runner will open new transaction for each used driver connection
+     * and will close they on finish.
+     */
+    public static function openTransaction(): self
+    {
+        return new self(self::MODE_OPEN_TRANSACTION);
+    }
+
+    /**
      * Create Runner in the 'continue transaction' mode.
      * In this case the Runner won't begin transactions, you should do it previously manually.
      * In case when a transaction won't be opened the Runner will throw an Exception and stop Unit of Work.
@@ -126,16 +134,34 @@ final class Runner implements RunnerInterface
      */
     public static function continueTransaction(): self
     {
-        $runner = new self();
-        $runner->continueTransaction = true;
-
-        return $runner;
+        return new self(self::MODE_CONTINUE_TRANSACTION);
     }
 
     /**
-     * todo: ?
      * Create Runner in the 'ignore transaction' mode.
      * In this case the Runner won't begin/commit/rollback transactions and will ignore any transaction statuses.
      */
-    // public static function ignoreTransaction(): self
+    public static function ignoreTransaction(): self
+    {
+        return new self(self::MODE_IGNORE_TRANSACTION);
+    }
+
+    private function useTransaction(DriverInterface $driver): void
+    {
+        if ($this->mode === self::MODE_IGNORE_TRANSACTION) {
+            return;
+        }
+
+        if ($this->mode === self::MODE_CONTINUE_TRANSACTION) {
+            if ($driver->getTransactionLevel() === 0) {
+                throw new RunnerException(sprintf(
+                    'The `%s` driver connection has no opened transaction.',
+                    $driver->getType()
+                ));
+            }
+            return;
+        }
+
+        $driver->beginTransaction();
+    }
 }

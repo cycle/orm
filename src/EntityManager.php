@@ -38,7 +38,7 @@ class EntityManager implements EntityManagerInterface
         return $this;
     }
 
-    public function run(?RunnerInterface $runner = null): StateInterface
+    public function run(bool $throwException = true, ?RunnerInterface $runner = null): StateInterface
     {
         if ($runner !== null) {
             $this->unitOfWork->setRunner($runner);
@@ -47,12 +47,17 @@ class EntityManager implements EntityManagerInterface
         $state = $this->unitOfWork->run();
         $this->clean();
 
+        if ($throwException && !$state->isSuccess()) {
+            throw $state->getLastError();
+        }
+
         return $state;
     }
 
-    public function clean(): static
+    public function clean(bool $cleanHeap = false): static
     {
         $this->unitOfWork = new UnitOfWork($this->orm);
+        $cleanHeap && $this->orm->getHeap()->clean();
 
         return $this;
     }

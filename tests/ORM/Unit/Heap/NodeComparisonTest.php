@@ -52,7 +52,7 @@ class NodeComparisonTest extends TestCase
         yield 'Stringable object that returns "1" with int 1' => [$this->createStringableObject('1'), 1];
         yield 'Objects with ValueInterface' => [
             $this->createObjectWithValueInterface('foo'),
-            $this->createObjectWithValueInterface('foo')
+            $this->createObjectWithValueInterface('foo'),
         ];
 
         $obj1 = $this->createStringableObject('obj');
@@ -108,7 +108,7 @@ class NodeComparisonTest extends TestCase
         yield 'different objects' => [$this->createStringableObject('foo'), $this->createStringableObject('bar')];
         yield 'Different objects with ValueInterface' => [
             $this->createObjectWithValueInterface('foo'),
-            $this->createObjectWithValueInterface('bar')
+            $this->createObjectWithValueInterface('bar'),
         ];
         yield 'Stringable and string' => [$this->createStringableObject('foo'), 'bar'];
         yield 'Not Stringable, same class different props' => [
@@ -130,7 +130,7 @@ class NodeComparisonTest extends TestCase
      */
     public function testCompareNotEqual(mixed $a, mixed $b): void
     {
-        $this->assertNotSame(0, Node::compare($a, $b), 'Shouldn\'t be same: '.$this->exportVars($a, $b));
+        $this->assertNotSame(0, Node::compare($a, $b), 'Shouldn\'t be same: ' . $this->exportVars($a, $b));
     }
 
     /**
@@ -138,7 +138,7 @@ class NodeComparisonTest extends TestCase
      */
     public function testCompareEqual(mixed $a, mixed $b): void
     {
-        $this->assertSame(0, Node::compare($a, $b), 'Should be same: '.$this->exportVars($a, $b));
+        $this->assertSame(0, Node::compare($a, $b), 'Should be same: ' . $this->exportVars($a, $b));
     }
 
     private function exportVars(mixed $a, mixed $b): string

@@ -21,11 +21,11 @@ abstract class RunnerTest extends BaseTest
 
     // Mode OPEN_TRANSACTION
 
-    public function testOpenTransactionRun(): void
+    public function testInnerTransactionRun(): void
     {
         $this->assertSame(0, $this->getDriver()->getTransactionLevel());
 
-        Runner::openTransaction()->run(new TestCommand($this->getDatabase()));
+        Runner::innerTransaction()->run(new TestCommand($this->getDatabase()));
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
     }
@@ -33,9 +33,9 @@ abstract class RunnerTest extends BaseTest
     /**
      * The opened transaction should be commited
      */
-    public function testOpenTransactionComplete(): void
+    public function testInnerTransactionComplete(): void
     {
-        $runner = Runner::openTransaction();
+        $runner = Runner::innerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
@@ -48,9 +48,9 @@ abstract class RunnerTest extends BaseTest
     /**
      * The opened transaction should be rollbacked
      */
-    public function testOpenTransactionRollback(): void
+    public function testInnerTransactionRollback(): void
     {
-        $runner = Runner::openTransaction();
+        $runner = Runner::innerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
@@ -68,7 +68,7 @@ abstract class RunnerTest extends BaseTest
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
 
-        Runner::continueTransaction()->run(new TestCommand($this->getDatabase()));
+        Runner::outerTransaction()->run(new TestCommand($this->getDatabase()));
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
     }
@@ -77,7 +77,7 @@ abstract class RunnerTest extends BaseTest
     {
         $this->expectException(RunnerException::class);
 
-        Runner::continueTransaction()->run(new TestCommand($this->getDatabase()));
+        Runner::outerTransaction()->run(new TestCommand($this->getDatabase()));
     }
 
     public function testContinueTransactionComplete(): void
@@ -86,7 +86,7 @@ abstract class RunnerTest extends BaseTest
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
 
-        $runner = Runner::continueTransaction();
+        $runner = Runner::outerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->complete();
 
@@ -99,7 +99,7 @@ abstract class RunnerTest extends BaseTest
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
 
-        $runner = Runner::continueTransaction();
+        $runner = Runner::outerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->rollback();
 
@@ -112,7 +112,7 @@ abstract class RunnerTest extends BaseTest
     {
         $this->assertSame(0, $this->getDriver()->getTransactionLevel());
 
-        (Runner::ignoreTransaction())->run(new TestCommand($this->getDatabase()));
+        Runner::outerTransaction(strict: false)->run(new TestCommand($this->getDatabase()));
 
         $this->assertSame(0, $this->getDriver()->getTransactionLevel());
     }
@@ -122,7 +122,7 @@ abstract class RunnerTest extends BaseTest
         $this->getDriver()->beginTransaction();
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
 
-        $runner = Runner::ignoreTransaction();
+        $runner = Runner::outerTransaction(strict: false);
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->complete();
 
@@ -134,7 +134,7 @@ abstract class RunnerTest extends BaseTest
         $this->getDriver()->beginTransaction();
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
 
-        $runner = Runner::ignoreTransaction();
+        $runner = Runner::outerTransaction(strict: false);
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->rollback();
 

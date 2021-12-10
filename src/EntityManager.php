@@ -17,14 +17,14 @@ class EntityManager implements EntityManagerInterface
         $this->clean();
     }
 
-    public function persist(object $entity, bool $cascade = true): static
+    public function persistState(object $entity, bool $cascade = true): static
     {
-        $this->unitOfWork->persist($entity, $cascade);
+        $this->unitOfWork->persistState($entity, $cascade);
 
         return $this;
     }
 
-    public function persistDeferred(object $entity, bool $cascade = true): static
+    public function persist(object $entity, bool $cascade = true): static
     {
         $this->unitOfWork->persistDeferred($entity, $cascade);
 

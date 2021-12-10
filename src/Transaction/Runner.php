@@ -55,7 +55,7 @@ final class Runner implements RunnerInterface
             $driver = $command->getDatabase()->getDriver();
 
             if (!\in_array($driver, $this->drivers, true)) {
-                $this->useTransaction($driver);
+                $this->prepareTransaction($driver);
 
                 $this->drivers[] = $driver;
             }
@@ -114,39 +114,33 @@ final class Runner implements RunnerInterface
     }
 
     /**
-     * Create Runner in the 'create transaction' mode.
+     * Create Runner in the 'inner transaction' mode.
      * In this case the Runner will open new transaction for each used driver connection
      * and will close they on finish.
      */
-    public static function openTransaction(): self
+    public static function innerTransaction(): self
     {
         return new self(self::MODE_OPEN_TRANSACTION);
     }
 
     /**
-     * Create Runner in the 'continue transaction' mode.
+     * Create Runner in the 'outer transaction' mode.
      * In this case the Runner won't begin transactions, you should do it previously manually.
-     * In case when a transaction won't be opened the Runner will throw an Exception and stop Unit of Work.
-     *
-     * The 'continue transaction' mode also means the Runner WON'T commit or rollback opened transactions
-     * on success or fail.
+     * This mode also means the Runner WON'T commit or rollback opened transactions on success or fail.
      * But commands that implement CompleteMethodInterface or RollbackMethodInterface will be called.
+     *
+     * @param bool $strict Check transaction statuses before commands running.
+     *        When strict mode is {@see true} and a transaction of any used driver didn't be opened
+     *        the Runner will throw an Exception and stop Unit of Work.
+     *        When strict mode is {@see false} the Runner won't begin/commit/rollback transactions
+     *        and will ignore any transaction statuses.
      */
-    public static function continueTransaction(): self
+    public static function outerTransaction(bool $strict = true): self
     {
-        return new self(self::MODE_CONTINUE_TRANSACTION);
+        return new self($strict ? self::MODE_CONTINUE_TRANSACTION : self::MODE_IGNORE_TRANSACTION);
     }
 
-    /**
-     * Create Runner in the 'ignore transaction' mode.
-     * In this case the Runner won't begin/commit/rollback transactions and will ignore any transaction statuses.
-     */
-    public static function ignoreTransaction(): self
-    {
-        return new self(self::MODE_IGNORE_TRANSACTION);
-    }
-
-    private function useTransaction(DriverInterface $driver): void
+    private function prepareTransaction(DriverInterface $driver): void
     {
         if ($this->mode === self::MODE_IGNORE_TRANSACTION) {
             return;

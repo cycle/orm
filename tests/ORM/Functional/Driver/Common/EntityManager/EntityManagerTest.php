@@ -63,8 +63,8 @@ abstract class EntityManagerTest extends BaseTest
         $entity2->content = 'Test content';
 
         $em->delete($entity0);
-        $em->persist($entity1);
-        $em->persistDeferred($entity2);
+        $em->persistState($entity1);
+        $em->persist($entity2);
 
         $em->clean();
 
@@ -89,8 +89,8 @@ abstract class EntityManagerTest extends BaseTest
         $entity2->content = 'Test content';
 
         $em->delete($entity0);
-        $em->persist($entity1);
-        $em->persistDeferred($entity2);
+        $em->persistState($entity1);
+        $em->persist($entity2);
 
         $em->clean(true);
 
@@ -114,7 +114,7 @@ abstract class EntityManagerTest extends BaseTest
         $entity->title = 'Test title';
         $entity->content = 'Test content';
 
-        $em->persistDeferred($entity);
+        $em->persist($entity);
         $entity->title = 'changed title';
 
         $this->captureWriteQueries();
@@ -140,7 +140,7 @@ abstract class EntityManagerTest extends BaseTest
         $entity->title = 'Test title';
         $entity->content = 'Test content';
 
-        $em->persist($entity);
+        $em->persistState($entity);
         $entity->title = 'changed title';
 
         $this->captureWriteQueries();
@@ -164,7 +164,7 @@ abstract class EntityManagerTest extends BaseTest
         $entity = new Post();
         $entity->title = 'Test title';
 
-        $em->persist($entity);
+        $em->persistState($entity);
 
         $this->expectException(ConstrainException::class);
         $em->run();
@@ -177,7 +177,7 @@ abstract class EntityManagerTest extends BaseTest
         $entity = new Post();
         $entity->title = 'Test title';
 
-        $em->persist($entity);
+        $em->persistState($entity);
 
         $result = $em->run(false);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Unit\Heap;
 
+use Cycle\Database\Injection\ValueInterface;
 use Cycle\ORM\Heap\Node;
 use DateTime;
 use DateTimeImmutable;
@@ -49,6 +50,10 @@ class NodeComparisonTest extends TestCase
         $obj = $this->createStringableObject('obj');
         yield 'same custom objects' => [$obj, $obj];
         yield 'Stringable object that returns "1" with int 1' => [$this->createStringableObject('1'), 1];
+        yield 'Objects with ValueInterface' => [
+            $this->createObjectWithValueInterface('foo'),
+            $this->createObjectWithValueInterface('foo')
+        ];
 
         $obj1 = $this->createStringableObject('obj');
         $obj2 = $this->createStringableObject('o', 'b', 'j');
@@ -101,6 +106,10 @@ class NodeComparisonTest extends TestCase
         yield 'different Datetime same second' => [new DateTimeImmutable(), new DateTimeImmutable()];
         // Custom object
         yield 'different objects' => [$this->createStringableObject('foo'), $this->createStringableObject('bar')];
+        yield 'Different objects with ValueInterface' => [
+            $this->createObjectWithValueInterface('foo'),
+            $this->createObjectWithValueInterface('bar')
+        ];
         yield 'Stringable and string' => [$this->createStringableObject('foo'), 'bar'];
         yield 'Not Stringable, same class different props' => [
             $this->createNotStringableObject(null, 'bar'),
@@ -121,7 +130,7 @@ class NodeComparisonTest extends TestCase
      */
     public function testCompareNotEqual(mixed $a, mixed $b): void
     {
-        $this->assertNotSame(0, Node::compare($a, $b), 'Shouldn\'t be same: ' . $this->exportVars($a, $b));
+        $this->assertNotSame(0, Node::compare($a, $b), 'Shouldn\'t be same: '.$this->exportVars($a, $b));
     }
 
     /**
@@ -129,7 +138,7 @@ class NodeComparisonTest extends TestCase
      */
     public function testCompareEqual(mixed $a, mixed $b): void
     {
-        $this->assertSame(0, Node::compare($a, $b), 'Should be same: ' . $this->exportVars($a, $b));
+        $this->assertSame(0, Node::compare($a, $b), 'Should be same: '.$this->exportVars($a, $b));
     }
 
     private function exportVars(mixed $a, mixed $b): string
@@ -141,6 +150,25 @@ class NodeComparisonTest extends TestCase
             \get_debug_type($b),
             \var_export($b, true)
         );
+    }
+
+    private function createObjectWithValueInterface(string ...$toConcat): object
+    {
+        return new class ($toConcat) implements ValueInterface {
+            public function __construct(private array $toConcat)
+            {
+            }
+
+            public function rawValue(): string
+            {
+                return \implode('', $this->toConcat);
+            }
+
+            public function rawType(): int
+            {
+                return 1;
+            }
+        };
     }
 
     private function createStringableObject(string ...$toConcat): object

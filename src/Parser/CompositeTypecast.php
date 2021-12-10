@@ -7,14 +7,23 @@ namespace Cycle\ORM\Parser;
 /**
  * @internal
  */
-final class CompositeTypecast implements TypecastInterface
+final class CompositeTypecast implements CastableInterface, UncastableInterface
 {
-    /** @var TypecastInterface[] */
+    /** @var CastableInterface[] */
     private array $casters;
+
+    /** @var UncastableInterface[] */
+    private array $uncasters = [];
 
     public function __construct(TypecastInterface ...$typecasts)
     {
         $this->casters = $typecasts;
+
+        foreach (array_reverse($this->casters) as $caster) {
+            if ($caster instanceof UncastableInterface) {
+                $this->uncasters[] = $caster;
+            }
+        }
     }
 
     public function setRules(array $rules): array
@@ -31,6 +40,16 @@ final class CompositeTypecast implements TypecastInterface
         foreach ($this->casters as $caster) {
             $values = $caster->cast($values);
         }
+
+        return $values;
+    }
+
+    public function uncast(array $values): array
+    {
+        foreach ($this->uncasters as $uncaster) {
+            $values = $uncaster->uncast($values);
+        }
+
         return $values;
     }
 }

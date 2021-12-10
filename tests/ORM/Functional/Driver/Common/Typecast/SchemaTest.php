@@ -11,7 +11,7 @@ use Cycle\ORM\Factory;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Parser\CompositeTypecast;
-use Cycle\ORM\Parser\Typecast;
+use Cycle\ORM\Parser\PrimitiveTypecast;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
@@ -183,7 +183,7 @@ final class SchemaTest extends BaseTest
         $baz = $this->orm->getEntityRegistry()->getTypecast('baz');
 
         $this->assertNull($foo);
-        $this->assertSame(Typecast::class, $bar::class);
+        $this->assertSame(PrimitiveTypecast::class, $bar::class);
         $this->assertSame(CompositeTypecast::class, $baz::class);
     }
 

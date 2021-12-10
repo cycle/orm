@@ -16,7 +16,7 @@ trait ScopeTrait
     /** @var string[] */
     protected array $waitScope = [];
 
-    private int $affectedRows;
+    private int $affectedRows = 0;
 
     /**
      * Wait for the context value.

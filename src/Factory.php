@@ -82,7 +82,7 @@ final class Factory implements FactoryInterface
         $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER);
 
         // Create basic typecast implementation
-        $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
+        $database = $orm->getProvider(SourceProviderInterface::class)->getSource($role)->getDatabase();
         try {
             if ($handler === null) {
                 if (!$rules) {
@@ -236,25 +236,24 @@ final class Factory implements FactoryInterface
     }
 
     public function source(
-        ORMInterface $orm,
         SchemaInterface $schema,
         string $role
     ): SourceInterface {
+        /** @var class-string<SourceInterface> $source */
         $source = $schema->define($role, SchemaInterface::SOURCE) ?? $this->defaults[SchemaInterface::SOURCE];
 
         if (!\is_subclass_of($source, SourceInterface::class)) {
             throw new TypecastException($source . ' does not implement ' . SourceInterface::class);
         }
 
-        if ($source !== Source::class) {
-            return $this->factory->make($source, ['orm' => $orm, 'role' => $role]);
-        }
+        $table = $schema->define($role, SchemaInterface::TABLE);
+        $database = $this->database($schema->define($role, SchemaInterface::DATABASE));
 
-        $source = new Source(
-            $this->database($schema->define($role, SchemaInterface::DATABASE)),
-            $schema->define($role, SchemaInterface::TABLE)
-        );
+        $source = $source !== Source::class
+            ? $this->factory->make($source, ['role' => $role, 'table' => $table, 'database' => $database])
+            : new Source($database, $table);
 
+        /** @var ScopeInterface|class-string<ScopeInterface>|null $scope */
         $scope = $schema->define($role, SchemaInterface::SCOPE) ?? $this->defaults[SchemaInterface::SCOPE];
 
         if ($scope === null) {
@@ -262,7 +261,7 @@ final class Factory implements FactoryInterface
         }
 
         if (!\is_subclass_of($scope, ScopeInterface::class)) {
-            throw new TypecastException($scope . ' does not implement ' . ScopeInterface::class);
+            throw new TypecastException(sprintf("%s does not implement %s.", $scope, ScopeInterface::class));
         }
 
         return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use WeakReference;
 
@@ -24,9 +25,6 @@ final class EntityRegistry implements EntityRegistryInterface
 
     private array $indexes = [];
 
-    /** @var SourceInterface[] */
-    private array $sources = [];
-
     /**
      * @var WeakReference<ORMInterface>
      */
@@ -34,6 +32,7 @@ final class EntityRegistry implements EntityRegistryInterface
 
     public function __construct(
         ORMInterface $orm,
+        private SourceProviderInterface $sourceProvider,
         private SchemaInterface $schema,
         private FactoryInterface $factory
     ) {
@@ -67,7 +66,7 @@ final class EntityRegistry implements EntityRegistryInterface
 
         if ($this->schema->define($role, SchemaInterface::TABLE) !== null) {
             $select = new Select($this->orm->get(), $role);
-            $select->scope($this->getSource($role)->getScope());
+            $select->scope($this->sourceProvider->getSource($role)->getScope());
         }
 
         return $this->repositories[$role] = $this->factory->repository($this->orm->get(), $this->schema, $role, $select);
@@ -78,15 +77,6 @@ final class EntityRegistry implements EntityRegistryInterface
         return \array_key_exists($role, $this->typecasts)
             ? $this->typecasts[$role]
             : ($this->typecasts[$role] = $this->factory->typecast($this->orm->get(), $role));
-    }
-
-    public function getSource(string $role): SourceInterface
-    {
-        if (isset($this->sources[$role])) {
-            return $this->sources[$role];
-        }
-
-        return $this->sources[$role] = $this->factory->source($this->orm->get(), $this->schema, $role);
     }
 
     public function getIndexes(string $role): array

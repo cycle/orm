@@ -61,7 +61,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * Create source associated with given role.
      */
     public function source(
-        ORMInterface $orm,
         SchemaInterface $schema,
         string $role
     ): SourceInterface;

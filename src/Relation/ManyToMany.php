@@ -14,6 +14,7 @@ use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
@@ -241,7 +242,7 @@ class ManyToMany extends Relation\AbstractRelation
         // getting scoped query
         $query = (new RootLoader(
             $this->orm->getSchema(),
-            $this->orm->getEntityRegistry(),
+            $this->orm->getProvider(SourceProviderInterface::class),
             $this->orm->getFactory(),
             $this->target
         ))->buildQuery();
@@ -249,7 +250,7 @@ class ManyToMany extends Relation\AbstractRelation
         // responsible for all the scoping
         $loader = new ManyToManyLoader(
             $this->orm->getSchema(),
-            $this->orm->getEntityRegistry(),
+            $this->orm->getProvider(SourceProviderInterface::class),
             $this->orm->getFactory(),
             $this->orm->getSource($this->target)->getTable(),
             $this->target,

@@ -9,6 +9,8 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Registry\Implementation\SourceProvider;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Transaction\CommandGenerator;
@@ -24,6 +26,7 @@ final class ORM implements ORMInterface
     private CommandGeneratorInterface $commandGenerator;
 
     private EntityRegistryInterface $entityRegistry;
+    private SourceProviderInterface $sourceProvider;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -154,7 +157,10 @@ final class ORM implements ORMInterface
 
     public function getProvider(string $class): object
     {
-        return $this->entityRegistry;
+        return match ($class) {
+            SourceProviderInterface::class => $this->sourceProvider,
+            default => $this->entityRegistry,
+        };
     }
 
     public function getSchema(): SchemaInterface
@@ -188,7 +194,7 @@ final class ORM implements ORMInterface
 
     public function getSource(string $entity): SourceInterface
     {
-        return $this->entityRegistry->getSource(
+        return $this->sourceProvider->getSource(
             $this->resolveRole($entity)
         );
     }
@@ -272,6 +278,7 @@ final class ORM implements ORMInterface
 
     private function resetEntityRegister(): void
     {
-        $this->entityRegistry = new EntityRegistry($this, $this->schema, $this->factory);
+        $this->sourceProvider = new SourceProvider($this->factory, $this->schema);
+        $this->entityRegistry = new EntityRegistry($this, $this->sourceProvider, $this->schema, $this->factory);
     }
 }

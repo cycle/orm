@@ -8,6 +8,8 @@ use Countable;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Registry\MapperProviderInterface;
+use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
@@ -48,6 +50,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     private RootLoader $loader;
 
     private QueryBuilder $builder;
+    private MapperProviderInterface $mapperProvider;
 
     /**
      * @param class-string<TEntity>|string $role
@@ -57,11 +60,12 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         private ORMInterface $orm,
         string $role
     ) {
+        $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
         $this->loader = new RootLoader(
             $orm->getSchema(),
-            $orm->getEntityRegistry(),
+            $orm->getProvider(SourceProviderInterface::class),
             $orm->getFactory(),
-            $this->orm->resolveRole($role)
+            $orm->resolveRole($role)
         );
         $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
@@ -416,9 +420,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         if (!$typecast) {
             return $node->getResult();
         }
-        $mapper = $this->orm
-            ->getEntityRegistry()
-            ->getMapper($this->loader->getTarget());
+        $mapper = $this->mapperProvider->getMapper($this->loader->getTarget());
 
         return array_map([$mapper, 'cast'], $node->getResult());
     }

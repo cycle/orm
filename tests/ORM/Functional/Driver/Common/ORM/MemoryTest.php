@@ -29,6 +29,46 @@ abstract class MemoryTest extends BaseTest
         // Load all relations instances
     }
 
+    // With `Collect Garbage Cycles`
+
+    public function testORMCloneGarbageAndCollectGarbageCycles(): void
+    {
+        $orm = $this->createORM();
+
+        $link = WeakReference::create($orm);
+
+        $orm = $this->orm->with(factory: new Factory($this->dbal));
+        \gc_collect_cycles();
+
+        $this->assertNull($link->get());
+    }
+
+    public function testORMUnsetGarbageAndCollectGarbageCycles(): void
+    {
+        $orm = $this->createORM();
+
+        $link = WeakReference::create($orm);
+
+        unset($orm);
+        \gc_collect_cycles();
+
+        $this->assertNull($link->get());
+    }
+
+    public function testORMWithLoadedEntityRegistryUnsetAndCollectGarbageCycles(): void
+    {
+        $orm = $this->createORM();
+        $map = $this->collectReferences($orm);
+
+        // $this->assertCount(17, $map);
+        unset($orm);
+        \gc_collect_cycles();
+
+        $this->assertCount(0, $map);
+    }
+
+    // Without `Collect Garbage Cycles`
+
     public function testORMCloneGarbage(): void
     {
         $orm = $this->createORM();
@@ -51,19 +91,7 @@ abstract class MemoryTest extends BaseTest
         $this->assertNull($link->get());
     }
 
-    public function testORMWithLoadedEntityRegistryUnsetAndCollectGarbageCycles(): void
-    {
-        $orm = $this->createORM();
-        $map = $this->collectReferences($orm);
-
-        // $this->assertCount(17, $map);
-        unset($orm);
-        \gc_collect_cycles();
-
-        $this->assertCount(0, $map);
-    }
-
-    public function testORMWithLoadedEntityRegistryUnsetWithoutGarbageCyclesCollecting(): void
+    public function testORMWithLoadedEntityRegistryUnset(): void
     {
         $orm = $this->createORM();
         $map = $this->collectReferences($orm);
@@ -73,6 +101,8 @@ abstract class MemoryTest extends BaseTest
 
         $this->assertCount(0, $map);
     }
+
+    // Support
 
     private function createORM(): ORMInterface
     {

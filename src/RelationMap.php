@@ -47,29 +47,29 @@ final class RelationMap
     public static function build(OrmInterface $orm, string $role): self
     {
         $factory = $orm->getFactory();
-        $ormSchema = $orm->getSchema();
+        $schema = $orm->getSchema();
 
-        $outerRelations = $ormSchema->getOuterRelations($role);
-        $innerRelations = $ormSchema->getInnerRelations($role);
+        $outerRelations = $schema->getOuterRelations($role);
+        $innerRelations = $schema->getInnerRelations($role);
 
         // Build relations
         $relations = [];
         foreach ($innerRelations as $relName => $relSchema) {
-            $relations[$relName] = $factory->relation($orm, $ormSchema, $role, $relName);
+            $relations[$relName] = $factory->relation($orm, $schema, $role, $relName);
         }
 
         // add Parent's relations
-        $parent = $ormSchema->define($role, SchemaInterface::PARENT);
+        $parent = $schema->define($role, SchemaInterface::PARENT);
         while ($parent !== null) {
-            foreach ($ormSchema->getInnerRelations($parent) as $relName => $relSchema) {
+            foreach ($schema->getInnerRelations($parent) as $relName => $relSchema) {
                 if (isset($relations[$relName])) {
                     continue;
                 }
-                $relations[$relName] = $factory->relation($orm, $ormSchema, $parent, $relName);
+                $relations[$relName] = $factory->relation($orm, $schema, $parent, $relName);
             }
 
-            $outerRelations += $ormSchema->getOuterRelations($parent);
-            $parent = $ormSchema->define($parent, SchemaInterface::PARENT);
+            $outerRelations += $schema->getOuterRelations($parent);
+            $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
 
         $result = new self($relations, $outerRelations);

@@ -13,6 +13,7 @@ use Cycle\ORM\Registry\EntityFactoryInterface;
 use Cycle\ORM\Registry\Implementation\EntityFactory;
 use Cycle\ORM\Registry\Implementation\EntityRegistry;
 use Cycle\ORM\Registry\Implementation\IndexProvider;
+use Cycle\ORM\Registry\Implementation\MapperProvider;
 use Cycle\ORM\Registry\Implementation\SourceProvider;
 use Cycle\ORM\Registry\Implementation\TypecastProvider;
 use Cycle\ORM\Registry\IndexProviderInterface;
@@ -42,6 +43,7 @@ final class ORM implements ORMInterface
     private TypecastProvider $typecastProvider;
     private EntityFactory $entityFactory;
     private IndexProvider $indexProvider;
+    private MapperProvider $mapperProvider;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -123,7 +125,7 @@ final class ORM implements ORMInterface
             SourceProviderInterface::class => $this->sourceProvider,
             TypecastProviderInterface::class => $this->typecastProvider,
             IndexProviderInterface::class => $this->indexProvider,
-            MapperProviderInterface::class,
+            MapperProviderInterface::class => $this->mapperProvider,
             RelationProviderInterface::class,
             RepositoryProviderInterface::class => $this->entityRegistry,
             default => throw new InvalidArgumentException("Undefined service `$class`.")
@@ -142,7 +144,7 @@ final class ORM implements ORMInterface
 
     public function getMapper(string|object $entity): MapperInterface
     {
-        return $this->entityRegistry->getMapper(
+        return $this->mapperProvider->getMapper(
             $this->resolveRole($entity)
         );
     }
@@ -241,11 +243,14 @@ final class ORM implements ORMInterface
         $this->sourceProvider = new SourceProvider($this->factory, $this->schema);
         $this->typecastProvider = new TypecastProvider($this->factory, $this->schema, $this->sourceProvider);
 
+        // Leaked:
+        $this->mapperProvider = new MapperProvider($this, $this->factory);
+
         $this->entityRegistry = new EntityRegistry($this, $this->sourceProvider, $this->schema, $this->factory);
         $this->entityFactory = new EntityFactory(
             $this->heap,
             $this->schema,
-            $this->entityRegistry,
+            $this->mapperProvider,
             $this->entityRegistry,
             $this->indexProvider
         );

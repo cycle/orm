@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Registry\Implementation;
 
 use Cycle\ORM\FactoryInterface;
-use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Registry\IndexProviderInterface;
-use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Registry\RelationProviderInterface;
 use Cycle\ORM\Registry\RepositoryProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
@@ -16,19 +13,14 @@ use Cycle\ORM\RelationMap;
 use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use WeakReference;
 
 /**
  * @internal
  */
 final class EntityRegistry implements
-    MapperProviderInterface,
     RepositoryProviderInterface,
     RelationProviderInterface
 {
-    /** @var array<non-empty-string, MapperInterface> */
-    private array $mappers = [];
-
     /** @var array<non-empty-string, RepositoryInterface> */
     private array $repositories = [];
 
@@ -48,15 +40,8 @@ final class EntityRegistry implements
      */
     public function __clone()
     {
-        $this->mappers = [];
         $this->relMaps = [];
-        $this->indexes = [];
         $this->repositories = [];
-    }
-
-    public function getMapper(string $entity): MapperInterface
-    {
-        return $this->mappers[$entity] ?? ($this->mappers[$entity] = $this->factory->mapper($this->orm, $entity));
     }
 
     public function getRepository(string $entity): RepositoryInterface

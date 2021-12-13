@@ -38,18 +38,12 @@ final class EntityRegistry implements
 
     private array $indexes = [];
 
-    /**
-     * @var WeakReference<ORMInterface>
-     */
-    private WeakReference $orm;
-
     public function __construct(
-        ORMInterface $orm,
+        private ORMInterface $orm,
         private SourceProviderInterface $sourceProvider,
         private SchemaInterface $schema,
         private FactoryInterface $factory
     ) {
-        $this->orm = WeakReference::create($orm);
     }
 
     /**
@@ -65,7 +59,7 @@ final class EntityRegistry implements
 
     public function getMapper(string $entity): MapperInterface
     {
-        return $this->mappers[$entity] ?? ($this->mappers[$entity] = $this->factory->mapper($this->orm->get(), $entity));
+        return $this->mappers[$entity] ?? ($this->mappers[$entity] = $this->factory->mapper($this->orm, $entity));
     }
 
     public function getRepository(string $entity): RepositoryInterface
@@ -77,11 +71,11 @@ final class EntityRegistry implements
         $select = null;
 
         if ($this->schema->define($entity, SchemaInterface::TABLE) !== null) {
-            $select = new Select($this->orm->get(), $entity);
+            $select = new Select($this->orm, $entity);
             $select->scope($this->sourceProvider->getSource($entity)->getScope());
         }
 
-        return $this->repositories[$entity] = $this->factory->repository($this->orm->get(), $this->schema, $entity, $select);
+        return $this->repositories[$entity] = $this->factory->repository($this->orm, $this->schema, $entity, $select);
     }
 
     public function getIndexes(string $entity): array
@@ -101,6 +95,6 @@ final class EntityRegistry implements
      */
     public function getRelationMap(string $entity): RelationMap
     {
-        return $this->relMaps[$entity] ?? ($this->relMaps[$entity] = RelationMap::build($this->orm->get(), $entity));
+        return $this->relMaps[$entity] ?? ($this->relMaps[$entity] = RelationMap::build($this->orm, $entity));
     }
 }

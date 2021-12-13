@@ -9,6 +9,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
@@ -34,6 +35,8 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
 
     protected ?string $inversion;
 
+    protected MapperProviderInterface $mapperProvider;
+
     /**
      * @param string $target Primary target role
      */
@@ -45,6 +48,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
         protected string $target,
         protected array $schema
     ) {
+        $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
         $this->inversion = $schema[Relation::INVERSION] ?? null;

@@ -9,12 +9,20 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Registry\Implementation\EntityRegistry;
 use Cycle\ORM\Registry\Implementation\SourceProvider;
+use Cycle\ORM\Registry\Implementation\TypecastProvider;
+use Cycle\ORM\Registry\IndexProviderInterface;
+use Cycle\ORM\Registry\MapperProviderInterface;
+use Cycle\ORM\Registry\RelationProviderInterface;
+use Cycle\ORM\Registry\RepositoryProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
+use Cycle\ORM\Registry\TypecastProviderInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Transaction\CommandGenerator;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
+use JetBrains\PhpStorm\ExpectedValues;
 
 /**
  * Central class ORM, provides access to various pieces of the system and manages schema state.
@@ -25,8 +33,9 @@ final class ORM implements ORMInterface
 
     private CommandGeneratorInterface $commandGenerator;
 
-    private EntityRegistryInterface $entityRegistry;
+    private EntityRegistry $entityRegistry;
     private SourceProviderInterface $sourceProvider;
+    private TypecastProvider $typecastProvider;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -155,10 +164,21 @@ final class ORM implements ORMInterface
         return $this->factory;
     }
 
-    public function getProvider(string $class): object
+    public function getProvider(
+        #[ExpectedValues(values: [
+            IndexProviderInterface::class,
+            MapperProviderInterface::class,
+            RelationProviderInterface::class,
+            RepositoryProviderInterface::class,
+            SourceProviderInterface::class,
+            TypecastProviderInterface::class,
+        ])]
+        string $class
+    ): object
     {
         return match ($class) {
             SourceProviderInterface::class => $this->sourceProvider,
+            TypecastProviderInterface::class => $this->typecastProvider,
             default => $this->entityRegistry,
         };
     }
@@ -171,11 +191,6 @@ final class ORM implements ORMInterface
     public function getHeap(): HeapInterface
     {
         return $this->heap;
-    }
-
-    public function getEntityRegistry(): EntityRegistryInterface
-    {
-        return $this->entityRegistry;
     }
 
     public function getMapper(string|object $entity): MapperInterface
@@ -279,6 +294,7 @@ final class ORM implements ORMInterface
     private function resetEntityRegister(): void
     {
         $this->sourceProvider = new SourceProvider($this->factory, $this->schema);
+        $this->typecastProvider = new TypecastProvider($this->factory, $this->schema, $this->sourceProvider);
         $this->entityRegistry = new EntityRegistry($this, $this->sourceProvider, $this->schema, $this->factory);
     }
 }

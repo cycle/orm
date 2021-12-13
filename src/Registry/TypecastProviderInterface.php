@@ -10,6 +10,8 @@ interface TypecastProviderInterface
 {
     /**
      * Get typecast implementation associated with given entity role.
+     *
+     * @param non-empty-string $role
      */
     public function getTypecast(string $role): ?TypecastInterface;
 }

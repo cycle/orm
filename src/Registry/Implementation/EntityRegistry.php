@@ -2,20 +2,33 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM;
+namespace Cycle\ORM\Registry\Implementation;
 
-use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\FactoryInterface;
+use Cycle\ORM\MapperInterface;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Registry\IndexProviderInterface;
+use Cycle\ORM\Registry\MapperProviderInterface;
+use Cycle\ORM\Registry\RelationProviderInterface;
+use Cycle\ORM\Registry\RepositoryProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
-use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\RelationMap;
+use Cycle\ORM\RepositoryInterface;
+use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select;
 use WeakReference;
 
-final class EntityRegistry implements EntityRegistryInterface
+/**
+ * @internal
+ */
+final class EntityRegistry implements
+    MapperProviderInterface,
+    RepositoryProviderInterface,
+    RelationProviderInterface,
+    IndexProviderInterface
 {
     /** @var MapperInterface[] */
     private array $mappers = [];
-
-    /** @var TypecastInterface[] */
-    private array $typecasts = [];
 
     /** @var RepositoryInterface[] */
     private array $repositories = [];
@@ -51,32 +64,25 @@ final class EntityRegistry implements EntityRegistryInterface
         $this->repositories = [];
     }
 
-    public function getMapper(string $role): MapperInterface
+    public function getMapper(string $entity): MapperInterface
     {
-        return $this->mappers[$role] ?? ($this->mappers[$role] = $this->factory->mapper($this->orm->get(), $role));
+        return $this->mappers[$entity] ?? ($this->mappers[$entity] = $this->factory->mapper($this->orm->get(), $entity));
     }
 
-    public function getRepository(string $role): RepositoryInterface
+    public function getRepository(string $entity): RepositoryInterface
     {
-        if (isset($this->repositories[$role])) {
-            return $this->repositories[$role];
+        if (isset($this->repositories[$entity])) {
+            return $this->repositories[$entity];
         }
 
         $select = null;
 
-        if ($this->schema->define($role, SchemaInterface::TABLE) !== null) {
-            $select = new Select($this->orm->get(), $role);
-            $select->scope($this->sourceProvider->getSource($role)->getScope());
+        if ($this->schema->define($entity, SchemaInterface::TABLE) !== null) {
+            $select = new Select($this->orm->get(), $entity);
+            $select->scope($this->sourceProvider->getSource($entity)->getScope());
         }
 
-        return $this->repositories[$role] = $this->factory->repository($this->orm->get(), $this->schema, $role, $select);
-    }
-
-    public function getTypecast(string $role): ?TypecastInterface
-    {
-        return \array_key_exists($role, $this->typecasts)
-            ? $this->typecasts[$role]
-            : ($this->typecasts[$role] = $this->factory->typecast($this->orm->get(), $role));
+        return $this->repositories[$entity] = $this->factory->repository($this->orm->get(), $this->schema, $entity, $select);
     }
 
     public function getIndexes(string $role): array

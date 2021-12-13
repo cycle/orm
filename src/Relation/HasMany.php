@@ -118,7 +118,7 @@ class HasMany extends AbstractRelation
         if (!$data) {
             return [];
         }
-        $mapper = $this->orm->getEntityRegistry()->getMapper($this->target);
+        $mapper = $this->mapperProvider->getMapper($this->target);
         foreach ($data as $key => $item) {
             // break link
             unset($data[$key]);

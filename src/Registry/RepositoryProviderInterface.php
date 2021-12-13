@@ -10,6 +10,8 @@ interface RepositoryProviderInterface
 {
     /**
      * Get repository associated with given entity role.
+     *
+     * @param non-empty-string $entity
      */
-    public function getRepository(string $role): RepositoryInterface;
+    public function getRepository(string $entity): RepositoryInterface;
 }

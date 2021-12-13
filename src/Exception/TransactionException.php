@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Exception;
 
-use Cycle\ORM\EntityRegistry;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Registry\RelationProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Transaction\Tuple;
 
 class TransactionException extends ORMException
 {
-    public static function unresolvedRelations(iterable $tuples, EntityRegistry $registry): self
+    public static function unresolvedRelations(iterable $tuples, RelationProviderInterface $relProvider): self
     {
         $messages = [];
         foreach ($tuples as $tuple) {
             $role = $tuple->node->getRole();
-            $map = $registry->getRelationMap($role);
+            $map = $relProvider->getRelationMap($role);
 
             $status = $tuple->task === Tuple::TASK_STORE && $tuple->node->getStatus() === Node::NEW
                 ? 'Create new'

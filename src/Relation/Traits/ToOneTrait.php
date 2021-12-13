@@ -25,7 +25,7 @@ trait ToOneTrait
     {
         return $data === null
             ? null
-            : ($this->orm->getEntityRegistry()->getMapper($this->target)?->cast($data) ?? $data);
+            : ($this->mapperProvider->getMapper($this->target)?->cast($data) ?? $data);
     }
 
     public function initReference(Node $node): ReferenceInterface

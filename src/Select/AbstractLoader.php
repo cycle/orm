@@ -10,6 +10,7 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;

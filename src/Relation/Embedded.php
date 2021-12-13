@@ -13,6 +13,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
@@ -25,6 +26,7 @@ use Cycle\ORM\Transaction\Tuple;
 final class Embedded implements SameRowRelationInterface
 {
     private MapperInterface $mapper;
+    private MapperProviderInterface $mapperProvider;
 
     /** @var string[] */
     private array $primaryKeys;
@@ -37,11 +39,12 @@ final class Embedded implements SameRowRelationInterface
         private string $name,
         private string $target
     ) {
-        $this->mapper = $this->orm->getMapper($target);
+        $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
+        $this->mapper = $this->mapperProvider->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
-        $this->primaryKeys = (array)$this->orm->getSchema()->define($target, Schema::PRIMARY_KEY);
-        $this->columns = $this->orm->getSchema()->define($target, Schema::COLUMNS);
+        $this->primaryKeys = (array)$orm->getSchema()->define($target, Schema::PRIMARY_KEY);
+        $this->columns = $orm->getSchema()->define($target, Schema::COLUMNS);
     }
 
     public function getName(): string
@@ -82,12 +85,13 @@ final class Embedded implements SameRowRelationInterface
     {
         return $data === null
             ? null
-            : ($this->orm->getEntityRegistry()->getMapper($this->target)?->cast($data) ?? $data);
+            : $this->mapperProvider->getMapper($this->target)->cast($data);
     }
 
-    public function collect($source): ?object
+    public function collect(mixed $data): ?object
     {
-        return $source;
+        \assert($data === null || \is_object($data));
+        return $data;
     }
 
     public function initReference(Node $node): ReferenceInterface
@@ -158,7 +162,7 @@ final class Embedded implements SameRowRelationInterface
             }
         }
 
-        $mapper = $this->orm->getMapper($this->target);
+        $mapper = $this->mapperProvider->getMapper($this->target);
         $changes = $this->getChanges($related, $rTuple->state);
         if ($command !== null) {
             foreach ($mapper->mapColumns($changes) as $field => $value) {

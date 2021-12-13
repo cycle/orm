@@ -8,12 +8,13 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
-use Cycle\ORM\EntityRegistryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Registry\RelationProviderInterface;
+use Cycle\ORM\Registry\TypecastProviderInterface;
 use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
@@ -34,7 +35,6 @@ abstract class DatabaseMapper implements MapperInterface
 
     /** @var string[] */
     protected array $primaryKeys;
-    protected EntityRegistryInterface $entityRegistry;
     private ?TypecastInterface $typecast;
     protected RelationMap $relationMap;
 
@@ -43,9 +43,8 @@ abstract class DatabaseMapper implements MapperInterface
         protected string $role
     ) {
         $this->source = $orm->getSource($role);
-        $this->entityRegistry = $orm->getEntityRegistry();
-        $this->typecast = $this->entityRegistry->getTypecast($role);
-        $this->relationMap = $this->entityRegistry->getRelationMap($role);
+        $this->typecast = $orm->getProvider(TypecastProviderInterface::class)->getTypecast($role);
+        $this->relationMap = $orm->getProvider(RelationProviderInterface::class)->getRelationMap($role);
 
         $schema = $orm->getSchema();
         foreach ($schema->define($role, SchemaInterface::COLUMNS) as $property => $column) {

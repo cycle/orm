@@ -155,8 +155,8 @@ class ManyToMany extends Relation\AbstractRelation
         if (!$data) {
             return [];
         }
-        $pivotMapper = $this->orm->getEntityRegistry()->getMapper($this->pivotRole);
-        $targetMapper = $this->orm->getEntityRegistry()->getMapper($this->target);
+        $pivotMapper = $this->mapperProvider->getMapper($this->pivotRole);
+        $targetMapper = $this->mapperProvider->getMapper($this->target);
 
         foreach ($data as $key => $pivot) {
             if (isset($pivot['@'])) {

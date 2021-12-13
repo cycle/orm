@@ -7,13 +7,22 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Registry\IndexProviderInterface;
+use Cycle\ORM\Registry\MapperProviderInterface;
+use Cycle\ORM\Registry\RelationProviderInterface;
+use Cycle\ORM\Registry\RepositoryProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**
  * Provide the access to all ORM services.
  */
-interface ORMInterface extends SourceProviderInterface
+interface ORMInterface extends
+    SourceProviderInterface,
+    MapperProviderInterface,
+    RepositoryProviderInterface,
+    RelationProviderInterface,
+    IndexProviderInterface
 {
     /**
      * Automatically resolve role based on object name or instance.
@@ -59,11 +68,6 @@ interface ORMInterface extends SourceProviderInterface
     public function getCommandGenerator(): CommandGeneratorInterface;
 
     /**
-     * Get entity registry.
-     */
-    public function getEntityRegistry(): EntityRegistryInterface;
-
-    /**
      * @template Provider
      * @param class-string<Provider> $class
      * @return Provider
@@ -88,11 +92,15 @@ interface ORMInterface extends SourceProviderInterface
 
     /**
      * Get mapper associated with given entity class, role or instance.
+     *
+     * @param non-empty-string|object $entity
      */
     public function getMapper(string|object $entity): MapperInterface;
 
     /**
      * Get repository associated with given entity class, role or instance.
+     *
+     * @param non-empty-string|object $entity
      */
     public function getRepository(string|object $entity): RepositoryInterface;
 }

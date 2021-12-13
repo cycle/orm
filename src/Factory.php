@@ -27,6 +27,9 @@ use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 
+/**
+ * @internal
+ */
 final class Factory implements FactoryInterface
 {
     private RelationConfig $config;
@@ -69,12 +72,11 @@ final class Factory implements FactoryInterface
         return $this->factory->make($alias, $parameters);
     }
 
-    public function typecast(ORMInterface $orm, string $role): ?TypecastInterface
+    public function typecast(SchemaInterface $schema, DatabaseInterface $database, string $role): ?TypecastInterface
     {
-        $schema = $orm->getSchema();
         // Get parent's typecast
         $parent = $schema->define($role, SchemaInterface::PARENT);
-        $parentHandler = $parent === null ? null : $this->typecast($orm, $parent);
+        $parentHandler = $parent === null ? null : $this->typecast($schema, $database, $parent);
         $handlers = [];
 
         // Schema's `typecast` option
@@ -82,7 +84,6 @@ final class Factory implements FactoryInterface
         $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER);
 
         // Create basic typecast implementation
-        $database = $orm->getProvider(SourceProviderInterface::class)->getSource($role)->getDatabase();
         try {
             if ($handler === null) {
                 if (!$rules) {
@@ -92,10 +93,10 @@ final class Factory implements FactoryInterface
                 $handlers[] = new Typecast($database);
             } elseif (\is_array($handler)) { // We need to use composite typecast for array
                 foreach ($handler as $type) {
-                    $handlers[] = $this->makeTypecastHandler($type, $database, $orm, $role);
+                    $handlers[] = $this->makeTypecastHandler($type, $database, $schema, $role);
                 }
             } else {
-                $handlers[] = $this->makeTypecastHandler($handler, $database, $orm, $role);
+                $handlers[] = $this->makeTypecastHandler($handler, $database, $schema, $role);
             }
         } catch (\Throwable $e) {
             throw new FactoryTypecastException(
@@ -300,7 +301,7 @@ final class Factory implements FactoryInterface
     private function makeTypecastHandler(
         string|TypecastInterface $handler,
         DatabaseInterface $database,
-        ORMInterface $orm,
+        SchemaInterface $schema,
         string $role
     ): TypecastInterface {
         // If handler is an object we don't need to use factory, we should return it as is
@@ -310,7 +311,7 @@ final class Factory implements FactoryInterface
 
         return $this->factory->make($handler, [
             'database' => $database,
-            'orm' => $orm,
+            'schema' => $schema,
             'role' => $role,
         ]);
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\DatabaseInterface;
 use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Parser\TypecastInterface;
@@ -15,6 +16,8 @@ use Spiral\Core\FactoryInterface as CoreFactory;
 
 /**
  * Must provide access to generic DI.
+ *
+ * @internal
  */
 interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
@@ -53,7 +56,8 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * Create typecast implementation associated with given role.
      */
     public function typecast(
-        ORMInterface $orm,
+        SchemaInterface $schema,
+        DatabaseInterface $database,
         string $role
     ): ?TypecastInterface;
 

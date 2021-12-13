@@ -177,7 +177,6 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
      */
     public function testCustomArrayInIterator(): void
     {
-        $mapper = $this->orm->getEntityRegistry()->getMapper('user');
         $bookData = [
             'id' => '1',
             'states' => 'foo|bar',

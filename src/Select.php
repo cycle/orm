@@ -8,7 +8,7 @@ use Countable;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Registry\EntityProviderInterface;
+use Cycle\ORM\Registry\EntityFactoryInterface;
 use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Select\JoinableLoader;
@@ -54,7 +54,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     private MapperProviderInterface $mapperProvider;
     private Heap\HeapInterface $heap;
     private SchemaInterface $schema;
-    private EntityProviderInterface $entityProvider;
+    private EntityFactoryInterface $entityFactory;
 
     /**
      * @param class-string<TEntity>|string $role
@@ -66,7 +66,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         $this->heap = $orm->getHeap();
         $this->schema = $orm->getSchema();
         $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
-        $this->entityProvider = $orm->getProvider(EntityProviderInterface::class);
+        $this->entityFactory = $orm->getProvider(EntityFactoryInterface::class);
         $this->loader = new RootLoader(
             $orm->getSchema(),
             $orm->getProvider(SourceProviderInterface::class),
@@ -385,7 +385,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         }
 
         /** @var TEntity */
-        return $this->entityProvider->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true);
+        return $this->entityFactory->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true);
     }
 
     /**
@@ -410,7 +410,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             $this->loader->getTarget(),
             $this->heap,
             $this->schema,
-            $this->entityProvider,
+            $this->entityFactory,
             $node->getResult(),
             typecast: true
         );

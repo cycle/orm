@@ -6,7 +6,7 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Registry\EntityProviderInterface;
+use Cycle\ORM\Registry\EntityFactoryInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Generator;
 use IteratorAggregate;
@@ -24,7 +24,7 @@ final class Iterator implements IteratorAggregate
         private string $role,
         private HeapInterface $heap,
         private SchemaInterface $schema,
-        private EntityProviderInterface $entityProvider,
+        private EntityFactoryInterface $entityFactory,
         private iterable $source,
         private bool $findInHeap = false,
         private bool $typecast = false
@@ -46,7 +46,7 @@ final class Iterator implements IteratorAggregate
             $orm->resolveRole($class),
             $orm->getHeap(),
             $orm->getSchema(),
-            $orm->getProvider(EntityProviderInterface::class),
+            $orm->getProvider(EntityFactoryInterface::class),
             $source,
             $findInHeap,
             $typecast
@@ -61,7 +61,7 @@ final class Iterator implements IteratorAggregate
         string $role,
         HeapInterface $heap,
         SchemaInterface $schema,
-        EntityProviderInterface $entityProvider,
+        EntityFactoryInterface $entityProvider,
         iterable $source,
         bool $findInHeap = false,
         bool $typecast = false
@@ -123,6 +123,6 @@ final class Iterator implements IteratorAggregate
             }
         }
 
-        return $e ?? $this->entityProvider->make($role, $data, Node::MANAGED, typecast: $this->typecast);
+        return $e ?? $this->entityFactory->make($role, $data, Node::MANAGED, typecast: $this->typecast);
     }
 }

@@ -7,7 +7,7 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Registry\EntityProviderInterface;
+use Cycle\ORM\Registry\EntityFactoryInterface;
 use Cycle\ORM\Registry\IndexProviderInterface;
 use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Registry\RelationProviderInterface;
@@ -19,7 +19,7 @@ use Cycle\ORM\Transaction\CommandGeneratorInterface;
  * Provide the access to all ORM services.
  */
 interface ORMInterface extends
-    EntityProviderInterface,
+    EntityFactoryInterface,
     SourceProviderInterface,
     MapperProviderInterface,
     RepositoryProviderInterface,

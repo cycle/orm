@@ -94,7 +94,7 @@ final class EntityRegistry implements
         $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
         $keys = $this->schema->define($role, SchemaInterface::FIND_BY_KEYS) ?? [];
 
-        return $this->indexes[$role] = array_unique(array_merge([$pk], $keys), SORT_REGULAR);
+        return $this->indexes[$role] = \array_unique(\array_merge([$pk], $keys), SORT_REGULAR);
     }
 
     /**

@@ -9,7 +9,8 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
-use Cycle\ORM\Registry\EntityProviderInterface;
+use Cycle\ORM\Registry\EntityFactoryInterface;
+use Cycle\ORM\Registry\Implementation\EntityFactory;
 use Cycle\ORM\Registry\Implementation\EntityRegistry;
 use Cycle\ORM\Registry\Implementation\SourceProvider;
 use Cycle\ORM\Registry\Implementation\TypecastProvider;
@@ -35,8 +36,9 @@ final class ORM implements ORMInterface
     private CommandGeneratorInterface $commandGenerator;
 
     private EntityRegistry $entityRegistry;
-    private SourceProviderInterface $sourceProvider;
+    private SourceProvider $sourceProvider;
     private TypecastProvider $typecastProvider;
+    private EntityFactory $entityFactory;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -45,7 +47,7 @@ final class ORM implements ORMInterface
     ) {
         $this->heap = new Heap();
         $this->commandGenerator = $commandGenerator ?? new CommandGenerator();
-        $this->resetEntityRegister();
+        $this->resetRegistry();
     }
 
     /**
@@ -54,7 +56,7 @@ final class ORM implements ORMInterface
     public function __clone()
     {
         $this->heap = new Heap();
-        $this->resetEntityRegister();
+        $this->resetRegistry();
     }
 
     public function __debugInfo(): array
@@ -66,29 +68,7 @@ final class ORM implements ORMInterface
 
     public function resolveRole(string|object $entity): string
     {
-        if (\is_object($entity)) {
-            $node = $this->getHeap()->get($entity);
-            if ($node !== null) {
-                return $node->getRole();
-            }
-
-            $class = $entity::class;
-            if (!$this->schema->defines($class)) {
-                $parentClass = get_parent_class($entity);
-
-                if ($parentClass === false
-                    || !$entity instanceof EntityProxyInterface
-                    || !$this->schema->defines($parentClass)
-                ) {
-                    throw new ORMException("Unable to resolve role of `$class`.");
-                }
-                $class = $parentClass;
-            }
-
-            $entity = $class;
-        }
-
-        return $this->schema->resolveAlias($entity) ?? throw new ORMException("Unable to resolve role `$entity`.");
+        return $this->entityFactory->resolveRole($entity);
     }
 
     public function get(string $role, array $scope, bool $load = true): ?object
@@ -109,50 +89,7 @@ final class ORM implements ORMInterface
 
     public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object
     {
-        $role = $data[LoaderInterface::ROLE_KEY] ?? $role;
-        unset($data[LoaderInterface::ROLE_KEY]);
-        // Resolved role
-        $rRole = $this->resolveRole($role);
-        $relMap = $this->entityRegistry->getRelationMap($rRole);
-        $mapper = $this->entityRegistry->getMapper($rRole);
-
-        $castedData = $typecast ? $mapper->cast($data) : $data;
-
-        if ($status !== Node::NEW) {
-            // unique entity identifier
-            $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
-            if (\is_array($pk)) {
-                $ids = [];
-                foreach ($pk as $key) {
-                    if (!isset($data[$key])) {
-                        $ids = null;
-                        break;
-                    }
-                    $ids[$key] = $data[$key];
-                }
-            } else {
-                $ids = isset($data[$pk]) ? [$pk => $data[$pk]] : null;
-            }
-
-            if ($ids !== null) {
-                $e = $this->heap->find($rRole, $ids);
-
-                if ($e !== null) {
-                    $node = $this->heap->get($e);
-                    \assert($node !== null);
-
-                    return $mapper->hydrate($e, $relMap->init($node, $castedData));
-                }
-            }
-        }
-
-        $node = new Node($status, $castedData, $rRole);
-        $e = $mapper->init($data, $role);
-
-        /** Entity should be attached before {@see RelationMap::init()} running */
-        $this->heap->attach($e, $node, $this->entityRegistry->getIndexes($rRole));
-
-        return $mapper->hydrate($e, $relMap->init($node, $castedData));
+        return $this->entityFactory->make($role, $data, $status, $typecast);
     }
 
     public function getCommandGenerator(): CommandGeneratorInterface
@@ -167,7 +104,7 @@ final class ORM implements ORMInterface
 
     public function getProvider(
         #[ExpectedValues(values: [
-            EntityProviderInterface::class,
+            EntityFactoryInterface::class,
             IndexProviderInterface::class,
             MapperProviderInterface::class,
             RelationProviderInterface::class,
@@ -179,7 +116,7 @@ final class ORM implements ORMInterface
     ): object
     {
         return match ($class) {
-            EntityProviderInterface::class => $this,
+            EntityFactoryInterface::class => $this->entityFactory,
             SourceProviderInterface::class => $this->sourceProvider,
             TypecastProviderInterface::class => $this->typecastProvider,
             default => $this->entityRegistry,
@@ -256,13 +193,10 @@ final class ORM implements ORMInterface
         $orm = clone $this;
 
         $orm->heap = $heap ?? $orm->heap;
+        $orm->schema = $schema ?? $orm->schema;
+        $orm->factory = $factory ?? $orm->factory;
 
-        if ($schema !== null || $factory !== null) {
-            $orm->schema = $schema ?? $orm->schema;
-            $orm->factory = $factory ?? $orm->factory;
-
-            $orm->resetEntityRegister();
-        }
+        $orm->resetRegistry();
 
         return $orm;
     }
@@ -294,10 +228,17 @@ final class ORM implements ORMInterface
         return $this->with(heap: $heap);
     }
 
-    private function resetEntityRegister(): void
+    private function resetRegistry(): void
     {
         $this->sourceProvider = new SourceProvider($this->factory, $this->schema);
         $this->typecastProvider = new TypecastProvider($this->factory, $this->schema, $this->sourceProvider);
         $this->entityRegistry = new EntityRegistry($this, $this->sourceProvider, $this->schema, $this->factory);
+        $this->entityFactory = new EntityFactory(
+            $this->heap,
+            $this->schema,
+            $this->entityRegistry,
+            $this->entityRegistry,
+            $this->entityRegistry
+        );
     }
 }

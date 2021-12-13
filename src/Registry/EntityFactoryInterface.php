@@ -6,15 +6,8 @@ namespace Cycle\ORM\Registry;
 
 use Cycle\ORM\Heap\Node;
 
-interface EntityProviderInterface
+interface EntityFactoryInterface
 {
-    /**
-     * Get/load entity by unique key/value pair.
-     *
-     * @param array  $scope KV pair to locate the model, currently only support one pair.
-     */
-    public function get(string $role, array $scope, bool $load = true): ?object;
-
     /**
      * Create new entity based on given role and input data.
      *

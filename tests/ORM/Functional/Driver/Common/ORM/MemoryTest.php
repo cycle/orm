@@ -86,12 +86,12 @@ abstract class MemoryTest extends BaseTest
         $schema = $orm->getSchema();
         \assert($schema::class === Schema::class);
 
-        $indexProvider = $orm->getProvider(IndexProviderInterface::class);
-        $mapperProvider = $orm->getProvider(MapperProviderInterface::class);
-        $relationProvider = $orm->getProvider(RelationProviderInterface::class);
-        $repositoryProvider = $orm->getProvider(RepositoryProviderInterface::class);
-        $sourceProvider = $orm->getProvider(SourceProviderInterface::class);
-        $typecastProvider = $orm->getProvider(TypecastProviderInterface::class);
+        $indexProvider = $orm->getService(IndexProviderInterface::class);
+        $mapperProvider = $orm->getService(MapperProviderInterface::class);
+        $relationProvider = $orm->getService(RelationProviderInterface::class);
+        $repositoryProvider = $orm->getService(RepositoryProviderInterface::class);
+        $sourceProvider = $orm->getService(SourceProviderInterface::class);
+        $typecastProvider = $orm->getService(TypecastProviderInterface::class);
 
         foreach ($schema->toArray() as $role => $roleSchema) {
             $map[$mapperProvider->getMapper($role)] = true;

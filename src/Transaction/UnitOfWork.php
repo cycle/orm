@@ -69,7 +69,7 @@ final class UnitOfWork implements StateInterface
                 // Generate detailed exception about unresolved relations
                 throw TransactionException::unresolvedRelations(
                     $this->pool->getUnresolved(),
-                    $this->orm->getProvider(RelationProviderInterface::class)
+                    $this->orm->getService(RelationProviderInterface::class)
                 );
             }
         } catch (\Throwable $e) {
@@ -112,8 +112,8 @@ final class UnitOfWork implements StateInterface
     private function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
-        $relationProvider = $this->orm->getProvider(RelationProviderInterface::class);
-        $indexProvider = $this->orm->getProvider(IndexProviderInterface::class);
+        $relationProvider = $this->orm->getService(RelationProviderInterface::class);
+        $indexProvider = $this->orm->getService(IndexProviderInterface::class);
         foreach ($this->pool->getAllTuples() as $e => $tuple) {
             $node = $tuple->node;
 

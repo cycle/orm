@@ -43,8 +43,8 @@ abstract class DatabaseMapper implements MapperInterface
         protected string $role
     ) {
         $this->source = $orm->getSource($role);
-        $this->typecast = $orm->getProvider(TypecastProviderInterface::class)->getTypecast($role);
-        $this->relationMap = $orm->getProvider(RelationProviderInterface::class)->getRelationMap($role);
+        $this->typecast = $orm->getService(TypecastProviderInterface::class)->getTypecast($role);
+        $this->relationMap = $orm->getService(RelationProviderInterface::class)->getRelationMap($role);
 
         $schema = $orm->getSchema();
         foreach ($schema->define($role, SchemaInterface::COLUMNS) as $property => $column) {

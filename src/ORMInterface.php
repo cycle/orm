@@ -75,7 +75,7 @@ interface ORMInterface extends
      * @param class-string<Provider> $class
      * @return Provider
      */
-    public function getProvider(string $class): object;
+    public function getService(string $class): object;
 
     /**
      * Get ORM relation and entity schema provider.

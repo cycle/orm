@@ -48,7 +48,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
         protected string $target,
         protected array $schema
     ) {
-        $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
+        $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
         $this->inversion = $schema[Relation::INVERSION] ?? null;

@@ -27,13 +27,13 @@ final class EntityRegistry implements
     RelationProviderInterface,
     IndexProviderInterface
 {
-    /** @var MapperInterface[] */
+    /** @var array<non-empty-string, MapperInterface> */
     private array $mappers = [];
 
-    /** @var RepositoryInterface[] */
+    /** @var array<non-empty-string, RepositoryInterface> */
     private array $repositories = [];
 
-    /** @var RelationMap[] */
+    /** @var array<non-empty-string, RelationMap> */
     private array $relMaps = [];
 
     private array $indexes = [];
@@ -60,7 +60,6 @@ final class EntityRegistry implements
         $this->mappers = [];
         $this->relMaps = [];
         $this->indexes = [];
-        $this->sources = [];
         $this->repositories = [];
     }
 
@@ -85,23 +84,23 @@ final class EntityRegistry implements
         return $this->repositories[$entity] = $this->factory->repository($this->orm->get(), $this->schema, $entity, $select);
     }
 
-    public function getIndexes(string $role): array
+    public function getIndexes(string $entity): array
     {
-        if (isset($this->indexes[$role])) {
-            return $this->indexes[$role];
+        if (isset($this->indexes[$entity])) {
+            return $this->indexes[$entity];
         }
 
-        $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
-        $keys = $this->schema->define($role, SchemaInterface::FIND_BY_KEYS) ?? [];
+        $pk = $this->schema->define($entity, SchemaInterface::PRIMARY_KEY);
+        $keys = $this->schema->define($entity, SchemaInterface::FIND_BY_KEYS) ?? [];
 
-        return $this->indexes[$role] = \array_unique(\array_merge([$pk], $keys), SORT_REGULAR);
+        return $this->indexes[$entity] = \array_unique(\array_merge([$pk], $keys), SORT_REGULAR);
     }
 
     /**
      * Get relation map associated with the given class.
      */
-    public function getRelationMap(string $role): RelationMap
+    public function getRelationMap(string $entity): RelationMap
     {
-        return $this->relMaps[$role] ?? ($this->relMaps[$role] = RelationMap::build($this->orm->get(), $role));
+        return $this->relMaps[$entity] ?? ($this->relMaps[$entity] = RelationMap::build($this->orm->get(), $entity));
     }
 }

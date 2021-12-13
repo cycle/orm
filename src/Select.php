@@ -65,11 +65,11 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     ) {
         $this->heap = $orm->getHeap();
         $this->schema = $orm->getSchema();
-        $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
-        $this->entityFactory = $orm->getProvider(EntityFactoryInterface::class);
+        $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
+        $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
         $this->loader = new RootLoader(
             $orm->getSchema(),
-            $orm->getProvider(SourceProviderInterface::class),
+            $orm->getService(SourceProviderInterface::class),
             $orm->getFactory(),
             $orm->resolveRole($role)
         );

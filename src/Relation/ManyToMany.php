@@ -242,7 +242,7 @@ class ManyToMany extends Relation\AbstractRelation
         // getting scoped query
         $query = (new RootLoader(
             $this->orm->getSchema(),
-            $this->orm->getProvider(SourceProviderInterface::class),
+            $this->orm->getService(SourceProviderInterface::class),
             $this->orm->getFactory(),
             $this->target
         ))->buildQuery();
@@ -250,7 +250,7 @@ class ManyToMany extends Relation\AbstractRelation
         // responsible for all the scoping
         $loader = new ManyToManyLoader(
             $this->orm->getSchema(),
-            $this->orm->getProvider(SourceProviderInterface::class),
+            $this->orm->getService(SourceProviderInterface::class),
             $this->orm->getFactory(),
             $this->orm->getSource($this->target)->getTable(),
             $this->target,

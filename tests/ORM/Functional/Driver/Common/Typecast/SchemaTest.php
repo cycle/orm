@@ -241,6 +241,6 @@ final class SchemaTest extends BaseTest
 
     private function getTypecast(string $role): ?TypecastInterface
     {
-        return $this->orm->getProvider(TypecastProviderInterface::class)->getTypecast($role);
+        return $this->orm->getService(TypecastProviderInterface::class)->getTypecast($role);
     }
 }

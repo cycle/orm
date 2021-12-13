@@ -9,5 +9,5 @@ interface IndexProviderInterface
     /**
      * Get list of keys entity must be indexed in a Heap by.
      */
-    public function getIndexes(string $role): array;
+    public function getIndexes(string $entity): array;
 }

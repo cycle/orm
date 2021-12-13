@@ -11,5 +11,5 @@ interface RelationProviderInterface
     /**
      * Get relation map associated with given entity role.
      */
-    public function getRelationMap(string $role): RelationMap;
+    public function getRelationMap(string $entity): RelationMap;
 }

@@ -24,6 +24,7 @@ use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Transaction\CommandGenerator;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
+use InvalidArgumentException;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
@@ -102,7 +103,7 @@ final class ORM implements ORMInterface
         return $this->factory;
     }
 
-    public function getProvider(
+    public function getService(
         #[ExpectedValues(values: [
             EntityFactoryInterface::class,
             IndexProviderInterface::class,
@@ -119,7 +120,11 @@ final class ORM implements ORMInterface
             EntityFactoryInterface::class => $this->entityFactory,
             SourceProviderInterface::class => $this->sourceProvider,
             TypecastProviderInterface::class => $this->typecastProvider,
-            default => $this->entityRegistry,
+            IndexProviderInterface::class,
+            MapperProviderInterface::class,
+            RelationProviderInterface::class,
+            RepositoryProviderInterface::class => $this->entityRegistry,
+            default => throw new InvalidArgumentException("Undefined service `$class`.")
         };
     }
 

@@ -39,7 +39,7 @@ final class Embedded implements SameRowRelationInterface
         private string $name,
         private string $target
     ) {
-        $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
+        $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
         $this->mapper = $this->mapperProvider->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper

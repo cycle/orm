@@ -46,7 +46,7 @@ final class Iterator implements IteratorAggregate
             $orm->resolveRole($class),
             $orm->getHeap(),
             $orm->getSchema(),
-            $orm->getProvider(EntityFactoryInterface::class),
+            $orm->getService(EntityFactoryInterface::class),
             $source,
             $findInHeap,
             $typecast

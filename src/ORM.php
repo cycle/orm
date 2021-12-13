@@ -12,6 +12,7 @@ use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Registry\EntityFactoryInterface;
 use Cycle\ORM\Registry\Implementation\EntityFactory;
 use Cycle\ORM\Registry\Implementation\EntityRegistry;
+use Cycle\ORM\Registry\Implementation\IndexProvider;
 use Cycle\ORM\Registry\Implementation\SourceProvider;
 use Cycle\ORM\Registry\Implementation\TypecastProvider;
 use Cycle\ORM\Registry\IndexProviderInterface;
@@ -40,6 +41,7 @@ final class ORM implements ORMInterface
     private SourceProvider $sourceProvider;
     private TypecastProvider $typecastProvider;
     private EntityFactory $entityFactory;
+    private IndexProvider $indexProvider;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -120,7 +122,7 @@ final class ORM implements ORMInterface
             EntityFactoryInterface::class => $this->entityFactory,
             SourceProviderInterface::class => $this->sourceProvider,
             TypecastProviderInterface::class => $this->typecastProvider,
-            IndexProviderInterface::class,
+            IndexProviderInterface::class => $this->indexProvider,
             MapperProviderInterface::class,
             RelationProviderInterface::class,
             RepositoryProviderInterface::class => $this->entityRegistry,
@@ -235,15 +237,17 @@ final class ORM implements ORMInterface
 
     private function resetRegistry(): void
     {
+        $this->indexProvider = new IndexProvider($this->schema);
         $this->sourceProvider = new SourceProvider($this->factory, $this->schema);
         $this->typecastProvider = new TypecastProvider($this->factory, $this->schema, $this->sourceProvider);
+
         $this->entityRegistry = new EntityRegistry($this, $this->sourceProvider, $this->schema, $this->factory);
         $this->entityFactory = new EntityFactory(
             $this->heap,
             $this->schema,
             $this->entityRegistry,
             $this->entityRegistry,
-            $this->entityRegistry
+            $this->indexProvider
         );
     }
 }

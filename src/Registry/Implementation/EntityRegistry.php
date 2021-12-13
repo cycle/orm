@@ -24,8 +24,7 @@ use WeakReference;
 final class EntityRegistry implements
     MapperProviderInterface,
     RepositoryProviderInterface,
-    RelationProviderInterface,
-    IndexProviderInterface
+    RelationProviderInterface
 {
     /** @var array<non-empty-string, MapperInterface> */
     private array $mappers = [];
@@ -35,8 +34,6 @@ final class EntityRegistry implements
 
     /** @var array<non-empty-string, RelationMap> */
     private array $relMaps = [];
-
-    private array $indexes = [];
 
     public function __construct(
         private ORMInterface $orm,
@@ -76,18 +73,6 @@ final class EntityRegistry implements
         }
 
         return $this->repositories[$entity] = $this->factory->repository($this->orm, $this->schema, $entity, $select);
-    }
-
-    public function getIndexes(string $entity): array
-    {
-        if (isset($this->indexes[$entity])) {
-            return $this->indexes[$entity];
-        }
-
-        $pk = $this->schema->define($entity, SchemaInterface::PRIMARY_KEY);
-        $keys = $this->schema->define($entity, SchemaInterface::FIND_BY_KEYS) ?? [];
-
-        return $this->indexes[$entity] = \array_unique(\array_merge([$pk], $keys), SORT_REGULAR);
     }
 
     /**

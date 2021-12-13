@@ -182,7 +182,6 @@ class HasMany extends AbstractRelation
             throw new \InvalidArgumentException('Collected data in the HasMany relation should be iterable.');
         }
         return $this->orm->getFactory()->collection(
-            $this->orm,
             $this->schema[Relation::COLLECTION_TYPE] ?? null
         )->collect($data);
     }

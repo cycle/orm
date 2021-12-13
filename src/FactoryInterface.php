@@ -74,7 +74,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      *        Can be class name or alias that can be configured in the {@see withCollectionFactory()} method.
      */
     public function collection(
-        ORMInterface $orm,
         string $name = null
     ): CollectionFactoryInterface;
 

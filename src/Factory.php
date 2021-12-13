@@ -166,7 +166,6 @@ final class Factory implements FactoryInterface
     }
 
     public function collection(
-        ORMInterface $orm,
         string $name = null
     ): CollectionFactoryInterface {
         if ($name === null) {

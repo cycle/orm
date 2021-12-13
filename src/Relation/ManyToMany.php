@@ -176,7 +176,6 @@ class ManyToMany extends Relation\AbstractRelation
     public function collect(mixed $data): iterable
     {
         return $this->orm->getFactory()->collection(
-            $this->orm,
             $this->schema[Relation::COLLECTION_TYPE] ?? null
         )->collect($data);
     }

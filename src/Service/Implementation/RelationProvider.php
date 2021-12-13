@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Registry\Implementation;
+namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Registry\RelationProviderInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\RelationMap;
 
 /**

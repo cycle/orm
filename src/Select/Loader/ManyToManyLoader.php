@@ -10,7 +10,7 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\SingularNode;
-use Cycle\ORM\Registry\SourceProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Exception;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Registry\RelationProviderInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Transaction\Tuple;
 

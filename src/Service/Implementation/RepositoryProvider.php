@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Registry\Implementation;
+namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Registry\RepositoryProviderInterface;
-use Cycle\ORM\Registry\SourceProviderInterface;
+use Cycle\ORM\Service\RepositoryProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;

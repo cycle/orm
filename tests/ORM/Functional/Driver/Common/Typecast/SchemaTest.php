@@ -13,7 +13,7 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Parser\TypecastInterface;
-use Cycle\ORM\Registry\TypecastProviderInterface;
+use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book;

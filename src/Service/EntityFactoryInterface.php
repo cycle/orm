@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Registry;
+namespace Cycle\ORM\Service;
 
 use Cycle\ORM\Heap\Node;
 

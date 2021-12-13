@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Registry\Implementation;
+namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Registry\MapperProviderInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
 
 /**
  * @internal

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Registry\Implementation;
+namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\EntityProxyInterface;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Registry\EntityFactoryInterface;
-use Cycle\ORM\Registry\IndexProviderInterface;
-use Cycle\ORM\Registry\MapperProviderInterface;
-use Cycle\ORM\Registry\RelationProviderInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\IndexProviderInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\LoaderInterface;
 

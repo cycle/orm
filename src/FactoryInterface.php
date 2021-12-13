@@ -8,7 +8,7 @@ use Cycle\Database\DatabaseInterface;
 use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Parser\TypecastInterface;
-use Cycle\ORM\Registry\SourceProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;

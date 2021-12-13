@@ -13,7 +13,7 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Registry\MapperProviderInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;

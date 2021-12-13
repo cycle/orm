@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Registry\Implementation;
+namespace Cycle\ORM\Service\Implementation;
 
-use Cycle\ORM\Registry\IndexProviderInterface;
+use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\SchemaInterface;
 
 use const SORT_REGULAR;

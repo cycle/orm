@@ -15,7 +15,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Parser\TypecastInterface;
-use Cycle\ORM\Registry\SourceProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;

@@ -6,7 +6,7 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Registry\EntityFactoryInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Generator;
 use IteratorAggregate;

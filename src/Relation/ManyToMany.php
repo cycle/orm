@@ -14,7 +14,7 @@ use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Registry\SourceProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;

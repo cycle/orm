@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Registry\Implementation;
+namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\TypecastInterface;
-use Cycle\ORM\Registry\SourceProviderInterface;
-use Cycle\ORM\Registry\TypecastProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
+use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\SchemaInterface;
 
 /**

@@ -7,12 +7,12 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Registry\EntityFactoryInterface;
-use Cycle\ORM\Registry\IndexProviderInterface;
-use Cycle\ORM\Registry\MapperProviderInterface;
-use Cycle\ORM\Registry\RelationProviderInterface;
-use Cycle\ORM\Registry\RepositoryProviderInterface;
-use Cycle\ORM\Registry\SourceProviderInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\IndexProviderInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
+use Cycle\ORM\Service\RepositoryProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**

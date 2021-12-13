@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Registry\EntityFactoryInterface;
 use Cycle\ORM\Registry\Implementation\EntityFactory;
-use Cycle\ORM\Registry\Implementation\EntityRegistry;
 use Cycle\ORM\Registry\Implementation\IndexProvider;
 use Cycle\ORM\Registry\Implementation\MapperProvider;
+use Cycle\ORM\Registry\Implementation\RelationProvider;
+use Cycle\ORM\Registry\Implementation\RepositoryProvider;
 use Cycle\ORM\Registry\Implementation\SourceProvider;
 use Cycle\ORM\Registry\Implementation\TypecastProvider;
 use Cycle\ORM\Registry\IndexProviderInterface;
@@ -22,7 +22,6 @@ use Cycle\ORM\Registry\RelationProviderInterface;
 use Cycle\ORM\Registry\RepositoryProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Registry\TypecastProviderInterface;
-use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Transaction\CommandGenerator;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
@@ -38,12 +37,13 @@ final class ORM implements ORMInterface
 
     private CommandGeneratorInterface $commandGenerator;
 
-    private EntityRegistry $entityRegistry;
+    private RelationProvider $relationProvider;
     private SourceProvider $sourceProvider;
     private TypecastProvider $typecastProvider;
     private EntityFactory $entityFactory;
     private IndexProvider $indexProvider;
     private MapperProvider $mapperProvider;
+    private RepositoryProvider $repositoryProvider;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -126,8 +126,8 @@ final class ORM implements ORMInterface
             TypecastProviderInterface::class => $this->typecastProvider,
             IndexProviderInterface::class => $this->indexProvider,
             MapperProviderInterface::class => $this->mapperProvider,
-            RelationProviderInterface::class,
-            RepositoryProviderInterface::class => $this->entityRegistry,
+            RelationProviderInterface::class => $this->relationProvider,
+            RepositoryProviderInterface::class => $this->repositoryProvider,
             default => throw new InvalidArgumentException("Undefined service `$class`.")
         };
     }
@@ -151,7 +151,7 @@ final class ORM implements ORMInterface
 
     public function getRepository(string|object $entity): RepositoryInterface
     {
-        return $this->entityRegistry->getRepository(
+        return $this->repositoryProvider->getRepository(
             $this->resolveRole($entity)
         );
     }
@@ -177,7 +177,7 @@ final class ORM implements ORMInterface
 
     public function getIndexes(string $entity): array
     {
-        return $this->entityRegistry->getIndexes(
+        return $this->indexProvider->getIndexes(
             $this->resolveRole($entity)
         );
     }
@@ -189,7 +189,7 @@ final class ORM implements ORMInterface
      */
     public function getRelationMap(string $entity): RelationMap
     {
-        return $this->entityRegistry->getRelationMap(
+        return $this->relationProvider->getRelationMap(
             $this->resolveRole($entity)
         );
     }
@@ -245,13 +245,19 @@ final class ORM implements ORMInterface
 
         // Leaked:
         $this->mapperProvider = new MapperProvider($this, $this->factory);
+        $this->relationProvider = new RelationProvider($this);
+        $this->repositoryProvider = new RepositoryProvider(
+            $this,
+            $this->sourceProvider,
+            $this->schema,
+            $this->factory
+        );
 
-        $this->entityRegistry = new EntityRegistry($this, $this->sourceProvider, $this->schema, $this->factory);
         $this->entityFactory = new EntityFactory(
             $this->heap,
             $this->schema,
             $this->mapperProvider,
-            $this->entityRegistry,
+            $this->relationProvider,
             $this->indexProvider
         );
     }

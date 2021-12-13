@@ -29,7 +29,8 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         State $state,
         private MapperInterface $mapper,
         /** @var string[] */
-        array $primaryKeys
+        array $primaryKeys,
+        private bool $mapColumns = true
     ) {
         parent::__construct($db, $table, $state);
         $this->waitScope(...$primaryKeys);
@@ -67,7 +68,7 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
 
         return array_merge(
             $this->columns,
-            $this->mapper->mapColumns($data)
+            $this->mapColumns ? $this->mapper->mapColumns($data) : $data
         );
     }
 
@@ -85,14 +86,14 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         }
 
         $allChanges = $changes = $this->state->getChanges();
-        $data = $changes !== [] ? $this->mapper->mapColumns($changes) : [];
+        $data = $changes !== [] && $this->mapColumns ? $this->mapper->mapColumns($changes) : $changes;
         $fields = array_keys($changes);
         if ($data !== [] || $this->columns !== []) {
             $this->affectedRows = $this->db
                 ->update(
                     $this->table,
                     $this->mapper->uncast(array_merge($this->columns, $data)),
-                    $this->mapper->mapColumns($this->scope)
+                    $this->mapColumns ? $this->mapper->mapColumns($this->scope) : $this->scope
                 )
                 ->run();
         }

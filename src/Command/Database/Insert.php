@@ -25,7 +25,8 @@ final class Insert extends StoreCommand
         private MapperInterface $mapper,
         /** @var string[] */
         private array $primaryKeys = [],
-        private ?string $pkColumn = null
+        private ?string $pkColumn = null,
+        private bool $mapColumns = true
     ) {
         parent::__construct($db, $table, $state);
     }
@@ -75,7 +76,7 @@ final class Insert extends StoreCommand
             ->values(
                 $this->mapper->uncast(array_merge(
                     $this->columns,
-                    $this->mapper->mapColumns($data)
+                    $this->mapColumns ? $this->mapper->mapColumns($data) : $data
                 ))
             );
 

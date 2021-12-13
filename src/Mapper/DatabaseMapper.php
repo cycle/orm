@@ -158,7 +158,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getDatabase(),
             $this->source->getTable(),
             $state,
-            [$this, 'mapColumns']
+            $this
         );
 
         $state->setStatus(Node::SCHEDULED_DELETE);

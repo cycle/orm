@@ -8,6 +8,7 @@ use Countable;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Registry\EntityProviderInterface;
 use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Registry\SourceProviderInterface;
 use Cycle\ORM\Select\JoinableLoader;
@@ -51,16 +52,21 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
 
     private QueryBuilder $builder;
     private MapperProviderInterface $mapperProvider;
+    private Heap\HeapInterface $heap;
+    private SchemaInterface $schema;
+    private EntityProviderInterface $entityProvider;
 
     /**
      * @param class-string<TEntity>|string $role
      */
     public function __construct(
-        /** @internal */
-        private ORMInterface $orm,
+        ORMInterface $orm,
         string $role
     ) {
+        $this->heap = $orm->getHeap();
+        $this->schema = $orm->getSchema();
         $this->mapperProvider = $orm->getProvider(MapperProviderInterface::class);
+        $this->entityProvider = $orm->getProvider(EntityProviderInterface::class);
         $this->loader = new RootLoader(
             $orm->getSchema(),
             $orm->getProvider(SourceProviderInterface::class),
@@ -75,7 +81,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function __destruct()
     {
-        unset($this->orm, $this->loader, $this->builder);
+        unset($this->loader, $this->builder);
     }
 
     /**
@@ -378,7 +384,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             return null;
         }
 
-        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true);
+        /** @var TEntity */
+        return $this->entityProvider->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true);
     }
 
     /**
@@ -399,9 +406,11 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         $node = $this->loader->createNode();
         $this->loader->loadData($node, true);
 
-        return new Iterator(
-            $this->orm,
+        return Iterator::createWithServices(
             $this->loader->getTarget(),
+            $this->heap,
+            $this->schema,
+            $this->entityProvider,
             $node->getResult(),
             typecast: true
         );

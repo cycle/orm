@@ -9,6 +9,7 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Registry\EntityProviderInterface;
 use Cycle\ORM\Registry\Implementation\EntityRegistry;
 use Cycle\ORM\Registry\Implementation\SourceProvider;
 use Cycle\ORM\Registry\Implementation\TypecastProvider;
@@ -166,6 +167,7 @@ final class ORM implements ORMInterface
 
     public function getProvider(
         #[ExpectedValues(values: [
+            EntityProviderInterface::class,
             IndexProviderInterface::class,
             MapperProviderInterface::class,
             RelationProviderInterface::class,
@@ -177,6 +179,7 @@ final class ORM implements ORMInterface
     ): object
     {
         return match ($class) {
+            EntityProviderInterface::class => $this,
             SourceProviderInterface::class => $this->sourceProvider,
             TypecastProviderInterface::class => $this->typecastProvider,
             default => $this->entityRegistry,
@@ -245,6 +248,25 @@ final class ORM implements ORMInterface
         );
     }
 
+    public function with(
+        ?SchemaInterface $schema = null,
+        ?FactoryInterface $factory = null,
+        ?HeapInterface $heap = null
+    ): ORMInterface {
+        $orm = clone $this;
+
+        $orm->heap = $heap ?? $orm->heap;
+
+        if ($schema !== null || $factory !== null) {
+            $orm->schema = $schema ?? $orm->schema;
+            $orm->factory = $factory ?? $orm->factory;
+
+            $orm->resetEntityRegister();
+        }
+
+        return $orm;
+    }
+
     /**
      * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
      * Use method {@see with} instead.
@@ -270,25 +292,6 @@ final class ORM implements ORMInterface
     public function withHeap(HeapInterface $heap): ORMInterface
     {
         return $this->with(heap: $heap);
-    }
-
-    public function with(
-        ?SchemaInterface $schema = null,
-        ?FactoryInterface $factory = null,
-        ?HeapInterface $heap = null
-    ): ORMInterface {
-        $orm = clone $this;
-
-        $orm->heap = $heap ?? $orm->heap;
-
-        if ($schema !== null || $factory !== null) {
-            $orm->schema = $schema ?? $orm->schema;
-            $orm->factory = $factory ?? $orm->factory;
-
-            $orm->resetEntityRegister();
-        }
-
-        return $orm;
     }
 
     private function resetEntityRegister(): void

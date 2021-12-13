@@ -7,6 +7,7 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Registry\EntityProviderInterface;
 use Cycle\ORM\Registry\IndexProviderInterface;
 use Cycle\ORM\Registry\MapperProviderInterface;
 use Cycle\ORM\Registry\RelationProviderInterface;
@@ -18,6 +19,7 @@ use Cycle\ORM\Transaction\CommandGeneratorInterface;
  * Provide the access to all ORM services.
  */
 interface ORMInterface extends
+    EntityProviderInterface,
     SourceProviderInterface,
     MapperProviderInterface,
     RepositoryProviderInterface,
@@ -40,13 +42,14 @@ interface ORMInterface extends
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      *
-     * @template T
+     * @template TEntity
      *
-     * @param class-string<T>|string $role Entity role or class name.
+     * @param class-string<TEntity>|string $role Entity role or class name.
+     * @param array<string, mixed> $data Entity data.
      * @param bool $typecast Indicates that data is raw, and typecasting should be applied.
      *
-     * @return T
-     * @psalm-return ($role is class-string ? T : object)
+     * @return TEntity
+     * @psalm-return ($role is class-string ? TEntity : object)
      */
     public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object;
 

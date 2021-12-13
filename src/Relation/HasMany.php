@@ -168,7 +168,7 @@ class HasMany extends AbstractRelation
             ->where($scope)
             ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
 
-        $iterator = new Iterator($this->orm, $this->target, $select->fetchData(), true);
+        $iterator = Iterator::createWithOrm($this->orm, $this->target, $select->fetchData(), true);
         $result = \iterator_to_array($iterator, false);
 
         $reference->setValue($result);

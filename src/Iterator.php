@@ -58,10 +58,10 @@ final class Iterator implements IteratorAggregate
      * @param iterable<array-key, array> $source
      */
     public static function createWithServices(
-        string $role,
         HeapInterface $heap,
         SchemaInterface $schema,
         EntityFactoryInterface $entityProvider,
+        string $role,
         iterable $source,
         bool $findInHeap = false,
         bool $typecast = false

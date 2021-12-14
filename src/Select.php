@@ -407,10 +407,10 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         $this->loader->loadData($node, true);
 
         return Iterator::createWithServices(
-            $this->loader->getTarget(),
             $this->heap,
             $this->schema,
             $this->entityFactory,
+            $this->loader->getTarget(),
             $node->getResult(),
             typecast: true
         );

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
@@ -13,6 +15,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Traits\HasSomeTrait;
 use Cycle\ORM\Select;
 use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -24,6 +27,18 @@ use Cycle\ORM\Transaction\Tuple;
 class HasMany extends AbstractRelation
 {
     use HasSomeTrait;
+
+    protected SourceProviderInterface $sourceProvider;
+    protected FactoryInterface $factory;
+    protected ORMInterface $orm;
+
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
+    {
+        parent::__construct($orm, $role, $name, $target, $schema);
+        $this->orm = $orm;
+        $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
+        $this->factory = $orm->getFactory();
+    }
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
@@ -165,7 +180,7 @@ class HasMany extends AbstractRelation
 
         $scope = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
         $select = (new Select($this->orm, $this->target))
-            ->scope($this->orm->getSource($this->target)->getScope())
+            ->scope($this->sourceProvider->getSource($this->target)->getScope())
             ->where($scope)
             ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
 
@@ -182,7 +197,7 @@ class HasMany extends AbstractRelation
         if (!\is_iterable($data)) {
             throw new \InvalidArgumentException('Collected data in the HasMany relation should be iterable.');
         }
-        return $this->orm->getFactory()->collection(
+        return $this->factory->collection(
             $this->schema[Relation::COLLECTION_TYPE] ?? null
         )->collect($data);
     }

@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\ORM;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
@@ -40,7 +41,7 @@ abstract class MemoryTest extends BaseTest
         $orm = $this->orm->with(factory: new Factory($this->dbal));
         \gc_collect_cycles();
 
-        $this->assertNull($link->get());
+        $this->assertTrue($link->get() === null);
     }
 
     public function testORMUnsetGarbageAndCollectGarbageCycles(): void
@@ -52,13 +53,25 @@ abstract class MemoryTest extends BaseTest
         unset($orm);
         \gc_collect_cycles();
 
-        $this->assertNull($link->get());
+        $this->assertTrue($link->get() === null);
     }
 
-    public function testORMWithLoadedEntityRegistryUnsetAndCollectGarbageCycles(): void
+    public function testORMWithLoadedServicesUnsetAndCollectGarbageCycles(): void
     {
         $orm = $this->createORM();
-        $map = $this->collectReferences($orm);
+        $map = $this->collectReferences($orm, false);
+
+        // $this->assertCount(17, $map);
+        unset($orm);
+        \gc_collect_cycles();
+
+        $this->assertCount(0, $map);
+    }
+
+    public function testORMWithLoadedServicesWithRolesUnsetAndCollectGarbageCycles(): void
+    {
+        $orm = $this->createORM();
+        $map = $this->collectReferences($orm, true);
 
         // $this->assertCount(17, $map);
         unset($orm);
@@ -77,30 +90,41 @@ abstract class MemoryTest extends BaseTest
 
         $orm = $this->orm->with(factory: new Factory($this->dbal));
 
-        $this->assertNull($link->get());
+        $this->assertTrue($link->get() === null);
     }
 
-    public function testORMUnsetGarbage(): void
-    {
-        $orm = $this->createORM();
+    // public function testORMUnsetGarbage(): void
+    // {
+    //     $orm = $this->createORM();
+    //
+    //     $link = WeakReference::create($orm);
+    //
+    //     unset($orm);
+    //
+    //     $this->assertNull($link->get());
+    // }
 
-        $link = WeakReference::create($orm);
+    // public function testORMWithLoadedServicesUnset(): void
+    // {
+    //     $orm = $this->createORM();
+    //     $map = $this->collectReferences($orm, false);
+    //
+    //     // $this->assertCount(17, $map);
+    //     unset($orm);
+    //
+    //     $this->assertCount(0, $map);
+    // }
 
-        unset($orm);
-
-        $this->assertNull($link->get());
-    }
-
-    public function testORMWithLoadedEntityRegistryUnset(): void
-    {
-        $orm = $this->createORM();
-        $map = $this->collectReferences($orm);
-
-        // $this->assertCount(17, $map);
-        unset($orm);
-
-        $this->assertCount(0, $map);
-    }
+    // public function testORMWithLoadedServicesWithRolesUnset(): void
+    // {
+    //     $orm = $this->createORM();
+    //     $map = $this->collectReferences($orm, true);
+    //
+    //     // $this->assertCount(17, $map);
+    //     unset($orm);
+    //
+    //     $this->assertCount(0, $map);
+    // }
 
     // Support
 
@@ -110,12 +134,13 @@ abstract class MemoryTest extends BaseTest
         return new ORM(new Factory($this->dbal), $schema);
     }
 
-    private function collectReferences(ORMInterface $orm): WeakMap
+    private function collectReferences(ORMInterface $orm, bool $loadRoles): WeakMap
     {
         $map = new WeakMap();
         $schema = $orm->getSchema();
         \assert($schema::class === Schema::class);
 
+        $entityFactory = $orm->getService(EntityFactoryInterface::class);
         $indexProvider = $orm->getService(IndexProviderInterface::class);
         $mapperProvider = $orm->getService(MapperProviderInterface::class);
         $relationProvider = $orm->getService(RelationProviderInterface::class);
@@ -123,13 +148,16 @@ abstract class MemoryTest extends BaseTest
         $sourceProvider = $orm->getService(SourceProviderInterface::class);
         $typecastProvider = $orm->getService(TypecastProviderInterface::class);
 
-        foreach ($schema->toArray() as $role => $roleSchema) {
-            $map[$mapperProvider->getMapper($role)] = true;
-            $map[$relationProvider->getRelationMap($role)] = true;
-            // $map[$repositoryProvider->getRepository($role)] = true;
-            $map[$sourceProvider->getSource($role)] = true;
-            $map[$typecastProvider->getTypecast($role)] = true;
+        if ($loadRoles) {
+            foreach ($schema->toArray() as $role => $roleSchema) {
+                $map[$mapperProvider->getMapper($role)] = true;
+                $map[$relationProvider->getRelationMap($role)] = true;
+                // $map[$repositoryProvider->getRepository($role)] = true;
+                $map[$sourceProvider->getSource($role)] = true;
+                $map[$typecastProvider->getTypecast($role)] = true;
+            }
         }
+        $map[$entityFactory] = true;
         $map[$indexProvider] = true;
         $map[$mapperProvider] = true;
         $map[$relationProvider] = true;

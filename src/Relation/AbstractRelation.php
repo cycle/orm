@@ -13,6 +13,7 @@ use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 
 /**
  * @internal
@@ -42,8 +43,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
      * @param string $target Primary target role
      */
     public function __construct(
-        /** @internal */
-        protected ORMInterface $orm,
+        ORMInterface $orm,
         private string $role,
         protected string $name,
         protected string $target,
@@ -91,14 +91,6 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     protected function getTargetRelationName(): string
     {
         return $this->inversion ?? $this->role . '.' . $this->name . ':' . $this->target;
-    }
-
-    /**
-     * Get the source associated with the role.
-     */
-    protected function getSource(string $role = null): SourceInterface
-    {
-        return $this->orm->getSource($role ?? $this->target);
     }
 
     /**

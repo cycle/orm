@@ -6,6 +6,7 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
@@ -38,12 +39,18 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected string $pivotRole;
 
-    private EntityFactoryInterface $entityFactory;
+    protected EntityFactoryInterface $entityFactory;
+    protected SourceProviderInterface $sourceProvider;
+    protected FactoryInterface $factory;
+    protected ORMInterface $orm;
 
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
+        $this->orm = $orm;
+        $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
         $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
+        $this->factory = $orm->getFactory();
         $this->pivotRole = $this->schema[Relation::THROUGH_ENTITY];
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
@@ -139,6 +146,7 @@ class ManyToMany extends Relation\AbstractRelation
         $pivotData = new SplObjectStorage();
 
         $iterator = Iterator::createWithOrm($this->orm, $this->target, $data, true);
+        // $iterator = Iterator::createWithServices($this->heap, $this->ormSchema, $this->entityProvider, $this->target, $data, true);
         foreach ($iterator as $pivot => $entity) {
             if (!\is_array($pivot)) {
                 // skip partially selected entities (DB level filter)
@@ -179,7 +187,7 @@ class ManyToMany extends Relation\AbstractRelation
 
     public function collect(mixed $data): iterable
     {
-        return $this->orm->getFactory()->collection(
+        return $this->factory->collection(
             $this->schema[Relation::COLLECTION_TYPE] ?? null
         )->collect($data);
     }
@@ -245,24 +253,24 @@ class ManyToMany extends Relation\AbstractRelation
         // getting scoped query
         $query = (new RootLoader(
             $this->ormSchema,
-            $this->orm->getService(SourceProviderInterface::class),
-            $this->orm->getFactory(),
+            $this->sourceProvider,
+            $this->factory,
             $this->target
         ))->buildQuery();
 
         // responsible for all the scoping
         $loader = new ManyToManyLoader(
             $this->ormSchema,
-            $this->orm->getService(SourceProviderInterface::class),
-            $this->orm->getFactory(),
-            $this->orm->getSource($this->target)->getTable(),
+            $this->sourceProvider,
+            $this->factory,
+            $this->sourceProvider->getSource($this->target)->getTable(),
             $this->target,
             $this->schema
         );
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'scope' => $this->orm->getSource($this->target)->getScope(),
+            'scope' => $this->sourceProvider->getSource($this->target)->getScope(),
             'as' => $this->target,
             'method' => JoinableLoader::POSTLOAD,
         ]);

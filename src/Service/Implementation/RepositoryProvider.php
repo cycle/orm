@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Service\Implementation;
 
+use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Service\RepositoryProviderInterface;
@@ -21,7 +22,7 @@ final class RepositoryProvider implements RepositoryProviderInterface
     private array $repositories = [];
 
     public function __construct(
-        private ORMInterface $orm,
+        private ?ORMInterface $orm,
         private SourceProviderInterface $sourceProvider,
         private SchemaInterface $schema,
         private FactoryInterface $factory
@@ -33,6 +34,9 @@ final class RepositoryProvider implements RepositoryProviderInterface
         if (isset($this->repositories[$entity])) {
             return $this->repositories[$entity];
         }
+        if ($this->orm === null) {
+            throw new ORMException('Repository is not prepared.');
+        }
 
         $select = null;
 
@@ -42,5 +46,14 @@ final class RepositoryProvider implements RepositoryProviderInterface
         }
 
         return $this->repositories[$entity] = $this->factory->repository($this->orm, $this->schema, $entity, $select);
+    }
+
+    public function prepareRepositories(): void
+    {
+        foreach ($this->schema->getRoles() as $role) {
+            $this->getRepository($role);
+        }
+        $this->orm = null;
+        unset($this->sourceProvider, $this->schema, $this->factory);
     }
 }

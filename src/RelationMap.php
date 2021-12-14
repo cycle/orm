@@ -11,6 +11,7 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\SameRowRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Relation\ShadowHasMany;
+use Cycle\ORM\Service\EntityFactoryInterface;
 
 /**
  * Manages the position of node in the relation graph and provide access to neighbours.
@@ -133,7 +134,7 @@ final class RelationMap
     /**
      * Init relation data in entity data and entity state.
      */
-    public function init(Node $node, array $data): array
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): array
     {
         foreach ($this->innerRelations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
@@ -154,7 +155,7 @@ final class RelationMap
             }
 
             // init relation for the entity and for state and the same time
-            $data[$name] = $relation->init($node, $item);
+            $data[$name] = $relation->init($factory, $node, $item);
         }
 
         return $data;

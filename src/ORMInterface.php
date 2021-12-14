@@ -8,6 +8,7 @@ use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
@@ -20,6 +21,7 @@ use Cycle\ORM\Transaction\CommandGeneratorInterface;
  */
 interface ORMInterface extends
     EntityFactoryInterface,
+    EntityProviderInterface,
     SourceProviderInterface,
     MapperProviderInterface,
     RepositoryProviderInterface,
@@ -30,13 +32,6 @@ interface ORMInterface extends
      * Automatically resolve role based on object name or instance.
      */
     public function resolveRole(string|object $entity): string;
-
-    /**
-     * Get/load entity by unique key/value pair.
-     *
-     * @param array  $scope KV pair to locate the model, currently only support one pair.
-     */
-    public function get(string $role, array $scope, bool $load = true): ?object;
 
     /**
      * Create new entity based on given role and input data. Method will attempt to re-use

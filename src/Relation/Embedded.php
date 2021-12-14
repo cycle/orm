@@ -13,8 +13,10 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
-use Cycle\ORM\Schema;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -27,24 +29,27 @@ final class Embedded implements SameRowRelationInterface
 {
     private MapperInterface $mapper;
     private MapperProviderInterface $mapperProvider;
+    private EntityProviderInterface $entityProvider;
 
     /** @var string[] */
     private array $primaryKeys;
 
     private array $columns;
 
+
     public function __construct(
         /** @internal */
-        private ORMInterface $orm,
+        ORMInterface $orm,
         private string $name,
         private string $target
     ) {
         $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
+        $this->entityProvider = $orm->getService(EntityProviderInterface::class);
         $this->mapper = $this->mapperProvider->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
-        $this->primaryKeys = (array)$orm->getSchema()->define($target, Schema::PRIMARY_KEY);
-        $this->columns = $orm->getSchema()->define($target, Schema::COLUMNS);
+        $this->primaryKeys = (array)$orm->getSchema()->define($target, SchemaInterface::PRIMARY_KEY);
+        $this->columns = $orm->getSchema()->define($target, SchemaInterface::COLUMNS);
     }
 
     public function getName(): string
@@ -68,14 +73,14 @@ final class Embedded implements SameRowRelationInterface
         return true;
     }
 
-    public function init(Node $node, array $data): object
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): object
     {
         foreach ($this->primaryKeys as $key) {
             // ensure proper object reference
             $data[$key] = $node->getData()[$key];
         }
 
-        $item = $this->orm->make($this->target, $data, Node::MANAGED);
+        $item = $factory->make($this->target, $data, Node::MANAGED);
         $node->setRelation($this->getName(), $item);
 
         return $item;
@@ -202,7 +207,7 @@ final class Embedded implements SameRowRelationInterface
             return $reference->getValue();
         }
 
-        $result = $this->orm->get($reference->getRole(), $reference->getScope(), $load);
+        $result = $this->entityProvider->get($reference->getRole(), $reference->getScope(), $load);
         if ($load === true || $result !== null) {
             $reference->setValue($result);
         }

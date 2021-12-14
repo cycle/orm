@@ -8,8 +8,11 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\Reference;
+use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Service\Implementation\EntityFactory;
+use Cycle\ORM\Service\Implementation\EntityProvider;
 use Cycle\ORM\Service\Implementation\IndexProvider;
 use Cycle\ORM\Service\Implementation\MapperProvider;
 use Cycle\ORM\Service\Implementation\RelationProvider;
@@ -22,7 +25,6 @@ use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Service\RepositoryProviderInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
-use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Transaction\CommandGenerator;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 use InvalidArgumentException;
@@ -44,6 +46,7 @@ final class ORM implements ORMInterface
     private IndexProvider $indexProvider;
     private MapperProvider $mapperProvider;
     private RepositoryProvider $repositoryProvider;
+    private EntityProvider $entityProvider;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -79,17 +82,7 @@ final class ORM implements ORMInterface
     public function get(string $role, array $scope, bool $load = true): ?object
     {
         $role = $this->resolveRole($role);
-        $e = $this->heap->find($role, $scope);
-
-        if ($e !== null) {
-            return $e;
-        }
-
-        if (!$load) {
-            return null;
-        }
-
-        return $this->getRepository($role)->findOne($scope);
+        return $this->entityProvider->get($role, $scope, $load);
     }
 
     public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object
@@ -122,6 +115,7 @@ final class ORM implements ORMInterface
     {
         return match ($class) {
             EntityFactoryInterface::class => $this->entityFactory,
+            EntityProviderInterface::class => $this->entityProvider,
             SourceProviderInterface::class => $this->sourceProvider,
             TypecastProviderInterface::class => $this->typecastProvider,
             IndexProviderInterface::class => $this->indexProvider,
@@ -244,14 +238,15 @@ final class ORM implements ORMInterface
         $this->typecastProvider = new TypecastProvider($this->factory, $this->schema, $this->sourceProvider);
 
         // Leaked:
-        $this->mapperProvider = new MapperProvider($this, $this->factory);
         $this->relationProvider = new RelationProvider($this);
+        $this->mapperProvider = new MapperProvider($this, $this->factory);
         $this->repositoryProvider = new RepositoryProvider(
             $this,
             $this->sourceProvider,
             $this->schema,
             $this->factory
         );
+        $this->entityProvider = new EntityProvider($this->heap, $this->repositoryProvider);
 
         $this->entityFactory = new EntityFactory(
             $this->heap,
@@ -260,5 +255,8 @@ final class ORM implements ORMInterface
             $this->relationProvider,
             $this->indexProvider
         );
+
+        $this->repositoryProvider->prepareRepositories();
+        $this->mapperProvider->prepareMappers();
     }
 }

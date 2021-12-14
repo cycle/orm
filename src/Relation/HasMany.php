@@ -12,6 +12,7 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Traits\HasSomeTrait;
 use Cycle\ORM\Select;
+use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -102,11 +103,11 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      */
-    public function init(Node $node, array $data): iterable
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): iterable
     {
         $elements = [];
         foreach ($data as $item) {
-            $elements[] = $this->orm->make($this->target, $item, Node::MANAGED);
+            $elements[] = $factory->make($this->target, $item, Node::MANAGED);
         }
 
         $node->setRelation($this->getName(), $elements);

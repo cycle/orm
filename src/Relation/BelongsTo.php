@@ -6,9 +6,11 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\State;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\ToOneTrait;
+use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -22,6 +24,13 @@ use Cycle\ORM\Transaction\Tuple;
 class BelongsTo extends AbstractRelation implements DependencyInterface
 {
     use ToOneTrait;
+
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
+    {
+        $this->entityProvider = $orm->getService(EntityProviderInterface::class);
+
+        parent::__construct($orm, $role, $name, $target, $schema);
+    }
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {

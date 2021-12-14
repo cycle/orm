@@ -67,7 +67,7 @@ final class EntityFactory implements EntityFactoryInterface
                     $node = $this->heap->get($e);
                     \assert($node !== null);
 
-                    return $mapper->hydrate($e, $relMap->init($node, $castedData));
+                    return $mapper->hydrate($e, $relMap->init($this, $node, $castedData));
                 }
             }
         }
@@ -78,7 +78,7 @@ final class EntityFactory implements EntityFactoryInterface
         /** Entity should be attached before {@see RelationMap::init()} running */
         $this->heap->attach($e, $node, $this->indexProvider->getIndexes($rRole));
 
-        return $mapper->hydrate($e, $relMap->init($node, $castedData));
+        return $mapper->hydrate($e, $relMap->init($this, $node, $castedData));
     }
 
     public function resolveRole(object|string $entity): string

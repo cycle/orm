@@ -36,6 +36,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     protected ?string $inversion;
 
     protected MapperProviderInterface $mapperProvider;
+    protected SchemaInterface $ormSchema;
 
     /**
      * @param string $target Primary target role
@@ -48,6 +49,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
         protected string $target,
         protected array $schema
     ) {
+        $this->ormSchema = $orm->getSchema();
         $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
@@ -109,14 +111,14 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
         if ($related->getRole() === $this->target || in_array($related->getRole(), $this->targets, true)) {
             return;
         }
-        $role = $this->orm->getSchema()->resolveAlias($related->getRole());
+        $role = $this->ormSchema->resolveAlias($related->getRole());
         if ($role === $this->target) {
             $this->targets[] = $related->getRole();
             return;
         }
         // Check parents
         do {
-            $parent = $this->orm->getSchema()->define($role, SchemaInterface::PARENT);
+            $parent = $this->ormSchema->define($role, SchemaInterface::PARENT);
             if ($parent === $this->target) {
                 $this->targets[] = $related->getRole();
                 return;

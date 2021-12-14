@@ -6,6 +6,7 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
 
 /**
  * Manages single branch type between parent entity and other objects.
@@ -19,7 +20,7 @@ interface ActiveRelationInterface extends RelationInterface
      *
      * @param Node $node Parent node.
      */
-    public function init(Node $node, array $data): object|iterable;
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): object|iterable;
 
     /**
      * Cast raw data

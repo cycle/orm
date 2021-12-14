@@ -8,15 +8,19 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\EntityProviderInterface;
 
 /**
  * @internal
  */
 trait ToOneTrait
 {
-    public function init(Node $node, array $data): object
+    protected EntityProviderInterface $entityProvider;
+
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): object
     {
-        $item = $this->orm->make($this->target, $data, Node::MANAGED);
+        $item = $factory->make($this->target, $data, Node::MANAGED);
         $node->setRelation($this->getName(), $item);
         return $item;
     }
@@ -48,7 +52,7 @@ trait ToOneTrait
             return $reference->getValue();
         }
 
-        $result = $this->orm->get($reference->getRole(), $reference->getScope(), $load);
+        $result = $this->entityProvider->get($reference->getRole(), $reference->getScope(), $load);
         if ($load === true || $result !== null) {
             $reference->setValue($result);
         }

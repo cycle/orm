@@ -35,12 +35,13 @@ final class Factory implements FactoryInterface
     private RelationConfig $config;
     private CoreFactory $factory;
 
-    /** @var array<string, string> */
+    /** @var array<int, string> */
     private array $defaults = [
         SchemaInterface::REPOSITORY => Repository::class,
         SchemaInterface::SOURCE => Source::class,
         SchemaInterface::MAPPER => Mapper::class,
         SchemaInterface::SCOPE => null,
+        SchemaInterface::TYPECAST_HANDLER => null,
     ];
 
     /** @var array<string, CollectionFactoryInterface> */
@@ -81,7 +82,8 @@ final class Factory implements FactoryInterface
 
         // Schema's `typecast` option
         $rules = (array)$schema->define($role, SchemaInterface::TYPECAST);
-        $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER);
+        $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER)
+            ?? $this->defaults[SchemaInterface::TYPECAST_HANDLER];
 
         // Create basic typecast implementation
         try {

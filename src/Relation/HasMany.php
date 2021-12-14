@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\FactoryInterface;
+use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
@@ -31,10 +32,14 @@ class HasMany extends AbstractRelation
     protected SourceProviderInterface $sourceProvider;
     protected FactoryInterface $factory;
     protected ORMInterface $orm;
+    protected EntityFactoryInterface $entityFactory;
+    private HeapInterface $heap;
 
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
+        $this->heap = $orm->getHeap();
+        $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
         $this->orm = $orm;
         $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
         $this->factory = $orm->getFactory();
@@ -179,12 +184,20 @@ class HasMany extends AbstractRelation
         }
 
         $scope = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
+        /** Todo: rewrite to loader usage like in {@see \Cycle\ORM\Relation\ManyToMany::resolve()} */
         $select = (new Select($this->orm, $this->target))
             ->scope($this->sourceProvider->getSource($this->target)->getScope())
             ->where($scope)
             ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
 
-        $iterator = Iterator::createWithOrm($this->orm, $this->target, $select->fetchData(), true);
+        $iterator = Iterator::createWithServices(
+            $this->heap,
+            $this->ormSchema,
+            $this->entityFactory,
+            $this->target,
+            $select->fetchData(),
+            true
+        );
         $result = \iterator_to_array($iterator, false);
 
         $reference->setValue($result);

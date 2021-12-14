@@ -7,6 +7,7 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\FactoryInterface;
+use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
@@ -15,12 +16,12 @@ use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Service\EntityFactoryInterface;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
 use Cycle\ORM\Select\RootLoader;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use SplObjectStorage;
@@ -42,12 +43,12 @@ class ManyToMany extends Relation\AbstractRelation
     protected EntityFactoryInterface $entityFactory;
     protected SourceProviderInterface $sourceProvider;
     protected FactoryInterface $factory;
-    protected ORMInterface $orm;
+    private HeapInterface $heap;
 
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
-        $this->orm = $orm;
+        $this->heap = $orm->getHeap();
         $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
         $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
         $this->factory = $orm->getFactory();
@@ -145,8 +146,14 @@ class ManyToMany extends Relation\AbstractRelation
         $elements = [];
         $pivotData = new SplObjectStorage();
 
-        $iterator = Iterator::createWithOrm($this->orm, $this->target, $data, true);
-        // $iterator = Iterator::createWithServices($this->heap, $this->ormSchema, $this->entityProvider, $this->target, $data, true);
+        $iterator = Iterator::createWithServices(
+            $this->heap,
+            $this->ormSchema,
+            $this->entityFactory,
+            $this->target,
+            $data,
+            true
+        );
         foreach ($iterator as $pivot => $entity) {
             if (!\is_array($pivot)) {
                 // skip partially selected entities (DB level filter)
@@ -300,7 +307,16 @@ class ManyToMany extends Relation\AbstractRelation
 
         $elements = [];
         $pivotData = new SplObjectStorage();
-        foreach (Iterator::createWithOrm($this->orm, $this->target, $root->getResult()[0]['output'], true, typecast: true) as $pivot => $entity) {
+        $iterator = Iterator::createWithServices(
+            $this->heap,
+            $this->ormSchema,
+            $this->entityFactory,
+            $this->target,
+            $root->getResult()[0]['output'],
+            true,
+            typecast: true
+        );
+        foreach ($iterator as $pivot => $entity) {
             $pivotData[$entity] = $this->entityFactory->make(
                 $this->schema[Relation::THROUGH_ENTITY],
                 $pivot,

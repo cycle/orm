@@ -101,7 +101,7 @@ abstract class MemoryTest extends BaseTest
 
         unset($orm);
 
-        $this->assertNull($link->get());
+        $this->assertNull($link->get() === null);
     }
 
     // public function testOrmUnsetWithLoadedServicesCheck(): void

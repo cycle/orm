@@ -111,8 +111,7 @@ final class ORM implements ORMInterface
             TypecastProviderInterface::class,
         ])]
         string $class
-    ): object
-    {
+    ): object {
         return match ($class) {
             EntityFactoryInterface::class => $this->entityFactory,
             EntityProviderInterface::class => $this->entityProvider,

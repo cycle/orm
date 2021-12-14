@@ -255,7 +255,7 @@ final class Factory implements FactoryInterface
             ? $this->factory->make($source, ['role' => $role, 'table' => $table, 'database' => $database])
             : new Source($database, $table);
 
-        /** @var ScopeInterface|class-string<ScopeInterface>|null $scope */
+        /** @var class-string<ScopeInterface>|ScopeInterface|null $scope */
         $scope = $schema->define($role, SchemaInterface::SCOPE) ?? $this->defaults[SchemaInterface::SCOPE];
 
         if ($scope === null) {
@@ -263,7 +263,7 @@ final class Factory implements FactoryInterface
         }
 
         if (!\is_subclass_of($scope, ScopeInterface::class)) {
-            throw new TypecastException(sprintf("%s does not implement %s.", $scope, ScopeInterface::class));
+            throw new TypecastException(sprintf('%s does not implement %s.', $scope, ScopeInterface::class));
         }
 
         return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));

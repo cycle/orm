@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture;
 
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\SchemaInterface;
 

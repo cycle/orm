@@ -36,7 +36,6 @@ final class Embedded implements SameRowRelationInterface
 
     private array $columns;
 
-
     public function __construct(
         /** @internal */
         ORMInterface $orm,

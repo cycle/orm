@@ -40,7 +40,7 @@ final class SchemaTest extends BaseTest
                 RelationConfig::getDefault(),
                 new SimpleFactory(
                     $factoryDefinitions,
-                    static fn(string|object $alias, array $parameters = []): mixed => \is_string($alias)
+                    static fn (string|object $alias, array $parameters = []): mixed => \is_string($alias)
                         ? $container->make($alias, $parameters) : $alias
                 ),
                 new ArrayCollectionFactory()
@@ -231,7 +231,7 @@ final class SchemaTest extends BaseTest
             'test-alias' => $aliasTypecast,
         ]);
 
-        $this->container->bindSingleton('bar-foo', fn() => $containerTypecast);
+        $this->container->bindSingleton('bar-foo', fn () => $containerTypecast);
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 

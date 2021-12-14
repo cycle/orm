@@ -65,8 +65,7 @@ final class Iterator implements IteratorAggregate
         iterable $source,
         bool $findInHeap = false,
         bool $typecast = false
-    ): self
-    {
+    ): self {
         return new self(
             $role,
             $heap,

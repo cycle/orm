@@ -67,7 +67,9 @@ interface ORMInterface extends
 
     /**
      * @template Provider
+     *
      * @param class-string<Provider> $class
+     *
      * @return Provider
      */
     public function getService(string $class): object;

@@ -12,8 +12,6 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Select\SourceInterface;
-use Cycle\ORM\Service\SourceProviderInterface;
 
 /**
  * @internal

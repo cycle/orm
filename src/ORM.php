@@ -237,7 +237,7 @@ final class ORM implements ORMInterface
         $this->sourceProvider = new SourceProvider($this->factory, $this->schema);
         $this->typecastProvider = new TypecastProvider($this->factory, $this->schema, $this->sourceProvider);
 
-        // Leaked:
+        // With back to ORM reference
         $this->relationProvider = new RelationProvider($this);
         $this->mapperProvider = new MapperProvider($this, $this->factory);
         $this->repositoryProvider = new RepositoryProvider(
@@ -256,6 +256,8 @@ final class ORM implements ORMInterface
             $this->indexProvider
         );
 
+        // Preload providers with back to ORM reference
+        $this->relationProvider->prepareRelationMaps();
         $this->repositoryProvider->prepareRepositories();
         $this->mapperProvider->prepareMappers();
     }

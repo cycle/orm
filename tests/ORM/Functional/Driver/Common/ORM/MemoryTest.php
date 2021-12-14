@@ -32,7 +32,7 @@ abstract class MemoryTest extends BaseTest
 
     // With `Collect Garbage Cycles`
 
-    public function testORMCloneGarbageAndCollectGarbageCycles(): void
+    public function testOrmCloneGarbageAndCollectGarbageCycles(): void
     {
         $orm = $this->createORM();
 
@@ -44,7 +44,7 @@ abstract class MemoryTest extends BaseTest
         $this->assertTrue($link->get() === null);
     }
 
-    public function testORMUnsetGarbageAndCollectGarbageCycles(): void
+    public function testOrmUnsetGarbageAndCollectGarbageCycles(): void
     {
         $orm = $this->createORM();
 
@@ -56,33 +56,33 @@ abstract class MemoryTest extends BaseTest
         $this->assertTrue($link->get() === null);
     }
 
-    public function testORMWithLoadedServicesUnsetAndCollectGarbageCycles(): void
-    {
-        $orm = $this->createORM();
-        $map = $this->collectReferences($orm, false);
+    // public function testOrmUnsetAndCollectGarbageCyclesWithLoadedServicesCheck(): void
+    // {
+    //     $orm = $this->createORM();
+    //     $map = $this->collectReferences($orm, false);
+    //
+    //     // $this->assertCount(17, $map);
+    //     unset($orm);
+    //     \gc_collect_cycles();
+    //
+    //     $this->assertCount(0, $map);
+    // }
 
-        // $this->assertCount(17, $map);
-        unset($orm);
-        \gc_collect_cycles();
-
-        $this->assertCount(0, $map);
-    }
-
-    public function testORMWithLoadedServicesWithRolesUnsetAndCollectGarbageCycles(): void
-    {
-        $orm = $this->createORM();
-        $map = $this->collectReferences($orm, true);
-
-        // $this->assertCount(17, $map);
-        unset($orm);
-        \gc_collect_cycles();
-
-        $this->assertCount(0, $map);
-    }
+    // public function testOrmUnsetAndCollectGarbageCyclesWithLoadedServicesWithRolesCheck(): void
+    // {
+    //     $orm = $this->createORM();
+    //     $map = $this->collectReferences($orm, true);
+    //
+    //     // $this->assertCount(17, $map);
+    //     unset($orm);
+    //     \gc_collect_cycles();
+    //
+    //     $this->assertCount(0, $map);
+    // }
 
     // Without `Collect Garbage Cycles`
 
-    public function testORMCloneGarbage(): void
+    public function testOrmCloneGarbage(): void
     {
         $orm = $this->createORM();
 
@@ -93,18 +93,18 @@ abstract class MemoryTest extends BaseTest
         $this->assertTrue($link->get() === null);
     }
 
-    // public function testORMUnsetGarbage(): void
-    // {
-    //     $orm = $this->createORM();
-    //
-    //     $link = WeakReference::create($orm);
-    //
-    //     unset($orm);
-    //
-    //     $this->assertNull($link->get());
-    // }
+    public function testOrmUnsetGarbage(): void
+    {
+        $orm = $this->createORM();
 
-    // public function testORMWithLoadedServicesUnset(): void
+        $link = WeakReference::create($orm);
+
+        unset($orm);
+
+        $this->assertNull($link->get());
+    }
+
+    // public function testOrmUnsetWithLoadedServicesCheck(): void
     // {
     //     $orm = $this->createORM();
     //     $map = $this->collectReferences($orm, false);
@@ -115,7 +115,7 @@ abstract class MemoryTest extends BaseTest
     //     $this->assertCount(0, $map);
     // }
 
-    // public function testORMWithLoadedServicesWithRolesUnset(): void
+    // public function testOrmUnsetWithLoadedServicesWithRolesCheck(): void
     // {
     //     $orm = $this->createORM();
     //     $map = $this->collectReferences($orm, true);
@@ -152,7 +152,7 @@ abstract class MemoryTest extends BaseTest
             foreach ($schema->toArray() as $role => $roleSchema) {
                 $map[$mapperProvider->getMapper($role)] = true;
                 $map[$relationProvider->getRelationMap($role)] = true;
-                // $map[$repositoryProvider->getRepository($role)] = true;
+                $map[$repositoryProvider->getRepository($role)] = true;
                 $map[$sourceProvider->getSource($role)] = true;
                 $map[$typecastProvider->getTypecast($role)] = true;
             }

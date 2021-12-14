@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Service\Implementation;
 
+use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\RelationMap;
@@ -17,7 +18,7 @@ final class RelationProvider implements RelationProviderInterface
     private array $relMaps = [];
 
     public function __construct(
-        private ORMInterface $orm,
+        private ?ORMInterface $orm,
     ) {
     }
 
@@ -26,6 +27,21 @@ final class RelationProvider implements RelationProviderInterface
      */
     public function getRelationMap(string $entity): RelationMap
     {
-        return $this->relMaps[$entity] ?? ($this->relMaps[$entity] = RelationMap::build($this->orm, $entity));
+        if (isset($this->relMaps[$entity])) {
+            return $this->relMaps[$entity];
+        }
+        if ($this->orm === null) {
+            throw new ORMException('Relation Map is not prepared.');
+        }
+
+        return $this->relMaps[$entity] = RelationMap::build($this->orm, $entity);
+    }
+
+    public function prepareRelationMaps(): void
+    {
+        foreach ($this->orm->getSchema()->getRoles() as $role) {
+            $this->getRelationMap($role);
+        }
+        $this->orm = null;
     }
 }

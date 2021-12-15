@@ -97,6 +97,15 @@ final class Node
     }
 
     /**
+     * Reset point state and flush all the changes.
+     * @internal
+     */
+    public function resetState(): void
+    {
+        $this->state = null;
+    }
+
+    /**
      * Get current state.
      */
     public function getStatus(): int
@@ -137,14 +146,6 @@ final class Node
         $this->state = null;
 
         return $changes;
-    }
-
-    /**
-     * Reset point state and flush all the changes.
-     */
-    public function resetState(): void
-    {
-        $this->state = null;
     }
 
     /**

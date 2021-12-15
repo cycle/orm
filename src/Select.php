@@ -401,7 +401,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * @return Iterator<TEntity>
      */
-    public function getIterator(): Iterator
+    public function getIterator(bool $findInHeap = false): Iterator
     {
         $node = $this->loader->createNode();
         $this->loader->loadData($node, true);
@@ -412,6 +412,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             $this->entityFactory,
             $this->loader->getTarget(),
             $node->getResult(),
+            $findInHeap,
             typecast: true
         );
     }

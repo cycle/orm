@@ -29,20 +29,19 @@ class HasMany extends AbstractRelation
 {
     use HasSomeTrait;
 
-    protected SourceProviderInterface $sourceProvider;
     protected FactoryInterface $factory;
-    protected ORMInterface $orm;
-    protected EntityFactoryInterface $entityFactory;
-    private HeapInterface $heap;
+    protected Select $select;
 
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
-        $this->heap = $orm->getHeap();
-        $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
-        $this->orm = $orm;
-        $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
+        $sourceProvider = $orm->getService(SourceProviderInterface::class);
         $this->factory = $orm->getFactory();
+
+        // Prepare Select Statement
+        $this->select = (new Select($orm, $this->target))
+            ->scope($sourceProvider->getSource($this->target)->getScope())
+            ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
     }
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
@@ -184,20 +183,8 @@ class HasMany extends AbstractRelation
         }
 
         $scope = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
-        /** Todo: rewrite to loader usage like in {@see \Cycle\ORM\Relation\ManyToMany::resolve()} */
-        $select = (new Select($this->orm, $this->target))
-            ->scope($this->sourceProvider->getSource($this->target)->getScope())
-            ->where($scope)
-            ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
 
-        $iterator = Iterator::createWithServices(
-            $this->heap,
-            $this->ormSchema,
-            $this->entityFactory,
-            $this->target,
-            $select->fetchData(),
-            true
-        );
+        $iterator = (clone $this->select)->where($scope)->getIterator(findInHeap: true);
         $result = \iterator_to_array($iterator, false);
 
         $reference->setValue($result);

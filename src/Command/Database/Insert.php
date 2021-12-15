@@ -22,11 +22,10 @@ final class Insert extends StoreCommand
         DatabaseInterface $db,
         string $table,
         State $state,
-        private MapperInterface $mapper,
+        private ?MapperInterface $mapper,
         /** @var string[] */
         private array $primaryKeys = [],
-        private ?string $pkColumn = null,
-        private bool $mapColumns = true
+        private ?string $pkColumn = null
     ) {
         parent::__construct($db, $table, $state);
     }
@@ -48,7 +47,7 @@ final class Insert extends StoreCommand
             $this->appendix = [];
         }
         $data = $this->state->getData();
-        return array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data));
+        return array_merge($this->columns, $this->mapper?->mapColumns($data) ?? $data);
     }
 
     /**
@@ -71,13 +70,15 @@ final class Insert extends StoreCommand
             }
         }
 
+        $merged = array_merge(
+            $this->columns,
+            $this->mapper?->mapColumns($data) ?? $data
+        );
+
         $insert = $this->db
             ->insert($this->table)
             ->values(
-                $this->mapper->uncast(array_merge(
-                    $this->columns,
-                    $this->mapColumns ? $this->mapper->mapColumns($data) : $data
-                ))
+                $this->mapper?->uncast($merged) ?? $merged
             );
 
         if ($this->pkColumn !== null && $insert instanceof ReturningInterface) {
@@ -91,7 +92,7 @@ final class Insert extends StoreCommand
             if (!isset($data[$fpk])) {
                 $state->register(
                     $fpk,
-                    $this->mapper->cast([$fpk => $insertID])[$fpk]
+                    $this->mapper === null ? $insertID : $this->mapper->cast([$fpk => $insertID])[$fpk]
                 );
             }
         }

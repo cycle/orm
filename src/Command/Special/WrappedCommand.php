@@ -27,23 +27,21 @@ class WrappedCommand implements CommandInterface
         DatabaseInterface $db,
         string $table,
         State $state,
-        MapperInterface $mapper,
+        ?MapperInterface $mapper,
         array $primaryKeys = [],
-        string $pkColumn = null,
-        bool $mapColumns = true
+        string $pkColumn = null
     ): WrappedStoreCommand {
-        return new WrappedStoreCommand(new Insert($db, $table, $state, $mapper, $primaryKeys, $pkColumn, $mapColumns));
+        return new WrappedStoreCommand(new Insert($db, $table, $state, $mapper, $primaryKeys, $pkColumn));
     }
 
     public static function createUpdate(
         DatabaseInterface $db,
         string $table,
         State $state,
-        MapperInterface $mapper,
-        array $primaryKeys = [],
-        bool $mapColumns = true
+        ?MapperInterface $mapper,
+        array $primaryKeys = []
     ): WrappedStoreCommand {
-        return new WrappedStoreCommand(new Update($db, $table, $state, $mapper, $primaryKeys, $mapColumns));
+        return new WrappedStoreCommand(new Update($db, $table, $state, $mapper, $primaryKeys));
     }
 
     public static function wrapCommand(CommandInterface $command): static

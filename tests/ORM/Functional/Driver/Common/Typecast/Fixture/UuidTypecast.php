@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture;
 
-use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Parser\CastableInterface;
 
-class UuidTypecast implements TypecastInterface
+class UuidTypecast implements CastableInterface
 {
     private array $rules = [];
 

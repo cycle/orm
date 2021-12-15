@@ -27,7 +27,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
      * @param array<TKey, TEntity> $elements
      * @param SplObjectStorage<TEntity, TPivot>|null $pivotData
      */
-    public function __construct(array $elements = [], SplObjectStorage $pivotData = null)
+    final public function __construct(array $elements = [], SplObjectStorage $pivotData = null)
     {
         parent::__construct($elements);
         $this->pivotContext = $pivotData ?? new SplObjectStorage();

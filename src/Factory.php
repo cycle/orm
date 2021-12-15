@@ -265,9 +265,6 @@ final class Factory implements FactoryInterface
         return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));
     }
 
-    /**
-     * Add default classes for resolve
-     */
     public function withDefaultSchemaClasses(array $defaults): self
     {
         $clone = clone $this;
@@ -283,10 +280,13 @@ final class Factory implements FactoryInterface
         string $interface = null
     ): self {
         $clone = clone $this;
+        $interface = $interface ?? $factory->getInterface();
+
         $clone->collectionFactoryAlias[$alias] = $factory;
         if ($interface !== null) {
             $clone->collectionFactoryInterface[$interface] = $factory;
         }
+
         return $clone;
     }
 

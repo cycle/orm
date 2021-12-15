@@ -10,6 +10,11 @@ namespace Cycle\ORM\Collection;
 interface CollectionFactoryInterface
 {
     /**
+     * @return class-string|null
+     */
+    public function getInterface(): ?string;
+
+    /**
      * @param class-string<TCollection> $class
      */
     public function withCollectionClass(string $class): static;

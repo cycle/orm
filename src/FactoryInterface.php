@@ -84,6 +84,9 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $relation
     ): RelationInterface;
 
+    /**
+     * Add default classes for producing
+     */
     public function withDefaultSchemaClasses(array $defaults): self;
 
     /**

@@ -79,6 +79,7 @@ final class Node
 
     /**
      * Current point state (set of changes).
+     *
      * @internal
      */
     public function getState(): ?State

@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\FactoryInterface;
-use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Iterator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;

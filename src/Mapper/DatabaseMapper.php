@@ -13,6 +13,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Parser\UncastableInterface;
 use Cycle\ORM\RelationMap;
@@ -75,7 +76,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function cast(array $data): array
     {
-        if ($this->typecast !== null) {
+        if ($this->typecast instanceof CastableInterface) {
             $data = $this->typecast->cast($data);
         }
 

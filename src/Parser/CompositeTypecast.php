@@ -10,18 +10,20 @@ namespace Cycle\ORM\Parser;
 final class CompositeTypecast implements CastableInterface, UncastableInterface
 {
     /** @var CastableInterface[] */
-    private array $casters;
+    private array $casters = [];
 
     /** @var UncastableInterface[] */
     private array $uncasters = [];
 
     public function __construct(TypecastInterface ...$typecasts)
     {
-        $this->casters = $typecasts;
+        foreach ($typecasts as $caster) {
+            if ($caster instanceof CastableInterface) {
+                $this->casters[] = $caster;
+            }
 
-        foreach (array_reverse($this->casters) as $caster) {
             if ($caster instanceof UncastableInterface) {
-                $this->uncasters[] = $caster;
+                \array_unshift($this->uncasters, $caster);
             }
         }
     }

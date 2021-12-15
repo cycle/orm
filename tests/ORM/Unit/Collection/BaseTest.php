@@ -36,42 +36,10 @@ abstract class BaseTest extends TestCase
                 $this->generatorArray(),
             ],
             'traversable' => [
-                new class () implements \Iterator {
-                    private array $array = [
-                        'foo' => 'bar',
-                        'baz' => 'bar',
-                    ];
-
-                    public function __construct()
-                    {
-                        $this->position = 0;
-                    }
-
-                    public function current()
-                    {
-                        return current($this->array);
-                    }
-
-                    public function next()
-                    {
-                        return next($this->array);
-                    }
-
-                    public function key()
-                    {
-                        return key($this->array);
-                    }
-
-                    public function valid()
-                    {
-                        return key($this->array) !== null;
-                    }
-
-                    public function rewind()
-                    {
-                        return reset($this->array);
-                    }
-                },
+                new \ArrayIterator([
+                    'foo' => 'bar',
+                    'baz' => 'bar',
+                ]),
             ],
         ];
     }

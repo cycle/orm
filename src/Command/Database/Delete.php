@@ -12,23 +12,20 @@ use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\MapperInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
     use ErrorTrait;
     use ScopeTrait;
 
-    /** @var callable|null */
-    private $mapper;
-
     public function __construct(
         DatabaseInterface $db,
         string $table,
         private State $state,
-        callable $mapper = null
+        private ?MapperInterface $mapper
     ) {
         parent::__construct($db, $table);
-        $this->mapper = $mapper;
     }
 
     public function isReady(): bool
@@ -47,7 +44,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 
         $this->affectedRows = $this->db->delete(
             $this->table,
-            $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
+            $this->mapper?->mapColumns($this->scope) ?? $this->scope
         )->run();
         $this->state->setStatus(Node::DELETED);
 

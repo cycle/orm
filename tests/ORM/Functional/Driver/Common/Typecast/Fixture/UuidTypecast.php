@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture;
 
-use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Parser\CastableInterface;
 
-class UuidTypecast implements TypecastInterface
+class UuidTypecast implements CastableInterface
 {
     private array $rules = [];
 
@@ -26,16 +26,16 @@ class UuidTypecast implements TypecastInterface
         return $rules;
     }
 
-    public function cast(array $values): array
+    public function cast(array $data): array
     {
         foreach ($this->rules as $key => $rule) {
-            if (!isset($values[$key])) {
+            if (!isset($data[$key])) {
                 continue;
             }
 
-            $values[$key] = 'uuid';
+            $data[$key] = 'uuid';
         }
 
-        return $values;
+        return $data;
     }
 }

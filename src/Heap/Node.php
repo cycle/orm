@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
+use Cycle\Database\Injection\ValueInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
@@ -171,6 +172,9 @@ final class Node
             if ($ta[0] === $ta[1]) {
                 if ($a instanceof DateTimeInterface && $b instanceof DateTimeInterface) {
                     return $a <=> $b;
+                }
+                if ($a instanceof ValueInterface && $b instanceof ValueInterface) {
+                    return $a->rawValue() <=> $b->rawValue();
                 }
                 if ($a instanceof \Stringable && $b instanceof \Stringable) {
                     return $a->__toString() <=> $b->__toString();

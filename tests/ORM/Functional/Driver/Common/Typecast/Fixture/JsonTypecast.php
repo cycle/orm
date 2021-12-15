@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture;
 
-use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Parser\CastableInterface;
 
-class JsonTypecast implements TypecastInterface
+class JsonTypecast implements CastableInterface
 {
     private array $rules = [];
 
@@ -22,16 +22,16 @@ class JsonTypecast implements TypecastInterface
         return $rules;
     }
 
-    public function cast(array $values): array
+    public function cast(array $data): array
     {
         foreach ($this->rules as $key => $rule) {
-            if (!isset($values[$key])) {
+            if (!isset($data[$key])) {
                 continue;
             }
 
-            $values[$key] = 'json';
+            $data[$key] = 'json';
         }
 
-        return $values;
+        return $data;
     }
 }

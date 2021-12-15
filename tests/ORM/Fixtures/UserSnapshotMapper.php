@@ -49,7 +49,8 @@ class UserSnapshotMapper extends Mapper
         return WrappedStoreCommand::createInsert(
             $this->source->getDatabase(),
             'user_snapshots',
-            $state
+            $state,
+            null
         )->withBeforeExecution(static function (StoreCommandInterface $command) use ($origin, $state): void {
             $state->register('user_id', $origin->getData()['id']);
         });

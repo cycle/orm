@@ -11,7 +11,6 @@ use Cycle\ORM\Factory;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Doctrine\Common\Collections\Collection;
 
 abstract class StiBaseTest extends BaseTest
 {

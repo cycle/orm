@@ -53,5 +53,4 @@ class IlluminateCollectionFactoryTest extends BaseTest
 
 class CustomCollection extends Collection
 {
-
 }

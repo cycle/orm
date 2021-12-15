@@ -36,7 +36,7 @@ abstract class BaseTest extends TestCase
                 $this->generatorArray(),
             ],
             'traversable' => [
-                new class implements \Iterator {
+                new class () implements \Iterator {
                     private array $array = [
                         'foo' => 'bar',
                         'baz' => 'bar',

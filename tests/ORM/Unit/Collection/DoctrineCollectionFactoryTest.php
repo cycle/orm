@@ -68,5 +68,4 @@ class DoctrineCollectionFactoryTest extends BaseTest
 
 class CustomPivotedCollection extends PivotedCollection
 {
-
 }

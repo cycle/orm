@@ -119,7 +119,7 @@ abstract class CaseTest extends BaseTest
         // No errors
         $this->assertTrue(true);
 
-        $this->printDebug();
+        // $this->printDebug();
     }
 
     /**

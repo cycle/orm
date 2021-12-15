@@ -13,5 +13,5 @@ interface CastableInterface extends TypecastInterface
      *
      * @throws TypecastException
      */
-    public function cast(array $values): array;
+    public function cast(array $data): array;
 }

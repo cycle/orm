@@ -26,16 +26,16 @@ class UuidTypecast implements CastableInterface
         return $rules;
     }
 
-    public function cast(array $values): array
+    public function cast(array $data): array
     {
         foreach ($this->rules as $key => $rule) {
-            if (!isset($values[$key])) {
+            if (!isset($data[$key])) {
                 continue;
             }
 
-            $values[$key] = 'uuid';
+            $data[$key] = 'uuid';
         }
 
-        return $values;
+        return $data;
     }
 }

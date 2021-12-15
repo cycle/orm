@@ -13,5 +13,5 @@ interface UncastableInterface extends TypecastInterface
      *
      * @throws TypecastException
      */
-    public function uncast(array $values): array;
+    public function uncast(array $data): array;
 }

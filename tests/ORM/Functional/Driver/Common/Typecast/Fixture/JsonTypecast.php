@@ -22,16 +22,16 @@ class JsonTypecast implements CastableInterface
         return $rules;
     }
 
-    public function cast(array $values): array
+    public function cast(array $data): array
     {
         foreach ($this->rules as $key => $rule) {
-            if (!isset($values[$key])) {
+            if (!isset($data[$key])) {
                 continue;
             }
 
-            $values[$key] = 'json';
+            $data[$key] = 'json';
         }
 
-        return $values;
+        return $data;
     }
 }

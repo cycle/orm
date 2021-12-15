@@ -15,8 +15,12 @@ final class CompositeTypecast implements CastableInterface, UncastableInterface
     /** @var UncastableInterface[] */
     private array $uncasters = [];
 
+    /** @var array<TypecastInterface> */
+    private array $typecasts;
+
     public function __construct(TypecastInterface ...$typecasts)
     {
+        $this->typecasts = $typecasts;
         foreach ($typecasts as $caster) {
             if ($caster instanceof CastableInterface) {
                 $this->casters[] = $caster;
@@ -30,28 +34,28 @@ final class CompositeTypecast implements CastableInterface, UncastableInterface
 
     public function setRules(array $rules): array
     {
-        foreach ($this->casters as $typecast) {
+        foreach ($this->typecasts as $typecast) {
             $rules = $typecast->setRules($rules);
         }
 
         return $rules;
     }
 
-    public function cast(array $values): array
+    public function cast(array $data): array
     {
         foreach ($this->casters as $caster) {
-            $values = $caster->cast($values);
+            $data = $caster->cast($data);
         }
 
-        return $values;
+        return $data;
     }
 
-    public function uncast(array $values): array
+    public function uncast(array $data): array
     {
         foreach ($this->uncasters as $uncaster) {
-            $values = $uncaster->uncast($values);
+            $data = $uncaster->uncast($data);
         }
 
-        return $values;
+        return $data;
     }
 }

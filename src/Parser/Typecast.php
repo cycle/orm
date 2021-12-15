@@ -12,7 +12,7 @@ use Throwable;
 /**
  * @internal
  */
-final class Typecast implements TypecastInterface
+final class Typecast implements CastableInterface
 {
     private const RULES = ['int', 'bool', 'float', 'datetime'];
 
@@ -43,20 +43,20 @@ final class Typecast implements TypecastInterface
         return $rules;
     }
 
-    public function cast(array $values): array
+    public function cast(array $data): array
     {
         try {
             foreach ($this->rules as $key => $rule) {
-                if (!isset($values[$key])) {
+                if (!isset($data[$key])) {
                     continue;
                 }
 
                 if (isset($this->callableRules[$key])) {
-                    $values[$key] = $rule($values[$key], $this->database);
+                    $data[$key] = $rule($data[$key], $this->database);
                     continue;
                 }
 
-                $values[$key] = $this->castPrimitive($rule, $values[$key]);
+                $data[$key] = $this->castPrimitive($rule, $data[$key]);
             }
         } catch (Throwable $e) {
             throw new TypecastException(
@@ -66,7 +66,7 @@ final class Typecast implements TypecastInterface
             );
         }
 
-        return $values;
+        return $data;
     }
 
     /**

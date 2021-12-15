@@ -12,7 +12,9 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Parser\UncastableInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\RelationMap;
@@ -73,7 +75,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function cast(array $data): array
     {
-        if ($this->typecast !== null) {
+        if ($this->typecast instanceof CastableInterface) {
             $data = $this->typecast->cast($data);
         }
 
@@ -92,6 +94,15 @@ abstract class DatabaseMapper implements MapperInterface
         }
 
         return $data;
+    }
+
+    public function uncast(array $data): array
+    {
+        if (! $this->typecast instanceof UncastableInterface) {
+            return $data;
+        }
+
+        return $this->typecast->uncast($data);
     }
 
     public function queueCreate(object $entity, Node $node, State $state): CommandInterface
@@ -114,11 +125,9 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getDatabase(),
             $this->source->getTable(),
             $state,
+            $this,
             $this->primaryKeys,
             \count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
-            [$this, 'mapColumns'],
-            /** @see TypecastInterface::cast() */
-            $this->typecast === null ? null : [$this->typecast, 'cast']
         );
     }
 
@@ -131,8 +140,8 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getDatabase(),
             $this->source->getTable(),
             $state,
-            $this->primaryKeys,
-            [$this, 'mapColumns']
+            $this,
+            $this->primaryKeys
         );
 
         foreach ($this->primaryKeys as $pk) {
@@ -145,7 +154,13 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function queueDelete(object $entity, Node $node, State $state): CommandInterface
     {
-        $delete = new Delete($this->source->getDatabase(), $this->source->getTable(), $state, [$this, 'mapColumns']);
+        $delete = new Delete(
+            $this->source->getDatabase(),
+            $this->source->getTable(),
+            $state,
+            $this
+        );
+
         $state->setStatus(Node::SCHEDULED_DELETE);
 
         $delete->waitScope(...$this->primaryKeys);

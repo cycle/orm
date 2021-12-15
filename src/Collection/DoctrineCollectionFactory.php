@@ -34,6 +34,11 @@ final class DoctrineCollectionFactory implements CollectionFactoryInterface
     /** @var class-string<TCollection> */
     private string $class = ArrayCollection::class;
 
+    public function getInterface(): ?string
+    {
+        return Collection::class;
+    }
+
     public function withCollectionClass(string $class): static
     {
         $clone = clone $this;
@@ -43,9 +48,22 @@ final class DoctrineCollectionFactory implements CollectionFactoryInterface
 
     public function collect(iterable $data): Collection
     {
-        if ($data instanceof PivotedStorage && $this->class === ArrayCollection::class) {
-            return new PivotedCollection($data->getElements(), $data->getContext());
+        if ($data instanceof PivotedStorage) {
+            if ($this->class === ArrayCollection::class) {
+                return new PivotedCollection($data->getElements(), $data->getContext());
+            }
+
+            if (is_a($this->class, PivotedCollection::class)) {
+                return new $this->class($data->getElements(), $data->getContext());
+            }
         }
-        return new $this->class(\is_array($data) ? $data : [...$data]);
+
+        $data = match (true) {
+            \is_array($data) => $data,
+            $data instanceof \Traversable => \iterator_to_array($data),
+            default => throw new CollectionFactoryException('Unsupported iterable type.'),
+        };
+
+        return new $this->class($data);
     }
 }

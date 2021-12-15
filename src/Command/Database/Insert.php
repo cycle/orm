@@ -9,6 +9,7 @@ use Cycle\Database\Query\ReturningInterface;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Heap\State;
+use Cycle\ORM\MapperInterface;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.
@@ -17,29 +18,16 @@ final class Insert extends StoreCommand
 {
     use ErrorTrait;
 
-    /** @var callable|null */
-    private $mapper;
-
-    /** @var callable|null */
-    private $caster;
-
-    /**
-     * @param callable|null $mapper Optional callable that calls {@see MapperInterface::mapColumns()} method.
-     * @param callable|null $caster Optional callable that calls {@see TypecastInterface::cast()} method.
-     */
     public function __construct(
         DatabaseInterface $db,
         string $table,
         State $state,
+        private ?MapperInterface $mapper,
         /** @var string[] */
         private array $primaryKeys = [],
-        private ?string $pkColumn = null,
-        callable $mapper = null,
-        callable $caster = null
+        private ?string $pkColumn = null
     ) {
         parent::__construct($db, $table, $state);
-        $this->mapper = $mapper;
-        $this->caster = $caster;
     }
 
     public function isReady(): bool
@@ -59,7 +47,7 @@ final class Insert extends StoreCommand
             $this->appendix = [];
         }
         $data = $this->state->getData();
-        return array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data));
+        return array_merge($this->columns, $this->mapper?->mapColumns($data) ?? $data);
     }
 
     /**
@@ -82,12 +70,16 @@ final class Insert extends StoreCommand
             }
         }
 
+        $merged = array_merge(
+            $this->columns,
+            $this->mapper?->mapColumns($data) ?? $data
+        );
+
         $insert = $this->db
             ->insert($this->table)
-            ->values(array_merge(
-                $this->columns,
-                $this->mapper === null ? $data : ($this->mapper)($data)
-            ));
+            ->values(
+                $this->mapper?->uncast($merged) ?? $merged
+            );
 
         if ($this->pkColumn !== null && $insert instanceof ReturningInterface) {
             $insert->returning($this->pkColumn);
@@ -100,12 +92,11 @@ final class Insert extends StoreCommand
             if (!isset($data[$fpk])) {
                 $state->register(
                     $fpk,
-                    $this->caster === null
-                    ? $insertID
-                    : ($this->caster)([$fpk => $insertID])[$fpk]
+                    $this->mapper === null ? $insertID : $this->mapper->cast([$fpk => $insertID])[$fpk]
                 );
             }
         }
+
         $state->updateTransactionData();
 
         parent::execute();

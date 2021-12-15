@@ -11,7 +11,6 @@ use Cycle\ORM\Factory;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Doctrine\Common\Collections\Collection;
 
 abstract class StiBaseTest extends BaseTest
 {
@@ -26,7 +25,7 @@ abstract class StiBaseTest extends BaseTest
             RelationConfig::getDefault(),
             null,
             new ArrayCollectionFactory()
-        ))->withCollectionFactory('doctrine', new DoctrineCollectionFactory(), Collection::class);
+        ))->withCollectionFactory('doctrine', new DoctrineCollectionFactory());
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()))->withFactory($factory);
     }

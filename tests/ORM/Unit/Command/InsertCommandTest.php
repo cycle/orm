@@ -12,6 +12,7 @@ use Cycle\Database\Query\QueryParameters;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\Tests\Fixtures\TestInsertCommand;
 use Cycle\ORM\Tests\Fixtures\TestInsertCommandWithReturning;
 use Mockery as m;
@@ -21,16 +22,20 @@ class InsertCommandTest extends TestCase
 {
     private Insert $cmd;
     private m\LegacyMockInterface|m\MockInterface|DatabaseInterface $db;
+    private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
     private State $state;
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->mapper = \Mockery::mock(MapperInterface::class);
+
         $this->cmd = new Insert(
             $this->db = m::mock(DatabaseInterface::class),
             'table',
-            $this->state = new State(Node::SCHEDULED_INSERT, []),
+            $this->state = new State(Node::SCHEDULED_INSERT, ['foo' => 'bar']),
+            $this->mapper,
             ['id'],
             'foo_id'
         );
@@ -50,9 +55,13 @@ class InsertCommandTest extends TestCase
     {
         $table = 'table';
 
-        $insertQuery = (new TestInsertCommand($table))->withDriver($driver = m::mock(DriverInterface::class), '');
+        $insertQuery = (new TestInsertCommand($table))
+            ->withDriver($driver = m::mock(DriverInterface::class), '');
 
-        $driver->shouldReceive('getQueryCompiler')->once()->andReturn($compiler = m::mock(CompilerInterface::class));
+        $driver->shouldReceive('getQueryCompiler')
+            ->once()
+            ->andReturn($compiler = m::mock(CompilerInterface::class));
+
         $driver->shouldReceive('execute')->once();
         $driver->shouldReceive('lastInsertID')->once()->andReturn(123);
 
@@ -62,10 +71,25 @@ class InsertCommandTest extends TestCase
             }
         );
 
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with($this->state->getData())
+            ->andReturn(['baz' => 'bar']);
+
+        $this->mapper->shouldReceive('uncast')
+            ->once()
+            ->with(['baz' => 'bar'])
+            ->andReturn(['baz1' => 'bar']);
+
+        $this->mapper->shouldReceive('cast')
+            ->once()
+            ->with(['id' => 123])
+            ->andReturn(['id' => 234]);
+
         $this->db->shouldReceive('insert')->once()->with($table)->andReturn($insertQuery);
         $this->cmd->execute();
 
-        $this->assertSame(123, $this->state->getValue('id'));
+        $this->assertSame(234, $this->state->getValue('id'));
     }
 
     public function testCommandWithReturningInterfaceWithoutPkColumnShouldNotUseIt()
@@ -77,6 +101,21 @@ class InsertCommandTest extends TestCase
 
         $table = 'table';
 
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with($this->state->getData())
+            ->andReturn(['baz' => 'bar']);
+
+        $this->mapper->shouldReceive('uncast')
+            ->once()
+            ->with(['baz' => 'bar'])
+            ->andReturn(['baz1' => 'bar']);
+
+        $this->mapper->shouldReceive('cast')
+            ->once()
+            ->with(['id' => 345])
+            ->andReturn(['id' => 234]);
+
         $this->db->shouldReceive('insert')
             ->once()
             ->with($table)
@@ -86,12 +125,27 @@ class InsertCommandTest extends TestCase
         $insertQuery->shouldReceive('run')->once()->andReturn(345);
         $this->cmd->execute();
 
-        $this->assertSame(345, $this->state->getValue('id'));
+        $this->assertSame(234, $this->state->getValue('id'));
     }
 
     public function testCommandWithReturningInterfaceShouldUseIt()
     {
         $table = 'table';
+
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with($this->state->getData())
+            ->andReturn(['baz' => 'bar']);
+
+        $this->mapper->shouldReceive('uncast')
+            ->once()
+            ->with(['baz' => 'bar'])
+            ->andReturn(['baz1' => 'bar']);
+
+        $this->mapper->shouldReceive('cast')
+            ->once()
+            ->with(['id' => 234])
+            ->andReturn(['id' => 324]);
 
         $this->db->shouldReceive('insert')
             ->once()
@@ -104,6 +158,6 @@ class InsertCommandTest extends TestCase
 
         $this->cmd->execute();
 
-        $this->assertSame(234, $this->state->getValue('id'));
+        $this->assertSame(324, $this->state->getValue('id'));
     }
 }

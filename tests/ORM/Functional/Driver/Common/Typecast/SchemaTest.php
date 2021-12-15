@@ -10,6 +10,7 @@ use Cycle\ORM\Exception\FactoryTypecastException;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
+use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Parser\TypecastInterface;
@@ -200,21 +201,21 @@ final class SchemaTest extends BaseTest
      */
     public function testUseCompositeTypecast(): void
     {
-        $containerTypecast = $this->createMock(TypecastInterface::class);
+        $containerTypecast = $this->createMock(CastableInterface::class);
         $containerTypecast
             ->expects($this->exactly(1))
             ->method('cast')
             ->with($this->equalTo(['foo' => 'bar'])) // waits from factory
             ->willReturn(['foo' => 'bar3']); // passes to $aliasTypecast
 
-        $aliasTypecast = $this->createMock(TypecastInterface::class);
+        $aliasTypecast = $this->createMock(CastableInterface::class);
         $aliasTypecast
             ->expects($this->exactly(1))
             ->method('cast')
             ->with($this->equalTo(['foo' => 'bar3'])) // waits from $containerTypecast
             ->willReturn(['foo' => 'bar1']); // passes to $typecast
 
-        $typecast = $this->createMock(TypecastInterface::class);
+        $typecast = $this->createMock(CastableInterface::class);
         $typecast
             ->expects($this->exactly(1))
             ->method('cast')

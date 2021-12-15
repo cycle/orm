@@ -34,6 +34,11 @@ use Cycle\ORM\Exception\CollectionFactoryException;
  */
 final class ArrayCollectionFactory implements CollectionFactoryInterface
 {
+    public function getInterface(): ?string
+    {
+        return null;
+    }
+
     /**
      * @psalm-param string $class
      */

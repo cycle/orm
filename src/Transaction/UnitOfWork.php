@@ -77,6 +77,8 @@ final class UnitOfWork implements StateInterface
             // this will keep entity data as it was before transaction run
             $this->resetHeap();
 
+            $this->pool->closeIterator();
+
             $this->error = $e;
 
             return $this;
@@ -86,6 +88,8 @@ final class UnitOfWork implements StateInterface
         $this->syncHeap();
 
         $this->runner->complete();
+
+        $this->error = null;
 
         return $this;
     }
@@ -146,9 +150,8 @@ final class UnitOfWork implements StateInterface
     private function resetHeap(): void
     {
         // todo: refactor
-        $heap = $this->orm->getHeap();
-        foreach ($heap as $e) {
-            $heap->get($e)->resetState();
+        foreach ($this->pool->getAllTuples() as $tuple) {
+            $tuple->node->resetState();
         }
     }
 

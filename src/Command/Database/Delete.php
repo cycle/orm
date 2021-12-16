@@ -7,6 +7,7 @@ namespace Cycle\ORM\Command\Database;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\Traits\ErrorTrait;
+use Cycle\ORM\Command\Traits\MapperTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\Node;
@@ -16,6 +17,7 @@ use Cycle\ORM\MapperInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
+    use MapperTrait;
     use ErrorTrait;
     use ScopeTrait;
 
@@ -23,9 +25,10 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         DatabaseInterface $db,
         string $table,
         private State $state,
-        private ?MapperInterface $mapper
+        ?MapperInterface $mapper
     ) {
         parent::__construct($db, $table);
+        $this->mapper = $mapper;
     }
 
     public function isReady(): bool
@@ -42,9 +45,11 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
             throw new CommandException('Unable to execute delete command without a scope.');
         }
 
+        $scope = $this->scope;
+
         $this->affectedRows = $this->db->delete(
             $this->table,
-            $this->mapper?->mapColumns($this->scope) ?? $this->scope
+            $this->prepareData($scope)
         )->run();
         $this->state->setStatus(Node::DELETED);
 

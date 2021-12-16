@@ -18,7 +18,7 @@ final class Typecaster implements TypecastInterface
         SchemaInterface $schema,
         public string $role
     ) {
-        $class = $schema->define($role, SchemaInterface::ENTITY);
+        // $class = $schema->define($role, SchemaInterface::ENTITY);
         // Some magic with reflection to prepare callables
         // ...
     }

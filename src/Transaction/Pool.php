@@ -324,6 +324,18 @@ final class Pool implements \Countable
     }
 
     /**
+     * Close opened iterator
+     */
+    public function closeIterator(): void
+    {
+        $this->iterating = false;
+        $this->priorityEnabled = false;
+        $this->priorityAutoAttach = false;
+        unset($this->priorityStorage, $this->unprocessed);
+        // $this->all = new SplObjectStorage();
+    }
+
+    /**
      * Make snapshot: create Node, State if not exists. Also attach Mapper
      */
     private function snap(Tuple $tuple): void
@@ -423,13 +435,4 @@ final class Pool implements \Countable
     //     }
     //     return null;
     // }
-
-    private function closeIterator(): void
-    {
-        $this->iterating = false;
-        $this->priorityEnabled = false;
-        $this->priorityAutoAttach = false;
-        unset($this->priorityStorage, $this->unprocessed);
-        // $this->all = new SplObjectStorage();
-    }
 }

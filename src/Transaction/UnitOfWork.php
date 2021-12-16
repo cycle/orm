@@ -24,6 +24,11 @@ final class UnitOfWork implements StateInterface
     private const RELATIONS_RESOLVED = 1;
     private const RELATIONS_DEFERRED = 2;
 
+    private const STAGE_PREPARING = 0;
+    private const STAGE_PROCESS = 1;
+    private const STAGE_FINISHED = 2;
+
+    private int $stage = self::STAGE_PREPARING;
     private Pool $pool;
     private CommandGeneratorInterface $commandGenerator;
     private ?\Throwable $error = null;
@@ -36,8 +41,24 @@ final class UnitOfWork implements StateInterface
         $this->commandGenerator = $orm->getCommandGenerator();
     }
 
+    public function isSuccess(): bool
+    {
+        return $this->stage === self::STAGE_FINISHED;
+    }
+
+    public function getLastError(): ?\Throwable
+    {
+        return $this->error;
+    }
+
+    public function retry(): static
+    {
+        return $this->run();
+    }
+
     public function persistState(object $entity, bool $cascade = true): self
     {
+        $this->checkActionPossibility('persist entity');
         $this->pool->attachStore($entity, $cascade, persist: true);
 
         return $this;
@@ -45,6 +66,7 @@ final class UnitOfWork implements StateInterface
 
     public function persistDeferred(object $entity, bool $cascade = true): self
     {
+        $this->checkActionPossibility('schedule entity storing');
         $this->pool->attachStore($entity, $cascade);
 
         return $this;
@@ -52,6 +74,7 @@ final class UnitOfWork implements StateInterface
 
     public function delete(object $entity, bool $cascade = true): self
     {
+        $this->checkActionPossibility('schedule entity deletion');
         $this->pool->attach($entity, Tuple::TASK_FORCE_DELETE, $cascade);
 
         return $this;
@@ -59,6 +82,14 @@ final class UnitOfWork implements StateInterface
 
     public function run(): StateInterface
     {
+        $this->stage = match ($this->stage) {
+            self::STAGE_FINISHED => throw new SuccessTransactionRetryException(
+                'A successful transaction cannot be re-run.'
+            ),
+            self::STAGE_PROCESS => throw new TransactionException('Can\'t run started transaction.'),
+            default => self::STAGE_PROCESS,
+        };
+
         $this->runner ??= Runner::innerTransaction();
 
         try {
@@ -73,7 +104,6 @@ final class UnitOfWork implements StateInterface
             }
         } catch (\Throwable $e) {
             $this->runner->rollback();
-
             $this->pool->closeIterator();
 
             // no calculations must be kept in node states, resetting
@@ -81,6 +111,7 @@ final class UnitOfWork implements StateInterface
             $this->resetHeap();
 
             $this->error = $e;
+            $this->stage = self::STAGE_PREPARING;
 
             return $this;
         }
@@ -89,8 +120,10 @@ final class UnitOfWork implements StateInterface
         $this->syncHeap();
 
         $this->runner->complete();
-
         $this->error = null;
+        $this->stage = self::STAGE_FINISHED;
+        // Clear state
+        unset($this->orm, $this->runner, $this->pool, $this->commandGenerator);
 
         return $this;
     }
@@ -98,6 +131,15 @@ final class UnitOfWork implements StateInterface
     public function setRunner(RunnerInterface $runner): void
     {
         $this->runner = $runner;
+    }
+
+    /**
+     * @throws TransactionException
+     */
+    private function checkActionPossibility(string $action): void
+    {
+        $this->stage === self::STAGE_PROCESS && throw new TransactionException("Can't $action. Transaction began.");
+        $this->stage === self::STAGE_FINISHED && throw new TransactionException("Can't $action. Transaction finished.");
     }
 
     private function runCommand(?CommandInterface $command): void
@@ -396,24 +438,5 @@ final class UnitOfWork implements StateInterface
         if (! $isDependenciesResolved && $tuple->status === Tuple::STATUS_PREPROCESSED) {
             $tuple->status = Tuple::STATUS_UNPROCESSED;
         }
-    }
-
-    public function isSuccess(): bool
-    {
-        return $this->getLastError() === null;
-    }
-
-    public function getLastError(): ?\Throwable
-    {
-        return $this->error;
-    }
-
-    public function retry(): static
-    {
-        if ($this->isSuccess()) {
-            throw new SuccessTransactionRetryException('A successful transaction cannot be re-run.');
-        }
-
-        return $this->run();
     }
 }

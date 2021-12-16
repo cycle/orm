@@ -7,6 +7,7 @@ namespace Cycle\ORM\Transaction;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Special\Sequence;
 use Cycle\ORM\Exception\PoolException;
+use Cycle\ORM\Exception\SuccessTransactionRetryException;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
@@ -73,11 +74,11 @@ final class UnitOfWork implements StateInterface
         } catch (\Throwable $e) {
             $this->runner->rollback();
 
+            $this->pool->closeIterator();
+
             // no calculations must be kept in node states, resetting
             // this will keep entity data as it was before transaction run
             $this->resetHeap();
-
-            $this->pool->closeIterator();
 
             $this->error = $e;
 
@@ -409,6 +410,10 @@ final class UnitOfWork implements StateInterface
 
     public function retry(): static
     {
+        if ($this->isSuccess()) {
+            throw new SuccessTransactionRetryException('A successful transaction cannot be re-run.');
+        }
+
         return $this->run();
     }
 }

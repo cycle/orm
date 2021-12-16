@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Transaction;
 
 use Cycle\ORM\Exception\RunnerException;
+use Cycle\ORM\Exception\SuccessTransactionRetryException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;
@@ -194,5 +195,31 @@ abstract class UnitOfWorkTest extends BaseTest
             ['title' => 'Title2', 'content' => 'Test2'],
             $this->orm->getHeap()->get($post2)->getState()->getData()
         );
+    }
+
+    public function testCallSuccessRetryException(): void
+    {
+        $eow = new UnitOfWork($this->orm, Runner::outerTransaction());
+
+        $post = new Post();
+        $post->title = 'Title1';
+        $post->content = 'Test1';
+
+        $eow->persistState($post);
+
+        $result = $eow->run();
+
+        $this->assertFalse($result->isSuccess());
+        $this->assertInstanceOf(RunnerException::class, $result->getLastError());
+
+        $this->getDriver()->beginTransaction();
+
+        $result = $result->retry();
+
+        $this->assertTrue($result->isSuccess());
+        $this->assertNull($result->getLastError());
+
+        $this->expectException(SuccessTransactionRetryException::class);
+        $result->retry();
     }
 }

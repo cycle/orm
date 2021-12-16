@@ -8,7 +8,6 @@ use Cycle\ORM\Mapper\Traits\SingleTableTrait;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\Promise;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Doctrine\Instantiator;
 use Laminas\Hydrator\HydratorInterface;
@@ -30,15 +29,14 @@ class PromiseMapper extends DatabaseMapper
 
     protected Instantiator\Instantiator $instantiator;
 
-    private SchemaInterface $schema;
 
     public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct($orm, $role);
 
         $this->schema = $orm->getSchema();
-        $this->entity = $this->schema->define($role, Schema::ENTITY);
-        $this->children = $this->schema->define($role, Schema::CHILDREN) ?? [];
+        $this->entity = $this->schema->define($role, SchemaInterface::ENTITY);
+        $this->children = $this->schema->define($role, SchemaInterface::CHILDREN) ?? [];
         $this->discriminator = $this->schema->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
 
         if (!isset($this->hydrator)) {

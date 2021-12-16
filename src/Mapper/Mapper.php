@@ -23,8 +23,6 @@ class Mapper extends DatabaseMapper
 
     protected array $children = [];
 
-    private SchemaInterface $schema;
-
     public function __construct(
         ORMInterface $orm,
         protected ProxyEntityFactory $entityFactory,

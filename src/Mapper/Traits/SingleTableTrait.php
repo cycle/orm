@@ -12,6 +12,7 @@ use Cycle\ORM\SchemaInterface;
 trait SingleTableTrait
 {
     protected string $discriminator = '_type';
+    private SchemaInterface $schema;
 
     /**
      * Classname to represent entity.

@@ -41,7 +41,6 @@ final class Heap implements HeapInterface, IteratorAggregate
         try {
             return $this->storage->offsetGet($entity);
         } catch (UnexpectedValueException) {
-            \Cycle\ORM\Transaction\Pool::DEBUG && print "Heap: node not found\n";
             return null;
         }
     }

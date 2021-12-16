@@ -182,7 +182,6 @@ final class UnitOfWork implements StateInterface
                     [Node::class, 'compare']
                 );
             } else {
-                // $entityRelations = $mapper->fetchRelations($e);
                 $syncData = $node->syncState($relationProvider->getRelationMap($role), $tuple->state);
             }
 
@@ -210,18 +209,7 @@ final class UnitOfWork implements StateInterface
          * @var object $entity
          * @var Tuple $tuple
          */
-        foreach ($this->pool->openIterator() as $entity => $tuple) {
-            \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
-                "\nPool: %s %s \033[35m%s(%s)\033[0m data: %s\n",
-                ['preparing', 'waiting', 'waited', 'deferred', 'proposed', 'preprocessed', 'processed'][$tuple->status],
-                ['store', 'delete', 'force delete'][$tuple->task],
-                $tuple->node->getRole(),
-                spl_object_id($entity),
-                implode('|', array_map(static fn ($x) => \is_object($x)
-                    ? $x::class
-                    : (string)$x, $tuple->node->getData()))
-            );
-
+        foreach ($this->pool->openIterator() as $tuple) {
             if ($tuple->task === Tuple::TASK_FORCE_DELETE && ! $tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
                 $command = $this->commandGenerator->generateDeleteCommand($this->orm, $tuple);
@@ -229,6 +217,7 @@ final class UnitOfWork implements StateInterface
                 $tuple->status = Tuple::STATUS_PROCESSED;
                 continue;
             }
+
             // Walk relations
             $this->resolveRelations($tuple);
         }
@@ -242,13 +231,9 @@ final class UnitOfWork implements StateInterface
 
         $deferred = false;
         $resolved = true;
-        $waitKeys = [];
         foreach ($map->getMasters() as $name => $relation) {
-            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
-            $role = $tuple->node->getRole();
             $relationStatus = $tuple->state->getRelationStatus($relation->getName());
-            if (/*!$relation->isCascade() || */ $relationStatus === RelationInterface::STATUS_RESOLVED) {
-                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m skip {$className}\n";
+            if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }
 
@@ -258,16 +243,10 @@ final class UnitOfWork implements StateInterface
                 // Disconnected -> WAIT if Tuple::STATUS_PREPARING
                 $relation->queue($this->pool, $tuple);
                 $relationStatus = $tuple->state->getRelationStatus($relation->getName());
-
-                // if ($tuple->status < Tuple::STATUS_PROPOSED) {
-                $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
-                $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
-            // }
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
                         $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
-                        // $tuple->state->setRelation($name, $entityData[$name] ?? null);
                         $relation->prepare($this->pool, $tuple, $entityData[$name] ?? null);
                         $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                     }
@@ -275,16 +254,9 @@ final class UnitOfWork implements StateInterface
                     $relation->queue($this->pool, $tuple);
                     $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                 }
-                $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
-                $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
             }
-            if ($relationStatus !== RelationInterface::STATUS_RESOLVED) {
-                $unresdef = $relationStatus === RelationInterface::STATUS_DEFERRED ? 'deferred' : 'not resolved';
-                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Master {$role}.{$name}\033[0m {$unresdef} {$relationStatus} {$className}\n";
-            // $waitKeys[] = $relation->getInnerKeys();
-            } else {
-                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Master {$role}.{$name}\033[0m resolved {$className}\n";
-            }
+            $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
+            $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
         }
 
         // $tuple->waitKeys = array_unique(array_merge(...$waitKeys));
@@ -303,17 +275,11 @@ final class UnitOfWork implements StateInterface
         $deferred = false;
         $resolved = true;
         if ($tuple->status === Tuple::STATUS_PREPARING) {
-            // $entityData = $tuple->mapper->extract($tuple->entity);
-            // $relData = $tuple->mapper->extract($tuple->entity);
             $relData = $tuple->mapper->fetchRelations($tuple->entity);
         }
         foreach ($map->getSlaves() as $name => $relation) {
             $relationStatus = $tuple->state->getRelationStatus($relation->getName());
-            $className = "\033[33m" . substr($relation::class, strrpos($relation::class, '\\') + 1) . "\033[0m";
-            $role = $tuple->node->getRole();
-            if (! $relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
-                // todo check changes for not cascaded relations?
-                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m skip {$className}\n";
+            if (!$relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }
 
@@ -321,9 +287,7 @@ final class UnitOfWork implements StateInterface
             $isWaitingKeys = array_intersect($innerKeys, $tuple->state->getWaitingFields(true)) !== [];
             $hasChangedKeys = array_intersect($innerKeys, $changedFields) !== [];
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
-                // $relData ??= $tuple->mapper->extract($tuple->entity);
                 $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
-                // $tuple->state->setRelation($name, $relData[$name] ?? null);
                 $relation->prepare(
                     $this->pool,
                     $tuple,
@@ -339,14 +303,9 @@ final class UnitOfWork implements StateInterface
                 && ! $hasChangedKeys
                 && \count(array_intersect($innerKeys, array_keys($transactData))) === \count($innerKeys)
             ) {
-                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolve {$className}\n";
                 $child ??= $tuple->state->getRelation($name);
                 $relation->queue($this->pool, $tuple);
                 $relationStatus = $tuple->state->getRelationStatus($relation->getName());
-            } elseif ($relationStatus === RelationInterface::STATUS_RESOLVED) {
-                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[32m  Slave {$role}.{$name}\033[0m resolved {$className}\n";
-            } else {
-                \Cycle\ORM\Transaction\Pool::DEBUG && print "\033[34m  Slave {$role}.{$name}\033[0m process {$relationStatus} {$className}\n";
             }
             $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
             $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
@@ -358,7 +317,6 @@ final class UnitOfWork implements StateInterface
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map, bool $hasDeferredRelations): void
     {
         if (! $map->hasEmbedded() && ! $tuple->state->hasChanges()) {
-            \Cycle\ORM\Transaction\Pool::DEBUG && print "No changes, no embedded \n";
             $tuple->status = ! $hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED
                 : max(Tuple::STATUS_DEFERRED, $tuple->status);

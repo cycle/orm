@@ -51,7 +51,7 @@ class CommandGenerator implements CommandGeneratorInterface
         $parents = $commands = [];
         $parent = $schema->define($tuple->node->getRole(), SchemaInterface::PARENT);
         while (is_string($parent)) {
-            array_unshift($parents, $parent);
+            \array_unshift($parents, $parent);
             $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
         foreach ($parents as $parent) {
@@ -76,6 +76,9 @@ class CommandGenerator implements CommandGeneratorInterface
         return $tuple->mapper->queueDelete($tuple->entity, $tuple->node, $tuple->state);
     }
 
+    /**
+     * @param non-empty-string $parentRole
+     */
     protected function generateParentStoreCommand(
         ORMInterface $orm,
         Tuple $tuple,

@@ -117,22 +117,12 @@ abstract class BaseTest extends TestCase
         }
     }
 
-    /**
-     * Calculates missing parameters for typecasting.
-     *
-     * @param SchemaInterface $schema
-     *
-     * @return \Cycle\ORM\ORMInterface|ORM
-     */
-    public function withSchema(SchemaInterface $schema)
+    public function withSchema(SchemaInterface $schema): ORMInterface
     {
-        $this->orm = $this->orm->withSchema($schema);
+        $this->orm = $this->orm->with(schema: $schema);
         return $this->orm;
     }
 
-    /**
-     * @return Driver
-     */
     public function getDriver(): Driver
     {
         if (isset(static::$driverCache[static::DRIVER])) {

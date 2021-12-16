@@ -32,6 +32,11 @@ interface MapperInterface
     public function cast(array $data): array;
 
     /**
+     * Uncast entity property values to configured types.
+     */
+    public function uncast(array $data): array;
+
+    /**
      * Hydrate entity with dataset.
      *
      * @template T

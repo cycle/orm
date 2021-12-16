@@ -6,9 +6,11 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\State;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\ToOneTrait;
+use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -23,33 +25,13 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 {
     use ToOneTrait;
 
-    private function checkNullValuePossibility(Tuple $tuple): bool
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
-        if ($tuple->status < Tuple::STATUS_WAITED) {
-            return true;
-        }
+        $this->entityProvider = $orm->getService(EntityProviderInterface::class);
 
-        if ($tuple->status < Tuple::STATUS_PREPROCESSED && array_intersect($this->innerKeys, $tuple->state->getWaitingFields(false)) !== []) {
-            return true;
-        }
-        // Check
-        $values = [];
-        $data = $tuple->state->getData();
-        foreach ($this->innerKeys as $i => $innerKey) {
-            if (!isset($data[$innerKey])) {
-                return false;
-            }
-            $values[$this->outerKeys[$i]] = $data[$innerKey];
-        }
-
-        $tuple->state->setRelation($this->getName(), new Reference($this->target, $values));
-        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
-        return true;
+        parent::__construct($orm, $role, $name, $target, $schema);
     }
 
-    /**
-     * todo: deduplicate with {@see \Cycle\ORM\Relation\RefersTo::prepare()}
-     */
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $state = $tuple->state;
@@ -86,7 +68,6 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
     public function queue(Pool $pool, Tuple $tuple): void
     {
-        $node = $tuple->node;
         $state = $tuple->state;
         $related = $state->getRelation($this->getName());
 
@@ -177,6 +158,32 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
                 $state->register($this->innerKeys[$i], $changes[$outerKey]);
             }
         }
+    }
+
+    private function checkNullValuePossibility(Tuple $tuple): bool
+    {
+        if ($tuple->status < Tuple::STATUS_WAITED) {
+            return true;
+        }
+
+        if ($tuple->status < Tuple::STATUS_PREPROCESSED
+            && array_intersect($this->innerKeys, $tuple->state->getWaitingFields(false)) !== []
+        ) {
+            return true;
+        }
+        // Check
+        $values = [];
+        $data = $tuple->state->getData();
+        foreach ($this->innerKeys as $i => $innerKey) {
+            if (!isset($data[$innerKey])) {
+                return false;
+            }
+            $values[$this->outerKeys[$i]] = $data[$innerKey];
+        }
+
+        $tuple->state->setRelation($this->getName(), new Reference($this->target, $values));
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+        return true;
     }
 
     private function setNullFromRelated(Tuple $tuple, bool $isPreparing): void

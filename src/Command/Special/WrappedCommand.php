@@ -10,6 +10,7 @@ use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Heap\State;
 use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\MapperInterface;
 
 class WrappedCommand implements CommandInterface
 {
@@ -26,22 +27,21 @@ class WrappedCommand implements CommandInterface
         DatabaseInterface $db,
         string $table,
         State $state,
+        ?MapperInterface $mapper,
         array $primaryKeys = [],
-        string $pkColumn = null,
-        callable $mapper = null,
-        callable $caster = null
+        string $pkColumn = null
     ): WrappedStoreCommand {
-        return new WrappedStoreCommand(new Insert($db, $table, $state, $primaryKeys, $pkColumn, $mapper, $caster));
+        return new WrappedStoreCommand(new Insert($db, $table, $state, $mapper, $primaryKeys, $pkColumn));
     }
 
     public static function createUpdate(
         DatabaseInterface $db,
         string $table,
         State $state,
-        array $primaryKeys = [],
-        callable $mapper = null
+        ?MapperInterface $mapper,
+        array $primaryKeys = []
     ): WrappedStoreCommand {
-        return new WrappedStoreCommand(new Update($db, $table, $state, $primaryKeys, $mapper));
+        return new WrappedStoreCommand(new Update($db, $table, $state, $mapper, $primaryKeys));
     }
 
     public static function wrapCommand(CommandInterface $command): static

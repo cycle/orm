@@ -6,7 +6,8 @@ namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
-use Cycle\ORM\Exception\ORMException;
+use Cycle\ORM\FactoryInterface;
+use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
@@ -19,7 +20,8 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
 use Cycle\ORM\Select\RootLoader;
-use Cycle\ORM\Select\SourceProviderInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use SplObjectStorage;
@@ -38,9 +40,18 @@ class ManyToMany extends Relation\AbstractRelation
 
     protected string $pivotRole;
 
+    protected EntityFactoryInterface $entityFactory;
+    protected SourceProviderInterface $sourceProvider;
+    protected FactoryInterface $factory;
+    private HeapInterface $heap;
+
     public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
     {
         parent::__construct($orm, $role, $name, $target, $schema);
+        $this->heap = $orm->getHeap();
+        $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
+        $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
+        $this->factory = $orm->getFactory();
         $this->pivotRole = $this->schema[Relation::THROUGH_ENTITY];
 
         $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
@@ -130,19 +141,26 @@ class ManyToMany extends Relation\AbstractRelation
         }
     }
 
-    public function init(Node $node, array $data): iterable
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): iterable
     {
         $elements = [];
         $pivotData = new SplObjectStorage();
 
-        $iterator = new Iterator($this->orm, $this->target, $data, true);
+        $iterator = Iterator::createWithServices(
+            $this->heap,
+            $this->ormSchema,
+            $this->entityFactory,
+            $this->target,
+            $data,
+            true
+        );
         foreach ($iterator as $pivot => $entity) {
             if (!\is_array($pivot)) {
                 // skip partially selected entities (DB level filter)
                 continue;
             }
 
-            $pivotData[$entity] = $this->orm->make($this->pivotRole, $pivot, Node::MANAGED);
+            $pivotData[$entity] = $factory->make($this->pivotRole, $pivot, Node::MANAGED);
             $elements[] = $entity;
         }
         $collection = new PivotedStorage($elements, $pivotData);
@@ -156,8 +174,8 @@ class ManyToMany extends Relation\AbstractRelation
         if (!$data) {
             return [];
         }
-        $pivotMapper = $this->orm->getEntityRegistry()->getMapper($this->pivotRole);
-        $targetMapper = $this->orm->getEntityRegistry()->getMapper($this->target);
+        $pivotMapper = $this->mapperProvider->getMapper($this->pivotRole);
+        $targetMapper = $this->mapperProvider->getMapper($this->target);
 
         foreach ($data as $key => $pivot) {
             if (isset($pivot['@'])) {
@@ -176,8 +194,7 @@ class ManyToMany extends Relation\AbstractRelation
 
     public function collect(mixed $data): iterable
     {
-        return $this->orm->getFactory()->collection(
-            $this->orm,
+        return $this->factory->collection(
             $this->schema[Relation::COLLECTION_TYPE] ?? null
         )->collect($data);
     }
@@ -233,10 +250,6 @@ class ManyToMany extends Relation\AbstractRelation
         if ($load === false) {
             return null;
         }
-        // todo replace with entity registry
-        if (!$this->orm instanceof SourceProviderInterface) {
-            throw new ORMException('PivotedPromise require ORM to implement SourceFactoryInterface');
-        }
         $scope = $reference->getScope();
         if ($scope === []) {
             $result = new PivotedStorage();
@@ -245,19 +258,26 @@ class ManyToMany extends Relation\AbstractRelation
         }
 
         // getting scoped query
-        $query = (new RootLoader($this->orm, $this->target))->buildQuery();
+        $query = (new RootLoader(
+            $this->ormSchema,
+            $this->sourceProvider,
+            $this->factory,
+            $this->target
+        ))->buildQuery();
 
         // responsible for all the scoping
         $loader = new ManyToManyLoader(
-            $this->orm,
-            $this->orm->getSource($this->target)->getTable(),
+            $this->ormSchema,
+            $this->sourceProvider,
+            $this->factory,
+            $this->sourceProvider->getSource($this->target)->getTable(),
             $this->target,
             $this->schema
         );
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'scope' => $this->orm->getSource($this->target)->getScope(),
+            'scope' => $this->sourceProvider->getSource($this->target)->getScope(),
             'as' => $this->target,
             'method' => JoinableLoader::POSTLOAD,
         ]);
@@ -287,8 +307,17 @@ class ManyToMany extends Relation\AbstractRelation
 
         $elements = [];
         $pivotData = new SplObjectStorage();
-        foreach (new Iterator($this->orm, $this->target, $root->getResult()[0]['output'], true, typecast: true) as $pivot => $entity) {
-            $pivotData[$entity] = $this->orm->make(
+        $iterator = Iterator::createWithServices(
+            $this->heap,
+            $this->ormSchema,
+            $this->entityFactory,
+            $this->target,
+            $root->getResult()[0]['output'],
+            true,
+            typecast: true
+        );
+        foreach ($iterator as $pivot => $entity) {
+            $pivotData[$entity] = $this->entityFactory->make(
                 $this->schema[Relation::THROUGH_ENTITY],
                 $pivot,
                 Node::MANAGED,
@@ -365,7 +394,7 @@ class ManyToMany extends Relation\AbstractRelation
             }
         }
 
-        $entity = $this->orm->make($this->pivotRole, $pivot ?? []);
+        $entity = $this->entityFactory->make($this->pivotRole, $pivot ?? []);
         $storage->set($rTuple->entity, $entity);
         return $entity;
     }

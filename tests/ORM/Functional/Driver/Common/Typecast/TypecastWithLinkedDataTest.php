@@ -177,7 +177,6 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
      */
     public function testCustomArrayInIterator(): void
     {
-        $mapper = $this->orm->getEntityRegistry()->getMapper('user');
         $bookData = [
             'id' => '1',
             'states' => 'foo|bar',
@@ -200,7 +199,7 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
 
         $data = [&$userData, &$userData, &$userData];
 
-        $iterator = new Iterator($this->orm, User::class, $data, typecast: true);
+        $iterator = Iterator::createWithOrm($this->orm, User::class, $data, typecast: true);
         /** @var User $user */
         $users = \iterator_to_array($iterator);
 

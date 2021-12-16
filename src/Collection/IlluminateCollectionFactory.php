@@ -28,6 +28,11 @@ final class IlluminateCollectionFactory implements CollectionFactoryInterface
         }
     }
 
+    public function getInterface(): ?string
+    {
+        return Collection::class;
+    }
+
     public function withCollectionClass(string $class): static
     {
         $clone = clone $this;

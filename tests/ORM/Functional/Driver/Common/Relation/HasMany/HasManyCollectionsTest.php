@@ -172,18 +172,15 @@ abstract class HasManyCollectionsTest extends BaseTest
             ))
                 ->withCollectionFactory(
                     'doctrine',
-                    $this->collectionFactory['doctrine'],
-                    \Doctrine\Common\Collections\Collection::class
+                    $this->collectionFactory['doctrine']
                 )
                 ->withCollectionFactory(
                     'illuminate',
-                    $this->collectionFactory['illuminate'],
-                    \Illuminate\Support\Collection::class
+                    $this->collectionFactory['illuminate']
                 )
                 ->withCollectionFactory(
                     'array',
-                    $this->collectionFactory['array'],
-                    \Illuminate\Support\Collection::class
+                    $this->collectionFactory['array']
                 ),
             new Schema([])
         );

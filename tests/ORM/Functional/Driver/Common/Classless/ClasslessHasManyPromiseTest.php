@@ -239,7 +239,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         $this->save($e);
 
-        $e = (new Select($this->orm->withHeap(new Heap()), 'user'))
+        $e = (new Select($this->orm->with(heap: new Heap()), 'user'))
             ->wherePK(1)->fetchOne();
 
         $e->comments = $e->comments->getCollection();

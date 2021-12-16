@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\EmbeddedNode;
-use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableInterface;
 use Cycle\ORM\Select\LoaderInterface;
@@ -31,7 +29,7 @@ final class EmbeddedLoader implements JoinableInterface
     ];
 
     public function __construct(
-        private ORMInterface $orm,
+        private SchemaInterface $ormSchema,
         private string $target
     ) {
         // never duplicate primary key in data selection
@@ -105,7 +103,7 @@ final class EmbeddedLoader implements JoinableInterface
     {
         return new EmbeddedNode(
             $this->columnNames(),
-            (array)$this->orm->getSchema()->define($this->parent->getTarget(), SchemaInterface::PRIMARY_KEY)
+            (array)$this->ormSchema->define($this->parent->getTarget(), SchemaInterface::PRIMARY_KEY)
         );
     }
 
@@ -121,7 +119,7 @@ final class EmbeddedLoader implements JoinableInterface
      */
     protected function define(int $property)
     {
-        return $this->orm->getSchema()->define($this->target, $property);
+        return $this->ormSchema->define($this->target, $property);
     }
 
     public function setSubclassesLoading(bool $enabled): void

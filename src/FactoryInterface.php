@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Cycle\Database\DatabaseProviderInterface;
 
 /**
  * Must provide access to generic DI.
+ *
+ * @internal
  */
 interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {
@@ -32,8 +36,8 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * Create loader associated with specific entity and relation.
      */
     public function loader(
-        ORMInterface $orm,
         SchemaInterface $schema,
+        SourceProviderInterface $sourceProvider,
         string $role,
         string $relation
     ): LoaderInterface;
@@ -52,7 +56,8 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * Create typecast implementation associated with given role.
      */
     public function typecast(
-        ORMInterface $orm,
+        SchemaInterface $schema,
+        DatabaseInterface $database,
         string $role
     ): ?TypecastInterface;
 
@@ -60,7 +65,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      * Create source associated with given role.
      */
     public function source(
-        ORMInterface $orm,
         SchemaInterface $schema,
         string $role
     ): SourceInterface;
@@ -70,7 +74,6 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
      *        Can be class name or alias that can be configured in the {@see withCollectionFactory()} method.
      */
     public function collection(
-        ORMInterface $orm,
         string $name = null
     ): CollectionFactoryInterface;
 
@@ -84,6 +87,9 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
         string $relation
     ): RelationInterface;
 
+    /**
+     * Add default classes for producing
+     */
     public function withDefaultSchemaClasses(array $defaults): self;
 
     /**

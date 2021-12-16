@@ -11,6 +11,7 @@ use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\State;
 use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\MapperInterface;
 
 /**
  * Update data CAN be modified by parent commands using context.
@@ -22,19 +23,16 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
     use ErrorTrait;
     use ScopeTrait;
 
-    /** @var callable|null */
-    private $mapper;
-
     public function __construct(
         DatabaseInterface $db,
         string $table,
         State $state,
-        array $primaryKeys,
-        callable $mapper = null
+        private ?MapperInterface $mapper,
+        /** @var string[] */
+        array $primaryKeys
     ) {
         parent::__construct($db, $table, $state);
         $this->waitScope(...$primaryKeys);
-        $this->mapper = $mapper;
     }
 
     /**
@@ -64,8 +62,13 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         if ($this->appendix !== []) {
             $this->state->setData($this->appendix);
         }
+
         $data = $this->state->getChanges();
-        return array_merge($this->columns, $this->mapper === null ? $data : ($this->mapper)($data));
+
+        return array_merge(
+            $this->columns,
+            $this->mapper?->mapColumns($data) ?? $data
+        );
     }
 
     /**
@@ -82,18 +85,21 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         }
 
         $allChanges = $changes = $this->state->getChanges();
-        $data = $changes !== [] && $this->mapper !== null ? ($this->mapper)($changes) : $changes;
-        $fields = array_keys($changes);
+        $data = $this->mapper !== null && $changes !== [] ? $this->mapper->mapColumns($changes) : $changes;
+        $fields = \array_keys($changes);
         if ($data !== [] || $this->columns !== []) {
             $this->affectedRows = $this->db
                 ->update(
                     $this->table,
-                    array_merge($this->columns, $data),
-                    $this->mapper === null ? $this->scope : ($this->mapper)($this->scope)
+                    $this->mapper?->uncast(\array_merge($this->columns, $data)) ?? $data,
+                    $this->mapper?->mapColumns($this->scope) ?? $this->scope
                 )
                 ->run();
         }
-        $this->state->updateTransactionData($fields !== [] && \count($fields) === \count($allChanges) ? null : $fields);
+
+        $this->state->updateTransactionData(
+            $fields !== [] && \count($fields) === \count($allChanges) ? null : $fields
+        );
 
         parent::execute();
     }

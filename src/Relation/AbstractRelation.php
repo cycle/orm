@@ -9,9 +9,9 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Select\SourceInterface;
 
 /**
  * @internal
@@ -34,17 +34,21 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
 
     protected ?string $inversion;
 
+    protected MapperProviderInterface $mapperProvider;
+    protected SchemaInterface $ormSchema;
+
     /**
      * @param string $target Primary target role
      */
     public function __construct(
-        /** @internal */
-        protected ORMInterface $orm,
+        ORMInterface $orm,
         private string $role,
         protected string $name,
         protected string $target,
         protected array $schema
     ) {
+        $this->ormSchema = $orm->getSchema();
+        $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
         $this->innerKeys = (array)$schema[Relation::INNER_KEY];
         $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
         $this->inversion = $schema[Relation::INVERSION] ?? null;
@@ -88,14 +92,6 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     }
 
     /**
-     * Get the source associated with the role.
-     */
-    protected function getSource(string $role = null): SourceInterface
-    {
-        return $this->orm->getSource($role ?? $this->target);
-    }
-
-    /**
      * Assert that given entity is allowed for the relation.
      *
      * @throws RelationException
@@ -105,14 +101,14 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
         if ($related->getRole() === $this->target || in_array($related->getRole(), $this->targets, true)) {
             return;
         }
-        $role = $this->orm->getSchema()->resolveAlias($related->getRole());
+        $role = $this->ormSchema->resolveAlias($related->getRole());
         if ($role === $this->target) {
             $this->targets[] = $related->getRole();
             return;
         }
         // Check parents
         do {
-            $parent = $this->orm->getSchema()->define($role, SchemaInterface::PARENT);
+            $parent = $this->ormSchema->define($role, SchemaInterface::PARENT);
             if ($parent === $this->target) {
                 $this->targets[] = $related->getRole();
                 return;

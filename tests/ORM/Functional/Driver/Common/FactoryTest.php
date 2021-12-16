@@ -112,7 +112,7 @@ abstract class FactoryTest extends BaseTest
 
     public function testShouldMakeDefaultSource(): void
     {
-        $result = $this->factory->source($this->orm, $this->orm->getSchema(), 'user');
+        $result = $this->factory->source($this->orm->getSchema(), 'user');
 
         $this->assertInstanceOf(Source::class, $result);
     }
@@ -123,7 +123,7 @@ abstract class FactoryTest extends BaseTest
             Schema::SOURCE => DifferentSource::class,
         ]);
 
-        $result = $this->factory->source($this->orm, $this->orm->getSchema(), 'user');
+        $result = $this->factory->source($this->orm->getSchema(), 'user');
 
         $this->assertInstanceOf(DifferentSource::class, $result);
     }
@@ -136,6 +136,6 @@ abstract class FactoryTest extends BaseTest
 
         $this->expectException(TypecastException::class);
 
-        $this->factory->source($this->orm, $this->orm->getSchema(), 'user');
+        $this->factory->source($this->orm->getSchema(), 'user');
     }
 }

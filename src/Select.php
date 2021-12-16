@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Countable;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Select\ScopeInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
+use Cycle\ORM\Select\ScopeInterface;
 use InvalidArgumentException;
 use IteratorAggregate;
-use Cycle\Database\Injection\Parameter;
-use Cycle\Database\Query\SelectQuery;
 use Spiral\Pagination\PaginableInterface;
 
 /**
@@ -48,16 +51,28 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     private RootLoader $loader;
 
     private QueryBuilder $builder;
+    private MapperProviderInterface $mapperProvider;
+    private Heap\HeapInterface $heap;
+    private SchemaInterface $schema;
+    private EntityFactoryInterface $entityFactory;
 
     /**
      * @param class-string<TEntity>|string $role
      */
     public function __construct(
-        /** @internal */
-        private ORMInterface $orm,
+        ORMInterface $orm,
         string $role
     ) {
-        $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
+        $this->heap = $orm->getHeap();
+        $this->schema = $orm->getSchema();
+        $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
+        $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
+        $this->loader = new RootLoader(
+            $orm->getSchema(),
+            $orm->getService(SourceProviderInterface::class),
+            $orm->getFactory(),
+            $orm->resolveRole($role)
+        );
         $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
 
@@ -66,7 +81,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function __destruct()
     {
-        unset($this->orm, $this->loader, $this->builder);
+        unset($this->loader, $this->builder);
     }
 
     /**
@@ -369,7 +384,8 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
             return null;
         }
 
-        return $this->orm->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true);
+        /** @var TEntity */
+        return $this->entityFactory->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true);
     }
 
     /**
@@ -385,15 +401,18 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * @return Iterator<TEntity>
      */
-    public function getIterator(): Iterator
+    public function getIterator(bool $findInHeap = false): Iterator
     {
         $node = $this->loader->createNode();
         $this->loader->loadData($node, true);
 
-        return new Iterator(
-            $this->orm,
+        return Iterator::createWithServices(
+            $this->heap,
+            $this->schema,
+            $this->entityFactory,
             $this->loader->getTarget(),
             $node->getResult(),
+            $findInHeap,
             typecast: true
         );
     }
@@ -411,9 +430,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
         if (!$typecast) {
             return $node->getResult();
         }
-        $mapper = $this->orm
-            ->getEntityRegistry()
-            ->getMapper($this->loader->getTarget());
+        $mapper = $this->mapperProvider->getMapper($this->loader->getTarget());
 
         return array_map([$mapper, 'cast'], $node->getResult());
     }

@@ -11,6 +11,8 @@ use Cycle\ORM\Exception\SuccessTransactionRetryException;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Service\IndexProviderInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\RelationMap;
@@ -99,7 +101,7 @@ final class UnitOfWork implements StateInterface
                 // Generate detailed exception about unresolved relations
                 throw TransactionException::unresolvedRelations(
                     $this->pool->getUnresolved(),
-                    $this->orm->getEntityRegistry()
+                    $this->orm->getService(RelationProviderInterface::class)
                 );
             }
         } catch (\Throwable $e) {
@@ -157,7 +159,8 @@ final class UnitOfWork implements StateInterface
     private function syncHeap(): void
     {
         $heap = $this->orm->getHeap();
-        $entityRegistry = $this->orm->getEntityRegistry();
+        $relationProvider = $this->orm->getService(RelationProviderInterface::class);
+        $indexProvider = $this->orm->getService(IndexProviderInterface::class);
         foreach ($this->pool->getAllTuples() as $e => $tuple) {
             $node = $tuple->node;
 
@@ -170,7 +173,7 @@ final class UnitOfWork implements StateInterface
 
             // reindex the entity while it has old data
             $node->setState($tuple->state);
-            $heap->attach($e, $node, $entityRegistry->getIndexes($role));
+            $heap->attach($e, $node, $indexProvider->getIndexes($role));
 
             if ($tuple->persist !== null) {
                 $syncData = array_udiff_assoc(
@@ -180,7 +183,7 @@ final class UnitOfWork implements StateInterface
                 );
             } else {
                 // $entityRelations = $mapper->fetchRelations($e);
-                $syncData = $node->syncState($entityRegistry->getRelationMap($role), $tuple->state);
+                $syncData = $node->syncState($relationProvider->getRelationMap($role), $tuple->state);
             }
 
             $tuple->mapper->hydrate($e, $syncData);

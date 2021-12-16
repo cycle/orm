@@ -29,11 +29,11 @@ final class SchemaTest extends BaseTest
     public const DRIVER = 'sqlite';
 
     private const PRIMARY_ROLE = 'book';
-    private Container $container;
+    private ?Container $container;
 
     public function setUpOrm(array $bookSchema = [], array $factoryDefinitions = []): void
     {
-        $this->container = $container = new Container();
+        $container = $this->container ??= new Container();
 
         $this->orm = new ORM(
             new Factory(
@@ -87,58 +87,56 @@ final class SchemaTest extends BaseTest
 
     public function testEmptyStringShouldThrowAnException(): void
     {
-        $this->setUpOrm([
-            SchemaInterface::TYPECAST_HANDLER => '',
-        ]);
-
         $this->expectException(FactoryTypecastException::class);
         $this->expectErrorMessage(
             'Bad typecast handler declaration for the `book` role. Undefined class or binding \'\''
         );
+
+        $this->setUpOrm([
+            SchemaInterface::TYPECAST_HANDLER => '',
+        ]);
 
         $this->getTypecast(self::PRIMARY_ROLE);
     }
 
     public function testHandlerWithWrongInterfaceShouldThrowAnException(): void
     {
+        $this->expectException(FactoryTypecastException::class);
+        $this->expectErrorMessage(
+            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
+        );
+
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => InvalidTypecaster::class,
         ]);
+    }
+
+    public function testHandlerWithWrongInterfaceAmongArrayShouldThrowAnException(): void
+    {
+        $this->container = new Container();
+        $this->container->bind('bar-foo', Typecaster::class);
 
         $this->expectException(FactoryTypecastException::class);
         $this->expectErrorMessage(
             'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
         );
 
-        $this->getTypecast(self::PRIMARY_ROLE);
-    }
-
-    public function testHandlerWithWrongInterfaceAmongArrayShouldThrowAnException(): void
-    {
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => [
                 InvalidTypecaster::class,
                 'bar-foo',
             ],
         ]);
-
-        $this->container->bind('bar-foo', Typecaster::class);
-
-        $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage(
-            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
-        );
-
-        $this->getTypecast(self::PRIMARY_ROLE);
     }
 
     public function testUseTypecastFromContainer(): void
     {
+        $this->container = new Container();
+        $this->container->bind('bar-foo', Typecaster::class);
+
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => 'bar-foo',
         ]);
-
-        $this->container->bind('bar-foo', Typecaster::class);
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
         $this->assertSame(Typecaster::class, $typecast::class);
@@ -146,10 +144,10 @@ final class SchemaTest extends BaseTest
 
     public function testUseTypecastAliasAsString(): void
     {
+        $tc = new Typecaster(new Schema([]), self::PRIMARY_ROLE);
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => 'test-alias',
         ], ['test-alias' => &$tc]);
-        $tc = new Typecaster($this->orm->getSchema(), self::PRIMARY_ROLE);
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
@@ -222,6 +220,9 @@ final class SchemaTest extends BaseTest
             ->with($this->equalTo(['foo' => 'bar1'])) // waits from $aliasTypecast
             ->willReturn(['foo' => 'bar2']); // passes to Composite typecast
 
+        $this->container = new Container();
+        $this->container->bindSingleton('bar-foo', fn () => $containerTypecast);
+
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => [
                 'bar-foo', // container
@@ -231,8 +232,6 @@ final class SchemaTest extends BaseTest
         ], [
             'test-alias' => $aliasTypecast,
         ]);
-
-        $this->container->bindSingleton('bar-foo', fn () => $containerTypecast);
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 

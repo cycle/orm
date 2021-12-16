@@ -49,13 +49,6 @@ interface ORMInterface extends
     public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object;
 
     /**
-     * Promise object reference, proxy or object from memory heap.
-     *
-     * @return object|ReferenceInterface
-     */
-    public function promise(string $role, array $scope): object;
-
-    /**
      * Get factory for relations, mappers and etc.
      */
     public function getFactory(): FactoryInterface;

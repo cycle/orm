@@ -188,13 +188,7 @@ final class Embedded implements SameRowRelationInterface
             unset($data[$key]);
         }
 
-        // todo use Node::compare?
-        return array_udiff_assoc($data, $state->getTransactionData(), [self::class, 'compare']);
-    }
-
-    private static function compare(mixed $a, mixed $b): int
-    {
-        return $a <=> $b;
+        return array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
     }
 
     /**

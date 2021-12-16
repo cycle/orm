@@ -194,7 +194,6 @@ final class UnitOfWork implements StateInterface
      */
     private function resetHeap(): void
     {
-        // todo: refactor
         foreach ($this->pool->getAllTuples() as $tuple) {
             $tuple->node->resetState();
         }
@@ -329,25 +328,21 @@ final class UnitOfWork implements StateInterface
             // Not embedded but has changes
             $this->runCommand($command);
 
-            if ($tuple->status <= Tuple::STATUS_PROPOSED && $hasDeferredRelations) {
-                $tuple->status = Tuple::STATUS_DEFERRED;
-            } else {
-                $tuple->status = Tuple::STATUS_PROCESSED;
-            }
+            $tuple->status = $tuple->status <= Tuple::STATUS_PROPOSED && $hasDeferredRelations
+                ? Tuple::STATUS_DEFERRED
+                : Tuple::STATUS_PROCESSED;
 
             return;
         }
 
-        // todo decide case when $command is null
-
         $entityData = $tuple->mapper->extract($tuple->entity);
-        // todo: use class MergeCommand here
         foreach ($map->getEmbedded() as $name => $relation) {
             $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }
             $tuple->state->setRelation($name, $entityData[$name] ?? null);
+            // We can use class MergeCommand here
             $relation->queue(
                 $this->pool,
                 $tuple,

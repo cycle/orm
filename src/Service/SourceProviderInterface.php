@@ -6,7 +6,6 @@ namespace Cycle\ORM\Service;
 
 use Cycle\ORM\Select\SourceInterface;
 
-// todo move back into Select namespace?
 interface SourceProviderInterface
 {
     /**

@@ -4,39 +4,44 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\Collection\ArrayCollectionFactory;
-use Cycle\ORM\Config\RelationConfig;
-use Cycle\ORM\Exception\TypecastException;
-use Cycle\ORM\Exception\FactoryTypecastException;
-use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Cycle\ORM\Config\RelationConfig;
+use Cycle\ORM\Exception\FactoryTypecastException;
+use Cycle\ORM\Exception\TypecastException;
+use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
-use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Repository;
+use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
-use Cycle\Database\DatabaseInterface;
-use Cycle\Database\DatabaseProviderInterface;
 
+/**
+ * @internal
+ */
 final class Factory implements FactoryInterface
 {
     private RelationConfig $config;
     private CoreFactory $factory;
 
-    /** @var array<string, string> */
+    /** @var array<int, string> */
     private array $defaults = [
-        Schema::REPOSITORY => Repository::class,
-        Schema::SOURCE => Source::class,
-        Schema::MAPPER => Mapper::class,
-        Schema::SCOPE => null,
+        SchemaInterface::REPOSITORY => Repository::class,
+        SchemaInterface::SOURCE => Source::class,
+        SchemaInterface::MAPPER => Mapper::class,
+        SchemaInterface::SCOPE => null,
+        SchemaInterface::TYPECAST_HANDLER => null,
     ];
 
     /** @var array<string, CollectionFactoryInterface> */
@@ -68,20 +73,19 @@ final class Factory implements FactoryInterface
         return $this->factory->make($alias, $parameters);
     }
 
-    public function typecast(ORMInterface $orm, string $role): ?TypecastInterface
+    public function typecast(SchemaInterface $schema, DatabaseInterface $database, string $role): ?TypecastInterface
     {
-        $schema = $orm->getSchema();
         // Get parent's typecast
         $parent = $schema->define($role, SchemaInterface::PARENT);
-        $parentHandler = $parent === null ? null : $this->typecast($orm, $parent);
+        $parentHandler = $parent === null ? null : $this->typecast($schema, $database, $parent);
         $handlers = [];
 
         // Schema's `typecast` option
         $rules = (array)$schema->define($role, SchemaInterface::TYPECAST);
-        $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER);
+        $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER)
+            ?? $this->defaults[SchemaInterface::TYPECAST_HANDLER];
 
         // Create basic typecast implementation
-        $database = $orm->getEntityRegistry()->getSource($role)->getDatabase();
         try {
             if ($handler === null) {
                 if (!$rules) {
@@ -91,10 +95,10 @@ final class Factory implements FactoryInterface
                 $handlers[] = new Typecast($database);
             } elseif (\is_array($handler)) { // We need to use composite typecast for array
                 foreach ($handler as $type) {
-                    $handlers[] = $this->makeTypecastHandler($type, $database, $orm, $role);
+                    $handlers[] = $this->makeTypecastHandler($type, $database, $schema, $role);
                 }
             } else {
-                $handlers[] = $this->makeTypecastHandler($handler, $database, $orm, $role);
+                $handlers[] = $this->makeTypecastHandler($handler, $database, $schema, $role);
             }
         } catch (\Throwable $e) {
             throw new FactoryTypecastException(
@@ -117,7 +121,7 @@ final class Factory implements FactoryInterface
     public function mapper(ORMInterface $orm, string $role): MapperInterface
     {
         $schema = $orm->getSchema();
-        $class = $schema->define($role, Schema::MAPPER) ?? $this->defaults[Schema::MAPPER];
+        $class = $schema->define($role, SchemaInterface::MAPPER) ?? $this->defaults[SchemaInterface::MAPPER];
 
         if (!\is_subclass_of($class, MapperInterface::class)) {
             throw new TypecastException(sprintf('%s does not implement %s.', $class, MapperInterface::class));
@@ -128,31 +132,33 @@ final class Factory implements FactoryInterface
             [
                 'orm' => $orm,
                 'role' => $role,
-                'schema' => $schema->define($role, Schema::SCHEMA),
+                'schema' => $schema->define($role, SchemaInterface::SCHEMA),
             ]
         );
     }
 
     public function loader(
-        ORMInterface $orm,
         SchemaInterface $schema,
+        SourceProviderInterface $sourceProvider,
         string $role,
         string $relation
     ): LoaderInterface {
         if ($relation === self::PARENT_LOADER) {
             $parent = $schema->define($role, SchemaInterface::PARENT);
-            return new ParentLoader($orm, $role, $parent);
+            return new ParentLoader($schema, $sourceProvider, $this, $role, $parent);
         }
         if ($relation === self::CHILD_LOADER) {
             $parent = $schema->define($role, SchemaInterface::PARENT);
-            return new SubclassLoader($orm, $parent, $role);
+            return new SubclassLoader($schema, $sourceProvider, $this, $parent, $role);
         }
         $definition = $schema->defineRelation($role, $relation);
 
         return $this->config->getLoader($definition[Relation::TYPE])->resolve(
             $this->factory,
             [
-                'orm' => $orm,
+                'ormSchema' => $schema,
+                'sourceProvider' => $sourceProvider,
+                'factory' => $this,
                 'role' => $role,
                 'name' => $relation,
                 'target' => $definition[Relation::TARGET],
@@ -162,7 +168,6 @@ final class Factory implements FactoryInterface
     }
 
     public function collection(
-        ORMInterface $orm,
         string $name = null
     ): CollectionFactoryInterface {
         if ($name === null) {
@@ -216,7 +221,7 @@ final class Factory implements FactoryInterface
         string $role,
         ?Select $select
     ): RepositoryInterface {
-        $class = $schema->define($role, Schema::REPOSITORY) ?? $this->defaults[Schema::REPOSITORY];
+        $class = $schema->define($role, SchemaInterface::REPOSITORY) ?? $this->defaults[SchemaInterface::REPOSITORY];
 
         if (!\is_subclass_of($class, RepositoryInterface::class)) {
             throw new TypecastException($class . ' does not implement ' . RepositoryInterface::class);
@@ -233,33 +238,32 @@ final class Factory implements FactoryInterface
     }
 
     public function source(
-        ORMInterface $orm,
         SchemaInterface $schema,
         string $role
     ): SourceInterface {
-        $source = $schema->define($role, Schema::SOURCE) ?? $this->defaults[Schema::SOURCE];
+        /** @var class-string<SourceInterface> $source */
+        $source = $schema->define($role, SchemaInterface::SOURCE) ?? $this->defaults[SchemaInterface::SOURCE];
 
         if (!\is_subclass_of($source, SourceInterface::class)) {
             throw new TypecastException($source . ' does not implement ' . SourceInterface::class);
         }
 
-        if ($source !== Source::class) {
-            return $this->factory->make($source, ['orm' => $orm, 'role' => $role]);
-        }
+        $table = $schema->define($role, SchemaInterface::TABLE);
+        $database = $this->database($schema->define($role, SchemaInterface::DATABASE));
 
-        $source = new Source(
-            $this->database($schema->define($role, Schema::DATABASE)),
-            $schema->define($role, Schema::TABLE)
-        );
+        $source = $source !== Source::class
+            ? $this->factory->make($source, ['role' => $role, 'table' => $table, 'database' => $database])
+            : new Source($database, $table);
 
-        $scope = $schema->define($role, Schema::SCOPE) ?? $this->defaults[Schema::SCOPE];
+        /** @var class-string<ScopeInterface>|ScopeInterface|null $scope */
+        $scope = $schema->define($role, SchemaInterface::SCOPE) ?? $this->defaults[SchemaInterface::SCOPE];
 
         if ($scope === null) {
             return $source;
         }
 
         if (!\is_subclass_of($scope, ScopeInterface::class)) {
-            throw new TypecastException($scope . ' does not implement ' . ScopeInterface::class);
+            throw new TypecastException(sprintf('%s does not implement %s.', $scope, ScopeInterface::class));
         }
 
         return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));
@@ -298,7 +302,7 @@ final class Factory implements FactoryInterface
     private function makeTypecastHandler(
         string|TypecastInterface $handler,
         DatabaseInterface $database,
-        ORMInterface $orm,
+        SchemaInterface $schema,
         string $role
     ): TypecastInterface {
         // If handler is an object we don't need to use factory, we should return it as is
@@ -308,7 +312,7 @@ final class Factory implements FactoryInterface
 
         return $this->factory->make($handler, [
             'database' => $database,
-            'orm' => $orm,
+            'schema' => $schema,
             'role' => $role,
         ]);
     }

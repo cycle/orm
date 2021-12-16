@@ -261,7 +261,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertNumWrites(0);
 
         /** @var Programator $programator */
-        $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
+        $programator = (new Select($this->orm->with(heap: new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $this->assertSame('Kotlin', $programator->language);
     }

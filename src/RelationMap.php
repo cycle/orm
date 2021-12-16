@@ -11,6 +11,7 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\SameRowRelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\Relation\ShadowHasMany;
+use Cycle\ORM\Service\EntityFactoryInterface;
 
 /**
  * Manages the position of node in the relation graph and provide access to neighbours.
@@ -47,29 +48,29 @@ final class RelationMap
     public static function build(OrmInterface $orm, string $role): self
     {
         $factory = $orm->getFactory();
-        $ormSchema = $orm->getSchema();
+        $schema = $orm->getSchema();
 
-        $outerRelations = $ormSchema->getOuterRelations($role);
-        $innerRelations = $ormSchema->getInnerRelations($role);
+        $outerRelations = $schema->getOuterRelations($role);
+        $innerRelations = $schema->getInnerRelations($role);
 
         // Build relations
         $relations = [];
         foreach ($innerRelations as $relName => $relSchema) {
-            $relations[$relName] = $factory->relation($orm, $ormSchema, $role, $relName);
+            $relations[$relName] = $factory->relation($orm, $schema, $role, $relName);
         }
 
         // add Parent's relations
-        $parent = $ormSchema->define($role, SchemaInterface::PARENT);
+        $parent = $schema->define($role, SchemaInterface::PARENT);
         while ($parent !== null) {
-            foreach ($ormSchema->getInnerRelations($parent) as $relName => $relSchema) {
+            foreach ($schema->getInnerRelations($parent) as $relName => $relSchema) {
                 if (isset($relations[$relName])) {
                     continue;
                 }
-                $relations[$relName] = $factory->relation($orm, $ormSchema, $parent, $relName);
+                $relations[$relName] = $factory->relation($orm, $schema, $parent, $relName);
             }
 
-            $outerRelations += $ormSchema->getOuterRelations($parent);
-            $parent = $ormSchema->define($parent, SchemaInterface::PARENT);
+            $outerRelations += $schema->getOuterRelations($parent);
+            $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
 
         $result = new self($relations, $outerRelations);
@@ -133,7 +134,7 @@ final class RelationMap
     /**
      * Init relation data in entity data and entity state.
      */
-    public function init(Node $node, array $data): array
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): array
     {
         foreach ($this->innerRelations as $name => $relation) {
             if (!array_key_exists($name, $data)) {
@@ -154,7 +155,7 @@ final class RelationMap
             }
 
             // init relation for the entity and for state and the same time
-            $data[$name] = $relation->init($node, $item);
+            $data[$name] = $relation->init($factory, $node, $item);
         }
 
         return $data;

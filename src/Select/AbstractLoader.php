@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Exception\FactoryException;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\FactoryInterface;
-use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
-use Cycle\Database\Query\SelectQuery;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
@@ -83,12 +83,16 @@ abstract class AbstractLoader implements LoaderInterface
      * @var array<string, array>
      */
     protected array $children;
+    protected SourceInterface $source;
 
     public function __construct(
-        protected ORMInterface $orm,
+        protected SchemaInterface $ormSchema,
+        protected SourceProviderInterface $sourceProvider,
+        protected FactoryInterface $factory,
         protected string $target
     ) {
-        $this->children = $orm->getSchema()->getInheritedRoles($target);
+        $this->children = $this->ormSchema->getInheritedRoles($target);
+        $this->source = $this->sourceProvider->getSource($target);
     }
 
     final public function __destruct()
@@ -131,14 +135,6 @@ abstract class AbstractLoader implements LoaderInterface
     public function getTarget(): string
     {
         return $this->target;
-    }
-
-    /**
-     * Data source associated with the loader.
-     */
-    public function getSource(): SourceInterface
-    {
-        return $this->orm->getSource($this->target);
     }
 
     public function withContext(LoaderInterface $parent, array $options = []): static
@@ -226,9 +222,9 @@ abstract class AbstractLoader implements LoaderInterface
 
         try {
             //Creating new loader.
-            $loader = $this->orm->getFactory()->loader(
-                $this->orm,
-                $this->orm->getSchema(),
+            $loader = $this->factory->loader(
+                $this->ormSchema,
+                $this->sourceProvider,
                 $this->target,
                 $relation
             );
@@ -357,7 +353,7 @@ abstract class AbstractLoader implements LoaderInterface
      */
     protected function define(int $property)
     {
-        return $this->orm->getSchema()->define($this->target, $property);
+        return $this->ormSchema->define($this->target, $property);
     }
 
     /**
@@ -376,26 +372,25 @@ abstract class AbstractLoader implements LoaderInterface
 
     protected function generateParentLoader(string $role): ?LoaderInterface
     {
-        $schema = $this->orm->getSchema();
-        $parent = $schema->define($role, SchemaInterface::PARENT);
-        $factory = $this->orm->getFactory();
-        return $parent === null ? null : $factory->loader($this->orm, $schema, $role, FactoryInterface::PARENT_LOADER);
+        $parent = $this->ormSchema->define($role, SchemaInterface::PARENT);
+        return $parent === null
+            ? null
+            : $this->factory->loader($this->ormSchema, $this->sourceProvider, $role, FactoryInterface::PARENT_LOADER);
     }
 
     protected function generateSublassLoaders(): iterable
     {
-        $schema = $this->orm->getSchema();
-        $factory = $this->orm->getFactory();
         if ($this->children !== []) {
             foreach ($this->children as $subRole => $children) {
-                yield $factory->loader($this->orm, $schema, $subRole, FactoryInterface::CHILD_LOADER);
+                yield $this->factory
+                    ->loader($this->ormSchema, $this->sourceProvider, $subRole, FactoryInterface::CHILD_LOADER);
             }
         }
     }
 
     protected function generateEagerRelationLoaders(string $target): \Generator
     {
-        $relations = $this->orm->getSchema()->define($target, SchemaInterface::RELATIONS) ?? [];
+        $relations = $this->ormSchema->define($target, SchemaInterface::RELATIONS) ?? [];
         foreach ($relations as $relation => $schema) {
             if (($schema[Relation::LOAD] ?? null) === Relation::LOAD_EAGER) {
                 yield $relation;

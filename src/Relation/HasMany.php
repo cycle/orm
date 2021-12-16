@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Iterator;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Traits\HasSomeTrait;
 use Cycle\ORM\Select;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -23,6 +26,21 @@ use Cycle\ORM\Transaction\Tuple;
 class HasMany extends AbstractRelation
 {
     use HasSomeTrait;
+
+    protected FactoryInterface $factory;
+    protected Select $select;
+
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
+    {
+        parent::__construct($orm, $role, $name, $target, $schema);
+        $sourceProvider = $orm->getService(SourceProviderInterface::class);
+        $this->factory = $orm->getFactory();
+
+        // Prepare Select Statement
+        $this->select = (new Select($orm, $this->target))
+            ->scope($sourceProvider->getSource($this->target)->getScope())
+            ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
+    }
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
@@ -102,11 +120,11 @@ class HasMany extends AbstractRelation
     /**
      * Init relation state and entity collection.
      */
-    public function init(Node $node, array $data): iterable
+    public function init(EntityFactoryInterface $factory, Node $node, array $data): iterable
     {
         $elements = [];
         foreach ($data as $item) {
-            $elements[] = $this->orm->make($this->target, $item, Node::MANAGED);
+            $elements[] = $factory->make($this->target, $item, Node::MANAGED);
         }
 
         $node->setRelation($this->getName(), $elements);
@@ -118,7 +136,7 @@ class HasMany extends AbstractRelation
         if (!$data) {
             return [];
         }
-        $mapper = $this->orm->getEntityRegistry()->getMapper($this->target);
+        $mapper = $this->mapperProvider->getMapper($this->target);
         foreach ($data as $key => $item) {
             // break link
             unset($data[$key]);
@@ -163,12 +181,8 @@ class HasMany extends AbstractRelation
         }
 
         $scope = array_merge($reference->getScope(), $this->schema[Relation::WHERE] ?? []);
-        $select = (new Select($this->orm, $this->target))
-            ->scope($this->orm->getSource($this->target)->getScope())
-            ->where($scope)
-            ->orderBy($this->schema[Relation::ORDER_BY] ?? []);
 
-        $iterator = new Iterator($this->orm, $this->target, $select->fetchData(), true);
+        $iterator = (clone $this->select)->where($scope)->getIterator(findInHeap: true);
         $result = \iterator_to_array($iterator, false);
 
         $reference->setValue($result);
@@ -181,8 +195,7 @@ class HasMany extends AbstractRelation
         if (!\is_iterable($data)) {
             throw new \InvalidArgumentException('Collected data in the HasMany relation should be iterable.');
         }
-        return $this->orm->getFactory()->collection(
-            $this->orm,
+        return $this->factory->collection(
             $this->schema[Relation::COLLECTION_TYPE] ?? null
         )->collect($data);
     }

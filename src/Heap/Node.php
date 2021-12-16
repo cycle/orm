@@ -38,7 +38,6 @@ final class Node
 
     /**
      * @param array<string, mixed> $data
-     * @param array<string, mixed> $rawData
      */
     public function __construct(
         #[ExpectedValues(valuesFromClass: self::class)]
@@ -62,11 +61,17 @@ final class Node
         return $this->role;
     }
 
+    /**
+     * @internal
+     */
     public function createState(): State
     {
         return $this->state = new State($this->status, $this->data, $this->rawData);
     }
 
+    /**
+     * @internal
+     */
     public function setState(State $state): self
     {
         $this->state = $state;
@@ -75,15 +80,29 @@ final class Node
 
     /**
      * Current point state (set of changes).
+     *
+     * @internal
      */
     public function getState(): ?State
     {
         return $this->state;
     }
 
+    /**
+     * @internal
+     */
     public function hasState(): bool
     {
         return $this->state !== null;
+    }
+
+    /**
+     * Reset point state and flush all the changes.
+     * @internal
+     */
+    public function resetState(): void
+    {
+        $this->state = null;
     }
 
     /**
@@ -125,18 +144,8 @@ final class Node
         $this->data = $state->getTransactionData();
         $this->updateRawData();
         $this->state = null;
-        $this->relationStatus = [];
 
         return $changes;
-    }
-
-    /**
-     * Reset point state and flush all the changes.
-     */
-    public function resetState(): void
-    {
-        $this->state = null;
-        $this->relationStatus = [];
     }
 
     /**
@@ -150,7 +159,7 @@ final class Node
         if ($value instanceof DateTimeInterface) {
             return $value instanceof DateTimeImmutable ? $value : DateTimeImmutable::createFromInterface($value);
         }
-        return $value instanceof \Stringable ? $value->__toString() : $value;
+        return $value instanceof Stringable ? $value->__toString() : $value;
     }
 
     public static function compare(mixed $a, mixed $b): int
@@ -176,7 +185,7 @@ final class Node
                 if ($a instanceof ValueInterface && $b instanceof ValueInterface) {
                     return $a->rawValue() <=> $b->rawValue();
                 }
-                if ($a instanceof \Stringable && $b instanceof \Stringable) {
+                if ($a instanceof Stringable && $b instanceof Stringable) {
                     return $a->__toString() <=> $b->__toString();
                 }
                 return (int)($a::class !== $b::class || (array)$a !== (array)$b);

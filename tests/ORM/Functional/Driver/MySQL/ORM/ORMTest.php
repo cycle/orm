@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\MySQL;
+namespace Cycle\ORM\Tests\Functional\Driver\MySQL\ORM;
 
 // phpcs:ignore
-use Cycle\ORM\Tests\Functional\Driver\Common\ORMTest as CommonClass;
+use Cycle\ORM\Tests\Functional\Driver\Common\ORM\ORMTest as CommonClass;
 
 /**
  * @group driver

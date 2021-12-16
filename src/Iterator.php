@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Generator;
 use IteratorAggregate;
@@ -12,26 +14,67 @@ use IteratorAggregate;
 /**
  * Iterates over given data-set and instantiates objects.
  *
- * @psalm-template TEntity of object
+ * @template TEntity
  *
  * @template-implements IteratorAggregate<array-key|array, TEntity>
  */
 final class Iterator implements IteratorAggregate
 {
-    private string $role;
-
-    /**
-     * @param class-string<TEntity> $class
-     * @param iterable<array-key, array> $source
-     */
-    public function __construct(
-        private ORMInterface $orm,
-        string $class,
+    private function __construct(
+        private string $role,
+        private HeapInterface $heap,
+        private SchemaInterface $schema,
+        private EntityFactoryInterface $entityFactory,
         private iterable $source,
         private bool $findInHeap = false,
         private bool $typecast = false
     ) {
-        $this->role = $orm->resolveRole($class);
+    }
+
+    /**
+     * @param class-string<TEntity>|string $class
+     * @param iterable<array-key, array> $source
+     */
+    public static function createWithOrm(
+        ORMInterface $orm,
+        string $class,
+        iterable $source,
+        bool $findInHeap = false,
+        bool $typecast = false
+    ): self {
+        return new self(
+            $orm->resolveRole($class),
+            $orm->getHeap(),
+            $orm->getSchema(),
+            $orm->getService(EntityFactoryInterface::class),
+            $source,
+            $findInHeap,
+            $typecast
+        );
+    }
+
+    /**
+     * @param non-empty-string $role
+     * @param iterable<array-key, array> $source
+     */
+    public static function createWithServices(
+        HeapInterface $heap,
+        SchemaInterface $schema,
+        EntityFactoryInterface $entityProvider,
+        string $role,
+        iterable $source,
+        bool $findInHeap = false,
+        bool $typecast = false
+    ): self {
+        return new self(
+            $role,
+            $heap,
+            $schema,
+            $entityProvider,
+            $source,
+            $findInHeap,
+            $typecast
+        );
     }
 
     /**
@@ -67,18 +110,18 @@ final class Iterator implements IteratorAggregate
     private function getEntity(array $data, string $role): object
     {
         if ($this->findInHeap) {
-            $pk = $this->orm->getSchema()->define($role, SchemaInterface::PRIMARY_KEY);
+            $pk = $this->schema->define($role, SchemaInterface::PRIMARY_KEY);
             if (\is_array($pk)) {
-                $e = $this->orm->getHeap()->find($role, $data);
+                $e = $this->heap->find($role, $data);
             } else {
                 $id = $data[$pk] ?? null;
 
                 if ($id !== null) {
-                    $e = $this->orm->getHeap()->find($role, [$pk => $id]);
+                    $e = $this->heap->find($role, [$pk => $id]);
                 }
             }
         }
 
-        return $e ?? $this->orm->make($role, $data, Node::MANAGED, typecast: $this->typecast);
+        return $e ?? $this->entityFactory->make($role, $data, Node::MANAGED, typecast: $this->typecast);
     }
 }

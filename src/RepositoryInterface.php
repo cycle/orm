@@ -11,10 +11,8 @@ interface RepositoryInterface
 {
     /**
      * Find entity by the primary key value or return null.
-     *
-     * @param mixed $id
      */
-    public function findByPK($id): ?object;
+    public function findByPK(mixed $id): ?object;
 
     /**
      * Find entity using given scope (where).

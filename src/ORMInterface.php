@@ -7,13 +7,26 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Select\SourceProviderInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\EntityProviderInterface;
+use Cycle\ORM\Service\IndexProviderInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
+use Cycle\ORM\Service\RepositoryProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
 /**
  * Provide the access to all ORM services.
  */
-interface ORMInterface extends SourceProviderInterface
+interface ORMInterface extends
+    EntityFactoryInterface,
+    EntityProviderInterface,
+    SourceProviderInterface,
+    MapperProviderInterface,
+    RepositoryProviderInterface,
+    RelationProviderInterface,
+    IndexProviderInterface
 {
     /**
      * Automatically resolve role based on object name or instance.
@@ -21,23 +34,17 @@ interface ORMInterface extends SourceProviderInterface
     public function resolveRole(string|object $entity): string;
 
     /**
-     * Get/load entity by unique key/value pair.
-     *
-     * @param array  $scope KV pair to locate the model, currently only support one pair.
-     */
-    public function get(string $role, array $scope, bool $load = true): ?object;
-
-    /**
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      *
-     * @template T
+     * @template TEntity
      *
-     * @param class-string<T>|string $role Entity role or class name.
+     * @param class-string<TEntity>|string $role Entity role or class name.
+     * @param array<string, mixed> $data Entity data.
      * @param bool $typecast Indicates that data is raw, and typecasting should be applied.
      *
-     * @return T
-     * @psalm-return ($role is class-string ? T : object)
+     * @return TEntity
+     * @psalm-return ($role is class-string ? TEntity : object)
      */
     public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object;
 
@@ -59,9 +66,13 @@ interface ORMInterface extends SourceProviderInterface
     public function getCommandGenerator(): CommandGeneratorInterface;
 
     /**
-     * Get entity registry.
+     * @template Provider
+     *
+     * @param class-string<Provider> $class
+     *
+     * @return Provider
      */
-    public function getEntityRegistry(): EntityRegistryInterface;
+    public function getService(string $class): object;
 
     /**
      * Get ORM relation and entity schema provider.
@@ -81,11 +92,15 @@ interface ORMInterface extends SourceProviderInterface
 
     /**
      * Get mapper associated with given entity class, role or instance.
+     *
+     * @param non-empty-string|object $entity
      */
     public function getMapper(string|object $entity): MapperInterface;
 
     /**
      * Get repository associated with given entity class, role or instance.
+     *
+     * @param non-empty-string|object $entity
      */
     public function getRepository(string|object $entity): RepositoryInterface;
 }

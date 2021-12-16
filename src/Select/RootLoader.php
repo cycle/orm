@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Cycle\ORM\ORMInterface;
+use Cycle\Database\Query\SelectQuery;
+use Cycle\Database\StatementInterface;
+use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\RootNode;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
-use Cycle\Database\Query\SelectQuery;
-use Cycle\Database\StatementInterface;
 
 /**
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
@@ -36,11 +37,15 @@ final class RootLoader extends AbstractLoader
 
     private SelectQuery $query;
 
-    public function __construct(ORMInterface $orm, string $target)
-    {
-        parent::__construct($orm, $target);
-        $this->query = $this->getSource()->getDatabase()->select()->from(
-            sprintf('%s AS %s', $this->getSource()->getTable(), $this->getAlias())
+    public function __construct(
+        SchemaInterface $ormSchema,
+        SourceProviderInterface $sourceProvider,
+        FactoryInterface $factory,
+        string $target
+    ) {
+        parent::__construct($ormSchema, $sourceProvider, $factory, $target);
+        $this->query = $this->source->getDatabase()->select()->from(
+            sprintf('%s AS %s', $this->source->getTable(), $this->getAlias())
         );
         $this->columns = $this->define(SchemaInterface::COLUMNS);
 

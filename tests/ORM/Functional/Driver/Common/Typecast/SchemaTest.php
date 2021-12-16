@@ -13,6 +13,8 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
+use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book;
@@ -39,7 +41,8 @@ final class SchemaTest extends BaseTest
                 RelationConfig::getDefault(),
                 new SimpleFactory(
                     $factoryDefinitions,
-                    static fn (string|object $alias, array $parameters = []): mixed => \is_string($alias) ? $container->make($alias, $parameters) : $alias
+                    static fn (string|object $alias, array $parameters = []): mixed => \is_string($alias)
+                        ? $container->make($alias, $parameters) : $alias
                 ),
                 new ArrayCollectionFactory()
             ),
@@ -89,9 +92,11 @@ final class SchemaTest extends BaseTest
         ]);
 
         $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Undefined class or binding \'\'');
+        $this->expectErrorMessage(
+            'Bad typecast handler declaration for the `book` role. Undefined class or binding \'\''
+        );
 
-        $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $this->getTypecast(self::PRIMARY_ROLE);
     }
 
     public function testHandlerWithWrongInterfaceShouldThrowAnException(): void
@@ -101,9 +106,11 @@ final class SchemaTest extends BaseTest
         ]);
 
         $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned');
+        $this->expectErrorMessage(
+            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
+        );
 
-        $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $this->getTypecast(self::PRIMARY_ROLE);
     }
 
     public function testHandlerWithWrongInterfaceAmongArrayShouldThrowAnException(): void
@@ -118,9 +125,11 @@ final class SchemaTest extends BaseTest
         $this->container->bind('bar-foo', Typecaster::class);
 
         $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned');
+        $this->expectErrorMessage(
+            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
+        );
 
-        $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $this->getTypecast(self::PRIMARY_ROLE);
     }
 
     public function testUseTypecastFromContainer(): void
@@ -131,7 +140,7 @@ final class SchemaTest extends BaseTest
 
         $this->container->bind('bar-foo', Typecaster::class);
 
-        $typecast = $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $typecast = $this->getTypecast(self::PRIMARY_ROLE);
         $this->assertSame(Typecaster::class, $typecast::class);
     }
 
@@ -140,9 +149,9 @@ final class SchemaTest extends BaseTest
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => 'test-alias',
         ], ['test-alias' => &$tc]);
-        $tc = new Typecaster($this->orm, self::PRIMARY_ROLE);
+        $tc = new Typecaster($this->orm->getSchema(), self::PRIMARY_ROLE);
 
-        $typecast = $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
         $this->assertSame(Typecaster::class, $typecast::class);
     }
@@ -156,7 +165,7 @@ final class SchemaTest extends BaseTest
         ]);
 
         /** @var Typecaster $typecast */
-        $typecast = $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
         $this->assertSame(Typecaster::class, $typecast::class);
         $this->assertSame(self::PRIMARY_ROLE, $typecast->role);
@@ -169,7 +178,7 @@ final class SchemaTest extends BaseTest
             SchemaInterface::TYPECAST_HANDLER => null,
         ]);
 
-        $typecast = $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
         $this->assertNull($typecast);
     }
@@ -178,9 +187,9 @@ final class SchemaTest extends BaseTest
     {
         $this->setUpOrm();
 
-        $foo = $this->orm->getEntityRegistry()->getTypecast('foo');
-        $bar = $this->orm->getEntityRegistry()->getTypecast('bar');
-        $baz = $this->orm->getEntityRegistry()->getTypecast('baz');
+        $foo = $this->getTypecast('foo');
+        $bar = $this->getTypecast('bar');
+        $baz = $this->getTypecast('baz');
 
         $this->assertNull($foo);
         $this->assertSame(Typecast::class, $bar::class);
@@ -225,9 +234,14 @@ final class SchemaTest extends BaseTest
 
         $this->container->bindSingleton('bar-foo', fn () => $containerTypecast);
 
-        $typecast = $this->orm->getEntityRegistry()->getTypecast(self::PRIMARY_ROLE);
+        $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
         $this->assertSame(CompositeTypecast::class, $typecast::class);
         $this->assertSame(['foo' => 'bar2'], $typecast->cast(['foo' => 'bar']));
+    }
+
+    private function getTypecast(string $role): ?TypecastInterface
+    {
+        return $this->orm->getService(TypecastProviderInterface::class)->getTypecast($role);
     }
 }

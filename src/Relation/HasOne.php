@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\Traits\HasSomeTrait;
 use Cycle\ORM\Relation\Traits\ToOneTrait;
+use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 
@@ -19,6 +21,13 @@ class HasOne extends AbstractRelation
 {
     use HasSomeTrait;
     use ToOneTrait;
+
+    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
+    {
+        $this->entityProvider = $orm->getService(EntityProviderInterface::class);
+
+        parent::__construct($orm, $role, $name, $target, $schema);
+    }
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {

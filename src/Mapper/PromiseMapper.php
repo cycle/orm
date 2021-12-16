@@ -29,7 +29,6 @@ class PromiseMapper extends DatabaseMapper
 
     protected Instantiator\Instantiator $instantiator;
 
-
     public function __construct(ORMInterface $orm, string $role)
     {
         parent::__construct($orm, $role);

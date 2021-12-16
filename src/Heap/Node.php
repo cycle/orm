@@ -98,6 +98,7 @@ final class Node
 
     /**
      * Reset point state and flush all the changes.
+     *
      * @internal
      */
     public function resetState(): void

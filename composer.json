@@ -18,7 +18,6 @@
     "mockery/mockery": "^1.1",
     "phpunit/phpunit": "^9.5",
     "ramsey/uuid": "^4.0",
-    "spiral/code-style": "^1.0",
     "spiral/tokenizer": "^2.8",
     "vimeo/psalm": "^4.9"
   },

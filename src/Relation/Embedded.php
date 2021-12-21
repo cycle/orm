@@ -166,9 +166,9 @@ final class Embedded implements SameRowRelationInterface
             }
         }
 
-        $mapper = $this->mapperProvider->getMapper($this->target);
-        $changes = $this->getChanges($related, $rTuple->state);
         if ($command !== null) {
+            $mapper = $this->mapperProvider->getMapper($this->target);
+            $changes = $mapper->uncast($changes);
             foreach ($mapper->mapColumns($changes) as $field => $value) {
                 $command->registerColumn($field, $value);
             }

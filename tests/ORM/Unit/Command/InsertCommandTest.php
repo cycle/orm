@@ -71,15 +71,15 @@ class InsertCommandTest extends TestCase
             }
         );
 
-        $this->mapper->shouldReceive('mapColumns')
-            ->once()
-            ->with($this->state->getData())
-            ->andReturn(['baz' => 'bar']);
-
         $this->mapper->shouldReceive('uncast')
             ->once()
-            ->with(['baz' => 'bar'])
-            ->andReturn(['baz1' => 'bar']);
+            ->with($this->state->getData())
+            ->andReturn(['foo' => 'baaar']);
+
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with(['foo' => 'baaar'])
+            ->andReturn(['baz' => 'bar']);
 
         $this->mapper->shouldReceive('cast')
             ->once()
@@ -101,15 +101,15 @@ class InsertCommandTest extends TestCase
 
         $table = 'table';
 
-        $this->mapper->shouldReceive('mapColumns')
-            ->once()
-            ->with($this->state->getData())
-            ->andReturn(['baz' => 'bar']);
-
         $this->mapper->shouldReceive('uncast')
             ->once()
-            ->with(['baz' => 'bar'])
-            ->andReturn(['baz1' => 'bar']);
+            ->with($this->state->getData())
+            ->andReturn(['foo' => 'baaar']);
+
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with(['foo' => 'baaar'])
+            ->andReturn(['baz' => 'bar']);
 
         $this->mapper->shouldReceive('cast')
             ->once()
@@ -132,15 +132,15 @@ class InsertCommandTest extends TestCase
     {
         $table = 'table';
 
-        $this->mapper->shouldReceive('mapColumns')
-            ->once()
-            ->with($this->state->getData())
-            ->andReturn(['baz' => 'bar']);
-
         $this->mapper->shouldReceive('uncast')
             ->once()
-            ->with(['baz' => 'bar'])
-            ->andReturn(['baz1' => 'bar']);
+            ->with($this->state->getData())
+            ->andReturn(['foo' => 'baaar']);
+
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with(['foo' => 'baaar'])
+            ->andReturn(['baz' => 'bar']);
 
         $this->mapper->shouldReceive('cast')
             ->once()

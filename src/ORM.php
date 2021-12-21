@@ -208,6 +208,17 @@ final class ORM implements ORMInterface
     }
 
     /**
+     * Warmup ORM and preload all internal services.
+     */
+    public function loadServices(): void
+    {
+        // Preload providers with back to ORM reference
+        $this->relationProvider->prepareRelationMaps();
+        $this->repositoryProvider->prepareRepositories();
+        $this->mapperProvider->prepareMappers();
+    }
+
+    /**
      * @deprecated since Cycle ORM v1.8, this method will be removed in future releases.
      * Use method {@see with} instead.
      */
@@ -240,10 +251,5 @@ final class ORM implements ORMInterface
             $this->relationProvider,
             $this->indexProvider
         );
-
-        // Preload providers with back to ORM reference
-        $this->relationProvider->prepareRelationMaps();
-        $this->repositoryProvider->prepareRepositories();
-        $this->mapperProvider->prepareMappers();
     }
 }

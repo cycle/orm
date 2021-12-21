@@ -3,7 +3,7 @@ Feel free to contribute to the development of the Cycle ORM or its components.
 Please make sure that the following requirements are satisfied before submitting your pull request:
 
 * KISS
-* PSR-2 ([your PRs will be automatically tested](https://github.com/cycle/orm/blob/master/.travis.yml#L26))
+* PSR-12
 * `declare(strict_types=1);` is mandatory
 * Your code must include tests
 
@@ -35,7 +35,7 @@ If you want to help but don't know where to start:
 * TODOs
 * Updating to latest dev-dependencies (PHPUnit, Mockery, etc)
 * Quality recommendations and improvements
-* Check [Open Issues](https://github.com/spiral/framework/issues)
+* Check [Open Issues](https://github.com/cycle/orm/issues)
 * More tests are always welcome
 * Typos
 
@@ -45,7 +45,7 @@ Feel free to propose any ideas related to architecture, docs (___docs are never 
 
 ## Critical/Security Issues
 If you found something which shouldn't be there or a bug which opens a security hole please let me know immediately by email
-[wolfy-j@spiralscout.com](mailto:team@spiralscout.com)
+[team@spiralscout.com](mailto:team@spiralscout.com)
 
 ## Official Support
 Cycle ORM and all related components are maintained by [Spiral Scout](https://spiralscout.com/).

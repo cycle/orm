@@ -3,25 +3,6 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  lint:
-    name: Check coding standards
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - name: Restore Composer Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ runner.os }}-composer-
-      - name: Install Dependencies
-        run: composer install --no-interaction --prefer-dist
-      - name: Check CS
-        run: vendor/bin/spiral-cs check src tests
   test:
     needs: sqlite
     name: Test PHP ${{ matrix.php-version }} with Code Coverage

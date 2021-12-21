@@ -51,9 +51,10 @@ final class ORM implements ORMInterface
     public function __construct(
         private FactoryInterface $factory,
         private SchemaInterface $schema,
-        CommandGeneratorInterface $commandGenerator = null
+        CommandGeneratorInterface $commandGenerator = null,
+        HeapInterface $heap = null
     ) {
-        $this->heap = new Heap();
+        $this->heap = $heap ?? new Heap();
         $this->commandGenerator = $commandGenerator ?? new CommandGenerator();
         $this->resetRegistry();
     }
@@ -63,7 +64,9 @@ final class ORM implements ORMInterface
      */
     public function __clone()
     {
-        $this->heap = new Heap();
+        $this->heap = clone $this->heap;
+        $this->heap->clean();
+
         $this->resetRegistry();
     }
 
@@ -178,15 +181,15 @@ final class ORM implements ORMInterface
         ?FactoryInterface $factory = null,
         ?HeapInterface $heap = null
     ): ORMInterface {
-        $orm = clone $this;
+        $heap ??= clone $this->heap;
+        $heap->clean();
 
-        $orm->heap = $heap ?? $orm->heap;
-        $orm->schema = $schema ?? $orm->schema;
-        $orm->factory = $factory ?? $orm->factory;
-
-        $orm->resetRegistry();
-
-        return $orm;
+        return new self(
+            factory: $factory ?? $this->factory,
+            schema: $schema ?? $this->schema,
+            commandGenerator: $this->commandGenerator,
+            heap: $heap
+        );
     }
 
     /**
@@ -205,6 +208,17 @@ final class ORM implements ORMInterface
     public function withFactory(FactoryInterface $factory): ORMInterface
     {
         return $this->with(factory: $factory);
+    }
+
+    /**
+     * Warmup ORM and preload all internal services.
+     */
+    public function loadServices(): void
+    {
+        // Preload providers with back to ORM reference
+        $this->relationProvider->prepareRelationMaps();
+        $this->repositoryProvider->prepareRepositories();
+        $this->mapperProvider->prepareMappers();
     }
 
     /**
@@ -240,10 +254,5 @@ final class ORM implements ORMInterface
             $this->relationProvider,
             $this->indexProvider
         );
-
-        // Preload providers with back to ORM reference
-        $this->relationProvider->prepareRelationMaps();
-        $this->repositoryProvider->prepareRepositories();
-        $this->mapperProvider->prepareMappers();
     }
 }

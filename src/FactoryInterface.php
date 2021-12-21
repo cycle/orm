@@ -16,8 +16,6 @@ use Spiral\Core\FactoryInterface as CoreFactory;
 
 /**
  * Must provide access to generic DI.
- *
- * @internal
  */
 interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
 {

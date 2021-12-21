@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\ORM;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Schema;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
@@ -14,7 +15,6 @@ use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Service\RepositoryProviderInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
-use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use WeakMap;
@@ -24,6 +24,10 @@ abstract class MemoryTest extends BaseTest
 {
     use TableTrait;
 
+    private const ACTION_CLONE = 'clone';
+    private const ACTION_UNSET = 'unset';
+    private const ACTION_WITH = 'with';
+
     public function setUp(): void
     {
         parent::setUp();
@@ -32,103 +36,70 @@ abstract class MemoryTest extends BaseTest
 
     // With `Collect Garbage Cycles`
 
-    public function testOrmCloneGarbageAndCollectGarbageCycles(): void
+    public function configProvider(): iterable
     {
-        $orm = $this->createORM();
+        return [
+            # With `Collect Garbage Cycles`
+            [self::ACTION_WITH, 'garbage' => true, 'warmupOrm' => true, 'loadLinks' => false, 'loadRoles' => false],
+            [self::ACTION_UNSET, 'garbage' => true, 'warmupOrm' => true, 'loadLinks' => false, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => true, 'warmupOrm' => true, 'loadLinks' => true, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => true, 'warmupOrm' => true, 'loadLinks' => true, 'loadRoles' => true],
+            # Without `Collect Garbage Cycles`
+            [self::ACTION_WITH, 'garbage' => false, 'warmupOrm' => true, 'loadLinks' => false, 'loadRoles' => false],
+            [self::ACTION_UNSET, 'garbage' => false, 'warmupOrm' => true, 'loadLinks' => false, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => false, 'warmupOrm' => true, 'loadLinks' => true, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => false, 'warmupOrm' => true, 'loadLinks' => true, 'loadRoles' => true],
 
-        $link = WeakReference::create($orm);
+            # The same but without warming up
 
-        $orm = $this->orm->with(factory: new Factory($this->dbal));
-        \gc_collect_cycles();
-
-        $this->assertTrue($link->get() === null);
+            # With `Collect Garbage Cycles`
+            [self::ACTION_WITH, 'garbage' => true, 'warmupOrm' => false, 'loadLinks' => false, 'loadRoles' => false],
+            [self::ACTION_UNSET, 'garbage' => true, 'warmupOrm' => false, 'loadLinks' => false, 'loadRoles' => false],
+            [self::ACTION_UNSET, 'garbage' => true, 'warmupOrm' => false, 'loadLinks' => true, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => true, 'warmupOrm' => false, 'loadLinks' => true, 'loadRoles' => true],
+            # Without `Collect Garbage Cycles`
+            // [self::ACTION_WITH, 'garbage' => false, 'warmupOrm' => false, 'loadLinks' => false, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => false, 'warmupOrm' => false, 'loadLinks' => false, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => false, 'warmupOrm' => false, 'loadLinks' => true, 'loadRoles' => false],
+            // [self::ACTION_UNSET, 'garbage' => false, 'warmupOrm' => false, 'loadLinks' => true, 'loadRoles' => true],
+        ];
     }
 
-    public function testOrmUnsetGarbageAndCollectGarbageCycles(): void
+    /**
+     * @dataProvider configProvider()
+     */
+    public function testOrm(string $action, bool $garbage, bool $warmupOrm, bool $loadLinks, bool $loadRoles): void
     {
+        // Create ORM
         $orm = $this->createORM();
-
+        // Preload all ORM services
+        $warmupOrm and $orm->loadServices();
+        // Collect weak references
+        $loadLinks and $map = $this->collectReferences($orm, $loadRoles);
+        // Create main ORM reference
         $link = WeakReference::create($orm);
 
-        unset($orm);
-        \gc_collect_cycles();
+        // Do main action
+        switch ($action) {
+            case self::ACTION_WITH:
+                $orm = $this->orm->with(factory: new Factory($this->dbal));
+                break;
+            case self::ACTION_UNSET:
+                unset($orm);
+                break;
+        }
 
+        // Collect cyclic references
+        $garbage and \gc_collect_cycles();
+        // check weak references
+        $loadLinks and $this->assertCount(0, $map);
+        // Check main orm reference
         $this->assertTrue($link->get() === null);
     }
-
-    // public function testOrmUnsetAndCollectGarbageCyclesWithLoadedServicesCheck(): void
-    // {
-    //     $orm = $this->createORM();
-    //     $map = $this->collectReferences($orm, false);
-    //
-    //     // $this->assertCount(17, $map);
-    //     unset($orm);
-    //     \gc_collect_cycles();
-    //
-    //     $this->assertCount(0, $map);
-    // }
-
-    // public function testOrmUnsetAndCollectGarbageCyclesWithLoadedServicesWithRolesCheck(): void
-    // {
-    //     $orm = $this->createORM();
-    //     $map = $this->collectReferences($orm, true);
-    //
-    //     // $this->assertCount(17, $map);
-    //     unset($orm);
-    //     \gc_collect_cycles();
-    //
-    //     $this->assertCount(0, $map);
-    // }
-
-    // Without `Collect Garbage Cycles`
-
-    public function testOrmCloneGarbage(): void
-    {
-        $orm = $this->createORM();
-
-        $link = WeakReference::create($orm);
-
-        $orm = $this->orm->with(factory: new Factory($this->dbal));
-
-        $this->assertTrue($link->get() === null);
-    }
-
-    public function testOrmUnsetGarbage(): void
-    {
-        $orm = $this->createORM();
-
-        $link = WeakReference::create($orm);
-
-        unset($orm);
-
-        $this->assertTrue($link->get() === null);
-    }
-
-    // public function testOrmUnsetWithLoadedServicesCheck(): void
-    // {
-    //     $orm = $this->createORM();
-    //     $map = $this->collectReferences($orm, false);
-    //
-    //     // $this->assertCount(17, $map);
-    //     unset($orm);
-    //
-    //     $this->assertCount(0, $map);
-    // }
-
-    // public function testOrmUnsetWithLoadedServicesWithRolesCheck(): void
-    // {
-    //     $orm = $this->createORM();
-    //     $map = $this->collectReferences($orm, true);
-    //
-    //     // $this->assertCount(17, $map);
-    //     unset($orm);
-    //
-    //     $this->assertCount(0, $map);
-    // }
 
     // Support
 
-    private function createORM(): ORMInterface
+    private function createORM(): ORM
     {
         $schema = new Schema(include __DIR__ . '/schema.php');
         return new ORM(new Factory($this->dbal), $schema);

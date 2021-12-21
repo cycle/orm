@@ -273,6 +273,11 @@ abstract class AbstractLoader implements LoaderInterface
         $this->loadChild($node, $includeRole);
     }
 
+    public function getSource(): SourceInterface
+    {
+        return $this->source;
+    }
+
     /**
      * Indicates that loader loads data.
      */

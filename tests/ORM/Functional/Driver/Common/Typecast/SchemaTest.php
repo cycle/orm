@@ -101,32 +101,35 @@ final class SchemaTest extends BaseTest
 
     public function testHandlerWithWrongInterfaceShouldThrowAnException(): void
     {
+        $this->setUpOrm([
+            SchemaInterface::TYPECAST_HANDLER => InvalidTypecaster::class,
+        ]);
+
         $this->expectException(FactoryTypecastException::class);
         $this->expectErrorMessage(
             'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
         );
 
-        $this->setUpOrm([
-            SchemaInterface::TYPECAST_HANDLER => InvalidTypecaster::class,
-        ]);
+        $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
     }
 
     public function testHandlerWithWrongInterfaceAmongArrayShouldThrowAnException(): void
     {
         $this->container = new Container();
         $this->container->bind('bar-foo', Typecaster::class);
-
-        $this->expectException(FactoryTypecastException::class);
-        $this->expectErrorMessage(
-            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
-        );
-
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => [
                 InvalidTypecaster::class,
                 'bar-foo',
             ],
         ]);
+
+        $this->expectException(FactoryTypecastException::class);
+        $this->expectErrorMessage(
+            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
+        );
+
+        $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
     }
 
     public function testUseTypecastFromContainer(): void

@@ -156,18 +156,6 @@ final class ORM implements ORMInterface
         );
     }
 
-    public function promise(string $role, array $scope): object
-    {
-        if (\count($scope) === 1) {
-            $e = $this->heap->find($role, $scope);
-            if ($e !== null) {
-                return $e;
-            }
-        }
-
-        return new Reference($role, $scope);
-    }
-
     public function getIndexes(string $entity): array
     {
         return $this->indexProvider->getIndexes(
@@ -176,9 +164,7 @@ final class ORM implements ORMInterface
     }
 
     /**
-     * Get relation map associated with the given class.
-     *
-     * todo: the ORMInterface hasn't this method
+     * Get relation map associated with the given role or class.
      */
     public function getRelationMap(string $entity): RelationMap
     {

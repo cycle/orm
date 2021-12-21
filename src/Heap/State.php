@@ -177,13 +177,6 @@ final class State
     public function register(string $key, mixed $value): void
     {
         $this->freeWaitingField($key);
-
-        \Cycle\ORM\Transaction\Pool::DEBUG && print sprintf(
-            "State(%s):Register {$key} => %s\n",
-            spl_object_id($this),
-            var_export($value, true)
-        );
-
         $this->data[$key] = $value;
     }
 

@@ -8,6 +8,7 @@ use Cycle\Database\DatabaseInterface;
 use Cycle\Database\Query\ReturningInterface;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
+use Cycle\ORM\Command\Traits\MapperTrait;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 
@@ -16,18 +17,20 @@ use Cycle\ORM\MapperInterface;
  */
 final class Insert extends StoreCommand
 {
+    use MapperTrait;
     use ErrorTrait;
 
     public function __construct(
         DatabaseInterface $db,
         string $table,
         State $state,
-        private ?MapperInterface $mapper,
+        ?MapperInterface $mapper,
         /** @var string[] */
         private array $primaryKeys = [],
         private ?string $pkColumn = null
     ) {
         parent::__construct($db, $table, $state);
+        $this->mapper = $mapper;
     }
 
     public function isReady(): bool
@@ -61,25 +64,19 @@ final class Insert extends StoreCommand
             $state->setData($this->appendix);
         }
 
-        $data = $state->getData();
+        $uncasted = $data = $state->getData();
 
         // filter PK null values
         foreach ($this->primaryKeys as $key) {
-            if (!isset($data[$key])) {
-                unset($data[$key]);
+            if (!isset($uncasted[$key])) {
+                unset($uncasted[$key]);
             }
         }
-
-        $merged = array_merge(
-            $this->columns,
-            $this->mapper?->mapColumns($data) ?? $data
-        );
+        $uncasted = $this->prepareData($uncasted);
 
         $insert = $this->db
             ->insert($this->table)
-            ->values(
-                $this->mapper?->uncast($merged) ?? $merged
-            );
+            ->values(\array_merge($this->columns, $uncasted));
 
         if ($this->pkColumn !== null && $insert instanceof ReturningInterface) {
             $insert->returning($this->pkColumn);

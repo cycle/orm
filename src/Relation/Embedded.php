@@ -166,9 +166,9 @@ final class Embedded implements SameRowRelationInterface
             }
         }
 
-        $mapper = $this->mapperProvider->getMapper($this->target);
-        $changes = $this->getChanges($related, $rTuple->state);
         if ($command !== null) {
+            $mapper = $this->mapperProvider->getMapper($this->target);
+            $changes = $mapper->uncast($changes);
             foreach ($mapper->mapColumns($changes) as $field => $value) {
                 $command->registerColumn($field, $value);
             }
@@ -188,13 +188,7 @@ final class Embedded implements SameRowRelationInterface
             unset($data[$key]);
         }
 
-        // todo use Node::compare?
-        return array_udiff_assoc($data, $state->getTransactionData(), [self::class, 'compare']);
-    }
-
-    private static function compare(mixed $a, mixed $b): int
-    {
-        return $a <=> $b;
+        return array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
     }
 
     /**

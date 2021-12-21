@@ -6,7 +6,6 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Service\IndexProviderInterface;

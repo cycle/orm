@@ -17,8 +17,8 @@ use Cycle\ORM\MapperInterface;
  */
 final class Insert extends StoreCommand
 {
-    use MapperTrait;
     use ErrorTrait;
+    use MapperTrait;
 
     public function __construct(
         DatabaseInterface $db,

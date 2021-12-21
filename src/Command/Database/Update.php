@@ -21,8 +21,8 @@ use Cycle\ORM\MapperInterface;
  */
 final class Update extends StoreCommand implements ScopeCarrierInterface
 {
-    use MapperTrait;
     use ErrorTrait;
+    use MapperTrait;
     use ScopeTrait;
 
     public function __construct(

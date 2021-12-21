@@ -17,8 +17,8 @@ use Cycle\ORM\MapperInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 {
-    use MapperTrait;
     use ErrorTrait;
+    use MapperTrait;
     use ScopeTrait;
 
     public function __construct(

@@ -16,7 +16,6 @@ enabled:
   - function_to_constant
   - hash_to_slash_comment
   - is_null
-  - logical_operators
   - magic_constant_casing
   - magic_method_casing
   - method_separation

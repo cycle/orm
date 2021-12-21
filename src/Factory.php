@@ -27,9 +27,6 @@ use Cycle\ORM\Select\SourceInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 
-/**
- * @internal
- */
 final class Factory implements FactoryInterface
 {
     private RelationConfig $config;

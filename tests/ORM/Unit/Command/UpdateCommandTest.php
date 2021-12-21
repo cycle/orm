@@ -86,21 +86,25 @@ class UpdateCommandTest extends TestCase
         $this->cmd->setScope('key', 'value');
         $this->cmd->registerAppendix('name', 'new value');
 
-        $this->mapper->shouldReceive('mapColumns')
-            ->with(['name' => 'new value'])
+        $this->mapper->shouldReceive('uncast')
+            ->with(['key' => 'value'])
             ->andReturn(['baz' => 'bar']);
 
         $this->mapper->shouldReceive('uncast')
-            ->with(['baz' => 'bar'])
+            ->with(['name' => 'new value'])
             ->andReturn(['baz1' => 'bar']);
 
         $this->mapper->shouldReceive('mapColumns')
-            ->with(['key' => 'value'])
-            ->andReturn(['key' => 'new_value']);
+            ->with(['baz' => 'bar'])
+            ->andReturn(['key' => 'scope']);
+
+        $this->mapper->shouldReceive('mapColumns')
+            ->with(['baz1' => 'bar'])
+            ->andReturn(['column' => 'value']);
 
         $this->db->shouldReceive('update')
             ->once()
-            ->with('table', ['baz1' => 'bar'], ['key' => 'new_value'])
+            ->with('table', ['column' => 'value'], ['key' => 'scope'])
             ->andReturn($query = \Mockery::mock(UpdateQuery::class));
 
         $query->shouldReceive('run')->once()->andReturn(5);
@@ -111,14 +115,18 @@ class UpdateCommandTest extends TestCase
         $this->assertSame(5, $this->cmd->getAffectedRows());
     }
 
-    public function testExecuteWithEmptyDataShouldNptRunQuwry()
+    public function testExecuteWithEmptyDataShouldNotRunQuery()
     {
         $this->cmd->setScope('key', 'value');
         $this->cmd->registerAppendix('name', 'new value');
 
-        $this->mapper->shouldReceive('mapColumns')
+        $this->mapper->shouldReceive('uncast')
             ->with(['name' => 'new value'])
-            ->andReturn();
+            ->andReturn(['name' => 'uncasted']);
+
+        $this->mapper->shouldReceive('mapColumns')
+            ->with(['name' => 'uncasted'])
+            ->andReturn([]);
 
         $this->cmd->execute();
 

@@ -383,7 +383,6 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             $this->orm->make(MarkdownPage::class, ['title' => 'page 3', 'content' => '...', 'owner_id' => 2]),
         ];
 
-        $this->logger->display();
         $this->captureWriteQueries();
         $this->save($entity);
         $this->assertNumWrites(6);

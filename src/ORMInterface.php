@@ -6,7 +6,6 @@ namespace Cycle\ORM;
 
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\EntityProviderInterface;
 use Cycle\ORM\Service\IndexProviderInterface;
@@ -47,13 +46,6 @@ interface ORMInterface extends
      * @psalm-return ($role is class-string ? TEntity : object)
      */
     public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object;
-
-    /**
-     * Promise object reference, proxy or object from memory heap.
-     *
-     * @return object|ReferenceInterface
-     */
-    public function promise(string $role, array $scope): object;
 
     /**
      * Get factory for relations, mappers and etc.

@@ -134,7 +134,6 @@ abstract class DatabaseMapper implements MapperInterface
     public function queueUpdate(object $entity, Node $node, State $state): CommandInterface
     {
         $fromData = $state->getTransactionData();
-        \Cycle\ORM\Transaction\Pool::DEBUG && print 'changes count: ' . \count($state->getChanges()) . "\n";
 
         $update = new Update(
             $this->source->getDatabase(),

@@ -20,8 +20,6 @@ use Traversable;
  */
 final class Pool implements \Countable
 {
-    public const DEBUG = false;
-
     /** @var SplObjectStorage<object, Tuple> */
     private SplObjectStorage $storage;
 
@@ -90,17 +88,6 @@ final class Pool implements \Countable
         return $this->smartAttachTuple($tuple, $highPriority, $persist);
     }
 
-    // public function attachTuple(Tuple $tuple): void
-    // {
-    //     // Find existing
-    //     $found = $this->findTuple($tuple->entity);
-    //     if ($found !== null) {
-    //         $this->updateTuple($found, $tuple->task, $tuple->status, $tuple->cascade, $tuple->node, $tuple->state);
-    //         return;
-    //     }
-    //     $this->smartAttachTuple($tuple);
-    // }
-
     private function smartAttachTuple(Tuple $tuple, bool $highPriority = false, bool $snap = false): Tuple
     {
         if ($tuple->status === Tuple::STATUS_PROCESSED) {
@@ -119,17 +106,9 @@ final class Pool implements \Countable
         if (isset($tuple->node) && $tuple->task === Tuple::TASK_DELETE) {
             $tuple->state->setStatus(Node::SCHEDULED_DELETE);
         }
-        $string = sprintf(
-            "pool:attach %s, task: %s, status: %s\n",
-            isset($tuple->node) ? $tuple->node->getRole() : $tuple->entity::class,
-            $tuple->task,
-            $tuple->status
-        );
         if (($this->priorityAutoAttach || $highPriority) && $tuple->status === Tuple::STATUS_PREPARING) {
-            self::DEBUG && print "\033[90mWith priority $string\033[0m";
             $this->priorityStorage->attach($tuple->entity, $tuple);
         } else {
-            self::DEBUG && print "\033[90m$string\033[0m";
             $this->storage->attach($tuple->entity, $tuple);
         }
         return $tuple;
@@ -225,7 +204,6 @@ final class Pool implements \Countable
                 }
                 $this->priorityAutoAttach = true;
                 $stage = 1;
-                self::DEBUG && print "\033[90mPOOL_STAGE $stage\033[0m\n";
                 $this->storage->rewind();
             }
             if ($stage === 1) {
@@ -246,7 +224,6 @@ final class Pool implements \Countable
                     }
                 }
                 $stage = 2;
-                self::DEBUG && print "\033[90mPOOL_STAGE $stage\033[0m\n";
                 $this->storage->rewind();
             }
             if ($stage === 2) {
@@ -273,10 +250,6 @@ final class Pool implements \Countable
                 }
                 $hasUnresolved = $this->unprocessed !== [];
                 if ($this->happens !== 0 && $hasUnresolved) {
-                    self::DEBUG && print
-                        "+-------------------------------\n" .
-                        "| \033[32m  LOOP UNRESOLVED :: " . count($this->unprocessed) . " \033[0m\n" .
-                        "+-------------------------------\n";
                     /** @psalm-suppress InvalidIterator */
                     foreach ($this->unprocessed as $item) {
                         $this->storage->attach($item->entity, $item);
@@ -424,15 +397,4 @@ final class Pool implements \Countable
         $tuple->node = $tuple->node ?? $node;
         $tuple->state = $tuple->state ?? $state;
     }
-
-    // private function findTuple(object $entity): ?Tuple
-    // {
-    //     if ($this->priorityEnabled && $this->priorityStorage->contains($entity)) {
-    //         return $this->priorityStorage->offsetGet($entity);
-    //     }
-    //     if ($this->storage->contains($entity)) {
-    //         return $this->storage->offsetGet($entity);
-    //     }
-    //     return null;
-    // }
 }

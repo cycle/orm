@@ -7,6 +7,7 @@ namespace Cycle\ORM\Command\Database;
 use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\StoreCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
+use Cycle\ORM\Command\Traits\MapperTrait;
 use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\State;
@@ -21,17 +22,19 @@ use Cycle\ORM\MapperInterface;
 final class Update extends StoreCommand implements ScopeCarrierInterface
 {
     use ErrorTrait;
+    use MapperTrait;
     use ScopeTrait;
 
     public function __construct(
         DatabaseInterface $db,
         string $table,
         State $state,
-        private ?MapperInterface $mapper,
+        ?MapperInterface $mapper,
         /** @var string[] */
         array $primaryKeys
     ) {
         parent::__construct($db, $table, $state);
+        $this->mapper = $mapper;
         $this->waitScope(...$primaryKeys);
     }
 
@@ -85,14 +88,15 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         }
 
         $allChanges = $changes = $this->state->getChanges();
-        $data = $this->mapper !== null && $changes !== [] ? $this->mapper->mapColumns($changes) : $changes;
+        $data = $this->prepareData($changes);
         $fields = \array_keys($changes);
         if ($data !== [] || $this->columns !== []) {
+            $scope = $this->scope;
             $this->affectedRows = $this->db
                 ->update(
                     $this->table,
-                    $this->mapper?->uncast(\array_merge($this->columns, $data)) ?? $data,
-                    $this->mapper?->mapColumns($this->scope) ?? $this->scope
+                    \array_merge($this->columns, $data),
+                    $this->prepareData($scope)
                 )
                 ->run();
         }

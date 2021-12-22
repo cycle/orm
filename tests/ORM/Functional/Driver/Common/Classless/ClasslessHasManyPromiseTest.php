@@ -142,7 +142,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertNumReads(0);
 
         // Resolve promise
-        $resolved = $u->comments->getCollection();
+        $resolved = $u->comments->fetch();
         $this->assertNumReads(1);
 
         $this->assertTrue($u->comments->hasValue());
@@ -203,7 +203,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $this->assertFalse($u->comments->hasValue());
         $this->assertNumReads(0);
 
-        $this->assertCount(0, $u->comments->getCollection());
+        $this->assertCount(0, $u->comments->fetch());
         $this->assertNumReads(1);
     }
 
@@ -234,7 +234,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     {
         $e = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
 
-        $e->comments = $e->comments->getCollection();
+        $e->comments = $e->comments->fetch();
         $e->comments->remove(1);
 
         $this->save($e);
@@ -242,7 +242,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $e = (new Select($this->orm->with(heap: new Heap()), 'user'))
             ->wherePK(1)->fetchOne();
 
-        $e->comments = $e->comments->getCollection();
+        $e->comments = $e->comments->fetch();
         $this->assertCount(2, $e->comments);
 
         $this->assertSame('msg 1', $e->comments[0]->message);
@@ -253,7 +253,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     {
         $e = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
 
-        $e->comments = $e->comments->getCollection();
+        $e->comments = $e->comments->fetch();
         $e->comments->remove(1);
 
         $c = $this->orm->make('comment');
@@ -265,7 +265,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $e = (new Select($this->orm->withHeap(new Heap()), 'user'))
             ->wherePK(1)->fetchOne();
 
-        $e->comments = $e->comments->getCollection();
+        $e->comments = $e->comments->fetch();
         $this->assertCount(3, $e->comments);
 
         $this->assertSame('msg 1', $e->comments[0]->message);
@@ -278,8 +278,8 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $selector = new Select($this->orm, 'user');
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
-        $a->comments = $a->comments->getCollection();
-        $b->comments = $b->comments->getCollection();
+        $a->comments = $a->comments->fetch();
+        $b->comments = $b->comments->fetch();
 
         $this->assertCount(3, $a->comments);
         $this->assertCount(0, $b->comments);

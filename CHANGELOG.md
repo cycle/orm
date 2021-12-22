@@ -3,7 +3,15 @@
 
 v2.0.0 (22.12.2021)
 --------------------
-
+- Minimal PHP version is 8.0
+- Composited keys
+- 'Joined Table Inheritance' and 'Single Table Inheritance'
+- Added ProxyMapper (`Cycle\Orm\Mapper\Mapper`)
+- Supporting for arrays/Doctrine/Laravel or custom collections in HasMany adn ManyToMany relations
+- Typecasting moved to Mappers
+- Added Typecast handlers with Castable/Uncastable interfaces
+- Added Entity Manager and Unit Of Work instead of `Cycle\ORM\Transaction`
+- A lot of Interfaces are changed
 
 v1.8.0 (04.11.2021)
 --------------------

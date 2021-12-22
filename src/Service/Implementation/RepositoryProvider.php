@@ -50,6 +50,9 @@ final class RepositoryProvider implements RepositoryProviderInterface
 
     public function prepareRepositories(): void
     {
+        if ($this->orm === null) {
+            return;
+        }
         foreach ($this->schema->getRoles() as $role) {
             $this->getRepository($role);
         }

@@ -38,6 +38,9 @@ final class MapperProvider implements MapperProviderInterface
 
     public function prepareMappers(): void
     {
+        if ($this->orm === null) {
+            return;
+        }
         foreach ($this->orm->getSchema()->getRoles() as $role) {
             $this->getMapper($role);
         }

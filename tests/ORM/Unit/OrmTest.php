@@ -43,7 +43,7 @@ final class OrmTest extends TestCase
     public function testORMCloneWithFactory(): void
     {
         $orm = $this->createOrm();
-        $new = $orm->with(factory: new Factory(new DatabaseManager(new DatabaseConfig([])),));
+        $new = $orm->with(factory: new Factory(new DatabaseManager(new DatabaseConfig([]))));
 
         $this->assertNotSame($orm, $new);
         $this->assertNotSame($new->getFactory(), $orm->getFactory());

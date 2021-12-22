@@ -14,10 +14,7 @@ final class Promise implements ReferenceInterface
     ) {
     }
 
-    /**
-     * @return iterable|object|null
-     */
-    public function getCollection()
+    public function fetch(): object|iterable|null
     {
         if (!$this->origin->hasValue()) {
             $this->resolve();

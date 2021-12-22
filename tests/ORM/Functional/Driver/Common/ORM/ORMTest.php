@@ -61,36 +61,6 @@ abstract class ORMTest extends BaseTest
         $this->assertCount(1, $this->orm->getSchema()->getRoles());
     }
 
-    public function testORMClone(): void
-    {
-        $orm = $this->orm->withFactory($this->orm->getFactory());
-        $this->assertNotSame($orm, $this->orm);
-    }
-
-    public function testORMCloneWithSchema(): void
-    {
-        $orm = $this->orm->with(new Schema([]));
-
-        $this->assertNotSame($orm, $this->orm);
-        $this->assertNotSame($orm->getSchema(), $this->orm->getSchema());
-    }
-
-    public function testORMCloneWithFactory(): void
-    {
-        $orm = $this->orm->with(factory: new Factory($this->dbal));
-
-        $this->assertNotSame($orm, $this->orm);
-        $this->assertNotSame($orm->getFactory(), $this->orm->getFactory());
-    }
-
-    public function testORMCloneWithHeap(): void
-    {
-        $orm = $this->orm->with(heap: new Heap());
-
-        $this->assertNotSame($orm, $this->orm);
-        $this->assertNotSame($orm->getHeap(), $this->orm->getHeap());
-    }
-
     public function testORMGetByRole(): void
     {
         $this->assertNull($this->orm->get('user', ['id' => 1], false));

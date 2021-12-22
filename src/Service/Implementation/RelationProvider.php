@@ -39,6 +39,9 @@ final class RelationProvider implements RelationProviderInterface
 
     public function prepareRelationMaps(): void
     {
+        if ($this->orm === null) {
+            return;
+        }
         foreach ($this->orm->getSchema()->getRoles() as $role) {
             $this->getRelationMap($role);
         }

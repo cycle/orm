@@ -7,7 +7,6 @@ namespace Cycle\ORM;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\EntityProviderInterface;
@@ -213,7 +212,7 @@ final class ORM implements ORMInterface
     /**
      * Warmup ORM and preload all internal services.
      */
-    public function loadServices(): void
+    public function prepareServices(): void
     {
         // Preload providers with back to ORM reference
         $this->relationProvider->prepareRelationMaps();

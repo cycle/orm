@@ -73,7 +73,7 @@ abstract class MemoryTest extends BaseTest
         // Create ORM
         $orm = $this->createORM();
         // Preload all ORM services
-        $warmupOrm and $orm->loadServices();
+        $warmupOrm and $orm->prepareServices();
         // Collect weak references
         $loadLinks and $map = $this->collectReferences($orm, $loadRoles);
         // Create main ORM reference

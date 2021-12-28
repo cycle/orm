@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 class TypecastTest extends TestCase
 {
     private Typecast $typecast;
-    private \Mockery\LegacyMockInterface|\Mockery\MockInterface|DatabaseInterface $db;
+    private m\LegacyMockInterface|m\MockInterface|DatabaseInterface $db;
 
     protected function setUp(): void
     {
@@ -25,7 +25,7 @@ class TypecastTest extends TestCase
         );
     }
 
-    public function testSetRules()
+    public function testSetRules(): void
     {
         $rules = [
             'id' => 'int',
@@ -41,7 +41,7 @@ class TypecastTest extends TestCase
         $this->assertSame(['uuid' => 'uuid'], $this->typecast->setRules($rules));
     }
 
-    public function testCastIntValue()
+    public function testCastIntValue(): void
     {
         $this->typecast->setRules(['id' => 'int']);
 
@@ -51,7 +51,7 @@ class TypecastTest extends TestCase
         ], $this->typecast->cast(['id' => '10', 'foo' => '5']));
     }
 
-    public function testCastBoolValue()
+    public function testCastBoolValue(): void
     {
         $this->typecast->setRules(['is_admin' => 'bool']);
 
@@ -61,7 +61,7 @@ class TypecastTest extends TestCase
         ], $this->typecast->cast(['is_admin' => 0, 'foo' => 1]));
     }
 
-    public function testCastFloatValue()
+    public function testCastFloatValue(): void
     {
         $this->typecast->setRules(['price' => 'float']);
 
@@ -71,7 +71,7 @@ class TypecastTest extends TestCase
         ], $this->typecast->cast(['price' => 100, 'foo' => '5']));
     }
 
-    public function testCasDateTimeValue()
+    public function testCasDateTimeValue(): void
     {
         $this->db->shouldReceive('getDriver')->once()->andReturn($driver = m::mock(DriverInterface::class));
         $driver->shouldReceive('getTimezone')->once()->andReturn(new \DateTimeZone('Europe/Berlin'));
@@ -84,7 +84,7 @@ class TypecastTest extends TestCase
         $this->assertSame('2010-05-10', $data['foo']);
     }
 
-    public function testCastValueWithNonExistType()
+    public function testCastValueWithNonExistType(): void
     {
         $this->typecast->setRules(['foo' => 'bar']);
 
@@ -93,7 +93,7 @@ class TypecastTest extends TestCase
         ], $this->typecast->cast(['price' => '10000']));
     }
 
-    public function testCastCallableValue()
+    public function testCastCallableValue(): void
     {
         $this->typecast->setRules(['uuid' => [Uuid::class, 'parse']]);
 

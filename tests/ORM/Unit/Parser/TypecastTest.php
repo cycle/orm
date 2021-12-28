@@ -32,7 +32,7 @@ class TypecastTest extends TestCase
             'guest' => 'bool',
             'bonus' => 'float',
             'date' => 'datetime',
-            'slug' => fn(string $value) => strtolower($value),
+            'slug' => fn (string $value) => strtolower($value),
             'title' => 'strtoupper',
             'test' => [Uuid::class, 'create'],
             'uuid' => 'uuid',
@@ -47,7 +47,7 @@ class TypecastTest extends TestCase
 
         $this->assertSame([
             'id' => 10,
-            'foo' => '5'
+            'foo' => '5',
         ], $this->typecast->cast(['id' => '10', 'foo' => '5']));
     }
 
@@ -57,7 +57,7 @@ class TypecastTest extends TestCase
 
         $this->assertSame([
             'is_admin' => false,
-            'foo' => 1
+            'foo' => 1,
         ], $this->typecast->cast(['is_admin' => 0, 'foo' => 1]));
     }
 
@@ -67,7 +67,7 @@ class TypecastTest extends TestCase
 
         $this->assertSame([
             'price' => 100.0,
-            'foo' => '5'
+            'foo' => '5',
         ], $this->typecast->cast(['price' => 100, 'foo' => '5']));
     }
 

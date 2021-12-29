@@ -44,12 +44,18 @@ final class PromiseMany implements PromiseInterface
      * @param array        $query
      * @param array        $where
      */
-    public function __construct(ORMInterface $orm, string $target, array $query = [], array $where = [])
-    {
+    public function __construct(
+        ORMInterface $orm,
+        string $target,
+        array $query = [],
+        array $where = [],
+        array $orderBy = []
+    ) {
         $this->orm = $orm;
         $this->target = $target;
         $this->query = $query;
         $this->where = $where;
+        $this->orderBy = $orderBy;
     }
 
     /**
@@ -103,13 +109,5 @@ final class PromiseMany implements PromiseInterface
         $this->orm = null;
 
         return $this->resolved;
-    }
-
-    /**
-     * @internal
-     */
-    public function setOrderBy(array $orderBy = []): void
-    {
-        $this->orderBy = $orderBy;
     }
 }

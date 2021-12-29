@@ -83,9 +83,9 @@ class HasMany extends AbstractRelation
             [
                 $this->outerKey => $innerKey,
             ],
-            $this->schema[Relation::WHERE] ?? []
+            $this->schema[Relation::WHERE] ?? [],
+            $this->schema[Relation::ORDER_BY] ?? []
         );
-        $p->setOrderBy($this->schema[Relation::ORDER_BY] ?? []);
 
         return [new CollectionPromise($p), $p];
     }

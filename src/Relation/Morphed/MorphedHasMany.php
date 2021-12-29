@@ -57,6 +57,7 @@ class MorphedHasMany extends HasMany
             ],
             $this->schema[Relation::WHERE] ?? []
         );
+        $p->setOrderBy($this->schema[Relation::ORDER_BY] ?? []);
 
         return [new CollectionPromise($p), $p];
     }

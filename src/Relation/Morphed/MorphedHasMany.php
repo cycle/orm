@@ -55,7 +55,8 @@ class MorphedHasMany extends HasMany
                 $this->outerKey => $innerKey,
                 $this->morphKey => $node->getRole(),
             ],
-            $this->schema[Relation::WHERE] ?? []
+            $this->schema[Relation::WHERE] ?? [],
+            $this->schema[Relation::ORDER_BY] ?? []
         );
 
         return [new CollectionPromise($p), $p];

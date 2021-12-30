@@ -33,6 +33,9 @@ final class PromiseMany implements PromiseInterface
     private $where = [];
 
     /** @var array */
+    private $orderBy = [];
+
+    /** @var array */
     private $resolved = [];
 
     /**
@@ -41,12 +44,18 @@ final class PromiseMany implements PromiseInterface
      * @param array        $query
      * @param array        $where
      */
-    public function __construct(ORMInterface $orm, string $target, array $query = [], array $where = [])
-    {
+    public function __construct(
+        ORMInterface $orm,
+        string $target,
+        array $query = [],
+        array $where = [],
+        array $orderBy = []
+    ) {
         $this->orm = $orm;
         $this->target = $target;
         $this->query = $query;
         $this->where = $where;
+        $this->orderBy = $orderBy;
     }
 
     /**
@@ -92,6 +101,7 @@ final class PromiseMany implements PromiseInterface
         $select = new Select($this->orm, $this->target);
         $select->scope($this->orm->getSource($this->target)->getConstrain());
         $select->andWhere($this->query + $this->where);
+        $select->orderBy($this->orderBy);
 
         $iterator = new Iterator($this->orm, $this->target, $select->fetchData(), true);
 

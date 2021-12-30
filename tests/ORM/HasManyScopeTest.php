@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests;
 
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -311,7 +312,7 @@ abstract class HasManyScopeTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([
             Relation::SCHEMA => [
-                Relation::ORDER_BY => ['@.level' => 'ASC'],
+                Relation::ORDER_BY => ['@.level' => 'DESC'],
             ],
         ]);
 
@@ -322,14 +323,14 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertCount(4, $a->comments);
         $this->assertCount(3, $b->comments);
 
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 3', $a->comments[2]->message);
-        $this->assertSame('msg 2', $a->comments[1]->message);
-        $this->assertSame('msg 1', $a->comments[0]->message);
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[2]->message);
+        $this->assertSame('msg 1', $a->comments[3]->message);
 
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
         $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        $this->assertSame('msg 2.1', $b->comments[2]->message);
     }
 
     public function testWithOrderByAltered(): void
@@ -473,7 +474,7 @@ abstract class HasManyScopeTest extends BaseTest
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
 
-    protected function withCommentsSchema(array $relationSchema)
+    protected function withCommentsSchema(array $relationSchema): ORMInterface
     {
         $eSchema = [];
         if (isset($relationSchema[Schema::SCOPE])) {
@@ -515,5 +516,28 @@ abstract class HasManyScopeTest extends BaseTest
                 Schema::RELATIONS => [],
             ] + $eSchema,
         ]));
+    }
+
+    public function testWithOrderByLazyLoad(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA => [
+                Relation::ORDER_BY => ['@.level' => 'DESC'],
+            ],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        $this->assertSame('msg 4', $a->comments[0]->message);
+        $this->assertSame('msg 3', $a->comments[1]->message);
+        $this->assertSame('msg 2', $a->comments[2]->message);
+        $this->assertSame('msg 1', $a->comments[3]->message);
+
+        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        $this->assertSame('msg 2.1', $b->comments[2]->message);
     }
 }

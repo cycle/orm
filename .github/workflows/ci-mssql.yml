@@ -23,6 +23,9 @@ jobs:
           - php: '8.0'
             extensions: pdo, pdo_sqlsrv
             mssql: 'server:2019-latest'
+          - php: '8.1'
+            extensions: pdo, pdo_sqlsrv-5.10.0beta2
+            mssql: 'server:2019-latest'
 
     services:
       mssql:
@@ -62,10 +65,11 @@ jobs:
         run: composer self-update
 
       - name: Install dependencies with composer
+        if: matrix.php != '8.2'
         run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
-      - name: Install dependencies with composer php 8.0
-        if: matrix.php == '8.0'
+      - name: Install dependencies with composer php 8.2
+        if: matrix.php == '8.2'
         run: composer update --ignore-platform-reqs --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Run tests with phpunit without coverage

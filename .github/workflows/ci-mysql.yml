@@ -21,6 +21,7 @@ jobs:
 
         php-version:
           - "8.0"
+          - "8.1"
 
         mysql-version:
           - "5.7"
@@ -77,7 +78,12 @@ jobs:
             php${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-
 
       - name: Install dependencies with composer
+        if: matrix.php-version != '8.2'
         run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+
+      - name: Install dependencies with composer php 8.2
+        if: matrix.php-version == '8.2'
+        run: composer update --ignore-platform-reqs --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Run mysql tests with phpunit
         env:

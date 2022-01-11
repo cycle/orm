@@ -12,6 +12,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\Mapper\BaseMapperTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use PHPUnit\Framework\AssertionFailedError;
 
 class EntityWithRelationHydrationTest extends BaseMapperTest
 {
@@ -294,7 +295,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         try {
             $user->profiles[] = 'test-value';
             $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
-        } catch (\Exception) {
+        } catch (AssertionFailedError $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            $this->stringStartsWith('Indirect modification of overloaded property')->evaluate($e->getMessage());
             // That's OK
         }
 
@@ -303,7 +307,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->assertContains('test-value', $user->profiles);
     }
 
-    public function testWriteByLinkLazyOverloadedArray()
+    public function testGetLinkValueFromLazyOverloadedRelation()
     {
         $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
             ->fetchOne();
@@ -311,7 +315,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         try {
             $collection = &$user->profiles;
             $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
-        } catch (\Exception) {
+        } catch (AssertionFailedError $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            $this->stringStartsWith('Indirect modification of overloaded property')->evaluate($e->getMessage());
             // That's OK
         }
         // $user->profile now loaded

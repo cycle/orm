@@ -1,5 +1,75 @@
 # CHANGELOG
 
+v1.8.1 (8.01.2022
+--------------------
+- Add the STI discriminator autoadding in the Schema by @gam6itko (#278)
+- Extract `origin` in the `HasMany::queue()` when it's instance of `Collection` by @roxblnfk (#277)
+- Fix lazy loading sorting by @msmakouz (#300)
+- Up min version of laminas-hydrator by @msmakouz (#310)
+
+v1.8.0 (04.11.2021)
+--------------------
+- Added `ORM::with`. Other `ORM::with*` methods marked as deprecated @msmakouz (#257)
+- Better compatibility between `ConstrainInterface` and `ScopeInterface` @roxblnfk (#271)
+
+v1.7.1 (04.11.2021)
+--------------------
+- Fixed `Node::getChanges()` when a key in `$current` argument is undefined @msmakouz (#238)
+
+v1.7.0 (02.11.2021)
+--------------------
+- Update the Node data comparison mechanism @msmakouz (#235)
+- Fix Entity data comparison with objects in fields @msmakouz (#234)
+- Add ability for relations to independently determine related value changing @hustlahusky (#227)
+
+v1.6.1 (13.10.2021)
+--------------------
+- Prevent repeating entity hydration in the 'has many' relation
+
+v1.6.0 (08.09.2021)
+--------------------
+- Added Scope classes and deprecations for Constrain classes @roxblnfk (#209)
+
+v1.5.1 (06.08.2021)
+--------------------
+- Hotfix: missing type casting to string for primary key @roquie (#204)
+
+v1.5.0 (01.07.2021)
+--------------------
+- Hotfix: fixed type assertions for mapped criteria keys @dimarkov-git (#187)
+- Hotfix: inner keys naming in morphed relations @hustlahusky (#192)
+- Refactor: prevent repeating entity hydration in the Many to Many relations @hustlahusky (#188)
+- Added deprecation for `SchemaInterface::CONSTRAIN`. Use `SchemaInterface::SCOPE` instead @roxblnfk (#194)
+
+v1.4.2 (12.05.2021)
+--------------------
+- Hotfix: PK changes not tracked (#179)
+- Better heap sync (#180)
+
+v1.4.1 (02.04.2021)
+--------------------
+- Fix inserting empty entities by @roxblnfk (#175)
+
+v1.4.0 (31.03.2021)
+--------------------
+- Added support of Doctrine/Annotations v2 by @roxblnfk
+- Bugfix: prevent merge nodes with same roles when initializing pivot entity by @hustlahusky
+- Bugfix: RefersTo and BelongTo relations innerKey naming error by @roxblnfk
+- Added 'orderBy' option for relations by @roxblnfk
+- Fixed ID mapping column is set and differs from the field name by @roxblnfk
+
+v1.3.3 (04.02.2021)
+--------------------
+- fixed issue with redundant UPDATE when updating entity state in cyclic relations (related to TimestampedMapper)
+- fixed issue causing typed (7.4+) entities to fail in cycling many to many relations
+- entity re-load refreshes the entity state and relations instead of keeping the original entity
+- minor optimizations in many to many relations
+- added PHP8 test pipelines
+
+v1.3.2 (04.02.2021)
+--------------------
+- fixes hydration of typed properties by bumping laminas hydrator to v4 by @roxblnfk
+
 v1.3.1 (24.12.2020)
 --------------------
 - bugfix: column mapping for embedded entities now excludes custom properties by @thenotsoft

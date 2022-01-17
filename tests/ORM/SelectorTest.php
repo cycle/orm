@@ -16,7 +16,9 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
+use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -32,6 +34,7 @@ abstract class SelectorTest extends BaseTest
             'id' => 'primary',
             'email' => 'string',
             'balance' => 'float',
+            'comment_id' => 'integer,nullable',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -39,6 +42,20 @@ abstract class SelectorTest extends BaseTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
+            ]
+        );
+
+        $this->makeTable('profile', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'image' => 'string',
+        ]);
+
+        $this->getDatabase()->table('profile')->insertMultiple(
+            ['user_id', 'image'],
+            [
+                [1, 'image.png'],
+                [2, 'second.png'],
             ]
         );
 
@@ -62,16 +79,40 @@ abstract class SelectorTest extends BaseTest
             ]
         );
 
-        $this->orm = $this->withSchema(new Schema([
+        $this->orm = $this->withSchema(new Schema($this->getSchemaDefinition()));
+    }
+
+    private function getSchemaDefinition(): array
+    {
+        return [
             User::class => [
                 Schema::ROLE => 'user',
                 Schema::MAPPER => Mapper::class,
                 Schema::DATABASE => 'default',
                 Schema::TABLE => 'user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::COLUMNS => ['id', 'email', 'balance', 'comment_id'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [
+                    'profile' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                            Relation::NULLABLE => false,
+                        ],
+                    ],
+                    'lastComment' => [
+                        Relation::TYPE => Relation::REFERS_TO,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'comment_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
                     'comments' => [
                         Relation::TYPE => Relation::HAS_MANY,
                         Relation::TARGET => Comment::class,
@@ -93,7 +134,29 @@ abstract class SelectorTest extends BaseTest
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
             ],
-        ]));
+            Profile::class => [
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::FIND_BY_KEYS => ['user_id'],
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'user' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => User::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::NULLABLE => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 
     public function testStableStatement(): void
@@ -132,5 +195,51 @@ abstract class SelectorTest extends BaseTest
                 'count_comments' => 3,
             ],
         ], $result);
+    }
+
+    public function testCount(): void
+    {
+        $this->assertSame(2, (new Select($this->orm, User::class))->count());
+        $this->assertSame(2, (new Select($this->orm, User::class))->with('profile')->count());
+        $this->assertSame(2, (new Select($this->orm, User::class))->with('lastComment', [
+            'method' => Select\AbstractLoader::LEFT_JOIN,
+        ])->count());
+        $this->assertSame(2, (new Select($this->orm, User::class))->with('comments')->count());
+
+        $schema = $this->getSchemaDefinition();
+        unset($schema[Profile::class][Schema::FIND_BY_KEYS]);
+        $this->orm = $this->withSchema(new Schema($schema));
+        $this->assertSame(2, (new Select($this->orm, User::class))->with('profile')->count());
+    }
+
+    public function testCountField(): void
+    {
+        $role = $this->orm->resolveRole(User::class);
+        $pk = \sprintf('%s.%s', $role, 'id');
+        $distinct = \sprintf('DISTINCT(%s)', $pk);
+
+        $this->assertSame('*', (new RootLoader($this->orm, $role))->getCountField());
+        $this->assertSame('*', $this->joinRelation(new RootLoader($this->orm, $role), 'profile')->getCountField());
+        $this->assertSame('*', $this->joinRelation(new RootLoader($this->orm, $role), 'lastComment', [
+            'method' => Select\AbstractLoader::LEFT_JOIN,
+        ])->getCountField());
+        $this->assertSame(
+            $distinct,
+            $this->joinRelation(new RootLoader($this->orm, $role), 'comments')->getCountField()
+        );
+
+        $schema = $this->getSchemaDefinition();
+        unset($schema[Profile::class][Schema::FIND_BY_KEYS]);
+        $this->orm = $this->withSchema(new Schema($schema));
+        $this->assertSame(
+            $distinct,
+            $this->joinRelation(new RootLoader($this->orm, $role), 'profile')->getCountField()
+        );
+    }
+
+    private function joinRelation(RootLoader $loader, string $relation, array $options = []): RootLoader
+    {
+        $loader->loadRelation($relation, $options, true);
+        return $loader;
     }
 }

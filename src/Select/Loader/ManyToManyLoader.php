@@ -197,6 +197,11 @@ class ManyToManyLoader extends JoinableLoader
         return $node;
     }
 
+    public function isDataDuplicationPossible(): bool
+    {
+        return true;
+    }
+
     /**
      * @param AbstractNode $node
      */

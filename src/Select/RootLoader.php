@@ -85,6 +85,20 @@ final class RootLoader extends AbstractLoader
     }
 
     /**
+     * Returns PK or DISTINCT(PK) if query has any join.
+     *
+     * @return string
+     */
+    public function getCountField(): string
+    {
+        if ($this->isDataDuplicationPossible()) {
+            return sprintf('DISTINCT(%s)', $this->getPK());
+        }
+
+        return '*';
+    }
+
+    /**
      * Return base query associated with the loader.
      *
      * @return SelectQuery

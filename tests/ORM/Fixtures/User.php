@@ -11,6 +11,8 @@ use Doctrine\Common\Collections\Collection;
 
 class User implements ImagedInterface
 {
+    use ProtectedFieldsTrait;
+
     public $id;
     public $email;
     public $balance;

@@ -7,10 +7,13 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
+use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Fixtures\Admin as User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
@@ -28,14 +31,32 @@ abstract class MapperTest extends BaseTest
                 'id' => 'primary',
                 'email' => 'string',
                 'balance' => 'float,nullable',
+                'protected' => 'int,nullable',
+                'private' => 'int,nullable',
+            ]
+        );
+
+        $this->makeTable(
+            'post',
+            [
+                'id' => 'primary',
+                'user_id' => 'int',
             ]
         );
 
         $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
+            ['email', 'balance', 'protected', 'private'],
             [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
+                ['hello@world.com', 100, 12, 13],
+                ['another@world.com', 200, 14, 15],
+            ]
+        );
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['user_id'],
+            [
+                [1],
+                [1],
+                [1],
             ]
         );
 
@@ -43,15 +64,48 @@ abstract class MapperTest extends BaseTest
             new Schema(
                 [
                     User::class => [
-                        Schema::ROLE => 'user',
-                        Schema::MAPPER => Mapper::class,
-                        Schema::DATABASE => 'default',
-                        Schema::TABLE => 'user',
-                        Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS => ['id', 'email', 'balance'],
-                        Schema::TYPECAST => ['balance' => 'float'],
-                        Schema::SCHEMA => [],
-                        Schema::RELATIONS => [],
+                        SchemaInterface::ROLE => 'user',
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'email', 'balance', 'protected', 'private'],
+                        SchemaInterface::TYPECAST => ['balance' => 'float'],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [
+                            'protectedRelation' => [
+                                Relation::TYPE => Relation::HAS_MANY,
+                                Relation::TARGET => 'post',
+                                Relation::LOAD => Relation::LOAD_EAGER,
+                                Relation::SCHEMA => [
+                                    Relation::CASCADE => true,
+                                    Relation::NULLABLE => false,
+                                    Relation::INNER_KEY => 'id',
+                                    Relation::OUTER_KEY => 'user',
+                                ],
+                            ],
+                            'privateRelation' => [
+                                Relation::TYPE => Relation::HAS_MANY,
+                                Relation::TARGET => 'post',
+                                Relation::LOAD => Relation::LOAD_EAGER,
+                                Relation::SCHEMA => [
+                                    Relation::CASCADE => true,
+                                    Relation::NULLABLE => false,
+                                    Relation::INNER_KEY => 'id',
+                                    Relation::OUTER_KEY => 'user',
+                                ],
+                            ],
+                        ],
+                    ],
+                    Post::class => [
+                        SchemaInterface::ROLE => 'post',
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'post',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'user' => 'user_id'],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
                     ],
                 ]
             )
@@ -68,11 +122,27 @@ abstract class MapperTest extends BaseTest
                     'id' => 1,
                     'email' => 'hello@world.com',
                     'balance' => 100.0,
+                    'protected' => 12,
+                    'private' => 13,
+                    'protectedRelation' => [
+                        ['user' => 1, 'id' => 1],
+                        ['user' => 1, 'id' => 2],
+                        ['user' => 1, 'id' => 3],
+                    ],
+                    'privateRelation' => [
+                        ['user' => 1, 'id' => 1],
+                        ['user' => 1, 'id' => 2],
+                        ['user' => 1, 'id' => 3],
+                    ],
                 ],
                 [
                     'id' => 2,
                     'email' => 'another@world.com',
                     'balance' => 200.0,
+                    'protected' => 14,
+                    'private' => 15,
+                    'protectedRelation' => [],
+                    'privateRelation' => [],
                 ],
             ],
             $selector->fetchData()
@@ -130,6 +200,43 @@ abstract class MapperTest extends BaseTest
         $this->assertEquals(1, $result->id);
         $this->assertEquals('hello@world.com', $result->email);
         $this->assertEquals(100.0, $result->balance);
+        $this->assertEquals(12, $result->getProtected());
+        $this->assertEquals(13, $result->getPrivate());
+
+        $data = $this->orm->getMapper($result)->fetchFields($result);
+        $this->assertEquals($data, [
+            'id' => 1,
+            'email' => 'hello@world.com',
+            'balance' => 100.0,
+            'protected' => 12,
+            'private' => 13,
+        ]);
+    }
+
+    public function testFetchOneWithRelation(): void
+    {
+        $result = (new Select($this->orm, User::class))
+            ->load('privateRelation')
+            ->load('protectedRelation')
+            ->fetchOne();
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals(1, $result->id);
+        $this->assertEquals('hello@world.com', $result->email);
+        $this->assertEquals(100.0, $result->balance);
+        $this->assertEquals(12, $result->getProtected());
+        $this->assertEquals(13, $result->getPrivate());
+        $this->assertCount(3, $result->getPrivateRelation());
+        $this->assertCount(3, $result->getProtectedRelation());
+
+        $data = $this->orm->getMapper($result)->fetchFields($result);
+        $this->assertEquals($data, [
+            'id' => 1,
+            'email' => 'hello@world.com',
+            'balance' => 100.0,
+            'protected' => 12,
+            'private' => 13,
+        ]);
     }
 
     public function testFetchSame(): void
@@ -137,16 +244,16 @@ abstract class MapperTest extends BaseTest
         $u = new User();
         $u->email = 'test';
         $u->balance = 100;
+        $u->setProtectedRelation([]);
+        $u->setPrivateRelation([]);
 
-        (new Transaction($this->orm))->persist($u)->run();
+        $this->save($u);
 
-        $selector = new Select($this->orm, User::class);
-        $result = $selector->orderBy('id', 'DESC')->fetchOne();
+        $result = (new Select($this->orm, User::class))
+            ->orderBy('id', 'DESC')
+            ->fetchOne();
 
         $this->assertInstanceOf(User::class, $result);
-        $this->assertEquals($u->id, $result->id);
-        $this->assertEquals($u->email, $result->email);
-        $this->assertEquals($u->balance, $result->balance);
 
         $this->assertSame($u, $result);
     }
@@ -208,6 +315,8 @@ abstract class MapperTest extends BaseTest
                 'id' => 1,
                 'email' => 'hello@world.com',
                 'balance' => 100.0,
+                'protected' => 12,
+                'private' => 13,
             ],
             $this->orm->getHeap()->get($result)->getData()
         );
@@ -218,18 +327,16 @@ abstract class MapperTest extends BaseTest
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
+        $e->setProtectedRelation([]);
+        $e->setPrivateRelation([]);
 
         $this->captureWriteQueries();
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(0);
 
         $this->assertEquals(3, $e->id);
@@ -243,6 +350,8 @@ abstract class MapperTest extends BaseTest
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
+        $e->setProtectedRelation([]);
+        $e->setPrivateRelation([]);
 
         $this->captureWriteQueries();
 

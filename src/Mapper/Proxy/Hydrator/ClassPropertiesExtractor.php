@@ -22,7 +22,7 @@ class ClassPropertiesExtractor
      *
      * @throws \ReflectionException
      *
-     * @return array<string, ReflectionClass>
+     * @return array<string, PropertyMap>
      */
     public function extract(string|object $objectOrClass, array $relations): array
     {
@@ -36,10 +36,11 @@ class ClassPropertiesExtractor
             $className = $property->getDeclaringClass()->getName();
             $propertyName = $property->getName();
 
-            if (in_array($propertyName, $relations)) {
-                $relationProperties[$property->isPrivate() ? $className : PropertyMap::PUBLIC_CLASS][$propertyName] = $propertyName;
+            $class = $property->isPublic() ? PropertyMap::PUBLIC_CLASS : $className;
+            if (\in_array($propertyName, $relations, true)) {
+                $relationProperties[$class][$propertyName] = $propertyName;
             } else {
-                $classProperties[$property->isPublic() ? PropertyMap::PUBLIC_CLASS : $className][$propertyName] = $propertyName;
+                $classProperties[$class][$propertyName] = $propertyName;
             }
         }
 

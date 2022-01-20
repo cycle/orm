@@ -1,0 +1,21 @@
+name: Feauture request
+description: 💡 Suggest an idea for this project
+title: "💡 "
+labels: ["type:feature"]
+assignees:
+  - roxblnfk
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to share your idea!
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: I have an idea!
+      description: Clear and concise description of your idea. Please write only in English.
+      placeholder: Tell us what you see!
+      value: "I have an idea, listen to me!!"
+    validations:
+      required: true

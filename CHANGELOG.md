@@ -1,5 +1,8 @@
 # CHANGELOG
 
+v2.0.1 (20.01.2022)
+--------------------
+-  Fix protected relation fields hydration on eager loading @roxblnfk (#314)
 
 v2.0.0 (22.12.2021)
 --------------------

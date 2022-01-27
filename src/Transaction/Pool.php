@@ -58,12 +58,12 @@ final class Pool implements \Countable
 
     public function attach(
         object $entity,
-        #[ExpectedValues(valuesFromClass: Tuple::class)]
+        #[ExpectedValues(values: [Tuple::TASK_STORE, Tuple::TASK_DELETE, Tuple::TASK_FORCE_DELETE])]
         int $task,
         bool $cascade,
-        Node $node = null,
-        State $state = null,
-        int $status = null,
+        ?Node $node = null,
+        ?State $state = null,
+        ?int $status = null,
         bool $highPriority = false,
         bool $persist = false
     ): Tuple {
@@ -394,7 +394,7 @@ final class Pool implements \Countable
         }
 
         $tuple->cascade = $tuple->cascade || $cascade;
-        $tuple->node = $tuple->node ?? $node;
-        $tuple->state = $tuple->state ?? $state;
+        $node === null or $tuple->node = $tuple->node ?? $node;
+        $state === null or $tuple->state = $tuple->state ?? $state;
     }
 }

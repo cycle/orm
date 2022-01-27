@@ -1,5 +1,9 @@
 # CHANGELOG
 
+v2.0.2 (27.01.2022)
+--------------------
+- Fix a Tuple updating in the Pool by @roxblnfk (#319)
+
 v2.0.1 (20.01.2022)
 --------------------
 -  Fix protected relation fields hydration on eager loading @roxblnfk (#314)

@@ -26,7 +26,7 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
         $this->makeTable('user', [
             'uuid' => 'string(36),primary',
             'email' => 'string',
-            'balance' => 'float'
+            'balance' => 'float',
         ]);
 
         $this->makeTable('comment', [
@@ -92,7 +92,7 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
                 Schema::COLUMNS => ['id', 'parent_id', 'user_id'],
                 Schema::SCHEMA => [],
                 Schema::TYPECAST => [
-                    'id' => 'int'
+                    'id' => 'int',
                 ],
                 Schema::RELATIONS => [
                     'userWithUuid' => [

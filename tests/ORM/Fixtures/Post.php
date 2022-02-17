@@ -18,4 +18,8 @@ class Post implements ImagedInterface
 
     /** @var Comment[]|PivotedCollectionInterface */
     public $comments;
+
+    public ?Post $parent = null;
+
+    public UserWithUUIDPrimaryKey $userWithUuidPK;
 }

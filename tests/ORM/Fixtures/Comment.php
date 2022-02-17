@@ -24,6 +24,8 @@ class Comment
 
     public $level;
 
+    public UserWithUUIDPrimaryKey $userWithUuid;
+
     public function __construct()
     {
         $this->favoredBy = new PivotedCollection();

@@ -10,6 +10,7 @@ class UserWithUUIDPrimaryKey implements ImagedInterface
     private $uuid;
     private $email;
     private $balance;
+    public array $comments = [];
 
     public function __construct(UuidPrimaryKey $uuid, string $email, float $balance)
     {

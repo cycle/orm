@@ -23,14 +23,15 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
     {
         parent::setUp();
 
-        $this->makeTable('user', [
+        $this->makeTable('user_with_uuid_pk', [
             'uuid' => 'string(36),primary',
             'email' => 'string',
             'balance' => 'float',
         ]);
 
-        $this->makeTable('comment', [
+        $this->makeTable('comment_with_uuid_user', [
             'id' => 'primary',
+            'message' => 'string,nullable',
             'parent_id' => 'integer,nullable',
             'user_id' => 'string(36),nullable',
         ]);
@@ -46,6 +47,7 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
 
         $comment = new Comment();
         $comment->userWithUuid = $user;
+        $comment->message = 'foo';
         $this->save($comment);
 
         /** @var UserWithUUIDPrimaryKey $user */
@@ -56,17 +58,23 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
         $childComment = new Comment();
         $childComment->parent = $comment;
         $childComment->userWithUuid = $user;
+        $childComment->message = 'bar';
         $this->save($childComment);
+
+        $first = $this->orm->getRepository(Comment::class)->findOne(['message' => 'foo']);
+        $second = $this->orm->getRepository(Comment::class)->findOne(['message' => 'bar']);
 
         $this->assertInstanceOf(
             UserWithUUIDPrimaryKey::class,
             $this->orm->getRepository(UserWithUUIDPrimaryKey::class)->findOne()
         );
-        $comments = $this->orm->getRepository(Comment::class)->findAll();
 
-        $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $comments[0]->userWithUuid);
-        $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $comments[1]->userWithUuid);
-        $this->assertInstanceOf(Comment::class, $comments[1]->parent);
+        $this->assertInstanceOf(Comment::class, $first);
+        $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $first->userWithUuid);
+        $this->assertNull($first->parent);
+        $this->assertInstanceOf(Comment::class, $second);
+        $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $second->userWithUuid);
+        $this->assertInstanceOf(Comment::class, $second->parent);
     }
 
     private function getSchemaArray(): array
@@ -76,7 +84,7 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
                 SchemaInterface::ROLE => 'user_with_uuid_primary_key',
                 SchemaInterface::MAPPER => Mapper::class,
                 SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'user',
+                SchemaInterface::TABLE => 'user_with_uuid_pk',
                 SchemaInterface::PRIMARY_KEY => 'uuid',
                 SchemaInterface::COLUMNS => ['uuid', 'email', 'balance'],
                 SchemaInterface::TYPECAST => [
@@ -87,9 +95,9 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
                 Schema::ROLE => 'comment',
                 Schema::MAPPER => Mapper::class,
                 Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
+                Schema::TABLE => 'comment_with_uuid_user',
                 Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'parent_id', 'user_id'],
+                Schema::COLUMNS => ['id', 'message', 'parent_id', 'user_id'],
                 Schema::SCHEMA => [],
                 Schema::TYPECAST => [
                     'id' => 'int',

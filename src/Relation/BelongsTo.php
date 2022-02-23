@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Exception\Relation\NullException;
+use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\Reference;
@@ -130,7 +131,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             if (!array_key_exists($innerKey, $oldData) || $oldData[$innerKey] !== $newData[$outerKey]) {
                 return true;
             }
-            $noChanges = $noChanges && $current[$innerKey] === $oldData[$innerKey];
+            $noChanges = $noChanges && Node::compare($current[$innerKey], $oldData[$innerKey]) === 0;
         }
         // If no changes
         if ($noChanges) {

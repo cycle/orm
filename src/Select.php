@@ -40,7 +40,7 @@ use Spiral\Pagination\PaginableInterface;
  * @template TEntity of object
  * @template-implements IteratorAggregate<mixed, TEntity>
  */
-final class Select implements IteratorAggregate, Countable, PaginableInterface
+class Select implements IteratorAggregate, Countable, PaginableInterface
 {
     // load relation data within same query
     public const SINGLE_QUERY = JoinableLoader::INLOAD;

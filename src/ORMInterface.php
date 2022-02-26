@@ -92,7 +92,12 @@ interface ORMInterface extends
     /**
      * Get repository associated with given entity class, role or instance.
      *
-     * @param non-empty-string|object $entity
+     * @template TEntity of object
+     *
+     * @param class-string<TEntity>|TEntity|non-empty-string $entity
+     *
+     * @return RepositoryInterface<TEntity>
+     * @psalm-return ($entity is class-string ? RepositoryInterface<TEntity> : RepositoryInterface)
      */
     public function getRepository(string|object $entity): RepositoryInterface;
 }

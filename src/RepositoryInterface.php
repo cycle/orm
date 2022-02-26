@@ -6,21 +6,29 @@ namespace Cycle\ORM;
 
 /**
  * Defines ability to locate entities based on scope parameters.
+ *
+ * @template TEntity
  */
 interface RepositoryInterface
 {
     /**
      * Find entity by the primary key value or return null.
+     *
+     * @return null|TEntity
      */
     public function findByPK(mixed $id): ?object;
 
     /**
      * Find entity using given scope (where).
+     *
+     * @return null|TEntity
      */
     public function findOne(array $scope = []): ?object;
 
     /**
      * Find multiple entities using given scope and sort options.
+     *
+     * @return iterable<TEntity>
      */
     public function findAll(array $scope = []): iterable;
 }

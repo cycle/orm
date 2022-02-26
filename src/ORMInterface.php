@@ -94,7 +94,7 @@ interface ORMInterface extends
      *
      * @template TEntity of object
      *
-     * @param class-string<TEntity>|TEntity|non-empty-string $entity
+     * @param class-string<TEntity>|non-empty-string|TEntity $entity
      *
      * @return RepositoryInterface<TEntity>
      * @psalm-return ($entity is class-string ? RepositoryInterface<TEntity> : RepositoryInterface)

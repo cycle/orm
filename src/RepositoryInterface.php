@@ -14,14 +14,14 @@ interface RepositoryInterface
     /**
      * Find entity by the primary key value or return null.
      *
-     * @return null|TEntity
+     * @return TEntity|null
      */
     public function findByPK(mixed $id): ?object;
 
     /**
      * Find entity using given scope (where).
      *
-     * @return null|TEntity
+     * @return TEntity|null
      */
     public function findOne(array $scope = []): ?object;
 

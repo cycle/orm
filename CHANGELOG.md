@@ -1,5 +1,11 @@
 # CHANGELOG
 
+v2.1.0 (03.03.2022)
+--------------------
+- Remove `final` from the `Select` class by @msmakouz (#327)
+- Fix keys comparing in the BelongsTo relation by @msmakouz (#326)
+- Add Psalm `@template` annotations to RepositoryInterface by @roxblnfk
+
 v2.0.2 (27.01.2022)
 --------------------
 - Fix a Tuple updating in the Pool by @roxblnfk (#319)

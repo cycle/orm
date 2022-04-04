@@ -509,7 +509,20 @@ abstract class ManyToManyRelationTest extends BaseTest
                 Schema::COLUMNS => ['id', 'name'],
                 Schema::TYPECAST => ['id' => 'int'],
                 Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
+                Schema::RELATIONS => [
+                    'users' => [
+                        Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::TARGET => User::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => TagContext::class,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::THROUGH_INNER_KEY => 'tag_id',
+                            Relation::THROUGH_OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
             ],
             TagContext::class => [
                 Schema::ROLE => 'tag_context',

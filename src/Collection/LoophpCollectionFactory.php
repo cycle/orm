@@ -45,6 +45,6 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
     {
         return ($this->class === Collection::class)
             ? Collection::fromIterable($data)
-            : new $this->class($data);
+            : $this->class::fromIterable($data);
     }
 }

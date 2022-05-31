@@ -17,9 +17,6 @@ final class RelationConfig extends InjectableConfig
     public const RELATION = 'relation';
     public const SCHEMA = 'schema';
 
-    /** @var array */
-    protected $config = [];
-
     public function getLoader(int|string $type): Autowire
     {
         if (!isset($this->config[$type][self::LOADER])) {

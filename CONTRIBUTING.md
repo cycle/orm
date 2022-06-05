@@ -14,7 +14,7 @@ To test ORM engine locally, download the `cycle/orm` repository and start docker
 
 ```bash
 $ cd tests/
-$ docker-composer up
+$ docker-compose up
 ```
 
 To run full test suite:

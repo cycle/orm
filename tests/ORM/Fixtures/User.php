@@ -33,13 +33,13 @@ class User implements ImagedInterface
      */
     public $comments;
 
-    /** @var Collection|Tag[] */
+    /** @var Collection<array-key, Tag>|Tag[] */
     public $tags;
 
     /**
      * @invisible
      *
-     * @var Collection|Comment[]
+     * @var Collection<array-key, Comment>|Comment[]
      */
     public $favorites;
 

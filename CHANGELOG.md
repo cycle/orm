@@ -1,5 +1,10 @@
 # CHANGELOG
 
+v2.1.1 (05.06.2022)
+--------------------
+- Remove `$config` property overriding in the `RelationConfig` by @msmakouz (#343)
+- Fix bug on ManyToMany resolving by @roxblnfk (#345)
+
 v2.1.0 (03.03.2022)
 --------------------
 - Remove `final` from the `Select` class by @msmakouz (#327)

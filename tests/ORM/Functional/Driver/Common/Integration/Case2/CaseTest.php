@@ -7,10 +7,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkAspectResult;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkCriterionResult;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkSubcriterionResult;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\Student;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\StudentProgress;
 use Cycle\ORM\Tests\Traits\TableTrait;
 

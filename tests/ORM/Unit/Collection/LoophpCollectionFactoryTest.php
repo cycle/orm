@@ -6,15 +6,15 @@ namespace Cycle\ORM\Tests\Unit\Collection;
 
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Collection\LoophpCollectionFactory;
-use Doctrine\Common\Collections\ArrayCollection as DoctrineCollection;
+use Cycle\ORM\Exception\CollectionFactoryException;
+use IteratorIterator;
 use loophp\collection\Collection;
-use loophp\collection\Contract\Collection as CollectionInterface;
 
 class LoophpCollectionFactoryTest extends BaseTest
 {
     public function testGetInterface(): void
     {
-        $this->assertSame(CollectionInterface::class, $this->getFactory()->getInterface());
+        $this->assertSame(Collection::class, $this->getFactory()->getInterface());
     }
 
     /**
@@ -31,18 +31,22 @@ class LoophpCollectionFactoryTest extends BaseTest
         ], $collection->all(false));
     }
 
-    public function testWitherCollectShouldReturnArray(): void
+    public function testWithCollectionClassImmutability(): void
     {
-        $collection = $this
-            ->getFactory()
-            ->withCollectionClass(DoctrineCollection::class);
+        $factory = $this->getFactory();
 
-        $this->assertInstanceOf(DoctrineCollection::class, $collection->collect([]));
+        $newFactory = $factory->withCollectionClass(Collection::class);
 
-        $collection = $collection
-            ->withCollectionClass(Collection::class);
+        $this->assertNotSame($factory, $newFactory);
+    }
 
-        $this->assertInstanceOf(Collection::class, $collection->collect([]));
+    public function testWithCollectionClassNotCollection(): void
+    {
+        $this->expectException(CollectionFactoryException::class);
+        $this->expectExceptionMessage('Unsupported collection class `IteratorIterator`.');
+
+        // todo use mock of CollectionInterface instead
+        $this->getFactory()->withCollectionClass(IteratorIterator::class);
     }
 
     protected function getFactory(): CollectionFactoryInterface

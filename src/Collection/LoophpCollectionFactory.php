@@ -6,7 +6,6 @@ namespace Cycle\ORM\Collection;
 
 use Cycle\ORM\Exception\CollectionFactoryException;
 use loophp\collection\Collection;
-use loophp\collection\Contract\Collection as CollectionInterface;
 
 /**
  * @template TCollection of Collection
@@ -19,9 +18,9 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
 
     public function __construct()
     {
-        if (!class_exists(Collection::class, true)) {
+        if (!\class_exists(Collection::class, true)) {
             throw new CollectionFactoryException(
-                sprintf(
+                \sprintf(
                     'There is no %s class. To resolve this issue you can install `loophp/collection` package.',
                     Collection::class
                 )
@@ -29,22 +28,24 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
         }
     }
 
-    public function getInterface(): ?string
+    public function getInterface(): string
     {
-        return CollectionInterface::class;
+        return Collection::class;
     }
 
     public function withCollectionClass(string $class): static
     {
-        $clone = clone $this;
-        $clone->class = $class;
-        return $clone;
+        if ($class !== Collection::class) {
+            throw new CollectionFactoryException(\sprintf(
+                'Unsupported collection class `%s`.',
+                $class
+            ));
+        }
+        return clone $this;
     }
 
-    public function collect(iterable $data): CollectionInterface
+    public function collect(iterable $data): Collection
     {
-        return ($this->class === Collection::class)
-            ? $this->class::fromIterable($data)
-            : new $this->class($data);
+        return $this->class::fromIterable($data);
     }
 }

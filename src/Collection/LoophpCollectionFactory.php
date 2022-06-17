@@ -37,11 +37,11 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
     public function withCollectionClass(string $class): static
     {
         $clone = clone $this;
-        $clone->class = $class === Collection::class ? Collection::class : $class;
+        $clone->class = $class;
         return $clone;
     }
 
-    public function collect(iterable $data): iterable
+    public function collect(iterable $data): CollectionInterface
     {
         return ($this->class === Collection::class)
             ? $this->class::fromIterable($data)

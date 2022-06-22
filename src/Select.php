@@ -38,7 +38,7 @@ use Spiral\Pagination\PaginableInterface;
  * @method mixed sum($identifier) Perform aggregation (SUM) based on column or expression value.
  *
  * @template TEntity of object
- * @template-implements IteratorAggregate<mixed, TEntity>
+ * @implements IteratorAggregate<mixed, TEntity>
  */
 class Select implements IteratorAggregate, Countable, PaginableInterface
 {
@@ -118,7 +118,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Create new Selector with applied scope. By default no scope used.
      *
-     * @return $this
+     * @return Select<TEntity>
      */
     public function scope(ScopeInterface $scope = null): self
     {
@@ -148,7 +148,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @psalm-param string|int|list<string|int>|object ...$ids
      *
-     * @return $this
+     * @return Select<TEntity>
      */
     public function wherePK(string|int|array|object ...$ids): self
     {
@@ -183,7 +183,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
-     * @return $this
+     * @return Select<TEntity>
      */
     public function limit(int $limit): self
     {
@@ -193,7 +193,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
-     * @return $this
+     * @return Select<TEntity>
      */
     public function offset(int $offset): self
     {
@@ -255,7 +255,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @see with()
      *
-     * @return $this
+     * @return Select<TEntity>
      */
     public function load(string|array $relation, array $options = []): self
     {
@@ -345,7 +345,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @see load()
      *
-     * @return $this
+     * @return Select<TEntity>
      */
     public function with(string|array $relation, array $options = []): self
     {

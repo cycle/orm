@@ -8,5 +8,6 @@ class User
 {
     public ?int $id = null;
     public string $name;
-    public TypeEnum $type = TypeEnum::Guest;
+    public TypeStringEnum $type_str = TypeStringEnum::Guest;
+    public TypeIntEnum $type_int = TypeIntEnum::Guest;
 }

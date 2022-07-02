@@ -37,7 +37,7 @@ final class Typecast implements CastableInterface
             if (\in_array($rule, self::RULES, true)) {
                 $this->rules[$key] = $rule;
                 unset($rules[$key]);
-            } elseif (\is_string($rule) && \is_a($rule, BackedEnum::class, true)) {
+            } elseif (\is_string($rule) && \is_subclass_of($rule, BackedEnum::class, true)) {
                 $this->enumClasses[$key] = $rule;
                 $this->rules[$key] = $rule;
                 unset($rules[$key]);

@@ -10,7 +10,7 @@ enum TypeStringEnum: string
     case User = 'user';
     case Admin = 'admin';
 
-    public static function make(string $value): ?self
+    public static function make(int|string $value): ?self
     {
         return self::tryFrom($value);
     }

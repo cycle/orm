@@ -10,7 +10,7 @@ enum TypeIntEnum: int
     case User = 1;
     case Admin = 2;
 
-    public static function make(int $value): ?self
+    public static function make(int|string $value): ?self
     {
         return self::tryFrom($value);
     }

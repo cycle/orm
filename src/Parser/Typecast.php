@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
 
+use BackedEnum;
 use Cycle\ORM\Exception\TypecastException;
 use DateTimeImmutable;
 use Cycle\Database\DatabaseInterface;
@@ -19,7 +20,10 @@ final class Typecast implements CastableInterface
     /** @var array<non-empty-string, bool> */
     private array $callableRules = [];
 
-    /** @var array<non-empty-string, mixed> */
+    /** @var array<string, class-string<BackedEnum>> */
+    private array $enumClasses = [];
+
+    /** @var array<non-empty-string, callable|class-string<BackedEnum>|string> */
     private array $rules = [];
 
     public function __construct(
@@ -30,7 +34,11 @@ final class Typecast implements CastableInterface
     public function setRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
-            if (in_array($rule, self::RULES, true)) {
+            if (\in_array($rule, self::RULES, true)) {
+                $this->rules[$key] = $rule;
+                unset($rules[$key]);
+            } elseif (\is_string($rule) && \is_a($rule, BackedEnum::class, true)) {
+                $this->enumClasses[$key] = $rule;
                 $this->rules[$key] = $rule;
                 unset($rules[$key]);
             } elseif (\is_callable($rule)) {
@@ -56,11 +64,17 @@ final class Typecast implements CastableInterface
                     continue;
                 }
 
+                if (isset($this->enumClasses[$key])) {
+                    /** @var class-string<BackedEnum> $rule */
+                    $data[$key] = $rule::tryFrom($data[$key]);
+                    continue;
+                }
+
                 $data[$key] = $this->castPrimitive($rule, $data[$key]);
             }
         } catch (Throwable $e) {
             throw new TypecastException(
-                sprintf('Unable to typecast the `%s` field. %s', $key, $e->getMessage()),
+                \sprintf('Unable to typecast the `%s` field. %s', $key, $e->getMessage()),
                 $e->getCode(),
                 $e
             );

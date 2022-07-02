@@ -60,12 +60,12 @@ class TypecastTest extends TestCase
         foreach (
             [
                 'null' => [['foo' => null], ['foo' => null]],
-                'guest str' => [['foo' => TypeStringEnum::Guest->value], ['foo' => TypeStringEnum::Guest]],
+                'guest str' => [['foo' => 'guest'], ['foo' => TypeStringEnum::Guest]],
                 'int' => [['foo' => 0], ['foo' => null]],
                 'object' => [['foo' => new \stdClass()], ['foo' => null]],
                 'invalid case' => [['foo' => 'foo-bar-baz'], ['foo' => null]],
-                'no needed key' => [['bar' => TypeStringEnum::Guest->value], ['bar' => TypeStringEnum::Guest->value]],
-                'stringable' => [['foo' => new CustomStringable(TypeStringEnum::Admin->value)], ['foo' => null]],
+                'no needed key' => [['bar' => 'guest'], ['bar' => 'guest']],
+                'stringable' => [['foo' => new CustomStringable('admin')], ['foo' => null]],
             ] as $k => $v
         ) {
             yield 'string: ' . $k => \array_merge([['foo' => TypeStringEnum::class]], $v);
@@ -74,13 +74,13 @@ class TypecastTest extends TestCase
         foreach (
             [
                 'null' => [['foo' => null], ['foo' => null]],
-                'guest int' => [['foo' => TypeIntEnum::Guest->value], ['foo' => TypeIntEnum::Guest]],
-                'stringed int' => [['foo' => (string)TypeIntEnum::Guest->value], ['foo' => TypeIntEnum::Guest]],
+                'guest int' => [['foo' => 0], ['foo' => TypeIntEnum::Guest]],
+                'stringed int' => [['foo' => '0'], ['foo' => TypeIntEnum::Guest]],
                 'object' => [['foo' => new \stdClass()], ['foo' => null]],
                 'invalid str case' => [['foo' => 'foo-bar-baz'], ['foo' => null]],
                 'invalid int case' => [['foo' => -1], ['foo' => null]],
-                'no needed key' => [['bar' => TypeIntEnum::Guest->value], ['bar' => TypeIntEnum::Guest->value]],
-                'stringable' => [['foo' => new CustomStringable((string)TypeIntEnum::Admin->value)], ['foo' => null]],
+                'no needed key' => [['bar' => 0], ['bar' => 0]],
+                'stringable' => [['foo' => new CustomStringable('2')], ['foo' => null]],
             ] as $k => $v
         ) {
             yield 'int: ' . $k => \array_merge([['foo' => TypeIntEnum::class]], $v);

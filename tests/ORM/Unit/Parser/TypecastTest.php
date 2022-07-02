@@ -13,6 +13,7 @@ use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
 use Cycle\ORM\Tests\Fixtures\Uuid;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use ReflectionEnum;
 
 class TypecastTest extends TestCase
 {
@@ -56,11 +57,15 @@ class TypecastTest extends TestCase
 
     public function enumCastDataProvider(): iterable
     {
+        $getCase = static fn (string $enum, string $case) => (new ReflectionEnum($enum))
+            ->getCase($case)
+            ->getValue();
+
         // String Enum
         foreach (
             [
                 'null' => [['foo' => null], ['foo' => null]],
-                'guest str' => [['foo' => 'guest'], ['foo' => TypeStringEnum::Guest]],
+                'guest str' => [['foo' => 'guest'], ['foo' => $getCase(TypeStringEnum::class, 'Guest')]],
                 'int' => [['foo' => 0], ['foo' => null]],
                 'object' => [['foo' => new \stdClass()], ['foo' => null]],
                 'invalid case' => [['foo' => 'foo-bar-baz'], ['foo' => null]],
@@ -74,8 +79,8 @@ class TypecastTest extends TestCase
         foreach (
             [
                 'null' => [['foo' => null], ['foo' => null]],
-                'guest int' => [['foo' => 0], ['foo' => TypeIntEnum::Guest]],
-                'stringed int' => [['foo' => '0'], ['foo' => TypeIntEnum::Guest]],
+                'guest int' => [['foo' => 0], ['foo' => $getCase(TypeIntEnum::class, 'Guest')]],
+                'stringed int' => [['foo' => '0'], ['foo' => $getCase(TypeIntEnum::class, 'Guest')]],
                 'object' => [['foo' => new \stdClass()], ['foo' => null]],
                 'invalid str case' => [['foo' => 'foo-bar-baz'], ['foo' => null]],
                 'invalid int case' => [['foo' => -1], ['foo' => null]],

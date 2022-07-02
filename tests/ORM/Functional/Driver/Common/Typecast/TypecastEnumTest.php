@@ -8,9 +8,10 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
+use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
+use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
+use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Functional\Driver\Common\Enum\Fixture\TypeStringEnum;
-use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\EnumedUser as User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 /**
@@ -29,14 +30,15 @@ abstract class TypecastEnumTest extends BaseTest
             [
                 'id' => 'primary',
                 'balance' => 'int',
-                'enum_type' => 'string',
+                'enum_string' => 'string',
+                'enum_int' => 'int',
             ]
         );
         $this->getDatabase()->table('user')->insertMultiple(
-            ['balance', 'enum_type'],
+            ['balance', 'enum_string', 'enum_int'],
             [
-                [100, TypeStringEnum::Admin->value],
-                [200, TypeStringEnum::Guest->value],
+                [100, TypeStringEnum::Admin->value, TypeIntEnum::Admin->value],
+                [200, TypeStringEnum::Guest->value, TypeIntEnum::Guest->value],
             ]
         );
 
@@ -49,11 +51,12 @@ abstract class TypecastEnumTest extends BaseTest
                         SchemaInterface::DATABASE => 'default',
                         SchemaInterface::TABLE => 'user',
                         SchemaInterface::PRIMARY_KEY => 'id',
-                        SchemaInterface::COLUMNS => ['id', 'balance', 'enum_type'],
+                        SchemaInterface::COLUMNS => ['id', 'balance', 'enum_string', 'enum_int'],
                         SchemaInterface::TYPECAST => [
                             'id' => 'int',
                             'balance' => 'int',
-                            'enum_type' => TypeStringEnum::class,
+                            'enum_string' => TypeStringEnum::class,
+                            'enum_int' => TypeIntEnum::class,
                         ],
                         SchemaInterface::SCHEMA => [],
                         SchemaInterface::RELATIONS => [],
@@ -69,7 +72,11 @@ abstract class TypecastEnumTest extends BaseTest
 
         $this->assertSame(
             [TypeStringEnum::Admin, TypeStringEnum::Guest],
-            \array_column($result, 'enum_type')
+            \array_column($result, 'enum_string')
+        );
+        $this->assertSame(
+            [TypeIntEnum::Admin, TypeIntEnum::Guest],
+            \array_column($result, 'enum_int')
         );
     }
 
@@ -77,7 +84,8 @@ abstract class TypecastEnumTest extends BaseTest
     {
         $e = new User();
         $e->balance = 304;
-        $e->enum_type = TypeStringEnum::Admin;
+        $e->enum_string = TypeStringEnum::Admin;
+        $e->enum_int = TypeIntEnum::Admin;
 
         $this->captureWriteQueries();
         $this->save($e);
@@ -92,22 +100,26 @@ abstract class TypecastEnumTest extends BaseTest
     {
         $e = new User();
         $e->balance = 304;
-        $e->enum_type = TypeStringEnum::Admin;
+        $e->enum_string = TypeStringEnum::Admin;
+        $e->enum_int = TypeIntEnum::Admin;
 
         $this->save($e);
 
-        $this->assertSame(TypeStringEnum::Admin, $e->enum_type);
+        $this->assertSame(TypeStringEnum::Admin, $e->enum_string);
+        $this->assertSame(TypeIntEnum::Admin, $e->enum_int);
         $this->orm->getHeap()->clean();
         $result = (new Select($this->orm, User::class))->wherePK($e->id)->fetchOne();
 
-        $this->assertSame(TypeStringEnum::Admin, $result->enum_type);
+        $this->assertSame(TypeStringEnum::Admin, $result->enum_string);
+        $this->assertSame(TypeIntEnum::Admin, $result->enum_int);
     }
 
     public function testUpdate(): void
     {
         $e = new User();
         $e->balance = 304;
-        $e->enum_type = TypeStringEnum::Admin;
+        $e->enum_string = TypeStringEnum::Admin;
+        $e->enum_int = TypeIntEnum::Admin;
 
         $this->save($e);
 
@@ -115,9 +127,11 @@ abstract class TypecastEnumTest extends BaseTest
         /** @var User $result */
         $result = (new Select($this->orm, User::class))->fetchOne();
 
-        $this->assertSame(TypeStringEnum::Admin, $result->enum_type);
+        $this->assertSame(TypeStringEnum::Admin, $result->enum_string);
+        $this->assertSame(TypeIntEnum::Admin, $result->enum_int);
 
-        $result->enum_type = TypeStringEnum::Guest;
+        $result->enum_string = TypeStringEnum::Guest;
+        $result->enum_int = TypeIntEnum::Guest;
 
         $this->save($result);
 
@@ -125,6 +139,7 @@ abstract class TypecastEnumTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $result2 = $selector->fetchOne();
 
-        $this->assertSame(TypeStringEnum::Guest, $result2->enum_type);
+        $this->assertSame(TypeStringEnum::Guest, $result2->enum_string);
+        $this->assertSame(TypeIntEnum::Guest, $result2->enum_int);
     }
 }

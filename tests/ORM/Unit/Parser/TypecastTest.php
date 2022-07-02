@@ -7,6 +7,9 @@ namespace Cycle\ORM\Tests\Unit\Parser;
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\Driver\DriverInterface;
 use Cycle\ORM\Parser\Typecast;
+use Cycle\ORM\Tests\Fixtures\Enum\CustomStringable;
+use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
+use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
 use Cycle\ORM\Tests\Fixtures\Uuid;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
@@ -49,6 +52,50 @@ class TypecastTest extends TestCase
             'id' => 10,
             'foo' => '5',
         ], $this->typecast->cast(['id' => '10', 'foo' => '5']));
+    }
+
+    public function enumCastDataProvider(): iterable
+    {
+        // String Enum
+        foreach (
+            [
+                'null' => [['foo' => null], ['foo' => null]],
+                'guest str' => [['foo' => TypeStringEnum::Guest->value], ['foo' => TypeStringEnum::Guest]],
+                'int' => [['foo' => 0], ['foo' => null]],
+                'object' => [['foo' => new \stdClass()], ['foo' => null]],
+                'invalid case' => [['foo' => 'foo-bar-baz'], ['foo' => null]],
+                'no needed key' => [['bar' => TypeStringEnum::Guest->value], ['bar' => TypeStringEnum::Guest->value]],
+                'stringable' => [['foo' => new CustomStringable(TypeStringEnum::Admin->value)], ['foo' => null]],
+            ] as $k => $v
+        ) {
+            yield 'string: ' . $k => \array_merge([['foo' => TypeStringEnum::class]], $v);
+        }
+        // Int Enum
+        foreach (
+            [
+                'null' => [['foo' => null], ['foo' => null]],
+                'guest int' => [['foo' => TypeIntEnum::Guest->value], ['foo' => TypeIntEnum::Guest]],
+                'stringed int' => [['foo' => (string)TypeIntEnum::Guest->value], ['foo' => TypeIntEnum::Guest]],
+                'object' => [['foo' => new \stdClass()], ['foo' => null]],
+                'invalid str case' => [['foo' => 'foo-bar-baz'], ['foo' => null]],
+                'invalid int case' => [['foo' => -1], ['foo' => null]],
+                'no needed key' => [['bar' => TypeIntEnum::Guest->value], ['bar' => TypeIntEnum::Guest->value]],
+                'stringable' => [['foo' => new CustomStringable((string)TypeIntEnum::Admin->value)], ['foo' => null]],
+            ] as $k => $v
+        ) {
+            yield 'int: ' . $k => \array_merge([['foo' => TypeIntEnum::class]], $v);
+        }
+    }
+
+    /**
+     * @requires PHP >= 8.1
+     * @dataProvider enumCastDataProvider
+     */
+    public function testEnumCast(array $rules, array $in, array $out): void
+    {
+        $this->typecast->setRules($rules);
+
+        $this->assertSame($out, $this->typecast->cast($in));
     }
 
     public function testCastBoolValue(): void

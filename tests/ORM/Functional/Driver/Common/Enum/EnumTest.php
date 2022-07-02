@@ -8,13 +8,15 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
+use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
+use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
+use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Functional\Driver\Common\Enum\Fixture\TypeIntEnum;
-use Cycle\ORM\Tests\Functional\Driver\Common\Enum\Fixture\TypeStringEnum;
-use Cycle\ORM\Tests\Functional\Driver\Common\Enum\Fixture\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 /**
+ * Common Enum store test
+ *
  * @requires PHP >= 8.1
  */
 abstract class EnumTest extends BaseTest
@@ -27,17 +29,17 @@ abstract class EnumTest extends BaseTest
 
         $this->makeTable('user', [
             'id' => 'primary',
-            'name' => 'string',
+            'balance' => 'int',
             'type_str' => 'string',
             'type_int' => 'int',
         ]);
 
         $this->getDatabase()->table('user')->insertMultiple(
-            ['name', 'type_str', 'type_int'],
+            ['balance', 'type_str', 'type_int'],
             [
-                ['Olga', TypeStringEnum::Guest->value, TypeIntEnum::Guest->value],
-                ['Alex', TypeStringEnum::User->value, TypeIntEnum::User->value],
-                ['Antony', TypeStringEnum::Admin->value, TypeIntEnum::Admin->value],
+                [56, TypeStringEnum::Guest->value, TypeIntEnum::Guest->value],
+                [42, TypeStringEnum::User->value, TypeIntEnum::User->value],
+                [69, TypeStringEnum::Admin->value, TypeIntEnum::Admin->value],
             ]
         );
 
@@ -48,7 +50,7 @@ abstract class EnumTest extends BaseTest
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'user',
                 SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'name', 'type_str', 'type_int'],
+                SchemaInterface::COLUMNS => ['id', 'balance', 'type_str', 'type_int'],
                 SchemaInterface::TYPECAST => [
                     'type_str' => \Closure::fromCallable([TypeStringEnum::class, 'make']),
                     'type_int' => \Closure::fromCallable([TypeIntEnum::class, 'make']),
@@ -67,19 +69,19 @@ abstract class EnumTest extends BaseTest
             [
                 [
                     'id' => '1',
-                    'name' => 'Olga',
+                    'balance' => 56,
                     'type_str' => 'guest',
                     'type_int' => 0,
                 ],
                 [
                     'id' => '2',
-                    'name' => 'Alex',
+                    'balance' => 42,
                     'type_str' => 'user',
                     'type_int' => 1,
                 ],
                 [
                     'id' => '3',
-                    'name' => 'Antony',
+                    'balance' => 69,
                     'type_str' => 'admin',
                     'type_int' => 2,
                 ],
@@ -96,19 +98,19 @@ abstract class EnumTest extends BaseTest
             [
                 [
                     'id' => 1,
-                    'name' => 'Olga',
+                    'balance' => 56,
                     'type_str' => TypeStringEnum::Guest,
                     'type_int' => TypeIntEnum::Guest,
                 ],
                 [
                     'id' => 2,
-                    'name' => 'Alex',
+                    'balance' => 42,
                     'type_str' => TypeStringEnum::User,
                     'type_int' => TypeIntEnum::User,
                 ],
                 [
                     'id' => 3,
-                    'name' => 'Antony',
+                    'balance' => 69,
                     'type_str' => TypeStringEnum::Admin,
                     'type_int' => TypeIntEnum::Admin,
                 ],
@@ -123,7 +125,7 @@ abstract class EnumTest extends BaseTest
             $user = $this->orm->make(
                 User::class,
                 [
-                    'name' => 'Bob',
+                    'balance' => 88,
                     'type_str' => TypeStringEnum::User,
                     'type_int' => TypeIntEnum::User,
                 ],

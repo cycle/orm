@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Enum\Fixture;
+namespace Cycle\ORM\Tests\Fixtures\Enum;
 
 enum TypeIntEnum: int
 {
@@ -12,6 +12,6 @@ enum TypeIntEnum: int
 
     public static function make(int|string $value): ?self
     {
-        return self::tryFrom($value);
+        return self::tryFrom((int)$value);
     }
 }

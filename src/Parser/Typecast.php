@@ -8,6 +8,7 @@ use BackedEnum;
 use Cycle\ORM\Exception\TypecastException;
 use DateTimeImmutable;
 use Cycle\Database\DatabaseInterface;
+use ReflectionEnum;
 use Throwable;
 
 /**
@@ -38,7 +39,8 @@ final class Typecast implements CastableInterface
                 $this->rules[$key] = $rule;
                 unset($rules[$key]);
             } elseif (\is_string($rule) && \is_subclass_of($rule, BackedEnum::class, true)) {
-                $this->enumClasses[$key] = $rule;
+                $reflection = new ReflectionEnum($rule);
+                $this->enumClasses[$key] = (string)$reflection->getBackingType();
                 $this->rules[$key] = $rule;
                 unset($rules[$key]);
             } elseif (\is_callable($rule)) {
@@ -66,7 +68,16 @@ final class Typecast implements CastableInterface
 
                 if (isset($this->enumClasses[$key])) {
                     /** @var class-string<BackedEnum> $rule */
-                    $data[$key] = $rule::tryFrom($data[$key]);
+                    $type = $this->enumClasses[$key];
+                    $value = $data[$key];
+                    $data[$key] = match (true) {
+                        !\is_scalar($value) => null,
+                        $type === 'string' && (\is_string($type) || \is_numeric($value))
+                            => $rule::tryFrom((string)$value),
+                        $type === 'int' && (\is_int($value) || \preg_match('/^\\d++$/', $value) === 1)
+                            => $rule::tryFrom((int)$value),
+                        default => null,
+                    };
                     continue;
                 }
 

@@ -57,6 +57,9 @@ class TypecastTest extends TestCase
 
     public function enumCastDataProvider(): iterable
     {
+        if (\PHP_VERSION_ID < 80100) {
+            return;
+        }
         $getCase = static fn (string $enum, string $case) => (new ReflectionEnum($enum))
             ->getCase($case)
             ->getValue();

@@ -10,6 +10,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\TypecastEnumTest as Common
 /**
  * @group driver
  * @group driver-postgres
+ * @requires PHP >= 8.1
  */
 class TypecastEnumTest extends CommonClass
 {

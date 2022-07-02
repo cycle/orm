@@ -15,7 +15,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Enum\Fixture\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 /**
- * @requires PHP 8.1
+ * @requires PHP >= 8.1
  */
 abstract class EnumTest extends BaseTest
 {

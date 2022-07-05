@@ -1,6 +1,6 @@
 # CHANGELOG
 
-v2.2.0 (in progress)
+v2.2.0 (05.07.2022)
 --------------------
 - Add supporting for [`loophp/collection`](https://github.com/loophp/collection) by @drupol (#344)
 - Add supporting for PHP 8.1 Enum in the default typecast handler `Cycle\ORM\Parser\Typecast` by @roxblnfk (#352)

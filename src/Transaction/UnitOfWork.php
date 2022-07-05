@@ -17,9 +17,6 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
 use Cycle\ORM\RelationMap;
 
-/**
- * @internal
- */
 final class UnitOfWork implements StateInterface
 {
     private const RELATIONS_NOT_RESOLVED = 0;

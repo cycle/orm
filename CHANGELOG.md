@@ -1,5 +1,16 @@
 # CHANGELOG
 
+v2.2.1 (in progress)
+--------------------
+- Fix `cascade` mode in BelongsTo relation by @roxblnfk (#347)
+
+v2.2.0 (05.07.2022)
+--------------------
+- Add supporting for [`loophp/collection`](https://github.com/loophp/collection) by @drupol (#344)
+- Add supporting for PHP 8.1 Enum in the default typecast handler `Cycle\ORM\Parser\Typecast` by @roxblnfk (#352)
+- Improve `template` annotations in `Cycle\ORM\Select\Repository` and `Cycle\ORM\Select` classes by @roxblnfk (#351)
+- Classes `Cycle\ORM\Transaction\UnitOfWork` and `Cycle\ORM\Transaction\Runner` are now not internal by @roxblnfk (#353)
+
 v2.1.1 (05.06.2022)
 --------------------
 - Remove `$config` property overriding in the `RelationConfig` by @msmakouz (#343)

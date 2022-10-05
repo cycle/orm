@@ -1,6 +1,8 @@
 on:
-  - pull_request
-  - push
+  push:
+    branches:
+      - '2.*'
+  pull_request: null
 
 name: ci-mysql
 

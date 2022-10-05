@@ -1,6 +1,8 @@
 on:
-  - pull_request
-  - push
+  push:
+    branches:
+      - '2.*'
+  pull_request: null
 
 name: ci-mssql
 
@@ -29,14 +31,14 @@ jobs:
 
     services:
       mssql:
-          image: mcr.microsoft.com/mssql/${{ matrix.mssql }}
-          env:
-              SA_PASSWORD: SSpaSS__1
-              ACCEPT_EULA: Y
-              MSSQL_PID: Developer
-          ports:
-              - 11433:1433
-          options: --name=mssql --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'SSpaSS__1' -Q 'SELECT 1'" --health-interval=10s --health-timeout=5s --health-retries=3
+        image: mcr.microsoft.com/mssql/${{ matrix.mssql }}
+        env:
+          SA_PASSWORD: SSpaSS__1
+          ACCEPT_EULA: Y
+          MSSQL_PID: Developer
+        ports:
+          - 11433:1433
+        options: --name=mssql --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'SSpaSS__1' -Q 'SELECT 1'" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout

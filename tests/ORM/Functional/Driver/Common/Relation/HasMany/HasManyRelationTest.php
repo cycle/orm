@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasMany;
 
+use Cycle\ORM\Exception\Relation\BadRelationValueException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -477,5 +478,18 @@ abstract class HasManyRelationTest extends BaseTest
         self::assertSame('updated message', $comment->message);
 
         $this->orm = $this->orm->withHeap(new Heap());
+    }
+
+    public function testBadRelationValue(): void
+    {
+        $e = new User();
+        $e->email = 'foo';
+        $e->balance = 12.3;
+        $e->comments = null;
+
+        $this->expectException(BadRelationValueException::class);
+        $this->expectExceptionMessage('must be of the iterable type');
+
+        $this->save($e);
     }
 }

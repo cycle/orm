@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
+use Cycle\ORM\Exception\Relation\BadRelationValueException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
@@ -60,6 +61,11 @@ class HasMany extends AbstractRelation
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
+        } elseif (!\is_iterable($related)) {
+            throw new BadRelationValueException(\sprintf(
+                'Value for Has Many relation must be of the iterable type, %s given.',
+                \gettype($related),
+            ));
         }
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
             $this->deleteChild($pool, $tuple, $item);

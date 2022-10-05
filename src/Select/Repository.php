@@ -9,11 +9,16 @@ use Cycle\ORM\Select;
 
 /**
  * Repository provides ability to load entities and construct queries.
+ *
+ * @template TEntity of object
+ * @implements RepositoryInterface<TEntity>
  */
 class Repository implements RepositoryInterface
 {
     /**
      * Create repository linked to one specific selector.
+     *
+     * @param Select<TEntity> $select
      */
     public function __construct(
         protected Select $select
@@ -45,6 +50,8 @@ class Repository implements RepositoryInterface
 
     /**
      * Get selector associated with the repository.
+     *
+     * @return Select<TEntity>
      */
     public function select(): Select
     {

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
 
+use BackedEnum;
 use Cycle\ORM\Exception\TypecastException;
 use DateTimeImmutable;
 use Cycle\Database\DatabaseInterface;
+use ReflectionEnum;
 use Throwable;
 
 /**
@@ -19,7 +21,10 @@ final class Typecast implements CastableInterface
     /** @var array<non-empty-string, bool> */
     private array $callableRules = [];
 
-    /** @var array<non-empty-string, mixed> */
+    /** @var array<string, class-string<BackedEnum>> */
+    private array $enumClasses = [];
+
+    /** @var array<non-empty-string, callable|class-string<BackedEnum>|string> */
     private array $rules = [];
 
     public function __construct(
@@ -30,7 +35,12 @@ final class Typecast implements CastableInterface
     public function setRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
-            if (in_array($rule, self::RULES, true)) {
+            if (\in_array($rule, self::RULES, true)) {
+                $this->rules[$key] = $rule;
+                unset($rules[$key]);
+            } elseif (\is_string($rule) && \is_subclass_of($rule, BackedEnum::class, true)) {
+                $reflection = new ReflectionEnum($rule);
+                $this->enumClasses[$key] = (string)$reflection->getBackingType();
                 $this->rules[$key] = $rule;
                 unset($rules[$key]);
             } elseif (\is_callable($rule)) {
@@ -56,11 +66,26 @@ final class Typecast implements CastableInterface
                     continue;
                 }
 
+                if (isset($this->enumClasses[$key])) {
+                    /** @var class-string<BackedEnum> $rule */
+                    $type = $this->enumClasses[$key];
+                    $value = $data[$key];
+                    $data[$key] = match (true) {
+                        !\is_scalar($value) => null,
+                        $type === 'string' && (\is_string($type) || \is_numeric($value))
+                            => $rule::tryFrom((string)$value),
+                        $type === 'int' && (\is_int($value) || \preg_match('/^\\d++$/', $value) === 1)
+                            => $rule::tryFrom((int)$value),
+                        default => null,
+                    };
+                    continue;
+                }
+
                 $data[$key] = $this->castPrimitive($rule, $data[$key]);
             }
         } catch (Throwable $e) {
             throw new TypecastException(
-                sprintf('Unable to typecast the `%s` field. %s', $key, $e->getMessage()),
+                \sprintf('Unable to typecast the `%s` field. %s', $key, $e->getMessage()),
                 $e->getCode(),
                 $e
             );

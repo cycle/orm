@@ -17,5 +17,10 @@
                 <referencedClass name="JetBrains\PhpStorm\ExpectedValues" />
             </errorLevel>
         </UndefinedAttributeClass>
+        <UndefinedClass>
+            <errorLevel type="suppress">
+                <referencedClass name="BackedEnum" />
+            </errorLevel>
+        </UndefinedClass>
     </issueHandlers>
 </psalm>

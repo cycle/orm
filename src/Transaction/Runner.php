@@ -12,9 +12,6 @@ use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\RunnerException;
 use Traversable;
 
-/**
- * @internal
- */
 final class Runner implements RunnerInterface
 {
     private const MODE_IGNORE_TRANSACTION = 0;

@@ -11,8 +11,11 @@ use Cycle\ORM\Transaction\Tuple;
 
 class TransactionException extends ORMException
 {
-    public static function unresolvedRelations(iterable $tuples, RelationProviderInterface $relProvider): self
-    {
+    public static function unresolvedRelations(
+        iterable $tuples,
+        RelationProviderInterface $relProvider,
+        ?\Throwable $e
+    ): self {
         $messages = [];
         foreach ($tuples as $tuple) {
             $role = $tuple->node->getRole();
@@ -37,6 +40,6 @@ class TransactionException extends ORMException
         $messages = \array_unique($messages);
         $message = "Transaction can't be finished. Some relations can't be resolved:\n" . implode("\n", $messages);
 
-        return new self($message);
+        return new self($message, 0, $e);
     }
 }

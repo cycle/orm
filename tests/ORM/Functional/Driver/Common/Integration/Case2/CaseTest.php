@@ -8,6 +8,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkCriterionResult;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkSubcriterionResult;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\StudentProgress;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -108,8 +109,12 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
         \assert($markCriterionResult instanceof MarkCriterionResult);
 
-        $sub = $markCriterionResult->markSubcriterionResults->first();
+        $sub = $markCriterionResult
+            ->markSubcriterionResults
+            ->filter(static fn (MarkSubcriterionResult $item) => $item->id === 'subcriterion-1')
+            ->first();
         $aspect = $sub->markAspectResults->first();
+        $this->assertNotFalse($aspect);
         $student = $aspect->student;
         $student->studentProgresses->add(new StudentProgress('new-progress-42'));
 

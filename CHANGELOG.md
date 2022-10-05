@@ -1,5 +1,9 @@
 # CHANGELOG
 
+v2.2.1 (in progress)
+--------------------
+- Fix `cascade` mode in BelongsTo relation by @roxblnfk (#347)
+
 v2.2.0 (05.07.2022)
 --------------------
 - Add supporting for [`loophp/collection`](https://github.com/loophp/collection) by @drupol (#344)

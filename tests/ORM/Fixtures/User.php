@@ -71,6 +71,7 @@ class User implements ImagedInterface
 
     public function __construct()
     {
+        $this->posts = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->tags = new PivotedCollection();
         $this->favorites = new PivotedCollection();

@@ -21,7 +21,8 @@ class Repository implements RepositoryInterface
      * @param Select<TEntity> $select
      */
     public function __construct(
-        protected Select $select
+        /** @readonly */
+        protected Select $select,
     ) {
     }
 

@@ -99,7 +99,7 @@ final class UnitOfWork implements StateInterface
                 throw TransactionException::unresolvedRelations(
                     $this->pool->getUnresolved(),
                     $this->orm->getService(RelationProviderInterface::class),
-                    $e
+                    $e,
                 );
             }
         } catch (\Throwable $e) {

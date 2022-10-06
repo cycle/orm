@@ -14,7 +14,7 @@ class TransactionException extends ORMException
     public static function unresolvedRelations(
         iterable $tuples,
         RelationProviderInterface $relProvider,
-        ?\Throwable $e
+        ?\Throwable $e = null,
     ): self {
         $messages = [];
         foreach ($tuples as $tuple) {

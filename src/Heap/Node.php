@@ -66,7 +66,7 @@ final class Node
      */
     public function createState(): State
     {
-        return $this->state = new State($this->status, $this->data, $this->rawData);
+        return $this->state ??= new State($this->status, $this->data, $this->rawData);
     }
 
     /**

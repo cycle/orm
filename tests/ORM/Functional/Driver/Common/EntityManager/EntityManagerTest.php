@@ -157,6 +157,28 @@ abstract class EntityManagerTest extends BaseTest
         $this->assertSame('changed title', $entity->title);
     }
 
+    /**
+     * @link https://github.com/cycle/orm/issues/355
+     */
+    public function testPersistStateTwice(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $entity = $this->orm->make(Post::class, [
+            'title' => 'Test title',
+            'content' => 'Test content',
+        ]);
+
+        $this->captureWriteQueries();
+        $em->persistState($entity)->run();
+        $this->assertNumWrites(1);
+        $this->assertNotNull($entity->id);
+
+        $this->captureWriteQueries();
+        $em->persistState($entity)->run();
+        $this->assertNumWrites(0);
+    }
+
     public function testRunException(): void
     {
         $em = new EntityManager($this->orm);

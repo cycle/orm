@@ -28,7 +28,7 @@ interface LoaderInterface
     /**
      * Get column name related to internal key.
      */
-    public function fieldAlias(string $key): string;
+    public function fieldAlias(string $field): string;
 
     /**
      * Initiate loader with it's position and options in dependency tree.

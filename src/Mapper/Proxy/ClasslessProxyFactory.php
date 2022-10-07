@@ -19,16 +19,16 @@ class ClasslessProxyFactory
 
     /**
      * Create empty entity
+     *
+     * @param non-empty-string $role
+     * @param array<non-empty-string, mixed> $data
      */
     public function create(
         RelationMap $relMap,
         string $role,
         array $data
     ): object {
-        $class = array_key_exists($role, $this->classMap)
-            ? $this->classMap[$role]
-            : $this->defineClass($role, $relMap, $data);
-
+        $class = $this->defineClass($role, $relMap, $data);
         $proxy = new $class();
         $proxy->__cycle_orm_rel_map = $relMap;
         return $proxy;
@@ -75,9 +75,15 @@ class ClasslessProxyFactory
         return $relations + $result;
     }
 
-    private function defineClass(string $role, RelationMap $relMap, array $fields): ?string
+    /**
+     * @param non-empty-string $role
+     * @param array<non-empty-string, mixed> $fields
+     *
+     * @return class-string
+     */
+    private function defineClass(string $role, RelationMap $relMap, array $fields): string
     {
-        if (array_key_exists($role, $this->classMap)) {
+        if (\array_key_exists($role, $this->classMap)) {
             return $this->classMap[$role];
         }
         $i = 0;

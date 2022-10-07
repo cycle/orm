@@ -35,11 +35,11 @@ class MorphedHasMany extends HasMany
         return '~morphed~:' . $this->name;
     }
 
-    protected function applyChanges(Tuple $parentTuple, Tuple $rTuple): void
+    protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {
-        parent::applyChanges($parentTuple, $rTuple);
+        parent::applyChanges($parentTuple, $tuple);
 
-        $rState = $rTuple->state;
+        $rState = $tuple->state;
         $role = $parentTuple->node->getRole();
         if (($rState->getData()[$this->morphKey] ?? null) !== $role) {
             $rState->register($this->morphKey, $role);

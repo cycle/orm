@@ -13,7 +13,7 @@ use SplObjectStorage;
  *
  * @psalm-template TKey of array-key
  * @psalm-template TEntity of object
- * @psalm-template TPivot
+ * @psalm-template TPivot of object
  *
  * @template-extends ArrayCollection<TKey, TEntity>
  * @template-implements PivotedCollectionInterface<TEntity, TPivot>
@@ -63,6 +63,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
      */
     protected function createFrom(array $elements): static
     {
+        /** @psalm-suppress MissingTemplateParam */
         $new = parent::createFrom($elements);
         $new->pivotContext = $this->pivotContext;
 

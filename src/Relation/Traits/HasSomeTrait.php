@@ -35,6 +35,8 @@ trait HasSomeTrait
 
     /**
      * Apply inner key values to related entity
+     *
+     * @param Tuple $tuple Related tuple
      */
     protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {

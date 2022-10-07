@@ -38,7 +38,6 @@ use Spiral\Pagination\PaginableInterface;
  * @method mixed sum($identifier) Perform aggregation (SUM) based on column or expression value.
  *
  * @template TEntity of object
- * @implements IteratorAggregate<mixed, TEntity>
  */
 class Select implements IteratorAggregate, Countable, PaginableInterface
 {
@@ -391,11 +390,11 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Fetch all records in a form of array.
      *
-     * @return array<array-key, TEntity>
+     * @return array<int, TEntity>
      */
     public function fetchAll(): array
     {
-        return iterator_to_array($this->getIterator(), false);
+        return \iterator_to_array($this->getIterator(), false);
     }
 
     /**
@@ -449,6 +448,9 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
         return $this;
     }
 
+    /**
+     * @return Select<TEntity>
+     */
     private function buildCompositePKQuery(array $pk, array $args): self
     {
         $prepared = [];
@@ -459,7 +461,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
             }
             if (\count($pk) !== \count($values)) {
                 throw new InvalidArgumentException(
-                    sprintf('Primary key should contain %d values.', \count($pk))
+                    \sprintf('Primary key should contain %d values.', \count($pk))
                 );
             }
 
@@ -470,7 +472,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
                     : $pk[$key];
 
                 if (!\in_array($key, $pk, true)) {
-                    throw new InvalidArgumentException(sprintf('Primary key %s not found.', $key));
+                    throw new InvalidArgumentException(\sprintf('Primary key %s not found.', $key));
                 }
 
                 $prepared[$index][$key] = $value;

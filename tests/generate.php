@@ -59,15 +59,18 @@ foreach ($classes as $class) {
     echo "Found {$class->getName()}\n";
 
     $path = str_replace(
-        [str_replace('\\', '/', __DIR__), 'ORM/Functional/Driver/Common/'],
+        [\str_replace('\\', '/', __DIR__), 'ORM/Functional/Driver/Common/'],
         '',
-        str_replace('\\', '/', $class->getFileName())
+        \str_replace('\\', '/', $class->getFileName())
     );
 
     $path = ltrim($path, '/');
 
     foreach ($databases as $driver => $details) {
-        $filename = sprintf('%s%s', $details['directory'], $path);
+        $filename = $details['directory'] . $path;
+        if (\file_exists($filename)) {
+            continue;
+        }
         $dir = pathinfo($filename, PATHINFO_DIRNAME);
 
         $namespace = str_replace(

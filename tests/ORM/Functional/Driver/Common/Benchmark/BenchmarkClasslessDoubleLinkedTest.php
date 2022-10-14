@@ -10,8 +10,10 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 use Cycle\ORM\Transaction;
 
+#[DontGenerateAttribute]
 abstract class BenchmarkClasslessDoubleLinkedTest extends BaseTest
 {
     use TableTrait;

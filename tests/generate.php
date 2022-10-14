@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 use Spiral\Tokenizer;
 
 error_reporting(E_ALL | E_STRICT);
@@ -56,7 +57,10 @@ foreach ($classes as $class) {
         continue;
     }
 
-    echo "Found {$class->getName()}\n";
+    if ($class->getAttributes(DontGenerateAttribute::class) !== []) {
+        continue;
+    }
+
 
     $path = str_replace(
         [\str_replace('\\', '/', __DIR__), 'ORM/Functional/Driver/Common/'],
@@ -71,6 +75,8 @@ foreach ($classes as $class) {
         if (\file_exists($filename)) {
             continue;
         }
+        echo "Processing $filename\n";
+
         $dir = pathinfo($filename, PATHINFO_DIRNAME);
 
         $namespace = str_replace(

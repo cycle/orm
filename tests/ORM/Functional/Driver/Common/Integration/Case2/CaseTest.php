@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2;
 
-use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkCriterionResult;
@@ -15,8 +14,8 @@ use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class CaseTest extends BaseTest
 {
-    use TableTrait;
     use IntegrationTestTrait;
+    use TableTrait;
 
     public function setUp(): void
     {

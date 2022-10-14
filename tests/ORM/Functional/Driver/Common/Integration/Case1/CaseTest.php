@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1;
 
-use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Comment;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Post;
@@ -15,8 +14,8 @@ use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class CaseTest extends BaseTest
 {
-    use TableTrait;
     use IntegrationTestTrait;
+    use TableTrait;
 
     /** @var User[] */
     private array $users = [];

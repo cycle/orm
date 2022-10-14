@@ -21,7 +21,8 @@ class Student
     /** @var Collection<array-key, StudentProgress> */
     public Collection $studentProgresses;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->markAspectResults = new ArrayCollection();
         $this->markAspectResultsWhoRequiresAttention = new ArrayCollection();
         $this->studentProgresses = new ArrayCollection();

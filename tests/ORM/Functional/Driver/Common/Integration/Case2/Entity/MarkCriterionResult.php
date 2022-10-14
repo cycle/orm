@@ -18,7 +18,8 @@ class MarkCriterionResult
     /** @var Collection<array-key, MarkSubcriterionResult> */
     public Collection $markSubcriterionResults;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->markSubcriterionResults = new ArrayCollection();
     }
 }

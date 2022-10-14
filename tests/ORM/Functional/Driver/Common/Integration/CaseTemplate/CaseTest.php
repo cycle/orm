@@ -24,15 +24,34 @@ abstract class CaseTest extends BaseTest
         $this->loadSchema(__DIR__ . '/schema.php');
     }
 
-    public function testRun(): void
+    public function testSelect(): void
     {
+        // Get entity
         $user = (new Select($this->orm, Entity\User::class))
             ->load('posts')
             ->wherePK(2)
             ->fetchOne();
 
+        // Check result
         $this->assertInstanceOf(Entity\User::class, $user);
         $this->assertCount(2, $user->posts);
+    }
+
+    public function testSave(): void
+    {
+        // Get entity
+        $user = (new Select($this->orm, Entity\User::class))
+            ->wherePK(2)
+            ->fetchOne();
+        // Change data
+        $user->setPassword('new-password-42');
+
+        // Store changes and calc write queries
+        $this->captureWriteQueries();
+        $this->save($user);
+
+        // Check write queries count
+        $this->assertNumWrites(1);
     }
 
     private function makeTables(): void

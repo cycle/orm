@@ -10,11 +10,13 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkCriterionResult;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\MarkSubcriterionResult;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity\StudentProgress;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class CaseTest extends BaseTest
 {
     use TableTrait;
+    use IntegrationTestTrait;
 
     public function setUp(): void
     {
@@ -97,9 +99,7 @@ abstract class CaseTest extends BaseTest
             ]
         );
 
-        $schema = include __DIR__ . '/schema.php';
-        \assert(\is_array($schema));
-        $this->orm = $this->orm->withSchema(new Schema($schema));
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     public function testRun(): void

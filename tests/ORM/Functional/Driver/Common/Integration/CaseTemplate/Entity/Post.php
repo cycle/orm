@@ -19,11 +19,11 @@ class Post
     public ?DateTimeImmutable $deleted_at = null;
     public User $user;
     public ?int $user_id = null;
-    /** @var Tag[] */
-    public array $tags = [];
+    /** @var iterable<Tag> */
+    public iterable $tags = [];
     public ?int $tag_id = null;
-    /** @var Comment[] */
-    public array $comments = [];
+    /** @var iterable<Comment> */
+    public iterable $comments = [];
 
     public function __construct(string $title = '', string $content = '')
     {

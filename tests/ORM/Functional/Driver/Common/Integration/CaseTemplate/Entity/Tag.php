@@ -11,8 +11,8 @@ class Tag
     public ?int $id = null;
     public string $label;
     public DateTimeImmutable $created_at;
-    /** @var Post[] */
-    public array $posts = [];
+    /** @var iterable<Post> */
+    public iterable $posts = [];
 
     public function __construct(string $label)
     {

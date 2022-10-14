@@ -15,10 +15,10 @@ class User
     public string $passwordHash;
     public DateTimeImmutable $created_at;
     public DateTimeImmutable $updated_at;
-    /** @var Post[] */
-    private array $posts = [];
-    /** @var Comment[] */
-    private array $comments = [];
+    /** @var iterable<Post> */
+    public iterable $posts = [];
+    /** @var iterable<Comment> */
+    public iterable $comments = [];
 
     public function __construct(string $login, string $password)
     {

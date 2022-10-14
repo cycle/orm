@@ -103,6 +103,7 @@ return [
             'tags' => [
                 Relation::TYPE => Relation::MANY_TO_MANY,
                 Relation::TARGET => 'tag',
+                Relation::COLLECTION_TYPE => 'array',
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
@@ -120,6 +121,7 @@ return [
             'comments' => [
                 Relation::TYPE => Relation::HAS_MANY,
                 Relation::TARGET => 'comment',
+                Relation::COLLECTION_TYPE => 'array',
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
@@ -183,6 +185,7 @@ return [
             'posts' => [
                 Relation::TYPE => Relation::MANY_TO_MANY,
                 Relation::TARGET => 'post',
+                Relation::COLLECTION_TYPE => 'array',
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
@@ -224,6 +227,7 @@ return [
             'posts' => [
                 Relation::TYPE => Relation::HAS_MANY,
                 Relation::TARGET => 'post',
+                Relation::COLLECTION_TYPE => 'array',
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
@@ -237,6 +241,7 @@ return [
             'comments' => [
                 Relation::TYPE => Relation::HAS_MANY,
                 Relation::TARGET => 'comment',
+                Relation::COLLECTION_TYPE => 'array',
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,

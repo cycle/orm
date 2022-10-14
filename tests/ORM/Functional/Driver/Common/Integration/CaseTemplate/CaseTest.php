@@ -26,12 +26,13 @@ abstract class CaseTest extends BaseTest
 
     public function testRun(): void
     {
-        $users = (new Select($this->orm, Entity\User::class))
+        $user = (new Select($this->orm, Entity\User::class))
             ->load('posts')
-            ->fetchAll();
+            ->wherePK(2)
+            ->fetchOne();
 
-        $this->assertCount(1, $users);
-        $this->assertCount(2, $users[1]);
+        $this->assertInstanceOf(Entity\User::class, $user);
+        $this->assertCount(2, $user->posts);
     }
 
     private function makeTables(): void
@@ -41,6 +42,8 @@ abstract class CaseTest extends BaseTest
             'id' => 'primary', // autoincrement
             'login' => 'string',
             'password_hash' => 'string',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ]);
 
         $this->makeTable('post', [
@@ -51,6 +54,9 @@ abstract class CaseTest extends BaseTest
             'public' => 'bool',
             'content' => 'string',
             'published_at' => 'datetime,nullable',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime,nullable',
         ]);
         $this->makeFK('post', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
 
@@ -60,6 +66,8 @@ abstract class CaseTest extends BaseTest
             'content' => 'string',
             'user_id' => 'int',
             'post_id' => 'int',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ]);
         $this->makeFK('comment', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
         $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');

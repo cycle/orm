@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1;
 
-use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Comment;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Post;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\Tag;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class CaseTest extends BaseTest
 {
+    use IntegrationTestTrait;
     use TableTrait;
 
     /** @var User[] */
@@ -83,9 +84,7 @@ abstract class CaseTest extends BaseTest
         $this->makeFK('post_tag', 'post_id', 'post', 'id', 'NO ACTION', 'CASCADE');
         $this->makeFK('post_tag', 'tag_id', 'tag', 'id', 'NO ACTION', 'CASCADE');
 
-        $schema = include __DIR__ . '/schema.php';
-        assert(\is_array($schema));
-        $this->orm = $this->orm->withSchema(new Schema($schema));
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     public function countProvider(): array

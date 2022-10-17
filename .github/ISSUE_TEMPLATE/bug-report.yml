@@ -38,3 +38,8 @@ body:
         PHP 8.1
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: |
+        If you know how to reproduce the bug you can
+        [do it easily via Pull Request with your Test Case](https://cycle-orm.dev/docs/issue-test-case).

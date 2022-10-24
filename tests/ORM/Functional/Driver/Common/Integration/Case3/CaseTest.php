@@ -39,7 +39,12 @@ abstract class CaseTest extends BaseTest
         $this->save($user);
 
         // Check write queries count
-        $this->assertNumWrites(1);
+        $this->assertNumWrites(2);
+
+        $user = (new Select($this->orm, Entity\User::class))
+            ->wherePK(1)
+            ->fetchOne();
+        $this->assertSame('eur', $user->currency->code);
     }
 
     private function makeTables(): void

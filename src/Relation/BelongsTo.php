@@ -62,8 +62,8 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
             return;
         }
         $rTuple = $pool->offsetGet($related);
-        if ($rTuple === null && $this->isCascade()) {
-            $pool->attachStore($related, true, null, null, false);
+        if ($rTuple === null) {
+            $pool->attachStore($related, $this->isCascade(), null, null, false);
         }
     }
 

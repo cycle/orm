@@ -33,7 +33,7 @@ return [
         Schema::COLUMNS => [
             'id' => 'id',
             'name' => 'name',
-            'currency_code' => 'currency_code'
+            'currency_code' => 'currency_code',
         ],
         Schema::RELATIONS => [
             'currency' => [

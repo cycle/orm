@@ -94,11 +94,12 @@ final class UnitOfWork implements StateInterface
         try {
             try {
                 $this->walkPool();
-            } catch (PoolException) {
+            } catch (PoolException $e) {
                 // Generate detailed exception about unresolved relations
                 throw TransactionException::unresolvedRelations(
                     $this->pool->getUnresolved(),
-                    $this->orm->getService(RelationProviderInterface::class)
+                    $this->orm->getService(RelationProviderInterface::class),
+                    $e,
                 );
             }
         } catch (\Throwable $e) {

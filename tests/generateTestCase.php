@@ -52,6 +52,6 @@ foreach ($caseTemplateFiles as $file) {
     }
 }
 
-if (file_exists(__DIR__ . 'generate.php')) {
+if (file_exists(__DIR__ . '/generate.php')) {
     \exec('php tests/generate.php');
 }

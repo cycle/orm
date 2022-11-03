@@ -8,12 +8,12 @@ declare(strict_types=1);
 //Composer
 require \dirname(__DIR__) . '/vendor/autoload.php';
 
-$dir = __DIR__ . '/ORM/Functional/Driver/Common/Integration';
-$caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/CaseTemplate';
+$integrationDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration';
+$caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/CaseTemplate/';
 
 $cases = 0;
 
-foreach (\scandir($dir) as $dirName) {
+foreach (\scandir($integrationDir) as $dirName) {
     if (\str_starts_with($dirName, 'Case') && $dirName !== 'CaseTemplate') {
         $cases++;
     }
@@ -21,45 +21,37 @@ foreach (\scandir($dir) as $dirName) {
 
 $caseName = 'Case' . $cases + 1;
 
-$newCaseDst = $dir . '/' . $caseName;
+$caseTemplateFiles = [
+    'Entity',
+    'Entity/Comment.php',
+    'Entity/Post.php',
+    'Entity/PostTag.php',
+    'Entity/Tag.php',
+    'Entity/User.php',
+    'CaseTest.php',
+    'schema.php',
+];
 
-echo \sprintf("Creating new test case with name '%s'... \n", $caseName);
+$caseDir = $integrationDir . '/' . $caseName;
 
-\copyDir($caseTemplateDir, $newCaseDst);
+\mkdir($caseDir);
 
-$rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($newCaseDst));
+foreach ($caseTemplateFiles as $file) {
+    $filePath = $caseTemplateDir . $file;
+    $copyPath = $caseDir . '/' . $file;
 
-$files = [];
-
-foreach ($rii as $file) {
-    if ($file->isDir()){
+    if (!\file_exists($filePath)) {
         continue;
     }
 
-    $files[] = $file->getPathname();
-}
-
-foreach ($files as $file) {
-    \file_put_contents($file, str_replace('CaseTemplate', $caseName, \file_get_contents($file)));
-}
-
-\exec('php tests/generate.php');
-
-function copyDir(string $src, string $dst): void
-{
-    $dir = \opendir($src);
-
-    @\mkdir($dst);
-
-    while ($file = \readdir($dir)) {
-        if (($file != '.') && ($file != '..')) {
-            if (is_dir($src . '/' . $file)) {
-                \copyDir($src . '/' . $file, $dst . '/' . $file);
-            } else {
-                \copy($src . '/' . $file, $dst . '/' . $file);
-            }
-        }
+    if (\is_dir($filePath)) {
+        \mkdir($caseDir . '/' . $file);
+    } else {
+        \copy($filePath, $copyPath);
+        \file_put_contents($copyPath, str_replace('CaseTemplate', $caseName, \file_get_contents($copyPath)));
     }
+}
 
-    \closedir($dir);
+if (file_exists(__DIR__ . 'generate.php')) {
+    \exec('php tests/generate.php');
 }

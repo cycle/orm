@@ -34,6 +34,8 @@ $caseTemplateFiles = [
 
 $caseDir = $integrationDir . '/' . $caseName;
 
+echo "Creating new test case with name '$caseName'...\n";
+
 \mkdir($caseDir);
 
 foreach ($caseTemplateFiles as $file) {

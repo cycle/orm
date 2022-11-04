@@ -6,54 +6,44 @@ declare(strict_types=1);
 \ini_set('display_errors', '1');
 
 //Composer
-require \dirname(__DIR__) . '/vendor/autoload.php';
+require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
 $integrationDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration';
-$caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/CaseTemplate/';
+$caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/CaseTemplate';
 
 $cases = 0;
 
 foreach (\scandir($integrationDir) as $dirName) {
-    if (\str_starts_with($dirName, 'Case') && $dirName !== 'CaseTemplate') {
-        $cases++;
-    }
+    \sscanf($dirName, 'Case%d', $last);
+    $cases = \max($cases, $last);
 }
 
-$caseName = 'Case' . $cases + 1;
+$cases++;
 
-$caseTemplateFiles = [
-    'Entity',
-    'Entity/Comment.php',
-    'Entity/Post.php',
-    'Entity/PostTag.php',
-    'Entity/Tag.php',
-    'Entity/User.php',
-    'CaseTest.php',
-    'schema.php',
-];
+$copyDir = $integrationDir . '/Case' . $cases;
 
-$caseDir = $integrationDir . '/' . $caseName;
+echo sprintf("Generating new test case 'Case%s'... \n", $cases);
 
-echo "Creating new test case with name '$caseName'...\n";
+\mkdir($copyDir);
 
-\mkdir($caseDir);
+$rii = new RecursiveIteratorIterator(
+    new RecursiveDirectoryIterator($caseTemplateDir, FilesystemIterator::SKIP_DOTS)
+);
 
-foreach ($caseTemplateFiles as $file) {
-    $filePath = $caseTemplateDir . $file;
-    $copyPath = $caseDir . '/' . $file;
+foreach ($rii as $file) {
+    $filePath = $file->getRealPath();
+    $target = substr($filePath, strlen($caseTemplateDir));
 
-    if (!\file_exists($filePath)) {
-        continue;
+    // creating directory...
+    $dirName = dirname($copyDir . $target);
+    if (!\is_dir($dirName)) {
+        \mkdir($dirName, recursive: true);
     }
 
-    if (\is_dir($filePath)) {
-        \mkdir($caseDir . '/' . $file);
-    } else {
-        \copy($filePath, $copyPath);
-        \file_put_contents($copyPath, str_replace('CaseTemplate', $caseName, \file_get_contents($copyPath)));
-    }
+    $contents = str_replace('CaseTemplate', 'Case' . $cases, \file_get_contents($filePath));
+    file_put_contents($copyDir . $target, $contents);
 }
 
-if (file_exists(__DIR__ . '/generate.php')) {
-    \exec('php tests/generate.php');
-}
+echo "Done \n";
+
+require 'generate.php';

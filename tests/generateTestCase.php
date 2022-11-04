@@ -44,6 +44,6 @@ foreach ($rii as $file) {
     file_put_contents($copyDir . $target, $contents);
 }
 
-echo "Done \n";
-
 require 'generate.php';
+
+echo "Done. New test case is here $copyDir \n";

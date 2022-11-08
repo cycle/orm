@@ -14,17 +14,18 @@ $caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/CaseTemp
 $cases = 0;
 
 foreach (\scandir($integrationDir) as $dirName) {
-    \sscanf($dirName, 'Case%d', $last);
-    $cases = \max($cases, $last);
+    if (\sscanf($dirName, 'Case%d', $last) === 1) {
+        $cases = \max($cases, $last);
+    }
 }
-
-$cases++;
+++$cases;
 
 $copyDir = $integrationDir . '/Case' . $cases;
 
-echo sprintf("Generating new test case 'Case%s'... \n", $cases);
+echo \sprintf("Generating new test case 'Case%s'... \n", $cases);
 
 \mkdir($copyDir);
+$copyDir = \realpath($copyDir);
 
 $rii = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($caseTemplateDir, FilesystemIterator::SKIP_DOTS)
@@ -32,7 +33,7 @@ $rii = new RecursiveIteratorIterator(
 
 foreach ($rii as $file) {
     $filePath = $file->getRealPath();
-    $target = substr($filePath, strlen($caseTemplateDir));
+    $target = \substr($filePath, \strlen($caseTemplateDir));
 
     // creating directory...
     $dirName = dirname($copyDir . $target);
@@ -40,10 +41,10 @@ foreach ($rii as $file) {
         \mkdir($dirName, recursive: true);
     }
 
-    $contents = str_replace('CaseTemplate', 'Case' . $cases, \file_get_contents($filePath));
-    file_put_contents($copyDir . $target, $contents);
+    $contents = \str_replace('CaseTemplate', 'Case' . $cases, \file_get_contents($filePath));
+    \file_put_contents($copyDir . $target, $contents);
 }
 
 require 'generate.php';
 
-echo "Done. New test case is here $copyDir \n";
+echo "Done. New test case is here:\n$copyDir\n";

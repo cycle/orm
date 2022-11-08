@@ -9,7 +9,7 @@ error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', '1');
 
 //Composer
-require dirname(__DIR__) . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
     'directories' => [__DIR__ . '/ORM/Functional/Driver/Common'],

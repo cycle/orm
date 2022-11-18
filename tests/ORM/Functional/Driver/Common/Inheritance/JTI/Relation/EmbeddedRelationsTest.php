@@ -79,14 +79,16 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
 
         $entity->credentials = $credentials;
 
+        $this->captureWriteQueries();
         $this->save($entity);
+        $this->assertNumWrites(1);
 
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertNotNull($entity->credentials->username);
-        $this->assertNotNull($entity->credentials->password);
+        $this->assertSame('roquie', $entity->credentials->username);
+        $this->assertSame('secret', $entity->credentials->password);
     }
 
     protected function getSchemaArray(): array

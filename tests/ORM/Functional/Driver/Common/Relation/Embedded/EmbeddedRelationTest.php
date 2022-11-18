@@ -162,7 +162,7 @@ abstract class EmbeddedRelationTest extends BaseTest
     public function testUpdateEmbeddedValue(): void
     {
         $selector = new Select($this->orm, User::class);
-        $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
+        $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
         $u->credentials->password = 'newpass';
 

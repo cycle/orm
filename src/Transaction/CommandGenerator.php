@@ -126,6 +126,6 @@ class CommandGenerator implements CommandGeneratorInterface
             $parent = $role;
         }
 
-        return (new Sequence($primaryCommand))->addCommand(...$result);
+        return (new Sequence($primaryCommand, false))->addCommand(...$result);
     }
 }

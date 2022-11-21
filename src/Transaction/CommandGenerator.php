@@ -32,7 +32,7 @@ class CommandGenerator implements CommandGeneratorInterface
         return match (\count($commands)) {
             0 => null,
             1 => \current($commands),
-            default => $this->buildStoreSequence($schema, $commands, $tuple)
+            default => $this->buildStoreSequence($schema, $commands, $tuple, $entityCommand)
         };
     }
 
@@ -94,8 +94,12 @@ class CommandGenerator implements CommandGeneratorInterface
     /**
      * @param array<string, StoreCommandInterface> $commands
      */
-    private function buildStoreSequence(SchemaInterface $schema, array $commands, Tuple $tuple): CommandInterface
-    {
+    private function buildStoreSequence(
+        SchemaInterface $schema,
+        array $commands,
+        Tuple $tuple,
+        ?CommandInterface $primaryCommand = null
+    ): CommandInterface {
         $parent = null;
         $result = [];
         foreach ($commands as $role => $command) {
@@ -122,6 +126,6 @@ class CommandGenerator implements CommandGeneratorInterface
             $parent = $role;
         }
 
-        return (new Sequence())->addCommand(...$result);
+        return (new Sequence($primaryCommand, false))->addCommand(...$result);
     }
 }

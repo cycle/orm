@@ -16,9 +16,10 @@ final class Sequence implements CommandInterface, \IteratorAggregate, \Countable
     private array $commands = [];
 
     public function __construct(
-        private ?CommandInterface $primary = null
+        private ?CommandInterface $primary = null,
+        bool $aggregatePrimary = true,
     ) {
-        if ($primary !== null) {
+        if ($primary !== null && $aggregatePrimary) {
             $this->commands[] = $primary;
         }
     }

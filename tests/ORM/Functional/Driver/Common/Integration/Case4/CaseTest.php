@@ -50,22 +50,22 @@ abstract class CaseTest extends BaseTest
         self::assertSame(
             [
                 'alias' => [
-                    ['value' => '1'],
-                    ['value' => '2'],
+                    ['id' => 1, 'value' => '1'],
+                    ['id' => 2, 'value' => '2'],
                 ],
                 'email' => [
-                    ['value' => '3'],
-                    ['value' => '4'],
+                    ['id' => 1, 'value' => '3'],
+                    ['id' => 2, 'value' => '4'],
                 ],
                 'phone' => [
-                    ['value' => '5'],
-                    ['value' => '6'],
+                    ['id' => 1, 'value' => '5'],
+                    ['id' => 2, 'value' => '6'],
                 ],
             ],
             [
-                'alias' => $db->select('value')->from('user_alias')->fetchAll(),
-                'email' => $db->select('value')->from('user_email')->fetchAll(),
-                'phone' => $db->select('value')->from('user_phone')->fetchAll(),
+                'alias' => $db->select('id', 'value')->from('user_alias')->fetchAll(),
+                'email' => $db->select('id', 'value')->from('user_email')->fetchAll(),
+                'phone' => $db->select('id', 'value')->from('user_phone')->fetchAll(),
             ]
         );
     }
@@ -84,19 +84,19 @@ abstract class CaseTest extends BaseTest
         $i = 0;
 
         $expected = [];
-        while ($cnt1-- > 0) {
+        for ($id = 1; $id <= $cnt1; $id++) {
             $em->persist(new User\Alias($user, $v = (string) ++$i));
-            $expected['alias'][] = ['value' => $v];
+            $expected['alias'][] = ['id' => $id, 'value' => $v];
         }
 
-        while ($cnt2-- > 0) {
+        for ($id = 1; $id <= $cnt2; $id++) {
             $em->persist(new User\Email($user, $v = (string) ++$i));
-            $expected['email'][] = ['value' => $v];
+            $expected['email'][] = ['id' => $id, 'value' => $v];
         }
 
-        while ($cnt3-- > 0) {
+        for ($id = 1; $id <= $cnt3; $id++) {
             $em->persist(new User\Phone($user, $v = (string) ++$i));
-            $expected['phone'][] = ['value' => $v];
+            $expected['phone'][] = ['id' => $id, 'value' => $v];
         }
         $em->run();
 
@@ -104,9 +104,9 @@ abstract class CaseTest extends BaseTest
         self::assertSame(
             $expected,
             [
-                'alias' => $db->select('value')->from('user_alias')->fetchAll(),
-                'email' => $db->select('value')->from('user_email')->fetchAll(),
-                'phone' => $db->select('value')->from('user_phone')->fetchAll(),
+                'alias' => $db->select('id', 'value')->from('user_alias')->fetchAll(),
+                'email' => $db->select('id', 'value')->from('user_email')->fetchAll(),
+                'phone' => $db->select('id', 'value')->from('user_phone')->fetchAll(),
             ]
         );
     }

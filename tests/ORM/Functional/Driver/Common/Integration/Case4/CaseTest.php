@@ -63,9 +63,9 @@ abstract class CaseTest extends BaseTest
                 ],
             ],
             [
-                'alias' => $db->select('id', 'value')->from('user_alias')->fetchAll(),
-                'email' => $db->select('id', 'value')->from('user_email')->fetchAll(),
-                'phone' => $db->select('id', 'value')->from('user_phone')->fetchAll(),
+                'alias' => $db->select('id', 'value')->from('user_alias')->orderBy('id')->fetchAll(),
+                'email' => $db->select('id', 'value')->from('user_email')->orderBy('id')->fetchAll(),
+                'phone' => $db->select('id', 'value')->from('user_phone')->orderBy('id')->fetchAll(),
             ]
         );
     }
@@ -104,9 +104,9 @@ abstract class CaseTest extends BaseTest
         self::assertSame(
             $expected,
             [
-                'alias' => $db->select('id', 'value')->from('user_alias')->fetchAll(),
-                'email' => $db->select('id', 'value')->from('user_email')->fetchAll(),
-                'phone' => $db->select('id', 'value')->from('user_phone')->fetchAll(),
+                'alias' => $db->select('id', 'value')->from('user_alias')->orderBy('id')->fetchAll(),
+                'email' => $db->select('id', 'value')->from('user_email')->orderBy('id')->fetchAll(),
+                'phone' => $db->select('id', 'value')->from('user_phone')->orderBy('id')->fetchAll(),
             ]
         );
     }

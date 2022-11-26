@@ -46,7 +46,6 @@ abstract class CaseTest extends BaseTest
 
         $em->run();
 
-        $db = $this->orm->getSource(User::class)->getDatabase();
         self::assertSame(
             [
                 'alias' => [
@@ -63,9 +62,9 @@ abstract class CaseTest extends BaseTest
                 ],
             ],
             [
-                'alias' => $db->select('id', 'value')->from('user_alias')->orderBy('id')->fetchAll(),
-                'email' => $db->select('id', 'value')->from('user_email')->orderBy('id')->fetchAll(),
-                'phone' => $db->select('id', 'value')->from('user_phone')->orderBy('id')->fetchAll(),
+                'alias' => $this->fetchFromTable('user_alias'),
+                'email' => $this->fetchFromTable('user_email'),
+                'phone' => $this->fetchFromTable('user_phone'),
             ]
         );
     }
@@ -100,13 +99,12 @@ abstract class CaseTest extends BaseTest
         }
         $em->run();
 
-        $db = $this->orm->getSource(User::class)->getDatabase();
         self::assertSame(
             $expected,
             [
-                'alias' => $db->select('id', 'value')->from('user_alias')->orderBy('id')->fetchAll(),
-                'email' => $db->select('id', 'value')->from('user_email')->orderBy('id')->fetchAll(),
-                'phone' => $db->select('id', 'value')->from('user_phone')->orderBy('id')->fetchAll(),
+                'alias' => $this->fetchFromTable('user_alias'),
+                'email' => $this->fetchFromTable('user_email'),
+                'phone' => $this->fetchFromTable('user_phone'),
             ]
         );
     }
@@ -116,6 +114,17 @@ abstract class CaseTest extends BaseTest
         yield [2, 2, 2];
         yield [3, 3, 1];
         yield [1, 7, 4];
+    }
+
+    private function fetchFromTable(string $tableName): array
+    {
+        $db = $this->orm->getSource(User::class)->getDatabase();
+        $rows = $db->select('id', 'value')->from($tableName)->orderBy('id')->fetchAll();
+        // cast id to int specially for mssql
+        return array_map(function (array $row): array {
+            $row['id'] = (int) $row['id'];
+            return $row;
+        }, $rows);
     }
 
     private function makeTables(): void

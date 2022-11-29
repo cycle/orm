@@ -8,6 +8,7 @@ use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity\PostTag;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 /**
@@ -29,7 +30,7 @@ abstract class CaseTest extends BaseTest
     }
 
     /**
-     * There pivot collection is replaced with new one but one target is from old collection
+     * There pivoted collection is replaced with new one but one target is from old collection
      */
     public function testPivotedCollectionUniqueIndex(): void
     {
@@ -54,6 +55,34 @@ abstract class CaseTest extends BaseTest
         $this->save($post);
         // Just delete two pivots
         $this->assertNumWrites(2);
+    }
+
+    /**
+     * There pivoted collection is replaced with new one and one target is from old collection has a different pivot
+     */
+    public function testPivotedCollectionUniqueIndexWithNewPivot(): void
+    {
+        // Get entity
+        $post = (new Select($this->orm, Entity\Post::class))
+            ->wherePK(1)
+            ->load('tags')
+            ->fetchOne();
+
+        $this->assertCount(3, $post->tags);
+
+        $tag1 = (new Select($this->orm, Entity\Tag::class))
+            ->wherePK(1)
+            ->fetchOne();
+
+        $this->assertSame($tag1, $post->tags[0]);
+
+        $post->tags = new PivotedCollection();
+        $post->tags->setPivot($tag1, new PostTag());
+
+        $this->captureWriteQueries();
+        $this->save($post);
+        // Delete all previous pivots and add new one
+        $this->assertNumWrites(3);
     }
 
     private function makeTables(): void

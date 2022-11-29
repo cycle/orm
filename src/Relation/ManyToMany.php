@@ -194,10 +194,14 @@ class ManyToMany extends Relation\AbstractRelation
     public function extractRelated(?iterable $data, PivotedStorage $original): PivotedStorage
     {
         $related = $this->extract($data);
-        if ($data instanceof PivotedStorage || $data instanceof PivotedCollectionInterface || \count($original) === 0) {
+        if (\count($original) === 0) {
             return $related;
         }
+        // Merge pivots
         foreach ($related as $item) {
+            if ($related->hasContext($item)) {
+                continue;
+            }
             if ($original->hasContext($item)) {
                 $related->set($item, $original->getContext()->offsetGet($item));
             }

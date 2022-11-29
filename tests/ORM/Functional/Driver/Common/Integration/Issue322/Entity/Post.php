@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case5\Entity;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity;
 
+use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use DateTimeImmutable;
 
 class Post
@@ -20,7 +21,7 @@ class Post
     public User $user;
     public ?int $user_id = null;
     /** @var iterable<Tag> */
-    public iterable $tags = [];
+    public iterable $tags;
     public ?int $tag_id = null;
     /** @var iterable<Comment> */
     public iterable $comments = [];
@@ -31,6 +32,7 @@ class Post
         $this->content = $content;
         $this->created_at = new DateTimeImmutable();
         $this->updated_at = new DateTimeImmutable();
+        $this->tags = new PivotedCollection();
         $this->resetSlug();
     }
 

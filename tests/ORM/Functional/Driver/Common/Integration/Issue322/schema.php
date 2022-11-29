@@ -7,11 +7,11 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity\Comment;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity\Post;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity\PostTag;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity\Tag;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity\Comment;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity\PostTag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity\Tag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity\User;
 
 return [
     'comment' => [

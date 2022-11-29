@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity;
 
 use DateTimeImmutable;
 

@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case5;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322;
 
+use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
+/**
+ * @link https://github.com/cycle/orm/issues/322
+ */
 abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
@@ -24,25 +28,32 @@ abstract class CaseTest extends BaseTest
         $this->loadSchema(__DIR__ . '/schema.php');
     }
 
-    public function test1WithClean(): void
+    /**
+     * There pivot collection is replaced with new one but one target is from old collection
+     */
+    public function testPivotedCollectionUniqueIndex(): void
     {
-        $user = new Entity\User('test','test');
-        $this->save($user);
+        // Get entity
+        $post = (new Select($this->orm, Entity\Post::class))
+            ->wherePK(1)
+            ->load('tags')
+            ->fetchOne();
 
-        $this->orm->getHeap()->clean();
-        $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
+        $this->assertCount(3, $post->tags);
 
-        $this->assertEquals($user->id, $get_user->id);
-    }
+        $tag1 = (new Select($this->orm, Entity\Tag::class))
+            ->wherePK(1)
+            ->fetchOne();
 
-    public function test2WithoutClean(): void
-    {
-        $user = new Entity\User('test','test');
-        $this->save($user);
+        $this->assertSame($tag1, $post->tags[0]);
 
-        $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
+        $post->tags = new PivotedCollection();
+        $post->tags->add($tag1);
 
-        $this->assertEquals($user->id, $get_user->id);
+        $this->captureWriteQueries();
+        $this->save($post);
+        // Just delete two pivots
+        $this->assertNumWrites(2);
     }
 
     private function makeTables(): void
@@ -85,14 +96,17 @@ abstract class CaseTest extends BaseTest
         $this->makeTable('tag', [
             'id' => 'primary',
             'label' => 'string',
+            'created_at' => 'datetime',
         ]);
 
         $this->makeTable('post_tag', [
+            'id' => 'primary',
             'post_id' => 'int',
             'tag_id' => 'int',
-        ], pk: ['post_id', 'tag_id']);
+        ]);
         $this->makeFK('post_tag', 'post_id', 'post', 'id', 'NO ACTION', 'CASCADE');
         $this->makeFK('post_tag', 'tag_id', 'tag', 'id', 'NO ACTION', 'CASCADE');
+        $this->makeIndex('post_tag', ['post_id', 'tag_id'], true);
     }
 
     private function fillData(): void
@@ -115,6 +129,24 @@ abstract class CaseTest extends BaseTest
                 [3, 'slug-string-4', 'Title 4', true, 'Foo-bar-baz content 4'],
                 [3, 'slug-string-5', 'Title 5', true, 'Foo-bar-baz content 5'],
                 [3, 'slug-string-6', 'Title 6', true, 'Foo-bar-baz content 6'],
+            ],
+        );
+
+        $this->getDatabase()->table('tag')->insertMultiple(
+            ['label'],
+            [
+                ['label-1'],
+                ['label-2'],
+                ['label-3'],
+            ],
+        );
+
+        $this->getDatabase()->table('post_tag')->insertMultiple(
+            ['post_id', 'tag_id'],
+            [
+                [1,1],
+                [1,2],
+                [1,3],
             ],
         );
     }

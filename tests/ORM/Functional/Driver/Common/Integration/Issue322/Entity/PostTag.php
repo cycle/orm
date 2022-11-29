@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case5\Entity;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue322\Entity;
 
 class PostTag
 {
-    // private ?int $id = null;
+    private ?int $id = null;
     private ?int $post_id = null;
     private ?int $tag_id = null;
 }

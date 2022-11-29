@@ -10,6 +10,9 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
+/**
+ * @link https://github.com/cycle/orm/issues/322
+ */
 abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
@@ -25,6 +28,9 @@ abstract class CaseTest extends BaseTest
         $this->loadSchema(__DIR__ . '/schema.php');
     }
 
+    /**
+     * There pivot collection is replaced with new one but one target is from old collection
+     */
     public function testPivotedCollectionUniqueIndex(): void
     {
         // Get entity
@@ -33,15 +39,21 @@ abstract class CaseTest extends BaseTest
             ->load('tags')
             ->fetchOne();
 
+        $this->assertCount(3, $post->tags);
+
         $tag1 = (new Select($this->orm, Entity\Tag::class))
             ->wherePK(1)
             ->fetchOne();
 
+        $this->assertSame($tag1, $post->tags[0]);
+
         $post->tags = new PivotedCollection();
         $post->tags->add($tag1);
 
-
+        $this->captureWriteQueries();
         $this->save($post);
+        // Just delete two pivots
+        $this->assertNumWrites(2);
     }
 
     private function makeTables(): void

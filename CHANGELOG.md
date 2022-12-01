@@ -1,8 +1,15 @@
 # CHANGELOG
 
-v2.2.1 (in progress)
+v2.2.1 (01.12.2022)
 --------------------
-- Fix `cascade` mode in BelongsTo relation by @roxblnfk (#347)
+- Fix `EM::persistState()` that inserted the same entity twice by @roxblnfk (#368)
+- Fix bug on saving of replaced pivoted collection by @BelaRyc (#382)
+- Fix `cascade` mode in BelongsTo relation by @roxblnfk and @msmakouz (#347, #374)
+- Fix storing od embedded entities in a JTI by @butschster (#379)
+- Add tests case template by @roxblnfk and @kastahov (#372, #377)
+  - [How to make an issue with test case](https://cycle-orm.dev/docs/issue-test-case)
+- Add a previous exception in TransactionException on throwing by @Eugentis (#367)
+- Add annotation `@readonly` for `Repository::$select` by @roxblnfk (#369)
 
 v2.2.0 (05.07.2022)
 --------------------

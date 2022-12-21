@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common;
 
+use Cycle\Database\Config\DriverConfig;
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
@@ -123,18 +124,21 @@ abstract class BaseTest extends TestCase
         return $this->orm;
     }
 
-    public function getDriver(): Driver
+    public function getDriver(array $driverConfig = []): Driver
     {
-        if (isset(static::$driverCache[static::DRIVER])) {
-            return static::$driverCache[static::DRIVER];
+        $hash = \hash('crc32', static::DRIVER . ':' . \json_encode($driverConfig));
+
+        if (isset(static::$driverCache[$hash])) {
+            return static::$driverCache[$hash];
         }
 
         $config = self::$config[static::DRIVER];
+        $this->applyDriverOptions($config, $driverConfig);
         if (!isset($this->driver)) {
             $this->driver = $config->driver::create($config);
         }
 
-        return static::$driverCache[static::DRIVER] = $this->driver;
+        return static::$driverCache[$hash] = $this->driver;
     }
 
     /**
@@ -390,6 +394,13 @@ abstract class BaseTest extends TestCase
                     "Entity and State are not in sync `{$eName}`.`{$name}`"
                 );
             }
+        }
+    }
+
+    private function applyDriverOptions(DriverConfig $config, array $options): void
+    {
+        if (isset($options['datetimeWithMicroseconds']) && $options['datetimeWithMicroseconds'] === true) {
+            $config->options['datetimeWithMicroseconds'] = true;
         }
     }
 }

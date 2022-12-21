@@ -14,7 +14,7 @@ $drivers = [
     'sqlite' => new Config\SQLiteDriverConfig(
         queryCache: true,
         options: [
-            'datetimeWithMicroseconds' => true
+            'datetimeWithMicroseconds' => true,
         ]
     ),
     'mysql' => new Config\MySQLDriverConfig(
@@ -27,7 +27,7 @@ $drivers = [
         ),
         queryCache: true,
         options: [
-            'datetimeWithMicroseconds' => true
+            'datetimeWithMicroseconds' => true,
         ]
     ),
     'postgres' => new Config\PostgresDriverConfig(
@@ -41,7 +41,7 @@ $drivers = [
         schema: 'public',
         queryCache: true,
         options: [
-            'datetimeWithMicroseconds' => true
+            'datetimeWithMicroseconds' => true,
         ]
     ),
     'sqlserver' => new Config\SQLServerDriverConfig(
@@ -54,7 +54,7 @@ $drivers = [
         ),
         queryCache: true,
         options: [
-            'datetimeWithMicroseconds' => true
+            'datetimeWithMicroseconds' => true,
         ]
     ),
 ];

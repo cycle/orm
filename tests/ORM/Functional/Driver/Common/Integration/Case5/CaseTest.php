@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case5;
 
-use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -26,7 +25,7 @@ abstract class CaseTest extends BaseTest
 
     public function test1WithClean(): void
     {
-        $user = new Entity\User('test','test');
+        $user = new Entity\User('test', 'test');
         $this->save($user);
 
         $this->orm->getHeap()->clean();
@@ -37,7 +36,7 @@ abstract class CaseTest extends BaseTest
 
     public function test2WithoutClean(): void
     {
-        $user = new Entity\User('test','test');
+        $user = new Entity\User('test', 'test');
         $this->save($user);
 
         $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
@@ -52,8 +51,8 @@ abstract class CaseTest extends BaseTest
             'id' => 'primary', // autoincrement
             'login' => 'string',
             'password_hash' => 'string',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at' => 'datetime(6)',
+            'updated_at' => 'datetime(6)',
         ]);
 
         $this->makeTable('post', [
@@ -63,10 +62,10 @@ abstract class CaseTest extends BaseTest
             'title' => 'string',
             'public' => 'bool',
             'content' => 'string',
-            'published_at' => 'datetime,nullable',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-            'deleted_at' => 'datetime,nullable',
+            'published_at' => 'datetime(6),nullable',
+            'created_at' => 'datetime(6)',
+            'updated_at' => 'datetime(6)',
+            'deleted_at' => 'datetime(6),nullable',
         ]);
         $this->makeFK('post', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
 
@@ -76,8 +75,8 @@ abstract class CaseTest extends BaseTest
             'content' => 'string',
             'user_id' => 'int',
             'post_id' => 'int',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at' => 'datetime(6)',
+            'updated_at' => 'datetime(6)',
         ]);
         $this->makeFK('comment', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
         $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');

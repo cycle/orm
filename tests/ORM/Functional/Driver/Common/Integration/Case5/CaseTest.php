@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case5;
 
-use Cycle\Database\Config\DatabaseConfig;
-use Cycle\Database\Database;
-use Cycle\Database\DatabaseManager;
+use Cycle\Database\Driver\Driver;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -20,15 +18,6 @@ abstract class CaseTest extends BaseTest
     {
         // Init DB
         parent::setUp();
-        $this->driver = $this->getDriver(driverConfig: ['datetimeWithMicroseconds' => true]);
-        $this->dbal = new DatabaseManager(new DatabaseConfig());
-        $this->dbal->addDatabase(
-            new Database(
-                'default',
-                '',
-                $this->driver
-            )
-        );
 
         $this->makeTables();
         $this->fillData();
@@ -129,5 +118,10 @@ abstract class CaseTest extends BaseTest
                 [3, 'slug-string-6', 'Title 6', true, 'Foo-bar-baz content 6'],
             ],
         );
+    }
+
+    public function getDriver(array $driverConfig = []): Driver
+    {
+        return parent::getDriver(['datetimeWithMicroseconds' => true]);
     }
 }

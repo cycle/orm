@@ -124,21 +124,18 @@ abstract class BaseTest extends TestCase
         return $this->orm;
     }
 
-    public function getDriver(array $driverConfig = []): Driver
+    public function getDriver(): Driver
     {
-        $hash = \hash('crc32', static::DRIVER . ':' . \json_encode($driverConfig));
-
-        if (isset(static::$driverCache[$hash])) {
-            return static::$driverCache[$hash];
+        if (isset(static::$driverCache[static::DRIVER])) {
+            return static::$driverCache[static::DRIVER];
         }
 
         $config = self::$config[static::DRIVER];
-        $this->applyDriverOptions($config, $driverConfig);
         if (!isset($this->driver)) {
             $this->driver = $config->driver::create($config);
         }
 
-        return static::$driverCache[$hash] = $this->driver;
+        return static::$driverCache[static::DRIVER] = $this->driver;
     }
 
     /**
@@ -397,10 +394,10 @@ abstract class BaseTest extends TestCase
         }
     }
 
-    private function applyDriverOptions(DriverConfig $config, array $options): void
+    protected function applyDriverOptions(DriverConfig $config, array $options): void
     {
-        if (isset($options['datetimeWithMicroseconds']) && $options['datetimeWithMicroseconds'] === true) {
-            $config->options['datetimeWithMicroseconds'] = true;
+        if (isset($options['datetimeWithMicroseconds'])) {
+            $config->options['datetimeWithMicroseconds'] = $options['datetimeWithMicroseconds'];
         }
     }
 }

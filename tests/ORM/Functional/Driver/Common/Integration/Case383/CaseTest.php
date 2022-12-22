@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case5;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case383;
 
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
@@ -15,7 +15,7 @@ abstract class CaseTest extends BaseTest
 
     public function setUp(): void
     {
-        $this->applyDriverOptions(static::$config[static::DRIVER], ['datetimeWithMicroseconds' => true]);
+        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => true]);
 
         // Init DB
         parent::setUp();
@@ -30,7 +30,7 @@ abstract class CaseTest extends BaseTest
     {
         parent::tearDown();
 
-        $this->applyDriverOptions(static::$config[static::DRIVER], ['datetimeWithMicroseconds' => false]);
+        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => false]);
         $this->driver = null;
     }
 

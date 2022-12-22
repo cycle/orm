@@ -396,8 +396,8 @@ abstract class BaseTest extends TestCase
 
     protected function applyDriverOptions(DriverConfig $config, array $options): void
     {
-        if (isset($options['datetimeWithMicroseconds'])) {
-            $config->options['datetimeWithMicroseconds'] = $options['datetimeWithMicroseconds'];
+        if (isset($options['withDatetimeMicroseconds'])) {
+            $config->options['withDatetimeMicroseconds'] = $options['withDatetimeMicroseconds'];
         }
     }
 }

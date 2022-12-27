@@ -28,9 +28,11 @@ function copyTemplateFiles(string $copyDir, string $caseTemplateDirName): void
 {
     $caseTemplateDir = __DIR__.'/ORM/Functional/Driver/Common/Integration/'.$caseTemplateDirName;
     if (!file_exists($caseTemplateDir) || !is_dir($caseTemplateDir)) {
-        echo "Error. CaseTemplate folder `$caseTemplateDir` noes not exists\n";
+        echo "Error. template folder '$caseTemplateDir' does not exists\n";
         exit(1);
     }
+
+    echo \sprintf("Using template files from '%s'...\n", $caseTemplateDir);
 
     $rii = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($caseTemplateDir, FilesystemIterator::SKIP_DOTS)

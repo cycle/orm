@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common;
 
+use Cycle\Database\Config\DriverConfig;
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
@@ -390,6 +391,13 @@ abstract class BaseTest extends TestCase
                     "Entity and State are not in sync `{$eName}`.`{$name}`"
                 );
             }
+        }
+    }
+
+    protected function applyDriverOptions(DriverConfig $config, array $options): void
+    {
+        if (isset($options['withDatetimeMicroseconds'])) {
+            $config->options['withDatetimeMicroseconds'] = $options['withDatetimeMicroseconds'];
         }
     }
 }

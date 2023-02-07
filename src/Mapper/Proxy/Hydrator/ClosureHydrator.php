@@ -6,6 +6,7 @@ namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
 use Closure;
 use Cycle\ORM\EntityProxyInterface;
+use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
 
@@ -32,7 +33,16 @@ class ClosureHydrator
         }
 
         foreach ($data as $property => $value) {
-            $object->{$property} = $value;
+            try {
+                $object->{$property} = $value;
+            } catch (\Throwable $e) {
+                if ($e::class === \TypeError::class) {
+                    throw new MapperException(
+                        "Can't hydrate an entity because property and value types are incompatible.",
+                        previous: $e
+                    );
+                }
+            }
         }
 
         return $object;

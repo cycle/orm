@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper\ProxyEntityMapper;
 
+use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Functional\Driver\Common\Mapper\BaseMapperTest;
 
 class EntityHydrationTest extends BaseMapperTest
@@ -20,24 +22,34 @@ class EntityHydrationTest extends BaseMapperTest
             new Schema(
                 [
                     EntityHydrationUser::class => [
-                        Schema::MAPPER => Mapper::class,
-                        Schema::DATABASE => 'default',
-                        Schema::TABLE => 'user',
-                        Schema::PRIMARY_KEY => 'uuid',
-                        Schema::COLUMNS => ['id', 'username', 'email'],
-                        Schema::TYPECAST => [],
-                        Schema::SCHEMA => [],
-                        Schema::RELATIONS => [],
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'uuid',
+                        SchemaInterface::COLUMNS => ['id', 'username', 'email'],
+                        SchemaInterface::TYPECAST => [],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
                     ],
                     ExtendedEntityHydrationUser::class => [
-                        Schema::MAPPER => Mapper::class,
-                        Schema::DATABASE => 'default',
-                        Schema::TABLE => 'user',
-                        Schema::PRIMARY_KEY => 'uuid',
-                        Schema::COLUMNS => ['id', 'username', 'email', 'isVerified', 'profileId'],
-                        Schema::TYPECAST => [],
-                        Schema::SCHEMA => [],
-                        Schema::RELATIONS => [],
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'uuid',
+                        SchemaInterface::COLUMNS => ['id', 'username', 'email', 'isVerified', 'profileId'],
+                        SchemaInterface::TYPECAST => [],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                    EntityHydrationIdentityUser::class => [
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'value'],
+                        SchemaInterface::TYPECAST => [],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
                     ],
                 ]
             )
@@ -145,8 +157,40 @@ class EntityHydrationTest extends BaseMapperTest
 
         $this->assertEquals('test', $user->tag);
     }
+
+    public function testWriteDynamicProperty(): void
+    {
+        $mapper = $this->orm->getMapper(EntityHydrationIdentityUser::class);
+        $emptyObject = new EntityHydrationIdentityUser();
+
+        $mapper->hydrate($emptyObject, ['id' => 123, 'value' => 'test']);
+
+        // self::assertSame(['id' => 123], $mapper->fetchFields($emptyObject));
+        self::assertTrue(true, 'No exception thrown');
+    }
+
+    public function testHydrateBadType(): void
+    {
+        $mapper = $this->orm->getMapper(EntityHydrationIdentityUser::class);
+        $emptyObject = new EntityHydrationIdentityUser();
+
+        $this->expectException(MapperException::class);
+        $this->expectExceptionMessage("Can't hydrate an entity because property and value types are incompatible.");
+
+        try {
+            $mapper->hydrate($emptyObject, ['id' => 'string value']);
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(\TypeError::class, $e->getPrevious());
+            throw $e;
+        }
+    }
 }
 // phpcs:disable
+class EntityHydrationIdentityUser
+{
+    public int $id;
+}
+
 class EntityHydrationUser
 {
     public int $id;

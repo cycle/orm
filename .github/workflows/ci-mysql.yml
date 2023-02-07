@@ -24,6 +24,7 @@ jobs:
         php-version:
           - "8.0"
           - "8.1"
+          - "8.2"
 
         mysql-version:
           - "5.7"

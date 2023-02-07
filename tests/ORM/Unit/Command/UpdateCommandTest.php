@@ -18,6 +18,7 @@ class UpdateCommandTest extends TestCase
 {
     private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
     private Update $cmd;
+    private DatabaseInterface $db;
     private State $state;
 
     protected function setUp(): void

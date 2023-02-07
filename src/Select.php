@@ -135,7 +135,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
-     * Compiled SQL query, changes in this query would not affect Selector state (but binded parameters will).
+     * Compiled SQL query, changes in this query would not affect Selector state (but bound parameters will).
      */
     public function buildQuery(): SelectQuery
     {

@@ -52,6 +52,9 @@ interface MapperInterface
 
     /**
      * Extract all values from the entity.
+     * The method should return the same result as {@see fetchFields()} and {@see fetchRelations()} combined.
+     * The method was separated because of performance and usability reasons.
+     * If you're going to customize fields extraction, pay attention to the {@see fetchFields()} method.
      */
     public function extract(object $entity): array;
 

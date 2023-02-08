@@ -1,34 +1,34 @@
 {
-  "name": "cycle/orm",
-  "type": "library",
-  "license": "MIT",
-  "description": "PHP DataMapper ORM and Data Modelling Engine",
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "require": {
-    "php": ">=8.0",
-    "ext-pdo": "*",
-    "cycle/database": "^2.3",
-    "doctrine/instantiator": "^1.3.1"
-  },
-  "require-dev": {
-    "doctrine/collections": "^1.6 || ^2.0",
-    "illuminate/collections": "^8.0",
-    "loophp/collection": "^6.0",
-    "mockery/mockery": "^1.1",
-    "phpunit/phpunit": "^9.5",
-    "ramsey/uuid": "^4.0",
-    "spiral/tokenizer": "^2.8",
-    "vimeo/psalm": "^4.9"
-  },
-  "autoload": {
-    "psr-4": {
-      "Cycle\\ORM\\": "src/"
+    "name": "cycle/orm",
+    "type": "library",
+    "license": "MIT",
+    "description": "PHP DataMapper ORM and Data Modelling Engine",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.0",
+        "ext-pdo": "*",
+        "cycle/database": "^2.3",
+        "doctrine/instantiator": "^1.3.1"
+    },
+    "require-dev": {
+        "doctrine/collections": "^1.6 || ^2.0",
+        "illuminate/collections": "^8.0",
+        "loophp/collection": "^6.0",
+        "mockery/mockery": "^1.1",
+        "phpunit/phpunit": "^9.5",
+        "ramsey/uuid": "^4.0",
+        "spiral/tokenizer": "^2.8",
+        "vimeo/psalm": "^4.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cycle\\ORM\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cycle\\ORM\\Tests\\": "tests/ORM/"
+        }
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Cycle\\ORM\\Tests\\": "tests/ORM/"
-    }
-  }
 }

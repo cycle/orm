@@ -9,6 +9,8 @@ use PHPUnit\Framework\TestCase;
 
 abstract class BaseTest extends TestCase
 {
+    private CollectionFactoryInterface $factory;
+
     abstract protected function getFactory(): CollectionFactoryInterface;
 
     protected function setUp(): void

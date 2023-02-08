@@ -166,6 +166,7 @@ class ProxyEntityFactory
             /** @see \Cycle\ORM\Mapper\Proxy\EntityProxyTrait */
             $classStr = <<<PHP
                 {$namespaceStr}
+                #[\AllowDynamicProperties]
                 class {$classNameStr} extends \\{$class} implements \\Cycle\\ORM\\EntityProxyInterface {
                     use \\Cycle\ORM\\Mapper\\Proxy\\EntityProxyTrait;
                 }

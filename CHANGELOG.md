@@ -1,5 +1,10 @@
 # CHANGELOG
 
+v2.2.2 (08.02.2023)
+--------------------
+* Fix compatibility with PHP 8.2 (AllowDynamicProperties) by @roxblnfk (#394)
+* Add tests with using for microseconds in a datetime fields by @BelaRyc and @msmakouz (#383)
+
 v2.2.1 (01.12.2022)
 --------------------
 - Fix `EM::persistState()` that inserted the same entity twice by @roxblnfk (#368)

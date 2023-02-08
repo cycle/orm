@@ -34,7 +34,8 @@ class ClosureHydrator
 
         foreach ($data as $property => $value) {
             try {
-                $object->{$property} = $value;
+                // Ignore deprecations
+                @$object->{$property} = $value;
             } catch (\Throwable $e) {
                 if ($e::class === \TypeError::class) {
                     throw new MapperException(

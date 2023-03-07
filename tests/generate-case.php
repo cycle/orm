@@ -6,9 +6,9 @@ declare(strict_types=1);
 \ini_set('display_errors', '1');
 
 //Composer
-require_once \dirname(__DIR__).'/vendor/autoload.php';
+require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
-$integrationDir = __DIR__.'/ORM/Functional/Driver/Common/Integration';
+$integrationDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration';
 
 function defaultCaseName(string $integrationDir): string
 {
@@ -21,12 +21,12 @@ function defaultCaseName(string $integrationDir): string
     }
     ++$cases;
 
-    return $integrationDir.'/Case'.$cases;
+    return $integrationDir . '/Case' . $cases;
 }
 
 function copyTemplateFiles(string $copyDir, string $caseTemplateDirName): void
 {
-    $caseTemplateDir = __DIR__.'/ORM/Functional/Driver/Common/Integration/'.$caseTemplateDirName;
+    $caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/' . $caseTemplateDirName;
     if (!file_exists($caseTemplateDir) || !is_dir($caseTemplateDir)) {
         echo "Error. template folder '$caseTemplateDir' does not exists\n";
         exit(1);
@@ -58,7 +58,7 @@ $options = getopt('', [
 ]);
 
 $copyDir = isset($options['case-name'])
-    ? $integrationDir.DIRECTORY_SEPARATOR.$options['case-name']
+    ? $integrationDir . DIRECTORY_SEPARATOR . $options['case-name']
     : defaultCaseName($integrationDir);
 
 if (file_exists($copyDir)) {

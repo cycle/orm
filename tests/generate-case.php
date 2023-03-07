@@ -6,44 +6,72 @@ declare(strict_types=1);
 \ini_set('display_errors', '1');
 
 //Composer
-require_once \dirname(__DIR__) . '/vendor/autoload.php';
+require_once \dirname(__DIR__).'/vendor/autoload.php';
 
-$integrationDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration';
-$caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/CaseTemplate';
+$integrationDir = __DIR__.'/ORM/Functional/Driver/Common/Integration';
 
-$cases = 0;
+function defaultCaseName(string $integrationDir): string
+{
+    $cases = 0;
 
-foreach (\scandir($integrationDir) as $dirName) {
-    if (\sscanf($dirName, 'Case%d', $last) === 1) {
-        $cases = \max($cases, $last);
+    foreach (\scandir($integrationDir) as $dirName) {
+        if (\sscanf($dirName, 'Case%d', $last) === 1) {
+            $cases = \max($cases, $last);
+        }
+    }
+    ++$cases;
+
+    return $integrationDir.'/Case'.$cases;
+}
+
+function copyTemplateFiles(string $copyDir, string $caseTemplateDirName): void
+{
+    $caseTemplateDir = __DIR__.'/ORM/Functional/Driver/Common/Integration/'.$caseTemplateDirName;
+    if (!file_exists($caseTemplateDir) || !is_dir($caseTemplateDir)) {
+        echo "Error. template folder '$caseTemplateDir' does not exists\n";
+        exit(1);
+    }
+
+    echo \sprintf("Using template files from '%s'...\n", $caseTemplateDir);
+
+    $rii = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($caseTemplateDir, FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($rii as $file) {
+        $filePath = $file->getRealPath();
+        $target = \substr($filePath, \strlen($caseTemplateDir));
+
+        // creating directory...
+        $dirName = dirname($copyDir . $target);
+        if (!\is_dir($dirName)) {
+            \mkdir($dirName, recursive: true);
+        }
+
+        $contents = \str_replace($caseTemplateDirName, basename($copyDir), \file_get_contents($filePath));
+        \file_put_contents($copyDir . $target, $contents);
     }
 }
-++$cases;
 
-$copyDir = $integrationDir . '/Case' . $cases;
+$options = getopt('', [
+    'case-name:',
+    'template:',
+]);
 
-echo \sprintf("Generating new test case 'Case%s'... \n", $cases);
+$copyDir = isset($options['case-name'])
+    ? $integrationDir.DIRECTORY_SEPARATOR.$options['case-name']
+    : defaultCaseName($integrationDir);
+
+if (file_exists($copyDir)) {
+    echo "Error. Tests folder `$copyDir` already exists\n";
+    exit(1);
+}
+
+echo \sprintf("Generating new test case '%s'... \n", basename($copyDir));
 
 \mkdir($copyDir);
 $copyDir = \realpath($copyDir);
 
-$rii = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator($caseTemplateDir, FilesystemIterator::SKIP_DOTS)
-);
-
-foreach ($rii as $file) {
-    $filePath = $file->getRealPath();
-    $target = \substr($filePath, \strlen($caseTemplateDir));
-
-    // creating directory...
-    $dirName = dirname($copyDir . $target);
-    if (!\is_dir($dirName)) {
-        \mkdir($dirName, recursive: true);
-    }
-
-    $contents = \str_replace('CaseTemplate', 'Case' . $cases, \file_get_contents($filePath));
-    \file_put_contents($copyDir . $target, $contents);
-}
+copyTemplateFiles($copyDir, $options['template'] ?? 'CaseTemplate');
 
 require 'generate.php';
 

@@ -108,12 +108,22 @@ final class QueryBuilder
         }
 
         if (!\str_contains($identifier, '.')) {
-            // parent element
-            return \sprintf(
-                '%s.%s',
-                $this->loader->getAlias(),
-                $this->loader->fieldAlias($identifier) ?? $identifier,
-            );
+            $current = $this->loader;
+
+            do {
+                $column = $current->fieldAlias($identifier);
+
+                // Find an inheritance parent that has this field
+                if ($column === null) {
+                    $parent = $current->getParentLoader();
+                    if ($parent !== null) {
+                        $current = $parent;
+                        continue;
+                    }
+                }
+
+                return \sprintf('%s.%s', $current->getAlias(), $column ?? $identifier);
+            } while (true);
         }
 
         $split = \strrpos($identifier, '.');

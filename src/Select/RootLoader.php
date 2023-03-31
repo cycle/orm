@@ -47,7 +47,7 @@ final class RootLoader extends AbstractLoader
         $this->query = $this->source->getDatabase()->select()->from(
             sprintf('%s AS %s', $this->source->getTable(), $this->getAlias())
         );
-        $this->columns = $this->define(SchemaInterface::COLUMNS);
+        $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
 
         foreach ($this->getEagerLoaders() as $relation) {
             $this->loadRelation($relation, [], false, true);

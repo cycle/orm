@@ -109,21 +109,21 @@ final class QueryBuilder
 
         if (!str_contains($identifier, '.')) {
             // parent element
-            return sprintf(
+            return \sprintf(
                 '%s.%s',
                 $this->loader->getAlias(),
                 $this->loader->fieldAlias($identifier)
             );
         }
 
-        $split = strrpos($identifier, '.');
+        $split = \strrpos($identifier, '.');
 
-        $loader = $this->findLoader(substr($identifier, 0, $split), $autoload);
+        $loader = $this->findLoader(\substr($identifier, 0, $split), $autoload);
         if ($loader !== null) {
-            return sprintf(
+            return \sprintf(
                 '%s.%s',
                 $loader->getAlias(),
-                $loader->fieldAlias(substr($identifier, $split + 1))
+                $loader->fieldAlias(\substr($identifier, $split + 1))
             );
         }
 
@@ -202,7 +202,7 @@ final class QueryBuilder
         }
 
         if ($args[0] instanceof Closure) {
-            $args[0] = $args[0] = function ($q) use ($args): void {
+            $args[0] = function ($q) use ($args): void {
                 $args[0]($this->withQuery($q));
             };
         }
@@ -236,11 +236,12 @@ final class QueryBuilder
         $result = [];
         foreach ($input as $k => $v) {
             if (\is_array($v)) {
-                if (!\is_numeric($k) && \in_array(strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR], true)) {
+                if (!\is_numeric($k) && \in_array(\strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR], true)) {
                     // complex expression like @OR and @AND
                     $result[$k] = $this->walkRecursive($v, $func, true);
                     continue;
                 }
+
                 if ($complex) {
                     $v = $this->walkRecursive($v, $func);
                 }

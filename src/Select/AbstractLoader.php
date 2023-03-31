@@ -17,6 +17,7 @@ use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
+use JetBrains\PhpStorm\Deprecated;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
@@ -279,6 +280,14 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
+     * Returns inheritance parent loader.
+     */
+    public function getParentLoader(): ?LoaderInterface
+    {
+        return $this->inherit;
+    }
+
+    /**
      * Indicates that loader loads data.
      */
     abstract public function isLoaded(): bool;
@@ -288,10 +297,19 @@ abstract class AbstractLoader implements LoaderInterface
         foreach ($this->load as $relation => $loader) {
             $loader->loadData($node->getNode($relation), $includeRole);
         }
-        $this->loadIerarchy($node, $includeRole);
+        $this->loadHierarchy($node, $includeRole);
     }
 
+    /**
+     * @deprecated
+     */
+    #[Deprecated('2.3',  '$this->loadHierarchy(%parameter0%, %parameter1%)')]
     protected function loadIerarchy(AbstractNode $node, bool $includeRole = false): void
+    {
+        $this->loadHierarchy($node, $includeRole);
+    }
+
+    protected function loadHierarchy(AbstractNode $node, bool $includeRole = false): void
     {
         if ($this->inherit === null && !$this->loadSubclasses) {
             return;

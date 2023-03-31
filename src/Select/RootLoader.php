@@ -118,7 +118,7 @@ final class RootLoader extends AbstractLoader
             $loader->loadData($node->getNode($relation), $includeRole);
         }
 
-        $this->loadIerarchy($node, $includeRole);
+        $this->loadHierarchy($node, $includeRole);
     }
 
     public function isLoaded(): bool

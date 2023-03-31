@@ -76,6 +76,7 @@ trait ColumnsTrait
      * @param non-empty-string[] $columns
      *
      * @return array<non-empty-string, non-empty-string>
+     *
      * @psalm-pure
      */
     #[Pure]

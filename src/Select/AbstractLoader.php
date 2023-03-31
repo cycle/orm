@@ -303,7 +303,7 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * @deprecated
      */
-    #[Deprecated('2.3',  '$this->loadHierarchy(%parameter0%, %parameter1%)')]
+    #[Deprecated('2.3', '$this->loadHierarchy(%parameter0%, %parameter1%)')]
     protected function loadIerarchy(AbstractNode $node, bool $includeRole = false): void
     {
         $this->loadHierarchy($node, $includeRole);

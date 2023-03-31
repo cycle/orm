@@ -450,7 +450,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
 
     /**
      * @param list<non-empty-string> $pk
-     * @param list<string|int|array|object> $args
+     * @param list<array|int|object|string> $args
      *
      * @return Select<TEntity>
      */

@@ -15,6 +15,7 @@ use Traversable;
 
 /**
  * @internal
+ *
  * @psalm-suppress TypeDoesNotContainType
  * @psalm-suppress RedundantCondition
  */
@@ -31,6 +32,7 @@ final class Pool implements \Countable
 
     /**
      * @var Tuple[]
+     *
      * @psalm-var list<Tuple>
      */
     private array $unprocessed;

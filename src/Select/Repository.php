@@ -11,6 +11,7 @@ use Cycle\ORM\Select;
  * Repository provides ability to load entities and construct queries.
  *
  * @template TEntity of object
+ *
  * @implements RepositoryInterface<TEntity>
  */
 class Repository implements RepositoryInterface

@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 /**
  * @entity (role="annotated")
+ *
  * @table (database="default", table="annotated", indexes={@index (columns={"email"}, unique=true)})
  */
 class Annotated

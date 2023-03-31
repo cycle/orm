@@ -121,7 +121,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         $this->save($u);
         $this->assertNumWrites(1);
 
-        $u2 = ((new Select($this->orm->withHeap(new Heap()), CompositePK::class)))
+        $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
             ->wherePK([$u->key1, $u->key2])
             ->fetchOne();

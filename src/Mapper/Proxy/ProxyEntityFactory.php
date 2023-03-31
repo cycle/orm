@@ -18,6 +18,7 @@ class ProxyEntityFactory
 {
     /**
      * @var string[]
+     *
      * @psalm-var class-string[]
      */
     private array $classMap = [];

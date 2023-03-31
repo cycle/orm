@@ -46,6 +46,7 @@ final class Factory implements FactoryInterface
 
     /**
      * @var array<string, CollectionFactoryInterface>
+     *
      * @psalm-var array<class-string, CollectionFactoryInterface>
      */
     private array $collectionFactoryInterface = [];

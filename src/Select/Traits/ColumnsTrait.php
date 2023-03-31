@@ -26,7 +26,7 @@ trait ColumnsTrait
      */
     public function fieldAlias(string $field): ?string
     {
-        return $this->columns[$field] ?? (\in_array($field, $this->columns, true) ? $field : null);
+        return $this->columns[$field] ?? null;
     }
 
     /**

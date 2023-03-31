@@ -235,7 +235,7 @@ abstract class CompositePKTest extends SimpleCasesTest
         $this->assertNumWrites(0);
 
         /** @var Programator $programator */
-        $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
+        $programator = (new Select($this->orm->with(heap: new Heap()), Programator::class))
             ->wherePK(['second_id' => 11, 'subrole_id' => 10])
             ->fetchOne();
         $this->assertSame(10, $programator->id);

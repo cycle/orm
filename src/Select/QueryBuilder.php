@@ -107,12 +107,12 @@ final class QueryBuilder
             return '*';
         }
 
-        if (!str_contains($identifier, '.')) {
+        if (!\str_contains($identifier, '.')) {
             // parent element
             return \sprintf(
                 '%s.%s',
                 $this->loader->getAlias(),
-                $this->loader->fieldAlias($identifier)
+                $this->loader->fieldAlias($identifier) ?? $identifier,
             );
         }
 
@@ -120,10 +120,11 @@ final class QueryBuilder
 
         $loader = $this->findLoader(\substr($identifier, 0, $split), $autoload);
         if ($loader !== null) {
+            $identifier = \substr($identifier, $split + 1);
             return \sprintf(
                 '%s.%s',
                 $loader->getAlias(),
-                $loader->fieldAlias(\substr($identifier, $split + 1))
+                $loader->fieldAlias($identifier) ?? $identifier,
             );
         }
 

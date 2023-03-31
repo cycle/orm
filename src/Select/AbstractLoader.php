@@ -302,6 +302,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * @deprecated
+     *
      * @codeCoverageIgnore
      */
     #[Deprecated('2.3', '$this->loadHierarchy(%parameter0%, %parameter1%)')]

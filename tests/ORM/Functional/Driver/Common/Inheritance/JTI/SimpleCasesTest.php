@@ -251,6 +251,18 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertEquals(static::PROGRAMATOR_4_LOADED, $selector->fetchData()[0]);
     }
 
+    public function testSelectProgramatorUsingParentsFields(): void
+    {
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->where([
+                '@AND' => [
+                    ['name' => 'Valeriy'],
+                    ['level' => ['>=' => 10]],
+                ],
+            ]);
+
+        $this->assertEquals(static::PROGRAMATOR_4_LOADED, $selector->fetchData()[0]);
+    }
 
     // Persist
 

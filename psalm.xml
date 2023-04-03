@@ -15,6 +15,7 @@
         <UndefinedAttributeClass>
             <errorLevel type="suppress">
                 <referencedClass name="JetBrains\PhpStorm\ExpectedValues" />
+                <referencedClass name="JetBrains\PhpStorm\Deprecated" />
                 <referencedClass name="JetBrains\PhpStorm\Pure" />
             </errorLevel>
         </UndefinedAttributeClass>

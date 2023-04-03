@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Select\Traits;
 
 use Cycle\Database\Query\SelectQuery;
+use JetBrains\PhpStorm\Pure;
 
 /**
  * Provides ability to add aliased columns into SelectQuery.
@@ -16,16 +17,16 @@ trait ColumnsTrait
     /**
      * List of columns associated with the loader.
      *
-     * @var string[]
+     * @var array<non-empty-string, non-empty-string>
      */
-    protected array $columns;
+    protected array $columns = [];
 
     /**
      * Return column name associated with given field.
      */
-    public function fieldAlias(string $field): string
+    public function fieldAlias(string $field): ?string
     {
-        return $this->columns[$field] ?? $field;
+        return $this->columns[$field] ?? null;
     }
 
     /**
@@ -46,19 +47,13 @@ trait ColumnsTrait
         $columns = $overwrite ? [] : $query->getColumns();
 
         foreach ($this->columns as $internal => $external) {
-            $name = $external;
-            if (!\is_numeric($internal)) {
-                $name = $internal;
-            }
-
-            $column = $name;
-
+            $name = $internal;
             if ($minify) {
                 //Let's use column number instead of full name
-                $column = 'c' . \count($columns);
+                $name = 'c' . \count($columns);
             }
 
-            $columns[] = "{$alias}.{$external} AS {$prefix}{$column}";
+            $columns[] = "{$alias}.{$external} AS {$prefix}{$name}";
         }
 
         return $query->columns($columns);
@@ -69,20 +64,29 @@ trait ColumnsTrait
      */
     protected function columnNames(): array
     {
-        $result = [];
-        foreach ($this->columns as $internal => $external) {
-            if (!\is_numeric($internal)) {
-                $result[] = $internal;
-            } else {
-                $result[] = $external;
-            }
-        }
-
-        return $result;
+        return \array_keys($this->columns);
     }
 
     /**
      * Table alias of the loader.
      */
     abstract protected function getAlias(): string;
+
+    /**
+     * @param non-empty-string[] $columns
+     *
+     * @return array<non-empty-string, non-empty-string>
+     *
+     * @psalm-pure
+     */
+    #[Pure]
+    private function normalizeColumns(array $columns): array
+    {
+        $result = [];
+        foreach ($columns as $alias => $column) {
+            $result[\is_int($alias) ? $column : $alias] = $column;
+        }
+
+        return $result;
+    }
 }

@@ -16,6 +16,7 @@ use SplObjectStorage;
  * @psalm-template TPivot of object
  *
  * @template-extends ArrayCollection<TKey, TEntity>
+ *
  * @template-implements PivotedCollectionInterface<TEntity, TPivot>
  */
 class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface

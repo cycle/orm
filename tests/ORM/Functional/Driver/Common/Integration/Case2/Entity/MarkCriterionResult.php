@@ -12,7 +12,7 @@ class MarkCriterionResult
     public ?string $id = null;
     public int $resultObjective = 0;
 
-    public Student $student;
+    public ?Student $student;
     public ?string $student_id = null;
 
     /** @var Collection<array-key, MarkSubcriterionResult> */

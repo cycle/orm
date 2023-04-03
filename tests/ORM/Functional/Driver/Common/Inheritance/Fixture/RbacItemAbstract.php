@@ -19,12 +19,14 @@ class RbacItemAbstract
 
     /**
      * @var DoctrineCollection|RbacPermission[]|RbacRole[]
+     *
      * @phpstan-var DoctrineCollection<string,RbacRole|RbacPermission>
      */
     public $parents;
 
     /**
      * @var DoctrineCollection|RbacPermission[]|RbacRole[]
+     *
      * @phpstan-var DoctrineCollection<string,RbacRole|RbacPermission>
      */
     public $children;

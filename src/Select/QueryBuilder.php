@@ -107,23 +107,34 @@ final class QueryBuilder
             return '*';
         }
 
-        if (!str_contains($identifier, '.')) {
-            // parent element
-            return sprintf(
-                '%s.%s',
-                $this->loader->getAlias(),
-                $this->loader->fieldAlias($identifier)
-            );
+        if (!\str_contains($identifier, '.')) {
+            $current = $this->loader;
+
+            do {
+                $column = $current->fieldAlias($identifier);
+
+                // Find an inheritance parent that has this field
+                if ($column === null) {
+                    $parent = $current->getParentLoader();
+                    if ($parent !== null) {
+                        $current = $parent;
+                        continue;
+                    }
+                }
+
+                return \sprintf('%s.%s', $current->getAlias(), $column ?? $identifier);
+            } while (true);
         }
 
-        $split = strrpos($identifier, '.');
+        $split = \strrpos($identifier, '.');
 
-        $loader = $this->findLoader(substr($identifier, 0, $split), $autoload);
+        $loader = $this->findLoader(\substr($identifier, 0, $split), $autoload);
         if ($loader !== null) {
-            return sprintf(
+            $identifier = \substr($identifier, $split + 1);
+            return \sprintf(
                 '%s.%s',
                 $loader->getAlias(),
-                $loader->fieldAlias(substr($identifier, $split + 1))
+                $loader->fieldAlias($identifier) ?? $identifier,
             );
         }
 
@@ -202,7 +213,7 @@ final class QueryBuilder
         }
 
         if ($args[0] instanceof Closure) {
-            $args[0] = $args[0] = function ($q) use ($args): void {
+            $args[0] = function ($q) use ($args): void {
                 $args[0]($this->withQuery($q));
             };
         }
@@ -236,11 +247,12 @@ final class QueryBuilder
         $result = [];
         foreach ($input as $k => $v) {
             if (\is_array($v)) {
-                if (!\is_numeric($k) && \in_array(strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR], true)) {
+                if (!\is_numeric($k) && \in_array(\strtoupper($k), [Compiler::TOKEN_AND, Compiler::TOKEN_OR], true)) {
                     // complex expression like @OR and @AND
                     $result[$k] = $this->walkRecursive($v, $func, true);
                     continue;
                 }
+
                 if ($complex) {
                     $v = $this->walkRecursive($v, $func);
                 }

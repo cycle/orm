@@ -43,6 +43,7 @@ interface ORMInterface extends
      * @param bool $typecast Indicates that data is raw, and typecasting should be applied.
      *
      * @return TEntity
+     *
      * @psalm-return ($role is class-string ? TEntity : object)
      */
     public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object;
@@ -97,6 +98,7 @@ interface ORMInterface extends
      * @param class-string<TEntity>|non-empty-string|TEntity $entity
      *
      * @return RepositoryInterface<TEntity>
+     *
      * @psalm-return ($entity is class-string ? RepositoryInterface<TEntity> : RepositoryInterface)
      */
     public function getRepository(string|object $entity): RepositoryInterface;

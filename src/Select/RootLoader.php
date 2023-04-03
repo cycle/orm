@@ -47,7 +47,7 @@ final class RootLoader extends AbstractLoader
         $this->query = $this->source->getDatabase()->select()->from(
             sprintf('%s AS %s', $this->source->getTable(), $this->getAlias())
         );
-        $this->columns = $this->define(SchemaInterface::COLUMNS);
+        $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
 
         foreach ($this->getEagerLoaders() as $relation) {
             $this->loadRelation($relation, [], false, true);
@@ -69,7 +69,7 @@ final class RootLoader extends AbstractLoader
     }
 
     /**
-     * Get primary key column identifier (aliased).
+     * Primary column name list with table name like `table.column`.
      *
      * @return string|string[]
      */
@@ -85,6 +85,16 @@ final class RootLoader extends AbstractLoader
         }
 
         return $this->getAlias() . '.' . $this->fieldAlias($pk);
+    }
+
+    /**
+     * Get list of primary fields.
+     *
+     * @return list<non-empty-string>
+     */
+    public function getPrimaryFields(): array
+    {
+        return (array)$this->define(SchemaInterface::PRIMARY_KEY);
     }
 
     /**
@@ -118,7 +128,7 @@ final class RootLoader extends AbstractLoader
             $loader->loadData($node->getNode($relation), $includeRole);
         }
 
-        $this->loadIerarchy($node, $includeRole);
+        $this->loadHierarchy($node, $includeRole);
     }
 
     public function isLoaded(): bool

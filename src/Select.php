@@ -151,12 +151,12 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function wherePK(string|int|array|object ...$ids): self
     {
-        $pk = $this->loader->getPK();
+        $pk = $this->loader->getPrimaryFields();
 
-        if (\is_array($pk) && \count($pk) > 1) {
+        if (\count($pk) > 1) {
             return $this->buildCompositePKQuery($pk, $ids);
         }
-        $pk = \current((array)$pk);
+        $pk = \current($pk);
 
         return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
@@ -449,6 +449,9 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
+     * @param list<non-empty-string> $pk
+     * @param list<array|int|object|string> $args
+     *
      * @return Select<TEntity>
      */
     private function buildCompositePKQuery(array $pk, array $args): self
@@ -467,14 +470,11 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
 
             $isAssoc = !array_is_list($values);
             foreach ($values as $key => $value) {
-                $key = $isAssoc
-                    ? $this->loader->getAlias() . '.' . $this->loader->fieldAlias($key)
-                    : $pk[$key];
-
-                if (!\in_array($key, $pk, true)) {
-                    throw new InvalidArgumentException(\sprintf('Primary key %s not found.', $key));
+                if ($isAssoc && !\in_array($key, $pk, true)) {
+                    throw new InvalidArgumentException(\sprintf('Primary key `%s` not found.', $key));
                 }
 
+                $key = $isAssoc ? $key : $pk[$key];
                 $prepared[$index][$key] = $value;
             }
         }

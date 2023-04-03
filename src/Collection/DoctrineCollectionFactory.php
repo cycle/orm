@@ -15,6 +15,7 @@ use Doctrine\Common\Collections\Collection;
  * Items and Pivots for `Many to Many` relation stores in {@see PivotedCollection}.
  *
  * @template TCollection of Collection
+ *
  * @template-implements CollectionFactoryInterface<TCollection>
  */
 final class DoctrineCollectionFactory implements CollectionFactoryInterface

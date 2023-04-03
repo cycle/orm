@@ -362,12 +362,12 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
     private function createOrm(): ORMInterface
     {
         return new ORM(
-            (new Factory(
+            new Factory(
                 $this->dbal,
                 RelationConfig::getDefault(),
                 null,
                 new \Cycle\ORM\Collection\ArrayCollectionFactory()
-            )),
+            ),
             new Schema([])
         );
     }

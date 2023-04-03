@@ -14,6 +14,7 @@ final class Schema implements SchemaInterface
     private array $aliases;
     /**
      * @var string[]
+     *
      * @psalm-var class-string[]
      */
     private array $classes = [];

@@ -233,6 +233,46 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertEquals(static::MANAGER_1_LOADED, $selector->fetchData()[0]);
     }
 
+    // Select using Where condition
+
+    public function testSelectProgramatorUsingParentField(): void
+    {
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->where('level', '>=', 10);
+
+        $this->assertEquals(static::PROGRAMATOR_4_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectProgramatorUsingParentParentField(): void
+    {
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->where('name', '=', 'Valeriy');
+
+        $this->assertEquals(static::PROGRAMATOR_4_LOADED, $selector->fetchData()[0]);
+    }
+
+    public function testSelectProgramatorUsingParentsFields(): void
+    {
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->where([
+                '@AND' => [
+                    ['name' => 'Valeriy'],
+                    ['level' => ['>=' => 10]],
+                ],
+            ]);
+
+        $this->assertEquals(static::PROGRAMATOR_4_LOADED, $selector->fetchData()[0]);
+    }
+
+    // Order by
+
+    public function testSelectProgramatorsWithSortingByParentField(): void
+    {
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))->orderBy('age', 'ASC');
+
+        $this->assertEquals(\array_reverse(static::PROGRAMATOR_ALL_LOADED), $selector->fetchData());
+    }
+
     // Persist
 
     public function testProgramatorNoChanges(): void

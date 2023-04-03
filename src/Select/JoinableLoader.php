@@ -67,7 +67,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         protected array $schema
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $target);
-        $this->columns = $this->define(SchemaInterface::COLUMNS);
+        $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
     }
 
     /**

@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 
 /**
  * @template TCollection of Collection
+ *
  * @template-implements CollectionFactoryInterface<TCollection>
  */
 final class IlluminateCollectionFactory implements CollectionFactoryInterface

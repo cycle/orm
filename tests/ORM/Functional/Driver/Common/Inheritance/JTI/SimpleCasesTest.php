@@ -264,6 +264,15 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertEquals(static::PROGRAMATOR_4_LOADED, $selector->fetchData()[0]);
     }
 
+    // Order by
+
+    public function testSelectProgramatorsWithSortingByParentField(): void
+    {
+        $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))->orderBy('age', 'ASC');
+
+        $this->assertEquals(\array_reverse(static::PROGRAMATOR_ALL_LOADED), $selector->fetchData());
+    }
+
     // Persist
 
     public function testProgramatorNoChanges(): void

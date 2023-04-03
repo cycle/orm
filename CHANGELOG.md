@@ -1,9 +1,18 @@
 # CHANGELOG
 
+v2.3.0 (03.04.2023)
+--------------------
+- Update `where()` and `orderBy()` behavior in the JTI case. It possible to pass parent field name. By @roxblnfk (#405)
+- `Select::wherePK()` is now more strict. Use entity field name instead of table columns.
+- Fix method naming: `AbstractLoader::loadIerarchy()` deprecated and renamed to `::loadHierarchy()`.
+- Class `\Cycle\ORM\Parser\Typecast` is now not internal by @thenotsoft (#395)
+- Update test case generator script. Now it possible to set case name like "Issue777" and a template folder that
+  different from the default `CaseTemplate` by @gam6itko (#389)
+
 v2.2.2 (08.02.2023)
 --------------------
-* Fix compatibility with PHP 8.2 (AllowDynamicProperties) by @roxblnfk (#394)
-* Add tests with using for microseconds in a datetime fields by @BelaRyc and @msmakouz (#383)
+- Fix compatibility with PHP 8.2 (AllowDynamicProperties) by @roxblnfk (#394)
+- Add tests with using for microseconds in a datetime fields by @BelaRyc and @msmakouz (#383)
 
 v2.2.1 (01.12.2022)
 --------------------

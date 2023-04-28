@@ -65,8 +65,18 @@ class ClosureHydrator
                         continue;
                     }
 
-                    $object->{$property} = $data[$property];
-                    unset($data[$property]);
+                    try {
+                        // Ignore deprecations
+                        @$object->{$property} = $data[$property];
+                        unset($data[$property]);
+                    } catch (\Throwable $e) {
+                        if ($e::class === \TypeError::class) {
+                            throw new MapperException(
+                                "Can't hydrate an entity because property and value types are incompatible.",
+                                previous: $e
+                            );
+                        }
+                    }
                 }
             }, null, $class)($object, $props, $data);
         }

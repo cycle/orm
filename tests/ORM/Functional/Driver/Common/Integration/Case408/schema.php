@@ -50,7 +50,6 @@ return [
         Schema::RELATIONS => [],
         Schema::TYPECAST => [
             // 'id' => Type\PingMonitorId::class,
-            'id' => Type\TargetId::class,
             'hostname' => Type\PublicHostname::class,
             'monitorInterval' => Type\MonitorInterval::class,
         ],

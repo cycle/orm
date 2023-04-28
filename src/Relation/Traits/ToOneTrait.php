@@ -8,6 +8,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\EntityProviderInterface;
 
@@ -27,9 +28,10 @@ trait ToOneTrait
 
     public function cast(?array $data): ?array
     {
+        $role = $data[LoaderInterface::ROLE_KEY] ?? $this->target;
         return $data === null
             ? null
-            : ($this->mapperProvider->getMapper($this->target)?->cast($data) ?? $data);
+            : ($this->mapperProvider->getMapper($role)?->cast($data) ?? $data);
     }
 
     public function initReference(Node $node): ReferenceInterface

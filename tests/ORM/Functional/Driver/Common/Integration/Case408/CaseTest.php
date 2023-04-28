@@ -50,44 +50,52 @@ abstract class CaseTest extends BaseTest
     private function makeTables(): void
     {
         // Make tables
+        $this->makeTable('target_groups', [
+            'id' => 'primary',
+            'name' => 'string',
+        ]);
+
         $this->makeTable('targets', [
             'id' => 'primary', // autoincrement
             'target_group_id' => 'int',
             'monitor_name' => 'string',
         ]);
+        $this->makeFK('targets', 'target_group_id', 'target_groups', 'id', 'NO ACTION', 'NO ACTION');
 
         $this->makeTable('ping_monitors', [
             'id' => 'int',
             'hostname' => 'string',
             'monitor_interval' => 'int',
         ]);
-        $this->makeFK('ping_monitors', 'id', 'targets', 'id', 'CASCADE', 'CASCADE');
+        $this->makeFK('ping_monitors', 'id', 'targets', 'id', 'NO ACTION', 'NO ACTION');
 
-        $this->makeTable('target_groups', [
-            'id' => 'primary',
-            'name' => 'string',
-        ]);
-        $this->makeFK('targets', 'target_group_id', 'target_groups', 'id', 'CASCADE', 'CASCADE');
 
         $this->makeTable('pivots', [
             'target_id' => 'int',
             'target_group_id' => 'int',
             'hash' => 'string',
         ]);
-        $this->makeFK('pivots', 'target_id', 'targets', 'id', 'CASCADE', 'CASCADE');
-        $this->makeFK('pivots', 'target_group_id', 'target_groups', 'id', 'CASCADE', 'CASCADE');
+        $this->makeFK('pivots', 'target_id', 'targets', 'id', 'NO ACTION', 'NO ACTION');
+        $this->makeFK('pivots', 'target_group_id', 'target_groups', 'id', 'NO ACTION', 'NO ACTION');
 
-        $this->makeTable('pivot_children', [
-            'target_id' => 'int',
-            'target_group_id' => 'int',
-            'rate' => 'int',
-        ]);
-        $this->makeFK('pivot_children', 'target_id', 'pivots', 'target_id', 'CASCADE', 'CASCADE');
-        $this->makeFK('pivot_children', 'target_group_id', 'pivots', 'target_group_id', 'CASCADE', 'CASCADE');
+        // $this->makeTable('pivot_children', [
+        //     'target_id' => 'int',
+        //     'target_group_id' => 'int',
+        //     'rate' => 'int',
+        // ]);
+        // $this->makeFK('pivot_children', 'target_id', 'pivots', 'target_id', 'CASCADE', 'CASCADE');
+        // $this->makeFK('pivot_children', 'target_group_id', 'pivots', 'target_group_id', 'CASCADE', 'CASCADE');
     }
 
     private function fillData(): void
     {
+        $this->getDatabase()->table('target_groups')->insertMultiple(
+            ['name'],
+            [
+                ['Group 1'],
+                ['Group 2'],
+            ],
+        );
         $this->getDatabase()->table('targets')->insertMultiple(
             ['target_group_id', 'monitor_name'],
             [
@@ -105,13 +113,6 @@ abstract class CaseTest extends BaseTest
                 [2, 'bar.bar', 15],
             ],
         );
-        $this->getDatabase()->table('target_groups')->insertMultiple(
-            ['id', 'name'],
-            [
-                [1, 'Group 1'],
-                [2, 'Group 2'],
-            ],
-        );
         $this->getDatabase()->table('pivots')->insertMultiple(
             ['target_id', 'target_group_id', 'hash'],
             [
@@ -122,12 +123,12 @@ abstract class CaseTest extends BaseTest
                 [5, 2, '5/2'],
             ],
         );
-        $this->getDatabase()->table('pivot_children')->insertMultiple(
-            ['target_id', 'target_group_id', 'rate'],
-            [
-                [2, 1, 1],
-                [3, 2, 2],
-            ],
-        );
+        // $this->getDatabase()->table('pivot_children')->insertMultiple(
+        //     ['target_id', 'target_group_id', 'rate'],
+        //     [
+        //         [2, 1, 1],
+        //         [3, 2, 2],
+        //     ],
+        // );
     }
 }

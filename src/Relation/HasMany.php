@@ -7,6 +7,7 @@ namespace Cycle\ORM\Relation;
 use Cycle\ORM\Exception\Relation\BadRelationValueException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\EmptyReference;
 use Cycle\ORM\Reference\Reference;
@@ -14,6 +15,7 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\Traits\HasSomeTrait;
 use Cycle\ORM\Select;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
@@ -142,11 +144,16 @@ class HasMany extends AbstractRelation
         if (!$data) {
             return [];
         }
-        $mapper = $this->mapperProvider->getMapper($this->target);
+
+        /** @var array<non-empty-string, MapperInterface> $mappers Mappers cache */
+        $mappers = [];
+
         foreach ($data as $key => $item) {
+            $role = $item[LoaderInterface::ROLE_KEY] ?? $this->target;
+            $mappers[$role] ??= $this->mapperProvider->getMapper($role);
             // break link
             unset($data[$key]);
-            $data[$key] = $mapper->cast($item);
+            $data[$key] = $mappers[$role]->cast($item);
         }
         return $data;
     }

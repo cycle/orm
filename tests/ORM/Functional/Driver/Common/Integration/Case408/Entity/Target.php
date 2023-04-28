@@ -10,9 +10,9 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case408\Type\TargetId;
 
 class Target
 {
-    public ?TargetId $id = null;
-    public TargetGroupId $target_group_id;
-    public MonitorName $monitorName;
+    protected ?TargetId $id = null;
+    private TargetGroupId $target_group_id;
+    private MonitorName $monitorName;
 
     public function __construct(string $monitorName = '')
     {

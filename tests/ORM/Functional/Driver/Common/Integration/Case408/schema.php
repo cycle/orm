@@ -7,6 +7,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case408\Entity\PingMonitor;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case408\Entity\Pivot;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case408\Entity\Target;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case408\Entity\TargetGroup;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case408\Type;
@@ -48,7 +49,8 @@ return [
         ],
         Schema::RELATIONS => [],
         Schema::TYPECAST => [
-            'id' => Type\PingMonitorId::class,
+            // 'id' => Type\PingMonitorId::class,
+            'id' => Type\TargetId::class,
             'hostname' => Type\PublicHostname::class,
             'monitorInterval' => Type\MonitorInterval::class,
         ],
@@ -70,7 +72,6 @@ return [
                 Relation::TYPE => Relation::HAS_MANY,
                 Relation::TARGET => 'target',
                 Relation::LOAD => Relation::LOAD_PROMISE,
-                Relation::COLLECTION_TYPE => 'doctrine',
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
                     Relation::NULLABLE => false,
@@ -80,12 +81,65 @@ return [
                     Relation::OUTER_KEY => 'target_group_id',
                 ],
             ],
+            'manyTargets' => [
+                Relation::TYPE => Relation::MANY_TO_MANY,
+                Relation::TARGET => 'target',
+                Relation::LOAD => Relation::LOAD_PROMISE,
+                Relation::SCHEMA => [
+                    Relation::CASCADE => true,
+                    Relation::NULLABLE => false,
+                    Relation::ORDER_BY => [],
+                    Relation::THROUGH_ENTITY => Pivot::class,
+                    Relation::INNER_KEY => 'id',
+                    Relation::THROUGH_INNER_KEY => 'targetGroupId',
+                    Relation::THROUGH_OUTER_KEY => 'targetId',
+                    Relation::OUTER_KEY => 'id',
+                ],
+            ],
         ],
-        Schema::SCOPE => null,
         Schema::TYPECAST => [
             'id' => Type\TargetGroupId::class,
             'name' => Type\TargetGroupName::class,
         ],
         Schema::TYPECAST_HANDLER => [TypeCaster::class, Cycle\ORM\Parser\Typecast::class],
     ],
+
+    'pivot' => [
+        Schema::ENTITY => Pivot::class,
+        Schema::DATABASE => 'default',
+        Schema::TABLE => 'pivots',
+        Schema::PRIMARY_KEY => ['targetId', 'targetGroupId'],
+        Schema::COLUMNS => [
+            'targetId' => 'target_id',
+            'targetGroupId' => 'target_group_id',
+            'hash' => 'hash',
+        ],
+        Schema::RELATIONS => [],
+        Schema::TYPECAST => [
+            'targetId' => Type\TargetId::class,
+            'targetGroupId' => Type\TargetGroupId::class,
+            'hash' => Type\Hash::class,
+        ],
+        Schema::TYPECAST_HANDLER => [TypeCaster::class, Cycle\ORM\Parser\Typecast::class],
+    ],
+
+    // 'pivotChild' => [
+    //     Schema::ENTITY => Pivot::class,
+    //     Schema::DATABASE => 'default',
+    //     Schema::TABLE => 'pivot_children',
+    //     Schema::PRIMARY_KEY => ['targetId', 'targetGroupId'],
+    //     Schema::PARENT => 'pivot',
+    //     Schema::COLUMNS => [
+    //         'targetId' => 'target_id',
+    //         'targetGroupId' => 'target_group_id',
+    //         'rate' => 'rate',
+    //     ],
+    //     Schema::RELATIONS => [],
+    //     Schema::TYPECAST => [
+    //         'targetId' => Type\TargetId::class,
+    //         'targetGroupId' => Type\TargetGroupId::class,
+    //         'rate' => Type\Rate::class,
+    //     ],
+    //     Schema::TYPECAST_HANDLER => [TypeCaster::class, Cycle\ORM\Parser\Typecast::class],
+    // ],
 ];

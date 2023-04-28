@@ -25,21 +25,26 @@ abstract class CaseTest extends BaseTest
         $this->loadSchema(__DIR__ . '/schema.php');
     }
 
-    public function testSelect(): void
+    public function testSelectHasMany(): void
     {
         // Get entity
-        $user = (new Select($this->orm, TargetGroup::class))
-            ->load('targets',
-                // [
-                //     'where' => function (/*QueryBuilder*/ $qb) use ($pingMonitorId) {
-                //         $qb->where('id', $pingMonitorId);
-                //     },
-                // ],
-            )
+        $group = (new Select($this->orm, TargetGroup::class))
+            ->load('targets')
             ->where('id', 1)
             ->fetchOne();
 
-        self::assertTrue(true, 'No exception thrown');
+        self::assertCount(3, $group->getTargets());
+    }
+
+    public function testSelectManyManyToMany(): void
+    {
+        // Get entity
+        $group = (new Select($this->orm, TargetGroup::class))
+            ->load('manyTargets')
+            ->where('id', 1)
+            ->fetchOne();
+
+        self::assertCount(2, $group->getManyTargets());
     }
 
     private function makeTables(): void
@@ -63,6 +68,22 @@ abstract class CaseTest extends BaseTest
             'name' => 'string',
         ]);
         $this->makeFK('targets', 'target_group_id', 'target_groups', 'id', 'CASCADE', 'CASCADE');
+
+        $this->makeTable('pivots', [
+            'target_id' => 'int',
+            'target_group_id' => 'int',
+            'hash' => 'string',
+        ]);
+        $this->makeFK('pivots', 'target_id', 'targets', 'id', 'CASCADE', 'CASCADE');
+        $this->makeFK('pivots', 'target_group_id', 'target_groups', 'id', 'CASCADE', 'CASCADE');
+
+        $this->makeTable('pivot_children', [
+            'target_id' => 'int',
+            'target_group_id' => 'int',
+            'rate' => 'int',
+        ]);
+        $this->makeFK('pivot_children', 'target_id', 'pivots', 'target_id', 'CASCADE', 'CASCADE');
+        $this->makeFK('pivot_children', 'target_group_id', 'pivots', 'target_group_id', 'CASCADE', 'CASCADE');
     }
 
     private function fillData(): void
@@ -70,9 +91,11 @@ abstract class CaseTest extends BaseTest
         $this->getDatabase()->table('targets')->insertMultiple(
             ['target_group_id', 'monitor_name'],
             [
-                ['1', 'foo-monitor'],
-                ['1', 'bar-monitor'],
-                ['1', 'baz-monitor'],
+                [1, 'foo-monitor'],
+                [1, 'bar-monitor'],
+                [1, 'baz-monitor'],
+                [2, 'fiz-monitor'],
+                [2, 'hex-monitor'],
             ],
         );
         $this->getDatabase()->table('ping_monitors')->insertMultiple(
@@ -86,6 +109,24 @@ abstract class CaseTest extends BaseTest
             ['id', 'name'],
             [
                 [1, 'Group 1'],
+                [2, 'Group 2'],
+            ],
+        );
+        $this->getDatabase()->table('pivots')->insertMultiple(
+            ['target_id', 'target_group_id', 'hash'],
+            [
+                [1, 1, '1/1'],
+                [2, 1, '2/1'],
+                [3, 2, '3/2'],
+                [4, 2, '4/2'],
+                [5, 2, '5/2'],
+            ],
+        );
+        $this->getDatabase()->table('pivot_children')->insertMultiple(
+            ['target_id', 'target_group_id', 'rate'],
+            [
+                [2, 1, 1],
+                [3, 2, 2],
             ],
         );
     }

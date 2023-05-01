@@ -1,5 +1,9 @@
 # CHANGELOG
 
+v2.3.1 (--.--.2023)
+--------------------
+- Fix typecasting for JTI entities fields on loading it in relations by @roxblnfk (#409)
+
 v2.3.0 (03.04.2023)
 --------------------
 - Update `where()` and `orderBy()` behavior in the JTI case. It possible to pass parent field name. By @roxblnfk (#405)

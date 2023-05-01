@@ -11,6 +11,7 @@ use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Reference\EmptyReference;
@@ -19,6 +20,7 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
@@ -151,19 +153,27 @@ class ManyToMany extends Relation\AbstractRelation
         if (!$data) {
             return [];
         }
-        $pivotMapper = $this->mapperProvider->getMapper($this->pivotRole);
-        $targetMapper = $this->mapperProvider->getMapper($this->target);
+        /**
+         * @var array<non-empty-string, MapperInterface> $targetMappers Target Mappers cache
+         * @var array<non-empty-string, MapperInterface> $pivotMappers Pivot Mappers cache
+         */
+        $pivotMappers = [];
+        $targetMappers = [];
 
         foreach ($data as $key => $pivot) {
             if (isset($pivot['@'])) {
                 $d = $pivot['@'];
                 // break link
                 unset($pivot['@']);
-                $pivot['@'] = $targetMapper->cast($d);
+
+                $targetRole = $d[LoaderInterface::ROLE_KEY] ?? $this->target;
+                $pivot['@'] = ($targetMappers[$targetRole] ??= $this->mapperProvider->getMapper($targetRole))->cast($d);
             }
             // break link
             unset($data[$key]);
-            $data[$key] = $pivotMapper->cast($pivot);
+
+            $pivotRole = $pivot[LoaderInterface::ROLE_KEY] ?? $this->pivotRole;
+            $data[$key] = ($pivotMappers[$pivotRole] ??= $this->mapperProvider->getMapper($pivotRole))->cast($pivot);
         }
 
         return $data;

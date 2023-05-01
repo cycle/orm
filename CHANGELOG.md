@@ -1,8 +1,8 @@
 # CHANGELOG
 
-v2.3.1 (--.--.2023)
+v2.3.1 (01.05.2023)
 --------------------
-- Fix typecasting for JTI entities fields on loading it in relations by @roxblnfk (#409)
+- Fix typecasting in relations when JTI entities are loaded by @roxblnfk (#408, #409)
 
 v2.3.0 (03.04.2023)
 --------------------

@@ -32,6 +32,7 @@ use Spiral\Pagination\PaginableInterface;
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
  * @method $this orderBy($expression, $direction = 'ASC');
+ * @method $this forUpdate()
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.

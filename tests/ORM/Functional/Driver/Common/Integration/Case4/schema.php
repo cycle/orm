@@ -22,7 +22,7 @@ return [
         Schema::COLUMNS => [
             'id' => 'id',
             'key' => 'key',
-            'parent_id' => 'parent_id'
+            'parent_id' => 'parent_id',
         ],
         Schema::RELATIONS => [
             'parent' => [
@@ -39,7 +39,7 @@ return [
         ],
         Schema::TYPECAST => [
             'id' => 'int',
-            'parent_id' => 'int'
+            'parent_id' => 'int',
         ],
     ],
 ];

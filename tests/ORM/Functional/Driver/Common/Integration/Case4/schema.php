@@ -28,7 +28,7 @@ return [
                     Relation::CASCADE => false,
                     Relation::NULLABLE => true,
                     Relation::INNER_KEY => 'id',
-                    Relation::OUTER_KEY => 'parent_id'
+                    Relation::OUTER_KEY => 'parent_id',
                 ],
             ],
         ],

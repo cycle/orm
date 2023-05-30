@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Postgres\Integration\Case3;
+namespace Cycle\ORM\Tests\Functional\Driver\Postgres\Integration\Case4;
 
 // phpcs:ignore
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\CaseTest as CommonClass;

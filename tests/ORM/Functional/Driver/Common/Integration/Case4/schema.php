@@ -18,7 +18,6 @@ return [
         Schema::COLUMNS => [
             'id' => 'id',
             'key' => 'key',
-            'parent_id' => 'parent_id',
         ],
         Schema::RELATIONS => [
             'parent' => [

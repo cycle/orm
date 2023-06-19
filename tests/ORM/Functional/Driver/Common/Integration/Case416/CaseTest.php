@@ -20,7 +20,6 @@ abstract class CaseTest extends BaseTest
         // Init DB
         parent::setUp();
         $this->makeTables();
-        $this->fillData();
 
         $this->loadSchema(__DIR__ . '/schema.php');
     }
@@ -33,8 +32,6 @@ abstract class CaseTest extends BaseTest
         $account = new Entity\Account($uuid, 'test@mail.com', \md5('password'));
         $identity->profile = $profile;
         $identity->account = $account;
-        $profile->identity = $identity;
-        $account->identity = $identity;
 
         $this->save($identity);
 
@@ -56,6 +53,9 @@ abstract class CaseTest extends BaseTest
         // Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case416\Entity\Profile::$identity of type
         // Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case416\Entity\Identity
         $this->assertTrue(true);
+
+        // To avoid `Entity and State are not in sync` exception
+        $this->orm->getHeap()->clean();
     }
 
     private function makeTables(): void
@@ -69,9 +69,9 @@ abstract class CaseTest extends BaseTest
 
         $this->makeTable(Entity\Account::ROLE, [
             'uuid' => 'string,primary',
-            'email' => 'datetime',
-            'password_hash' => 'datetime',
-            'updated_at' => 'datetime,nullable',
+            'email' => 'string',
+            'password_hash' => 'string',
+            'updated_at' => 'datetime',
         ]);
         $this->makeFK(
             Entity\Account::ROLE,
@@ -96,9 +96,5 @@ abstract class CaseTest extends BaseTest
             'NO ACTION',
             'NO ACTION',
         );
-    }
-
-    private function fillData(): void
-    {
     }
 }

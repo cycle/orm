@@ -21,7 +21,7 @@ final class StdMapper extends DatabaseMapper
     {
         $relations = $this->relationMap->getRelations();
         foreach ($data as $k => $v) {
-            if ($v instanceof ReferenceInterface && array_key_exists($k, $relations)) {
+            if ($v instanceof ReferenceInterface && \array_key_exists($k, $relations)) {
                 $relation = $relations[$k];
                 $relation->resolve($v, false);
 

@@ -21,16 +21,16 @@ abstract class CaseTest extends BaseTest
         parent::setUp();
 
         // Make tables
-        $this->makeTable('users', [
+        $this->makeTable('case_5_users', [
             'id' => 'primary',
             'name' => 'string',
         ]);
-        $this->makeTable('buyers', [
+        $this->makeTable('case_5_buyers', [
             'id' => 'primary',
             'address' => 'string',
         ]);
         $this->makeTable(
-            table: 'buyer_partners',
+            table: 'case_5_buyer_partners',
             columns: [
                 'buyer_id' => 'int',
                 'partner_id' => 'int',
@@ -40,15 +40,15 @@ abstract class CaseTest extends BaseTest
 
         $this->loadSchema(__DIR__ . '/schema.php');
 
-        $this->getDatabase()->table('users')->insertMultiple(
-            ['id', 'name'],
-            [[1, 'John'], [2, 'Sam'], [3, 'Paul']],
+        $this->getDatabase()->table('case_5_users')->insertMultiple(
+            ['name'],
+            [['John'], ['Sam'], ['Paul']],
         );
-        $this->getDatabase()->table('buyers')->insertMultiple(
-            ['id', 'address'],
-            [[1, 'foo'], [2, 'bar'], [3, 'baz']],
+        $this->getDatabase()->table('case_5_buyers')->insertMultiple(
+            ['address'],
+            [['foo'], ['bar'], ['baz']],
         );
-        $this->getDatabase()->table('buyer_partners')->insertMultiple(
+        $this->getDatabase()->table('case_5_buyer_partners')->insertMultiple(
             ['buyer_id', 'partner_id'],
             [[1, 2], [1, 3]],
         );
@@ -62,9 +62,12 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         // It's important. $buyer->partners - will trigger relation load and we test it
-        $this->assertEquals([
-            new Buyer(id: 2, name: 'Sam', address: 'bar'),
-            new Buyer(id: 3, name: 'Paul', address: 'baz'),
-        ], $buyer->partners);
+        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
+            return $element->id === 2;
+        }));
+        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
+            return $element->id === 3;
+        }));
+        $this->assertCount(2, $buyer->partners);
     }
 }

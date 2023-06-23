@@ -11,7 +11,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case5\Entity\User;
 return [
     'user' => [
         Schema::ENTITY => User::class,
-        Schema::TABLE => 'users',
+        Schema::TABLE => 'case_5_users',
         Schema::PRIMARY_KEY => ['id'],
         Schema::COLUMNS => [
             'id' => 'id',
@@ -23,7 +23,7 @@ return [
     ],
     'buyer' => [
         Schema::ENTITY => Buyer::class,
-        Schema::TABLE => 'buyers',
+        Schema::TABLE => 'case_5_buyers',
         Schema::PRIMARY_KEY => ['id'],
         Schema::PARENT => 'user',
         Schema::COLUMNS => [
@@ -50,7 +50,7 @@ return [
     ],
     'buyer_partner' => [
         Schema::ENTITY => BuyerPartner::class,
-        Schema::TABLE => 'buyer_partners',
+        Schema::TABLE => 'case_5_buyer_partners',
         Schema::PRIMARY_KEY => ['buyer_id', 'partner_id'],
         Schema::COLUMNS => [
             'buyer_id' => 'buyer_id',

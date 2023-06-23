@@ -8,6 +8,8 @@ use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ParentMergeNode;
+use Cycle\ORM\Select\AbstractLoader;
+use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
@@ -71,6 +73,17 @@ class ParentLoader extends JoinableLoader
     protected function getJoinMethod(): string
     {
         return 'INNER';
+    }
+
+    protected function calculateAlias(AbstractLoader $parent): string
+    {
+        $alias = parent::calculateAlias($parent);
+
+        if ($parent instanceof RootLoader) {
+            return 'parent_' . $alias;
+        }
+
+        return $alias;
     }
 
     protected function initNode(): AbstractNode

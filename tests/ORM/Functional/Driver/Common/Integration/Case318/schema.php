@@ -37,7 +37,7 @@ return [
             'uuid' => 'uuid',
         ],
         Schema::TYPECAST_HANDLER => [
-            Typecast::class
+            Typecast::class,
         ],
     ],
     'group' => [
@@ -52,7 +52,7 @@ return [
             'uuid' => 'uuid',
         ],
         Schema::TYPECAST_HANDLER => [
-            Typecast::class
+            Typecast::class,
         ],
     ],
     'user_group' => [
@@ -69,7 +69,7 @@ return [
             'group_uuid' => 'uuid',
         ],
         Schema::TYPECAST_HANDLER => [
-            Typecast::class
+            Typecast::class,
         ],
     ],
 ];

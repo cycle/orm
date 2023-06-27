@@ -285,7 +285,7 @@ class ManyToMany extends Relation\AbstractRelation
         $root->linkNode('output', $node);
 
         // emulate presence of parent entity
-        $root->parseRow(0, $scope);
+        $root->parseRow(0, $this->mapperProvider->getMapper($reference->getRole())->uncast($scope));
 
         $iterator = $query->getIterator();
         foreach ($iterator as $row) {

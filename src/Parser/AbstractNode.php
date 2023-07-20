@@ -97,15 +97,20 @@ abstract class AbstractNode
         $data = $this->fetchData($offset, $row);
 
         $innerOffset = 0;
-        $iterate = array_merge(
+        $relatedNodes = \array_merge(
             $this->mergeParent === null ? [] : [$this->mergeParent],
             $this->nodes,
             $this->mergeSubclass
         );
 
-        if ($this->isSkippedNode($data)) {
+        if ($this->isEmptyPrimaryKey($data)) {
+            // Skip all columns which are related to current node and sub nodes.
             return \count($this->columns)
-                + \array_reduce($iterate, static fn (int $cnt, AbstractNode $node) => $cnt + \count($node->columns), 0);
+                + \array_reduce(
+                    $relatedNodes,
+                    static fn (int $cnt, AbstractNode $node): int => $cnt + \count($node->columns),
+                    0,
+                );
         }
 
         if ($this->deduplicate($data)) {
@@ -130,7 +135,7 @@ abstract class AbstractNode
             $this->push($data);
         }
 
-        foreach ($iterate as $node) {
+        foreach ($relatedNodes as $node) {
             if (!$node->joined) {
                 continue;
             }
@@ -386,10 +391,15 @@ abstract class AbstractNode
         return $result;
     }
 
-    protected function isSkippedNode(array $data): bool
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return bool True if any PK field is empty
+     */
+    private function isEmptyPrimaryKey(array $data): bool
     {
-        foreach ($this->duplicateCriteria as $value) {
-            if ($data[$value] === null) {
+        foreach ($this->duplicateCriteria as $key) {
+            if ($data[$key] === null) {
                 return true;
             }
         }

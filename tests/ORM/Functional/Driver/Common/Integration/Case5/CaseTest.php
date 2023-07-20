@@ -29,6 +29,10 @@ abstract class CaseTest extends BaseTest
             'id' => 'primary',
             'address' => 'string',
         ]);
+        $this->makeTable('badge_table', [
+            'id' => 'primary',
+            'label' => 'string',
+        ]);
         $this->makeTable(
             table: 'case_5_buyer_partners',
             columns: [
@@ -47,6 +51,10 @@ abstract class CaseTest extends BaseTest
         $this->getDatabase()->table('case_5_buyers')->insertMultiple(
             ['address'],
             [['foo'], ['bar'], ['baz']],
+        );
+        $this->getDatabase()->table('badge_table')->insertMultiple(
+            ['label'],
+            [['lab'], ['bal'], ['abl']],
         );
         $this->getDatabase()->table('case_5_buyer_partners')->insertMultiple(
             ['buyer_id', 'partner_id'],
@@ -69,5 +77,6 @@ abstract class CaseTest extends BaseTest
             return $element->id === 3;
         }));
         $this->assertCount(2, $buyer->partners);
+        $this->assertSame('lab', $buyer->badge->label);
     }
 }

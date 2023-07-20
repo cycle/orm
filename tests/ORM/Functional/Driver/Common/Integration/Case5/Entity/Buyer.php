@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 class Buyer extends User
 {
     public Collection $partners;
+    public Badge $badge;
 
     public function __construct(
         int $id,

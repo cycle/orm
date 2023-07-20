@@ -96,6 +96,18 @@ abstract class AbstractNode
     {
         $data = $this->fetchData($offset, $row);
 
+        $innerOffset = 0;
+        $iterate = array_merge(
+            $this->mergeParent === null ? [] : [$this->mergeParent],
+            $this->nodes,
+            $this->mergeSubclass
+        );
+
+        if ($this->isSkippedNode($data)) {
+            return \count($this->columns)
+                + \array_reduce($iterate, static fn (int $cnt, AbstractNode $node) => $cnt + \count($node->columns), 0);
+        }
+
         if ($this->deduplicate($data)) {
             foreach ($this->indexedData->getIndexes() as $index) {
                 try {
@@ -118,12 +130,6 @@ abstract class AbstractNode
             $this->push($data);
         }
 
-        $innerOffset = 0;
-        $iterate = array_merge(
-            $this->mergeParent === null ? [] : [$this->mergeParent],
-            $this->nodes,
-            $this->mergeSubclass
-        );
         foreach ($iterate as $node) {
             if (!$node->joined) {
                 continue;
@@ -378,5 +384,15 @@ abstract class AbstractNode
             $result[$key] = $data[$key];
         }
         return $result;
+    }
+
+    protected function isSkippedNode(array $data): bool
+    {
+        foreach ($this->duplicateCriteria as $value) {
+            if ($data[$value] === null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

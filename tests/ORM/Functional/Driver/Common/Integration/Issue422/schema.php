@@ -22,7 +22,6 @@ return [
         Schema::FIND_BY_KEYS => ['id'],
         Schema::COLUMNS => [
             'id' => 'id',
-            'name' => 'name',
         ],
         Schema::RELATIONS => [
             'billing' => [
@@ -34,14 +33,18 @@ return [
                     Relation::NULLABLE => true,
                     Relation::INNER_KEY => ['id'],
                     Relation::OUTER_KEY => 'user_id',
-                    Relation::ORDER_BY => [],
                 ],
+            ],
+            'otherEmbedded' => [
+                Relation::TYPE => Relation::EMBEDDED,
+                Relation::TARGET => 'user:otherEmbeddable:otherEmbeddable',
+                Relation::LOAD => Relation::LOAD_EAGER,
+                Relation::SCHEMA => [],
             ],
         ],
         Schema::SCOPE => null,
         Schema::TYPECAST => [
             'id' => 'int',
-            'name' => 'string',
         ],
         Schema::SCHEMA => [],
     ],
@@ -58,17 +61,6 @@ return [
             'user_id' => 'user_id',
         ],
         Schema::RELATIONS => [
-            'user' => [
-                Relation::TYPE => Relation::REFERS_TO,
-                Relation::TARGET => 'user',
-                Relation::LOAD => Relation::LOAD_EAGER,
-                Relation::SCHEMA => [
-                    Relation::CASCADE => true,
-                    Relation::NULLABLE => false,
-                    Relation::INNER_KEY => ['user_id'],
-                    Relation::OUTER_KEY => ['id'],
-                ],
-            ],
             'someEmbeddable' => [
                 Relation::TYPE => Relation::EMBEDDED,
                 Relation::TARGET => 'billing:someEmbeddable:someEmbeddable',
@@ -81,9 +73,8 @@ return [
             'id' => 'int',
         ],
         Schema::SCHEMA => [],
-        Schema::TYPECAST_HANDLER => [Cycle\ORM\Parser\Typecast::class],
     ],
-    'billing:someEmbeddable:someEmbeddable' =>  [
+    'billing:someEmbeddable:someEmbeddable' => [
         Schema::ENTITY => SomeEmbedded::class,
         Schema::MAPPER => Mapper::class,
         Schema::SOURCE => Source::class,
@@ -105,6 +96,28 @@ return [
             'id' => 'int',
         ],
         Schema::SCHEMA => [],
-        Schema::TYPECAST_HANDLER => null,
-    ]
+    ],
+    'user:otherEmbeddable:otherEmbeddable' => [
+        Schema::ENTITY => SomeEmbedded::class,
+        Schema::MAPPER => Mapper::class,
+        Schema::SOURCE => Source::class,
+        Schema::REPOSITORY => Repository::class,
+        Schema::DATABASE => 'default',
+        Schema::TABLE => 'user',
+        Schema::PRIMARY_KEY => ['id'],
+        Schema::FIND_BY_KEYS => ['id'],
+        Schema::COLUMNS => [
+            'propertyString' => 'property_string',
+            'propertyInt' => 'property_int',
+            'id' => 'id',
+        ],
+        Schema::RELATIONS => [],
+        Schema::SCOPE => null,
+        Schema::TYPECAST => [
+            'propertyString' => 'string',
+            'propertyInt' => 'int',
+            'id' => 'int',
+        ],
+        Schema::SCHEMA => [],
+    ],
 ];

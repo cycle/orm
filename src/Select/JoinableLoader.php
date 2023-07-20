@@ -109,7 +109,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         //Calculate table alias
         $loader->options['as'] = $loader->calculateAlias($parent);
 
-        if (array_key_exists('scope', $options)) {
+        if (\array_key_exists('scope', $options)) {
             if ($loader->options['scope'] instanceof ScopeInterface) {
                 $loader->setScope($loader->options['scope']);
             } elseif (\is_string($loader->options['scope'])) {

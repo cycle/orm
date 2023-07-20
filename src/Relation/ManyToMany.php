@@ -248,12 +248,14 @@ class ManyToMany extends Relation\AbstractRelation
             return $result;
         }
 
+        $source = $this->sourceProvider->getSource($this->target);
         // getting scoped query
         $query = (new RootLoader(
             $this->ormSchema,
             $this->sourceProvider,
             $this->factory,
-            $this->target
+            $this->target,
+            loadRelations: false,
         ))->buildQuery();
 
         // responsible for all the scoping
@@ -261,14 +263,14 @@ class ManyToMany extends Relation\AbstractRelation
             $this->ormSchema,
             $this->sourceProvider,
             $this->factory,
-            $this->sourceProvider->getSource($this->target)->getTable(),
+            $source->getTable(),
             $this->target,
             $this->schema
         );
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'scope' => $this->sourceProvider->getSource($this->target)->getScope(),
+            'scope' => $source->getScope(),
             'as' => $this->target,
             'method' => JoinableLoader::POSTLOAD,
         ]);

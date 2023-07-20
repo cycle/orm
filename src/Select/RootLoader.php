@@ -37,11 +37,15 @@ final class RootLoader extends AbstractLoader
 
     private SelectQuery $query;
 
+    /**
+     * @param bool $loadRelations Define loading eager relations and JTI hierarchy.
+     */
     public function __construct(
         SchemaInterface $ormSchema,
         SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
-        string $target
+        string $target,
+        bool $loadRelations = true,
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $target);
         $this->query = $this->source->getDatabase()->select()->from(
@@ -49,8 +53,10 @@ final class RootLoader extends AbstractLoader
         );
         $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
 
-        foreach ($this->getEagerLoaders() as $relation) {
-            $this->loadRelation($relation, [], false, true);
+        if ($loadRelations) {
+            foreach ($this->getEagerLoaders() as $relation) {
+                $this->loadRelation($relation, [], false, true);
+            }
         }
     }
 

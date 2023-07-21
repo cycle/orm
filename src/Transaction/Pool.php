@@ -74,7 +74,7 @@ final class Pool implements \Countable
         if ($tuple !== null) {
             $this->updateTuple($tuple, $task, $status, $cascade, $node, $state);
             if ($persist) {
-                $this->snap($tuple);
+                $this->snap($tuple, true);
             }
             return $tuple;
         }
@@ -313,7 +313,7 @@ final class Pool implements \Countable
     /**
      * Make snapshot: create Node, State if not exists. Also attach Mapper
      */
-    private function snap(Tuple $tuple): void
+    private function snap(Tuple $tuple, bool $forceUpdateState = false): void
     {
         $entity = $tuple->entity;
         /** @var Node|null $node */
@@ -335,6 +335,8 @@ final class Pool implements \Countable
         $tuple->node = $node;
         if (!isset($tuple->state)) {
             $tuple->state = $tuple->node->createState();
+            $tuple->state->setData($tuple->mapper->fetchFields($entity));
+        } elseif ($forceUpdateState) {
             $tuple->state->setData($tuple->mapper->fetchFields($entity));
         }
 

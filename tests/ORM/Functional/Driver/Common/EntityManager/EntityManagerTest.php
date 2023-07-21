@@ -130,9 +130,9 @@ abstract class EntityManagerTest extends BaseTest
     }
 
     /**
-     * Not deferred persisting should be calc changes on entity adding into transaction
+     * Not deferred persisting should calc changes on entity when adding into transaction
      */
-    public function testPersist(): void
+    public function testPersistState(): void
     {
         $em = new EntityManager($this->orm);
 

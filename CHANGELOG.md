@@ -1,5 +1,18 @@
 # CHANGELOG
 
+v2.3.3 (21.07.2023)
+--------------------
+- Fix loading for Embedded entities when parent is null by @gam6itko and @roxblnfk (#422, #423)
+- Fix: remove extra joins from JTI and eager relations when ManyToMany is resolved. By @msmakouz and @roxblnfk (#418)
+- Fix the Unit of Work persistState() method in a sequenced call. By @msmakouz and @roxblnfk (#424, #426)
+- Fix ManyToMany lazy loading when value object are used as keys. By @msmakouz and @roxblnfk (#318, #420)
+
+v2.3.2 (20.06.2023)
+--------------------
+- Fix proxy-mapper hydration mechanism: public relations in a non-proxy-entity are hydrated like private ones.
+  There is a special logic related to `ReferenceInterface` hydrating. By @roxblnfk (#417)
+- Add the method `forUpdate` in the `Select` phpdoc. By @msmakouz in (#413)
+
 v2.3.1 (01.05.2023)
 --------------------
 - Fix typecasting in relations when JTI entities are loaded by @roxblnfk (#408, #409)

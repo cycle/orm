@@ -336,8 +336,7 @@ final class Pool implements \Countable
         if (!isset($tuple->state)) {
             $tuple->state = $tuple->node->createState();
             $tuple->state->setData($tuple->mapper->fetchFields($entity));
-        }
-        if ($forceUpdateState) {
+        } elseif ($forceUpdateState) {
             $tuple->state->setData($tuple->mapper->fetchFields($entity));
         }
 

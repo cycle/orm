@@ -157,6 +157,60 @@ abstract class EntityManagerTest extends BaseTest
         $this->assertSame('changed title', $entity->title);
     }
 
+    public function testPersistStateTwiceAndChangeEntity(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $entity = new Post();
+        $entity->title = 'Test 1';
+        $entity->content = 'Test content';
+
+        $em->persistState($entity);
+        $entity->title = 'Title 2';
+        $em->persistState($entity);
+        $entity->title = 'Title 3';
+
+        $this->captureWriteQueries();
+        $result = $em->run();
+
+        $this->assertTrue($result->isSuccess());
+        $this->assertNumWrites(1);
+        $this->assertNotNull($entity->id);
+
+        $this->orm->getHeap()->clean();
+        $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
+
+        $this->assertSame('Title 2', $stored->title);
+    }
+
+    public function testPersistStateTwiceAndChangeEntityWithStoredEntity(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $entity = new Post();
+        $entity->title = 'Test 1';
+        $entity->content = 'Test content';
+        $this->save($entity);
+
+        $entity->title = 'Title 2';
+        $em->persistState($entity);
+        $entity->title = 'Title 3';
+        $em->persistState($entity);
+        $entity->title = 'Title 4';
+
+        $this->captureWriteQueries();
+        $result = $em->run();
+
+        $this->assertTrue($result->isSuccess());
+        $this->assertNumWrites(1);
+        $this->assertNotNull($entity->id);
+
+        $this->orm->getHeap()->clean();
+        $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
+
+        $this->assertSame('Title 3', $stored->title);
+    }
+
     /**
      * @link https://github.com/cycle/orm/issues/355
      */

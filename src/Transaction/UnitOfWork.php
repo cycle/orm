@@ -183,7 +183,7 @@ final class UnitOfWork implements StateInterface
                 $syncData = $node->syncState($relationProvider->getRelationMap($role), $tuple->state);
             }
 
-            $tuple->mapper->hydrate($e, $syncData);
+            $tuple->mapper->hydrate($e, $syncData, false);
         }
     }
 

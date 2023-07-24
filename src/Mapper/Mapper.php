@@ -42,9 +42,9 @@ class Mapper extends DatabaseMapper
         return $this->entityFactory->create($this->relationMap, $class);
     }
 
-    public function hydrate(object $entity, array $data): object
+    public function hydrate(object $entity, array $data, bool $resolveRelations = true): object
     {
-        $this->entityFactory->upgrade($this->relationMap, $entity, $data);
+        $this->entityFactory->upgrade($this->relationMap, $entity, $data, $resolveRelations);
         return $entity;
     }
 

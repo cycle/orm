@@ -73,7 +73,8 @@ class ProxyEntityFactory
     public function upgrade(
         RelationMap $relMap,
         object $entity,
-        array $data
+        array $data,
+        bool $resolveRelations = true
     ): object {
         $properties = $this->getEntityProperties($entity, $relMap);
 
@@ -82,7 +83,8 @@ class ProxyEntityFactory
             $relMap,
             $properties,
             $entity,
-            $data
+            $data,
+            $resolveRelations
         );
     }
 

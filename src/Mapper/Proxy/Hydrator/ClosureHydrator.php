@@ -18,8 +18,13 @@ class ClosureHydrator
     /**
      * @param array<string, PropertyMap> $propertyMaps Array of class properties
      */
-    public function hydrate(RelationMap $relMap, array $propertyMaps, object $object, array $data): object
-    {
+    public function hydrate(
+        RelationMap $relMap,
+        array $propertyMaps,
+        object $object,
+        array $data,
+        bool $resolveRelations = true
+    ): object {
         $isProxy = $object instanceof EntityProxyInterface;
 
         $properties = $propertyMaps[ClassPropertiesExtractor::KEY_FIELDS]->getProperties();
@@ -28,7 +33,7 @@ class ClosureHydrator
         if (!$isProxy) {
             $properties = $propertyMaps[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties();
             if ($properties !== []) {
-                $this->setRelationProperties($properties, $relMap, $object, $data);
+                $this->setRelationProperties($properties, $relMap, $object, $data, $resolveRelations);
             }
         }
 
@@ -85,12 +90,18 @@ class ClosureHydrator
     /**
      * Map private relations of non-proxy entity
      */
-    private function setRelationProperties(array $properties, RelationMap $relMap, object $object, array &$data): void
-    {
+    private function setRelationProperties(
+        array $properties,
+        RelationMap $relMap,
+        object $object,
+        array &$data,
+        bool $resolve = true
+    ): void {
         $refl = new \ReflectionClass($object);
-        $setter = static function (object $object, array $props, array &$data) use ($refl, $relMap): void {
+        $setter = static function (object $object, array $props, array &$data) use ($refl, $relMap, $resolve): void {
             foreach ($props as $property) {
-                if (!\array_key_exists($property, $data)) {
+                if (!\array_key_exists($property, $data) || !$resolve) {
+                    unset($data[$property]);
                     continue;
                 }
 

@@ -50,7 +50,6 @@ abstract class CaseTest extends BaseTest
             'content' => 'string',
             'post_id' => 'integer',
         ]);
-        $this->makeFK('comments', 'post_id', 'posts', 'id', 'NO ACTION', 'NO ACTION');
     }
 
     private function fillData(): void

@@ -47,8 +47,13 @@ class ManyToMany extends Relation\AbstractRelation
     protected FactoryInterface $factory;
     private HeapInterface $heap;
 
-    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
-    {
+    public function __construct(
+        ORMInterface $orm,
+        private string $role,
+        string $name,
+        string $target,
+        array $schema
+    ) {
         parent::__construct($orm, $role, $name, $target, $schema);
         $this->heap = $orm->getHeap();
         $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
@@ -287,7 +292,7 @@ class ManyToMany extends Relation\AbstractRelation
         $root->linkNode('output', $node);
 
         // emulate presence of parent entity
-        $root->parseRow(0, $this->mapperProvider->getMapper($reference->getRole())->uncast($scope));
+        $root->parseRow(0, $this->mapperProvider->getMapper($this->role)->uncast($scope));
 
         $iterator = $query->getIterator();
         foreach ($iterator as $row) {

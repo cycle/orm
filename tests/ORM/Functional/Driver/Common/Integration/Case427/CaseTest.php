@@ -11,6 +11,9 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case427\Entity\User;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
+/**
+ * @link https://github.com/cycle/orm/issues/427
+ */
 abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;

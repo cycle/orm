@@ -10,6 +10,9 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @link https://github.com/cycle/orm/issues/416
+ */
 abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;

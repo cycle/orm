@@ -46,8 +46,9 @@ abstract class CaseTest extends BaseTest
 
         $user = $this->orm->getRepository(Entity\User::class)
             ->findByPK($userUuid);
+        $groups = $user->groups;
 
-        $this->assertEquals($groupUuid, $user->groups[0]->uuid);
+        $this->assertEquals($groupUuid, $groups[0]->uuid);
     }
 
     private function makeTables(): void

@@ -1,9 +1,7 @@
 name: Bug Report
 description: 🐛 File a bug report
-title: "🐛 "
+title: "🐛 Some think went wrong"
 labels: ["type:bug", "status:to be verified"]
-assignees:
-  - roxblnfk
 body:
   - type: markdown
     attributes:
@@ -34,8 +32,8 @@ body:
       description: What version of our software are you running?
       render: shell
       value: |
-        ORM 2.0.0
-        PHP 8.1
+        ORM 2.3.4
+        PHP 8.2
     validations:
       required: true
   - type: markdown

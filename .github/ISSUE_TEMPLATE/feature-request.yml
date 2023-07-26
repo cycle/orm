@@ -1,9 +1,7 @@
 name: Feauture request
 description: 💡 Suggest an idea for this project
 title: "💡 "
-labels: ["type:feature"]
-assignees:
-  - roxblnfk
+labels: ["type:feature", "type:under discussion"]
 body:
   - type: markdown
     attributes:

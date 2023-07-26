@@ -64,10 +64,14 @@ class HasMany extends AbstractRelation
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
         } elseif (!\is_iterable($related)) {
-            throw new BadRelationValueException(\sprintf(
-                'Value for Has Many relation must be of the iterable type, %s given.',
-                \gettype($related),
-            ));
+            if ($related === null) {
+                $related = $this->collect([]);
+            } else {
+                throw new BadRelationValueException(\sprintf(
+                    'Value for Has Many relation must be of the iterable type, %s given.',
+                    \get_debug_type($related),
+                ));
+            }
         }
         foreach ($this->calcDeleted($related, $original ?? []) as $item) {
             $this->deleteChild($pool, $tuple, $item);

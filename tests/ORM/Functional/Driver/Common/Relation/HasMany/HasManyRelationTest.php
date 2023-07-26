@@ -485,11 +485,84 @@ abstract class HasManyRelationTest extends BaseTest
         $e = new User();
         $e->email = 'foo';
         $e->balance = 12.3;
-        $e->comments = null;
+        $e->comments = false;
 
         $this->expectException(BadRelationValueException::class);
         $this->expectExceptionMessage('must be of the iterable type');
 
         $this->save($e);
+    }
+
+    /**
+     * Ignore uninitialized collection
+     */
+    public function testCreateWithUninitialisedField(): void
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+        unset($e->comments);
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
+        $this->assertFalse(isset($e->comments));
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * Nothing to update if empty collection is replaced with null
+     */
+    public function testUpdateEntityWithUnsetCollection(): void
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
+        $this->assertIsIterable($e->comments);
+
+        $e->comments = null;
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If collection is replaced with null or unset - remove all children
+     */
+    public function testRemoveChildrenUsingUnset(): void
+    {
+        /** @var User $e */
+        $e = (new Select($this->orm, User::class))
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
+
+        $this->assertCount(3, $e->comments);
+        unset($e->comments);
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(3);
+
+        // consecutive test
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
+
+        $this->orm->getHeap()->clean();
+
+        $e = (new Select($this->orm, User::class))
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
+        $this->assertCount(0, $e->comments);
     }
 }

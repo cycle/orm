@@ -55,7 +55,7 @@ class BinaryId implements ValueInterface
     }
 
     /**
-     * @param string|resource $value
+     * @param resource|string $value
      */
     public static function typecast($value, ?DatabaseInterface $db = null): self
     {

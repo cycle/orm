@@ -10,6 +10,9 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
+/**
+ * @link https://github.com/cycle/orm/pull/414
+ */
 abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
@@ -45,16 +48,12 @@ abstract class CaseTest extends BaseTest
             ->wherePK(2)
             ->fetchOne();
 
-        $manager = new EntityManager($this->orm);
-        $manager->persist($model);
-        $manager->run();
+        $this->save($model);
 
         $model = (new Select($this->orm, Entity\Node::class))
             ->wherePK(3)
             ->fetchOne();
 
-        $manager->persist($model);
-
-        $manager->run();
+        $this->save($model);
     }
 }

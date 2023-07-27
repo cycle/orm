@@ -89,6 +89,9 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             ) {
                 $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_DEFERRED);
                 return;
+            } else {
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                return;
             }
         }
 

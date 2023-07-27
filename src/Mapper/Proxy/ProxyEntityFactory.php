@@ -48,7 +48,7 @@ class ProxyEntityFactory
         RelationMap $relMap,
         string $sourceClass,
     ): object {
-        $class = array_key_exists($sourceClass, $this->classMap)
+        $class = \array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
             : $this->defineClass($relMap, $sourceClass);
 

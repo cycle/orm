@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  sqlserver:
+  cycle-sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     ports:
       - "11433:1433"
@@ -9,7 +9,7 @@ services:
       SA_PASSWORD: "SSpaSS__1"
       ACCEPT_EULA: "Y"
 
-  mysql_latest:
+  cycle-mysql_latest:
     image: mysql:latest
     restart: always
     command: --default-authentication-plugin=mysql_native_password
@@ -20,8 +20,8 @@ services:
       MYSQL_ROOT_PASSWORD: "root"
       MYSQL_ROOT_HOST: "%"
 
-  postgres:
-    image: postgres:12
+  cycle-postgres:
+    image: postgres:15.2
     restart: always
     ports:
       - "15432:5432"

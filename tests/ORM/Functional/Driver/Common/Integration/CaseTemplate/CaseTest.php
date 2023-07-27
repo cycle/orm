@@ -85,8 +85,10 @@ abstract class CaseTest extends BaseTest
             'content' => 'string',
             'user_id' => 'int',
             'post_id' => 'int',
+            'published_at' => 'datetime,nullable',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'deleted_at' => 'datetime,nullable',
         ]);
         $this->makeFK('comment', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
         $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
@@ -124,6 +126,14 @@ abstract class CaseTest extends BaseTest
                 [3, 'slug-string-4', 'Title 4', true, 'Foo-bar-baz content 4'],
                 [3, 'slug-string-5', 'Title 5', true, 'Foo-bar-baz content 5'],
                 [3, 'slug-string-6', 'Title 6', true, 'Foo-bar-baz content 6'],
+            ],
+        );
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['user_id', 'post_id', 'public', 'content'],
+            [
+                [1, 1, true, 'Foo-bar-baz comment 1'],
+                [1, 2, true, 'Foo-bar-baz comment 2'],
+                [1, 1, true, 'Foo-bar-baz comment 3'],
             ],
         );
     }

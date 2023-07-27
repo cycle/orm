@@ -24,7 +24,7 @@ abstract class CaseTest extends BaseTest
 
         // Make tables
         $this->makeTable('nodes', [
-            'id' => 'primary',
+            'id' => 'int,primary',
             'key' => 'string',
             'parent_id' => 'int,nullable',
         ]);

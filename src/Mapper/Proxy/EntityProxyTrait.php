@@ -39,6 +39,23 @@ trait EntityProxyTrait
         throw new RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));
     }
 
+    public function __unset(string $name): void
+    {
+        if (\array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
+            $propertyClass = $this->__cycle_orm_relation_props->getPropertyClass($name);
+            if ($propertyClass === PropertyMap::PUBLIC_CLASS) {
+                unset($this->$name);
+            } else {
+                Closure::bind(static function (object $object, string $property): void {
+                    unset($object->{$property});
+                }, null, $propertyClass)($this, $name);
+            }
+        }
+        if (\method_exists(parent::class, '__unset')) {
+            parent::__unset($name);
+        }
+    }
+
     public function __set(string $name, $value): void
     {
         if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+v2.3.4 (31.07.2023)
+--------------------
+- Fix fields uncasting in the ManyToMany relation by @roxblnfk, thanks @gam6itko (#427, #428)
+- Fix resolving of a not loaded parent in the relation RefersTo by @roxblnfk, thanks @msmakouz and snafets (#414)
+- Fix belongs to relation when parent is changed using parent id by @roxblnfk, thanks @roquie (#346, #432)
+
 v2.3.3 (21.07.2023)
 --------------------
 - Fix loading for Embedded entities when parent is null by @gam6itko and @roxblnfk (#422, #423)
@@ -11,7 +17,7 @@ v2.3.2 (20.06.2023)
 --------------------
 - Fix proxy-mapper hydration mechanism: public relations in a non-proxy-entity are hydrated like private ones.
   There is a special logic related to `ReferenceInterface` hydrating. By @roxblnfk (#417)
-- Add the method `forUpdate` in the `Select` phpdoc. By @msmakouz in (#413)
+- Add the method `forUpdate` in the `Select` phpdoc. By @msmakouz (#413)
 
 v2.3.1 (01.05.2023)
 --------------------

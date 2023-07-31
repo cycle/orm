@@ -101,7 +101,10 @@ class ProxyEntityFactory
         foreach ($relMap->getRelations() as $key => $relation) {
             if (!array_key_exists($key, $currentData)) {
                 $arrayData ??= $this->entityToArray($entity);
-                $currentData[$key] = $arrayData[$key];
+                if (!array_key_exists($key, $arrayData)) {
+                    continue;
+                }
+                $currentData[$key] = $arrayData[$key] ?? null;
             }
         }
 

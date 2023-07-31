@@ -34,7 +34,10 @@ class ClosureHydrator
 
         foreach ($data as $property => $value) {
             try {
-                // Ignore deprecations
+                if (isset($relMap->getRelations()[$property])) {
+                    unset($object->{$property});
+                }
+                // Use @ to try to ignore deprecations
                 @$object->{$property} = $value;
             } catch (\Throwable $e) {
                 if ($e::class === \TypeError::class) {
@@ -66,7 +69,7 @@ class ClosureHydrator
                     }
 
                     try {
-                        // Ignore deprecations
+                        // Use @ to try to ignore deprecations
                         @$object->{$property} = $data[$property];
                         unset($data[$property]);
                     } catch (\Throwable $e) {

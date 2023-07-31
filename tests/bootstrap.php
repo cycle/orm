@@ -13,6 +13,9 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 $drivers = [
     'sqlite' => new Config\SQLiteDriverConfig(
         queryCache: true,
+        options:[
+            'logQueryParameters' => true,
+        ],
     ),
     'mysql' => new Config\MySQLDriverConfig(
         connection: new Config\MySQL\TcpConnectionConfig(

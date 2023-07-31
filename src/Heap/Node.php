@@ -129,15 +129,11 @@ final class Node
     {
         $changes = array_udiff_assoc($state->getTransactionData(), $this->data, [self::class, 'compare']);
 
-        $relations = $relMap->getRelations();
-        foreach ($state->getRelations() as $name => $relation) {
-            if ($relation instanceof ReferenceInterface
-                && isset($relations[$name])
-                && (isset($this->relations[$name]) xor isset($relation))
-            ) {
-                $changes[$name] = $relation->hasValue() ? $relation->getValue() : $relation;
+        foreach ($state->getRelations() as $name => $value) {
+            if ($value instanceof ReferenceInterface) {
+                $changes[$name] = $value->hasValue() ? $value->getValue() : $value;
             }
-            $this->setRelation($name, $relation);
+            $this->setRelation($name, $value);
         }
 
         // DELETE handled separately

@@ -36,6 +36,10 @@ abstract class CaseTest extends BaseTest
         $post->user_id = 2;
 
         $this->save($post);
+
+        $this->assertSame(2, $post->user_id);
+        $this->assertSame(2, $post->user->id);
+        $this->orm->getHeap()->clean();
     }
 
     private function makeTables(): void

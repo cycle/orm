@@ -441,9 +441,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertInstanceOf(Collection::class, $user->tags);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($user);
-        $tr->run();
+        $this->save($user);
         $this->assertNumWrites(0);
 
         $wantTags = ['tag a', 'tag c'];
@@ -480,6 +478,81 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertCount(2, $user->tags);
         $this->assertSame('tag a', $user->tags[0]->name);
         $this->assertSame('tag c', $user->tags[1]->name);
+    }
+
+    /**
+     * Ignore uninitialized collection
+     */
+    public function testCreateWithUninitialisedField(): void
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+        unset($e->tags);
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
+        $this->assertFalse(isset($e->tags));
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * It's impossible to remove collection after persistence
+     */
+    public function testUpdateEntityWithUnsetCollection(): void
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->balance = 300;
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
+        $this->assertIsIterable($e->tags);
+
+        unset($e->tags);
+        $e->tags = null;
+
+        $this->save($e);
+        // There are
+        $this->orm->getHeap()->clean();
+    }
+
+    /**
+     * If collection is replaced with null or unset - remove all children
+     */
+    public function testRemoveRelatedUsingUnset(): void
+    {
+        /**
+         * @var User $user
+         */
+        $user = (new Select($this->orm, User::class))->load('tags')->fetchOne(['id' => 1]);
+
+        $this->assertInstanceOf(Collection::class, $user->tags);
+        $this->assertCount(2, $user->tags);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+
+        unset($user->tags);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(2);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+
+        $this->orm->getHeap()->clean();
+
+        $user = (new Select($this->orm, User::class))->load('tags')->fetchOne(['id' => 1]);
+        $this->assertCount(0, $user->tags);
     }
 
     private function getSchemaArray(): array

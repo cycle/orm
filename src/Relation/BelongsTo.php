@@ -126,11 +126,13 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $newData = $rTuple->state->getTransactionData();
         $current = $tuple->state->getData();
         $noChanges = true;
+        $toReference = [];
         foreach ($this->outerKeys as $i => $outerKey) {
             $innerKey = $this->innerKeys[$i];
             if (!array_key_exists($innerKey, $oldData) || $oldData[$innerKey] !== $newData[$outerKey]) {
                 return true;
             }
+            $toReference[$outerKey] = $current[$innerKey];
             $noChanges = $noChanges && Node::compare($current[$innerKey], $oldData[$innerKey]) === 0;
         }
         // If no changes
@@ -140,14 +142,27 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
         // Nullable relation and null values
         if ($this->isNullable()) {
+            $isNull = true;
             foreach ($this->innerKeys as $innerKey) {
                 if (!array_key_exists($innerKey, $current) || $current[$innerKey] !== null) {
-                    return false;
+                    $isNull = false;
+                    break;
                 }
             }
-            $tuple->state->setRelation($this->getName(), null);
-            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            if ($isNull) {
+                $tuple->state->setRelation($this->getName(), null);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                return false;
+            }
         }
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+
+        $reference = new Reference($this->target, $toReference);
+        $tuple->state->setRelation(
+            $this->getName(),
+            $this->resolve($reference, false) ?? $reference,
+        );
+
         return false;
     }
 

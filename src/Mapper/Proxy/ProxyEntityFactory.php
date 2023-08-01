@@ -48,7 +48,7 @@ class ProxyEntityFactory
         RelationMap $relMap,
         string $sourceClass,
     ): object {
-        $class = array_key_exists($sourceClass, $this->classMap)
+        $class = \array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
             : $this->defineClass($relMap, $sourceClass);
 
@@ -101,6 +101,7 @@ class ProxyEntityFactory
         foreach ($relMap->getRelations() as $key => $relation) {
             if (!array_key_exists($key, $currentData)) {
                 $arrayData ??= $this->entityToArray($entity);
+
                 if (\array_key_exists($key, $arrayData)) {
                     $currentData[$key] = $arrayData[$key];
                 }

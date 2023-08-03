@@ -70,8 +70,11 @@ class ProxyEntityFactory
      *
      * @return object Entity with hydrated data
      */
-    public function upgrade(RelationMap $relMap, object $entity, array $data): object
-    {
+    public function upgrade(
+        RelationMap $relMap,
+        object $entity,
+        array $data
+    ): object {
         $properties = $this->getEntityProperties($entity, $relMap);
 
         // new set of data and relations always overwrite entity state

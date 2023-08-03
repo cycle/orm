@@ -111,7 +111,7 @@ class ClosureHydrator
                             $c = $type->getName();
                             if ($c === 'object' || $c === 'mixed' || $value instanceof $c) {
                                 if ($relation !== null) {
-                                    $value = $relation->collect($relation->resolve($value, false));
+                                    $value = $relation->collect($relation->resolve($value, false)) ?? $value;
                                 }
 
                                 $object->{$property} = $value;

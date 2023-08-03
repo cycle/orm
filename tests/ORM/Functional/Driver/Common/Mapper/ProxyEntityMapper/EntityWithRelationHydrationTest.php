@@ -221,6 +221,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                     'email' => 'email',
                     'friend_id' => 'friend_id',
                 ],
+                Schema::TYPECAST => ['id' => 'int', 'friend_id' => 'int'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [
                     'friend' => [

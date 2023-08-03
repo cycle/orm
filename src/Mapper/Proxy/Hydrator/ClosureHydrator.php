@@ -106,13 +106,11 @@ class ClosureHydrator
                             ? $prop->getType()->getTypes()
                             : [$prop->getType()];
 
-                        $relation = $relMap->getRelations()[$property] ?? null;
+                        $relation = $relMap->getRelations()[$property];
                         foreach ($types as $type) {
                             $c = $type->getName();
                             if ($c === 'object' || $c === 'mixed' || $value instanceof $c) {
-                                if ($relation !== null) {
-                                    $value = $relation->collect($relation->resolve($value, false)) ?? $value;
-                                }
+                                $value = $relation->collect($relation->resolve($value, false)) ?? $value;
 
                                 $object->{$property} = $value;
                                 unset($data[$property]);
@@ -121,10 +119,7 @@ class ClosureHydrator
                                 continue 2;
                             }
                         }
-
-                        if ($relation !== null) {
-                            $value = $relation->collect($relation->resolve($value, true));
-                        }
+                        $value = $relation->collect($relation->resolve($value, true));
                     }
                 }
 

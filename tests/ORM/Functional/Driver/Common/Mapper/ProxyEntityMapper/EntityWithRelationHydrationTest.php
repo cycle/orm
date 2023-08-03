@@ -24,7 +24,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     {
         parent::setUp();
 
-        $this->makeTable('user', ['id' => 'primary', 'email' => 'string']);
+        $this->makeTable('user', ['id' => 'primary', 'email' => 'string', 'friend_id' => 'integer,nullable']);
         $this->makeTable('profile', ['id' => 'primary', 'name' => 'string', 'user_id' => 'integer']);
         $this->makeTable('tag', ['id' => 'primary', 'name' => 'string',]);
         $this->makeTable('tag_user', ['user_id' => 'integer', 'tag_id' => 'integer',]);
@@ -210,10 +210,37 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
                     ],
                 ],
             ],
+            EntityWithMixedTypeRelation::class => [
+                Schema::ROLE => 'mixed_type',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => [
+                    'id' => 'id',
+                    'email' => 'email',
+                    'friend_id' => 'friend_id',
+                ],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'friend' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => EntityWithMixedTypeRelation::class,
+                        Relation::LOAD => Relation::LOAD_PROMISE,
+
+                        Relation::SCHEMA => [
+                            Relation::NULLABLE => false,
+                            Relation::CASCADE => true,
+                            Relation::OUTER_KEY => 'id',
+                            Relation::INNER_KEY => 'friend_id',
+                        ],
+                    ],
+                ],
+            ],
         ]));
     }
 
-    public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled()
+    public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $profile = new EntityWithRelationHydrationProfile('test');
         $profile->user_id = 1;
@@ -224,7 +251,30 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         // $this->assertInstanceOf(ReferenceInterface::class, $profile->getRefersUser());
     }
 
-    public function testPrivateHasManyRelationPropertyWithoutProxyShouldBeFilled()
+    public function testRelationWithMixedTypeShouldBeFilledAsReference(): void
+    {
+        $user = new EntityWithMixedTypeRelation();
+        $user->email = 'foo@bar.com';
+        $user->friend_id = 1;
+
+        $this->save($user);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $user->friend);
+    }
+
+    public function testRelationExistedInHeapMustFilledAsEntity(): void
+    {
+        $user = new EntityWithMixedTypeRelation();
+        $user->email = 'foo@bar.com';
+        $user->friend_id = 1;
+
+        $this->orm->getRepository(EntityWithMixedTypeRelation::class)->findByPK(1);
+
+        $this->save($user);
+        $this->assertInstanceOf(EntityWithMixedTypeRelation::class, $user->friend);
+    }
+
+    public function testPrivateHasManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $profile = new EntityWithRelationHydrationProfile('test');
         $user = new EntityWithRelationHydrationUser('admin@site.com');
@@ -235,7 +285,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->assertSame($user, $profile->getUser());
     }
 
-    public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled()
+    public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $tagContext = new EntityWithRelationHydrationTagContext();
         $tagContext->user_id = 1;
@@ -250,7 +300,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     /**
      * TODO: error with shadow belongs to
      */
-    public function testPrivatMorphBelongsToRelationPropertyWithoutProxyShouldBeFilled()
+    public function testPrivateMorphBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $profile = new EntityWithRelationHydrationProfile('test');
         $profile->user_id = 1;
@@ -307,7 +357,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->assertContains('test-value', $user->profiles);
     }
 
-    public function testGetLinkValueFromLazyOverloadedRelation()
+    public function testGetLinkValueFromLazyOverloadedRelation(): void
     {
         $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
             ->fetchOne();
@@ -432,4 +482,12 @@ class EntityWithRelationHydrationImage
     {
         $this->parent = $parent;
     }
+}
+
+class EntityWithMixedTypeRelation
+{
+    public int $id;
+    public string $email;
+    public ?int $friend_id = null;
+    public mixed $friend;
 }

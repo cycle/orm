@@ -18,13 +18,8 @@ class ClosureHydrator
     /**
      * @param array<string, PropertyMap> $propertyMaps Array of class properties
      */
-    public function hydrate(
-        RelationMap $relMap,
-        array $propertyMaps,
-        object $object,
-        array $data,
-        bool $resolveRelations = true
-    ): object {
+    public function hydrate(RelationMap $relMap, array $propertyMaps, object $object, array $data): object
+    {
         $isProxy = $object instanceof EntityProxyInterface;
 
         $properties = $propertyMaps[ClassPropertiesExtractor::KEY_FIELDS]->getProperties();
@@ -33,7 +28,7 @@ class ClosureHydrator
         if (!$isProxy) {
             $properties = $propertyMaps[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties();
             if ($properties !== []) {
-                $this->setRelationProperties($properties, $relMap, $object, $data, $resolveRelations);
+                $this->setRelationProperties($properties, $relMap, $object, $data);
             }
         }
 
@@ -90,18 +85,12 @@ class ClosureHydrator
     /**
      * Map private relations of non-proxy entity
      */
-    private function setRelationProperties(
-        array $properties,
-        RelationMap $relMap,
-        object $object,
-        array &$data,
-        bool $resolve = true
-    ): void {
+    private function setRelationProperties(array $properties, RelationMap $relMap, object $object, array &$data): void
+    {
         $refl = new \ReflectionClass($object);
-        $setter = static function (object $object, array $props, array &$data) use ($refl, $relMap, $resolve): void {
+        $setter = static function (object $object, array $props, array &$data) use ($refl, $relMap): void {
             foreach ($props as $property) {
-                if (!\array_key_exists($property, $data) || !$resolve) {
-                    unset($data[$property]);
+                if (!\array_key_exists($property, $data)) {
                     continue;
                 }
 
@@ -117,9 +106,14 @@ class ClosureHydrator
                             ? $prop->getType()->getTypes()
                             : [$prop->getType()];
 
+                        $relation = $relMap->getRelations()[$property] ?? null;
                         foreach ($types as $type) {
                             $c = $type->getName();
-                            if ($c === 'object' || $value instanceof $c) {
+                            if ($c === 'object' || $c === 'mixed' || $value instanceof $c) {
+                                if ($relation !== null) {
+                                    $value = $relation->collect($relation->resolve($value, false));
+                                }
+
                                 $object->{$property} = $value;
                                 unset($data[$property]);
 
@@ -128,7 +122,6 @@ class ClosureHydrator
                             }
                         }
 
-                        $relation = $relMap->getRelations()[$property] ?? null;
                         if ($relation !== null) {
                             $value = $relation->collect($relation->resolve($value, true));
                         }

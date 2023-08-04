@@ -50,7 +50,7 @@ class ProxyEntityFactory
     ): object {
         $class = \array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
-            : $this->defineClass($relMap, $sourceClass);
+            : $this->defineClass($sourceClass);
 
         $proxy = $this->instantiator->instantiate($class);
         $proxy->__cycle_orm_rel_map = $relMap;
@@ -137,7 +137,7 @@ class ProxyEntityFactory
         return $result;
     }
 
-    private function defineClass(RelationMap $relMap, string $class): string
+    private function defineClass(string $class): string
     {
         if (!class_exists($class, true)) {
             throw new \RuntimeException(sprintf(

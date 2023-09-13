@@ -35,7 +35,7 @@ jobs:
           php-version: ${{ matrix.php-version }}
           coverage: pcov
           tools: pecl
-          extensions: mbstring, pdo, pdo_sqlite, pdo_pgsql, pdo_sqlsrv-5.10.0beta2, pdo_mysql
+          extensions: mbstring, pdo, pdo_sqlite, pdo_pgsql, pdo_sqlsrv-5.11.1, pdo_mysql
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"

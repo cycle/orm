@@ -1,5 +1,11 @@
 # CHANGELOG
 
+v2.4.0 (05.10.2023)
+--------------------
+- Add support uninitialized collections in entities by @roxblnfk (#431)
+- Allow doctrine/instantiator 2.x by @msmakouz (#438)
+- Improve relations hydration for non-proxy entities. Now it more lazy. By @msmakouz (#429)
+
 v2.3.4 (31.07.2023)
 --------------------
 - Fix fields uncasting in the ManyToMany relation by @roxblnfk, thanks @gam6itko (#427, #428)

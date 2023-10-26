@@ -60,7 +60,7 @@ class ProxyEntityFactoryTest extends TestCase
     public function testCreatesNonExistingObjectShouldThrowException()
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectErrorMessage(
+        $this->expectExceptionMessage(
             'The entity `hello-world` class does not exist. Proxy factory can not create classless entities.'
         );
 

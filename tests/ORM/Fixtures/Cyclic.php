@@ -15,6 +15,9 @@ class Cyclic
     /** @var Cyclic|null */
     public $other;
 
+
+    public iterable $collection = [];
+
     public function __construct(string $name = '', ?self $parent = null, ?self $other = null)
     {
         $this->name = $name;

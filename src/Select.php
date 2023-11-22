@@ -33,6 +33,18 @@ use Spiral\Pagination\PaginableInterface;
  * @method $this orHaving(...$args);
  * @method $this orderBy($expression, $direction = 'ASC');
  * @method $this forUpdate()
+ * @method $this whereJson(string $path, mixed $value)
+ * @method $this orWhereJson(string $path, mixed $value)
+ * @method $this whereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this orWhereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this whereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this orWhereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this whereJsonContainsKey(string $path)
+ * @method $this orWhereJsonContainsKey(string $path)
+ * @method $this whereJsonDoesntContainKey(string $path)
+ * @method $this orWhereJsonDoesntContainKey(string $path)
+ * @method $this whereJsonLength(string $path, int $length, string $operator = '=')
+ * @method $this orWhereJsonLength(string $path, int $length, string $operator = '=')
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.

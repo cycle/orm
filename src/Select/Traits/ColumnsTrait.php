@@ -26,6 +26,13 @@ trait ColumnsTrait
      */
     public function fieldAlias(string $field): ?string
     {
+        // The field can be a JSON path separated by ->
+        if (\str_contains($field, '->')) {
+            $parts = \explode('->', $field, 2);
+
+            return isset($this->columns[$parts[0]]) ? \sprintf('%s->%s', $this->columns[$parts[0]], $parts[1]) : null;
+        }
+
         return $this->columns[$field] ?? null;
     }
 

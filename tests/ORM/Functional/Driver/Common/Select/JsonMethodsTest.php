@@ -50,6 +50,7 @@ abstract class JsonMethodsTest extends BaseTest
                 Schema::PRIMARY_KEY => 'id',
                 Schema::COLUMNS => ['id', 'title', 'user_id'],
                 Schema::SCHEMA => [],
+                Schema::TYPECAST => ['id' => 'int'],
                 Schema::RELATIONS => [
                     'user' => [
                         Relation::TYPE => Relation::BELONGS_TO,

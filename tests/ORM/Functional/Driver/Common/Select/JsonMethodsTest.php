@@ -72,7 +72,7 @@ abstract class JsonMethodsTest extends BaseTest
         $user = $selector->whereJson('settings->theme', 'light')->fetchOne();
 
         $this->assertSame(2, $user->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
     }
 
     public function testWhereJsonWithRelation(): void
@@ -81,7 +81,7 @@ abstract class JsonMethodsTest extends BaseTest
         $post = $selector->whereJson('user.settings->theme', 'light')->fetchOne();
 
         $this->assertSame(2, $post->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
     }
 
     public function testOrWhereJson(): void
@@ -93,7 +93,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(2, $user->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
     }
 
     public function testOrWhereJsonWithRelation(): void
@@ -105,7 +105,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(2, $post->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
     }
 
     public function testWhereJsonContains(): void
@@ -114,7 +114,7 @@ abstract class JsonMethodsTest extends BaseTest
         $user = $selector->whereJsonContains('settings->theme', 'light')->fetchOne();
 
         $this->assertSame(2, $user->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
     }
 
     public function testWhereJsonContainsWithRelation(): void
@@ -123,7 +123,7 @@ abstract class JsonMethodsTest extends BaseTest
         $post = $selector->whereJsonContains('user.settings->theme', 'light')->fetchOne();
 
         $this->assertSame(2, $post->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
     }
 
     public function testOrWhereJsonContains(): void
@@ -135,7 +135,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(2, $user->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
     }
 
     public function testOrWhereJsonContainsWithRelation(): void
@@ -147,7 +147,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(2, $post->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
     }
 
     public function testWhereJsonDoesntContain(): void
@@ -156,7 +156,7 @@ abstract class JsonMethodsTest extends BaseTest
         $user = $selector->whereJsonDoesntContain('settings->theme', 'light')->fetchOne();
 
         $this->assertSame(1, $user->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
     }
 
     public function testWhereJsonDoesntContainWithRelation(): void
@@ -165,7 +165,7 @@ abstract class JsonMethodsTest extends BaseTest
         $post = $selector->whereJsonDoesntContain('user.settings->theme', 'light')->fetchOne();
 
         $this->assertSame(1, $post->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
     }
 
     public function testOrWhereJsonDoesntContain(): void
@@ -177,7 +177,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(1, $user->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
     }
 
     public function testOrWhereJsonDoesntContainWithRelation(): void
@@ -189,7 +189,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(1, $post->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
     }
 
     public function testWhereJsonContainsKey(): void
@@ -198,7 +198,7 @@ abstract class JsonMethodsTest extends BaseTest
         $user = $selector->whereJsonContainsKey('settings->foo')->fetchOne();
 
         $this->assertSame(1, $user->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
     }
 
     public function testWhereJsonContainsKeyWithRelation(): void
@@ -207,7 +207,7 @@ abstract class JsonMethodsTest extends BaseTest
         $post = $selector->whereJsonContainsKey('user.settings->foo')->fetchOne();
 
         $this->assertSame(1, $post->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
     }
 
     public function testOrWhereJsonContainsKey(): void
@@ -219,7 +219,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(1, $user->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
     }
 
     public function testOrWhereJsonContainsKeyWithRelation(): void
@@ -231,7 +231,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(1, $post->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
     }
 
     public function testWhereJsonDoesntContainKey(): void
@@ -240,7 +240,7 @@ abstract class JsonMethodsTest extends BaseTest
         $user = $selector->whereJsonDoesntContainKey('settings->foo')->fetchOne();
 
         $this->assertSame(2, $user->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
     }
 
     public function testWhereJsonDoesntContainKeyWithRelation(): void
@@ -249,7 +249,7 @@ abstract class JsonMethodsTest extends BaseTest
         $post = $selector->whereJsonDoesntContainKey('user.settings->foo')->fetchOne();
 
         $this->assertSame(2, $post->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
     }
 
     public function testOrWhereJsonDoesntContainKey(): void
@@ -261,7 +261,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(2, $user->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
     }
 
     public function testOrWhereJsonDoesntContainKeyWithRelation(): void
@@ -273,7 +273,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(2, $post->id);
-        $this->assertSame(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
     }
 
     public function testWhereJsonLength(): void
@@ -282,7 +282,7 @@ abstract class JsonMethodsTest extends BaseTest
         $user = $selector->whereJsonLength('settings->foo', 2)->fetchOne();
 
         $this->assertSame(1, $user->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
     }
 
     public function testWhereJsonLengthWithRelation(): void
@@ -291,7 +291,7 @@ abstract class JsonMethodsTest extends BaseTest
         $post = $selector->whereJsonLength('user.settings->foo', 2)->fetchOne();
 
         $this->assertSame(1, $post->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
     }
 
     public function testOrWhereJsonLength(): void
@@ -303,7 +303,7 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(1, $user->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
     }
 
     public function testOrWhereJsonLengthWithRelation(): void
@@ -315,6 +315,6 @@ abstract class JsonMethodsTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame(1, $post->id);
-        $this->assertSame(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
     }
 }

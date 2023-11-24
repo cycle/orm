@@ -111,85 +111,85 @@ abstract class JsonMethodsTest extends BaseTest
     public function testWhereJsonContains(): void
     {
         $selector = new Select($this->orm, User::class);
-        $user = $selector->whereJsonContains('settings->theme', 'light')->fetchOne();
+        $users = $selector->whereJsonContains('settings->foo', ['bar', 'baz'])->fetchAll();
 
-        $this->assertSame(2, $user->id);
-        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertSame(1, $users[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($users[0]->settings, true));
     }
 
     public function testWhereJsonContainsWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
-        $post = $selector->whereJsonContains('user.settings->theme', 'light')->fetchOne();
+        $posts = $selector->whereJsonContains('user.settings->foo', ['bar', 'baz'])->fetchAll();
 
-        $this->assertSame(2, $post->id);
-        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertSame(1, $posts[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($posts[0]->user->settings, true));
     }
 
     public function testOrWhereJsonContains(): void
     {
         $selector = new Select($this->orm, User::class);
-        $user = $selector
+        $users = $selector
             ->where('id', 100)
-            ->orWhereJsonContains('settings->theme', 'light')
-            ->fetchOne();
+            ->orWhereJsonContains('user.settings->foo', ['bar', 'baz'])
+            ->fetchAll();
 
-        $this->assertSame(2, $user->id);
-        $this->assertEquals(['theme' => 'light'], \json_decode($user->settings, true));
+        $this->assertSame(1, $users[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($users[0]->settings, true));
     }
 
     public function testOrWhereJsonContainsWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
-        $post = $selector
+        $posts = $selector
             ->where('id', 100)
-            ->orWhereJsonContains('user.settings->theme', 'light')
-            ->fetchOne();
+            ->orWhereJsonContains('user.settings->foo', ['bar', 'baz'])
+            ->fetchAll();
 
-        $this->assertSame(2, $post->id);
-        $this->assertEquals(['theme' => 'light'], \json_decode($post->user->settings, true));
+        $this->assertSame(1, $posts[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($posts[0]->user->settings, true));
     }
 
     public function testWhereJsonDoesntContain(): void
     {
         $selector = new Select($this->orm, User::class);
-        $user = $selector->whereJsonDoesntContain('settings->theme', 'light')->fetchOne();
+        $users = $selector->whereJsonDoesntContain('settings->theme', 'light')->fetchAll();
 
-        $this->assertSame(1, $user->id);
-        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertSame(1, $users[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($users[0]->settings, true));
     }
 
     public function testWhereJsonDoesntContainWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
-        $post = $selector->whereJsonDoesntContain('user.settings->theme', 'light')->fetchOne();
+        $posts = $selector->whereJsonDoesntContain('user.settings->theme', 'light')->fetchAll();
 
-        $this->assertSame(1, $post->id);
-        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertSame(1, $posts[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($posts[0]->user->settings, true));
     }
 
     public function testOrWhereJsonDoesntContain(): void
     {
         $selector = new Select($this->orm, User::class);
-        $user = $selector
+        $users = $selector
             ->where('id', 100)
             ->orWhereJsonDoesntContain('settings->theme', 'light')
-            ->fetchOne();
+            ->fetchAll();
 
-        $this->assertSame(1, $user->id);
-        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($user->settings, true));
+        $this->assertSame(1, $users[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($users[0]->settings, true));
     }
 
     public function testOrWhereJsonDoesntContainWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
-        $post = $selector
+        $posts = $selector
             ->where('id', 100)
             ->orWhereJsonDoesntContain('user.settings->theme', 'light')
-            ->fetchOne();
+            ->fetchAll();
 
-        $this->assertSame(1, $post->id);
-        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($post->user->settings, true));
+        $this->assertSame(1, $posts[0]->id);
+        $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], \json_decode($posts[0]->user->settings, true));
     }
 
     public function testWhereJsonContainsKey(): void

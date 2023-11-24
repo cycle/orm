@@ -36,7 +36,7 @@ final class ColumnsTrait extends TestCase
 
     private function prepareClass(): object
     {
-        return new class(self::FIELDS) {
+        return new class (self::FIELDS) {
             use \Cycle\ORM\Select\Traits\ColumnsTrait
             {
                 fieldAlias as public;

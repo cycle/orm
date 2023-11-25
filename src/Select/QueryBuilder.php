@@ -23,6 +23,19 @@ use Cycle\Database\Query\SelectQuery;
  * @method QueryBuilder orderBy($expression, $direction = 'ASC');
  * @method QueryBuilder limit(int $limit)
  * @method QueryBuilder offset(int $offset)
+ * @method QueryBuilder forUpdate()
+ * @method QueryBuilder whereJson(string $path, mixed $value)
+ * @method QueryBuilder orWhereJson(string $path, mixed $value)
+ * @method QueryBuilder whereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method QueryBuilder orWhereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method QueryBuilder whereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method QueryBuilder orWhereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method QueryBuilder whereJsonContainsKey(string $path)
+ * @method QueryBuilder orWhereJsonContainsKey(string $path)
+ * @method QueryBuilder whereJsonDoesntContainKey(string $path)
+ * @method QueryBuilder orWhereJsonDoesntContainKey(string $path)
+ * @method QueryBuilder whereJsonLength(string $path, int $length, string $operator = '=')
+ * @method QueryBuilder orWhereJsonLength(string $path, int $length, string $operator = '=')
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.

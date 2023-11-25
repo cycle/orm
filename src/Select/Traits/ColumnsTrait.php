@@ -26,7 +26,12 @@ trait ColumnsTrait
      */
     public function fieldAlias(string $field): ?string
     {
-        return $this->columns[$field] ?? null;
+        // The field can be a JSON path separated by ->
+        $p = \explode('->', $field, 2);
+
+        $p[0] = $this->columns[$p[0]] ?? null;
+
+        return $p[0] === null ? null : \implode('->', $p);
     }
 
     /**

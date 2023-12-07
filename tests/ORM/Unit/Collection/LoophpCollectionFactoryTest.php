@@ -66,7 +66,7 @@ class LoophpCollectionFactoryTest extends BaseTest
      */
     public function testWithCollectionClassCustomClass(mixed $data): void
     {
-        $customClass = new class(Collection::empty()) extends CollectionDecorator {};
+        $customClass = new class (Collection::empty()) extends CollectionDecorator {};
 
         $collection = $this->getFactory()->withCollectionClass($customClass::class)->collect($data);
 

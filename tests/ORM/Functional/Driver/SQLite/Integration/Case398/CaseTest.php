@@ -14,4 +14,14 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case398\CaseTest as Com
 class CaseTest extends CommonClass
 {
     public const DRIVER = 'sqlite';
+
+    public function testSelectWithFullJoin(): void
+    {
+        $this->markTestSkipped('SQLite does not support FULL JOIN');
+    }
+
+    public function testSelectWithRightJoin(): void
+    {
+        $this->markTestSkipped('SQLite does not support RIGHT JOIN');
+    }
 }

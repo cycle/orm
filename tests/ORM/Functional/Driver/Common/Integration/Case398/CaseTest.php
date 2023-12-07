@@ -25,11 +25,55 @@ abstract class CaseTest extends BaseTest
         $this->loadSchema(__DIR__ . '/schema.php');
     }
 
+    public function testSelectWithJoin(): void
+    {
+        $select = new Select($this->orm, Product::class);
+        $product = $select
+            ->join('inner', 'filter_products', 'fp')->on('id', 'fp.product_id')
+            ->where(new Fragment('fp.filter_id = ?', 5))
+            ->fetchOne();
+
+        $this->assertSame('Product-2', $product->title);
+    }
+
     public function testSelectWithInnerJoin(): void
     {
         $select = new Select($this->orm, Product::class);
         $product = $select
             ->innerJoin('filter_products', 'fp')->on('id', 'fp.product_id')
+            ->where(new Fragment('fp.filter_id = ?', 5))
+            ->fetchOne();
+
+        $this->assertSame('Product-2', $product->title);
+    }
+
+    public function testSelectWithRightJoin(): void
+    {
+        $select = new Select($this->orm, Product::class);
+        $product = $select
+            ->rightJoin('filter_products', 'fp')->on('id', 'fp.product_id')
+            ->where(new Fragment('fp.filter_id = ?', 5))
+            ->fetchOne();
+
+        $this->assertSame('Product-2', $product->title);
+    }
+
+    public function testSelectWithLeftJoin(): void
+    {
+        $select = new Select($this->orm, Product::class);
+        $product = $select
+            ->leftJoin('filter_products', 'fp')->on('id', 'fp.product_id')
+            ->where(new Fragment('fp.filter_id = ?', 5))
+            ->fetchOne();
+
+        $this->assertSame('Product-2', $product->title);
+    }
+
+    public function testSelectWithFullJoin(): void
+    {
+        $select = new Select($this->orm, Product::class);
+        $product = $select
+            ->fullJoin('filter_products', 'fp')->on('id', 'fp.product_id')
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 

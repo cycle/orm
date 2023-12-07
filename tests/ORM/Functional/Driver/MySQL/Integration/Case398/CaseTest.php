@@ -14,4 +14,9 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case398\CaseTest as Com
 class CaseTest extends CommonClass
 {
     public const DRIVER = 'mysql';
+
+    public function testSelectWithFullJoin(): void
+    {
+        $this->markTestSkipped('MySQL does not support FULL JOIN');
+    }
 }

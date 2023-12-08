@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Collection;
 
+use Cycle\ORM\Collection\Pivoted\LoophpPivotedCollection;
+use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Exception\CollectionFactoryException;
 use loophp\collection\Collection;
 use loophp\collection\CollectionDecorator;
@@ -19,6 +21,8 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
     /** @var class-string<TCollection> */
     private string $class = Collection::class;
 
+    private bool $decoratorExists = false;
+
     public function __construct()
     {
         if (!\class_exists(Collection::class, true)) {
@@ -28,6 +32,10 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
                     Collection::class
                 )
             );
+        }
+
+        if (\class_exists(CollectionDecorator::class, true)) {
+            $this->decoratorExists = true;
         }
     }
 
@@ -39,7 +47,7 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
     public function withCollectionClass(string $class): static
     {
         if (
-            \class_exists(CollectionDecorator::class) &&
+            $this->decoratorExists &&
             (\is_a($class, CollectionDecorator::class, true) || $class === CollectionInterface::class)
         ) {
             $clone = clone $this;
@@ -60,6 +68,16 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
 
     public function collect(iterable $data): CollectionInterface
     {
+        if ($data instanceof PivotedStorage && $this->decoratorExists) {
+            if ($this->class === Collection::class || $this->class === CollectionInterface::class) {
+                return new LoophpPivotedCollection($data->getElements(), $data->getContext());
+            }
+
+            if (\is_a($this->class, LoophpPivotedCollection::class)) {
+                return new $this->class($data->getElements(), $data->getContext());
+            }
+        }
+
         return $this->class::fromIterable($data);
     }
 }

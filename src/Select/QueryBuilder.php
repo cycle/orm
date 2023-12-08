@@ -59,7 +59,11 @@ final class QueryBuilder
      */
     public function __call(string $func, array $args)
     {
-        $result = \call_user_func_array($this->targetFunc($func), $this->proxyArgs($args));
+        $result = \call_user_func_array(
+            $this->targetFunc($func),
+            $this->isJoin($func) ? $args : $this->proxyArgs($args)
+        );
+
         if ($result === $this->query) {
             return $this;
         }
@@ -276,5 +280,10 @@ final class QueryBuilder
         }
 
         return $result;
+    }
+
+    private function isJoin(string $method): bool
+    {
+        return \in_array($method, ['join', 'innerJoin', 'rightJoin', 'leftJoin', 'fullJoin'], true);
     }
 }

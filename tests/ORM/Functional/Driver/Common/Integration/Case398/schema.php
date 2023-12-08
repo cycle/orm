@@ -30,7 +30,7 @@ return [
         Schema::SOURCE => Source::class,
         Schema::DATABASE => 'default',
         Schema::MAPPER => Mapper::class,
-        Schema::TABLE => 'filter_products',
+        Schema::TABLE => 'filter_products_table',
         Schema::PRIMARY_KEY => ['product_id', 'filter_id'],
         Schema::COLUMNS => [
             'id' => 'id',

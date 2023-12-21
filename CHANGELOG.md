@@ -1,9 +1,19 @@
 # CHANGELOG
 
+v2.6.0 (22.12.2023)
+--------------------
+- Add support for `loophp/collection` v7 by @msmakouz (#448)
+- Fix wrong adding table prefix on joins by @msmakouz (#447)
+
+v2.5.0 (27.11.2023)
+--------------------
+- Expose JSON methods in the Select query builder by @msmakouz (#445)
+- Add NullHeap by @roxblnfk (#441)
+
 v2.4.0 (05.10.2023)
 --------------------
 - Add support uninitialized collections in entities by @roxblnfk (#431)
-- Allow doctrine/instantiator 2.x by @msmakouz (#438)
+- Allow `doctrine/instantiator` 2.x by @msmakouz (#438)
 - Improve relations hydration for non-proxy entities. Now it more lazy. By @msmakouz (#429)
 
 v2.3.4 (31.07.2023)

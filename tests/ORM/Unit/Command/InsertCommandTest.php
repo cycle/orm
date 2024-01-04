@@ -29,7 +29,7 @@ class InsertCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->mapper = \Mockery::mock(MapperInterface::class);
+        $this->mapper = m::mock(MapperInterface::class);
 
         $this->cmd = new Insert(
             $this->db = m::mock(DatabaseInterface::class),

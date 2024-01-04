@@ -21,7 +21,7 @@ class DeleteCommandTest extends TestCase
     {
         $this->expectException(CommandException::class);
 
-        $this->mapper = \Mockery::mock(MapperInterface::class);
+        $this->mapper = m::mock(MapperInterface::class);
         $state = new State(Node::SCHEDULED_DELETE, []);
         $cmd = new Delete(
             m::mock(DatabaseInterface::class),

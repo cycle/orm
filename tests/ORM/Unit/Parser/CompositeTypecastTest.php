@@ -108,7 +108,7 @@ class CompositeTypecastTest extends TestCase
         }
 
         $typecast = new CompositeTypecast(
-            ... array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
+            ...array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
         );
 
         $this->assertSame(self::RULES_RESULT, $typecast->setRules(self::RULES_INITIAL));
@@ -135,7 +135,7 @@ class CompositeTypecastTest extends TestCase
         }
 
         $typecast = new CompositeTypecast(
-            ... array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
+            ...array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
         );
 
         $this->assertSame(self::CAST_RESULT, $typecast->cast(self::CAST_INITIAL));
@@ -163,7 +163,7 @@ class CompositeTypecastTest extends TestCase
         }
 
         $typecast = new CompositeTypecast(
-            ... array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
+            ...array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
         );
 
         $this->assertSame(self::UNCAST_RESULT, $typecast->uncast(self::UNCAST_INITIAL));

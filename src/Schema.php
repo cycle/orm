@@ -365,7 +365,7 @@ final class Schema implements SchemaInterface
             return false;
         }
         // Optional fields
-        return ! (($schema[Relation::WHERE] ?? []) !== ($targetSchema[Relation::WHERE] ?? [])
+        return !(($schema[Relation::WHERE] ?? []) !== ($targetSchema[Relation::WHERE] ?? [])
             || ($schema[Relation::THROUGH_WHERE] ?? []) !== ($targetSchema[Relation::THROUGH_WHERE] ?? []));
     }
 

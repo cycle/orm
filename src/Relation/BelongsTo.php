@@ -116,11 +116,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         if ($rTuple->status < $minStatus) {
             return false;
         }
-        $faitFields = \array_intersect($this->outerKeys, $rTuple->state->getWaitingFields());
-        // Skip waited fields they are not required hard
-        if ($faitFields !== [] && \array_sum($faitFields) > 0) {
-            return false;
-        }
+
         // Check bidirected relation: when related entity has been removed from HasSome relation
         $oldData = $tuple->node->getData();
         $newData = $rTuple->state->getTransactionData();

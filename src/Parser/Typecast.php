@@ -11,9 +11,6 @@ use Cycle\Database\DatabaseInterface;
 use ReflectionEnum;
 use Throwable;
 
-/**
- * @internal
- */
 final class Typecast implements CastableInterface
 {
     private const RULES = ['int', 'bool', 'float', 'datetime'];

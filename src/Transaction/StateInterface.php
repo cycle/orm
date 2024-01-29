@@ -13,6 +13,7 @@ interface StateInterface
      * Check if transaction has been run successful.
      *
      * @psalm-assert-if-true null $this->getLastError()
+     *
      * @psalm-assert-if-false Throwable $this->getLastError()
      */
     public function isSuccess(): bool;

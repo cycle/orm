@@ -32,7 +32,7 @@ class DoctrineCollectionFactoryTest extends BaseTest
         ], $collection->toArray());
     }
 
-    public function testCollectPivotStorageWithArrayCollection()
+    public function testCollectPivotStorageWithArrayCollection(): void
     {
         $collection = $this->getFactory()->collect(
             new PivotedStorage($array = [
@@ -45,7 +45,7 @@ class DoctrineCollectionFactoryTest extends BaseTest
         $this->assertSame($array, $collection->toArray());
     }
 
-    public function testCollectPivotStorageWithPivotedCollection()
+    public function testCollectPivotStorageWithPivotedCollection(): void
     {
         $collection = $this->getFactory()
             ->withCollectionClass(CustomPivotedCollection::class)

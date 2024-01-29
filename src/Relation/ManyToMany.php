@@ -11,6 +11,7 @@ use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Iterator;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Reference\EmptyReference;
@@ -19,6 +20,7 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Loader\ManyToManyLoader;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
@@ -45,8 +47,13 @@ class ManyToMany extends Relation\AbstractRelation
     protected FactoryInterface $factory;
     private HeapInterface $heap;
 
-    public function __construct(ORMInterface $orm, string $role, string $name, string $target, array $schema)
-    {
+    public function __construct(
+        ORMInterface $orm,
+        private string $role,
+        string $name,
+        string $target,
+        array $schema
+    ) {
         parent::__construct($orm, $role, $name, $target, $schema);
         $this->heap = $orm->getHeap();
         $this->sourceProvider = $orm->getService(SourceProviderInterface::class);
@@ -151,19 +158,27 @@ class ManyToMany extends Relation\AbstractRelation
         if (!$data) {
             return [];
         }
-        $pivotMapper = $this->mapperProvider->getMapper($this->pivotRole);
-        $targetMapper = $this->mapperProvider->getMapper($this->target);
+        /**
+         * @var array<non-empty-string, MapperInterface> $targetMappers Target Mappers cache
+         * @var array<non-empty-string, MapperInterface> $pivotMappers Pivot Mappers cache
+         */
+        $pivotMappers = [];
+        $targetMappers = [];
 
         foreach ($data as $key => $pivot) {
             if (isset($pivot['@'])) {
                 $d = $pivot['@'];
                 // break link
                 unset($pivot['@']);
-                $pivot['@'] = $targetMapper->cast($d);
+
+                $targetRole = $d[LoaderInterface::ROLE_KEY] ?? $this->target;
+                $pivot['@'] = ($targetMappers[$targetRole] ??= $this->mapperProvider->getMapper($targetRole))->cast($d);
             }
             // break link
             unset($data[$key]);
-            $data[$key] = $pivotMapper->cast($pivot);
+
+            $pivotRole = $pivot[LoaderInterface::ROLE_KEY] ?? $this->pivotRole;
+            $data[$key] = ($pivotMappers[$pivotRole] ??= $this->mapperProvider->getMapper($pivotRole))->cast($pivot);
         }
 
         return $data;
@@ -194,10 +209,14 @@ class ManyToMany extends Relation\AbstractRelation
     public function extractRelated(?iterable $data, PivotedStorage $original): PivotedStorage
     {
         $related = $this->extract($data);
-        if ($data instanceof PivotedStorage || $data instanceof PivotedCollectionInterface || \count($original) === 0) {
+        if (\count($original) === 0) {
             return $related;
         }
+        // Merge pivots
         foreach ($related as $item) {
+            if ($related->hasContext($item)) {
+                continue;
+            }
             if ($original->hasContext($item)) {
                 $related->set($item, $original->getContext()->offsetGet($item));
             }
@@ -234,12 +253,14 @@ class ManyToMany extends Relation\AbstractRelation
             return $result;
         }
 
+        $source = $this->sourceProvider->getSource($this->target);
         // getting scoped query
         $query = (new RootLoader(
             $this->ormSchema,
             $this->sourceProvider,
             $this->factory,
-            $this->target
+            $this->target,
+            loadRelations: false,
         ))->buildQuery();
 
         // responsible for all the scoping
@@ -247,14 +268,14 @@ class ManyToMany extends Relation\AbstractRelation
             $this->ormSchema,
             $this->sourceProvider,
             $this->factory,
-            $this->sourceProvider->getSource($this->target)->getTable(),
+            $source->getTable(),
             $this->target,
             $this->schema
         );
 
         /** @var ManyToManyLoader $loader */
         $loader = $loader->withContext($loader, [
-            'scope' => $this->sourceProvider->getSource($this->target)->getScope(),
+            'scope' => $source->getScope(),
             'as' => $this->target,
             'method' => JoinableLoader::POSTLOAD,
         ]);
@@ -271,7 +292,7 @@ class ManyToMany extends Relation\AbstractRelation
         $root->linkNode('output', $node);
 
         // emulate presence of parent entity
-        $root->parseRow(0, $scope);
+        $root->parseRow(0, $this->mapperProvider->getMapper($this->role)->uncast($scope));
 
         $iterator = $query->getIterator();
         foreach ($iterator as $row) {

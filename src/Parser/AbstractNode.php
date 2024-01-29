@@ -96,6 +96,23 @@ abstract class AbstractNode
     {
         $data = $this->fetchData($offset, $row);
 
+        $innerOffset = 0;
+        $relatedNodes = \array_merge(
+            $this->mergeParent === null ? [] : [$this->mergeParent],
+            $this->nodes,
+            $this->mergeSubclass
+        );
+
+        if ($this->isEmptyPrimaryKey($data)) {
+            // Skip all columns which are related to current node and sub nodes.
+            return \count($this->columns)
+                + \array_reduce(
+                    $relatedNodes,
+                    static fn (int $cnt, AbstractNode $node): int => $cnt + \count($node->columns),
+                    0,
+                );
+        }
+
         if ($this->deduplicate($data)) {
             foreach ($this->indexedData->getIndexes() as $index) {
                 try {
@@ -118,13 +135,7 @@ abstract class AbstractNode
             $this->push($data);
         }
 
-        $innerOffset = 0;
-        $iterate = array_merge(
-            $this->mergeParent === null ? [] : [$this->mergeParent],
-            $this->nodes,
-            $this->mergeSubclass
-        );
-        foreach ($iterate as $node) {
+        foreach ($relatedNodes as $node) {
             if (!$node->joined) {
                 continue;
             }
@@ -378,5 +389,20 @@ abstract class AbstractNode
             $result[$key] = $data[$key];
         }
         return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return bool True if any PK field is empty
+     */
+    private function isEmptyPrimaryKey(array $data): bool
+    {
+        foreach ($this->duplicateCriteria as $key) {
+            if ($data[$key] === null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

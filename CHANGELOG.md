@@ -1,8 +1,68 @@
 # CHANGELOG
 
-v2.2.1 (in progress)
+v2.6.0 (22.12.2023)
 --------------------
-- Fix `cascade` mode in BelongsTo relation by @roxblnfk (#347)
+- Add support for `loophp/collection` v7 by @msmakouz (#448)
+- Fix wrong adding table prefix on joins by @msmakouz (#447)
+
+v2.5.0 (27.11.2023)
+--------------------
+- Expose JSON methods in the Select query builder by @msmakouz (#445)
+- Add NullHeap by @roxblnfk (#441)
+
+v2.4.0 (05.10.2023)
+--------------------
+- Add support uninitialized collections in entities by @roxblnfk (#431)
+- Allow `doctrine/instantiator` 2.x by @msmakouz (#438)
+- Improve relations hydration for non-proxy entities. Now it more lazy. By @msmakouz (#429)
+
+v2.3.4 (31.07.2023)
+--------------------
+- Fix fields uncasting in the ManyToMany relation by @roxblnfk, thanks @gam6itko (#427, #428)
+- Fix resolving of a not loaded parent in the relation RefersTo by @roxblnfk, thanks @msmakouz and snafets (#414)
+- Fix belongs to relation when parent is changed using parent id by @roxblnfk, thanks @roquie (#346, #432)
+
+v2.3.3 (21.07.2023)
+--------------------
+- Fix loading for Embedded entities when parent is null by @gam6itko and @roxblnfk (#422, #423)
+- Fix: remove extra joins from JTI and eager relations when ManyToMany is resolved. By @msmakouz and @roxblnfk (#418)
+- Fix the Unit of Work persistState() method in a sequenced call. By @msmakouz and @roxblnfk (#424, #426)
+- Fix ManyToMany lazy loading when value object are used as keys. By @msmakouz and @roxblnfk (#318, #420)
+
+v2.3.2 (20.06.2023)
+--------------------
+- Fix proxy-mapper hydration mechanism: public relations in a non-proxy-entity are hydrated like private ones.
+  There is a special logic related to `ReferenceInterface` hydrating. By @roxblnfk (#417)
+- Add the method `forUpdate` in the `Select` phpdoc. By @msmakouz (#413)
+
+v2.3.1 (01.05.2023)
+--------------------
+- Fix typecasting in relations when JTI entities are loaded by @roxblnfk (#408, #409)
+
+v2.3.0 (03.04.2023)
+--------------------
+- Update `where()` and `orderBy()` behavior in the JTI case. It possible to pass parent field name. By @roxblnfk (#405)
+- `Select::wherePK()` is now more strict. Use entity field name instead of table columns.
+- Fix method naming: `AbstractLoader::loadIerarchy()` deprecated and renamed to `::loadHierarchy()`.
+- Class `\Cycle\ORM\Parser\Typecast` is now not internal by @thenotsoft (#395)
+- Update test case generator script. Now it possible to set case name like "Issue777" and a template folder that
+  different from the default `CaseTemplate` by @gam6itko (#389)
+
+v2.2.2 (08.02.2023)
+--------------------
+- Fix compatibility with PHP 8.2 (AllowDynamicProperties) by @roxblnfk (#394)
+- Add tests with using for microseconds in a datetime fields by @BelaRyc and @msmakouz (#383)
+
+v2.2.1 (01.12.2022)
+--------------------
+- Fix `EM::persistState()` that inserted the same entity twice by @roxblnfk (#368)
+- Fix bug on saving of replaced pivoted collection by @BelaRyc (#382)
+- Fix `cascade` mode in BelongsTo relation by @roxblnfk and @msmakouz (#347, #374)
+- Fix storing od embedded entities in a JTI by @butschster (#379)
+- Add tests case template by @roxblnfk and @kastahov (#372, #377)
+  - [How to make an issue with test case](https://cycle-orm.dev/docs/issue-test-case)
+- Add a previous exception in TransactionException on throwing by @Eugentis (#367)
+- Add annotation `@readonly` for `Repository::$select` by @roxblnfk (#369)
 
 v2.2.0 (05.07.2022)
 --------------------

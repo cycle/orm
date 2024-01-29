@@ -34,8 +34,8 @@ final class EmbeddedLoader implements JoinableInterface
     ) {
         // never duplicate primary key in data selection
         $primaryKey = (array)$this->define(SchemaInterface::PRIMARY_KEY);
-        foreach ($this->define(SchemaInterface::COLUMNS) as $internal => $external) {
-            if (!in_array($internal, $primaryKey, true) && !in_array($external, $primaryKey, true)) {
+        foreach ($this->normalizeColumns($this->define(SchemaInterface::COLUMNS)) as $internal => $external) {
+            if (!\in_array($internal, $primaryKey, true)) {
                 $this->columns[$internal] = $external;
             }
         }

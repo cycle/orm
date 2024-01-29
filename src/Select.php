@@ -32,6 +32,19 @@ use Spiral\Pagination\PaginableInterface;
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
  * @method $this orderBy($expression, $direction = 'ASC');
+ * @method $this forUpdate()
+ * @method $this whereJson(string $path, mixed $value)
+ * @method $this orWhereJson(string $path, mixed $value)
+ * @method $this whereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this orWhereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this whereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this orWhereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
+ * @method $this whereJsonContainsKey(string $path)
+ * @method $this orWhereJsonContainsKey(string $path)
+ * @method $this whereJsonDoesntContainKey(string $path)
+ * @method $this orWhereJsonDoesntContainKey(string $path)
+ * @method $this whereJsonLength(string $path, int $length, string $operator = '=')
+ * @method $this orWhereJsonLength(string $path, int $length, string $operator = '=')
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
@@ -135,7 +148,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
-     * Compiled SQL query, changes in this query would not affect Selector state (but binded parameters will).
+     * Compiled SQL query, changes in this query would not affect Selector state (but bound parameters will).
      */
     public function buildQuery(): SelectQuery
     {
@@ -151,12 +164,12 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function wherePK(string|int|array|object ...$ids): self
     {
-        $pk = $this->loader->getPK();
+        $pk = $this->loader->getPrimaryFields();
 
-        if (\is_array($pk) && \count($pk) > 1) {
+        if (\count($pk) > 1) {
             return $this->buildCompositePKQuery($pk, $ids);
         }
-        $pk = \current((array)$pk);
+        $pk = \current($pk);
 
         return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
@@ -449,6 +462,9 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
+     * @param list<non-empty-string> $pk
+     * @param list<array|int|object|string> $args
+     *
      * @return Select<TEntity>
      */
     private function buildCompositePKQuery(array $pk, array $args): self
@@ -467,14 +483,11 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
 
             $isAssoc = !array_is_list($values);
             foreach ($values as $key => $value) {
-                $key = $isAssoc
-                    ? $this->loader->getAlias() . '.' . $this->loader->fieldAlias($key)
-                    : $pk[$key];
-
-                if (!\in_array($key, $pk, true)) {
-                    throw new InvalidArgumentException(\sprintf('Primary key %s not found.', $key));
+                if ($isAssoc && !\in_array($key, $pk, true)) {
+                    throw new InvalidArgumentException(\sprintf('Primary key `%s` not found.', $key));
                 }
 
+                $key = $isAssoc ? $key : $pk[$key];
                 $prepared[$index][$key] = $value;
             }
         }

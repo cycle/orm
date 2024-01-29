@@ -130,9 +130,9 @@ abstract class EntityManagerTest extends BaseTest
     }
 
     /**
-     * Not deferred persisting should be calc changes on entity adding into transaction
+     * Not deferred persisting should calc changes on entity when adding into transaction
      */
-    public function testPersist(): void
+    public function testPersistState(): void
     {
         $em = new EntityManager($this->orm);
 
@@ -155,6 +155,60 @@ abstract class EntityManagerTest extends BaseTest
 
         $this->assertSame('Test title', $stored->title);
         $this->assertSame('changed title', $entity->title);
+    }
+
+    public function testPersistStateTwiceAndChangeEntity(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $entity = new Post();
+        $entity->title = 'Test 1';
+        $entity->content = 'Test content';
+
+        $em->persistState($entity);
+        $entity->title = 'Title 2';
+        $em->persistState($entity);
+        $entity->title = 'Title 3';
+
+        $this->captureWriteQueries();
+        $result = $em->run();
+
+        $this->assertTrue($result->isSuccess());
+        $this->assertNumWrites(1);
+        $this->assertNotNull($entity->id);
+
+        $this->orm->getHeap()->clean();
+        $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
+
+        $this->assertSame('Title 2', $stored->title);
+    }
+
+    public function testPersistStateTwiceAndChangeEntityWithStoredEntity(): void
+    {
+        $em = new EntityManager($this->orm);
+
+        $entity = new Post();
+        $entity->title = 'Test 1';
+        $entity->content = 'Test content';
+        $this->save($entity);
+
+        $entity->title = 'Title 2';
+        $em->persistState($entity);
+        $entity->title = 'Title 3';
+        $em->persistState($entity);
+        $entity->title = 'Title 4';
+
+        $this->captureWriteQueries();
+        $result = $em->run();
+
+        $this->assertTrue($result->isSuccess());
+        $this->assertNumWrites(1);
+        $this->assertNotNull($entity->id);
+
+        $this->orm->getHeap()->clean();
+        $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
+
+        $this->assertSame('Title 3', $stored->title);
     }
 
     /**

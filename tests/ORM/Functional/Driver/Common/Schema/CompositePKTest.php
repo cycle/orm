@@ -166,8 +166,7 @@ abstract class CompositePKTest extends BaseTest
 
         $this->save($u1);
 
-        // one entity with assoc PK. Keys - fields in db
-        $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['field2' => 2, 'field1' => 1])->fetchOne();
+        $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['key2' => 2, 'key1' => 1])->fetchOne();
 
         $this->assertSame($u1->key1, $data1->key1);
         $this->assertSame($u1->key2, $data1->key2);
@@ -230,8 +229,8 @@ abstract class CompositePKTest extends BaseTest
             'Incorrect count' => [
                 ['key1' => 1, 'key2' => 2, 'key3' => 3], 'Primary key should contain 2 values.',
             ],
-            'Don\'t exist' => [
-                ['foo' => 2, 'bar' => 1], 'Primary key simple_entity.foo not found.',
+            'Key not found' => [
+                ['foo' => 2, 'bar' => 1], 'Primary key `foo` not found.',
             ],
         ];
     }

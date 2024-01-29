@@ -116,21 +116,19 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         if ($rTuple->status < $minStatus) {
             return false;
         }
-        $faitFields = \array_intersect($this->outerKeys, $rTuple->state->getWaitingFields());
-        // Skip waited fields they are not required hard
-        if ($faitFields !== [] && \array_sum($faitFields) > 0) {
-            return false;
-        }
+
         // Check bidirected relation: when related entity has been removed from HasSome relation
         $oldData = $tuple->node->getData();
         $newData = $rTuple->state->getTransactionData();
         $current = $tuple->state->getData();
         $noChanges = true;
+        $toReference = [];
         foreach ($this->outerKeys as $i => $outerKey) {
             $innerKey = $this->innerKeys[$i];
             if (!array_key_exists($innerKey, $oldData) || $oldData[$innerKey] !== $newData[$outerKey]) {
                 return true;
             }
+            $toReference[$outerKey] = $current[$innerKey];
             $noChanges = $noChanges && Node::compare($current[$innerKey], $oldData[$innerKey]) === 0;
         }
         // If no changes
@@ -140,14 +138,27 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
         // Nullable relation and null values
         if ($this->isNullable()) {
+            $isNull = true;
             foreach ($this->innerKeys as $innerKey) {
                 if (!array_key_exists($innerKey, $current) || $current[$innerKey] !== null) {
-                    return false;
+                    $isNull = false;
+                    break;
                 }
             }
-            $tuple->state->setRelation($this->getName(), null);
-            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            if ($isNull) {
+                $tuple->state->setRelation($this->getName(), null);
+                $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                return false;
+            }
         }
+        $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+
+        $reference = new Reference($this->target, $toReference);
+        $tuple->state->setRelation(
+            $this->getName(),
+            $this->resolve($reference, false) ?? $reference,
+        );
+
         return false;
     }
 

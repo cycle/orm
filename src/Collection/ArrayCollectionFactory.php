@@ -30,6 +30,7 @@ use Cycle\ORM\Exception\CollectionFactoryException;
  * </code>
  *
  * @template TCollection of array
+ *
  * @template-implements CollectionFactoryInterface<TCollection>
  */
 final class ArrayCollectionFactory implements CollectionFactoryInterface

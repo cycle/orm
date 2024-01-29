@@ -18,6 +18,7 @@ class ProxyEntityFactory
 {
     /**
      * @var string[]
+     *
      * @psalm-var class-string[]
      */
     private array $classMap = [];
@@ -47,9 +48,9 @@ class ProxyEntityFactory
         RelationMap $relMap,
         string $sourceClass,
     ): object {
-        $class = array_key_exists($sourceClass, $this->classMap)
+        $class = \array_key_exists($sourceClass, $this->classMap)
             ? $this->classMap[$sourceClass]
-            : $this->defineClass($relMap, $sourceClass);
+            : $this->defineClass($sourceClass);
 
         $proxy = $this->instantiator->instantiate($class);
         $proxy->__cycle_orm_rel_map = $relMap;
@@ -100,7 +101,10 @@ class ProxyEntityFactory
         foreach ($relMap->getRelations() as $key => $relation) {
             if (!array_key_exists($key, $currentData)) {
                 $arrayData ??= $this->entityToArray($entity);
-                $currentData[$key] = $arrayData[$key];
+
+                if (\array_key_exists($key, $arrayData)) {
+                    $currentData[$key] = $arrayData[$key];
+                }
             }
         }
 
@@ -133,7 +137,7 @@ class ProxyEntityFactory
         return $result;
     }
 
-    private function defineClass(RelationMap $relMap, string $class): string
+    private function defineClass(string $class): string
     {
         if (!class_exists($class, true)) {
             throw new \RuntimeException(sprintf(
@@ -166,6 +170,7 @@ class ProxyEntityFactory
             /** @see \Cycle\ORM\Mapper\Proxy\EntityProxyTrait */
             $classStr = <<<PHP
                 {$namespaceStr}
+                #[\AllowDynamicProperties]
                 class {$classNameStr} extends \\{$class} implements \\Cycle\\ORM\\EntityProxyInterface {
                     use \\Cycle\ORM\\Mapper\\Proxy\\EntityProxyTrait;
                 }

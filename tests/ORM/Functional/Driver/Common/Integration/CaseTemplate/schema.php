@@ -208,7 +208,7 @@ return [
         ],
         Schema::SCHEMA => [],
     ],
-    User::ROLE => [
+    'user' => [
         Schema::ENTITY => User::class,
         Schema::MAPPER => Mapper::class,
         Schema::SOURCE => Source::class,

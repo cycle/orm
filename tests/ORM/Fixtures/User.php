@@ -69,6 +69,8 @@ class User implements ImagedInterface
      */
     public $credentials;
 
+    public ?string $settings = null;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();

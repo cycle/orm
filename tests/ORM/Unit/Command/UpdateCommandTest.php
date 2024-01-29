@@ -18,13 +18,14 @@ class UpdateCommandTest extends TestCase
 {
     private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
     private Update $cmd;
+    private DatabaseInterface $db;
     private State $state;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->mapper = \Mockery::mock(MapperInterface::class);
+        $this->mapper = m::mock(MapperInterface::class);
         $this->state = new State(Node::SCHEDULED_UPDATE, ['foo' => 'bar']);
 
         $this->cmd = new Update(
@@ -105,7 +106,7 @@ class UpdateCommandTest extends TestCase
         $this->db->shouldReceive('update')
             ->once()
             ->with('table', ['column' => 'value'], ['key' => 'scope'])
-            ->andReturn($query = \Mockery::mock(UpdateQuery::class));
+            ->andReturn($query = m::mock(UpdateQuery::class));
 
         $query->shouldReceive('run')->once()->andReturn(5);
 

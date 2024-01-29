@@ -67,7 +67,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         protected array $schema
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $target);
-        $this->columns = $this->define(SchemaInterface::COLUMNS);
+        $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
     }
 
     /**
@@ -109,7 +109,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         //Calculate table alias
         $loader->options['as'] = $loader->calculateAlias($parent);
 
-        if (array_key_exists('scope', $options)) {
+        if (\array_key_exists('scope', $options)) {
             if ($loader->options['scope'] instanceof ScopeInterface) {
                 $loader->setScope($loader->options['scope']);
             } elseif (\is_string($loader->options['scope'])) {

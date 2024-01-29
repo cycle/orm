@@ -207,7 +207,7 @@ final class UnitOfWork implements StateInterface
          * @var Tuple $tuple
          */
         foreach ($this->pool->openIterator() as $tuple) {
-            if ($tuple->task === Tuple::TASK_FORCE_DELETE && ! $tuple->cascade) {
+            if ($tuple->task === Tuple::TASK_FORCE_DELETE && !$tuple->cascade) {
                 // currently we rely on db to delete all nested records (or soft deletes)
                 $command = $this->commandGenerator->generateDeleteCommand($this->orm, $tuple);
                 $this->runCommand($command);
@@ -222,7 +222,7 @@ final class UnitOfWork implements StateInterface
 
     private function resolveMasterRelations(Tuple $tuple, RelationMap $map): int
     {
-        if (! $map->hasDependencies()) {
+        if (!$map->hasDependencies()) {
             return self::RELATIONS_RESOLVED;
         }
 
@@ -262,7 +262,7 @@ final class UnitOfWork implements StateInterface
 
     private function resolveSlaveRelations(Tuple $tuple, RelationMap $map): int
     {
-        if (! $map->hasSlaves()) {
+        if (!$map->hasSlaves()) {
             return self::RELATIONS_RESOLVED;
         }
         $changedFields = array_keys($tuple->state->getChanges());
@@ -296,8 +296,8 @@ final class UnitOfWork implements StateInterface
 
             if ($relationStatus !== RelationInterface::STATUS_PREPARE
                 && $relationStatus !== RelationInterface::STATUS_RESOLVED
-                && ! $isWaitingKeys
-                && ! $hasChangedKeys
+                && !$isWaitingKeys
+                && !$hasChangedKeys
                 && \count(array_intersect($innerKeys, array_keys($transactData))) === \count($innerKeys)
             ) {
                 $child ??= $tuple->state->getRelation($name);
@@ -313,8 +313,8 @@ final class UnitOfWork implements StateInterface
 
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map, bool $hasDeferredRelations): void
     {
-        if (! $map->hasEmbedded() && ! $tuple->state->hasChanges()) {
-            $tuple->status = ! $hasDeferredRelations
+        if (!$map->hasEmbedded() && !$tuple->state->hasChanges()) {
+            $tuple->status = !$hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED
                 : max(Tuple::STATUS_DEFERRED, $tuple->status);
 
@@ -322,7 +322,7 @@ final class UnitOfWork implements StateInterface
         }
         $command = $this->commandGenerator->generateStoreCommand($this->orm, $tuple);
 
-        if (! $map->hasEmbedded()) {
+        if (!$map->hasEmbedded()) {
             // Not embedded but has changes
             $this->runCommand($command);
 
@@ -349,7 +349,7 @@ final class UnitOfWork implements StateInterface
         }
         $this->runCommand($command);
 
-        $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED || ! $hasDeferredRelations
+        $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED || !$hasDeferredRelations
             ? Tuple::STATUS_PROCESSED
             : max(Tuple::STATUS_DEFERRED, $tuple->status);
     }
@@ -389,7 +389,7 @@ final class UnitOfWork implements StateInterface
                 : $this->resolveMasterRelations($tuple, $map);
         }
 
-        if (! $isDependenciesResolved && $tuple->status === Tuple::STATUS_PREPROCESSED) {
+        if (!$isDependenciesResolved && $tuple->status === Tuple::STATUS_PREPROCESSED) {
             $tuple->status = Tuple::STATUS_UNPROCESSED;
         }
     }

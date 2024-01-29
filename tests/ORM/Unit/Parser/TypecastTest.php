@@ -97,6 +97,7 @@ class TypecastTest extends TestCase
 
     /**
      * @requires PHP >= 8.1
+     *
      * @dataProvider enumCastDataProvider
      */
     public function testEnumCast(array $rules, array $in, array $out): void

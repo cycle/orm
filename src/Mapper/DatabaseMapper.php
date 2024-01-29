@@ -98,7 +98,7 @@ abstract class DatabaseMapper implements MapperInterface
 
     public function uncast(array $data): array
     {
-        if (! $this->typecast instanceof UncastableInterface) {
+        if (!$this->typecast instanceof UncastableInterface) {
             return $data;
         }
 

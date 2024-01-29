@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity\User;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue380\Entity\User;
 
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case4\Entity\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue380\Entity\User;
 
 class Alias
 {

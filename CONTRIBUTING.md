@@ -26,7 +26,7 @@ $ ./vendor/bin/phpunit
 To run quick test suite:
 
 ```bash
-$ ./vendor/bin/phpunit tests/ORM/Driver/SQLite
+$ ./vendor/bin/phpunit tests/ORM/Functional/Driver/SQLite
 ```
 
 ## Help Needed In

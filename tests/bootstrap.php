@@ -25,7 +25,10 @@ $drivers = [
             user: 'root',
             password: 'root',
         ),
-        queryCache: true
+        queryCache: true,
+        options: [
+            'logQueryParameters' => true,
+        ],
     ),
     'postgres' => new Config\PostgresDriverConfig(
         connection: new Config\Postgres\TcpConnectionConfig(
@@ -37,6 +40,9 @@ $drivers = [
         ),
         schema: 'public',
         queryCache: true,
+        options: [
+            'logQueryParameters' => true,
+        ],
     ),
     'sqlserver' => new Config\SQLServerDriverConfig(
         connection: new Config\SQLServer\TcpConnectionConfig(
@@ -46,7 +52,10 @@ $drivers = [
             user: 'SA',
             password: 'SSpaSS__1'
         ),
-        queryCache: true
+        queryCache: true,
+        options: [
+            'logQueryParameters' => true,
+        ],
     ),
 ];
 

@@ -66,7 +66,7 @@ class ClassPropertiesExtractor
             $this->findAllInstanceProperties($class->getParentClass() ?: null),
             \array_filter(
                 $class->getProperties(),
-                static fn(ReflectionProperty $property): bool => !$property->isStatic()
+                static fn (ReflectionProperty $property): bool => !$property->isStatic()
             )
         );
     }

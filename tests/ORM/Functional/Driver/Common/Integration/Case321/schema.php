@@ -26,6 +26,9 @@ return [
             'id' => 'int',
         ],
         Schema::SCHEMA => [],
+        Schema::GENERATED_FIELDS => [
+            'id' => Schema::GENERATED_DB, // autoincrement
+        ],
     ],
     'user2' => [
         Schema::ENTITY => User2::class,
@@ -44,5 +47,8 @@ return [
             'id' => 'int',
         ],
         Schema::SCHEMA => [],
+        Schema::GENERATED_FIELDS => [
+            'id' => Schema::GENERATED_DB, // autoincrement
+        ],
     ],
 ];

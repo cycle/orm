@@ -50,6 +50,9 @@ final class SerialColumnTest extends BaseTest
                 SchemaInterface::COLUMNS => ['id', 'balance'],
                 SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [],
+                SchemaInterface::GENERATED_FIELDS => [
+                    'balance' => SchemaInterface::GENERATED_DB, // sequence
+                ],
             ],
         ]));
     }

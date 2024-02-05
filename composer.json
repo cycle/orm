@@ -5,6 +5,37 @@
     "description": "PHP DataMapper ORM and Data Modelling Engine",
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "homepage": "https://cycle-orm.dev",
+    "support": {
+        "issues": "https://github.com/cycle/orm/issues",
+        "source": "https://github.com/cycle/orm",
+        "docs": "https://cycle-orm.dev/docs",
+        "chat": "https://discord.gg/spiralphp"
+    },
+    "authors": [
+        {
+            "name": "Anton Titov (wolfy-j)",
+            "email": "wolfy-j@spiralscout.com"
+        },
+        {
+            "name": "Aleksei Gagarin (roxblnfk)",
+            "email": "alexey.gagarin@spiralscout.com"
+        },
+        {
+            "name": "Pavel Butchnev (butschster)",
+            "email": "pavel.buchnev@spiralscout.com"
+        },
+        {
+            "name": "Maksim Smakouz (msmakouz)",
+            "email": "maksim.smakouz@spiralscout.com"
+        }
+    ],
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/cycle"
+        }
+    ],
     "require": {
         "php": ">=8.0",
         "ext-pdo": "*",
@@ -20,7 +51,8 @@
         "phpunit/phpunit": "^9.5",
         "ramsey/uuid": "^4.0",
         "spiral/tokenizer": "^2.8 || ^3.0",
-        "vimeo/psalm": "^4.9"
+        "vimeo/psalm": "5.21",
+        "buggregator/trap": "^1.4"
     },
     "autoload": {
         "psr-4": {

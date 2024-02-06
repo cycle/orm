@@ -112,9 +112,7 @@ final class Insert extends StoreCommand
             // Array of [field name => column name]
             $returning = \array_combine(\array_keys($returningFields), \array_keys($returning));
 
-            // TODO replace:
-            // $insert->returning(...\array_values($returning));
-            $insert->returning(\array_values($returning)[0]);
+            $insert->returning(...\array_values($returning));
 
             $insertID = $insert->run();
 

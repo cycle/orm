@@ -97,7 +97,8 @@ abstract class BaseTest extends TestCase
                 null,
                 new DoctrineCollectionFactory()
             ))->withCollectionFactory('array', new ArrayCollectionFactory()),
-            new Schema([])
+            new Schema([]),
+            $this->getCommandGenerator(),
         );
     }
 
@@ -399,5 +400,10 @@ abstract class BaseTest extends TestCase
         if (isset($options['withDatetimeMicroseconds'])) {
             $config->options['withDatetimeMicroseconds'] = $options['withDatetimeMicroseconds'];
         }
+    }
+
+    protected function getCommandGenerator(): ?Transaction\CommandGeneratorInterface
+    {
+        return null;
     }
 }

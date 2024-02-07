@@ -33,7 +33,7 @@
     "funding": [
         {
             "type": "github",
-            "url": "https://github.com/sponsors/cycle "
+            "url": "https://github.com/sponsors/cycle"
         }
     ],
     "require": {
@@ -51,8 +51,7 @@
         "phpunit/phpunit": "^9.5",
         "ramsey/uuid": "^4.0",
         "spiral/tokenizer": "^2.8 || ^3.0",
-        "vimeo/psalm": "5.21",
-        "buggregator/trap": "^1.4"
+        "vimeo/psalm": "5.21"
     },
     "autoload": {
         "psr-4": {

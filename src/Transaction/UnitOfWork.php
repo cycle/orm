@@ -163,7 +163,7 @@ final class UnitOfWork implements StateInterface
             $node = $tuple->node;
 
             // marked as being deleted and has no external claims (GC like approach)
-            if (in_array($node->getStatus(), [Node::DELETED, Node::SCHEDULED_DELETE], true)) {
+            if (\in_array($node->getStatus(), [Node::DELETED, Node::SCHEDULED_DELETE], true)) {
                 $heap->detach($e);
                 continue;
             }
@@ -174,7 +174,7 @@ final class UnitOfWork implements StateInterface
             $heap->attach($e, $node, $indexProvider->getIndexes($role));
 
             if ($tuple->persist !== null) {
-                $syncData = array_udiff_assoc(
+                $syncData = \array_udiff_assoc(
                     $tuple->state->getData(),
                     $tuple->persist->getData(),
                     [Node::class, 'compare']
@@ -265,7 +265,7 @@ final class UnitOfWork implements StateInterface
         if (!$map->hasSlaves()) {
             return self::RELATIONS_RESOLVED;
         }
-        $changedFields = array_keys($tuple->state->getChanges());
+        $changedFields = \array_keys($tuple->state->getChanges());
 
         // Attach children to pool
         $transactData = $tuple->state->getTransactionData();
@@ -281,15 +281,15 @@ final class UnitOfWork implements StateInterface
             }
 
             $innerKeys = $relation->getInnerKeys();
-            $isWaitingKeys = array_intersect($innerKeys, $tuple->state->getWaitingFields(true)) !== [];
-            $hasChangedKeys = array_intersect($innerKeys, $changedFields) !== [];
+            $isWaitingKeys = \array_intersect($innerKeys, $tuple->state->getWaitingFields(true)) !== [];
+            $hasChangedKeys = \array_intersect($innerKeys, $changedFields) !== [];
             if ($relationStatus === RelationInterface::STATUS_PREPARE) {
                 $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
                 $relation->prepare(
                     $this->pool,
                     $tuple,
                     $relData[$name] ?? null,
-                    $isWaitingKeys || $hasChangedKeys
+                    $isWaitingKeys || $hasChangedKeys,
                 );
                 $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             }
@@ -298,9 +298,9 @@ final class UnitOfWork implements StateInterface
                 && $relationStatus !== RelationInterface::STATUS_RESOLVED
                 && !$isWaitingKeys
                 && !$hasChangedKeys
-                && \count(array_intersect($innerKeys, array_keys($transactData))) === \count($innerKeys)
+                && \count(\array_intersect($innerKeys, \array_keys($transactData))) === \count($innerKeys)
             ) {
-                $child ??= $tuple->state->getRelation($name);
+                // $child ??= $tuple->state->getRelation($name);
                 $relation->queue($this->pool, $tuple);
                 $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             }
@@ -316,7 +316,7 @@ final class UnitOfWork implements StateInterface
         if (!$map->hasEmbedded() && !$tuple->state->hasChanges()) {
             $tuple->status = !$hasDeferredRelations
                 ? Tuple::STATUS_PROCESSED
-                : max(Tuple::STATUS_DEFERRED, $tuple->status);
+                : \max(Tuple::STATUS_DEFERRED, $tuple->status);
 
             return;
         }
@@ -351,14 +351,13 @@ final class UnitOfWork implements StateInterface
 
         $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED || !$hasDeferredRelations
             ? Tuple::STATUS_PROCESSED
-            : max(Tuple::STATUS_DEFERRED, $tuple->status);
+            : \max(Tuple::STATUS_DEFERRED, $tuple->status);
     }
 
     private function resolveRelations(Tuple $tuple): void
     {
         $map = $this->orm->getRelationMap($tuple->node->getRole());
 
-        // Dependency relations
         $result = $tuple->task === Tuple::TASK_STORE
             ? $this->resolveMasterRelations($tuple, $map)
             : $this->resolveSlaveRelations($tuple, $map);
@@ -368,8 +367,8 @@ final class UnitOfWork implements StateInterface
         // Self
         if ($deferred && $tuple->status < Tuple::STATUS_PROPOSED) {
             $tuple->status = Tuple::STATUS_DEFERRED;
-            // $this->pool->attachTuple($tuple);
         }
+
         if ($isDependenciesResolved) {
             if ($tuple->task === Tuple::TASK_STORE) {
                 $this->resolveSelfWithEmbedded($tuple, $map, $deferred);
@@ -383,7 +382,6 @@ final class UnitOfWork implements StateInterface
         }
 
         if ($tuple->cascade) {
-            // Slave relations relations
             $tuple->task === Tuple::TASK_STORE
                 ? $this->resolveSlaveRelations($tuple, $map)
                 : $this->resolveMasterRelations($tuple, $map);

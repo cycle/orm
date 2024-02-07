@@ -9,6 +9,7 @@ use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Schema\GeneratedField;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Document;
@@ -64,7 +65,7 @@ final class SerialColumnTest extends BaseTest
                 SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [],
                 SchemaInterface::GENERATED_FIELDS => [
-                    'balance' => SchemaInterface::GENERATED_DB, // sequence
+                    'balance' => GeneratedField::DB_INSERT, // sequence
                 ],
             ],
             Document::class => [
@@ -81,10 +82,10 @@ final class SerialColumnTest extends BaseTest
                     'updated_at' => 'datetime',
                 ],
                 SchemaInterface::GENERATED_FIELDS => [
-                    'id' => SchemaInterface::GENERATED_DB,
-                    'body' => SchemaInterface::GENERATED_DB,
-                    'created_at' => SchemaInterface::GENERATED_DB,
-                    'updated_at' => SchemaInterface::GENERATED_PHP_INSERT | SchemaInterface::GENERATED_PHP_UPDATE,
+                    'id' => GeneratedField::DB_INSERT,
+                    'body' => GeneratedField::DB_INSERT,
+                    'created_at' => GeneratedField::DB_INSERT,
+                    'updated_at' => GeneratedField::PHP_INSERT | GeneratedField::PHP_UPDATE,
                 ],
             ],
         ]));
@@ -134,7 +135,7 @@ final class SerialColumnTest extends BaseTest
 
     protected function getCommandGenerator(): ?Transaction\CommandGeneratorInterface
     {
-        return new class extends Transaction\CommandGenerator {
+        return new class () extends Transaction\CommandGenerator {
             protected function storeEntity(ORMInterface $orm, Transaction\Tuple $tuple, bool $isNew): ?CommandInterface
             {
                 /** @var CommandInterface|null $command */

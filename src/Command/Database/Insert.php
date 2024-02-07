@@ -11,6 +11,7 @@ use Cycle\ORM\Command\Traits\ErrorTrait;
 use Cycle\ORM\Command\Traits\MapperTrait;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
+use Cycle\ORM\Schema\GeneratedField;
 use Cycle\ORM\SchemaInterface;
 
 /**
@@ -87,7 +88,7 @@ final class Insert extends StoreCommand
         }
         // unset db-generated fields if they are null
         foreach ($this->generated as $column => $mode) {
-            if (($mode & SchemaInterface::GENERATED_DB) === 0x0) {
+            if (($mode & GeneratedField::DB_INSERT) === 0x0) {
                 continue;
             }
 
@@ -164,7 +165,7 @@ final class Insert extends StoreCommand
         $data = $this->state->getData();
 
         foreach ($this->generated as $field => $mode) {
-            if (($mode & (SchemaInterface::GENERATED_DB | SchemaInterface::GENERATED_PHP_INSERT)) === 0x0) {
+            if (($mode & (GeneratedField::DB_INSERT | GeneratedField::PHP_INSERT)) === 0x0) {
                 continue;
             }
 

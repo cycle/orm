@@ -141,7 +141,6 @@ final class Insert extends StoreCommand
             }
         }
 
-
         $state->updateTransactionData();
 
         parent::execute();
@@ -173,6 +172,6 @@ final class Insert extends StoreCommand
             }
         }
 
-        return true;
+        return false;
     }
 }

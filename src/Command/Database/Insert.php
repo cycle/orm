@@ -12,7 +12,6 @@ use Cycle\ORM\Command\Traits\MapperTrait;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\Schema\GeneratedField;
-use Cycle\ORM\SchemaInterface;
 
 /**
  * Insert data into associated table and provide lastInsertID promise.

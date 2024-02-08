@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Postgres;
+namespace Cycle\ORM\Tests\Functional\Driver\Common;
 
-use Cycle\Database\Schema\AbstractColumn;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORMInterface;
@@ -14,45 +13,22 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Document;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 use Cycle\ORM\Transaction;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @group driver
- * @group driver-postgres
- */
-final class SerialColumnTest extends BaseTest
+#[DontGenerateAttribute]
+abstract class GeneratedColumnTest extends BaseTest
 {
-    public const DRIVER = 'postgres';
     use TableTrait;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $schema = $this->getDatabase()->table('user')->getSchema();
-        $schema->column('id')->type('uuid');
-        $schema->column('balance')->type('serial')->nullable(false);
-        $schema->save();
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['id'],
-            [
-                [Uuid::uuid4()->toString()],
-                [Uuid::uuid4()->toString()],
-                [Uuid::uuid4()->toString()],
-            ]
-        );
-
-        $schema = $this->getDatabase()->table('document')->getSchema();
-        $schema->column('id')->primary();
-        $schema->column('body')->type('serial')->nullable(false);
-        $schema->column('created_at')->type('datetime')->nullable(false)->defaultValue(AbstractColumn::DATETIME_NOW);
-        $schema->column('updated_at')->type('datetime')->nullable(false);
-        $schema->save();
+        $this->createTables();
 
         $this->orm = $this->withSchema(new Schema([
             User::class => [
@@ -65,7 +41,7 @@ final class SerialColumnTest extends BaseTest
                 SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [],
                 SchemaInterface::GENERATED_FIELDS => [
-                    'balance' => GeneratedField::DB_INSERT, // sequence
+                    'balance' => GeneratedField::ON_INSERT, // sequence
                 ],
             ],
             Document::class => [
@@ -82,10 +58,10 @@ final class SerialColumnTest extends BaseTest
                     'updated_at' => 'datetime',
                 ],
                 SchemaInterface::GENERATED_FIELDS => [
-                    'id' => GeneratedField::DB_INSERT,
-                    'body' => GeneratedField::DB_INSERT,
-                    'created_at' => GeneratedField::DB_INSERT,
-                    'updated_at' => GeneratedField::PHP_INSERT | GeneratedField::PHP_UPDATE,
+                    'id' => GeneratedField::ON_INSERT,
+                    'body' => GeneratedField::ON_INSERT,
+                    'created_at' => GeneratedField::ON_INSERT,
+                    'updated_at' => GeneratedField::BEFORE_INSERT | GeneratedField::BEFORE_UPDATE,
                 ],
             ],
         ]));
@@ -122,14 +98,14 @@ final class SerialColumnTest extends BaseTest
 
         $this->save($d1, $d2, $d3);
 
-        $this->assertSame(1, $d1->id);
-        $this->assertSame(1, $d1->body);
+        $this->assertEquals(1, $d1->id);
+        $this->assertEquals(1, $d1->body);
         $this->assertNotSame('2020-01-01', $d1->created_at->format('Y-m-d'));
-        $this->assertSame(2, $d2->id);
-        $this->assertSame(213, $d2->body);
+        $this->assertEquals(2, $d2->id);
+        $this->assertEquals(213, $d2->body);
         $this->assertSame('2020-01-01', $d2->created_at->format('Y-m-d'));
-        $this->assertSame(3, $d3->id);
-        $this->assertSame(2, $d3->body);
+        $this->assertEquals(3, $d3->id);
+        $this->assertEquals(2, $d3->body);
         $this->assertSame('2020-01-01', $d3->created_at->format('Y-m-d'));
     }
 
@@ -151,4 +127,6 @@ final class SerialColumnTest extends BaseTest
             }
         };
     }
+
+    abstract function createTables(): void;
 }

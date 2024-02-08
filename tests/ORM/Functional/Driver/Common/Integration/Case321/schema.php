@@ -28,7 +28,7 @@ return [
         ],
         Schema::SCHEMA => [],
         Schema::GENERATED_FIELDS => [
-            'id' => GeneratedField::DB_INSERT, // autoincrement
+            'id' => GeneratedField::ON_INSERT, // autoincrement
         ],
     ],
     'user2' => [
@@ -49,7 +49,7 @@ return [
         ],
         Schema::SCHEMA => [],
         Schema::GENERATED_FIELDS => [
-            'id' => GeneratedField::DB_INSERT, // autoincrement
+            'id' => GeneratedField::ON_INSERT, // autoincrement
         ],
     ],
 ];

@@ -87,7 +87,7 @@ final class Insert extends StoreCommand
         }
         // unset db-generated fields if they are null
         foreach ($this->generated as $column => $mode) {
-            if (($mode & GeneratedField::DB_INSERT) === 0x0) {
+            if (($mode & GeneratedField::ON_INSERT) === 0x0) {
                 continue;
             }
 
@@ -164,7 +164,7 @@ final class Insert extends StoreCommand
         $data = $this->state->getData();
 
         foreach ($this->generated as $field => $mode) {
-            if (($mode & (GeneratedField::DB_INSERT | GeneratedField::PHP_INSERT)) === 0x0) {
+            if (($mode & (GeneratedField::ON_INSERT | GeneratedField::BEFORE_INSERT)) === 0x0) {
                 continue;
             }
 

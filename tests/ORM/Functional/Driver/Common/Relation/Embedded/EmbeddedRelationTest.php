@@ -128,6 +128,7 @@ abstract class EmbeddedRelationTest extends BaseTest
 
     public function testCreateUserWithEmbedded(): void
     {
+        $this->logger->display();
         $u = new User();
         $u->email = 'new@email.com';
         $u->balance = 900;
@@ -138,7 +139,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->save($u);
         $this->assertNumWrites(1);
 
-        $this->assertSame(3, $u->id);
+        $this->assertSame(3, (int)$u->id);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();

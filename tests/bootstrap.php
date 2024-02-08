@@ -45,10 +45,8 @@ $drivers = [
         ],
     ),
     'sqlserver' => new Config\SQLServerDriverConfig(
-        connection: new Config\SQLServer\TcpConnectionConfig(
-            database: 'tempdb',
-            host: '127.0.0.1',
-            port: 11433,
+        connection: new Config\SQLServer\DsnConnectionConfig(
+            'sqlsrv:Server=127.0.0.1,11433;Database=tempdb;TrustServerCertificate=true',
             user: 'SA',
             password: 'SSpaSS__1'
         ),

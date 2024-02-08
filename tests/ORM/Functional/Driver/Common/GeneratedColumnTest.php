@@ -65,7 +65,6 @@ abstract class GeneratedColumnTest extends BaseTest
                 ],
             ],
         ]));
-        $this->logger->display();
     }
 
     public function testPersist(): void
@@ -128,5 +127,5 @@ abstract class GeneratedColumnTest extends BaseTest
         };
     }
 
-    abstract function createTables(): void;
+    abstract public function createTables(): void;
 }

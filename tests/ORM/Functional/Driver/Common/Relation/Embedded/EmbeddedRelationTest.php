@@ -128,7 +128,6 @@ abstract class EmbeddedRelationTest extends BaseTest
 
     public function testCreateUserWithEmbedded(): void
     {
-        $this->logger->display();
         $u = new User();
         $u->email = 'new@email.com';
         $u->balance = 900;

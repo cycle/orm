@@ -20,7 +20,6 @@ class GeneratedColumnTest extends CommonClass
 
     public function createTables(): void
     {
-        $this->logger->display();
         $this->getDatabase()->query('DROP SEQUENCE IF EXISTS testSequence1;');
         $this->getDatabase()->query('DROP SEQUENCE IF EXISTS testSequence2;');
         $this->getDatabase()->query('CREATE SEQUENCE testSequence1 START WITH 1;');

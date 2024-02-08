@@ -31,6 +31,7 @@ interface SchemaInterface
     public const DISCRIMINATOR = 17; // Discriminator column name for single table inheritance
     public const LISTENERS = 18;
     public const TYPECAST_HANDLER = 19; // Typecast handler definition that implements TypecastInterface
+    public const GENERATED_FIELDS = 20; // List of generated fields [field => generating type]
 
     /**
      * Return all roles defined within the schema.

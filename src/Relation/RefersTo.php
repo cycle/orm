@@ -98,7 +98,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         if ($rTuple->status === Tuple::STATUS_PROCESSED
             || ($rTuple->status > Tuple::STATUS_PREPARING
                 && $rTuple->state->getStatus() !== node::NEW
-                && array_intersect($this->outerKeys, $rTuple->state->getWaitingFields()) === [])
+                && \array_intersect($this->outerKeys, $rTuple->state->getWaitingFields()) === [])
         ) {
             $this->pullValues($tuple->state, $rTuple->state);
             $node->setRelation($this->getName(), $related);

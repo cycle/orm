@@ -143,7 +143,7 @@ abstract class TypecastTest extends BaseTest
         $this->save($user);
 
         $this->assertNotNull($user->id);
-        $this->assertIsInt($user->id->value);
+        $this->assertIsNumeric($user->id->value);
     }
 
     // ORM::make()

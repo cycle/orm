@@ -142,6 +142,11 @@ class InsertCommandTest extends TestCase
             ->with(['foo' => 'baaar'])
             ->andReturn(['baz' => 'bar']);
 
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with(['id' => 'foo_id'])
+            ->andReturn(['foo_id' => 'foo_id']);
+
         $this->mapper->shouldReceive('cast')
             ->once()
             ->with(['id' => 234])

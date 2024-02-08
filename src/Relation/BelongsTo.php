@@ -179,7 +179,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         }
 
         if ($tuple->status < Tuple::STATUS_PREPROCESSED
-            && array_intersect($this->innerKeys, $tuple->state->getWaitingFields(false)) !== []
+            && \array_intersect($this->innerKeys, $tuple->state->getWaitingFields(false)) !== []
         ) {
             return true;
         }

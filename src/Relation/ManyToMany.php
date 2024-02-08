@@ -363,8 +363,6 @@ class ManyToMany extends Relation\AbstractRelation
 
         foreach ($this->throughInnerKeys as $i => $pInnerKey) {
             $pTuple->state->register($pInnerKey, $tuple->state->getTransactionData()[$this->innerKeys[$i]] ?? null);
-
-            // $rState->forward($this->outerKeys[$i], $pState, $this->throughOuterKeys[$i]);
         }
 
         if ($this->inversion === null) {

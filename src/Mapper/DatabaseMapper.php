@@ -39,6 +39,8 @@ abstract class DatabaseMapper implements MapperInterface
     protected array $primaryKeys;
     private ?TypecastInterface $typecast;
     protected RelationMap $relationMap;
+    /** @var array<non-empty-string, int> */
+    private array $generatedFields;
 
     public function __construct(
         ORMInterface $orm,
@@ -53,6 +55,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this->columns[\is_int($property) ? $column : $property] = $column;
         }
 
+        $this->generatedFields = $schema->define($role, SchemaInterface::GENERATED_FIELDS) ?? [];
         // Parent's fields
         $parent = $schema->define($role, SchemaInterface::PARENT);
         while ($parent !== null) {
@@ -128,6 +131,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this,
             $this->primaryKeys,
             \count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null,
+            $this->generatedFields,
         );
     }
 

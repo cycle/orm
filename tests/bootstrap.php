@@ -25,7 +25,10 @@ $drivers = [
             user: 'root',
             password: 'root',
         ),
-        queryCache: true
+        queryCache: true,
+        options: [
+            'logQueryParameters' => true,
+        ],
     ),
     'postgres' => new Config\PostgresDriverConfig(
         connection: new Config\Postgres\TcpConnectionConfig(
@@ -37,16 +40,20 @@ $drivers = [
         ),
         schema: 'public',
         queryCache: true,
+        options: [
+            'logQueryParameters' => true,
+        ],
     ),
     'sqlserver' => new Config\SQLServerDriverConfig(
-        connection: new Config\SQLServer\TcpConnectionConfig(
-            database: 'tempdb',
-            host: '127.0.0.1',
-            port: 11433,
+        connection: new Config\SQLServer\DsnConnectionConfig(
+            'sqlsrv:Server=127.0.0.1,11433;Database=tempdb;TrustServerCertificate=true',
             user: 'SA',
             password: 'SSpaSS__1'
         ),
-        queryCache: true
+        queryCache: true,
+        options: [
+            'logQueryParameters' => true,
+        ],
     ),
 ];
 

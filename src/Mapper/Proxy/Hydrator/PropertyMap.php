@@ -25,7 +25,7 @@ class PropertyMap
     public function getPropertyClass(string $name): ?string
     {
         foreach ($this->properties as $class => $properties) {
-            if (in_array($name, $properties, true)) {
+            if (\in_array($name, $properties, true)) {
                 return $class;
             }
         }

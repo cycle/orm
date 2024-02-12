@@ -62,13 +62,11 @@ class ClassPropertiesExtractor
             return [];
         }
 
-        return array_merge(
-            $this->findAllInstanceProperties($class->getParentClass() ?: null), // of course PHP is shit.
-            array_filter(
+        return \array_merge(
+            $this->findAllInstanceProperties($class->getParentClass() ?: null),
+            \array_filter(
                 $class->getProperties(),
-                static function (ReflectionProperty $property): bool {
-                    return !$property->isStatic();
-                }
+                static fn (ReflectionProperty $property): bool => !$property->isStatic()
             )
         );
     }

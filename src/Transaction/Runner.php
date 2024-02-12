@@ -75,7 +75,7 @@ final class Runner implements RunnerInterface
     {
         if ($this->mode === self::MODE_OPEN_TRANSACTION) {
             // Commit all of the open and normalized database transactions
-            foreach (array_reverse($this->drivers) as $driver) {
+            foreach (\array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
                 $driver->commitTransaction();
             }
@@ -94,14 +94,14 @@ final class Runner implements RunnerInterface
     {
         if ($this->mode === self::MODE_OPEN_TRANSACTION) {
             // Close all open and normalized database transactions
-            foreach (array_reverse($this->drivers) as $driver) {
+            foreach (\array_reverse($this->drivers) as $driver) {
                 /** @var DriverInterface $driver */
                 $driver->rollbackTransaction();
             }
         }
 
         // Close all of external types of transactions (revert changes)
-        foreach (array_reverse($this->executed) as $command) {
+        foreach (\array_reverse($this->executed) as $command) {
             if ($command instanceof RollbackMethodInterface) {
                 $command->rollBack();
             }
@@ -145,7 +145,7 @@ final class Runner implements RunnerInterface
 
         if ($this->mode === self::MODE_CONTINUE_TRANSACTION) {
             if ($driver->getTransactionLevel() === 0) {
-                throw new RunnerException(sprintf(
+                throw new RunnerException(\sprintf(
                     'The `%s` driver connection has no opened transaction.',
                     $driver->getType()
                 ));

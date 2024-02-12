@@ -163,7 +163,7 @@ final class State
 
     public function getValue(string $key): mixed
     {
-        return array_key_exists($key, $this->data) ? $this->data[$key] : ($this->transactionData[$key] ?? null);
+        return \array_key_exists($key, $this->data) ? $this->data[$key] : ($this->transactionData[$key] ?? null);
     }
 
     public function hasValue(string $key, bool $allowNull = true): bool
@@ -171,7 +171,7 @@ final class State
         if (!$allowNull) {
             return isset($this->data[$key]) || isset($this->transactionData[$key]);
         }
-        return array_key_exists($key, $this->data) || array_key_exists($key, $this->transactionData);
+        return \array_key_exists($key, $this->data) || \array_key_exists($key, $this->transactionData);
     }
 
     public function register(string $key, mixed $value): void

@@ -1,6 +1,14 @@
 # CHANGELOG
 
-v2.6.0 (22.12.2023)
+v2.7.0 (08.02.2024)
+--------------------
+- Add Generated Fields option into ORM Schema by @roxblnfk (#462)
+
+v2.6.1 (04.01.2024)
+--------------------
+- Fix compatibility with PHP 8.3 by @msmakouz (#454)
+
+- v2.6.0 (22.12.2023)
 --------------------
 - Add support for `loophp/collection` v7 by @msmakouz (#448)
 - Fix wrong adding table prefix on joins by @msmakouz (#447)

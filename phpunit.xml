@@ -11,8 +11,8 @@
          convertWarningsToExceptions="true"
          convertDeprecationsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="false"
-         stopOnError="false"
+         stopOnFailure="true"
+         stopOnError="true"
 >
     <coverage>
         <include>

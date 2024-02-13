@@ -170,5 +170,4 @@ return [
         ],
         Schema::SCHEMA => [],
     ],
-
 ];

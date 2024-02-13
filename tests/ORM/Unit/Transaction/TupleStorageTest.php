@@ -93,7 +93,7 @@ class TupleStorageTest extends TestCase
         }
 
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+        self::assertCount(0, (fn (): array => $this->iterators)->call($storage));
 
         $iterator = $storage->getIterator();
         // Start generator
@@ -101,12 +101,12 @@ class TupleStorageTest extends TestCase
             break;
         }
         /** @see TupleStorage::$iterators */
-        self::assertCount(1, (fn(): array => $this->iterators)->call($storage));
+        self::assertCount(1, (fn (): array => $this->iterators)->call($storage));
 
         // Cleanup on iterator destruction
         unset($iterator);
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+        self::assertCount(0, (fn (): array => $this->iterators)->call($storage));
 
         // Cleanup on end of iteration
         $iterator = $storage->getIterator();
@@ -115,7 +115,7 @@ class TupleStorageTest extends TestCase
             // do nothing
         }
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+        self::assertCount(0, (fn (): array => $this->iterators)->call($storage));
     }
 
     public function testDetachWhenIterating(): void

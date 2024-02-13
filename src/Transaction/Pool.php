@@ -179,6 +179,7 @@ final class Pool implements \Countable
                     if ($tuple->status !== Tuple::STATUS_PREPARING) {
                         continue;
                     }
+
                     yield $entity => $tuple;
                     $this->trashIt($entity, $tuple, $pool);
                     // Check priority
@@ -195,6 +196,7 @@ final class Pool implements \Countable
                     if ($tuple->status !== Tuple::STATUS_WAITING || $tuple->task === Tuple::TASK_DELETE) {
                         continue;
                     }
+
                     $tuple->status = Tuple::STATUS_WAITED;
                     yield $entity => $tuple;
                     $this->trashIt($entity, $tuple, $this->storage);

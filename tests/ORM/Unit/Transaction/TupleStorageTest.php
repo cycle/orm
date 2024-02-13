@@ -88,36 +88,111 @@ class TupleStorageTest extends TestCase
     public function testAddItemsWhenIterating(): void
     {
         $storage = new TupleStorage();
-        $tuples = [];
         for ($i = 0; $i < 10; $i++) {
-            $tuples[] = $this->createTuple(new \stdClass());
+            $storage->attach($this->createTuple(new \stdClass()));
         }
-        // Randomize the order
-        \shuffle($tuples);
 
-        // Store all
-        foreach ($tuples as $tuple) {
-            $storage->attach($tuple);
+        /** @see TupleStorage::$iterators */
+        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+
+        $iterator = $storage->getIterator();
+        // Start generator
+        foreach ($iterator as $item) {
+            break;
         }
+        /** @see TupleStorage::$iterators */
+        self::assertCount(1, (fn(): array => $this->iterators)->call($storage));
+
+        // Cleanup on iterator destruction
+        unset($iterator);
+        /** @see TupleStorage::$iterators */
+        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+
+        // Cleanup on end of iteration
+        $iterator = $storage->getIterator();
+        // Start generator
+        foreach ($iterator as $item) {
+            // do nothing
+        }
+        /** @see TupleStorage::$iterators */
+        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+    }
+
+    public function testDetachWhenIterating(): void
+    {
+        $storage = new TupleStorage();
+        $tuple1 = $this->createTuple((object)['value' => 1]);
+        $tuple2 = $this->createTuple((object)['value' => 2]);
+        $tuple3 = $this->createTuple((object)['value' => 3]);
+        $tuple4 = $this->createTuple((object)['value' => 4]);
+
+        $storage->attach($tuple1);
+        $storage->attach($tuple2);
+        $storage->attach($tuple3);
+        $storage->attach($tuple4);
 
         $collection = [];
-        $i = 0;
-        foreach ($storage as $entity => $tuple) {
+        foreach ($storage as $tuple) {
             $collection[] = $tuple;
             self::assertTrue($storage->contains($tuple->entity));
             self::assertSame($tuple, $storage->getTuple($tuple->entity));
 
-            // Add a new item after each 10th iteration
-            if (++$i % 10 === 0) {
-                $newTuple = $this->createTuple(new \stdClass());
-                $storage->attach($newTuple);
-                $tuples[] = $newTuple;
+            if ($tuple === $tuple2) {
+                $storage->detach($tuple3->entity);
             }
         }
+        self::assertCount(3, $storage);
+        self::assertSame([$tuple1, $tuple2, $tuple4], $collection);
+    }
 
-        self::assertCount(\count($tuples), $storage);
-        self::assertCount(\count($tuples), $collection);
-        self::assertSame(\array_values($tuples), $collection);
+    public function testCleanupIteratorState(): void
+    {
+        $storage = new TupleStorage();
+        $tuple1 = $this->createTuple((object)['value' => 1]);
+        $tuple2 = $this->createTuple((object)['value' => 2]);
+        $tuple3 = $this->createTuple((object)['value' => 3]);
+        $tuple4 = $this->createTuple((object)['value' => 4]);
+
+        $storage->attach($tuple1);
+        $storage->attach($tuple2);
+        $storage->attach($tuple3);
+        $storage->attach($tuple4);
+
+        $collection = [];
+        foreach ($storage as $tuple) {
+            $collection[] = $tuple;
+            self::assertTrue($storage->contains($tuple->entity));
+            self::assertSame($tuple, $storage->getTuple($tuple->entity));
+
+            if ($tuple === $tuple2) {
+                $storage->detach($tuple3->entity);
+            }
+        }
+        self::assertCount(3, $storage);
+        self::assertSame([$tuple1, $tuple2, $tuple4], $collection);
+    }
+
+    public function testParallelIterators(): void
+    {
+        $storage = new TupleStorage();
+        for ($i = 0; $i < 5; $i++) {
+            $tuple = $this->createTuple(new \stdClass());
+            $storage->attach($tuple);
+        }
+
+        /** @var \Generator $iterator1 */
+        $iterator1 = $storage->getIterator();
+
+        $i = 0;
+        foreach ($storage as $tuple) {
+            self::assertTrue($iterator1->valid());
+            self::assertSame($tuple, $iterator1->current());
+
+            if (++$i % 2 === 0) {
+                $storage->attach($this->createTuple(new \stdClass()));
+            }
+            $iterator1->next();
+        }
     }
 
     private function createTuple(object $entity): Tuple

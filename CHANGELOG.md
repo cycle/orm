@@ -1,5 +1,9 @@
 # CHANGELOG
 
+v2.7.1 (13.02.2024)
+--------------------
+- Fix inserting order in regular cases by @roxblnfk and @gam6itko (#381)
+
 v2.7.0 (08.02.2024)
 --------------------
 - Add Generated Fields option into ORM Schema by @roxblnfk (#462)

@@ -84,7 +84,6 @@ abstract class CaseTest extends BaseTest
             'id' => 'primary', // autoincrement
         ]);
 
-        $this->logger->display();
         $this->makeTable('user4', [
             'id' => 'primary',
             'counter' => 'int',

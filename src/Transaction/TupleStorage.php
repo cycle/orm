@@ -6,7 +6,6 @@ namespace Cycle\ORM\Transaction;
 
 use Countable;
 use IteratorAggregate;
-use SplObjectStorage;
 
 /**
  * @internal
@@ -14,23 +13,33 @@ use SplObjectStorage;
  */
 final class TupleStorage implements IteratorAggregate, Countable
 {
-    /** @var SplObjectStorage<object, Tuple> */
-    private SplObjectStorage $storage;
+    /** @var array<int, Tuple> */
+    private array $storage = [];
 
-    public function __construct()
-    {
-        $this->storage = new SplObjectStorage();
-    }
+    private array $iterators = [];
 
+    /**
+     * @return \Traversable<object, Tuple>
+     */
     public function getIterator(): \Traversable
     {
-        $this->storage->rewind();
+        $iterator = $this->storage;
+        // When the generator is destroyed, the reference to the iterator is removed from the collection.
+        $cleaner = new class () {
+            public array $iterators;
+            public function __destruct()
+            {
+                unset($this->iterators[\spl_object_id($this)]);
+            }
+        };
+        /** @psalm-suppress UnsupportedPropertyReferenceUsage */
+        $cleaner->iterators = &$this->iterators;
+        $this->iterators[\spl_object_id($cleaner)] = &$iterator;
 
-        while ($this->storage->valid()) {
-            $entity = $this->storage->current();
-            $tuple = $this->storage->getInfo();
-            $this->storage->next();
-            yield $entity => $tuple;
+        while (\count($iterator) > 0) {
+            $tuple = \current($iterator);
+            unset($iterator[\key($iterator)]);
+            yield $tuple->entity => $tuple;
         }
     }
 
@@ -41,22 +50,33 @@ final class TupleStorage implements IteratorAggregate, Countable
      */
     public function getTuple(object $entity): Tuple
     {
-        return $this->storage->offsetGet($entity);
+        return $this->storage[\spl_object_id($entity)] ?? throw new \RuntimeException('Tuple not found');
     }
 
     public function attach(Tuple $tuple): void
     {
-        $this->storage->attach($tuple->entity, $tuple);
+        if ($this->contains($tuple->entity)) {
+            return;
+        }
+
+        $this->storage[\spl_object_id($tuple->entity)] = $tuple;
+        foreach ($this->iterators as &$collection) {
+            $collection[\spl_object_id($tuple->entity)] = $tuple;
+        }
     }
 
     public function contains(object $entity): bool
     {
-        return $this->storage->contains($entity);
+        return \array_key_exists(\spl_object_id($entity), $this->storage);
     }
 
     public function detach(object $entity): void
     {
-        $this->storage->offsetUnset($entity);
+        $id = \spl_object_id($entity);
+        unset($this->storage[$id]);
+        foreach ($this->iterators as &$collection) {
+            unset($collection[$id]);
+        }
     }
 
     /**
@@ -64,6 +84,6 @@ final class TupleStorage implements IteratorAggregate, Countable
      */
     public function count(): int
     {
-        return $this->storage->count();
+        return \count($this->storage);
     }
 }

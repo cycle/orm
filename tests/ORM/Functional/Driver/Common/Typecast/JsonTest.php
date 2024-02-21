@@ -40,7 +40,7 @@ abstract class JsonTest extends BaseTest
                 'email' => 'hello@world.com',
                 'settings' => \json_encode(['theme' => 'dark']),
                 'settings_nullable' => null,
-                'json_serializable' => null
+                'json_serializable' => null,
             ],
         );
         $this->getDatabase()->table('users')->insertOne(
@@ -48,7 +48,7 @@ abstract class JsonTest extends BaseTest
                 'email' => 'another@world.com',
                 'settings' => \json_encode(['grids' => ['products' => ['columns' => ['id', 'title']]]]),
                 'settings_nullable' => \json_encode(['theme' => 'dark']),
-                'json_serializable' => null
+                'json_serializable' => null,
             ],
         );
 
@@ -82,7 +82,7 @@ abstract class JsonTest extends BaseTest
                 SchemaInterface::TYPECAST_HANDLER => [
                     JsonTypecast::class,
                     Typecast::class,
-                ]
+                ],
             ] + $mapping,
         ]));
     }
@@ -214,7 +214,7 @@ abstract class JsonTest extends BaseTest
     {
         $selector = new Select($this->orm, Admin::class);
         $result = $selector->fetchAll();
-        ;
+
         $this->assertSame(['json'], $result[0]->settings);
 
         $e = new Admin();

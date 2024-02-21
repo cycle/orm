@@ -69,7 +69,11 @@ class User implements ImagedInterface
      */
     public $credentials;
 
-    public ?string $settings = null;
+    public array $settings;
+
+    public ?array $settingsNullable = null;
+
+    public ?JsonSerializableClass $jsonSerializable = null;
 
     public function __construct()
     {

@@ -245,7 +245,7 @@ abstract class TypecastTest extends BaseTest
         ], typecast: true);
 
         $this->assertSame('uuid', $book1->id);
-        $this->assertSame('json', $book1->title);
+        $this->assertSame(['json'], $book1->title);
 
         $this->assertSame('uuid', $book2->id);
         $this->assertNull($book2->title);

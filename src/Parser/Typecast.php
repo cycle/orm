@@ -11,9 +11,9 @@ use Cycle\Database\DatabaseInterface;
 use ReflectionEnum;
 use Throwable;
 
-final class Typecast implements CastableInterface
+final class Typecast implements CastableInterface, UncastableInterface
 {
-    private const RULES = ['int', 'bool', 'float', 'datetime'];
+    private const RULES = ['int', 'bool', 'float', 'datetime', 'json'];
 
     /** @var array<non-empty-string, bool> */
     private array $callableRules = [];
@@ -25,7 +25,7 @@ final class Typecast implements CastableInterface
     private array $rules = [];
 
     public function __construct(
-        private DatabaseInterface $database
+        private DatabaseInterface $database,
     ) {
     }
 
@@ -92,6 +92,25 @@ final class Typecast implements CastableInterface
     }
 
     /**
+     * @throws \JsonException
+     */
+    public function uncast(array $data): array
+    {
+        foreach ($this->rules as $column => $rule) {
+            if (!isset($data[$column])) {
+                continue;
+            }
+
+            $data[$column] = match ($rule) {
+                'json' => \json_encode($data[$column], \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR),
+                default => $data[$column]
+            };
+        }
+
+        return $data;
+    }
+
+    /**
      * @throws \Exception
      */
     private function castPrimitive(mixed $rule, mixed $value): mixed
@@ -104,6 +123,7 @@ final class Typecast implements CastableInterface
                 $value,
                 $this->database->getDriver()->getTimezone()
             ),
+            'json' => \json_decode($value, true, 512, \JSON_THROW_ON_ERROR),
             default => $value,
         };
     }

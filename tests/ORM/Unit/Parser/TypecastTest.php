@@ -40,6 +40,7 @@ class TypecastTest extends TestCase
             'title' => 'strtoupper',
             'test' => [Uuid::class, 'create'],
             'uuid' => 'uuid',
+            'settings' => 'json',
         ];
 
         $this->assertSame(['uuid' => 'uuid'], $this->typecast->setRules($rules));
@@ -127,7 +128,7 @@ class TypecastTest extends TestCase
         ], $this->typecast->cast(['price' => 100, 'foo' => '5']));
     }
 
-    public function testCasDateTimeValue(): void
+    public function testCastDateTimeValue(): void
     {
         $this->db->shouldReceive('getDriver')->once()->andReturn($driver = m::mock(DriverInterface::class));
         $driver->shouldReceive('getTimezone')->once()->andReturn(new \DateTimeZone('Europe/Berlin'));
@@ -158,5 +159,35 @@ class TypecastTest extends TestCase
 
         $this->assertInstanceOf(Uuid::class, $result['uuid']);
         $this->assertSame('71ceb213-ec3d-4ae5-911b-ba042abfb204', $result['uuid']->toString());
+    }
+
+    public function testCastJsonValue(): void
+    {
+        $this->typecast->setRules(['foo' => 'json', 'baz' => 'json']);
+
+        $data = $this->typecast->cast([
+            'foo' => \json_encode(['foo' => 'bar']),
+            'bar' => \json_encode(['bar' => 'baz']),
+            'baz' => null,
+        ]);
+
+        $this->assertSame(['foo' => 'bar'], $data['foo']);
+        $this->assertSame(\json_encode(['bar' => 'baz']), $data['bar']);
+        $this->assertNull($data['baz']);
+    }
+
+    public function testUncast(): void
+    {
+        $this->typecast->setRules(['foo' => 'json', 'baz' => 'json']);
+
+        $data = $this->typecast->uncast([
+            'foo' => ['foo' => 'bar'],
+            'bar' => ['bar' => 'baz'],
+            'baz' => null,
+        ]);
+
+        $this->assertSame(json_encode(['foo' => 'bar']), $data['foo']);
+        $this->assertSame(['bar' => 'baz'], $data['bar']);
+        $this->assertNull($data['baz']);
     }
 }

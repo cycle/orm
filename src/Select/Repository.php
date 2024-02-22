@@ -59,4 +59,12 @@ class Repository implements RepositoryInterface
     {
         return clone $this->select;
     }
+
+    public function forUpdate(): static
+    {
+        $repository = clone $this;
+        $repository->select->forUpdate();
+
+        return $repository;
+    }
 }

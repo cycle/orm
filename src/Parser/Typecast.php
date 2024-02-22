@@ -102,7 +102,10 @@ final class Typecast implements CastableInterface, UncastableInterface
             }
 
             $data[$column] = match ($rule) {
-                'json' => \json_encode($data[$column], \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR),
+                'json' => \json_encode(
+                    $data[$column],
+                    \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE
+                ),
                 default => $data[$column]
             };
         }

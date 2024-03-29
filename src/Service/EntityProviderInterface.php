@@ -9,12 +9,12 @@ interface EntityProviderInterface
     /**
      * Get/load entity by unique key/value pair.
      *
-     * @template TEntity
+     * @template TEntity of object
      *
      * @param class-string<TEntity>|string $role Entity role or class name.
      * @param array $scope KV pair to locate the model, currently only support one pair.
      *
-     * @psalm-return ($role is class-string ? TEntity : object)|null
+     * @return ($role is class-string<TEntity> ? TEntity|null : object|null)
      */
     public function get(string $role, array $scope, bool $load = true): ?object;
 }

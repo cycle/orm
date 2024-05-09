@@ -153,6 +153,72 @@ abstract class JsonTest extends BaseTest
         $this->assertSame(['some' => 'data'], $result->settingsNullable);
     }
 
+    public function testStoresEmptyArraySettings(): void
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->settings = [];
+        $e->settingsNullable = [];
+
+        $this->captureWriteQueries();
+        $em = new EntityManager($this->orm);
+        $em->persist($e);
+        $em->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $em = new EntityManager($this->orm);
+        $em->persist($e);
+        $em->run();
+        $this->assertNumWrites(0);
+
+        $this->assertEquals(3, $e->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($e));
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+
+        $this->orm = $this->orm->with(heap: new Heap());
+
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->where('id', 3)->fetchOne();
+        $this->assertSame('test@email.com', $result->email);
+        $this->assertSame([], $result->settings);
+        $this->assertSame([], $result->settingsNullable);
+    }
+
+    public function testStoresNullSettings(): void
+    {
+        $e = new User();
+        $e->email = 'test@email.com';
+        $e->settings = [];
+        $e->settingsNullable = null;
+
+        $this->captureWriteQueries();
+        $em = new EntityManager($this->orm);
+        $em->persist($e);
+        $em->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $em = new EntityManager($this->orm);
+        $em->persist($e);
+        $em->run();
+        $this->assertNumWrites(0);
+
+        $this->assertEquals(3, $e->id);
+
+        $this->assertTrue($this->orm->getHeap()->has($e));
+        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+
+        $this->orm = $this->orm->with(heap: new Heap());
+
+        $selector = new Select($this->orm, User::class);
+        $result = $selector->where('id', 3)->fetchOne();
+        $this->assertSame('test@email.com', $result->email);
+        $this->assertSame([], $result->settings);
+        $this->assertSame(null, $result->settingsNullable);
+    }
+
     public function testStoreJsonSerializable(): void
     {
         $e = new User();

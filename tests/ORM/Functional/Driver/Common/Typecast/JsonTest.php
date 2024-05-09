@@ -161,15 +161,11 @@ abstract class JsonTest extends BaseTest
         $e->settingsNullable = [];
 
         $this->captureWriteQueries();
-        $em = new EntityManager($this->orm);
-        $em->persist($e);
-        $em->run();
+        $this-save($e);
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
-        $em = new EntityManager($this->orm);
-        $em->persist($e);
-        $em->run();
+        $this-save($e)
         $this->assertNumWrites(0);
 
         $this->assertEquals(3, $e->id);
@@ -177,7 +173,7 @@ abstract class JsonTest extends BaseTest
         $this->assertTrue($this->orm->getHeap()->has($e));
         $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
 
-        $this->orm = $this->orm->with(heap: new Heap());
+        $this->orm = $this->orm->getHeap()->clear();
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
@@ -194,15 +190,11 @@ abstract class JsonTest extends BaseTest
         $e->settingsNullable = null;
 
         $this->captureWriteQueries();
-        $em = new EntityManager($this->orm);
-        $em->persist($e);
-        $em->run();
+        $this-save($e)
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
-        $em = new EntityManager($this->orm);
-        $em->persist($e);
-        $em->run();
+        $this-save($e)
         $this->assertNumWrites(0);
 
         $this->assertEquals(3, $e->id);

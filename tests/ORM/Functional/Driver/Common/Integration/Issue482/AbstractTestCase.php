@@ -46,14 +46,14 @@ abstract class AbstractTestCase extends BaseTest
             })
             // User want to sort by translation
             ->with('translations', [
-                'as' => 'transRu',
+                'as' => 'transEn',
                 'method' => 4, //JoinableLoader::LEFT_JOIN
                 'where' => [
                     'locale_id' => 1,
                 ],
                 'alias' => 'trans2',
             ])
-            ->orderBy('transRu.title', 'asc');
+            ->orderBy('transEn.title', 'asc');
 
         $data = $select->fetchData();
         $this->assertCount(3, $data);
@@ -111,10 +111,9 @@ abstract class AbstractTestCase extends BaseTest
         $this->getDatabase()->table('translation')->insertMultiple(
             ['id', 'country_id', 'locale_id', 'title'],
             [
-                [++$t, 1, $ru, 'Россия на русском'],
                 [++$t, 1, $en, 'Russia on english'],
-                [++$t, 2, $ru, 'Америка на русском'],
                 [++$t, 2, $en, 'America on english'],
+                [++$t, 2, $en, 'China on english'],
             ],
         );
     }

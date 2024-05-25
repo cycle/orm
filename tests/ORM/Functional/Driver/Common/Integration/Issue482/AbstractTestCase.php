@@ -27,8 +27,6 @@ abstract class AbstractTestCase extends BaseTest
 
     public function testSelect(): void
     {
-        $this->logger->display();
-
         $select = $this->orm->getRepository(Country::class)
             ->select()
             ->load('translations')

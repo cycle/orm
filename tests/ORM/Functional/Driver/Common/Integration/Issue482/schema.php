@@ -88,7 +88,7 @@ return [
             ],
         ],
         Schema::TYPECAST => [
-            'id' => 'id',
+            'id' => 'int',
             'country_id' => 'int',
             'locale_id' => 'int',
             'title' => 'string',

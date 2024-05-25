@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue482;
 
+use Cycle\ORM\Select;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
@@ -55,10 +56,40 @@ abstract class AbstractTestCase extends BaseTest
             ])
             ->orderBy('transEn.title', 'asc');
 
+        $this->assertExpectedSql($select);
+
         $data = $select->fetchData();
         $this->assertCount(3, $data);
+        $this->assertEquals(
+            [
+                'America on english',
+                'China on english',
+                'Russia on english',
+            ],
+            \array_column(
+                \array_merge(
+                    ...\array_column($data, 'translations')
+                ),
+                'title'
+            )
+        );
+
         $all = $select->fetchAll();
         $this->assertCount(3, $all);
+        $this->assertEquals(
+            [
+                'America on english',
+                'China on english',
+                'Russia on english',
+            ],
+            \array_map(
+                static function (Country $c) {
+                    self::assertCount(1, $c->translations);
+                    return $c->translations[0]->title;
+                },
+                $all
+            )
+        );
     }
 
     private function makeTables(): void
@@ -88,6 +119,10 @@ abstract class AbstractTestCase extends BaseTest
 
     private function fillData(): void
     {
+        $this->getDatabase()->table('translation')->delete()->run();
+        $this->getDatabase()->table('country')->delete()->run();
+        $this->getDatabase()->table('locale')->delete()->run();
+
         $en = 1;
         $this->getDatabase()->table('locale')->insertMultiple(
             ['code'],
@@ -113,4 +148,6 @@ abstract class AbstractTestCase extends BaseTest
             ],
         );
     }
+
+    abstract protected function assertExpectedSql(Select $select): void;
 }

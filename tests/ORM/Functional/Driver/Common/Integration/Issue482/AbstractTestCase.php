@@ -30,7 +30,6 @@ abstract class AbstractTestCase extends BaseTest
     {
         $select = $this->orm->getRepository(Country::class)
             ->select()
-            ->load('translations')
             ->where('is_friendly', true)
             // User wants to search everywhere
             ->with('translations', [
@@ -54,7 +53,10 @@ abstract class AbstractTestCase extends BaseTest
                 ],
                 'alias' => 'trans2',
             ])
-            ->orderBy('transEn.title', 'asc');
+            ->orderBy('transEn.title', 'asc')
+            ->load('translations', [
+                'using' => 'trans',
+            ]);
 
         $this->assertExpectedSql($select);
 

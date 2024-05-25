@@ -106,13 +106,15 @@ abstract class AbstractTestCase extends BaseTest
                 [4, 'Boateng', 'GOAL', true],
             ],
         );
+
+        $t = 0;
         $this->getDatabase()->table('translation')->insertMultiple(
-            ['country_id', 'locale_id', 'title'],
+            ['id', 'country_id', 'locale_id', 'title'],
             [
-                [1, $ru, 'Россия на русском'],
-                [1, $en, 'Russia on english'],
-                [2, $ru, 'Америка на русском'],
-                [2, $en, 'America on english'],
+                [++$t, 1, $ru, 'Россия на русском'],
+                [++$t, 1, $en, 'Russia on english'],
+                [++$t, 2, $ru, 'Америка на русском'],
+                [++$t, 2, $en, 'America on english'],
             ],
         );
     }

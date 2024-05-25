@@ -88,32 +88,28 @@ abstract class AbstractTestCase extends BaseTest
 
     private function fillData(): void
     {
-        $ru = 1;
-        $en = 2;
+        $en = 1;
         $this->getDatabase()->table('locale')->insertMultiple(
-            ['id', 'code'],
+            ['code'],
             [
-                [$ru, 'ru'],
-                [$en, 'en'],
+                ['en'],
             ],
         );
         $this->getDatabase()->table('country')->insertMultiple(
-            ['id', 'name', 'code', 'is_friendly'],
+            ['name', 'code', 'is_friendly'],
             [
-                [1, 'Russia', 'RUS', true],
-                [2, 'USA', 'USA', true],
-                [3, 'China', 'CHN', true],
-                [4, 'Boateng', 'GOAL', true],
+                ['Russia', 'RUS', true],
+                ['USA', 'USA', true],
+                ['China', 'CHN', true],
             ],
         );
 
-        $t = 0;
         $this->getDatabase()->table('translation')->insertMultiple(
-            ['id', 'country_id', 'locale_id', 'title'],
+            ['country_id', 'locale_id', 'title'],
             [
-                [++$t, 1, $en, 'Russia on english'],
-                [++$t, 2, $en, 'America on english'],
-                [++$t, 2, $en, 'China on english'],
+                [1, $en, 'Russia on english'],
+                [2, $en, 'America on english'],
+                [3, $en, 'China on english'],
             ],
         );
     }

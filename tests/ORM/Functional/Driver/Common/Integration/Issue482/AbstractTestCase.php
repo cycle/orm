@@ -126,12 +126,10 @@ abstract class AbstractTestCase extends BaseTest
         $this->getDatabase()->table('locale')->delete()->run();
 
         $en = 1;
-        $ru = 2;
         $this->getDatabase()->table('locale')->insertMultiple(
             ['code'],
             [
                 ['en'],
-                ['ru'],
             ],
         );
         $this->getDatabase()->table('country')->insertMultiple(
@@ -147,11 +145,8 @@ abstract class AbstractTestCase extends BaseTest
             ['country_id', 'locale_id', 'title'],
             [
                 [1, $en, 'Russia on english'],
-                [1, $ru, 'Россия на русском'],
                 [2, $en, 'America on english'],
-                [2, $ru, 'Америка на русском'],
                 [3, $en, 'China on english'],
-                [3, $ru, 'Китай на русском'],
             ],
         );
     }

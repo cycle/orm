@@ -83,13 +83,6 @@ abstract class BaseTest extends TestCase
             $this->logger->display();
         }
 
-        $this->logger = new TestLogger();
-        $this->getDriver()->setLogger($this->logger);
-
-        if (self::$config['debug']) {
-            $this->logger->display();
-        }
-
         $this->orm = new ORM(
             (new Factory(
                 $this->dbal,

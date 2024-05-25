@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Usage:
+ *  php tests/generate-case.php --case-name=Issue777
+ *  php tests/generate-case.php --case-name=Issue888 --template=Issue777
+ */
+
 declare(strict_types=1);
 
 \error_reporting(E_ALL | E_STRICT);

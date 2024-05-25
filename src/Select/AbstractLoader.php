@@ -189,6 +189,7 @@ abstract class AbstractLoader implements LoaderInterface
 
         $relation = $this->resolvePath($relation);
         $alias ??= $options['alias'] ?? $relation;
+        unset($options['alias']);
         if (!empty($options['as'])) {
             // ??
             $this->registerPath($options['as'], $alias);

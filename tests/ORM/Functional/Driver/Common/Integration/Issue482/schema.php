@@ -46,7 +46,7 @@ return [
             'id' => 'int',
             'name' => 'string',
             'code' => 'string',
-            'is_friendly' => 'bool',
+            'isFriendly' => 'bool',
         ],
         Schema::SCHEMA => [],
     ],

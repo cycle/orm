@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Show databases for root user
-        run: mysql --protocol=tcp -h localhost -P 3306 -u root -proot -e "ALTER DATABASE spiral CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        run: mysql --protocol=tcp -h localhost -P 13306 -u root -proot -e "ALTER DATABASE spiral CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
       - name: Checkout
         uses: actions/checkout@v2

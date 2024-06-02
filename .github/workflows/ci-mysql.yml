@@ -43,9 +43,8 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Set charset and collation
-        run: |
-          mysql -proot -e "ALTER DATABASE spiral CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+      - name: Show databases for root user
+        run: mysql --protocol=tcp -h localhost -P 3306 -u root -proot -e "ALTER DATABASE spiral CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
       - name: Checkout
         uses: actions/checkout@v2

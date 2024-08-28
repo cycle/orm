@@ -24,16 +24,16 @@ jobs:
             mssql: 'server:2017-latest'
           - php: '8.0'
             extensions: pdo, pdo_sqlsrv
-            mssql: 'server:2019-latest'
+            mssql: 'server:2019-CU25-ubuntu-20.04'
           - php: '8.1'
             extensions: pdo, pdo_sqlsrv
-            mssql: 'server:2019-latest'
+            mssql: 'server:2019-CU25-ubuntu-20.04'
           - php: '8.2'
             extensions: pdo, pdo_sqlsrv
-            mssql: 'server:2019-latest'
+            mssql: 'server:2019-CU25-ubuntu-20.04'
           - php: '8.3'
             extensions: pdo, pdo_sqlsrv
-            mssql: 'server:2019-latest'
+            mssql: 'server:2019-CU25-ubuntu-20.04'
 
     services:
       mssql:

@@ -2,7 +2,7 @@ version: "3"
 
 services:
   cycle-sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: mcr.microsoft.com/mssql/server:2019-CU25-ubuntu-20.04
     ports:
       - "11433:1433"
     environment:

@@ -28,7 +28,7 @@ jobs:
       - name: Setup DB services
         run: |
           cd tests
-          docker-compose up -d
+          docker compose up -d
           cd ..
       - name: Setup PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2

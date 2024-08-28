@@ -277,7 +277,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * fetched from schema.
      *
      * Example:
-     * $this->getKey(Relation::OUTER_KEY);
+     *
+     *      $this->getKey(Relation::OUTER_KEY);
      */
     protected function localKey(string|int $key): ?string
     {

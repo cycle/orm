@@ -223,36 +223,34 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * Examples:
      *
-     * // Select users and load their comments (will cast 2 queries, HAS_MANY comments)
-     * User::find()->with('comments');
+     *      // Select users and load their comments (will cast 2 queries, HAS_MANY comments)
+     *      User::find()->with('comments');
      *
-     * // You can load chain of relations - select user and load their comments and post related to
-     * //comment
-     * User::find()->with('comments.post');
+     *      // You can load chain of relations - select user and load their comments and post related to comment
+     *      User::find()->with('comments.post');
      *
-     * // We can also specify custom where conditions on data loading, let's load only public
-     * // comments.
-     * User::find()->load('comments', [
-     *      'where' => ['{@}.status' => 'public']
-     * ]);
+     *      // We can also specify custom where conditions on data loading, let's load only public comments.
+     *      User::find()->load('comments', [
+     *          'where' => ['{@}.status' => 'public']
+     *      ]);
      *
      * Please note using "{@}" column name, this placeholder is required to prevent collisions and
      * it will be automatically replaced with valid table alias of pre-loaded comments table.
      *
-     * // In case where your loaded relation is MANY_TO_MANY you can also specify pivot table
-     * // conditions, let's pre-load all approved user tags, we can use same placeholder for pivot
-     * // table alias
-     * User::find()->load('tags', [
-     *      'wherePivot' => ['{@}.approved' => true]
-     * ]);
+     *      // In case where your loaded relation is MANY_TO_MANY you can also specify pivot table
+     *      // conditions, let's pre-load all approved user tags, we can use same placeholder for pivot
+     *      // table alias
+     *      User::find()->load('tags', [
+     *           'wherePivot' => ['{@}.approved' => true]
+     *      ]);
      *
-     * // In most of cases you don't need to worry about how data was loaded, using external query
-     * // or left join, however if you want to change such behaviour you can force load method
-     * // using {@see Select::SINGLE_QUERY}
-     * User::find()->load('tags', [
-     *      'method'     => Select::SINGLE_QUERY,
-     *      'wherePivot' => ['{@}.approved' => true]
-     * ]);
+     *      // In most of cases you don't need to worry about how data was loaded, using external query
+     *      // or left join, however if you want to change such behaviour you can force load method
+     *      // using {@see Select::SINGLE_QUERY}
+     *      User::find()->load('tags', [
+     *           'method'     => Select::SINGLE_QUERY,
+     *           'wherePivot' => ['{@}.approved' => true]
+     *      ]);
      *
      * Attention, you will not be able to correctly paginate in this case and only ORM loaders
      * support different loading types.
@@ -260,7 +258,8 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      * You can specify multiple loaders using array as first argument.
      *
      * Example:
-     * User::find()->load(['posts', 'comments', 'profile']);
+     *
+     *      User::find()->load(['posts', 'comments', 'profile']);
      *
      * Attention, consider disabling entity map if you want to use recursive loading (i.e
      * post.tags.posts), but first think why you even need recursive relation loading.
@@ -306,90 +305,79 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * Examples:
      *
-     * Find all users who have comments comments
-     * ```php
-     * User::find()->with('comments');
-     * ```
+     *      // Find all users who have comments comments
+     *      User::find()->with('comments');
      *
-     * Find all users who have approved comments (we can use comments table alias in where statement)
-     * ```php
-     * User::find()->with('comments')->where('comments.approved', true);
-     * ```
+     *      // Find all users who have approved comments (we can use comments table alias in where statement)
+     *      User::find()->with('comments')->where('comments.approved', true);
      *
-     * Find all users who have posts which have approved comments
-     * ```php
-     * User::find()->with('posts.comments')->where('posts_comments.approved', true);
-     * ```
+     *      // Find all users who have posts which have approved comments
+     *      User::find()->with('posts.comments')->where('posts_comments.approved', true);
      *
-     * Custom join alias for post comments relation
-     * ```php
-     * $user->with('posts.comments', [
-     *      'as' => 'comments'
-     * ])->where('comments.approved', true);
-     * ```
+     *      // Custom join alias for post comments relation
+     *      $user->with('posts.comments', [
+     *          'as' => 'comments'
+     *      ])->where('comments.approved', true);
      *
-     * If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation
-     * name plus "_pivot" postfix. Let's load all users with approved tags.
-     * ```php
-     * $user->with('tags')->where('tags_pivot.approved', true);
-     * ```
+     *      // If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation name plus "_pivot" postfix. Let's load all users with approved tags.
+     *      $user->with('tags')->where('tags_pivot.approved', true);
      *
-     * You can also use custom alias for pivot table as well
-     * ```php
-     * User::find()->with('tags', [
-     *      'pivotAlias' => 'tags_connection'
-     * ])
-     * ->where('tags_connection.approved', false);
-     * ```
+     *      // You can also use custom alias for pivot table as well
+     *      User::find()->with('tags', [
+     *          'pivotAlias' => 'tags_connection'
+     *      ])
+     *      ->where('tags_connection.approved', false);
+     *
      *
      * You can safely combine with() and load() methods.
      *
-     * Load all users with approved comments and pre-load all their comments
-     * ```php
-     * User::find()->with('comments')->where('comments.approved', true)->load('comments');
-     * ```
+     *      // Load all users with approved comments and pre-load all their comments
+     *      User::find()
+     *          ->with('comments')
+     *          ->where('comments.approved', true)->load('comments');
      *
      * You can also use custom conditions in this case, let's find all users with approved
      * comments and pre-load such approved comments
-     * ```php
-     * User::find()->with('comments')
-     *             ->where('comments.approved', true)
-     *             ->load('comments', [
+     *
+     *      User::find()
+     *              ->with('comments')
+     *              ->where('comments.approved', true)
+     *              ->load('comments', [
      *                  'where' => ['{@}.approved' => true]
      *              ]);
-     * ```
      *
      * As you might notice previous construction will create 2 queries, however we can simplify
      * this construction to use already joined table as source of data for relation via "using" keyword
-     * ```php
-     * User::find()->with('comments')
-     *             ->where('comments.approved', true)
-     *             ->load('comments', ['using' => 'comments']);
-     * ```
+     *
+     *      User::find()
+     *          ->with('comments')
+     *          ->where('comments.approved', true)
+     *          ->load('comments', ['using' => 'comments']);
      *
      * You will get only one query with INNER JOIN, to better understand this example let's use
      * custom alias for comments in with() method.
-     * ```php
-     * User::find()->with('comments', ['as' => 'commentsR'])
-     *             ->where('commentsR.approved', true)
-     *             ->load('comments', ['using' => 'commentsR']);
-     * ```
+     *
+     *      User::find()
+     *          ->with('comments', ['as' => 'commentsR'])
+     *          ->where('commentsR.approved', true)
+     *          ->load('comments', ['using' => 'commentsR']);
      *
      * To use with() twice on the same relation, you can use `alias` option.
-     * ```php
-     * Country::find()
-     *     // Find all translations
-     *     ->with('translations', [ 'as' => 'trans'])
-     *     ->load('translations', ['using' => 'trans'])
-     *     // Second `with` for sorting only
-     *     ->with('translations', [
-     *         'as' => 'transEn', // Alias for SQL
-     *         'alias' => 'translations-en', // Alias for ORM to not to overwrite previous `with`
-     *         'method' => JoinableLoader::LEFT_JOIN,
-     *         'where' => ['locale' => 'en'],
-     *     ])
-     *     ->orderBy('transEn.title', 'ASC');
-     * ```
+     *
+     *      Country::find()
+     *          // Find all translations
+     *          ->with('translations', [ 'as' => 'trans'])
+     *          ->load('translations', ['using' => 'trans'])
+     *          // Second `with` for sorting only
+     *          ->with('translations', [
+     *              // Alias for SQL
+     *              'as' => 'transEn',
+     *              // Alias for ORM to not to overwrite previous `with`
+     *              'alias' => 'translations-en',
+     *              'method' => JoinableLoader::LEFT_JOIN,
+     *              'where' => ['locale' => 'en'],
+     *          ])
+     *          ->orderBy('transEn.title', 'ASC');
      *
      * @return static<TEntity>
      *

@@ -11,23 +11,23 @@ use Cycle\ORM\Exception\CollectionFactoryException;
  * In the case of a relation loaded lazily in a proxy mapper,
  * you should note that writing to such array collection should take place after an overloading:
  *
- *      // {$user->posts} is not loaded
+ *     // {$user->posts} is not loaded
  *
- *      // Bad code:
- *      // Exception or notice will be thrown
- *      // because the {$user->posts} value comes from a __get method.
- *      $user->posts[] = new Post;
- *
- *
- *      // Bad code:
- *      // Exception or notice will be thrown
- *      // because the {$user->posts} value comes from a __get method.
- *      $posts = &$user->posts;
+ *     // Bad code:
+ *     // Exception or notice will be thrown
+ *     // because the {$user->posts} value comes from a __get method.
+ *     $user->posts[] = new Post;
  *
  *
- *      // Correct example:
- *      $user->post; // Resolve relation. It can be any `reading` code
- *      $user->post[] = new Post;
+ *     // Bad code:
+ *     // Exception or notice will be thrown
+ *     // because the {$user->posts} value comes from a __get method.
+ *     $posts = &$user->posts;
+ *
+ *
+ *     // Correct example:
+ *     $user->post; // Resolve relation. It can be any `reading` code
+ *     $user->post[] = new Post;
  *
  * @template TCollection of array
  *

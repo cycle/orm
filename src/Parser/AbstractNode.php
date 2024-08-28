@@ -266,11 +266,11 @@ abstract class AbstractNode
      *
      * Example (default ORM Loaders):
      *
-     *      $this->parent->mount('profile', 'id', 1, [
-     *          'id' => 100,
-     *          'user_id' => 1,
-     *          // ...
-     *      ]);
+     *     $this->parent->mount('profile', 'id', 1, [
+     *         'id' => 100,
+     *         'user_id' => 1,
+     *         // ...
+     *     ]);
      *
      * In this example "id" argument is inner key of "user" record and it's linked to outer key
      * "user_id" in "profile" record, which defines reference criteria as 1.
@@ -310,11 +310,11 @@ abstract class AbstractNode
      *
      * Example (default ORM Loaders):
      *
-     *      $this->parent->mountArray('comments', 'id', 1, [
-     *          'id' => 100,
-     *          'user_id' => 1,
-     *          // ...
-     *      ]);
+     *     $this->parent->mountArray('comments', 'id', 1, [
+     *         'id' => 100,
+     *         'user_id' => 1,
+     *         // ...
+     *     ]);
      *
      * In this example "id" argument is inner key of "user" record and it's linked to outer key
      * "user_id" in "profile" record, which defines reference criteria as 1.

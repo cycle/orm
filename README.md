@@ -8,7 +8,7 @@
 
 <img src="https://cycle-orm.dev/cycle.png" height="135px" alt="Cycle ORM" align="left"/>
 
-Cycle is PHP DataMapper, ORM and Data Modelling engine designed to safely work in classic and demonized PHP
+Cycle is PHP DataMapper, ORM and Data Modelling engine designed to safely work in classic and daemonized PHP
 applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options
 to model datasets, powerful query builder and supports dynamic mapping schema. The engine can work with plain PHP
 objects, support annotation declarations, and proxies via extensions.

@@ -41,7 +41,12 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): LoaderInterface;
 
     /**
+     * @template TEntity
+     *
      * Create repository associated with given role.
+     *
+     * @param non-empty-string|class-string<TEntity> $role
+     * @return ($role is class-string<TEntity> ? RepositoryInterface<TEntity> : RepositoryInterface<object>)
      */
     public function repository(
         ORMInterface $orm,

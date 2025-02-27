@@ -6,6 +6,7 @@ namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
@@ -63,10 +64,25 @@ final class EntityFactory implements EntityFactoryInterface
                 $e = $this->heap->find($rRole, $ids);
 
                 if ($e !== null) {
+                    // Get not resolved relations (references)
+                    $refs = \array_filter(
+                        $mapper->fetchRelations($e),
+                        fn($v) => $v instanceof ReferenceInterface,
+                    );
+
+                    if ($refs === []) {
+                        return $e;
+                    }
+
                     $node = $this->heap->get($e);
                     \assert($node !== null);
 
-                    return $mapper->hydrate($e, $relMap->init($this, $node, $castedData));
+                    // Replace references with actual relation data
+                    return $mapper->hydrate($e, $relMap->init(
+                        $this,
+                        $node,
+                        \array_intersect_key($castedData, $refs),
+                    ));
                 }
             }
         }

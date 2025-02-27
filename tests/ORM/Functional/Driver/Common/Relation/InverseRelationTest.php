@@ -22,8 +22,9 @@ abstract class InverseRelationTest extends BaseTest
 
     public function testFetchRelation(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $selector->load('profile.user')->orderBy('user.id');
+        $selector = (new Select($this->orm, User::class))
+            ->load('profile.user')
+            ->orderBy('user.id');
 
         $this->assertEquals([
             [

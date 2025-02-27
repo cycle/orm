@@ -14,7 +14,7 @@ $drivers = [
     'sqlite' => new Config\SQLiteDriverConfig(
         queryCache: true,
         options: [
-            'logQueryParameters' => true,
+            'logInterpolatedQueries' => true,
         ],
     ),
     'mysql' => new Config\MySQLDriverConfig(
@@ -28,7 +28,7 @@ $drivers = [
         ),
         queryCache: true,
         options: [
-            'logQueryParameters' => true,
+            'logInterpolatedQueries' => true,
         ],
     ),
     'postgres' => new Config\PostgresDriverConfig(
@@ -42,7 +42,7 @@ $drivers = [
         schema: 'public',
         queryCache: true,
         options: [
-            'logQueryParameters' => true,
+            'logInterpolatedQueries' => true,
         ],
     ),
     'sqlserver' => new Config\SQLServerDriverConfig(
@@ -53,7 +53,7 @@ $drivers = [
         ),
         queryCache: true,
         options: [
-            'logQueryParameters' => true,
+            'logInterpolatedQueries' => true,
         ],
     ),
 ];

@@ -259,11 +259,13 @@ abstract class ClasslessMapperTest extends BaseMapperTest
     public function testLoadOverwriteValues(): void
     {
         $u = $this->orm->getRepository('user')->findByPK(1);
+        $this->assertSame('hello@world.com', $u->email);
         $u->email = 'test@email.com';
         $this->assertSame('test@email.com', $u->email);
 
         $u2 = $this->orm->getRepository('user')->findByPK(1);
-        $this->assertSame('hello@world.com', $u2->email);
+        self::assertSame($u, $u2);
+        $this->assertSame('test@email.com', $u2->email);
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
         $this->assertSame('hello@world.com', $u3->email);
@@ -272,10 +274,10 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $t = new Transaction($this->orm);
         $t->persist($u);
         $t->run();
-        $this->assertNumWrites(0);
+        $this->assertNumWrites(1);
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
-        $this->assertSame('hello@world.com', $u4->email);
+        $this->assertSame('test@email.com', $u4->email);
     }
 
     public function testNullableValuesInASndOut(): void

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;

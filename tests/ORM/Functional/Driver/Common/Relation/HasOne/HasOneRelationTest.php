@@ -574,8 +574,7 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testOverwritePromisedRelation(): void
     {
-        $select = new Select($this->orm, User::class);
-        $u = $select->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
 
         $newProfile = new Profile();
         $newProfile->image = 'new';
@@ -587,28 +586,22 @@ abstract class HasOneRelationTest extends BaseTest
             ->load('profile')
             ->wherePK(1)->fetchOne();
 
-        $this->assertSame('image.png', $u2->profile->image);
+        $this->assertSame('new', $u2->profile->image, 'Not promised relation should not be overwritten');
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
             ->select()->load('profile')->wherePK(1)->fetchOne();
+        $this->assertSame('image.png', $u3->profile->image, 'Clrearly loaded entity has not changed fields');
 
-        $this->assertSame('image.png', $u3->profile->image);
-
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
+        $this->save($u);
 
         // ovewrite values
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
             ->select()->load('profile')->wherePK(1)->fetchOne();
 
-        $this->assertSame('image.png', $u4->profile->image);
+        $this->assertSame('new', $u4->profile->image, 'the new value should be saved');
 
         $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-
+        $this->save($u);
         $this->assertNumWrites(0);
     }
 

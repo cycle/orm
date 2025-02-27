@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
@@ -16,12 +17,14 @@ use Cycle\ORM\Service\Implementation\IndexProvider;
 use Cycle\ORM\Service\Implementation\MapperProvider;
 use Cycle\ORM\Service\Implementation\RelationProvider;
 use Cycle\ORM\Service\Implementation\RepositoryProvider;
+use Cycle\ORM\Service\Implementation\RoleResolver;
 use Cycle\ORM\Service\Implementation\SourceProvider;
 use Cycle\ORM\Service\Implementation\TypecastProvider;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Service\RepositoryProviderInterface;
+use Cycle\ORM\Service\RoleResolverInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\Transaction\CommandGenerator;
@@ -38,11 +41,12 @@ final class ORM implements ORMInterface
     private RelationProvider $relationProvider;
     private SourceProvider $sourceProvider;
     private TypecastProvider $typecastProvider;
-    private EntityFactory $entityFactory;
+    private EntityFactoryInterface $entityFactory;
     private IndexProvider $indexProvider;
     private MapperProvider $mapperProvider;
     private RepositoryProvider $repositoryProvider;
     private EntityProvider $entityProvider;
+    private RoleResolverInterface $roleResolver;
 
     public function __construct(
         private FactoryInterface $factory,
@@ -57,7 +61,7 @@ final class ORM implements ORMInterface
 
     public function resolveRole(string|object $entity): string
     {
-        return $this->entityFactory->resolveRole($entity);
+        return $this->roleResolver->resolveRole($entity);
     }
 
     public function get(string $role, array $scope, bool $load = true): ?object
@@ -242,6 +246,7 @@ final class ORM implements ORMInterface
             $this->factory,
         );
         $this->entityProvider = new EntityProvider($this->heap, $this->repositoryProvider);
+        $this->roleResolver = new RoleResolver($this->schema, $this->heap);
 
         $this->entityFactory = new EntityFactory(
             $this->heap,
@@ -249,6 +254,7 @@ final class ORM implements ORMInterface
             $this->mapperProvider,
             $this->relationProvider,
             $this->indexProvider,
+            $this->roleResolver,
         );
     }
 }

@@ -24,6 +24,10 @@ jobs:
           - "8.3"
           - "8.4"
     steps:
+      - name: Install ODBC driver.
+        run: |
+          sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup DB services

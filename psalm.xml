@@ -13,6 +13,8 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
+        <MissingClassConstType errorLevel="suppress" />
+        <UnusedClass errorLevel="suppress" />
         <UndefinedAttributeClass>
             <errorLevel type="suppress">
                 <referencedClass name="JetBrains\PhpStorm\ExpectedValues" />
@@ -20,10 +22,5 @@
                 <referencedClass name="JetBrains\PhpStorm\Pure" />
             </errorLevel>
         </UndefinedAttributeClass>
-        <UndefinedClass>
-            <errorLevel type="suppress">
-                <referencedClass name="BackedEnum" />
-            </errorLevel>
-        </UndefinedClass>
     </issueHandlers>
 </psalm>

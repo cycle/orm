@@ -92,7 +92,7 @@ abstract class TypecastTest extends BaseTest
 
         $this->assertSame($user1, $user2);
         $this->assertNotNull($user1->id);
-        $this->assertSame(200, $user1->balance->value);
+        $this->assertSame(50, $user1->balance->value, 'non-relation field must not be overwritten');
 
         // no exceptions thrown
         $this->save($user1);

@@ -51,10 +51,10 @@
         "mockery/mockery": "^1.1",
         "phpunit/phpunit": "^9.5",
         "ramsey/uuid": "^4.0",
-        "spiral/tokenizer": "^2.8 || ^3.0",
         "spiral/code-style": "~2.2.0",
+        "spiral/tokenizer": "^2.8 || ^3.0",
         "symfony/var-dumper": "^5.2 || ^6.0 || ^7.0",
-        "vimeo/psalm": "5.21"
+        "vimeo/psalm": "5.21 || ^6.8"
     },
     "autoload": {
         "psr-4": {

@@ -528,6 +528,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 
     public function testOverwritePromisedRelation(): void
     {
+        // The relation `child_entity` will not be loaded
         $u = (new Select($this->orm, CompositePK::class))->wherePK([1, 1])->fetchOne();
 
         $newCompositePKChild = new CompositePKChild();
@@ -543,12 +544,13 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->wherePK([1, 1])->fetchOne();
 
         $this->assertSame($u, $u2);
-        // Overwritten
-        $this->assertSame(self::CHILD_1['key3'], $u2->child_entity->key3);
+        // Relation was not overwritten
+        $this->assertSame('new', $u2->child_entity->key3);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
-        $this->assertNumWrites(0);
+        $this->save($u);
+        // Add a new pivot and delete the old one
+        $this->assertNumWrites(2);
     }
 
     public function setUp(): void

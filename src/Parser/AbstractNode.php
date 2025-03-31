@@ -52,7 +52,7 @@ abstract class AbstractNode
 
     protected ?ParentMergeNode $mergeParent = null;
 
-    /** @var SubclassMergeNode[]  */
+    /** @var SubclassMergeNode[] */
     protected array $mergeSubclass = [];
 
     protected ?string $indexName;
@@ -65,7 +65,7 @@ abstract class AbstractNode
     protected ?MultiKeyCollection $indexedData = null;
 
     /**
-     * @param string[] $columns  List of columns node must fetch from the row.
+     * @param string[] $columns List of columns node must fetch from the row.
      *                           When columns are empty original line will be returned as result.
      * @param string[]|null $outerKeys Defines column name in parent Node to be aggregated.
      */
@@ -99,7 +99,9 @@ abstract class AbstractNode
             return \count($this->columns)
                 + \array_reduce(
                     $relatedNodes,
-                    static fn(int $cnt, AbstractNode $node): int => $cnt + \count($node->columns),
+                    static fn(int $cnt, AbstractNode $node): int => $node instanceof ArrayNode
+                        ? 0
+                        : $cnt + \count($node->columns),
                     0,
                 );
         }
@@ -389,6 +391,7 @@ abstract class AbstractNode
         foreach ($keys as $key) {
             $result[$key] = $data[$key];
         }
+
         return $result;
     }
 
@@ -404,6 +407,7 @@ abstract class AbstractNode
                 return true;
             }
         }
+
         return false;
     }
 }

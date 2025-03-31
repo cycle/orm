@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.8.8@1361cd33008feb3ae2b4a93f1860e14e538ec8c2">
+<files psalm-version="6.10.0@9c0add4eb88d4b169ac04acb7c679918cbb9c252">
   <file src="src/Collection/ArrayCollectionFactory.php">
     <DocblockTypeContradiction>
       <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
@@ -2162,9 +2162,6 @@
     <DocblockTypeContradiction>
       <code><![CDATA[$compareCallback === null]]></code>
     </DocblockTypeContradiction>
-    <InvalidOperand>
-      <code><![CDATA[$roleName]]></code>
-    </InvalidOperand>
     <MissingOverrideAttribute>
       <code><![CDATA[public function define(string $role, int $property): mixed]]></code>
       <code><![CDATA[public function defineRelation(string $role, string $relation): array]]></code>

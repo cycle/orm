@@ -95,11 +95,11 @@ abstract class AbstractNode
         );
 
         if ($this->isEmptyPrimaryKey($data)) {
-            // Skip all columns which are related to current node and sub nodes.
+            // Skip all columns that are related to current node and sub nodes.
             return \count($this->columns)
                 + \array_reduce(
                     $relatedNodes,
-                    static fn(int $cnt, AbstractNode $node): int => $node instanceof ArrayNode
+                    static fn(int $cnt, AbstractNode $node): int => $node::class === ArrayNode::class
                         ? 0
                         : $cnt + \count($node->columns),
                     0,

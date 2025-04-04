@@ -37,7 +37,7 @@ final class Condition implements CommandInterface, \IteratorAggregate
     /**
      * @return \Generator
      */
-    public function getIterator()
+    public function getIterator(): \Generator
     {
         if (($this->condition)()) {
             yield $this->command;

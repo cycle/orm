@@ -102,6 +102,11 @@ class HasManyLoader extends JoinableLoader
         return parent::configureQuery($query);
     }
 
+    public function isDataDuplicationPossible(): bool
+    {
+        return true;
+    }
+
     /**
      * {@inheritdoc}
      */

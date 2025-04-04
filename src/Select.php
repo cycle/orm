@@ -65,7 +65,7 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     {
         $this->orm = $orm;
         $this->loader = new RootLoader($orm, $this->orm->resolveRole($role));
-        $this->builder = new QueryBuilder($this->getLoader()->getQuery(), $this->loader);
+        $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
 
     /**
@@ -167,18 +167,13 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     /**
      * Attention, column will be quoted by driver!
      *
-     * @param string|null $column When column is null DISTINCT(PK) will be generated.
+     * @param string|null $column When column is null PK or DISTINCT(PK) will be generated.
      *
      * @return int
      */
     public function count(string $column = null): int
     {
-        if ($column === null) {
-            // @tuneyourserver solves the issue with counting on queries with joins.
-            $column = sprintf('DISTINCT(%s)', $this->loader->getPK());
-        }
-
-        return (int) $this->__call('count', [$column]);
+        return (int) $this->__call('count', [$column ?? $this->loader->getCountField()]);
     }
 
     /**
@@ -440,15 +435,5 @@ final class Select implements IteratorAggregate, Countable, PaginableInterface
     public function sqlStatement(): string
     {
         return $this->buildQuery()->sqlStatement();
-    }
-
-    /**
-     * Return base loader associated with the selector.
-     *
-     * @return RootLoader
-     */
-    private function getLoader(): RootLoader
-    {
-        return $this->loader;
     }
 }

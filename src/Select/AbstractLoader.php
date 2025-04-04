@@ -260,6 +260,23 @@ abstract class AbstractLoader implements LoaderInterface
     abstract public function isLoaded(): bool;
 
     /**
+     * Indicates that query can load multiple joined rows,
+     * which possibly can lead to data duplication.
+     *
+     * @return bool
+     */
+    public function isDataDuplicationPossible(): bool
+    {
+        foreach ($this->join as $loader) {
+            if ($loader->isDataDuplicationPossible()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param AbstractNode $node
      */
     protected function loadChild(AbstractNode $node): void

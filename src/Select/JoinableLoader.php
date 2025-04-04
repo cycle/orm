@@ -14,6 +14,7 @@ namespace Cycle\ORM\Select;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
@@ -231,6 +232,18 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         }
 
         return parent::configureQuery($query);
+    }
+
+    public function isDataDuplicationPossible(): bool
+    {
+        $outerKey = $this->schema[Relation::OUTER_KEY];
+        $indexes = $this->orm->getIndexes($this->target);
+
+        if (!\in_array($outerKey, $indexes, true)) {
+            return true;
+        }
+
+        return parent::isDataDuplicationPossible();
     }
 
     /**

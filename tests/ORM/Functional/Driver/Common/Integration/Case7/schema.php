@@ -7,9 +7,9 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\Post;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\PostTag;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\Tag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\PostTag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Tag;
 
 return [
     'post' => [
@@ -30,7 +30,7 @@ return [
                 Relation::TYPE => Relation::MANY_TO_MANY,
                 Relation::TARGET => 'tag',
                 Relation::COLLECTION_TYPE => 'array',
-                Relation::LOAD => Relation::LOAD_PROMISE,
+                Relation::LOAD => Relation::LOAD_EAGER,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
                     Relation::NULLABLE => false,
@@ -45,6 +45,25 @@ return [
                 ],
             ],
         ],
+        Schema::TYPECAST => [
+            'id' => 'int',
+        ],
+        Schema::SCHEMA => [],
+    ],
+    'tag' => [
+        Schema::ENTITY => Tag::class,
+        Schema::MAPPER => Mapper::class,
+        Schema::SOURCE => Source::class,
+        Schema::REPOSITORY => Repository::class,
+        Schema::DATABASE => 'default',
+        Schema::TABLE => 'tag',
+        Schema::PRIMARY_KEY => ['id'],
+        Schema::FIND_BY_KEYS => ['id'],
+        Schema::COLUMNS => [
+            'id' => 'id',
+            'label' => 'label',
+        ],
+        Schema::SCOPE => null,
         Schema::TYPECAST => [
             'id' => 'int',
         ],
@@ -70,45 +89,6 @@ return [
             'id' => 'int',
             'post_id' => 'int',
             'tag_id' => 'int',
-        ],
-        Schema::SCHEMA => [],
-    ],
-    'tag' => [
-        Schema::ENTITY => Tag::class,
-        Schema::MAPPER => Mapper::class,
-        Schema::SOURCE => Source::class,
-        Schema::REPOSITORY => Repository::class,
-        Schema::DATABASE => 'default',
-        Schema::TABLE => 'tag',
-        Schema::PRIMARY_KEY => ['id'],
-        Schema::FIND_BY_KEYS => ['id'],
-        Schema::COLUMNS => [
-            'id' => 'id',
-            'label' => 'label',
-        ],
-        Schema::RELATIONS => [
-            'posts' => [
-                Relation::TYPE => Relation::MANY_TO_MANY,
-                Relation::TARGET => 'post',
-                Relation::COLLECTION_TYPE => 'array',
-                Relation::LOAD => Relation::LOAD_EAGER,
-                Relation::SCHEMA => [
-                    Relation::CASCADE => true,
-                    Relation::NULLABLE => false,
-                    Relation::WHERE => [],
-                    Relation::ORDER_BY => [],
-                    Relation::INNER_KEY => ['id'],
-                    Relation::OUTER_KEY => ['id'],
-                    Relation::THROUGH_ENTITY => 'postTag',
-                    Relation::THROUGH_INNER_KEY => 'tag_id',
-                    Relation::THROUGH_OUTER_KEY => 'post_id',
-                    Relation::THROUGH_WHERE => [],
-                ],
-            ],
-        ],
-        Schema::SCOPE => null,
-        Schema::TYPECAST => [
-            'id' => 'int',
         ],
         Schema::SCHEMA => [],
     ],

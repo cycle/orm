@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 use Spiral\Tokenizer;
 
-error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 //Composer

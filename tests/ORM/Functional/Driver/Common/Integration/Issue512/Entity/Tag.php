@@ -8,7 +8,6 @@ class Tag
 {
     public ?int $id = null;
     public string $label;
-    public \DateTimeImmutable $created_at;
 
     /** @var iterable<Post> */
     public iterable $posts = [];
@@ -16,6 +15,5 @@ class Tag
     public function __construct(string $label)
     {
         $this->label = $label;
-        $this->created_at = new \DateTimeImmutable();
     }
 }

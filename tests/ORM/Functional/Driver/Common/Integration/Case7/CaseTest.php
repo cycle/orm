@@ -44,6 +44,7 @@ abstract class CaseTest extends BaseTest
         // Init DB
         parent::setUp();
         $this->makeTables();
+        $this->fillData();
 
         $this->loadSchema(__DIR__ . '/schema.php');
     }
@@ -71,5 +72,10 @@ abstract class CaseTest extends BaseTest
         );
         $this->makeFK('post_tag', 'post_id', 'post', 'id', 'NO ACTION', 'CASCADE');
         $this->makeFK('post_tag', 'tag_id', 'tag', 'id', 'NO ACTION', 'CASCADE');
+    }
+
+    private function fillData(): void
+    {
+        $this->getDatabase()->table('tag')->insertOne(['label' => 'foo']);
     }
 }

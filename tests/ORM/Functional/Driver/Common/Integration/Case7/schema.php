@@ -95,6 +95,21 @@ return [
                     ],
                 ],
             ],
+            'post' => [
+                Relation::TYPE => Relation::BELONGS_TO,
+                Relation::TARGET => 'post',
+                Relation::LOAD => Relation::HAS_ONE,
+                Relation::SCHEMA => [
+                    Relation::CASCADE => true,
+                    Relation::NULLABLE => false,
+                    Relation::INNER_KEY => [
+                        'post_id',
+                    ],
+                    Relation::OUTER_KEY => [
+                        'id',
+                    ],
+                ],
+            ],
         ],
         Schema::SCOPE => null,
         Schema::TYPECAST => [

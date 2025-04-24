@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7;
 
+use Cycle\ORM\EntityManager;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\PostTag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Tag;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -17,32 +20,23 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function testGet(): void
+    public function testCreatePostEntity(): void
     {
-        /** @var Post $post1 */
-        $post1 = $this->orm->get(Post::class, ['title' => 'Title1']);
-        self::assertCount(1, $post1->postTags);
-        self::assertSame('foo', $post1->postTags[0]->tag->label);
+        // save post
+        $post = new Post('title3', 'content3');
+        (new EntityManager($this->orm))->persist($post)->run();
 
-        /** @var Post $post2 */
-        $post2 = $this->orm->get(Post::class, ['title' => 'Title2']);
-        self::assertCount(2, $post2->postTags);
-        self::assertSame('bar', $post2->postTags[0]->tag->label);
-        self::assertSame('baz', $post2->postTags[1]->tag->label);
-    }
+        // save post tag
+        $pt1 = new PostTag();
+        $pt1->post = $post;
+        $pt1->tag = $this->orm->get(Tag::class, ['id' => 1]);
+        (new EntityManager($this->orm))->persist($pt1)->run();
 
-    public function testRepositorySelect(): void
-    {
-        /** @var Post $post1 */
-        $post1 = $this->orm->getRepository(Post::class)->findByPK(1);
-        self::assertCount(1, $post1->postTags);
-        self::assertSame('foo', $post1->postTags[0]->tag->label);
+        $id = $post->id;
+        unset($post);
 
-        /** @var Post $post2 */
-        $post2 = $this->orm->getRepository(Post::class)->findByPK(2);
-        self::assertCount(2, $post2->postTags);
-        self::assertSame('bar', $post2->postTags[0]->tag->label);
-        self::assertSame('baz', $post2->postTags[1]->tag->label);
+        $post = $this->orm->getRepository(Post::class)->findByPK($id);
+        self::assertCount(1, $post->postTags);
     }
 
     public function setUp(): void

@@ -17,16 +17,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testGet(): void
     {
         /** @var Post $post1 */
@@ -53,6 +43,16 @@ abstract class CaseTest extends BaseTest
         self::assertCount(2, $post2->tags);
         self::assertSame('bar', $post2->tags[0]->label);
         self::assertSame('baz', $post2->tags[1]->label);
+    }
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

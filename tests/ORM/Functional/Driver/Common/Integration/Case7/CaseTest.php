@@ -20,12 +20,12 @@ abstract class CaseTest extends BaseTest
     public function testGet(): void
     {
         /** @var Post $post1 */
-        $post1 = $this->orm->get(Post::class, ['id' => 1]);
+        $post1 = $this->orm->get(Post::class, ['title' => 'Title1']);
         self::assertCount(1, $post1->tags);
         self::assertSame('foo', $post1->tags[0]->label);
 
         /** @var Post $post2 */
-        $post2 = $this->orm->get(Post::class, ['id' => 2]);
+        $post2 = $this->orm->get(Post::class, ['title' => 'Title2']);
         self::assertCount(2, $post2->tags);
         self::assertSame('bar', $post2->tags[0]->label);
         self::assertSame('baz', $post2->tags[1]->label);
@@ -83,29 +83,19 @@ abstract class CaseTest extends BaseTest
 
     private function fillData(): void
     {
-        $this->getDatabase()->table('post')->insertMultiple(
-            ['id', 'title', 'content'],
-            [
-                [1, 'Title 1', '1 tag'],
-                [2, 'Title 2', '2 tags'],
-            ],
-        );
+        $p1 = $this->getDatabase()->table('post')->insertOne(['title' => 'Title1', 'content' => '1 tag']);
+        $p2 = $this->getDatabase()->table('post')->insertOne(['title' => 'Title2', 'content' => '2 tag']);
 
-        $this->getDatabase()->table('tag')->insertMultiple(
-            ['id', 'label'],
-            [
-                [1, 'foo'],
-                [2, 'bar'],
-                [3, 'baz'],
-            ],
-        );
+        $t1 = $this->getDatabase()->table('tag')->insertOne(['label' => 'foo']);
+        $t2 = $this->getDatabase()->table('tag')->insertOne(['label' => 'bar']);
+        $t3 = $this->getDatabase()->table('tag')->insertOne(['label' => 'baz']);
 
         $this->getDatabase()->table('post_tag')->insertMultiple(
-            ['id', 'post_id', 'tag_id'],
+            ['post_id', 'tag_id'],
             [
-                [11, 1, 1],
-                [22, 2, 2],
-                [23, 2, 3],
+                [$p1, $t1],
+                [$p2, $t2],
+                [$p2, $t3],
             ],
         );
     }

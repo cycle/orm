@@ -6,6 +6,8 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7;
 
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\PostTag;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Tag;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -13,6 +15,16 @@ abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
     use TableTrait;
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
+    }
 
     public function testSelect(): void
     {
@@ -27,16 +39,6 @@ abstract class CaseTest extends BaseTest
         self::assertSame('bar', $post2->tags[0]->label);
         self::assertSame('baz', $post2->tags[1]->label);
 
-    }
-
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

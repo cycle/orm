@@ -6,11 +6,12 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7;
 
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Post;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\PostTag;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Tag;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
+/**
+ * ManyToMany load=eager MUST load related entities.
+ */
 abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
@@ -26,7 +27,7 @@ abstract class CaseTest extends BaseTest
         $this->loadSchema(__DIR__ . '/schema.php');
     }
 
-    public function testSelect(): void
+    public function testGet(): void
     {
         /** @var Post $post1 */
         $post1 = $this->orm->get(Post::class, ['id' => 1]);
@@ -38,7 +39,20 @@ abstract class CaseTest extends BaseTest
         self::assertCount(2, $post2->tags);
         self::assertSame('bar', $post2->tags[0]->label);
         self::assertSame('baz', $post2->tags[1]->label);
+    }
 
+    public function testRepositorySelect(): void
+    {
+        /** @var Post $post1 */
+        $post1 = $this->orm->getRepository(Post::class)->findByPK(1);
+        self::assertCount(1, $post1->tags);
+        self::assertSame('foo', $post1->tags[0]->label);
+
+        /** @var Post $post2 */
+        $post2 = $this->orm->getRepository(Post::class)->findByPK(2);
+        self::assertCount(2, $post2->tags);
+        self::assertSame('bar', $post2->tags[0]->label);
+        self::assertSame('baz', $post2->tags[1]->label);
     }
 
     private function makeTables(): void

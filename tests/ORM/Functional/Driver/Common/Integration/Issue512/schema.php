@@ -7,11 +7,9 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\Comment;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\Post;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\PostTag;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\Tag;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue512\Entity\User;
 
 return [
     'post' => [

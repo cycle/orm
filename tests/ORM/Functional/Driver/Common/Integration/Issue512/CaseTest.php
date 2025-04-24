@@ -13,9 +13,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function testSelect(): void
-    {
-    }
+    public function testSelect(): void {}
 
     public function setUp(): void
     {
@@ -46,7 +44,7 @@ abstract class CaseTest extends BaseTest
                 'post_id' => 'int',
                 'tag_id' => 'int',
             ],
-            pk: ['post_id', 'tag_id']
+            pk: ['post_id', 'tag_id'],
         );
         $this->makeFK('post_tag', 'post_id', 'post', 'id', 'NO ACTION', 'CASCADE');
         $this->makeFK('post_tag', 'tag_id', 'tag', 'id', 'NO ACTION', 'CASCADE');

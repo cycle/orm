@@ -9,8 +9,6 @@ class PostTag
     public ?int $id = null;
     public ?int $post_id = null;
     public ?int $tag_id = null;
-
     public ?Post $post = null;
-
     public ?Tag $tag = null;
 }

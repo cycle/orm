@@ -26,22 +26,18 @@ return [
             'content' => 'content',
         ],
         Schema::RELATIONS => [
-            'tags' => [
-                Relation::TYPE => Relation::MANY_TO_MANY,
-                Relation::TARGET => 'tag',
-                Relation::COLLECTION_TYPE => 'array',
+            'postTags' => [
+                Relation::TYPE => Relation::HAS_MANY,
+                Relation::TARGET => 'postTag',
                 Relation::LOAD => Relation::LOAD_EAGER,
+                Relation::COLLECTION_TYPE => null,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
                     Relation::NULLABLE => false,
                     Relation::WHERE => [],
                     Relation::ORDER_BY => [],
                     Relation::INNER_KEY => ['id'],
-                    Relation::OUTER_KEY => ['id'],
-                    Relation::THROUGH_ENTITY => 'postTag',
-                    Relation::THROUGH_INNER_KEY => 'post_id',
-                    Relation::THROUGH_OUTER_KEY => 'tag_id',
-                    Relation::THROUGH_WHERE => [],
+                    Relation::OUTER_KEY => ['post_id'],
                 ],
             ],
         ],
@@ -83,7 +79,23 @@ return [
             'post_id' => 'post_id',
             'tag_id' => 'tag_id',
         ],
-        Schema::RELATIONS => [],
+        Schema::RELATIONS => [
+            'tag' => [
+                Relation::TYPE => Relation::BELONGS_TO,
+                Relation::TARGET => 'tag',
+                Relation::LOAD => Relation::HAS_ONE,
+                Relation::SCHEMA => [
+                    Relation::CASCADE => true,
+                    Relation::NULLABLE => true,
+                    Relation::INNER_KEY => [
+                        'tag_id',
+                    ],
+                    Relation::OUTER_KEY => [
+                        'id',
+                    ],
+                ],
+            ],
+        ],
         Schema::SCOPE => null,
         Schema::TYPECAST => [
             'id' => 'int',

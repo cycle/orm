@@ -10,10 +10,8 @@ class Post
     public string $title = '';
     public string $content = '';
 
-    /** @var iterable<Tag> */
-    public iterable $tags = [];
-
-    public ?int $tag_id = null;
+    /** @var iterable<PostTag> */
+    public iterable $postTags = [];
 
     public function __construct(string $title = '', string $content = '')
     {

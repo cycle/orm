@@ -21,28 +21,28 @@ abstract class CaseTest extends BaseTest
     {
         /** @var Post $post1 */
         $post1 = $this->orm->get(Post::class, ['title' => 'Title1']);
-        self::assertCount(1, $post1->tags);
-        self::assertSame('foo', $post1->tags[0]->label);
+        self::assertCount(1, $post1->postTags);
+        self::assertSame('foo', $post1->postTags[0]->tag->label);
 
         /** @var Post $post2 */
         $post2 = $this->orm->get(Post::class, ['title' => 'Title2']);
-        self::assertCount(2, $post2->tags);
-        self::assertSame('bar', $post2->tags[0]->label);
-        self::assertSame('baz', $post2->tags[1]->label);
+        self::assertCount(2, $post2->postTags);
+        self::assertSame('bar', $post2->postTags[0]->tag->label);
+        self::assertSame('baz', $post2->postTags[1]->tag->label);
     }
 
     public function testRepositorySelect(): void
     {
         /** @var Post $post1 */
         $post1 = $this->orm->getRepository(Post::class)->findByPK(1);
-        self::assertCount(1, $post1->tags);
-        self::assertSame('foo', $post1->tags[0]->label);
+        self::assertCount(1, $post1->postTags);
+        self::assertSame('foo', $post1->postTags[0]->tag->label);
 
         /** @var Post $post2 */
         $post2 = $this->orm->getRepository(Post::class)->findByPK(2);
-        self::assertCount(2, $post2->tags);
-        self::assertSame('bar', $post2->tags[0]->label);
-        self::assertSame('baz', $post2->tags[1]->label);
+        self::assertCount(2, $post2->postTags);
+        self::assertSame('bar', $post2->postTags[0]->tag->label);
+        self::assertSame('baz', $post2->postTags[1]->tag->label);
     }
 
     public function setUp(): void
@@ -71,11 +71,10 @@ abstract class CaseTest extends BaseTest
         $this->makeTable(
             table: 'post_tag',
             columns: [
-                'id' => 'int',
+                'id' => 'primary',
                 'post_id' => 'int',
                 'tag_id' => 'int',
             ],
-            pk: ['post_id', 'tag_id'],
         );
         $this->makeFK('post_tag', 'post_id', 'post', 'id', 'NO ACTION', 'CASCADE');
         $this->makeFK('post_tag', 'tag_id', 'tag', 'id', 'NO ACTION', 'CASCADE');

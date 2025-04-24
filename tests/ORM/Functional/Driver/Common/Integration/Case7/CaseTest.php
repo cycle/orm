@@ -44,7 +44,6 @@ abstract class CaseTest extends BaseTest
         // Init DB
         parent::setUp();
         $this->makeTables();
-        $this->fillData();
 
         $this->loadSchema(__DIR__ . '/schema.php');
     }
@@ -72,24 +71,5 @@ abstract class CaseTest extends BaseTest
         );
         $this->makeFK('post_tag', 'post_id', 'post', 'id', 'NO ACTION', 'CASCADE');
         $this->makeFK('post_tag', 'tag_id', 'tag', 'id', 'NO ACTION', 'CASCADE');
-    }
-
-    private function fillData(): void
-    {
-        $p1 = $this->getDatabase()->table('post')->insertOne(['title' => 'Title1', 'content' => '1 tag']);
-        $p2 = $this->getDatabase()->table('post')->insertOne(['title' => 'Title2', 'content' => '2 tag']);
-
-        $t1 = $this->getDatabase()->table('tag')->insertOne(['label' => 'foo']);
-        $t2 = $this->getDatabase()->table('tag')->insertOne(['label' => 'bar']);
-        $t3 = $this->getDatabase()->table('tag')->insertOne(['label' => 'baz']);
-
-        $this->getDatabase()->table('post_tag')->insertMultiple(
-            ['post_id', 'tag_id'],
-            [
-                [$p1, $t1],
-                [$p2, $t2],
-                [$p2, $t3],
-            ],
-        );
     }
 }

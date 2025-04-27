@@ -15,6 +15,7 @@ final class Relation
     public const SCHEMA = 2;
     public const LOAD = 3;
     public const COLLECTION_TYPE = 4;
+    public const OBSOLETE = 5;
 
     // Composite relation type without usage of external table.
     public const EMBEDDED = 1;

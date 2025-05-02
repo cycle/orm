@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7;
 
-use Cycle\ORM\EntityManager;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\Post;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case7\Entity\PostTag;

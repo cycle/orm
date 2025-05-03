@@ -467,14 +467,51 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->orm->getHeap()->clean();
     }
 
-    /**
-     * If collection is replaced with null or unset - remove all children
-     */
-    public function testRemoveRelatedUsingUnset(): void
+    public function testUninitializedProperty(): void
     {
-        /**
-         * @var User $user
-         */
+        $u = new User();
+        $u->email = 'many@email.com';
+        $u->balance = 900;
+        unset($u->tags);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+
+        self::assertFalse(isset($u->tags));
+
+        $u->tags = [];
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If relation property was unset - ignore this field
+     */
+    public function testUnsetProperty(): void
+    {
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))->load('tags')->fetchOne(['id' => 1]);
+
+        $this->assertInstanceOf(Collection::class, $user->tags);
+        $this->assertCount(2, $user->tags);
+
+        unset($user->tags);
+
+        // Ignore uninitialized collection
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If collection is replaced with null - remove all children
+     */
+    public function testRemoveChildrenUsingSetNull(): void
+    {
+        /** @var User $user */
         $user = (new Select($this->orm, User::class))->load('tags')->fetchOne(['id' => 1]);
 
         $this->assertInstanceOf(Collection::class, $user->tags);
@@ -484,7 +521,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->save($user);
         $this->assertNumWrites(0);
 
-        unset($user->tags);
+        $user->tags = null;
 
         $this->captureWriteQueries();
         $this->save($user);

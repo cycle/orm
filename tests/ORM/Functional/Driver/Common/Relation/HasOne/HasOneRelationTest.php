@@ -23,6 +23,8 @@ abstract class HasOneRelationTest extends BaseTest
 {
     use TableTrait;
 
+    protected const NULLABLE = false;
+
     public function testHasInSchema(): void
     {
         $this->assertSame(['profile'], $this->orm->getSchema()->getRelations('user'));
@@ -294,18 +296,19 @@ abstract class HasOneRelationTest extends BaseTest
 
     public function testAssignNewChild(): void
     {
-        $selector = new Select($this->orm, User::class);
-        $e = $selector->wherePK(1)->load('profile')->fetchOne();
+        $e = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->load('profile')->fetchOne();
 
         $oP = $e->profile;
         $e->profile = new Profile();
         $e->profile->image = 'new.jpg';
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(2);
 
-        $this->assertFalse($this->orm->getHeap()->has($oP));
+        $this->assertSame(static::NULLABLE, $this->orm->getHeap()->has($oP));
         $this->assertTrue($this->orm->getHeap()->has($e->profile));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
@@ -349,12 +352,10 @@ abstract class HasOneRelationTest extends BaseTest
         $b->profile = new Profile();
         $b->profile->image = 'secondary.gif';
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($b);
 
         // reset state
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm->getHeap()->clean();
 
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
@@ -363,16 +364,15 @@ abstract class HasOneRelationTest extends BaseTest
 
         [$a->profile, $b->profile] = [$b->profile, $a->profile];
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
+        $this->save($a, $b);
 
         // reset state
-        $this->orm = $this->orm->withHeap(new Heap());
+        $this->orm->getHeap()->clean();
 
         $selector = new Select($this->orm, User::class);
-        [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
+        [$a, $b] = $selector
+            ->load('profile')
+            ->orderBy('user.id')->fetchAll();
         $this->assertSame('image.png', $b->profile->image);
         $this->assertSame('secondary.gif', $a->profile->image);
     }
@@ -605,6 +605,79 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    public function testUninitializedProperty(): void
+    {
+        $u = new User();
+        $u->email = 'many@email.com';
+        $u->balance = 900;
+        unset($u->profile);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+
+        self::assertFalse(isset($u->profile));
+
+        $u->profile = null;
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If relation property was unset - ignore this field
+     */
+    public function testUnsetProperty(): void
+    {
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->with('profile')->fetchOne();
+
+        unset($user->profile);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If relation is replaced with null - delete the child (set user_id to null)
+     */
+    public function testRemoveChildrenUsingSetNull(): void
+    {
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->with('profile')->fetchOne();
+
+        $this->assertInstanceOf(Profile::class, $user->profile);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+
+        $user->profile = null;
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+
+        $this->orm->getHeap()->clean();
+        $user = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->with('profile')->fetchOne();
+        static::NULLABLE
+            ? $this->assertNull($user->profile)
+            // Because not nullable HAS_ONE loads the child using INNER JOIN
+            : $this->assertNull($user);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -667,6 +740,7 @@ abstract class HasOneRelationTest extends BaseTest
                         Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Profile::class,
                         Relation::SCHEMA => [
+                            Relation::NULLABLE => static::NULLABLE,
                             Relation::CASCADE => true,
                             Relation::INNER_KEY => 'id',
                             Relation::OUTER_KEY => 'user_id',

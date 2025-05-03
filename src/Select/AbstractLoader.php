@@ -125,6 +125,10 @@ abstract class AbstractLoader implements LoaderInterface
             );
         }
 
+        if (isset($options['method']) && $options['method'] === true) {
+            $options['method'] = self::JOIN;
+        }
+
         $loader = clone $this;
         $loader->parent = $parent;
         $loader->options = $options + $this->options;
@@ -195,7 +199,7 @@ abstract class AbstractLoader implements LoaderInterface
         if ($join) {
             if (empty($options['method']) || !\in_array($options['method'], [self::JOIN, self::LEFT_JOIN], true)) {
                 // let's tell our loaded that it's method is JOIN (forced)
-                $options['method'] = self::JOIN;
+                $options['method'] = true;
             }
         }
 

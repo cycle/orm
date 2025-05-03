@@ -64,13 +64,18 @@ final class EntityFactory implements EntityFactoryInterface
                 $e = $this->heap->find($rRole, $ids);
 
                 if ($e !== null) {
-                    // Get not resolved relations (references)
-                    $refs = \array_filter(
-                        $mapper->fetchRelations($e),
-                        fn($v) => $v instanceof ReferenceInterface,
-                    );
+                    $relations = $relMap->getRelations();
+                    $fetched = $mapper->fetchRelations($e);
 
-                    if ($refs === []) {
+                    // Get not resolved (references) or not set relations
+                    $overwrite = [];
+                    foreach ($relations as $name => $_) {
+                        if (!\array_key_exists($name, $fetched) || $fetched[$name] instanceof ReferenceInterface) {
+                            $overwrite[$name] = true;
+                        }
+                    }
+
+                    if ($overwrite === []) {
                         return $e;
                     }
 
@@ -81,7 +86,7 @@ final class EntityFactory implements EntityFactoryInterface
                     return $mapper->hydrate($e, $relMap->init(
                         $this,
                         $node,
-                        \array_intersect_key($castedData, $refs),
+                        \array_intersect_key($castedData, $overwrite),
                     ));
                 }
             }

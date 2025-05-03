@@ -84,7 +84,11 @@ class ManyToMany extends Relation\AbstractRelation
         if ($related instanceof ReferenceInterface && $this->resolve($related, true) !== null) {
             $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
+        } elseif (SpecialValue::isNotSet($related)) {
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
         }
+
         $related = $this->extractRelated($related, $original);
         // $tuple->state->setStorage($this->pivotEntity, $related);
         $tuple->state->setRelation($this->getName(), $related);

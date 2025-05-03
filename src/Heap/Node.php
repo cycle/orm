@@ -7,6 +7,7 @@ namespace Cycle\ORM\Heap;
 use Cycle\Database\Injection\ValueInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Relation\SpecialValue;
 use Cycle\ORM\RelationMap;
 use JetBrains\PhpStorm\ExpectedValues;
 
@@ -191,6 +192,10 @@ final class Node
         $changes = \array_udiff_assoc($state->getTransactionData(), $this->data, [self::class, 'compare']);
 
         foreach ($state->getRelations() as $name => $value) {
+            if (SpecialValue::isNotSet($value)) {
+                continue;
+            }
+
             if ($value instanceof ReferenceInterface) {
                 $changes[$name] = $value->hasValue() ? $value->getValue() : $value;
             }

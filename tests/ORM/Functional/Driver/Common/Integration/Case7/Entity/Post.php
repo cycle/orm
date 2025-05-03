@@ -11,7 +11,7 @@ class Post
     public string $content = '';
 
     /** @var iterable<PostTag> */
-    public iterable $postTags = [];
+    public iterable $postTags;
 
     public function __construct(string $title = '', string $content = '')
     {

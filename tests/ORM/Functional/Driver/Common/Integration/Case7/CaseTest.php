@@ -26,12 +26,14 @@ abstract class CaseTest extends BaseTest
         /**
          * Wrong way
          *
-         * @note When we create a new Post entity manually, ORM has no ability to put a promise in relation.
-         *       So, when we call $post->postTags, it will be empty.
+         * @note When we create a new Post entity manually, ORM will not have magic abilities there.
          * @link https://spiral.dev/blog/cycle-orm-hungry-for-relations
+         *
+         * But there {@see Post::$postTags} is not initialized. ORM will ignore uninitialized relations.
+         * That's why after eager loading below ORM will hydrate the empty relation.
          */
-        // $post = new Post('title3', 'content3');
-        // $this->save($post);
+        $post = new Post('title3', 'content3');
+        $this->save($post);
 
         /**
          * Right way
@@ -39,7 +41,8 @@ abstract class CaseTest extends BaseTest
          * @note We use ORM to create a new Post entity.
          *       We get an entity-proxy that has a promise in relation under the hood.
          */
-        $post = $this->orm->make(Post::class, ['title' => 'title3', 'content' => 'content3']);
+        // $post = $this->orm->make(Post::class, ['title' => 'title3', 'content' => 'content3']);
+        // $this->save($post);
 
 
         // Get tag
@@ -55,11 +58,14 @@ abstract class CaseTest extends BaseTest
         $id = $post->id;
         unset($post);
 
+        $this->enableProfiling();
+
         /**
-         * @note When we use repository to get a Post entity, we actually get the same cached entity from the heap.
-         *       So, the empty relation won't be overwritten.
+         * @note When we use a repository to get the Post entity, we actually get the same cached entity from the heap.
+         *       So, if the relation has an empty collection, it won't be overwritten.
+         *       But we have uninitialized relation in the heap. So, ORM will hydrate it.
          *
-         *       We can call `$this->orm->getHeap()->clean();` to clear the heap.
+         * @since ORM 2.10.0 EntityManager can fill only unresolved relations
          */
         $post = $this->orm->getRepository(Post::class)->findByPK($id);
         self::assertCount(1, $post->postTags);

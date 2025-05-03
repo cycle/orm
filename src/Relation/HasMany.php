@@ -48,7 +48,9 @@ class HasMany extends AbstractRelation
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         $node = $tuple->node;
-        $original = $node->getRelation($this->getName());
+        $original = $node->hasRelation($this->getName())
+            ? $node->getRelation($this->getName())
+            : SpecialValue::notSet();
         $tuple->state->setRelation($this->getName(), $related);
 
         if ($original instanceof ReferenceInterface) {
@@ -63,6 +65,9 @@ class HasMany extends AbstractRelation
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
+        } elseif (SpecialValue::isNotSet($related)) {
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
         } elseif (!\is_iterable($related)) {
             if ($related === null) {
                 $related = $this->collect([]);
@@ -73,8 +78,10 @@ class HasMany extends AbstractRelation
                 ));
             }
         }
-        foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $this->deleteChild($pool, $tuple, $item);
+        if (!SpecialValue::isEmpty($original)) {
+            foreach ($this->calcDeleted($related, $original) as $item) {
+                $this->deleteChild($pool, $tuple, $item);
+            }
         }
 
         if (\count($related) === 0) {

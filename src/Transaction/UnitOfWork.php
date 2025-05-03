@@ -11,6 +11,7 @@ use Cycle\ORM\Exception\SuccessTransactionRetryException;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Relation\SpecialValue;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
@@ -287,7 +288,7 @@ final class UnitOfWork implements StateInterface
                 $relation->prepare(
                     $this->pool,
                     $tuple,
-                    $relData[$name] ?? null,
+                    \array_key_exists($name, $relData) ? $relData[$name] : SpecialValue::notSet(),
                     $isWaitingKeys || $hasChangedKeys,
                 );
                 $relationStatus = $tuple->state->getRelationStatus($relation->getName());

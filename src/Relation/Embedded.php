@@ -120,6 +120,12 @@ final class Embedded implements SameRowRelationInterface
         if ($tuple->task !== Tuple::TASK_STORE) {
             return;
         }
+
+        if (!$tuple->state->hasRelation($this->getName())) {
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
+        }
+
         $related = $tuple->state->getRelation($this->getName());
 
         // Master Node

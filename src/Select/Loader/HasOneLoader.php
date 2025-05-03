@@ -60,6 +60,15 @@ class HasOneLoader extends JoinableLoader
         return parent::configureQuery($query);
     }
 
+    public function withContext(LoaderInterface $parent, array $options = []): static
+    {
+        if (isset($options['method']) && ($options['method'] === self::INLOAD || $options['method'] === true)) {
+            $options['method'] = ($this->schema[Relation::NULLABLE] ?? false) ? self::LEFT_JOIN : self::JOIN;
+        }
+
+        return parent::withContext($parent, $options);
+    }
+
     protected function initNode(): AbstractNode
     {
         return new SingularNode(
@@ -68,14 +77,5 @@ class HasOneLoader extends JoinableLoader
             (array) $this->schema[Relation::OUTER_KEY],
             (array) $this->schema[Relation::INNER_KEY],
         );
-    }
-
-    public function withContext(LoaderInterface $parent, array $options = []): static
-    {
-        if (isset($options['method']) && ($options['method'] === self::INLOAD || $options['method'] === true)) {
-            $options['method'] = ($this->schema[Relation::NULLABLE] ?? false) ? self::LEFT_JOIN : self::JOIN;
-        }
-
-        return parent::withContext($parent, $options);
     }
 }

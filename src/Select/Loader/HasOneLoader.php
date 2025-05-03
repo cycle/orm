@@ -9,7 +9,6 @@ use Cycle\ORM\Parser\SingularNode;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 use Cycle\Database\Query\SelectQuery;
@@ -58,15 +57,6 @@ class HasOneLoader extends JoinableLoader
         );
 
         return parent::configureQuery($query);
-    }
-
-    public function withContext(LoaderInterface $parent, array $options = []): static
-    {
-        if (isset($options['method']) && ($options['method'] === self::INLOAD || $options['method'] === true)) {
-            $options['method'] = ($this->schema[Relation::NULLABLE] ?? false) ? self::LEFT_JOIN : self::JOIN;
-        }
-
-        return parent::withContext($parent, $options);
     }
 
     protected function initNode(): AbstractNode

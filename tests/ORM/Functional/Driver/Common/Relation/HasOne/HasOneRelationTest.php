@@ -672,10 +672,7 @@ abstract class HasOneRelationTest extends BaseTest
         $user = (new Select($this->orm, User::class))
             ->wherePK(1)
             ->load('profile')->fetchOne();
-        static::NULLABLE
-            ? $this->assertNull($user->profile)
-            // Because not nullable HAS_ONE loads the child using INNER JOIN
-            : $this->assertNull($user);
+        $this->assertNull($user->profile);
     }
 
     public function setUp(): void

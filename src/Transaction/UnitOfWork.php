@@ -244,7 +244,11 @@ final class UnitOfWork implements StateInterface
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
                     if ($relationStatus === RelationInterface::STATUS_PREPARE) {
                         $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
-                        $relation->prepare($this->pool, $tuple, $entityData[$name] ?? null);
+                        $relation->prepare(
+                            $this->pool,
+                            $tuple,
+                            \array_key_exists($name, $entityData) ? $entityData[$name] : SpecialValue::notSet(),
+                        );
                         $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                     }
                 } else {

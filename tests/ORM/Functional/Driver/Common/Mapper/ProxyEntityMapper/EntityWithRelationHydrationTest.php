@@ -24,7 +24,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $this->orm = $this->orm->with(
-            options: (new Options())->withIgnoreUninitializedRelations(false)
+            options: (new Options())->withIgnoreUninitializedRelations(false),
         );
 
         $profile = new EntityWithRelationHydrationProfile('test');
@@ -39,7 +39,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     public function testRelationWithMixedTypeShouldBeFilledAsReference(): void
     {
         $this->orm = $this->orm->with(
-            options: (new Options())->withIgnoreUninitializedRelations(false)
+            options: (new Options())->withIgnoreUninitializedRelations(false),
         );
 
         $user = new EntityWithMixedTypeRelation();
@@ -54,7 +54,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     public function testRelationExistedInHeapMustFilledAsEntity(): void
     {
         $this->orm = $this->orm->with(
-            options: (new Options())->withIgnoreUninitializedRelations(false)
+            options: (new Options())->withIgnoreUninitializedRelations(false),
         );
 
         $user = new EntityWithMixedTypeRelation();
@@ -70,7 +70,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     public function testPrivateHasManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $this->orm = $this->orm->with(
-            options: (new Options())->withIgnoreUninitializedRelations(false)
+            options: (new Options())->withIgnoreUninitializedRelations(false),
         );
 
         $profile = new EntityWithRelationHydrationProfile('test');
@@ -85,7 +85,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $this->orm = $this->orm->with(
-            options: (new Options())->withIgnoreUninitializedRelations(false)
+            options: (new Options())->withIgnoreUninitializedRelations(false),
         );
 
         $tagContext = new EntityWithRelationHydrationTagContext();

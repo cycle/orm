@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.10.0@9c0add4eb88d4b169ac04acb7c679918cbb9c252">
+<files psalm-version="6.10.1@f9fd6bc117e9ce1e854c2ed6777e7135aaa4966b">
   <file src="src/Collection/ArrayCollectionFactory.php">
     <DocblockTypeContradiction>
       <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
@@ -14,11 +14,6 @@
     <InvalidReturnType>
       <code><![CDATA[array]]></code>
     </InvalidReturnType>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function collect(iterable $data): array]]></code>
-      <code><![CDATA[public function getInterface(): ?string]]></code>
-      <code><![CDATA[public function withCollectionClass(string $class): static]]></code>
-    </MissingOverrideAttribute>
   </file>
   <file src="src/Collection/DoctrineCollectionFactory.php">
     <DocblockTypeContradiction>
@@ -32,11 +27,6 @@
     <InvalidReturnType>
       <code><![CDATA[Collection]]></code>
     </InvalidReturnType>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function collect(iterable $data): Collection]]></code>
-      <code><![CDATA[public function getInterface(): ?string]]></code>
-      <code><![CDATA[public function withCollectionClass(string $class): static]]></code>
-    </MissingOverrideAttribute>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$data->getContext()]]></code>
     </MixedArgumentTypeCoercion>
@@ -51,11 +41,6 @@
     </TypeDoesNotContainType>
   </file>
   <file src="src/Collection/IlluminateCollectionFactory.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function collect(iterable $data): Collection]]></code>
-      <code><![CDATA[public function getInterface(): ?string]]></code>
-      <code><![CDATA[public function withCollectionClass(string $class): static]]></code>
-    </MissingOverrideAttribute>
     <PossiblyUnusedMethod>
       <code><![CDATA[__construct]]></code>
     </PossiblyUnusedMethod>
@@ -77,11 +62,6 @@
     <InvalidReturnType>
       <code><![CDATA[CollectionInterface]]></code>
     </InvalidReturnType>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function collect(iterable $data): CollectionInterface]]></code>
-      <code><![CDATA[public function getInterface(): string]]></code>
-      <code><![CDATA[public function withCollectionClass(string $class): static]]></code>
-    </MissingOverrideAttribute>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$data->getContext()]]></code>
     </MixedArgumentTypeCoercion>
@@ -112,14 +92,6 @@
       <code><![CDATA[LoophpPivotedCollection]]></code>
       <code><![CDATA[LoophpPivotedCollection]]></code>
     </InvalidTemplateParam>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function count(): int]]></code>
-      <code><![CDATA[public function getPivot(object $element): mixed]]></code>
-      <code><![CDATA[public function getPivotContext(): \SplObjectStorage]]></code>
-      <code><![CDATA[public function hasPivot(object $element): bool]]></code>
-      <code><![CDATA[public function setPivot(object $element, mixed $pivot): void]]></code>
-      <code><![CDATA[public static function fromIterable(iterable $iterable): static]]></code>
-    </MissingOverrideAttribute>
     <MissingTemplateParam>
       <code><![CDATA[parent::fromIterable($elements)]]></code>
     </MissingTemplateParam>
@@ -146,21 +118,12 @@
     <InvalidPropertyAssignmentValue>
       <code><![CDATA[$this->pivotContext]]></code>
     </InvalidPropertyAssignmentValue>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function createFrom(array $elements): static]]></code>
-      <code><![CDATA[public function getPivot(object $element): mixed]]></code>
-      <code><![CDATA[public function getPivotContext(): \SplObjectStorage]]></code>
-      <code><![CDATA[public function hasPivot(object $element): bool]]></code>
-      <code><![CDATA[public function setPivot(object $element, mixed $pivot): void]]></code>
-    </MissingOverrideAttribute>
     <MoreSpecificImplementedParamType>
       <code><![CDATA[$elements]]></code>
     </MoreSpecificImplementedParamType>
   </file>
   <file src="src/Collection/Pivoted/PivotedCollectionInterface.php">
     <PossiblyUnusedMethod>
-      <code><![CDATA[getPivot]]></code>
-      <code><![CDATA[hasPivot]]></code>
       <code><![CDATA[setPivot]]></code>
     </PossiblyUnusedMethod>
   </file>
@@ -168,19 +131,11 @@
     <ClassMustBeFinal>
       <code><![CDATA[PivotedStorage]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function count(): int]]></code>
-      <code><![CDATA[public function getIterator(): \Generator]]></code>
-    </MissingOverrideAttribute>
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
   </file>
   <file src="src/Command/Database/Delete.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function execute(): void]]></code>
-      <code><![CDATA[public function isReady(): bool]]></code>
-    </MissingOverrideAttribute>
     <PossiblyNullArgument>
       <code><![CDATA[$this->table]]></code>
     </PossiblyNullArgument>
@@ -189,12 +144,6 @@
     <EmptyArrayAccess>
       <code><![CDATA[$returningFields[$this->primaryKeys[0]]]]></code>
     </EmptyArrayAccess>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function execute(): void]]></code>
-      <code><![CDATA[public function getStoreData(): array]]></code>
-      <code><![CDATA[public function hasData(): bool]]></code>
-      <code><![CDATA[public function isReady(): bool]]></code>
-    </MissingOverrideAttribute>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$field]]></code>
       <code><![CDATA[$field]]></code>
@@ -227,13 +176,6 @@
     </TypeDoesNotContainNull>
   </file>
   <file src="src/Command/Database/Update.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function execute(): void]]></code>
-      <code><![CDATA[public function getDatabase(): ?DatabaseInterface]]></code>
-      <code><![CDATA[public function getStoreData(): array]]></code>
-      <code><![CDATA[public function hasData(): bool]]></code>
-      <code><![CDATA[public function isReady(): bool]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$primaryKeys]]></code>
     </MixedArgument>
@@ -248,13 +190,6 @@
       <code><![CDATA[$this->table]]></code>
     </PossiblyNullArgument>
   </file>
-  <file src="src/Command/DatabaseCommand.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function execute(): void]]></code>
-      <code><![CDATA[public function getDatabase(): ?DatabaseInterface]]></code>
-      <code><![CDATA[public function isExecuted(): bool]]></code>
-    </MissingOverrideAttribute>
-  </file>
   <file src="src/Command/ScopeCarrierInterface.php">
     <PossiblyUnusedMethod>
       <code><![CDATA[getAffectedRows]]></code>
@@ -262,14 +197,6 @@
     </PossiblyUnusedMethod>
   </file>
   <file src="src/Command/Special/MergeCommand.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function count(): int]]></code>
-      <code><![CDATA[public function execute(): void]]></code>
-      <code><![CDATA[public function getDatabase(): ?DatabaseInterface]]></code>
-      <code><![CDATA[public function getIterator(): \Generator]]></code>
-      <code><![CDATA[public function isExecuted(): bool]]></code>
-      <code><![CDATA[public function isReady(): bool]]></code>
-    </MissingOverrideAttribute>
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
@@ -278,14 +205,6 @@
     </MixedAssignment>
   </file>
   <file src="src/Command/Special/Sequence.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function count(): int]]></code>
-      <code><![CDATA[public function execute(): void]]></code>
-      <code><![CDATA[public function getDatabase(): ?DatabaseInterface]]></code>
-      <code><![CDATA[public function getIterator(): \Generator]]></code>
-      <code><![CDATA[public function isExecuted(): bool]]></code>
-      <code><![CDATA[public function isReady(): bool]]></code>
-    </MissingOverrideAttribute>
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
@@ -298,12 +217,6 @@
       <code><![CDATA[$pkColumn]]></code>
       <code><![CDATA[$table]]></code>
     </ArgumentTypeCoercion>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function execute(): void]]></code>
-      <code><![CDATA[public function getDatabase(): ?DatabaseInterface]]></code>
-      <code><![CDATA[public function isExecuted(): bool]]></code>
-      <code><![CDATA[public function isReady(): bool]]></code>
-    </MissingOverrideAttribute>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$primaryKeys]]></code>
     </MixedArgumentTypeCoercion>
@@ -327,11 +240,6 @@
     </UnsafeInstantiation>
   </file>
   <file src="src/Command/Special/WrappedStoreCommand.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function hasData(): bool]]></code>
-      <code><![CDATA[public function registerAppendix(string $key, mixed $value): void]]></code>
-      <code><![CDATA[public function registerColumn(string $key, mixed $value): void]]></code>
-    </MissingOverrideAttribute>
     <NonInvariantDocblockPropertyType>
       <code><![CDATA[$command]]></code>
     </NonInvariantDocblockPropertyType>
@@ -340,10 +248,6 @@
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/Command/StoreCommand.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function registerAppendix(string $key, mixed $value): void]]></code>
-      <code><![CDATA[public function registerColumn(string $key, mixed $value): void]]></code>
-    </MissingOverrideAttribute>
     <PossiblyNullPropertyAssignmentValue>
       <code><![CDATA[$db]]></code>
     </PossiblyNullPropertyAssignmentValue>
@@ -382,6 +286,12 @@
       <code><![CDATA[$this->waitScope]]></code>
     </InvalidPropertyAssignmentValue>
   </file>
+  <file src="src/Config/RelationConfig.php">
+    <TooManyArguments>
+      <code><![CDATA[new Autowire($loader)]]></code>
+      <code><![CDATA[new Autowire($relation)]]></code>
+    </TooManyArguments>
+  </file>
   <file src="src/EntityManager.php">
     <ClassMustBeFinal>
       <code><![CDATA[EntityManager]]></code>
@@ -389,13 +299,6 @@
     <InvalidThrow>
       <code><![CDATA[throw $state->getLastError()]]></code>
     </InvalidThrow>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function clean(bool $cleanHeap = false): static]]></code>
-      <code><![CDATA[public function delete(object $entity, bool $cascade = true): static]]></code>
-      <code><![CDATA[public function persist(object $entity, bool $cascade = true): static]]></code>
-      <code><![CDATA[public function persistState(object $entity, bool $cascade = true): static]]></code>
-      <code><![CDATA[public function run(bool $throwException = true, ?RunnerInterface $runner = null): StateInterface]]></code>
-    </MissingOverrideAttribute>
     <PossiblyUnusedMethod>
       <code><![CDATA[__construct]]></code>
     </PossiblyUnusedMethod>
@@ -560,19 +463,6 @@
             ],
         )]]></code>
     </LessSpecificReturnStatement>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function collection(]]></code>
-      <code><![CDATA[public function database(?string $database = null): DatabaseInterface]]></code>
-      <code><![CDATA[public function loader(]]></code>
-      <code><![CDATA[public function make(]]></code>
-      <code><![CDATA[public function mapper(ORMInterface $orm, string $role): MapperInterface]]></code>
-      <code><![CDATA[public function relation(]]></code>
-      <code><![CDATA[public function repository(]]></code>
-      <code><![CDATA[public function source(]]></code>
-      <code><![CDATA[public function typecast(SchemaInterface $schema, DatabaseInterface $database, string $role): ?TypecastInterface]]></code>
-      <code><![CDATA[public function withCollectionFactory(]]></code>
-      <code><![CDATA[public function withDefaultSchemaClasses(array $defaults): self]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$class]]></code>
       <code><![CDATA[$class]]></code>
@@ -640,15 +530,6 @@
     <InvalidNullableReturnType>
       <code><![CDATA[\SplObjectStorage]]></code>
     </InvalidNullableReturnType>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function attach(object $entity, Node $node, array $index = []): void]]></code>
-      <code><![CDATA[public function clean(): void]]></code>
-      <code><![CDATA[public function detach(object $entity): void]]></code>
-      <code><![CDATA[public function find(string $role, array $scope): ?object]]></code>
-      <code><![CDATA[public function get(object $entity): ?Node]]></code>
-      <code><![CDATA[public function getIterator(): \SplObjectStorage]]></code>
-      <code><![CDATA[public function has(object $entity): bool]]></code>
-    </MissingOverrideAttribute>
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
@@ -741,11 +622,6 @@
       <code><![CDATA[$values]]></code>
     </UnusedForeachValue>
   </file>
-  <file src="src/Heap/HeapInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[has]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="src/Heap/Node.php">
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$name]]></code>
@@ -761,16 +637,6 @@
     <UnusedParam>
       <code><![CDATA[$relMap]]></code>
     </UnusedParam>
-  </file>
-  <file src="src/Heap/NullHeap.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function attach(object $entity, Node $node, array $index = []): void {}]]></code>
-      <code><![CDATA[public function clean(): void {}]]></code>
-      <code><![CDATA[public function detach(object $entity): void {}]]></code>
-      <code><![CDATA[public function find(string $role, array $scope): ?object]]></code>
-      <code><![CDATA[public function get(object $entity): ?Node]]></code>
-      <code><![CDATA[public function has(object $entity): bool]]></code>
-    </MissingOverrideAttribute>
   </file>
   <file src="src/Heap/State.php">
     <MixedArgumentTypeCoercion>
@@ -801,9 +667,6 @@
     <ImplementedReturnTypeMismatch>
       <code><![CDATA[\Generator<array, array-key|TEntity, mixed, void>]]></code>
     </ImplementedReturnTypeMismatch>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getIterator(): \Generator]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$role]]></code>
@@ -846,13 +709,6 @@
     <InvalidArgument>
       <code><![CDATA[\array_keys($this->columns + $this->parentColumns)]]></code>
     </InvalidArgument>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function extract($entity): array]]></code>
-      <code><![CDATA[public function fetchFields(object $entity): array]]></code>
-      <code><![CDATA[public function fetchRelations(object $entity): array]]></code>
-      <code><![CDATA[public function hydrate($entity, array $data): object]]></code>
-      <code><![CDATA[public function init(array $data, ?string $role = null): object]]></code>
-    </MissingOverrideAttribute>
     <MissingParamType>
       <code><![CDATA[$entity]]></code>
       <code><![CDATA[$entity]]></code>
@@ -868,15 +724,6 @@
       <code><![CDATA[$this->source->getTable()]]></code>
       <code><![CDATA[\count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null]]></code>
     </ArgumentTypeCoercion>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function cast(array $data): array]]></code>
-      <code><![CDATA[public function getRole(): string]]></code>
-      <code><![CDATA[public function mapColumns(array &$values): array]]></code>
-      <code><![CDATA[public function queueCreate(object $entity, Node $node, State $state): CommandInterface]]></code>
-      <code><![CDATA[public function queueDelete(object $entity, Node $node, State $state): CommandInterface]]></code>
-      <code><![CDATA[public function queueUpdate(object $entity, Node $node, State $state): CommandInterface]]></code>
-      <code><![CDATA[public function uncast(array $data): array]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$parent]]></code>
     </MixedArgument>
@@ -912,13 +759,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[Mapper]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function extract(object $entity): array]]></code>
-      <code><![CDATA[public function fetchFields(object $entity): array]]></code>
-      <code><![CDATA[public function fetchRelations(object $entity): array]]></code>
-      <code><![CDATA[public function hydrate(object $entity, array $data): object]]></code>
-      <code><![CDATA[public function init(array $data, ?string $role = null): object]]></code>
-    </MissingOverrideAttribute>
     <MixedAssignment>
       <code><![CDATA[$this->children]]></code>
       <code><![CDATA[$this->discriminator]]></code>
@@ -1137,13 +977,6 @@
     </UnusedForeachValue>
   </file>
   <file src="src/Mapper/StdMapper.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function extract($entity): array]]></code>
-      <code><![CDATA[public function fetchFields(object $entity): array]]></code>
-      <code><![CDATA[public function fetchRelations(object $entity): array]]></code>
-      <code><![CDATA[public function hydrate($entity, array $data): object]]></code>
-      <code><![CDATA[public function init(array $data, ?string $role = null): object]]></code>
-    </MissingOverrideAttribute>
     <MissingParamType>
       <code><![CDATA[$entity]]></code>
       <code><![CDATA[$entity]]></code>
@@ -1189,53 +1022,27 @@
             MapperProviderInterface::class => $this->mapperProvider,
             RelationProviderInterface::class => $this->relationProvider,
             RepositoryProviderInterface::class => $this->repositoryProvider,
+            Options::class => $this->options,
             default => throw new \InvalidArgumentException("Undefined service `$class`."),
         }]]></code>
     </InvalidReturnStatement>
     <InvalidReturnType>
       <code><![CDATA[object]]></code>
     </InvalidReturnType>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function get(string $role, array $scope, bool $load = true): ?object]]></code>
-      <code><![CDATA[public function getCommandGenerator(): CommandGeneratorInterface]]></code>
-      <code><![CDATA[public function getFactory(): FactoryInterface]]></code>
-      <code><![CDATA[public function getHeap(): HeapInterface]]></code>
-      <code><![CDATA[public function getIndexes(string $entity): array]]></code>
-      <code><![CDATA[public function getMapper(string|object $entity): MapperInterface]]></code>
-      <code><![CDATA[public function getRelationMap(string $entity): RelationMap]]></code>
-      <code><![CDATA[public function getRepository(string|object $entity): RepositoryInterface]]></code>
-      <code><![CDATA[public function getSchema(): SchemaInterface]]></code>
-      <code><![CDATA[public function getService(]]></code>
-      <code><![CDATA[public function getSource(string $entity): SourceInterface]]></code>
-      <code><![CDATA[public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object]]></code>
-      <code><![CDATA[public function resolveRole(string|object $entity): string]]></code>
-      <code><![CDATA[public function with(]]></code>
-    </MissingOverrideAttribute>
     <MixedReturnStatement>
       <code><![CDATA[$this->entityFactory->make($role, $data, $status, $typecast)]]></code>
     </MixedReturnStatement>
     <PossiblyUnusedMethod>
       <code><![CDATA[prepareServices]]></code>
       <code><![CDATA[withFactory]]></code>
-      <code><![CDATA[withHeap]]></code>
-      <code><![CDATA[withSchema]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="src/ORMInterface.php">
     <ImplementedReturnTypeMismatch>
       <code><![CDATA[($role is class-string ? TEntity : object)]]></code>
     </ImplementedReturnTypeMismatch>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getMapper(string|object $entity): MapperInterface;]]></code>
-      <code><![CDATA[public function getRepository(string|object $entity): RepositoryInterface;]]></code>
-      <code><![CDATA[public function make(string $role, array $data = [], int $status = Node::NEW, bool $typecast = false): object;]]></code>
-    </MissingOverrideAttribute>
   </file>
   <file src="src/Parser/AbstractMergeNode.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function push(array &$data): void]]></code>
-      <code><![CDATA[public function mergeInheritanceNodes(bool $includeRole = false): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[static::OVERWRITE_DATA]]></code>
@@ -1328,28 +1135,17 @@
     </UnsupportedReferenceUsage>
   </file>
   <file src="src/Parser/ArrayNode.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function push(array &$data): void]]></code>
-    </MissingOverrideAttribute>
     <PossiblyNullArgument>
       <code><![CDATA[$this->container]]></code>
       <code><![CDATA[$this->indexName]]></code>
     </PossiblyNullArgument>
   </file>
   <file src="src/Parser/CompositeTypecast.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function cast(array $data): array]]></code>
-      <code><![CDATA[public function setRules(array $rules): array]]></code>
-      <code><![CDATA[public function uncast(array $data): array]]></code>
-    </MissingOverrideAttribute>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[array]]></code>
     </PossiblyUnusedReturnValue>
   </file>
   <file src="src/Parser/EmbeddedNode.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function push(array &$data): void]]></code>
-    </MissingOverrideAttribute>
     <PossiblyNullArgument>
       <code><![CDATA[$this->container]]></code>
       <code><![CDATA[$this->indexName]]></code>
@@ -1414,10 +1210,6 @@
     </UnusedParam>
   </file>
   <file src="src/Parser/OutputNode.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function push(array &$data): void]]></code>
-      <code><![CDATA[public function __destruct()]]></code>
-    </MissingOverrideAttribute>
     <UnsupportedReferenceUsage>
       <code><![CDATA[$this->result[] = &$data]]></code>
     </UnsupportedReferenceUsage>
@@ -1426,14 +1218,8 @@
     <ClassMustBeFinal>
       <code><![CDATA[ParentMergeNode]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function mergeInheritanceNodes(bool $includeRole = false): void]]></code>
-    </MissingOverrideAttribute>
   </file>
   <file src="src/Parser/SingularNode.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function push(array &$data): void]]></code>
-    </MissingOverrideAttribute>
     <PossiblyNullArgument>
       <code><![CDATA[$this->container]]></code>
       <code><![CDATA[$this->indexName]]></code>
@@ -1474,11 +1260,6 @@
       <code><![CDATA[$type === 'string']]></code>
       <code><![CDATA[null]]></code>
     </DocblockTypeContradiction>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function cast(array $data): array]]></code>
-      <code><![CDATA[public function setRules(array $rules): array]]></code>
-      <code><![CDATA[public function uncast(array $data): array]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$key]]></code>
       <code><![CDATA[$value]]></code>
@@ -1486,6 +1267,7 @@
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$data[$column]]]></code>
+      <code><![CDATA[$data[$key]]]></code>
       <code><![CDATA[$data[$key]]]></code>
       <code><![CDATA[$data[$key]]]></code>
       <code><![CDATA[$rule]]></code>
@@ -1502,23 +1284,7 @@
       <code><![CDATA[$this->enumClasses]]></code>
     </PropertyTypeCoercion>
   </file>
-  <file src="src/Reference/EmptyReference.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getRole(): string]]></code>
-      <code><![CDATA[public function getScope(): array]]></code>
-      <code><![CDATA[public function getValue(): mixed]]></code>
-      <code><![CDATA[public function hasValue(): bool]]></code>
-      <code><![CDATA[public function setValue(mixed $value): void]]></code>
-    </MissingOverrideAttribute>
-  </file>
   <file src="src/Reference/Promise.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getRole(): string]]></code>
-      <code><![CDATA[public function getScope(): array]]></code>
-      <code><![CDATA[public function getValue(): mixed]]></code>
-      <code><![CDATA[public function hasValue(): bool]]></code>
-      <code><![CDATA[public function setValue(mixed $value): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$this->origin->getValue()]]></code>
     </MixedArgument>
@@ -1530,22 +1296,8 @@
     <ClassMustBeFinal>
       <code><![CDATA[Reference]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[final public function getRole(): string]]></code>
-      <code><![CDATA[final public function getScope(): array]]></code>
-      <code><![CDATA[final public function getValue(): mixed]]></code>
-      <code><![CDATA[final public function hasValue(): bool]]></code>
-      <code><![CDATA[final public function setValue(mixed $value): void]]></code>
-    </MissingOverrideAttribute>
   </file>
   <file src="src/Relation/AbstractRelation.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function __toString(): string]]></code>
-      <code><![CDATA[public function getInnerKeys(): array]]></code>
-      <code><![CDATA[public function getName(): string]]></code>
-      <code><![CDATA[public function getTarget(): string]]></code>
-      <code><![CDATA[public function isCascade(): bool]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$role]]></code>
     </MixedArgument>
@@ -1567,10 +1319,6 @@
     </PossiblyNullArgument>
   </file>
   <file src="src/Relation/BelongsTo.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
@@ -1579,6 +1327,7 @@
       <code><![CDATA[$nodeValue]]></code>
       <code><![CDATA[$original]]></code>
       <code><![CDATA[$prefill]]></code>
+      <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
@@ -1594,19 +1343,6 @@
       <code><![CDATA[$this->target]]></code>
       <code><![CDATA[$this->target]]></code>
     </ArgumentTypeCoercion>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function cast(?array $data): ?array]]></code>
-      <code><![CDATA[public function collect(mixed $data): ?object]]></code>
-      <code><![CDATA[public function getInnerKeys(): array]]></code>
-      <code><![CDATA[public function getName(): string]]></code>
-      <code><![CDATA[public function getTarget(): string]]></code>
-      <code><![CDATA[public function init(EntityFactoryInterface $factory, Node $node, array $data): object]]></code>
-      <code><![CDATA[public function initReference(Node $node): ReferenceInterface]]></code>
-      <code><![CDATA[public function isCascade(): bool]]></code>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple, ?StoreCommandInterface $command = null): void]]></code>
-      <code><![CDATA[public function resolve(ReferenceInterface $reference, bool $load): ?object]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$related]]></code>
     </MixedArgument>
@@ -1656,22 +1392,13 @@
     <InvalidArgument>
       <code><![CDATA[$related]]></code>
     </InvalidArgument>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function cast(?array $data): array]]></code>
-      <code><![CDATA[public function collect(mixed $data): iterable]]></code>
-      <code><![CDATA[public function init(EntityFactoryInterface $factory, Node $node, array $data): iterable]]></code>
-      <code><![CDATA[public function initReference(Node $node): ReferenceInterface]]></code>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-      <code><![CDATA[public function resolve(ReferenceInterface $reference, bool $load): ?iterable]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$item]]></code>
-      <code><![CDATA[$original ?? []]]></code>
+      <code><![CDATA[$original]]></code>
       <code><![CDATA[$role]]></code>
       <code><![CDATA[$this->schema[Relation::COLLECTION_TYPE] ?? null]]></code>
       <code><![CDATA[$this->schema[Relation::WHERE] ?? []]]></code>
@@ -1708,8 +1435,12 @@
         )->collect($data)]]></code>
     </MixedReturnStatement>
     <PossiblyNullArgument>
+      <code><![CDATA[$original]]></code>
       <code><![CDATA[$related]]></code>
     </PossiblyNullArgument>
+    <PossiblyNullIterator>
+      <code><![CDATA[$related]]></code>
+    </PossiblyNullIterator>
     <RedundantCondition>
       <code><![CDATA[$original]]></code>
     </RedundantCondition>
@@ -1724,10 +1455,6 @@
     </UnusedVariable>
   </file>
   <file src="src/Relation/HasOne.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$original]]></code>
       <code><![CDATA[$original]]></code>
@@ -1761,15 +1488,6 @@
       <code><![CDATA[$entity]]></code>
       <code><![CDATA[$relatedStorage->get($parent)]]></code>
     </InvalidReturnStatement>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function cast(?array $data): array]]></code>
-      <code><![CDATA[public function collect(mixed $data): iterable]]></code>
-      <code><![CDATA[public function init(EntityFactoryInterface $factory, Node $node, array $data): iterable]]></code>
-      <code><![CDATA[public function initReference(Node $node): ReferenceInterface]]></code>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-      <code><![CDATA[public function resolve(ReferenceInterface $reference, bool $load): ?iterable]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$d]]></code>
       <code><![CDATA[$data->toArray()]]></code>
@@ -1909,11 +1627,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[BelongsToMorphed]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function assertValid(Node $related): void]]></code>
-      <code><![CDATA[public function initReference(Node $node): ReferenceInterface]]></code>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$target]]></code>
@@ -1932,12 +1645,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[MorphedHasMany]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void]]></code>
-      <code><![CDATA[protected function assertValid(Node $related): void]]></code>
-      <code><![CDATA[protected function getReferenceScope(Node $node): ?array]]></code>
-      <code><![CDATA[protected function getTargetRelationName(): string]]></code>
-    </MissingOverrideAttribute>
     <MixedAssignment>
       <code><![CDATA[$this->morphKey]]></code>
     </MixedAssignment>
@@ -1949,12 +1656,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[MorphedHasOne]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function assertValid(Node $related): void]]></code>
-      <code><![CDATA[protected function getReferenceScope(Node $node): ?array]]></code>
-      <code><![CDATA[protected function getTargetRelationName(): string]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$related]]></code>
     </MixedArgument>
@@ -1973,16 +1674,13 @@
     <ClassMustBeFinal>
       <code><![CDATA[RefersTo]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
@@ -1996,23 +1694,10 @@
       <code><![CDATA[getTarget]]></code>
     </PossiblyUnusedMethod>
   </file>
-  <file src="src/Relation/SameRowRelationInterface.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple, ?StoreCommandInterface $command = null): void;]]></code>
-    </MissingOverrideAttribute>
-  </file>
   <file src="src/Relation/ShadowBelongsTo.php">
     <ClassMustBeFinal>
       <code><![CDATA[ShadowBelongsTo]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getInnerKeys(): array]]></code>
-      <code><![CDATA[public function getName(): string]]></code>
-      <code><![CDATA[public function getTarget(): string]]></code>
-      <code><![CDATA[public function isCascade(): bool]]></code>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$key]]></code>
     </MixedArgument>
@@ -2031,14 +1716,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[ShadowHasMany]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getInnerKeys(): array]]></code>
-      <code><![CDATA[public function getName(): string]]></code>
-      <code><![CDATA[public function getTarget(): string]]></code>
-      <code><![CDATA[public function isCascade(): bool]]></code>
-      <code><![CDATA[public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void]]></code>
-      <code><![CDATA[public function queue(Pool $pool, Tuple $tuple): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$related]]></code>
@@ -2155,22 +1832,12 @@
   <file src="src/RepositoryInterface.php">
     <PossiblyUnusedMethod>
       <code><![CDATA[findAll]]></code>
-      <code><![CDATA[findByPK]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="src/Schema.php">
     <DocblockTypeContradiction>
       <code><![CDATA[$compareCallback === null]]></code>
     </DocblockTypeContradiction>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function define(string $role, int $property): mixed]]></code>
-      <code><![CDATA[public function defineRelation(string $role, string $relation): array]]></code>
-      <code><![CDATA[public function defines(string $role): bool]]></code>
-      <code><![CDATA[public function getInheritedRoles(string $parent): array]]></code>
-      <code><![CDATA[public function getRelations(string $role): array]]></code>
-      <code><![CDATA[public function getRoles(): array]]></code>
-      <code><![CDATA[public function resolveAlias(string $role): ?string]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$child]]></code>
       <code><![CDATA[$container]]></code>
@@ -2412,11 +2079,6 @@
       <code><![CDATA[$nullable]]></code>
     </UnusedVariable>
   </file>
-  <file src="src/SchemaInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getRelations]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="src/Select.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$ids]]></code>
@@ -2436,12 +2098,6 @@
     <InvalidTemplateParam>
       <code><![CDATA[Iterator<TEntity>]]></code>
     </InvalidTemplateParam>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function count(?string $column = null): int]]></code>
-      <code><![CDATA[public function getIterator(bool $findInHeap = false): Iterator]]></code>
-      <code><![CDATA[public function limit(int $limit): self]]></code>
-      <code><![CDATA[public function offset(int $offset): self]]></code>
-    </MissingOverrideAttribute>
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
@@ -2494,24 +2150,12 @@
       <code><![CDATA[$node->getResult()]]></code>
     </PossiblyInvalidArgument>
     <PossiblyUnusedMethod>
-      <code><![CDATA[fetchData]]></code>
       <code><![CDATA[getBuilder]]></code>
-      <code><![CDATA[load]]></code>
       <code><![CDATA[loadSubclasses]]></code>
       <code><![CDATA[sqlStatement]]></code>
-      <code><![CDATA[with]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="src/Select/AbstractLoader.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function createNode(): AbstractNode]]></code>
-      <code><![CDATA[public function getTarget(): string]]></code>
-      <code><![CDATA[public function isHierarchical(): bool]]></code>
-      <code><![CDATA[public function loadData(AbstractNode $node, bool $includeRole = false): void]]></code>
-      <code><![CDATA[public function loadRelation(]]></code>
-      <code><![CDATA[public function setSubclassesLoading(bool $enabled): void]]></code>
-      <code><![CDATA[public function withContext(LoaderInterface $parent, array $options = []): static]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$alias]]></code>
       <code><![CDATA[$options['as']]]></code>
@@ -2579,15 +2223,6 @@
     <LessSpecificReturnStatement>
       <code><![CDATA[$loader]]></code>
     </LessSpecificReturnStatement>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function applyScope(SelectQuery $query): SelectQuery]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-      <code><![CDATA[public function getAlias(): string]]></code>
-      <code><![CDATA[public function isJoined(): bool]]></code>
-      <code><![CDATA[public function isLoaded(): bool]]></code>
-      <code><![CDATA[public function loadData(AbstractNode $node, bool $includeRole = false): void]]></code>
-      <code><![CDATA[public function withContext(LoaderInterface $parent, array $options = []): static]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$relation]]></code>
       <code><![CDATA[$row]]></code>
@@ -2627,10 +2262,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[BelongsToLoader]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function initNode(): AbstractNode]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
     </MixedArgument>
@@ -2642,17 +2273,6 @@
     </MixedArgumentTypeCoercion>
   </file>
   <file src="src/Select/Loader/EmbeddedLoader.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-      <code><![CDATA[public function createNode(): AbstractNode]]></code>
-      <code><![CDATA[public function getAlias(): string]]></code>
-      <code><![CDATA[public function getTarget(): string]]></code>
-      <code><![CDATA[public function isHierarchical(): bool]]></code>
-      <code><![CDATA[public function isJoined(): bool]]></code>
-      <code><![CDATA[public function loadData(AbstractNode $node, bool $includeRole = false): void]]></code>
-      <code><![CDATA[public function setSubclassesLoading(bool $enabled): void {}]]></code>
-      <code><![CDATA[public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
       <code><![CDATA[$this->options['minify'] ?? true]]></code>
@@ -2678,10 +2298,6 @@
     </UndefinedInterfaceMethod>
   </file>
   <file src="src/Select/Loader/HasManyLoader.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function initNode(): AbstractNode]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []]]></code>
       <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
@@ -2694,10 +2310,6 @@
     </MixedArgumentTypeCoercion>
   </file>
   <file src="src/Select/Loader/HasOneLoader.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function initNode(): AbstractNode]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
     </MixedArgument>
@@ -2715,16 +2327,6 @@
     <LessSpecificReturnStatement>
       <code><![CDATA[$loader]]></code>
     </LessSpecificReturnStatement>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function initNode(): AbstractNode]]></code>
-      <code><![CDATA[protected function loadChild(AbstractNode $node, bool $includeRole = false): void]]></code>
-      <code><![CDATA[protected function mountColumns(]]></code>
-      <code><![CDATA[public function __clone()]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-      <code><![CDATA[public function createNode(): AbstractNode]]></code>
-      <code><![CDATA[public function loadRelation(]]></code>
-      <code><![CDATA[public function withContext(LoaderInterface $parent, array $options = []): static]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$key]]></code>
       <code><![CDATA[$key]]></code>
@@ -2783,9 +2385,6 @@
     <InvalidArrayOffset>
       <code><![CDATA[[$this->localKey(Relation::MORPH_KEY) => $this->parent->getTarget()]]]></code>
     </InvalidArrayOffset>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <PossiblyNullReference>
       <code><![CDATA[getTarget]]></code>
     </PossiblyNullReference>
@@ -2797,9 +2396,6 @@
     <InvalidArrayOffset>
       <code><![CDATA[[$this->localKey(Relation::MORPH_KEY) => $this->parent->getTarget()]]]></code>
     </InvalidArrayOffset>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <PossiblyNullReference>
       <code><![CDATA[getTarget]]></code>
     </PossiblyNullReference>
@@ -2808,12 +2404,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[ParentLoader]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function generateSublassLoaders(): iterable]]></code>
-      <code><![CDATA[protected function getJoinMethod(): string]]></code>
-      <code><![CDATA[protected function initNode(): AbstractNode]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$this->columnNames()]]></code>
       <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
@@ -2825,10 +2415,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[PivotLoader]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function initNode(): AbstractNode]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::THROUGH_WHERE] ?? []]]></code>
     </MixedArgument>
@@ -2846,10 +2432,6 @@
     </PossiblyUnusedMethod>
   </file>
   <file src="src/Select/Loader/SubQueryLoader.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function initNode(): RootNode]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$alias]]></code>
       <code><![CDATA[$column]]></code>
@@ -2879,12 +2461,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[SubclassLoader]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function generateParentLoader(string $role): ?LoaderInterface]]></code>
-      <code><![CDATA[protected function getJoinMethod(): string]]></code>
-      <code><![CDATA[protected function initNode(): AbstractNode]]></code>
-      <code><![CDATA[public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery]]></code>
-    </MissingOverrideAttribute>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$this->columnNames()]]></code>
       <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
@@ -2927,20 +2503,10 @@
       <code><![CDATA[\strpos($name, '(')]]></code>
     </RiskyTruthyFalsyComparison>
   </file>
-  <file src="src/Select/QueryScope.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function apply(QueryBuilder $query): void]]></code>
-    </MissingOverrideAttribute>
-  </file>
   <file src="src/Select/Repository.php">
     <ClassMustBeFinal>
       <code><![CDATA[Repository]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function findAll(array $scope = [], array $orderBy = []): iterable]]></code>
-      <code><![CDATA[public function findByPK($id): ?object]]></code>
-      <code><![CDATA[public function findOne(array $scope = []): ?object]]></code>
-    </MissingOverrideAttribute>
     <MissingParamType>
       <code><![CDATA[$id]]></code>
     </MissingParamType>
@@ -2961,14 +2527,6 @@
     <LessSpecificReturnStatement>
       <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
     </LessSpecificReturnStatement>
-    <MissingOverrideAttribute>
-      <code><![CDATA[protected function configureQuery(SelectQuery $query): SelectQuery]]></code>
-      <code><![CDATA[protected function initNode(): RootNode]]></code>
-      <code><![CDATA[public function __clone()]]></code>
-      <code><![CDATA[public function getAlias(): string]]></code>
-      <code><![CDATA[public function isLoaded(): bool]]></code>
-      <code><![CDATA[public function loadData(AbstractNode $node, bool $includeRole = false): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$key]]></code>
       <code><![CDATA[$pk]]></code>
@@ -2994,14 +2552,6 @@
       <code><![CDATA[$this->fieldAlias($key)]]></code>
       <code><![CDATA[$this->fieldAlias($pk)]]></code>
     </PossiblyNullOperand>
-  </file>
-  <file src="src/Select/Source.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getDatabase(): DatabaseInterface]]></code>
-      <code><![CDATA[public function getScope(): ?ScopeInterface]]></code>
-      <code><![CDATA[public function getTable(): string]]></code>
-      <code><![CDATA[public function withScope(?ScopeInterface $scope): SourceInterface]]></code>
-    </MissingOverrideAttribute>
   </file>
   <file src="src/Select/Traits/ChainTrait.php">
     <PossiblyFalseArgument>
@@ -3063,9 +2613,6 @@
     </InvalidNullableReturnType>
   </file>
   <file src="src/Service/Implementation/EntityFactory.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function make(]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$role]]></code>
     </MixedArgument>
@@ -3088,7 +2635,7 @@
       <code><![CDATA[return $mapper->hydrate($e, $relMap->init(
                         $this,
                         $node,
-                        \array_intersect_key($castedData, $refs),
+                        \array_intersect_key($castedData, $overwrite),
                     ));]]></code>
       <code><![CDATA[return $mapper->hydrate($e, $relMap->init($this, $node, $castedData));]]></code>
     </NoValue>
@@ -3100,15 +2647,7 @@
       <code><![CDATA[$role]]></code>
     </PossiblyInvalidCast>
   </file>
-  <file src="src/Service/Implementation/EntityProvider.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function get(string $role, array $scope, bool $load = true): ?object]]></code>
-    </MissingOverrideAttribute>
-  </file>
   <file src="src/Service/Implementation/IndexProvider.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getIndexes(string $entity): array]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$keys]]></code>
     </MixedArgument>
@@ -3121,9 +2660,6 @@
     </MixedReturnStatement>
   </file>
   <file src="src/Service/Implementation/MapperProvider.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getMapper(string $entity): MapperInterface]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$role]]></code>
     </MixedArgument>
@@ -3132,9 +2668,6 @@
     </MixedAssignment>
   </file>
   <file src="src/Service/Implementation/RelationProvider.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getRelationMap(string $entity): RelationMap]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$role]]></code>
     </MixedArgument>
@@ -3146,9 +2679,6 @@
     </PropertyTypeCoercion>
   </file>
   <file src="src/Service/Implementation/RepositoryProvider.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getRepository(string $entity): RepositoryInterface]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$role]]></code>
     </MixedArgument>
@@ -3171,9 +2701,6 @@
       <code><![CDATA[$node->getRole()]]></code>
       <code><![CDATA[$this->schema->resolveAlias($entity) ?? throw new ORMException("Unable to resolve role `$entity`.")]]></code>
     </LessSpecificReturnStatement>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function resolveRole(object|string $entity): string]]></code>
-    </MissingOverrideAttribute>
     <MoreSpecificReturnType>
       <code><![CDATA[string]]></code>
     </MoreSpecificReturnType>
@@ -3182,17 +2709,9 @@
     </UnnecessaryVarAnnotation>
   </file>
   <file src="src/Service/Implementation/SourceProvider.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getSource(string $entity): SourceInterface]]></code>
-    </MissingOverrideAttribute>
     <MoreSpecificImplementedParamType>
       <code><![CDATA[$entity]]></code>
     </MoreSpecificImplementedParamType>
-  </file>
-  <file src="src/Service/Implementation/TypecastProvider.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getTypecast(string $role): ?TypecastInterface]]></code>
-    </MissingOverrideAttribute>
   </file>
   <file src="src/Transaction.php">
     <DeprecatedInterface>
@@ -3201,14 +2720,6 @@
     <InvalidThrow>
       <code><![CDATA[throw $uow->getLastError()]]></code>
     </InvalidThrow>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function delete(object $entity, int $mode = self::MODE_CASCADE): self]]></code>
-      <code><![CDATA[public function persist(object $entity, int $mode = self::MODE_CASCADE): self]]></code>
-      <code><![CDATA[public function run(): void]]></code>
-    </MissingOverrideAttribute>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Transaction/CommandGenerator.php">
     <ArgumentTypeCoercion>
@@ -3218,10 +2729,6 @@
     <ClassMustBeFinal>
       <code><![CDATA[CommandGenerator]]></code>
     </ClassMustBeFinal>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function generateDeleteCommand(ORMInterface $orm, Tuple $tuple): ?CommandInterface]]></code>
-      <code><![CDATA[public function generateStoreCommand(ORMInterface $orm, Tuple $tuple): ?CommandInterface]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$parentKey[$i]]]></code>
       <code><![CDATA[$pk]]></code>
@@ -3240,9 +2747,6 @@
     <ArgumentTypeCoercion>
       <code><![CDATA[$node?->getRole() ?? $entity]]></code>
     </ArgumentTypeCoercion>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function count(): int]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$item]]></code>
     </MixedArgument>
@@ -3261,12 +2765,6 @@
     </UnnecessaryVarAnnotation>
   </file>
   <file src="src/Transaction/Runner.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function complete(): void]]></code>
-      <code><![CDATA[public function count(): int]]></code>
-      <code><![CDATA[public function rollback(): void]]></code>
-      <code><![CDATA[public function run(CommandInterface $command): void]]></code>
-    </MissingOverrideAttribute>
     <MixedArgument>
       <code><![CDATA[$cmd]]></code>
     </MixedArgument>
@@ -3300,10 +2798,6 @@
     <MissingConstructor>
       <code><![CDATA[$iterators]]></code>
     </MissingConstructor>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function count(): int]]></code>
-      <code><![CDATA[public function getIterator(): \Traversable]]></code>
-    </MissingOverrideAttribute>
     <MixedArrayAccess>
       <code><![CDATA[$collection[$id]]]></code>
     </MixedArrayAccess>
@@ -3325,11 +2819,6 @@
     <LessSpecificReturnStatement>
       <code><![CDATA[$this->run()]]></code>
     </LessSpecificReturnStatement>
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function getLastError(): ?\Throwable]]></code>
-      <code><![CDATA[public function isSuccess(): bool]]></code>
-      <code><![CDATA[public function retry(): static]]></code>
-    </MissingOverrideAttribute>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$name]]></code>
     </MixedArgumentTypeCoercion>
@@ -3346,8 +2835,9 @@
   <file src="src/TransactionInterface.php">
     <PossiblyUnusedMethod>
       <code><![CDATA[delete]]></code>
-      <code><![CDATA[persist]]></code>
-      <code><![CDATA[run]]></code>
     </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[self]]></code>
+    </PossiblyUnusedReturnValue>
   </file>
 </files>

@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper\ProxyEntityMapper;
 
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Options;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -22,6 +23,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
     {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false)
+        );
+
         $profile = new EntityWithRelationHydrationProfile('test');
         $profile->user_id = 1;
 
@@ -33,6 +38,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     public function testRelationWithMixedTypeShouldBeFilledAsReference(): void
     {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false)
+        );
+
         $user = new EntityWithMixedTypeRelation();
         $user->email = 'foo@bar.com';
         $user->friend_id = 1;
@@ -44,6 +53,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     public function testRelationExistedInHeapMustFilledAsEntity(): void
     {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false)
+        );
+
         $user = new EntityWithMixedTypeRelation();
         $user->email = 'foo@bar.com';
         $user->friend_id = 1;
@@ -56,6 +69,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     public function testPrivateHasManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false)
+        );
+
         $profile = new EntityWithRelationHydrationProfile('test');
         $user = new EntityWithRelationHydrationUser('admin@site.com');
         $user->profiles[] = $profile;
@@ -67,6 +84,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false)
+        );
+
         $tagContext = new EntityWithRelationHydrationTagContext();
         $tagContext->user_id = 1;
         $tagContext->tag_id = 2;

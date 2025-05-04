@@ -10,6 +10,7 @@ use Cycle\ORM\Exception\PoolException;
 use Cycle\ORM\Exception\SuccessTransactionRetryException;
 use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Options;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation\SpecialValue;
 use Cycle\ORM\Service\IndexProviderInterface;
@@ -31,6 +32,7 @@ final class UnitOfWork implements StateInterface
     private Pool $pool;
     private CommandGeneratorInterface $commandGenerator;
     private ?\Throwable $error = null;
+    private bool $ignoreUninitializedRelations;
 
     public function __construct(
         private ORMInterface $orm,
@@ -38,6 +40,7 @@ final class UnitOfWork implements StateInterface
     ) {
         $this->pool = new Pool($orm);
         $this->commandGenerator = $orm->getCommandGenerator();
+        $this->ignoreUninitializedRelations = $orm->getService(Options::class)->ignoreUninitializedRelations;
     }
 
     public function isSuccess(): bool
@@ -247,7 +250,9 @@ final class UnitOfWork implements StateInterface
                         $relation->prepare(
                             $this->pool,
                             $tuple,
-                            \array_key_exists($name, $entityData) ? $entityData[$name] : SpecialValue::notSet(),
+                            \array_key_exists($name, $entityData)
+                                ? $entityData[$name]
+                                : ($this->ignoreUninitializedRelations ? SpecialValue::notSet() : null),
                         );
                         $relationStatus = $tuple->state->getRelationStatus($relation->getName());
                     }
@@ -292,7 +297,9 @@ final class UnitOfWork implements StateInterface
                 $relation->prepare(
                     $this->pool,
                     $tuple,
-                    \array_key_exists($name, $relData) ? $relData[$name] : SpecialValue::notSet(),
+                    \array_key_exists($name, $relData)
+                        ? $relData[$name]
+                        : ($this->ignoreUninitializedRelations ? SpecialValue::notSet() : null),
                     $isWaitingKeys || $hasChangedKeys,
                 );
                 $relationStatus = $tuple->state->getRelationStatus($relation->getName());

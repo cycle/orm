@@ -53,6 +53,9 @@ class HasOne extends AbstractRelation
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
+        } elseif (SpecialValue::isNotSet($related)) {
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
         }
 
         if ($related === null) {

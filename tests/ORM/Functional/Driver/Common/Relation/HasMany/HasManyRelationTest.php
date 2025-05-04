@@ -465,9 +465,9 @@ abstract class HasManyRelationTest extends BaseTest
     }
 
     /**
-     * If collection is replaced with null or unset - remove all children
+     * If relation property was unset - ignore this field
      */
-    public function testRemoveChildrenUsingUnset(): void
+    public function testUnsetProperty(): void
     {
         /** @var User $e */
         $e = (new Select($this->orm, User::class))
@@ -477,6 +477,26 @@ abstract class HasManyRelationTest extends BaseTest
 
         $this->assertCount(3, $e->comments);
         unset($e->comments);
+
+        // Ignore uninitialized collection
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If collection is replaced with null - remove all children
+     */
+    public function testRemoveChildrenUsingSetNull(): void
+    {
+        /** @var User $e */
+        $e = (new Select($this->orm, User::class))
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
+
+        $this->assertCount(3, $e->comments);
+        $e->comments = null;
 
         $this->captureWriteQueries();
         $this->save($e);

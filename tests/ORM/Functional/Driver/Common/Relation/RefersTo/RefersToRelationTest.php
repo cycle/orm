@@ -173,14 +173,15 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->captureWriteQueries();
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
         $this->assertNumWrites(3);
 
-        $this->orm = $this->orm->withHeap(new Heap());
-        $s = new Select($this->orm, User::class);
-        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+        $this->orm->getHeap()->clean();
+        $u = (new Select($this->orm, User::class))
+            ->load('lastComment')
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertNotNull($u->lastComment);
         $this->assertCount(1, $u->comments);
@@ -189,15 +190,16 @@ abstract class RefersToRelationTest extends BaseTest
         $u->lastComment = null;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
-        $s = new Select($this->orm, User::class);
+        $this->orm->getHeap()->clean();
 
-        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->load('lastComment')
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertNull($u->lastComment);
         $this->assertCount(1, $u->comments);
@@ -216,6 +218,38 @@ abstract class RefersToRelationTest extends BaseTest
             Relation\BelongsTo::class,
             $this->orm->getRelationMap(User::class)->getRelations()['lastComment'],
         );
+    }
+
+    /**
+     * If relation property was unset - ignore this field
+     */
+    public function testUnsetProperty(): void
+    {
+        $u = new User();
+        $u->email = 'email@email.com';
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = 'last comment';
+
+        $u->addComment($c);
+
+        $this->save($u);
+        $this->orm->getHeap()->clean();
+
+        /** @var User $u */
+        $u = (new Select($this->orm, User::class))
+            ->load('lastComment')
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
+
+        self::assertNotNull($u->lastComment);
+        unset($u->lastComment);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     public function setUp(): void

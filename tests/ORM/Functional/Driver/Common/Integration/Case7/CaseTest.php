@@ -58,8 +58,6 @@ abstract class CaseTest extends BaseTest
         $id = $post->id;
         unset($post);
 
-        $this->enableProfiling();
-
         /**
          * @note When we use a repository to get the Post entity, we actually get the same cached entity from the heap.
          *       So, if the relation has an empty collection, it won't be overwritten.

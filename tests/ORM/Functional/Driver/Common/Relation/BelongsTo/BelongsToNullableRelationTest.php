@@ -37,7 +37,6 @@ abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
      */
     public function testRemoveParentUsingSetNull(): void
     {
-        $this->enableProfiling();
         /** @var Profile $profile */
         $profile = (new Select($this->orm, Profile::class))
             ->wherePK(1)

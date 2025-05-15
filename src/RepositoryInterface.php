@@ -7,7 +7,7 @@ namespace Cycle\ORM;
 /**
  * Defines ability to locate entities based on scope parameters.
  *
- * @template TEntity
+ * @template TEntity of object
  */
 interface RepositoryInterface
 {

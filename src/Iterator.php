@@ -13,7 +13,7 @@ use IteratorAggregate;
 /**
  * Iterates over given data-set and instantiates objects.
  *
- * @template TEntity
+ * @template TEntity of object
  *
  * @template-implements IteratorAggregate<array-key|array, TEntity>
  */

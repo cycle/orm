@@ -33,7 +33,7 @@ interface ORMInterface extends
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      *
-     * @template TEntity
+     * @template TEntity of object
      *
      * @param class-string<TEntity>|string $role Entity role or class name.
      * @param array<string, mixed> $data Entity data.

@@ -15,6 +15,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\Purchase
 return [
     'order' => [
         Schema::ENTITY => Order::class,
+        Schema::MAPPER => Mapper::class,
         Schema::SOURCE => Source::class,
         Schema::DATABASE => 'default',
         Schema::TABLE => 'order',
@@ -63,6 +64,17 @@ return [
             'status' => 'status',
         ],
         Schema::RELATIONS => [
+            'order' => [
+                Relation::TYPE => Relation::BELONGS_TO,
+                Relation::TARGET => 'order',
+                Relation::LOAD => Relation::LOAD_PROMISE,
+                Relation::SCHEMA => [
+                    Relation::CASCADE => true,
+                    Relation::NULLABLE => false,
+                    Relation::INNER_KEY => 'order_id',
+                    Relation::OUTER_KEY => ['id'],
+                ],
+            ],
             'purchaseOrder' => [
                 Relation::TYPE => Relation::BELONGS_TO,
                 Relation::TARGET => 'purchase_order',

@@ -6,9 +6,9 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity;
 
 class PurchaseOrder
 {
-
     public ?int $id = null;
     public string $number;
+
     /** @var iterable<PurchaseOrderItem> */
     public iterable $items = [];
 
@@ -16,5 +16,4 @@ class PurchaseOrder
     {
         $this->number = $number;
     }
-
 }

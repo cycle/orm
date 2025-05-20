@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Schema\GeneratedField;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
@@ -46,6 +47,9 @@ return [
             'number' => 'string',
         ],
         Schema::SCHEMA => [],
+        Schema::GENERATED_FIELDS => [
+            'id' => GeneratedField::ON_INSERT, // autoincrement
+        ],
     ],
     'order_item' => [
         Schema::ENTITY => OrderItem::class,
@@ -96,6 +100,9 @@ return [
             'status' => 'int',
         ],
         Schema::SCHEMA => [],
+        Schema::GENERATED_FIELDS => [
+            'id' => GeneratedField::ON_INSERT, // autoincrement
+        ],
     ],
     'purchase_order' => [
         Schema::ENTITY => PurchaseOrder::class,
@@ -132,6 +139,9 @@ return [
             'number' => 'string',
         ],
         Schema::SCHEMA => [],
+        Schema::GENERATED_FIELDS => [
+            'id' => GeneratedField::ON_INSERT, // autoincrement
+        ],
     ],
     'purchase_order_item' => [
         Schema::ENTITY => PurchaseOrderItem::class,
@@ -169,5 +179,8 @@ return [
             'quantity' => 'int',
         ],
         Schema::SCHEMA => [],
+        Schema::GENERATED_FIELDS => [
+            'id' => GeneratedField::ON_INSERT, // autoincrement
+        ],
     ],
 ];

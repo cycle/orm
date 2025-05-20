@@ -16,5 +16,4 @@ class Order
     {
         $this->number = $number;
     }
-
 }

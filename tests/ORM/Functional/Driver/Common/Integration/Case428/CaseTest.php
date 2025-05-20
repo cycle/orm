@@ -62,6 +62,23 @@ abstract class CaseTest extends BaseTest
         $this->save($purchaseOrder, ...$orderItems);
     }
 
+    public function testCreate(): void
+    {
+        $order = new Entity\Order('O0101');
+        $purchaseOrder = new PurchaseOrder('PO101');
+
+        $orderItems = [];
+        for ($i = 0; $i < 20; $i++) {
+            $orderItem = new Entity\OrderItem('A' . $i, 1);
+            $orderItem->order = $order;
+            // $order->items[] = $orderItem;
+            $orderItem->purchaseOrder = $purchaseOrder;
+            $orderItems[] = $orderItem;
+        }
+
+        $this->save($order, $purchaseOrder, ...$orderItems);
+    }
+
     public function setUp(): void
     {
         // Init DB

@@ -1,0 +1,44 @@
+# Query and Selection System - Select, Loaders, and Repository Pattern
+# This covers querying, data loading strategies, and repository implementations
+
+documents:
+  - description: Query and selection system including Select queries, loaders, and repositories
+    outputPath: project/query-system.md
+    sources:
+      - type: text
+        content: |
+          # Query and Selection System
+
+          This document covers the query and data selection system in Cycle ORM, including the Select query builder, various data loaders for efficient loading strategies, repository pattern implementations, and query scoping mechanisms.
+
+      - type: file
+        description: Main Select query builder
+        sourcePaths: src
+        filePattern: "Select.php"
+
+      - type: file
+        description: Core selection infrastructure
+        sourcePaths: src/Select
+        filePattern: "*.php"
+        notPath:
+          - src/Select/Loader/
+          - src/Select/Traits/
+          - src/Select/Abstract*.php
+
+      - type: file
+        description: Data loader implementations for various relationship types
+        sourcePaths: src/Select/Loader
+        filePattern: "*.php"
+        notPath:
+          - src/Select/Loader/Morphed/
+
+      - type: file
+        description: Morphed relationship loaders
+        sourcePaths: src/Select/Loader/Morphed
+        filePattern: "*.php"
+
+      - type: tree
+        description: Query system structure
+        sourcePaths: src/Select
+        maxDepth: 3
+        includeFiles: true

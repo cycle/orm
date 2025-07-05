@@ -1,0 +1,41 @@
+# Entity Management - ORM Core, Heap, and Entity Factory
+# This covers entity lifecycle management, heap (entity map), and the main ORM facade
+
+documents:
+  - description: Entity management core - ORM facade, heap, and entity lifecycle
+    outputPath: project/entity-management.md
+    sources:
+      - type: text
+        content: |
+          # Entity Management System
+
+          This document covers the core entity management system in Cycle ORM, including the main ORM facade, heap (entity map) for tracking loaded entities, and the complete entity lifecycle from creation to persistence.
+
+      - type: file
+        description: Main ORM class and entity manager
+        sourcePaths: src
+        filePattern:
+          - "ORM.php"
+          - "EntityManager.php"
+
+      - type: file
+        description: Heap system for entity tracking and caching
+        sourcePaths: src/Heap
+        filePattern: "*.php"
+        notPath:
+          - src/Heap/Traits/
+
+      - type: file
+        description: Entity factory and service implementations
+        sourcePaths: src/Service
+        filePattern: "*.php"
+        path:
+          - src/Service/Implementation/
+
+      - type: tree
+        description: Entity management structure
+        sourcePaths:
+          - src/Heap
+          - src/Service
+        maxDepth: 2
+        includeFiles: true

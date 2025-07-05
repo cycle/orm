@@ -1,0 +1,51 @@
+# Traits and Utility Components - Shared Functionality and Helpers
+# This covers all trait implementations and shared utility components
+
+documents:
+  - description: Shared traits and utility components used across the ORM system
+    outputPath: project/traits-and-utilities.md
+    sources:
+      - type: text
+        content: |
+          # Traits and Utility Components
+
+          This document covers all the shared traits and utility components used throughout Cycle ORM, including reusable functionality for parsing, commands, heap management, mapping, relations, and query building.
+
+      - type: file
+        description: Parser-related traits
+        sourcePaths: src/Parser/Traits
+        filePattern: "*.php"
+
+      - type: file
+        description: Command-related traits
+        sourcePaths: src/Command/Traits
+        filePattern: "*.php"
+
+      - type: file
+        description: Heap management traits
+        sourcePaths: src/Heap/Traits
+        filePattern: "*.php"
+
+      - type: file
+        description: Mapper-related traits
+        sourcePaths: src/Mapper/Traits
+        filePattern: "*.php"
+
+      - type: file
+        description: Relation-related traits
+        sourcePaths: src/Relation/Traits
+        filePattern: "*.php"
+
+      - type: file
+        description: Select and query-related traits
+        sourcePaths: src/Select/Traits
+        filePattern: "*.php"
+
+      - type: tree
+        description: Traits structure across the system
+        sourcePaths: src
+        filePattern: "*.php"
+        path:
+          - src/*/Traits/
+        maxDepth: 3
+        includeFiles: true

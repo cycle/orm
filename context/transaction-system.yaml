@@ -1,0 +1,50 @@
+# Transaction and Command System - Persistence and Unit of Work
+# This covers transaction management, command pattern, and persistence operations
+
+documents:
+  - description: Transaction and command system for managing persistence operations
+    outputPath: project/transaction-system.md
+    sources:
+      - type: text
+        content: |
+          # Transaction and Command System
+
+          This document covers the transaction management and command system in Cycle ORM, including the Unit of Work pattern, command generation and execution, database commands, and transaction state management.
+
+      - type: file
+        description: Transaction management and legacy interface
+        sourcePaths: src
+        filePattern:
+          - "Transaction.php"
+
+      - type: file
+        description: Core transaction system components
+        sourcePaths: src/Transaction
+        filePattern: "*.php"
+
+      - type: file
+        description: Command interfaces and base implementations
+        sourcePaths: src/Command
+        filePattern: "*.php"
+        notPath:
+          - src/Command/Database/
+          - src/Command/Special/
+          - src/Command/Traits/
+
+      - type: file
+        description: Database-specific command implementations
+        sourcePaths: src/Command/Database
+        filePattern: "*.php"
+
+      - type: file
+        description: Special command types and wrappers
+        sourcePaths: src/Command/Special
+        filePattern: "*.php"
+
+      - type: tree
+        description: Transaction system structure
+        sourcePaths:
+          - src/Transaction
+          - src/Command
+        maxDepth: 2
+        includeFiles: true

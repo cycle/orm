@@ -266,6 +266,16 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
+     * Returns all loaders that are joined to the current loader.
+     *
+     * @return LoaderInterface[]
+     */
+    public function getJoinedLoaders(): array
+    {
+        return $this->join;
+    }
+
+    /**
      * Indicates that loader loads data.
      */
     abstract public function isLoaded(): bool;

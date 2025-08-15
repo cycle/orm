@@ -64,6 +64,9 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     private SchemaInterface $schema;
     private EntityFactoryInterface $entityFactory;
 
+    protected int $limit = 0;
+    protected int $offset = 0;
+
     /**
      * @param class-string<TEntity>|string $role
      */
@@ -109,7 +112,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function buildQuery(): SelectQuery
     {
-        return $this->loader->buildQuery();
+        return $this->addGroupByPK()->loader->buildQuery();
     }
 
     /**
@@ -155,6 +158,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function limit(int $limit): self
     {
+        $this->limit = $limit;
         $this->loader->getQuery()->limit($limit);
 
         return $this;
@@ -165,6 +169,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function offset(int $offset): self
     {
+        $this->offset = $offset;
         $this->loader->getQuery()->offset($offset);
 
         return $this;
@@ -368,9 +373,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function fetchOne(?array $query = null): ?object
     {
         $select = (clone $this)->where($query)->limit(1);
-        $node = $select->loader->createNode();
-        $select->loader->loadData($node, true);
-        $data = $node->getResult();
+        $data = $select->loadData();
 
         if (!isset($data[0])) {
             return null;
@@ -395,15 +398,12 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function getIterator(bool $findInHeap = false): Iterator
     {
-        $node = $this->loader->createNode();
-        $this->loader->loadData($node, true);
-
         return Iterator::createWithServices(
             $this->heap,
             $this->schema,
             $this->entityFactory,
             $this->loader->getTarget(),
-            $node->getResult(),
+            $this->loadData(),
             $findInHeap,
             typecast: true,
         );
@@ -412,20 +412,17 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     /**
      * Load data tree from database and linked loaders in a form of array.
      *
-     * @return array<array-key, array<string, mixed>>
+     * @return array<array-key, array<non-empty-string, mixed>>
      */
     public function fetchData(bool $typecast = true): iterable
     {
-        $node = $this->loader->createNode();
-        $this->loader->loadData($node, false);
-
         if (!$typecast) {
-            return $node->getResult();
+            return $this->loadData(false);
         }
 
         $mapper = $this->mapperProvider->getMapper($this->loader->getTarget());
 
-        return \array_map([$mapper, 'cast'], $node->getResult());
+        return \array_map([$mapper, 'cast'], $this->loadData(false));
     }
 
     /**
@@ -450,7 +447,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         if (\in_array(\strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
             // aggregations
             return $this->builder->withQuery(
-                $this->loader->buildQuery(),
+                $this->buildQuery(),
             )->__call($name, $arguments);
         }
 
@@ -519,5 +516,45 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         }]);
 
         return $this;
+    }
+
+    /**
+     * @param bool $addRole If true, the role name with the key `@role` will be added to the result set.
+     * @return array<array-key, array<non-empty-string, mixed>>
+     */
+    protected function loadData(bool $addRole = true): array
+    {
+        $self = $this->addGroupByPK();
+        $node = $self->loader->createNode();
+        $self->loader->loadData($node, $addRole);
+        return $node->getResult();
+    }
+
+    /**
+     * Add group by for all primary keys if necessary.
+     *
+     * This is required to prevent duplicates in the result set when using LIMIT and OFFSET.
+     *
+     * @return static<TEntity> Original $this or cloned instance with group by added.
+     */
+    private function addGroupByPK(): self
+    {
+        if ($this->limit <= 1 && $this->offset === 0) {
+            return $this;
+        }
+
+        // Check if there are no joins in the query
+        if ($this->loader->getJoinedLoaders() === []) {
+            // No joins, we can safely return the original instance
+            return $this;
+        }
+
+        $self = clone $this;
+        $pk = (array) $self->loader->getPK();
+        foreach ($pk as $key) {
+            $self->loader->getQuery()->groupBy($key);
+        }
+
+        return $self;
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528;
 
 use Cycle\ORM\Select;
+use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528\Entity\Country;
@@ -21,6 +22,36 @@ abstract class AbstractTestCase extends BaseTest
         $select = (new Select($this->orm, Country::class))
             ->load('translations')
             ->where('translations.locale_id', 1);
+        /** @var Paginator $paginator */
+        $paginator = (new Paginator(2))->paginate($select);
+        $data = $select->fetchData();
+        $this->assertSame(10, $paginator->count());
+        $this->assertCount(2, $data);
+    }
+
+    public function testWithLeft(): void
+    {
+        $select = (new Select($this->orm, Country::class))
+            ->with('translations', [
+                'as' => 'trans',
+                'alias' => 'trans',
+                'method' => JoinableLoader::LEFT_JOIN,
+            ]);
+        /** @var Paginator $paginator */
+        $paginator = (new Paginator(2))->paginate($select);
+        $data = $select->fetchData();
+        $this->assertSame(10, $paginator->count());
+        $this->assertCount(2, $data);
+    }
+
+    public function testWithInner(): void
+    {
+        $select = (new Select($this->orm, Country::class))
+            ->with('translations', [
+                'as' => 'trans',
+                'alias' => 'trans',
+                'method' => JoinableLoader::JOIN,
+            ]);
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();

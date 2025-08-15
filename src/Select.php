@@ -57,15 +57,14 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     // load related data after the query
     public const OUTER_QUERY = JoinableLoader::POSTLOAD;
 
+    protected int $limit = 0;
+    protected int $offset = 0;
     private RootLoader $loader;
     private QueryBuilder $builder;
     private MapperProviderInterface $mapperProvider;
     private Heap\HeapInterface $heap;
     private SchemaInterface $schema;
     private EntityFactoryInterface $entityFactory;
-
-    protected int $limit = 0;
-    protected int $offset = 0;
 
     /**
      * @param class-string<TEntity>|string $role
@@ -479,6 +478,18 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     }
 
     /**
+     * @param bool $addRole If true, the role name with the key `@role` will be added to the result set.
+     * @return array<array-key, array<non-empty-string, mixed>>
+     */
+    protected function loadData(bool $addRole = true): array
+    {
+        $self = $this->addGroupByPK();
+        $node = $self->loader->createNode();
+        $self->loader->loadData($node, $addRole);
+        return $node->getResult();
+    }
+
+    /**
      * @param list<non-empty-string> $pk
      * @param list<array|int|object|string> $args
      *
@@ -516,18 +527,6 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         }]);
 
         return $this;
-    }
-
-    /**
-     * @param bool $addRole If true, the role name with the key `@role` will be added to the result set.
-     * @return array<array-key, array<non-empty-string, mixed>>
-     */
-    protected function loadData(bool $addRole = true): array
-    {
-        $self = $this->addGroupByPK();
-        $node = $self->loader->createNode();
-        $self->loader->loadData($node, $addRole);
-        return $node->getResult();
     }
 
     /**

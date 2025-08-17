@@ -59,6 +59,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
 
     protected int $limit = 0;
     protected int $offset = 0;
+    protected bool $allowGroupBy;
     private RootLoader $loader;
     private QueryBuilder $builder;
     private MapperProviderInterface $mapperProvider;
@@ -77,6 +78,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         $this->schema = $orm->getSchema();
         $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
         $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
+        $this->allowGroupBy = $orm->getService(Options::class)->groupByToDeduplicate;
         $this->loader = new RootLoader(
             $orm->getSchema(),
             $orm->getService(SourceProviderInterface::class),
@@ -538,7 +540,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     private function addGroupByPK(): self
     {
-        if ($this->limit <= 1 && $this->offset === 0) {
+        if (!$this->allowGroupBy || $this->limit <= 1 && $this->offset === 0) {
             return $this;
         }
 
@@ -549,10 +551,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         }
 
         $self = clone $this;
-        $pk = (array) $self->loader->getPK();
-        foreach ($pk as $key) {
-            $self->loader->getQuery()->groupBy($key);
-        }
+        $self->loader->forceGroupBy();
 
         return $self;
     }

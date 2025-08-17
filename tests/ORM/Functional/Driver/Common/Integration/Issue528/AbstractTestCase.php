@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528;
 
+use Cycle\ORM\Options;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
@@ -63,6 +64,9 @@ abstract class AbstractTestCase extends BaseTest
     {
         // Init DB
         parent::setUp();
+        $this->orm = $this->orm->with(
+            options: (new Options())->withGroupByToDeduplicate(true),
+        );
         $this->makeTables();
         $this->fillData();
 

@@ -56,6 +56,7 @@ class HasMany extends AbstractRelation
                 $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
                 return;
             }
+
             $original = $this->resolve($original, true);
             $node->setRelation($this->getName(), $original);
         }
@@ -63,6 +64,9 @@ class HasMany extends AbstractRelation
         if ($related instanceof ReferenceInterface) {
             $related = $this->resolve($related, true);
             $tuple->state->setRelation($this->getName(), $related);
+        } elseif (SpecialValue::isNotSet($related)) {
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
         } elseif (!\is_iterable($related)) {
             if ($related === null) {
                 $related = $this->collect([]);
@@ -73,8 +77,10 @@ class HasMany extends AbstractRelation
                 ));
             }
         }
-        foreach ($this->calcDeleted($related, $original ?? []) as $item) {
-            $this->deleteChild($pool, $tuple, $item);
+        if (!SpecialValue::isEmpty($original)) {
+            foreach ($this->calcDeleted($related, $original) as $item) {
+                $this->deleteChild($pool, $tuple, $item);
+            }
         }
 
         if (\count($related) === 0) {

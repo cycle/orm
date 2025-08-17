@@ -21,6 +21,8 @@ abstract class EmbeddedRelationTest extends BaseTest
 {
     use TableTrait;
 
+    protected const NULLABLE = false;
+
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -358,23 +360,96 @@ abstract class EmbeddedRelationTest extends BaseTest
     {
         $this->expectException(NullException::class);
 
-        $selector = new Select($this->orm, User::class);
-        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->orderBy('id', 'ASC')
+            ->fetchOne();
 
         $u->credentials = null;
 
         $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
+        $this->save($u);
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+        $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('credentials')
+            ->wherePK($u->id)
+            ->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);
         $this->assertSame('user3', $u2->credentials->username);
     }
+
+    /**
+     * If relation property was unset - ignore this field
+     */
+    public function testUnsetProperty(): void
+    {
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->with('credentials')->fetchOne();
+
+        unset($user->credentials);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+    }
+
+    // Embedded Relation doesn't support null yet
+    //
+    // /**
+    //  * If relation is replaced with null - delete the child (set user_id to null)
+    //  */
+    // public function testRemoveChildrenUsingSetNull(): void
+    // {
+    //     /** @var User $user */
+    //     $user = (new Select($this->orm, User::class))
+    //         ->wherePK(1)
+    //         ->with('credentials')->fetchOne();
+    //
+    //     $this->assertInstanceOf(UserCredentials::class, $user->credentials);
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($user);
+    //     $this->assertNumWrites(0);
+    //
+    //     $user->credentials = null;
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($user);
+    //     $this->assertNumWrites(1);
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($user);
+    //     $this->assertNumWrites(0);
+    //
+    //     $this->orm->getHeap()->clean();
+    //     $user = (new Select($this->orm, User::class))
+    //         ->wherePK(1)
+    //         ->with('credentials')->fetchOne();
+    //     $this->assertNull($user->credentials);
+    // }
+    //
+    // public function testUninitializedProperty(): void
+    // {
+    //     $u = new User();
+    //     $u->email = 'many@email.com';
+    //     $u->balance = 900;
+    //     unset($u->credentials);
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($u);
+    //     $this->assertNumWrites(1);
+    //
+    //     self::assertFalse(isset($u->credentials));
+    //
+    //     $u->credentials = null;
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($u);
+    //     $this->assertNumWrites(0);
+    // }
 
     public function setUp(): void
     {
@@ -407,6 +482,7 @@ abstract class EmbeddedRelationTest extends BaseTest
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [
                     'credentials' => [
+                        Relation::NULLABLE => static::NULLABLE,
                         Relation::TYPE => Relation::EMBEDDED,
                         Relation::TARGET => 'user:credentials',
                         Relation::LOAD => Relation::LOAD_PROMISE,

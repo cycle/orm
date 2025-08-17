@@ -40,8 +40,10 @@ trait HasSomeTrait
      */
     protected function applyChanges(Tuple $parentTuple, Tuple $tuple): void
     {
+        $state = $tuple->state;
+        $state->setRelation($this->getTargetRelationName(), $parentTuple->entity);
         foreach ($this->innerKeys as $i => $innerKey) {
-            $tuple->state->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
+            $state->register($this->outerKeys[$i], $parentTuple->state->getValue($innerKey));
         }
     }
 }

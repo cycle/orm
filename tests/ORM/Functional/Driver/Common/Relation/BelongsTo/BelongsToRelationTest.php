@@ -23,6 +23,8 @@ abstract class BelongsToRelationTest extends BaseTest
 {
     use TableTrait;
 
+    protected const NULLABLE = false;
+
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -313,6 +315,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testSetNullException(): void
     {
+        static::NULLABLE and $this->markTestSkipped();
         $this->expectException(NullException::class);
 
         $s = new Select($this->orm, Profile::class);
@@ -356,7 +359,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testWhereNested(): void
     {
-        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm, Nested::class);
         $n = $s->with('profile.user')
             ->where('profile.user.id', 1)
             ->fetchOne();
@@ -366,7 +369,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testWhereNestedWithAlias(): void
     {
-        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm, Nested::class);
         $n = $s
             ->with('profile.user', ['as' => 'u'])
             ->where('u.id', 1)
@@ -376,18 +379,19 @@ abstract class BelongsToRelationTest extends BaseTest
     }
 
     /**
-     * Nullable BelongsTo relation should not be transformed to RefersTo
+     * If relation property was unset - ignore this field
      */
-    public function testSetNullable(): void
+    public function testUnsetProperty(): void
     {
-        $schema = $this->getSchemaArray();
-        $schema[Profile::class][Schema::RELATIONS]['user'][Relation::SCHEMA][Relation::NULLABLE] = true;
-        $this->orm = $this->withSchema(new Schema($schema));
+        /** @var Profile $profile */
+        $profile = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->load('user')->fetchOne();
 
-        $this->assertInstanceOf(
-            Relation\BelongsTo::class,
-            $this->orm->getRelationMap(Profile::class)->getRelations()['user'],
-        );
+        unset($profile->user);
+
+        $this->captureWriteQueries();
+        $this->save($profile);
+        $this->assertNumWrites(0);
     }
 
     public function setUp(): void
@@ -410,7 +414,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->makeTable('profile', [
             'id' => 'primary',
-            'user_id' => 'integer',
+            'user_id' => 'integer,nullable',
             'image' => 'string',
         ]);
 
@@ -468,6 +472,7 @@ abstract class BelongsToRelationTest extends BaseTest
                         Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
+                            Relation::NULLABLE => static::NULLABLE,
                             Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',

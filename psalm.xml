@@ -13,6 +13,8 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
+        <MissingOverrideAttribute errorLevel="suppress" />
+        <PossiblyUnusedMethod errorLevel="suppress" />
         <MissingClassConstType errorLevel="suppress" />
         <UnusedClass errorLevel="suppress" />
         <UndefinedAttributeClass>

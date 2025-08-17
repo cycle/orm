@@ -46,16 +46,19 @@ final class ORM implements ORMInterface
     private RepositoryProvider $repositoryProvider;
     private EntityProvider $entityProvider;
     private RoleResolverInterface $roleResolver;
+    private Options $options;
 
     public function __construct(
         private FactoryInterface $factory,
         private SchemaInterface $schema,
         ?CommandGeneratorInterface $commandGenerator = null,
         ?HeapInterface $heap = null,
+        ?Options $options = null,
     ) {
         $this->heap = $heap ?? new Heap();
         $this->commandGenerator = $commandGenerator ?? new CommandGenerator();
         $this->resetRegistry();
+        $this->options = $options ?? new Options();
     }
 
     public function resolveRole(string|object $entity): string
@@ -93,6 +96,7 @@ final class ORM implements ORMInterface
             RepositoryProviderInterface::class,
             SourceProviderInterface::class,
             TypecastProviderInterface::class,
+            Options::class,
         ])]
         string $class,
     ): object {
@@ -105,6 +109,7 @@ final class ORM implements ORMInterface
             MapperProviderInterface::class => $this->mapperProvider,
             RelationProviderInterface::class => $this->relationProvider,
             RepositoryProviderInterface::class => $this->repositoryProvider,
+            Options::class => $this->options,
             default => throw new \InvalidArgumentException("Undefined service `$class`."),
         };
     }
@@ -161,6 +166,7 @@ final class ORM implements ORMInterface
         ?SchemaInterface $schema = null,
         ?FactoryInterface $factory = null,
         ?HeapInterface $heap = null,
+        ?Options $options = null,
     ): ORMInterface {
         $heap ??= clone $this->heap;
         $heap->clean();
@@ -170,6 +176,7 @@ final class ORM implements ORMInterface
             schema: $schema ?? $this->schema,
             commandGenerator: $this->commandGenerator,
             heap: $heap,
+            options: $options,
         );
     }
 

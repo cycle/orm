@@ -14,6 +14,9 @@ final class Typecast implements CastableInterface, UncastableInterface
     /** @var array<non-empty-string, bool> */
     private array $callableRules = [];
 
+    /** @var array<non-empty-string, array> */
+    private array $callableArguments = [];
+
     /** @var array<string, class-string<\BackedEnum>> */
     private array $enumClasses = [];
 
@@ -35,6 +38,20 @@ final class Typecast implements CastableInterface, UncastableInterface
                 $this->enumClasses[$key] = (string) $reflection->getBackingType();
                 $this->rules[$key] = $rule;
                 unset($rules[$key]);
+            } elseif (
+                \is_array($rule)
+                && \count($rule) >= 2
+                && \is_string($rule[0])
+                && \is_string($rule[1])
+                && \class_exists($rule[0])
+                && \method_exists($rule[0], $rule[1])
+            ) {
+                if (isset($rule[2]) && \is_array($rule[2])) {
+                    $this->callableArguments[$key] = $rule[2];
+                }
+                $this->callableRules[$key] = true;
+                $this->rules[$key] = $rule;
+                unset($rules[$key]);
             } elseif (\is_callable($rule)) {
                 $this->callableRules[$key] = true;
                 $this->rules[$key] = $rule;
@@ -54,7 +71,8 @@ final class Typecast implements CastableInterface, UncastableInterface
                 }
 
                 if (isset($this->callableRules[$key])) {
-                    $data[$key] = $rule($data[$key], $this->database);
+                    $arguments = [$data[$key], $this->database, $this->callableArguments[$key] ?? []];
+                    $data[$key] = $rule(...$arguments);
                     continue;
                 }
 

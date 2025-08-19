@@ -71,8 +71,10 @@ final class Typecast implements CastableInterface, UncastableInterface
                 }
 
                 if (isset($this->callableRules[$key])) {
+                    /** @var callable $callable */
+                    $callable = \is_array($rule) ? [$rule[0], $rule[1]] : $rule;
                     $arguments = [$data[$key], $this->database, $this->callableArguments[$key] ?? []];
-                    $data[$key] = $rule(...$arguments);
+                    $data[$key] = $callable(...$arguments);
                     continue;
                 }
 

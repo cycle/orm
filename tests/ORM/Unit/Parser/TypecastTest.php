@@ -10,6 +10,7 @@ use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Tests\Fixtures\Enum\CustomStringable;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
+use Cycle\ORM\Tests\Fixtures\StaticCallableRule;
 use Cycle\ORM\Tests\Fixtures\Uuid;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
@@ -29,6 +30,7 @@ class TypecastTest extends TestCase
             'slug' => fn(string $value) => strtolower($value),
             'title' => 'strtoupper',
             'test' => [Uuid::class, 'create'],
+            'callable' => [StaticCallableRule::class, 'invoke', ['foo' => 'bar']],
             'uuid' => 'uuid',
             'settings' => 'json',
         ];
@@ -149,6 +151,21 @@ class TypecastTest extends TestCase
 
         $this->assertInstanceOf(Uuid::class, $result['uuid']);
         $this->assertSame('71ceb213-ec3d-4ae5-911b-ba042abfb204', $result['uuid']->toString());
+    }
+
+    public function testCastCallableWithArguments(): void
+    {
+        $this->typecast->setRules(['callable' => [StaticCallableRule::class, 'invoke', ['foo' => 'bar']]]);
+
+        $result = $this->typecast->cast(['callable' => 'baz']);
+
+        $this->assertIsArray($result['callable']);
+        $this->assertArrayHasKey('value', $result['callable']);
+        $this->assertArrayHasKey('database', $result['callable']);
+        $this->assertArrayHasKey('arguments', $result['callable']);
+        $this->assertSame('baz', $result['callable']['value']);
+        $this->assertInstanceOf(DatabaseInterface::class, $result['callable']['database']);
+        $this->assertSame(['foo' => 'bar'], $result['callable']['arguments']);
     }
 
     public function testCastJsonValue(): void

@@ -245,12 +245,6 @@
       <code><![CDATA[$this->waitScope]]></code>
     </InvalidPropertyAssignmentValue>
   </file>
-  <file src="src/Config/RelationConfig.php">
-    <TooManyArguments>
-      <code><![CDATA[new Autowire($loader)]]></code>
-      <code><![CDATA[new Autowire($relation)]]></code>
-    </TooManyArguments>
-  </file>
   <file src="src/EntityManager.php">
     <ClassMustBeFinal>
       <code><![CDATA[EntityManager]]></code>
@@ -1184,7 +1178,6 @@
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$data[$column]]]></code>
-      <code><![CDATA[$data[$key]]]></code>
       <code><![CDATA[$data[$key]]]></code>
       <code><![CDATA[$data[$key]]]></code>
       <code><![CDATA[$rule]]></code>

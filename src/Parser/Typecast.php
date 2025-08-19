@@ -20,7 +20,7 @@ final class Typecast implements CastableInterface, UncastableInterface
     /** @var array<string, class-string<\BackedEnum>> */
     private array $enumClasses = [];
 
-    /** @var array<non-empty-string, callable|class-string<\BackedEnum>|string> */
+    /** @var array<non-empty-string, array|callable|class-string<\BackedEnum>|string> */
     private array $rules = [];
 
     public function __construct(

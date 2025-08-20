@@ -47,7 +47,7 @@ final class Typecast implements CastableInterface, UncastableInterface
     private array $casters = [];
 
     /** @var array<non-empty-string, \Closure(mixed): mixed> */
-    private array $uncaters = [];
+    private array $uncasters = [];
 
     /**
      * @param non-empty-string $role The role of the entity being typecasted
@@ -80,7 +80,7 @@ final class Typecast implements CastableInterface, UncastableInterface
                 };
 
                 if ($rule === 'json') {
-                    $this->uncaters[$key] = static fn(mixed $value): string => \json_encode(
+                    $this->uncasters[$key] = static fn(mixed $value): string => \json_encode(
                         $value,
                         \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
                     );
@@ -167,7 +167,7 @@ final class Typecast implements CastableInterface, UncastableInterface
     public function uncast(array $data): array
     {
         try {
-            foreach ($this->uncaters as $key => $callable) {
+            foreach ($this->uncasters as $key => $callable) {
                 if (isset($data[$key])) {
                     $data[$key] = $callable($data[$key]);
                 }

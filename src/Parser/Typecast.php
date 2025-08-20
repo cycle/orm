@@ -8,6 +8,37 @@ use BackedEnum;
 use Cycle\ORM\Exception\TypecastException;
 use Cycle\Database\DatabaseInterface;
 
+/**
+ * Default typecasting class for ORM entities.
+ *
+ * This class handles casting data from database format to PHP types and vice versa.
+ *
+ * It supports various rule types including:
+ *  - Built-in primitives: 'int', 'bool', 'float', 'datetime'.
+ *  - JSON encoding/decoding: 'json'.
+ *  - Backed enums: Any class implementing BackedEnum
+ *  - Callable functions:
+ *      - Single-argument static factory: [ClassName::class, 'simple'].
+ *      - Callable with database instance: [ClassName::class, 'withDatabase']
+ *      - Callable with additional arguments: [ClassName::class, 'customArgs', ['value1', 'value2']].
+ *
+ *      ```
+ *      class ClassName {
+ *          public static function simple(mixed $value): mixed { ... }
+ *
+ *          public static function withDatabase(
+ *              mixed $value,
+ *              DatabaseInterface $database, // Will be injected automatically
+ *          ): mixed { ... }
+ *
+ *          public static function customArgs(
+ *              mixed $value,
+ *              string $arg1, // 'value1' will be passed
+ *              string $arg2, // 'value2' will be passed
+ *          ): mixed { ... }
+ *      }
+ *      ```
+ */
 final class Typecast implements CastableInterface, UncastableInterface
 {
     private const RULES = ['int', 'bool', 'float', 'datetime', 'json'];
@@ -29,19 +60,18 @@ final class Typecast implements CastableInterface, UncastableInterface
 
     public function setRules(array $rules): array
     {
-        $invoker = null;
         foreach ($rules as $key => $rule) {
             // Static rules
             if (\in_array($rule, self::RULES, true)) {
                 $this->casters[$key] = match ($rule) {
-                    'int' => static fn (mixed $value): int => (int) $value,
-                    'bool' => static fn (mixed $value): bool => (bool) $value,
-                    'float' => static fn (mixed $value): float => (float) $value,
-                    'datetime' => fn (mixed $value): \DateTimeImmutable => new \DateTimeImmutable(
+                    'int' => static fn(mixed $value): int => (int) $value,
+                    'bool' => static fn(mixed $value): bool => (bool) $value,
+                    'float' => static fn(mixed $value): float => (float) $value,
+                    'datetime' => fn(mixed $value): \DateTimeImmutable => new \DateTimeImmutable(
                         $value,
                         $this->database->getDriver()->getTimezone(),
                     ),
-                    'json' => static fn (mixed $value): array => \json_decode(
+                    'json' => static fn(mixed $value): array => \json_decode(
                         $value,
                         true,
                         512,
@@ -50,7 +80,7 @@ final class Typecast implements CastableInterface, UncastableInterface
                 };
 
                 if ($rule === 'json') {
-                    $this->uncaters[$key] = static fn (mixed $value): string => \json_encode(
+                    $this->uncaters[$key] = static fn(mixed $value): string => \json_encode(
                         $value,
                         \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
                     );
@@ -67,11 +97,11 @@ final class Typecast implements CastableInterface, UncastableInterface
 
                 $this->casters[$key] = $type === 'string'
                     // String backed enum
-                    ? static fn (mixed $value): ?\BackedEnum => \is_string($value) || \is_numeric($value)
+                    ? static fn(mixed $value): ?\BackedEnum => \is_string($value) || \is_numeric($value)
                         ? $rule::tryFrom((string) $value)
                         : null
                     // Int backed enum
-                    : static fn (mixed $value): ?\BackedEnum => \is_int($value) || \is_string($value) && \preg_match('/^\\d++$/', $value) === 1
+                    : static fn(mixed $value): ?\BackedEnum => \is_int($value) || \is_string($value) && \preg_match('/^\\d++$/', $value) === 1
                         ? $rule::tryFrom((int) $value)
                         : null;
 
@@ -84,7 +114,7 @@ final class Typecast implements CastableInterface, UncastableInterface
                 $closure = \Closure::fromCallable($rule);
                 $this->casters[$key] = (new \ReflectionFunction($closure))->getNumberOfParameters() === 1
                     ? $closure
-                    : fn (mixed $value): mixed => $closure($value, $this->database);
+                    : fn(mixed $value): mixed => $closure($value, $this->database);
                 unset($rules[$key]);
                 continue;
             }

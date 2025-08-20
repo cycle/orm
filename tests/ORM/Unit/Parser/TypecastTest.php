@@ -14,6 +14,7 @@ use Cycle\ORM\Tests\Fixtures\StaticCallableRule;
 use Cycle\ORM\Tests\Fixtures\Uuid;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use ReflectionFunction;
 
 class TypecastTest extends TestCase
 {
@@ -153,19 +154,35 @@ class TypecastTest extends TestCase
         $this->assertSame('71ceb213-ec3d-4ae5-911b-ba042abfb204', $result['uuid']->toString());
     }
 
-    public function testCastCallableWithArguments(): void
+    /**
+     * @dataProvider callablesWithArgs
+     */
+    public function testCastCallableWithArguments(array $callable, array $args, bool $hasDatabase): void
     {
-        $this->typecast->setRules(['callable' => [StaticCallableRule::class, 'invoke', ['foo' => 'bar']]]);
+        $this->typecast->setRules(['callable' => [...$callable, $args]]);
 
-        $result = $this->typecast->cast(['callable' => 'baz']);
+        $result = $this->typecast->cast(['callable' => 'baz'])['callable'];
 
-        $this->assertIsArray($result['callable']);
-        $this->assertArrayHasKey('value', $result['callable']);
-        $this->assertArrayHasKey('database', $result['callable']);
-        $this->assertArrayHasKey('arguments', $result['callable']);
-        $this->assertSame('baz', $result['callable']['value']);
-        $this->assertInstanceOf(DatabaseInterface::class, $result['callable']['database']);
-        $this->assertSame(['foo' => 'bar'], $result['callable']['arguments']);
+        $this->assertSame('baz', $result['value'], 'Value should be "baz"');
+        $hasDatabase and $this->assertInstanceOf(DatabaseInterface::class, $result['database'], 'Database passed');
+
+        $isVariadic = (new ReflectionFunction(\Closure::fromCallable($callable)))->isVariadic();
+        $this->assertSame(
+            $isVariadic ? $args : \array_values($args),
+            $result['arguments'],
+            'Arguments must be the same as passed',
+        );
+    }
+
+    public static function callablesWithArgs(): iterable
+    {
+        yield [[StaticCallableRule::class, 'invoke'], ['bar'], true];
+        yield [[StaticCallableRule::class, 'invoke'], [['bar']], true];
+        yield [[StaticCallableRule::class, 'invoke'], ['argument' => ['bar']], true];
+        yield [[StaticCallableRule::class, 'invokeVariadic'], ['foo' => 'bar'], true];
+        yield [[StaticCallableRule::class, 'invokeWithoutDatabaseVariadic'], ['foo' => 'bar'], false];
+        yield [[StaticCallableRule::class, 'invokeWithoutDatabaseVariadic'], [1, 2, 42], false];
+        yield [[StaticCallableRule::class, 'invokeWithoutDatabase'], [69], false];
     }
 
     public function testCastJsonValue(): void
@@ -203,6 +220,7 @@ class TypecastTest extends TestCase
         parent::setUp();
 
         $this->typecast = new Typecast(
+            'role',
             $this->db = m::mock(DatabaseInterface::class),
         );
     }

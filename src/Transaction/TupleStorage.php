@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Transaction;
 
-use IteratorAggregate;
-
 /**
  * @internal
  *
- * @implements IteratorAggregate<object, Tuple>
+ * @implements \IteratorAggregate<object, Tuple>
  */
 final class TupleStorage implements \IteratorAggregate, \Countable
 {

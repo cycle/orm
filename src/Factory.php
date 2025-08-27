@@ -90,7 +90,7 @@ final class Factory implements FactoryInterface
                     return $parentHandler;
                 }
 
-                $handlers[] = new Typecast($database);
+                $handlers[] = new Typecast($role, $database);
             } elseif (\is_array($handler)) { // We need to use composite typecast for array
                 foreach ($handler as $type) {
                     $handlers[] = $this->makeTypecastHandler($type, $database, $schema, $role);

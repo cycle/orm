@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528;
 
+use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Options;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
@@ -45,6 +46,22 @@ abstract class AbstractTestCase extends BaseTest
         $this->assertCount(2, $data);
     }
 
+    public function testWithLeftAndWhere(): void
+    {
+        $select = (new Select($this->orm, Country::class))
+            ->with('translations', [
+                'as' => 'trans',
+                'alias' => 'trans',
+                'method' => JoinableLoader::LEFT_JOIN,
+            ])
+            ->where('translations.locale_id', 1);
+        /** @var Paginator $paginator */
+        $paginator = (new Paginator(2))->paginate($select);
+        $data = $select->fetchData();
+        $this->assertSame(10, $paginator->count());
+        $this->assertCount(2, $data);
+    }
+
     public function testWithInner(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -58,6 +75,54 @@ abstract class AbstractTestCase extends BaseTest
         $data = $select->fetchData();
         $this->assertSame(10, $paginator->count());
         $this->assertCount(2, $data);
+    }
+
+    public function testWithInnerAndWhere(): void
+    {
+        $select = (new Select($this->orm, Country::class))
+            ->with('translations', [
+                'as' => 'trans',
+                'alias' => 'trans',
+                'method' => JoinableLoader::JOIN,
+            ])
+            ->where('translations.locale_id', 1);
+        /** @var Paginator $paginator */
+        $paginator = (new Paginator(2))->paginate($select);
+        $data = $select->fetchData();
+        $this->assertSame(10, $paginator->count());
+        $this->assertCount(2, $data);
+    }
+
+    public function testWithAndLoad(): void
+    {
+        $select = (new Select($this->orm, Country::class))
+            ->with('translations', [
+                'as' => 'with_trans',
+                'method' => JoinableLoader::LEFT_JOIN,
+            ])
+            ->load('translations')
+            ->where('translations.locale_id', 1);
+        /** @var Paginator $paginator */
+        $paginator = (new Paginator(2))->paginate($select);
+        $data = $select->fetchData();
+        $this->assertSame(10, $paginator->count());
+        $this->assertCount(2, $data);
+    }
+
+    public function testWithAndLoadUsing(): void
+    {
+        self::expectException(LoaderException::class);
+        self::expectExceptionMessage('Unable to load data using join with limit on parent query');
+
+        $select = (new Select($this->orm, Country::class))
+            ->with('translations', [
+                'as' => 'with_trans',
+                'method' => JoinableLoader::LEFT_JOIN,
+            ])
+            ->load('translations', ['using' => 'with_trans'])
+            ->where('translations.locale_id', 1);
+        (new Paginator(2))->paginate($select);
+        $select->fetchData();
     }
 
     public function setUp(): void

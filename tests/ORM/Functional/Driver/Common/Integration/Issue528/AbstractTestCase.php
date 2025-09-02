@@ -31,6 +31,19 @@ abstract class AbstractTestCase extends BaseTest
         $this->assertCount(2, $data);
     }
 
+    public function testLoadWherePagination2(): void
+    {
+        $select = (new Select($this->orm, Country::class))
+            ->load('translations')
+            ->load('translations.locale')
+            ->where('translations.locale.id', 1);
+        /** @var Paginator $paginator */
+        $paginator = (new Paginator(2))->paginate($select);
+        $data = $select->fetchData();
+        $this->assertSame(10, $paginator->count());
+        $this->assertCount(2, $data);
+    }
+
     public function testWithLeft(): void
     {
         $select = (new Select($this->orm, Country::class))

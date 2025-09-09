@@ -13,7 +13,7 @@ final class Options
      * @readonly
      * @note will be set to TRUE in the next major version.
      */
-    public bool $ignoreUninitializedRelations = true;
+    public bool $ignoreUninitializedRelations = false;
 
     /**
      * @readonly

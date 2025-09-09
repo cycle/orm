@@ -378,12 +378,9 @@
     </ClassMustBeFinal>
   </file>
   <file src="src/Factory.php">
-    <InvalidArgument>
-      <code><![CDATA[$database]]></code>
-    </InvalidArgument>
-    <InvalidCast>
-      <code><![CDATA[$database]]></code>
-    </InvalidCast>
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$role]]></code>
+    </ArgumentTypeCoercion>
     <InvalidPropertyAssignmentValue>
       <code><![CDATA[[
         SchemaInterface::REPOSITORY => Repository::class,
@@ -472,9 +469,6 @@
       <code><![CDATA[$class]]></code>
       <code><![CDATA[$e->getCode()]]></code>
     </PossiblyInvalidArgument>
-    <TooFewArguments>
-      <code><![CDATA[new Typecast($database)]]></code>
-    </TooFewArguments>
   </file>
   <file src="src/Heap/Heap.php">
     <InvalidNullableReturnType>
@@ -2014,8 +2008,6 @@
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
     <MixedArgument>
-      <code><![CDATA[$data[0]]]></code>
-      <code><![CDATA[$node->getResult()]]></code>
       <code><![CDATA[$subOption]]></code>
       <code><![CDATA[$subOption + $options]]></code>
     </MixedArgument>
@@ -2050,17 +2042,18 @@
             $this->schema,
             $this->entityFactory,
             $this->loader->getTarget(),
-            $node->getResult(),
+            $this->loadData(),
             $findInHeap,
             typecast: true,
         )]]></code>
       <code><![CDATA[Iterator<TEntity>]]></code>
-      <code><![CDATA[\array_map([$mapper, 'cast'], $node->getResult())]]></code>
-      <code><![CDATA[array<array-key, array<string, mixed>>]]></code>
+      <code><![CDATA[\array_map([$mapper, 'cast'], $this->loadData(false))]]></code>
+      <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
+      <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
     </MixedReturnTypeCoercion>
-    <PossiblyInvalidArgument>
-      <code><![CDATA[$node->getResult()]]></code>
-    </PossiblyInvalidArgument>
+    <PossiblyFalseArgument>
+      <code><![CDATA[\reset($pk)]]></code>
+    </PossiblyFalseArgument>
   </file>
   <file src="src/Select/AbstractLoader.php">
     <MixedArgument>

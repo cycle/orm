@@ -8,6 +8,7 @@ use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Options;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -392,6 +393,28 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->captureWriteQueries();
         $this->save($profile);
         $this->assertNumWrites(0);
+    }
+
+    /**
+     * If non-nullable relation property was unset - throw NullException
+     */
+    public function testUnsetPropertyWithoutIgnoreUninitializedRelations(): void
+    {
+        echo static::class;
+        $this->orm = $this->orm->with(options: (new Options())->withIgnoreUninitializedRelations(false));
+        /** @var Profile $profile */
+        $profile = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->load('user')->fetchOne();
+
+        unset($profile->user);
+        $this->expectException(NullException::class);
+
+        $this->captureWriteQueries();
+        try {
+            $this->save($profile);
+        } finally {
+            $this->assertNumWrites(0);
+        }
     }
 
     public function setUp(): void

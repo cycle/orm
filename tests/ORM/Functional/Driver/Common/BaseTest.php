@@ -153,6 +153,9 @@ abstract class BaseTest extends TestCase
             ))->withCollectionFactory('array', new ArrayCollectionFactory()),
             new Schema([]),
             $this->getCommandGenerator(),
+            options: (new \Cycle\ORM\Options())
+                ->withIgnoreUninitializedRelations(true)
+                ->withGroupByToDeduplicate(true),
         );
     }
 

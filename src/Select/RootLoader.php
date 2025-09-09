@@ -34,6 +34,7 @@ final class RootLoader extends AbstractLoader
         'scope' => true,
     ];
     private SelectQuery $query;
+    private bool $forceGroupBy = false;
 
     /**
      * @param bool $loadRelations Define loading eager relations and JTI hierarchy.
@@ -133,6 +134,18 @@ final class RootLoader extends AbstractLoader
     }
 
     /**
+     * Add selected columns to GROUP BY clause.
+     *
+     * Might be useful when deduplication is required because of JOINs or other conditions.
+     *
+     * @param bool $force When set to true, GROUP BY will be forced.
+     */
+    public function forceGroupBy(bool $force = true): void
+    {
+        $this->forceGroupBy = $force;
+    }
+
+    /**
      * Clone the underlying query.
      */
     public function __clone()
@@ -144,7 +157,7 @@ final class RootLoader extends AbstractLoader
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         return parent::configureQuery(
-            $this->mountColumns($query, true, '', true),
+            $this->mountColumns($query, true, '', true, $this->forceGroupBy),
         );
     }
 

@@ -37,16 +37,17 @@ trait ColumnsTrait
     /**
      * Set columns into SelectQuery.
      *
-     * @param bool        $minify    Minify column names (will work in case when query parsed in
-     *                               FETCH_NUM mode).
-     * @param string      $prefix    Prefix to be added for each column name.
-     * @param bool        $overwrite When set to true existed columns will be removed.
+     * @param bool $minify Minify column names (will work in case when query parsed in FETCH_NUM mode).
+     * @param string $prefix Prefix to be added for each column name.
+     * @param bool $overwrite When set to true existed columns will be removed.
+     * @param bool $addToGroup When set to true columns will be added to GROUP BY clause.
      */
     protected function mountColumns(
         SelectQuery $query,
         bool $minify = false,
         string $prefix = '',
         bool $overwrite = false,
+        bool $addToGroup = false,
     ): SelectQuery {
         $alias = $this->getAlias();
         $columns = $overwrite ? [] : $query->getColumns();
@@ -59,6 +60,7 @@ trait ColumnsTrait
             }
 
             $columns[] = "{$alias}.{$external} AS {$prefix}{$name}";
+            $addToGroup and $query->groupBy("{$alias}.{$external}");
         }
 
         return $query->columns($columns);

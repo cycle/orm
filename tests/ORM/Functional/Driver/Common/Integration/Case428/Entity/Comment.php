@@ -17,7 +17,7 @@ class Comment
         public int $id,
         public string $content,
         public Post $post,
-        public User $user
+        public User $user,
     ) {
         $this->created_at = new \DateTimeImmutable();
         $this->updated_at = new \DateTimeImmutable();

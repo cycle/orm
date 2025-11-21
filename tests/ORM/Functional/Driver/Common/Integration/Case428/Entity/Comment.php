@@ -6,17 +6,19 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity;
 
 class Comment
 {
-    public ?int $id = null;
-    public string $content;
     public \DateTimeImmutable $created_at;
     public \DateTimeImmutable $updated_at;
-    public Post $post;
-    public int $post_id;
+    public ?int $post_id = null;
+    public ?int $user_id = null;
+    public ?Comment $parent = null;
+    public ?int $parent_id = null;
 
-    public function __construct(string $content, Post $post)
-    {
-        $this->post = $post;
-        $this->content = $content;
+    public function __construct(
+        public int $id,
+        public string $content,
+        public Post $post,
+        public User $user
+    ) {
         $this->created_at = new \DateTimeImmutable();
         $this->updated_at = new \DateTimeImmutable();
     }

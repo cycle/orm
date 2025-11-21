@@ -17,12 +17,17 @@ class Post
     public ?int $user_id = null;
     public ?Category $category = null;
     public ?int $category_id = null;
+    public Metadata $metadata;
 
-    public function __construct(string $title = '', string $content = '')
-    {
+    public function __construct(
+        string $title = '',
+        string $content = '',
+        string $metadata = '',
+    ) {
         $this->title = $title;
         $this->content = $content;
         $this->created_at = new \DateTimeImmutable();
         $this->updated_at = new \DateTimeImmutable();
+        $this->metadata = new Metadata($metadata);
     }
 }

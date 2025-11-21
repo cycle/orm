@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428;
 
+use Cycle\ORM\EntityManager;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
@@ -27,18 +28,28 @@ abstract class TestCase extends BaseTest
 
     public function testCreate(): void
     {
-        // Get entity
-        $post = new Entity\Post('New title', 'New content');
-        $post->best_comment = new Entity\Comment('New comment content', $post);
-
         $this->enableProfiling();
+        // Get entity
+        $user = new Entity\User('Test User', 'test@example.com');
+        $post = new Entity\Post('New title', 'New content');
+        $post->user = $user;
+
+        $em = new EntityManager($this->orm);
+        $em->persist($post);
+        $em->run();
+
+        $post->best_comment = new Entity\Comment(42, 'New comment content', $post, $user);
 
         // Store changes and calc write queries
-        $this->captureWriteQueries();
-        $this->save($post);
+        $em = new EntityManager($this->orm);
+        $em->persist($post);
+        $em->run();
 
         // Check write queries count
-        $this->assertNumWrites(3);
+        $this->orm->getHeap()->clean();
+
+        $post = (new Select($this->orm, Entity\Post::class))->where(['id' => $post->id])->fetchOne();
+        self::assertSame(42, $post->best_comment_id);
     }
 
     public function setUp(): void
@@ -54,7 +65,7 @@ abstract class TestCase extends BaseTest
     private function makeTables(): void
     {
         $this->makeTable('user', [
-            'id' => 'primary',
+            'id' => 'int',
             'name' => 'string',
             'email' => 'string',
             'created_at' => 'datetime',
@@ -62,7 +73,7 @@ abstract class TestCase extends BaseTest
         ]);
 
         $this->makeTable('category', [
-            'id' => 'primary',
+            'id' => 'int',
             'name' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
@@ -77,19 +88,23 @@ abstract class TestCase extends BaseTest
             'best_comment_id' => 'int,nullable',
             'user_id' => 'int,nullable',
             'category_id' => 'int,nullable',
+            'data' => 'string',
         ]);
 
         $this->makeTable('comment', [
-            'id' => 'primary',
+            'id' => 'int',
             'content' => 'string',
             'post_id' => 'int',
+            'user_id' => 'int',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'parent_id' => 'int,nullable',
         ]);
 
         $this->makeFK('post', 'user_id', 'user', 'id', 'SET NULL', 'SET NULL');
         $this->makeFK('post', 'category_id', 'category', 'id', 'SET NULL', 'SET NULL');
         $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
+        $this->makeFK('comment', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
         $this->makeFK('post', 'best_comment_id', 'comment', 'id', 'SET NULL', 'SET NULL');
     }
 
@@ -112,18 +127,18 @@ abstract class TestCase extends BaseTest
         );
 
         $this->getDatabase()->table('post')->insertMultiple(
-            ['id', 'title', 'content', 'best_comment_id', 'user_id', 'category_id'],
+            ['title', 'content', 'best_comment_id', 'user_id', 'category_id', 'data'],
             [
-                [1, 'Title 1', 'Foo-bar-baz content 1', 2, 1, 1],
+                ['Title 1', 'Foo-bar-baz content 1', 2, 1, 1, 'metadata'],
             ],
         );
 
         $this->getDatabase()->table('comment')->insertMultiple(
-            ['post_id', 'content'],
+            ['id', 'post_id', 'user_id', 'content'],
             [
-                [1, 'Foo-bar-baz comment 1'],
-                [1, 'Foo-bar-baz comment 2'],
-                [1, 'Foo-bar-baz comment 3'],
+                [1, 1, 1, 'Foo-bar-baz comment 1'],
+                [2, 1, 2, 'Foo-bar-baz comment 2'],
+                [3, 1, 1, 'Foo-bar-baz comment 3'],
             ],
         );
     }

@@ -98,6 +98,10 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
         $this->save($c);
         $this->assertNumWrites(2);
 
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
+
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');
         $c = $selector->load('cyclic')->wherePK($c->id)->fetchOne();
         $this->assertEquals('new', $c->name);

@@ -28,7 +28,6 @@ abstract class TestCase extends BaseTest
 
     public function testCreate(): void
     {
-        $this->enableProfiling();
         // Get entity
         $user = new Entity\User('Test User', 'test@example.com');
         $post = new Entity\Post('New title', 'New content');

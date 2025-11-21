@@ -400,7 +400,6 @@ abstract class BelongsToRelationTest extends BaseTest
      */
     public function testUnsetPropertyWithoutIgnoreUninitializedRelations(): void
     {
-        echo static::class;
         $this->orm = $this->orm->with(options: (new Options())->withIgnoreUninitializedRelations(false));
         /** @var Profile $profile */
         $profile = (new Select($this->orm, Profile::class))

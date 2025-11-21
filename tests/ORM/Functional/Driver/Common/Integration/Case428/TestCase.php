@@ -53,6 +53,21 @@ abstract class TestCase extends BaseTest
 
     private function makeTables(): void
     {
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'name' => 'string',
+            'email' => 'string',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ]);
+
+        $this->makeTable('category', [
+            'id' => 'primary',
+            'name' => 'string',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ]);
+
         $this->makeTable('post', [
             'id' => 'primary',
             'title' => 'string',
@@ -60,6 +75,8 @@ abstract class TestCase extends BaseTest
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'best_comment_id' => 'int,nullable',
+            'user_id' => 'int,nullable',
+            'category_id' => 'int,nullable',
         ]);
 
         $this->makeTable('comment', [
@@ -69,18 +86,38 @@ abstract class TestCase extends BaseTest
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ]);
-        // $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
-        // $this->makeFK('post', 'best_comment_id', 'comment', 'id', 'SET NULL', 'SET NULL');
+
+        $this->makeFK('post', 'user_id', 'user', 'id', 'SET NULL', 'SET NULL');
+        $this->makeFK('post', 'category_id', 'category', 'id', 'SET NULL', 'SET NULL');
+        $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
+        $this->makeFK('post', 'best_comment_id', 'comment', 'id', 'SET NULL', 'SET NULL');
     }
 
     private function fillData(): void
     {
-        $this->getDatabase()->table('post')->insertMultiple(
-            ['id', 'title', 'content', 'best_comment_id'],
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['id', 'name', 'email'],
             [
-                [1, 'Title 1', 'Foo-bar-baz content 1', 2],
+                [1, 'John Doe', 'john@example.com'],
+                [2, 'Jane Smith', 'jane@example.com'],
             ],
         );
+
+        $this->getDatabase()->table('category')->insertMultiple(
+            ['id', 'name'],
+            [
+                [1, 'Technology'],
+                [2, 'Science'],
+            ],
+        );
+
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['id', 'title', 'content', 'best_comment_id', 'user_id', 'category_id'],
+            [
+                [1, 'Title 1', 'Foo-bar-baz content 1', 2, 1, 1],
+            ],
+        );
+
         $this->getDatabase()->table('comment')->insertMultiple(
             ['post_id', 'content'],
             [

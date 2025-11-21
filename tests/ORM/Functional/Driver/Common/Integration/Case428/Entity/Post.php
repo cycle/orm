@@ -13,6 +13,10 @@ class Post
     public \DateTimeImmutable $updated_at;
     public ?Comment $best_comment = null;
     public ?int $best_comment_id = null;
+    public ?User $user = null;
+    public ?int $user_id = null;
+    public ?Category $category = null;
+    public ?int $category_id = null;
 
     public function __construct(string $title = '', string $content = '')
     {

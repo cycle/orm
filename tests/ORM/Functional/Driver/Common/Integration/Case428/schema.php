@@ -6,10 +6,55 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Source;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\Category;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\Comment;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\User;
 
 return [
+    'user' => [
+        Schema::ENTITY => User::class,
+        Schema::SOURCE => Source::class,
+        Schema::DATABASE => 'default',
+        Schema::TABLE => 'user',
+        Schema::PRIMARY_KEY => ['id'],
+        Schema::FIND_BY_KEYS => ['id'],
+        Schema::COLUMNS => [
+            'id' => 'id',
+            'name' => 'name',
+            'email' => 'email',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+        ],
+        Schema::RELATIONS => [],
+        Schema::TYPECAST => [
+            'id' => 'int',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ],
+        Schema::SCHEMA => [],
+    ],
+    'category' => [
+        Schema::ENTITY => Category::class,
+        Schema::SOURCE => Source::class,
+        Schema::DATABASE => 'default',
+        Schema::TABLE => 'category',
+        Schema::PRIMARY_KEY => ['id'],
+        Schema::FIND_BY_KEYS => ['id'],
+        Schema::COLUMNS => [
+            'id' => 'id',
+            'name' => 'name',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+        ],
+        Schema::RELATIONS => [],
+        Schema::TYPECAST => [
+            'id' => 'int',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ],
+        Schema::SCHEMA => [],
+    ],
     'comment' => [
         Schema::ENTITY => Comment::class,
         Schema::SOURCE => Source::class,
@@ -60,6 +105,8 @@ return [
             'created_at' => 'created_at',
             'updated_at' => 'updated_at',
             'best_comment_id' => 'best_comment_id',
+            'user_id' => 'user_id',
+            'category_id' => 'category_id',
         ],
         Schema::RELATIONS => [
             'best_comment' => [
@@ -73,6 +120,28 @@ return [
                     Relation::OUTER_KEY => ['id'],
                 ],
             ],
+            'user' => [
+                Relation::TYPE => Relation::BELONGS_TO,
+                Relation::TARGET => 'user',
+                Relation::LOAD => Relation::LOAD_PROMISE,
+                Relation::SCHEMA => [
+                    Relation::CASCADE => true,
+                    Relation::NULLABLE => true,
+                    Relation::INNER_KEY => ['user_id'],
+                    Relation::OUTER_KEY => ['id'],
+                ],
+            ],
+            'category' => [
+                Relation::TYPE => Relation::BELONGS_TO,
+                Relation::TARGET => 'category',
+                Relation::LOAD => Relation::LOAD_PROMISE,
+                Relation::SCHEMA => [
+                    Relation::CASCADE => true,
+                    Relation::NULLABLE => true,
+                    Relation::INNER_KEY => ['category_id'],
+                    Relation::OUTER_KEY => ['id'],
+                ],
+            ],
         ],
         Schema::TYPECAST => [
             'id' => 'int',
@@ -80,6 +149,8 @@ return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'best_comment_id' => 'int',
+            'user_id' => 'int',
+            'category_id' => 'int',
         ],
         Schema::SCHEMA => [],
     ],

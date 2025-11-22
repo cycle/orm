@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\Injection\Expression;
+use Cycle\Database\Injection\Fragment;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
@@ -29,6 +31,7 @@ use Spiral\Pagination\PaginableInterface;
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
  * @method $this orderBy($expression, $direction = 'ASC');
+ * @method $this groupBy(string|Fragment|Expression $expression)
  * @method $this forUpdate()
  * @method $this whereJson(string $path, mixed $value)
  * @method $this orWhereJson(string $path, mixed $value)

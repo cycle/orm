@@ -13,7 +13,6 @@ class LogRecord
     public string $actor_type;
     public int $actor_id;
     public \DateTimeImmutable $created_at;
-
     public Actor $actor;
 
     public function __construct(Actor $actor, string $message)

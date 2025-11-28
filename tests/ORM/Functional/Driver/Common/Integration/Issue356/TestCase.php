@@ -37,7 +37,7 @@ abstract class TestCase extends BaseTest
         $logs = (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
             ->fetchAll();
-        $this->assertNumReads(2);
+        $this->assertNumReads(3);
 
         // Check result
         $this->captureReadQueries();
@@ -111,6 +111,11 @@ abstract class TestCase extends BaseTest
                 ['log-3 for tenant-1', Entity\Tenant::ROLE, 1, new \DateTimeImmutable()],
                 ['log-4 for tenant-2', Entity\Tenant::ROLE, 2, new \DateTimeImmutable()],
                 ['log-5 for user-3', Entity\User::ROLE, 3, new \DateTimeImmutable()],
+                ['log-6 for tenant-3', Entity\Tenant::ROLE, 3, new \DateTimeImmutable()],
+                ['log-7 for user-4', Entity\User::ROLE, 1, new \DateTimeImmutable()],
+                ['log-8 for tenant-4', Entity\Tenant::ROLE, 2, new \DateTimeImmutable()],
+                ['log-9 for user-5', Entity\User::ROLE, 4, new \DateTimeImmutable()],
+                ['log-10 for tenant-5', Entity\Tenant::ROLE, 5, new \DateTimeImmutable()],
             ],
         );
     }

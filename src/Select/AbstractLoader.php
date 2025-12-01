@@ -91,6 +91,10 @@ abstract class AbstractLoader implements LoaderInterface
         protected SchemaInterface $ormSchema,
         protected SourceProviderInterface $sourceProvider,
         protected FactoryInterface $factory,
+
+        /**
+         * @var non-empty-string Target role
+         */
         protected string $target,
     ) {
         $this->children = $this->ormSchema->getInheritedRoles($target);

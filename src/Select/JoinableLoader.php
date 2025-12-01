@@ -147,7 +147,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return;
         }
 
-        //Ensure all nested relations
+        // Ensure all nested relations
         $statement = $this->configureQuery($this->initQuery(), $references)->run();
 
         foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {

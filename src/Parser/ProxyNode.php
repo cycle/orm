@@ -41,12 +41,6 @@ final class ProxyNode extends AbstractNode
         return $this->includeNodes[$target];
     }
 
-    protected function push(array &$data): void
-    {
-        // BelongsToMorphedNode doesn't store data itself
-        // Data is pushed to child nodes by role
-    }
-
     public function linkNode(?string $container, AbstractNode $node): void
     {
         $this->parent->linkNode($container, $node);
@@ -55,5 +49,11 @@ final class ProxyNode extends AbstractNode
     public function joinNode(?string $container, AbstractNode $node): void
     {
         $this->parent->joinNode($container, $node);
+    }
+
+    protected function push(array &$data): void
+    {
+        // BelongsToMorphedNode doesn't store data itself
+        // Data is pushed to child nodes by role
     }
 }

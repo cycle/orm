@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356;
 
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
@@ -27,6 +28,29 @@ abstract class TestCase extends BaseTest
         // Check result
         $this->captureReadQueries();
         $this->assertInstanceOf(Entity\LogRecord::class, $log);
+        $this->assertNumReads(0);
+    }
+
+    public function testUpdateOne(): void
+    {
+        $this->enableProfiling();
+        // Eager load morphed relation
+        $this->captureReadQueries();
+        $log = (new Select($this->orm, Entity\LogRecord::class))
+            ->wherePK(1)
+            ->fetchOne();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
+            ->collect($log)
+            ->load('actor')
+            ->run();
+        $this->assertNumReads(1);
+
+        // Check result
+        $this->captureReadQueries();
+        $this->assertInstanceOf(Entity\Actor::class, $log->actor);
         $this->assertNumReads(0);
     }
 

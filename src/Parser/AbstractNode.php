@@ -62,7 +62,7 @@ abstract class AbstractNode
      *
      * @internal
      */
-    protected ?MultiKeyCollection $indexedData = null;
+    protected MultiKeyCollection $indexedData;
 
     /**
      * @param string[] $columns List of columns node must fetch from the row.
@@ -257,7 +257,7 @@ abstract class AbstractNode
     {
         $this->parent = null;
         $this->nodes = [];
-        $this->indexedData = null;
+        unset($this->indexedData);
         $this->duplicates = [];
     }
 

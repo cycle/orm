@@ -68,6 +68,8 @@ trait ColumnsTrait
 
     /**
      * Return original column names.
+     *
+     * @return non-empty-string[]
      */
     protected function columnNames(): array
     {

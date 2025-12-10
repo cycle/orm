@@ -63,7 +63,7 @@ class ParentLoader extends JoinableLoader
         return parent::configureQuery($query);
     }
 
-    protected function generateSublassLoaders(): iterable
+    protected function generateSubclassLoaders(): iterable
     {
         return [];
     }

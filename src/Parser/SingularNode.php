@@ -18,12 +18,14 @@ final class SingularNode extends AbstractNode
      * @param string[] $primaryKeys
      * @param string[] $innerKeys Inner relation keys (for example user_id)
      * @param string[]|null $outerKeys Outer (parent) relation keys (for example id = parent.id)
+     * @param string|null $role Pitched role name (for polymorphic relations)
      */
     public function __construct(
         array $columns,
         array $primaryKeys,
         protected array $innerKeys,
         ?array $outerKeys,
+        protected ?string $role = null,
     ) {
         parent::__construct($columns, $outerKeys);
         $this->setDuplicateCriteria($primaryKeys);
@@ -42,10 +44,24 @@ final class SingularNode extends AbstractNode
             }
         }
 
+        if ($this->role === null) {
+            $this->parent->mount(
+                $this->container,
+                $this->indexName,
+                $this->intersectData($this->innerKeys, $data),
+                $data,
+            );
+            return;
+        }
+
+        // The role may be predefined in data (for example, in STI or JTI scenarios)
+        $role = $data['@role'] ?? $this->role;
+        $data['@role'] = $role;
+
         $this->parent->mount(
             $this->container,
             $this->indexName,
-            $this->intersectData($this->innerKeys, $data),
+            ['@role' => $role, ...$this->intersectData($this->innerKeys, $data)],
             $data,
         );
     }

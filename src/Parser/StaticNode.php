@@ -31,12 +31,12 @@ final class StaticNode extends OutputNode
             }
         }
 
-        // // Let's force placeholders for every sub loaded
-        // foreach ($this->nodes as $name => $node) {
-        //     if ($node instanceof ParentMergeNode) {
-        //         continue;
-        //     }
-        //     $data[$name] = $node instanceof ArrayNode ? [] : null;
-        // }
+        // Let's force placeholders for every sub loaded
+        foreach ($this->nodes as $name => $node) {
+            if ($node instanceof ParentMergeNode) {
+                continue;
+            }
+            $data[$name] = $node instanceof ArrayNode ? [] : null;
+        }
     }
 }

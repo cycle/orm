@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Relation;
 
-use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
@@ -75,8 +74,11 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
         $factory = $this->orm->getService(EntityFactoryInterface::class);
 
         foreach ($this->entities as $entity) {
-            $data = $mapper->uncast($mapper->fetchFields($entity));
-            $this->indexEntity($heap, $pk, $data, $entity);
+            $n = $heap->get($entity) ?? throw new \LogicException("Entity node not found in the heap.");
+            // Use Node data to load relations instead of actual entity data
+            // to avoid inconsistent state in the Heap
+            $data = $n->getData();
+            $this->indexEntity($n, $pk, $data, $entity);
             $node->push($data);
             unset($data);
         }
@@ -113,7 +115,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
      * @param non-empty-array<non-empty-string> $keys
      * @param non-empty-array<non-empty-string> $data
      */
-    public function indexEntity(HeapInterface $heap, array $keys, array $data, object $entity): void
+    public function indexEntity(Node $node, array $keys, array $data, object $entity): void
     {
         $pool = &$this->index;
         foreach ($keys as $k) {
@@ -125,10 +127,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
         }
 
 
-        $pool = [
-            $entity,
-            $heap->get($entity) ?? throw new \LogicException("Entity node not found in the heap."),
-        ];
+        $pool = [$entity, $node];
     }
 
     /**

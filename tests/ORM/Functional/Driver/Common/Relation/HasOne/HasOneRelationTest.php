@@ -689,10 +689,8 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNumReads(1);
 
         $this->captureReadQueries();
-        foreach ($users as $user) {
-            $user->profile; // force loading
-            static::NULLABLE or $this->assertNotNull($user->profile);
-        }
+        $this->assertNotNull($users[0]->profile);
+        static::NULLABLE and $this->assertNull($users[1]->profile);
         $this->assertNumReads(0);
     }
 

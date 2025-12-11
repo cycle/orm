@@ -675,10 +675,8 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNull($user->profile);
     }
 
-    public function testUpdateRelationSortedByPivot(): void
+    public function testUpdateRelation(): void
     {
-        $this->enableProfiling();
-
         $this->captureReadQueries();
         /** @var list<User> $users */
         $users = (new Select($this->orm, User::class))->fetchAll();

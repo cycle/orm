@@ -137,7 +137,7 @@ abstract class HasManyLoadingTest extends BaseTest
         ], $selector->fetchData());
     }
 
-    public function testUpdateRelationSortedByPivot(): void
+    public function testUpdateRelationSortedById(): void
     {
         $this->captureReadQueries();
         /** @var list<User> $users */

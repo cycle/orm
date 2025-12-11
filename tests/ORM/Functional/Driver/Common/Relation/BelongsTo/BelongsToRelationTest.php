@@ -416,7 +416,7 @@ abstract class BelongsToRelationTest extends BaseTest
         }
     }
 
-    public function testUpdateRelationSortedByPivot(): void
+    public function testUpdateRelation(): void
     {
         $this->captureReadQueries();
         /** @var list<Profile> $profiles */

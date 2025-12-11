@@ -245,6 +245,33 @@ abstract class HasManyNestedConditionTest extends BaseTest
         ], $users->fetchData());
     }
 
+    public function testUpdateNestedRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)
+            ->load('posts.comments')
+            ->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            $this->assertIsIterable($user->posts);
+            foreach ($user->posts as $post) {
+                $this->assertIsIterable($post->comments);
+                // Verify comments are loaded
+                foreach ($post->comments as $comment) {
+                    $this->assertNotNull($comment->message);
+                }
+            }
+        }
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

@@ -15,44 +15,6 @@ use PHPUnit\Framework\TestCase;
 
 class BulkLoaderTest extends TestCase
 {
-    private function createORM(): ORM
-    {
-        $schema = new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'profile' => [
-                        \Cycle\ORM\Relation::TYPE => \Cycle\ORM\Relation::HAS_ONE,
-                        \Cycle\ORM\Relation::TARGET => Profile::class,
-                        \Cycle\ORM\Relation::SCHEMA => [
-                            \Cycle\ORM\Relation::CASCADE => true,
-                            \Cycle\ORM\Relation::INNER_KEY => 'id',
-                            \Cycle\ORM\Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Profile::class => [
-                Schema::ROLE => 'profile',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'profile',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'image'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]);
-
-        return new ORM(new Factory($this->createMock(\Cycle\Database\DatabaseProviderInterface::class)), $schema);
-    }
-
     /**
      * Test that BulkLoader throws exception when no entities are provided
      */
@@ -240,5 +202,43 @@ class BulkLoaderTest extends TestCase
         $result = $loader->load('profile', ['where' => ['id' => 1]]);
 
         $this->assertSame($loader, $result);
+    }
+
+    private function createORM(): ORM
+    {
+        $schema = new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'profile' => [
+                        \Cycle\ORM\Relation::TYPE => \Cycle\ORM\Relation::HAS_ONE,
+                        \Cycle\ORM\Relation::TARGET => Profile::class,
+                        \Cycle\ORM\Relation::SCHEMA => [
+                            \Cycle\ORM\Relation::CASCADE => true,
+                            \Cycle\ORM\Relation::INNER_KEY => 'id',
+                            \Cycle\ORM\Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Profile::class => [
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]);
+
+        return new ORM(new Factory($this->createMock(\Cycle\Database\DatabaseProviderInterface::class)), $schema);
     }
 }

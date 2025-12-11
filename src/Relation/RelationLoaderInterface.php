@@ -12,6 +12,10 @@ use Cycle\ORM\Select;
  * Allows to load relations in bulk for a set of collected entities.
  *
  * @note Don't implement this interface directly. The signature might change in the future.
+ *
+ * Important behavior:
+ * - Relations are loaded using the entity state from the database (heap node data), not runtime changes
+ * - Already loaded relations (non-references) will not be overwritten
  */
 interface RelationLoaderInterface
 {
@@ -27,6 +31,9 @@ interface RelationLoaderInterface
 
     /**
      * Execute relation loading for all collected entities.
+     *
+     * Only unresolved relations (lazy references) will be loaded.
+     * Relations use database state for loading, ignoring runtime changes to foreign keys.
      */
     public function run(): void;
 }

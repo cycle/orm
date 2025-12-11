@@ -33,7 +33,6 @@ abstract class TestCase extends BaseTest
 
     public function testUpdateOne(): void
     {
-        $this->enableProfiling();
         // Eager load morphed relation
         $this->captureReadQueries();
         $log = (new Select($this->orm, Entity\LogRecord::class))
@@ -68,6 +67,30 @@ abstract class TestCase extends BaseTest
         foreach ($logs as $log) {
             $this->assertInstanceOf(Entity\LogRecord::class, $log);
             self::assertInstanceOf(Entity\Actor::class, $log->actor);
+        }
+        $this->assertNumReads(0);
+    }
+
+    public function testUpdateMany(): void
+    {
+        // Eager load morphed relation
+        $this->captureReadQueries();
+        $logs = (new Select($this->orm, Entity\LogRecord::class))
+            ->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
+            ->collect(...$logs)
+            ->load('actor')
+            ->run();
+        // 2 queries: one for users, one for tenants
+        $this->assertNumReads(2);
+
+        // Check result
+        $this->captureReadQueries();
+        foreach ($logs as $log) {
+            $this->assertInstanceOf(Entity\Actor::class, $log->actor);
         }
         $this->assertNumReads(0);
     }

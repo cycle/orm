@@ -416,6 +416,25 @@ abstract class BelongsToRelationTest extends BaseTest
         }
     }
 
+    public function testUpdateRelationSortedByPivot(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<Profile> $profiles */
+        $profiles = (new Select($this->orm, Profile::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$profiles)->load('user')->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($profiles as $profile) {
+            $profile->user; // force loading
+            static::NULLABLE or $this->assertNotNull($profile->user);
+        }
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

@@ -139,6 +139,38 @@ abstract class ManyToManyLoadingTest extends BaseTest
         ], $selector->fetchData());
     }
 
+    public function testUpdateRelationSortedByPivot(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)
+            ->load('tags', [
+                // 'load' => function (Select\QueryBuilder $q): void {
+                //     $q->orderBy('@.@.as', 'DESC');
+                // },
+                'orderBy' => ['@.@.as' => 'DESC'],
+            ])->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            $this->assertIsIterable($user->tags);
+            $this->assertNotEmpty($user->tags);
+            // Check order
+            if (\count($user->tags) > 1) {
+                self::assertGreaterThan(
+                    $user->tags->offsetGet(1)->id,
+                    $user->tags->offsetGet(0)->id,
+                );
+            }
+        }
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

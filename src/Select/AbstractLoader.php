@@ -17,7 +17,6 @@ use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
-use Iterator;
 use JetBrains\PhpStorm\Deprecated;
 
 /**

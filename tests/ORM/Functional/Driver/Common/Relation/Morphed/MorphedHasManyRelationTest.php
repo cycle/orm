@@ -388,6 +388,39 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         }));
     }
 
+    public function testUpdateRelationSortedById(): void
+    {
+        $this->enableProfiling();
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)
+            ->load('comments', [
+                'orderBy' => ['id' => 'DESC'],
+            ])->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $checked = false;
+        foreach ($users as $user) {
+            $this->assertIsIterable($user->comments);
+            // Check order
+            if (\count($user->comments) > 1) {
+                self::assertGreaterThan(
+                    $user->comments->offsetGet(1)->id,
+                    $user->comments->offsetGet(0)->id,
+                );
+                $checked = true;
+            }
+        }
+
+        $this->assertTrue($checked, 'No comments to check order.');
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

@@ -61,7 +61,7 @@ final class SingularNode extends AbstractNode
         $this->parent->mount(
             $this->container,
             $this->indexName,
-            ['@role' => $role, ...$this->intersectData($this->innerKeys, $data)],
+            ['@role' => $role] + $this->intersectData($this->innerKeys, $data),
             $data,
         );
     }

@@ -571,6 +571,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
                         ],
                     ],
                 ],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                ],
             ],
             Post::class => [
                 Schema::ROLE => 'post',
@@ -592,6 +595,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
                         ],
                     ],
                 ],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                ],
             ],
             Image::class => [
                 Schema::ROLE => 'image',
@@ -602,6 +608,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
                 Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'url'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                ],
             ],
         ];
     }

@@ -390,7 +390,6 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
     public function testUpdateRelationSortedById(): void
     {
-        $this->enableProfiling();
         $this->captureReadQueries();
         /** @var list<User> $users */
         $users = (new Select($this->orm, User::class))->fetchAll();

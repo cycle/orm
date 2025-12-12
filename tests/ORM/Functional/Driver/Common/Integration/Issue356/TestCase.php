@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356;
 
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
@@ -30,6 +31,28 @@ abstract class TestCase extends BaseTest
         $this->assertNumReads(0);
     }
 
+    public function testUpdateOne(): void
+    {
+        // Eager load morphed relation
+        $this->captureReadQueries();
+        $log = (new Select($this->orm, Entity\LogRecord::class))
+            ->wherePK(1)
+            ->fetchOne();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
+            ->collect($log)
+            ->load('actor')
+            ->run();
+        $this->assertNumReads(1);
+
+        // Check result
+        $this->captureReadQueries();
+        $this->assertInstanceOf(Entity\Actor::class, $log->actor);
+        $this->assertNumReads(0);
+    }
+
     public function testSelectAll(): void
     {
         // Eager load morphed relation for multiple entities
@@ -44,6 +67,30 @@ abstract class TestCase extends BaseTest
         foreach ($logs as $log) {
             $this->assertInstanceOf(Entity\LogRecord::class, $log);
             self::assertInstanceOf(Entity\Actor::class, $log->actor);
+        }
+        $this->assertNumReads(0);
+    }
+
+    public function testUpdateMany(): void
+    {
+        // Eager load morphed relation
+        $this->captureReadQueries();
+        $logs = (new Select($this->orm, Entity\LogRecord::class))
+            ->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
+            ->collect(...$logs)
+            ->load('actor')
+            ->run();
+        // 2 queries: one for users, one for tenants
+        $this->assertNumReads(2);
+
+        // Check result
+        $this->captureReadQueries();
+        foreach ($logs as $log) {
+            $this->assertInstanceOf(Entity\Actor::class, $log->actor);
         }
         $this->assertNumReads(0);
     }

@@ -402,6 +402,8 @@ abstract class AbstractLoader implements LoaderInterface
 
     /**
      * Returns list of relations to be automatically joined with parent object.
+     *
+     * @return \Generator<int, LoaderInterface|non-empty-string>
      */
     protected function getEagerLoaders(?string $role = null): \Generator
     {
@@ -410,7 +412,7 @@ abstract class AbstractLoader implements LoaderInterface
         if ($parentLoader !== null) {
             yield $parentLoader;
         }
-        yield from $this->generateSublassLoaders();
+        yield from $this->generateSubclassLoaders();
         yield from $this->generateEagerRelationLoaders($role);
     }
 
@@ -422,17 +424,23 @@ abstract class AbstractLoader implements LoaderInterface
             : $this->factory->loader($this->ormSchema, $this->sourceProvider, $role, FactoryInterface::PARENT_LOADER);
     }
 
-    protected function generateSublassLoaders(): iterable
+    /**
+     * @return iterable<LoaderInterface>
+     */
+    protected function generateSubclassLoaders(): iterable
     {
         if ($this->children !== []) {
-            foreach ($this->children as $subRole => $children) {
+            foreach ($this->children as $subRole => $_) {
                 yield $this->factory
                     ->loader($this->ormSchema, $this->sourceProvider, $subRole, FactoryInterface::CHILD_LOADER);
             }
         }
     }
 
-    protected function generateEagerRelationLoaders(string $target): \Generator
+    /**
+     * @return iterable<non-empty-string>
+     */
+    protected function generateEagerRelationLoaders(string $target): iterable
     {
         $relations = $this->ormSchema->define($target, SchemaInterface::RELATIONS) ?? [];
         foreach ($relations as $relation => $schema) {

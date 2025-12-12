@@ -169,6 +169,11 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function isJoined(): bool
     {
+        /** It's impossible to join with {@see UpdateLoader} because it doesn't produce any SQL */
+        if ($this->parent instanceof UpdateLoader) {
+            return false;
+        }
+
         if (!empty($this->options['using'])) {
             return true;
         }

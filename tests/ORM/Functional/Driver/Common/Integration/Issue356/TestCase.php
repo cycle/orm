@@ -10,6 +10,9 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
+/**
+ * Test belongs to morphed loader
+ */
 abstract class TestCase extends BaseTest
 {
     use IntegrationTestTrait;
@@ -116,8 +119,9 @@ abstract class TestCase extends BaseTest
         ]);
 
         $this->makeTable(Entity\User::ROLE, [
-            'id' => 'primary',
+            // The columns order is matters here for testSelectAll purpose
             'name' => 'string',
+            'id' => 'primary',
             'created_at' => 'datetime',
         ]);
 

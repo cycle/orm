@@ -11,6 +11,7 @@ class User implements Actor
     public ?int $id = null;
     public string $name;
     public \DateTimeImmutable $created_at;
+    public bool $active = false;
 
     public function __construct(string $name)
     {

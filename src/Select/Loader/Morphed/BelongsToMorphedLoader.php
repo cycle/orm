@@ -5,23 +5,28 @@ declare(strict_types=1);
 namespace Cycle\ORM\Select\Loader\Morphed;
 
 use Cycle\Database\Query\SelectQuery;
-use Cycle\ORM\Exception\LoaderException;
+use Cycle\Database\StatementInterface;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ProxyNode;
 use Cycle\ORM\Parser\SingularNode;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\LoaderInterface;
-use Cycle\ORM\Select\RootLoader;
+use Cycle\ORM\Select\ScopeInterface;
+use Cycle\ORM\Select\Traits\ColumnsTrait;
+use Cycle\ORM\Select\Traits\ScopeTrait;
 use Cycle\ORM\Service\SourceProviderInterface;
-use JetBrains\PhpStorm\Pure;
 
 /**
  * Creates an additional query constrain based on parent entity alias.
  */
-final class BelongsToMorphedLoader implements LoaderInterface
+final class BelongsToMorphedLoader extends AbstractLoader
 {
+    use ScopeTrait;
+    use ColumnsTrait;
+
     /**
      * Loader that contains current loader
      */
@@ -32,7 +37,6 @@ final class BelongsToMorphedLoader implements LoaderInterface
         'scope' => true,
         'minify' => true,
     ];
-    private ProxyNode $node;
 
     /** @var non-empty-string */
     private string $morphKey;
@@ -44,69 +48,36 @@ final class BelongsToMorphedLoader implements LoaderInterface
     private array $outerKey;
 
     /**
-     * @param class-string $target Target entity interface
      * @param array<non-empty-string, mixed> $schema Relation schema
      */
     public function __construct(
-        private SchemaInterface $ormSchema,
-        private SourceProviderInterface $sourceProvider,
-        private FactoryInterface $factory,
-        private string $target,
+        SchemaInterface $ormSchema,
+        SourceProviderInterface $sourceProvider,
+        FactoryInterface $factory,
         array $schema,
     ) {
+        $this->ormSchema = $ormSchema;
+        $this->sourceProvider = $sourceProvider;
+        $this->factory = $factory;
+
         $this->morphKey = $schema[Relation::MORPH_KEY];
         $this->innerKey = (array) $schema[Relation::INNER_KEY];
         $this->outerKey = (array) $schema[Relation::OUTER_KEY];
-        $this->node = new ProxyNode([$this->morphKey, ...$this->innerKey]);
     }
 
-    /**
-     * Return the relation alias.
-     */
     public function getAlias(): string
     {
-        throw new \RuntimeException('Not implemented');
+        return $this->target ?? throw new \RuntimeException('Target role is not defined yet.');
     }
 
-    /**
-     * Loader specific entity class.
-     */
     public function getTarget(): string
     {
-        return $this->target;
+        return $this->target ?? throw new \RuntimeException('Target role is not defined yet.');
     }
 
-    /**
-     * Get column name related to internal key.
-     */
-    public function fieldAlias(string $field): ?string
+    public function initNode(): AbstractNode
     {
-        throw new \RuntimeException('Not implemented');
-    }
-
-    public function withContext(LoaderInterface $parent, array $options = []): static
-    {
-        // check that given options are known
-        if (!empty($wrong = \array_diff(\array_keys($options), \array_keys($this->options)))) {
-            throw new LoaderException(
-                \sprintf(
-                    'Relation %s does not support option: %s',
-                    $this::class,
-                    \implode(', ', $wrong),
-                ),
-            );
-        }
-
-        $loader = clone $this;
-        $loader->parent = $parent;
-        $loader->options = $options + $this->options;
-
-        return $loader;
-    }
-
-    public function createNode(): AbstractNode
-    {
-        return $this->node;
+        return new ProxyNode([$this->morphKey, ...$this->innerKey]);
     }
 
     public function loadData(AbstractNode $node, bool $includeRole = false): void
@@ -123,17 +94,12 @@ final class BelongsToMorphedLoader implements LoaderInterface
         }
     }
 
-    public function setSubclassesLoading(bool $enabled): void {}
-
-    public function isHierarchical(): bool
+    public function isLoaded(): bool
     {
-        return false;
+        // This loader is always loaded
+        return true;
     }
 
-    /**
-     * @param non-empty-string $role
-     * @param array<non-empty-string, non-empty-string> $columns Normalized columns
-     */
     private function applyCriteria(SelectQuery $query, array $criteria): SelectQuery
     {
         // Map criteria to inner keys
@@ -147,6 +113,11 @@ final class BelongsToMorphedLoader implements LoaderInterface
         return $query;
     }
 
+    /**
+     * Group references by their morph role.
+     *
+     * @return array<non-empty-string, array<non-empty-string, mixed>>
+     */
     private function groupReferencesByRole(array $references): array
     {
         $grouped = [];
@@ -169,32 +140,41 @@ final class BelongsToMorphedLoader implements LoaderInterface
         string $role,
         array $references,
     ): void {
-        $columns = $this->normalizeColumns($this->ormSchema->define($role, SchemaInterface::COLUMNS));
-        $pk = (array) $this->ormSchema->define($role, SchemaInterface::PRIMARY_KEY);
-        $newNode = new SingularNode(\array_keys($columns), $pk, $this->outerKey, [$this->morphKey, ...$this->innerKey], $role);
+        $self = $this->cloneForRole($role);
+        $newNode = new SingularNode(
+            columns: \array_keys($self->columns),
+            primaryKeys: (array) $self->ormSchema->define($role, SchemaInterface::PRIMARY_KEY),
+            innerKeys: $self->outerKey,
+            outerKeys: [$self->morphKey, ...$self->innerKey],
+            role: $role,
+        );
 
         // Register this role in the morphed node
         $roleNode = $node->addNode($role, $newNode);
 
-        // Create loader for the specific role
-        $loader = new RootLoader(
-            $this->ormSchema,
-            $this->sourceProvider,
-            $this->factory,
-            $role,
-            loadRelations: false, // Don't auto-load eager relations
+        // Build Query
+        $query = $self->source->getDatabase()->select()->from(
+            \sprintf('%s AS %s', $self->source->getTable(), $self->getAlias()),
         );
 
-        // Configure query with WHERE IN condition
-        $query = $loader->getQuery();
-        $this->applyCriteria($query, $references);
-        $this->mountColumns($query, $role, $columns, $this->options['minify'], '', true);
+        // Scopes
+        $self->scope = match (true) {
+            $self->options['scope'] === true => $self->getSource()->getScope(),
+            $self->options['scope'] instanceof ScopeInterface => $self->options['scope'],
+            \is_string($self->options['scope']) => $self->factory->make($self->options['scope']),
+            default => null,
+        };
+
+        // Configure WHERE IN condition
+        $self->applyCriteria($query, $references);
+        $self->mountColumns($query, $self->options['minify'], '', true);
+        $self->configureQuery($query);
 
         // Execute query
         $statement = $query->run();
 
         // Parse fetched rows into the ROLE-SPECIFIC node
-        foreach ($statement->fetchAll(\Cycle\Database\StatementInterface::FETCH_NUM) as $row) {
+        foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {
             $roleNode->parseRow(0, $row);
         }
 
@@ -202,50 +182,16 @@ final class BelongsToMorphedLoader implements LoaderInterface
     }
 
     /**
-     * Set columns into SelectQuery.
-     *
-     * @param non-empty-string $alias Table alias
-     * @param array<non-empty-string, non-empty-string> $columns Normalized columns
-     * @param bool $minify Minify column names (will work in case when query parsed in FETCH_NUM mode).
-     * @param string $prefix Prefix to be added for each column name.
-     * @param bool $overwrite When set to true existed columns will be removed.
-     * @param bool $addToGroup When set to true columns will be added to GROUP BY clause.
+     * @param non-empty-string $role
      */
-    private function mountColumns(
-        SelectQuery $query,
-        string $alias,
-        array $columns,
-        bool $minify = false,
-        string $prefix = '',
-        bool $overwrite = false,
-        bool $addToGroup = false,
-    ): SelectQuery {
-        $cols = $overwrite ? [] : $query->getColumns();
-        $i = 0;
-        foreach ($columns as $internal => $external) {
-            $name = $minify ? 'c' . ($i++) : $internal;
-            $cols[] = "{$alias}.{$external} AS {$prefix}{$name}";
-            $addToGroup and $query->groupBy("{$alias}.{$external}");
-        }
-
-        return $query->columns($cols);
-    }
-
-    /**
-     * @param non-empty-string[] $columns
-     *
-     * @return array<non-empty-string, non-empty-string>
-     *
-     * @psalm-pure
-     */
-    #[Pure]
-    private function normalizeColumns(array $columns): array
+    private function cloneForRole(string $role): self
     {
-        $result = [];
-        foreach ($columns as $alias => $column) {
-            $result[\is_int($alias) ? $column : $alias] = $column;
-        }
+        $self = clone $this;
+        $self->target = $role;
+        $self->children = $self->ormSchema->getInheritedRoles($role);
+        $self->source = $self->sourceProvider->getSource($role);
+        $self->columns = $self->normalizeColumns($self->ormSchema->define($role, SchemaInterface::COLUMNS));
 
-        return $result;
+        return $self;
     }
 }

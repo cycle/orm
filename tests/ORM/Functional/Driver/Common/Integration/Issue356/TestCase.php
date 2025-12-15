@@ -98,6 +98,27 @@ abstract class TestCase extends BaseTest
         $this->assertNumReads(0);
     }
 
+    public function testScoped(): void
+    {
+        // Eager load morphed relation
+        $this->captureReadQueries();
+        /** @var array<int, Entity\LogRecord> $logs */
+        $logs = (new Select($this->orm, Entity\LogRecord::class))
+            ->load('actor')
+            ->wherePK(9, 10)
+            ->orderBy('id')
+            ->fetchAll();
+        $this->assertNumReads(3);
+
+        $this->assertCount(2, $logs);
+
+        // Check result
+        $this->captureReadQueries();
+        self::assertNull($logs[0]->actor);
+        self::assertInstanceOf(Entity\Tenant::class, $logs[1]->actor);
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         // Init DB
@@ -120,6 +141,7 @@ abstract class TestCase extends BaseTest
 
         $this->makeTable(Entity\User::ROLE, [
             // The columns order is matters here for testSelectAll purpose
+            'active' => 'bool',
             'name' => 'string',
             'id' => 'primary',
             'created_at' => 'datetime',
@@ -135,13 +157,13 @@ abstract class TestCase extends BaseTest
     private function fillData(): void
     {
         $this->getDatabase()->table(Entity\User::ROLE)->insertMultiple(
-            ['name'],
+            ['name', 'active'],
             [
-                ['user-1'],
-                ['user-2'],
-                ['user-3'],
-                ['user-4'],
-                ['user-5'],
+                ['user-1', true],
+                ['user-2', true],
+                ['user-3', true],
+                ['user-4', true],
+                ['user-5', false],
             ],
         );
         $this->getDatabase()->table(Entity\Tenant::ROLE)->insertMultiple(
@@ -165,7 +187,7 @@ abstract class TestCase extends BaseTest
                 ['log-6 for tenant-3', Entity\Tenant::ROLE, 3, new \DateTimeImmutable()],
                 ['log-7 for user-4', Entity\User::ROLE, 1, new \DateTimeImmutable()],
                 ['log-8 for tenant-4', Entity\Tenant::ROLE, 2, new \DateTimeImmutable()],
-                ['log-9 for user-5', Entity\User::ROLE, 4, new \DateTimeImmutable()],
+                ['log-9 for user-5', Entity\User::ROLE, 5, new \DateTimeImmutable()],
                 ['log-10 for tenant-5', Entity\Tenant::ROLE, 5, new \DateTimeImmutable()],
             ],
         );

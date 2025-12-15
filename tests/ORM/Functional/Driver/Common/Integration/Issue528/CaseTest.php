@@ -14,7 +14,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528\Entity\Country
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Spiral\Pagination\Paginator;
 
-abstract class AbstractTestCase extends BaseTest
+abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
     use TableTrait;

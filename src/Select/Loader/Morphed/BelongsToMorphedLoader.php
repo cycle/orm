@@ -15,6 +15,7 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Service\SourceProviderInterface;
+use JetBrains\PhpStorm\Pure;
 
 /**
  * Creates an additional query constrain based on parent entity alias.
@@ -29,6 +30,7 @@ final class BelongsToMorphedLoader implements LoaderInterface
     protected array $options = [
         'load' => false,
         'scope' => true,
+        'minify' => true,
     ];
     private ProxyNode $node;
 
@@ -128,7 +130,11 @@ final class BelongsToMorphedLoader implements LoaderInterface
         return false;
     }
 
-    protected function configureQuery(SelectQuery $query, array $criteria): SelectQuery
+    /**
+     * @param non-empty-string $role
+     * @param array<non-empty-string, non-empty-string> $columns Normalized columns
+     */
+    private function applyCriteria(SelectQuery $query, array $criteria): SelectQuery
     {
         // Map criteria to inner keys
         $where = [];
@@ -153,6 +159,11 @@ final class BelongsToMorphedLoader implements LoaderInterface
         return $grouped;
     }
 
+    /**
+     * Load data for a specific role.
+     *
+     * @param non-empty-string $role
+     */
     private function loadRoleData(
         AbstractNode $node,
         string $role,
@@ -160,7 +171,7 @@ final class BelongsToMorphedLoader implements LoaderInterface
     ): void {
         $columns = $this->normalizeColumns($this->ormSchema->define($role, SchemaInterface::COLUMNS));
         $pk = (array) $this->ormSchema->define($role, SchemaInterface::PRIMARY_KEY);
-        $newNode = new SingularNode($columns, $pk, $this->outerKey, [$this->morphKey, ...$this->innerKey], $role);
+        $newNode = new SingularNode(\array_keys($columns), $pk, $this->outerKey, [$this->morphKey, ...$this->innerKey], $role);
 
         // Register this role in the morphed node
         $roleNode = $node->addNode($role, $newNode);
@@ -174,16 +185,10 @@ final class BelongsToMorphedLoader implements LoaderInterface
             loadRelations: false, // Don't auto-load eager relations
         );
 
-        // Ensure all nested relations
-        // todo @see src/Select/JoinableLoader.php:134
-        // $query = $this->initQuery($role);
-
         // Configure query with WHERE IN condition
         $query = $loader->getQuery();
-        $this->configureQuery($query, $references);
-
-        // $node = $loader->createNode();
-        // $loader->loadData($node, includeRole: true);
+        $this->applyCriteria($query, $references);
+        $this->mountColumns($query, $role, $columns, $this->options['minify'], '', true);
 
         // Execute query
         $statement = $query->run();
@@ -196,11 +201,49 @@ final class BelongsToMorphedLoader implements LoaderInterface
         $statement->close();
     }
 
+    /**
+     * Set columns into SelectQuery.
+     *
+     * @param non-empty-string $alias Table alias
+     * @param array<non-empty-string, non-empty-string> $columns Normalized columns
+     * @param bool $minify Minify column names (will work in case when query parsed in FETCH_NUM mode).
+     * @param string $prefix Prefix to be added for each column name.
+     * @param bool $overwrite When set to true existed columns will be removed.
+     * @param bool $addToGroup When set to true columns will be added to GROUP BY clause.
+     */
+    private function mountColumns(
+        SelectQuery $query,
+        string $alias,
+        array $columns,
+        bool $minify = false,
+        string $prefix = '',
+        bool $overwrite = false,
+        bool $addToGroup = false,
+    ): SelectQuery {
+        $cols = $overwrite ? [] : $query->getColumns();
+        $i = 0;
+        foreach ($columns as $internal => $external) {
+            $name = $minify ? 'c' . ($i++) : $internal;
+            $cols[] = "{$alias}.{$external} AS {$prefix}{$name}";
+            $addToGroup and $query->groupBy("{$alias}.{$external}");
+        }
+
+        return $query->columns($cols);
+    }
+
+    /**
+     * @param non-empty-string[] $columns
+     *
+     * @return array<non-empty-string, non-empty-string>
+     *
+     * @psalm-pure
+     */
+    #[Pure]
     private function normalizeColumns(array $columns): array
     {
         $result = [];
         foreach ($columns as $alias => $column) {
-            $result[] = \is_int($alias) ? $column : $alias;
+            $result[\is_int($alias) ? $column : $alias] = $column;
         }
 
         return $result;

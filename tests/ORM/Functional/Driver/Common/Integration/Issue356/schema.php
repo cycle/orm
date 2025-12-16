@@ -46,7 +46,7 @@ return [
         ],
         Schema::SCOPE => null,
         Schema::TYPECAST => [
-            'id' => 'int',
+            'lid' => 'int',
             'message' => 'string',
             'actor_id' => 'int',
             'actor_type' => 'string',

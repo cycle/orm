@@ -41,10 +41,10 @@ final class BelongsToMorphedLoader extends AbstractLoader
     /** @var non-empty-string */
     private string $morphKey;
 
-    /** @var array<non-empty-string> */
+    /** @var list<non-empty-string> */
     private array $innerKey;
 
-    /** @var array<non-empty-string> */
+    /** @var list<non-empty-string> */
     private array $outerKey;
 
     /**

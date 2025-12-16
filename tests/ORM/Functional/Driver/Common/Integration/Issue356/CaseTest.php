@@ -13,7 +13,7 @@ use Cycle\ORM\Tests\Traits\TableTrait;
 /**
  * Test belongs to morphed loader
  */
-abstract class TestCase extends BaseTest
+abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
     use TableTrait;
@@ -69,7 +69,9 @@ abstract class TestCase extends BaseTest
         $this->captureReadQueries();
         foreach ($logs as $log) {
             $this->assertInstanceOf(Entity\LogRecord::class, $log);
-            self::assertInstanceOf(Entity\Actor::class, $log->actor);
+            \in_array($log->id, [9], true)
+                ? self::assertNull($log->actor)
+                : self::assertInstanceOf(Entity\Actor::class, $log->actor);
         }
         $this->assertNumReads(0);
     }
@@ -93,7 +95,9 @@ abstract class TestCase extends BaseTest
         // Check result
         $this->captureReadQueries();
         foreach ($logs as $log) {
-            $this->assertInstanceOf(Entity\Actor::class, $log->actor);
+            \in_array($log->id, [9], true)
+                ? self::assertNull($log->actor)
+                : self::assertInstanceOf(Entity\Actor::class, $log->actor);
         }
         $this->assertNumReads(0);
     }

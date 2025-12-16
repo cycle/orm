@@ -69,7 +69,7 @@ abstract class CaseTest extends BaseTest
         $this->captureReadQueries();
         foreach ($logs as $log) {
             $this->assertInstanceOf(Entity\LogRecord::class, $log);
-            \in_array($log->id, [9], true)
+            \in_array($log->lid, [9], true)
                 ? self::assertNull($log->actor)
                 : self::assertInstanceOf(Entity\Actor::class, $log->actor);
         }
@@ -80,6 +80,7 @@ abstract class CaseTest extends BaseTest
     {
         // Eager load morphed relation
         $this->captureReadQueries();
+        /** @var list<Entity\LogRecord> $logs */
         $logs = (new Select($this->orm, Entity\LogRecord::class))
             ->fetchAll();
         $this->assertNumReads(1);
@@ -95,7 +96,7 @@ abstract class CaseTest extends BaseTest
         // Check result
         $this->captureReadQueries();
         foreach ($logs as $log) {
-            \in_array($log->id, [9], true)
+            \in_array($log->lid, [9], true)
                 ? self::assertNull($log->actor)
                 : self::assertInstanceOf(Entity\Actor::class, $log->actor);
         }
@@ -110,7 +111,7 @@ abstract class CaseTest extends BaseTest
         $logs = (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
             ->wherePK(9, 10)
-            ->orderBy('id')
+            ->orderBy('l_id')
             ->fetchAll();
         $this->assertNumReads(3);
 
@@ -136,19 +137,19 @@ abstract class CaseTest extends BaseTest
     private function makeTables(): void
     {
         $this->makeTable(Entity\LogRecord::ROLE, [
-            'id' => 'primary', // autoincrement
-            'message' => 'string',
-            'actor_id' => 'int,nullable',
-            'actor_type' => 'string,nullable',
-            'created_at' => 'datetime',
+            'l_id' => 'primary', // autoincrement
+            'l_message' => 'string',
+            'l_actor_id' => 'int,nullable',
+            'l_actor_type' => 'string,nullable',
+            'l_created_at' => 'datetime',
         ]);
 
         $this->makeTable(Entity\User::ROLE, [
             // The columns order is matters here for testSelectAll purpose
-            'active' => 'bool',
-            'name' => 'string',
-            'id' => 'primary',
-            'created_at' => 'datetime',
+            'u_active' => 'bool',
+            'u_name' => 'string',
+            'u_id' => 'primary',
+            'u_created_at' => 'datetime',
         ]);
 
         $this->makeTable(Entity\Tenant::ROLE, [
@@ -161,7 +162,7 @@ abstract class CaseTest extends BaseTest
     private function fillData(): void
     {
         $this->getDatabase()->table(Entity\User::ROLE)->insertMultiple(
-            ['name', 'active'],
+            ['u_name', 'u_active'],
             [
                 ['user-1', true],
                 ['user-2', true],
@@ -181,7 +182,7 @@ abstract class CaseTest extends BaseTest
             ],
         );
         $this->getDatabase()->table(Entity\LogRecord::ROLE)->insertMultiple(
-            ['message', 'actor_type', 'actor_id', 'created_at'],
+            ['l_message', 'l_actor_type', 'l_actor_id', 'l_created_at'],
             [
                 ['log-1 for user-1', Entity\User::ROLE, 1, new \DateTimeImmutable()],
                 ['log-2 for user-2', Entity\User::ROLE, 2, new \DateTimeImmutable()],

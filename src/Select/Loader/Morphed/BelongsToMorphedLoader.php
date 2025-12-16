@@ -103,12 +103,9 @@ final class BelongsToMorphedLoader extends AbstractLoader
     private function applyCriteria(SelectQuery $query, array $criteria): SelectQuery
     {
         // Map criteria to inner keys
-        $where = [];
         foreach ($this->innerKey as $i => $key) {
-            $where[$this->outerKey[$i]] = $criteria[$key];
+            $query->where($this->getAlias() . '.' . $this->fieldAlias($this->outerKey[$i]), $criteria[$key]);
         }
-
-        $query->where(\key($where), \reset($where));
 
         return $query;
     }

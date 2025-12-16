@@ -258,12 +258,17 @@
     <InvalidThrow>
       <code><![CDATA[throw $state->getLastError()]]></code>
     </InvalidThrow>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[StateInterface]]></code>
+    </PossiblyUnusedReturnValue>
     <PropertyNotSetInConstructor>
       <code><![CDATA[$unitOfWork]]></code>
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/EntityManagerInterface.php">
     <PossiblyUnusedReturnValue>
+      <code><![CDATA[StateInterface]]></code>
+      <code><![CDATA[self]]></code>
       <code><![CDATA[static]]></code>
     </PossiblyUnusedReturnValue>
   </file>
@@ -2341,7 +2346,6 @@
       <code><![CDATA[$row]]></code>
       <code><![CDATA[$self->scope]]></code>
       <code><![CDATA[$this->morphKey]]></code>
-      <code><![CDATA[$where[$this->outerKey[$i]]]]></code>
     </MixedAssignment>
     <MixedMethodCall>
       <code><![CDATA[parseRow]]></code>
@@ -2350,6 +2354,9 @@
       <code><![CDATA[$grouped]]></code>
       <code><![CDATA[array<non-empty-string, array<non-empty-string, mixed>>]]></code>
     </MixedReturnTypeCoercion>
+    <PossiblyNullOperand>
+      <code><![CDATA[$this->fieldAlias($this->outerKey[$i])]]></code>
+    </PossiblyNullOperand>
     <PropertyNotSetInConstructor>
       <code><![CDATA[BelongsToMorphedLoader]]></code>
       <code><![CDATA[BelongsToMorphedLoader]]></code>

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428;
 
-use Cycle\ORM\EntityManager;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
@@ -32,17 +31,14 @@ abstract class CaseTest extends BaseTest
         $user = new Entity\User('Test User', 'test@example.com');
         $post = new Entity\Post('New title', 'New content');
         $post->user = $user;
+        $user->id = 42;
 
-        $em = new EntityManager($this->orm);
-        $em->persist($post);
-        $em->run();
+        $this->save($post);
 
         $post->best_comment = new Entity\Comment(42, 'New comment content', $post, $user);
 
         // Store changes and calc write queries
-        $em = new EntityManager($this->orm);
-        $em->persist($post);
-        $em->run();
+        $this->save($post);
 
         // Check write queries count
         $this->orm->getHeap()->clean();
@@ -64,7 +60,7 @@ abstract class CaseTest extends BaseTest
     private function makeTables(): void
     {
         $this->makeTable('user', [
-            'id' => 'int',
+            'id' => 'int,primary',
             'name' => 'string',
             'email' => 'string',
             'created_at' => 'datetime',
@@ -72,7 +68,7 @@ abstract class CaseTest extends BaseTest
         ]);
 
         $this->makeTable('category', [
-            'id' => 'int',
+            'id' => 'int,primary',
             'name' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
@@ -91,7 +87,7 @@ abstract class CaseTest extends BaseTest
         ]);
 
         $this->makeTable('comment', [
-            'id' => 'int',
+            'id' => 'int,primary',
             'content' => 'string',
             'post_id' => 'int',
             'user_id' => 'int',
@@ -128,7 +124,7 @@ abstract class CaseTest extends BaseTest
         $this->getDatabase()->table('post')->insertMultiple(
             ['title', 'content', 'best_comment_id', 'user_id', 'category_id', 'data'],
             [
-                ['Title 1', 'Foo-bar-baz content 1', 2, 1, 1, 'metadata'],
+                ['Title 1', 'Foo-bar-baz content 1', null, 1, 1, 'metadata'],
             ],
         );
 
@@ -140,5 +136,11 @@ abstract class CaseTest extends BaseTest
                 [3, 1, 1, 'Foo-bar-baz comment 3'],
             ],
         );
+
+        $this->getDatabase()->table('post')->update([
+            'best_comment_id' => 2,
+        ], [
+            'id' => 1,
+        ])->run();
     }
 }

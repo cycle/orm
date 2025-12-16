@@ -8,7 +8,7 @@ class LogRecord
 {
     public const ROLE = 'log';
 
-    public ?int $id = null;
+    public ?int $lid = null;
     public string $message;
     public string $actor_type;
     public int $actor_id;

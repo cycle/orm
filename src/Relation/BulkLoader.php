@@ -29,7 +29,16 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
 
     public function collect(object ...$entities): RelationLoaderInterface
     {
-        $entities === [] and throw new \InvalidArgumentException('At least one entity must be provided.');
+        if ($entities === []) {
+            return new class implements RelationLoaderInterface {
+                public function load(string $relation, array $options = []): static
+                {
+                    return $this;
+                }
+
+                public function run(): void {}
+            };
+        }
         $entities = \array_values($entities);
 
         // Validate entity roles
@@ -112,7 +121,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
      * @param non-empty-array<non-empty-string> $keys
      * @param non-empty-array<non-empty-string> $data
      */
-    public function indexEntity(Node $node, array $keys, array $data, object $entity): void
+    private function indexEntity(Node $node, array $keys, array $data, object $entity): void
     {
         $pool = &$this->index;
         foreach ($keys as $k) {

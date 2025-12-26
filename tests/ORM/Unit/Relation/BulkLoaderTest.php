@@ -8,6 +8,7 @@ use Cycle\ORM\Factory;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Relation\BulkLoader;
+use Cycle\ORM\Relation\RelationLoaderInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\Profile;
@@ -130,14 +131,12 @@ class BulkLoaderTest extends TestCase
      */
     public function testCollectWithEmptyArrayUnpacking(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('At least one entity must be provided.');
-
         $orm = $this->createORM();
-        $entities = [];
+        $loader = (new BulkLoader($orm))->collect();
 
-        $loader = new BulkLoader($orm);
-        $loader->collect(...$entities);
+        self::assertInstanceOf(RelationLoaderInterface::class, $loader);
+        $loader->load('profile');
+        $loader->run();
     }
 
     /**

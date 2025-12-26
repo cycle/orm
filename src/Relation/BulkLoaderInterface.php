@@ -12,6 +12,8 @@ interface BulkLoaderInterface
     /**
      * Collect entities for bulk relation loading.
      *
+     * If no entities are provided, a no-op loader is returned.
+     *
      * @param object ...$entities Entities to collect
      * @psalm-immutable
      */

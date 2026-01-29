@@ -173,7 +173,7 @@ return [
         ],
         Schema::SCOPE => null,
         Schema::TYPECAST => [
-            'id' => 'primary',
+            'id' => 'int',
             'purchase_order_id' => 'int',
             'order_item_id' => 'int',
             'quantity' => 'int',

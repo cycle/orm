@@ -7,7 +7,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue489\Entity\User;
 
 return [
     'user' => [

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue489;
 
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue489\Entity\User;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 

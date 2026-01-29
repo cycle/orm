@@ -8,10 +8,10 @@ use Cycle\ORM\Schema\GeneratedField;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\Order;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\OrderItem;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\PurchaseOrder;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\PurchaseOrderItem;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity\Order;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity\OrderItem;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity\PurchaseOrder;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity\PurchaseOrderItem;
 
 return [
     'order' => [

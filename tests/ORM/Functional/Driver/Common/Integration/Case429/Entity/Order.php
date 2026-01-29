@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity;
 
-class PurchaseOrder
+class Order
 {
+
     public ?int $id = null;
     public string $number;
-
-    /** @var iterable<PurchaseOrderItem> */
+    /** @var iterable<OrderItem> */
     public iterable $items = [];
 
     public function __construct(string $number)

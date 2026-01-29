@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428;
+namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429;
 
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\Order;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\PurchaseOrder;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case428\Entity\PurchaseOrderItem;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity\Order;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity\PurchaseOrder;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity\PurchaseOrderItem;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 

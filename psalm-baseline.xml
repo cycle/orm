@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.14.2@bbd217fc98c0daa0a13aea2a7f119d03ba3fc9a0">
+<files psalm-version="6.14.3@d0b040a91f280f071c1abcb1b77ce3822058725a">
   <file src="src/Collection/ArrayCollectionFactory.php">
     <DocblockTypeContradiction>
       <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
@@ -258,17 +258,12 @@
     <InvalidThrow>
       <code><![CDATA[throw $state->getLastError()]]></code>
     </InvalidThrow>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[StateInterface]]></code>
-    </PossiblyUnusedReturnValue>
     <PropertyNotSetInConstructor>
       <code><![CDATA[$unitOfWork]]></code>
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/EntityManagerInterface.php">
     <PossiblyUnusedReturnValue>
-      <code><![CDATA[StateInterface]]></code>
-      <code><![CDATA[self]]></code>
       <code><![CDATA[static]]></code>
     </PossiblyUnusedReturnValue>
   </file>
@@ -2106,9 +2101,6 @@
       <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
       <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
     </MixedReturnTypeCoercion>
-    <PossiblyFalseArgument>
-      <code><![CDATA[\reset($pk)]]></code>
-    </PossiblyFalseArgument>
   </file>
   <file src="src/Select/AbstractLoader.php">
     <MixedArgument>
@@ -2518,8 +2510,6 @@
       <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
     </LessSpecificReturnStatement>
     <MixedArgument>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[$pk]]></code>
       <code><![CDATA[$row]]></code>
       <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
     </MixedArgument>
@@ -2528,8 +2518,6 @@
       <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
     </MixedArgumentTypeCoercion>
     <MixedAssignment>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[$pk]]></code>
       <code><![CDATA[$row]]></code>
     </MixedAssignment>
     <MoreSpecificReturnType>
@@ -2684,13 +2672,6 @@
     <MixedAssignment>
       <code><![CDATA[$role]]></code>
     </MixedAssignment>
-    <MixedPropertyTypeCoercion>
-      <code><![CDATA[$this->repositories]]></code>
-    </MixedPropertyTypeCoercion>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[$this->repositories[$entity] = $this->factory->repository($this->orm, $this->schema, $entity, $select)]]></code>
-      <code><![CDATA[RepositoryInterface]]></code>
-    </MixedReturnTypeCoercion>
   </file>
   <file src="src/Service/Implementation/RoleResolver.php">
     <LessSpecificReturnStatement>
@@ -2816,6 +2797,9 @@
     <PossiblyNullReference>
       <code><![CDATA[run]]></code>
     </PossiblyNullReference>
+    <RedundantPropertyInitializationCheck>
+      <code><![CDATA[isset($this->pool)]]></code>
+    </RedundantPropertyInitializationCheck>
     <UnnecessaryVarAnnotation>
       <code><![CDATA[Tuple]]></code>
     </UnnecessaryVarAnnotation>

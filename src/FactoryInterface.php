@@ -41,7 +41,7 @@ interface FactoryInterface extends DatabaseProviderInterface, CoreFactory
     ): LoaderInterface;
 
     /**
-     * @template TEntity
+     * @template TEntity of object
      *
      * Create repository associated with given role.
      *

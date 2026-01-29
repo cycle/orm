@@ -51,7 +51,7 @@ class HasOneLoader extends JoinableLoader
         FactoryInterface $factory,
         string $name,
         string $target,
-        array $schema
+        array $schema,
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $name, $target, $schema);
         $this->options['where'] = $schema[Relation::WHERE] ?? [];
@@ -78,7 +78,7 @@ class HasOneLoader extends JoinableLoader
         $this->setOrderBy(
             $query,
             $this->getAlias(),
-            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []
+            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? [],
         );
 
         return parent::configureQuery($query);

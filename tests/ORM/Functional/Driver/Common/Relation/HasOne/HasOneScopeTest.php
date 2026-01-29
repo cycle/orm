@@ -22,47 +22,6 @@ abstract class HasOneScopeTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'level' => 'integer',
-            'message' => 'string',
-        ]);
-
-        $this->makeFK('comment', 'user_id', 'user', 'id');
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['user_id', 'level', 'message'],
-            [
-                [1, 1, 'msg 1'],
-                [1, 2, 'msg 2'],
-                [1, 3, 'msg 3'],
-                [1, 4, 'msg 4'],
-                [2, 1, 'msg 2.1'],
-                [2, 2, 'msg 2.2'],
-                [2, 3, 'msg 2.3'],
-            ]
-        );
-    }
-
     public function testScopeOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -392,6 +351,47 @@ abstract class HasOneScopeTest extends BaseTest
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
 
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'level' => 'integer',
+            'message' => 'string',
+        ]);
+
+        $this->makeFK('comment', 'user_id', 'user', 'id');
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['user_id', 'level', 'message'],
+            [
+                [1, 1, 'msg 1'],
+                [1, 2, 'msg 2'],
+                [1, 3, 'msg 3'],
+                [1, 4, 'msg 4'],
+                [2, 1, 'msg 2.1'],
+                [2, 2, 'msg 2.2'],
+                [2, 3, 'msg 2.3'],
+            ],
+        );
+    }
+
     protected function withCommentsSchema(array $relationSchema): ORMInterface
     {
         $eSchema = [];
@@ -424,10 +424,10 @@ abstract class HasOneScopeTest extends BaseTest
                         Relation::TYPE => Relation::HAS_ONE,
                         Relation::TARGET => Comment::class,
                         Relation::SCHEMA => [
-                                Relation::CASCADE => true,
-                                Relation::INNER_KEY => 'id',
-                                Relation::OUTER_KEY => 'user_id',
-                            ] + $rSchema,
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ] + $rSchema,
                     ],
                 ],
                 Schema::SCOPE => SortByIDScope::class,

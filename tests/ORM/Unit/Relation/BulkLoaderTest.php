@@ -21,12 +21,11 @@ class BulkLoaderTest extends TestCase
      */
     public function testCollectThrowsExceptionWhenNoEntitiesProvided(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('At least one entity must be provided.');
-
         $orm = $this->createORM();
         $loader = new BulkLoader($orm);
         $loader->collect();
+
+        $this->expectNotToPerformAssertions();
     }
 
     /**

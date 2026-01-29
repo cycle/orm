@@ -26,7 +26,7 @@ return [
         ],
         Schema::RELATIONS => [
             'user' => [
-                Relation::TYPE => Relation::REFERS_TO,
+                Relation::TYPE => Relation::BELONGS_TO,
                 Relation::TARGET => 'user',
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
@@ -34,7 +34,7 @@ return [
                     Relation::NULLABLE => true,
                     Relation::INNER_KEY => 'user_id',
                     Relation::OUTER_KEY => ['id'],
-                    Relation::INVERSION => 'users',
+                    // Relation::INVERSION => 'users',
                 ],
             ],
             'users' => [
@@ -48,7 +48,7 @@ return [
                     Relation::ORDER_BY => [],
                     Relation::INNER_KEY => ['id'],
                     Relation::OUTER_KEY => 'user_id',
-                    Relation::INVERSION => 'user',
+                    // Relation::INVERSION => 'user',
                 ],
             ],
         ],

@@ -191,6 +191,11 @@ final class RelationMap
             return;
         }
 
+        if (isset($relationSchema[Relation::SCHEMA][Relation::INVERSION])) {
+            // handshaked relation, skip
+            return;
+        }
+
         $relation = new ShadowBelongsTo($container, $role, $relationSchema);
         $this->dependencies[$relation->getName()] = $relation;
     }

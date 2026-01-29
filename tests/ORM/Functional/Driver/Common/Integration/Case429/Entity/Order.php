@@ -6,9 +6,9 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case429\Entity;
 
 class Order
 {
-
     public ?int $id = null;
     public string $number;
+
     /** @var iterable<OrderItem> */
     public iterable $items = [];
 

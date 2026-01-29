@@ -37,6 +37,5 @@ abstract class CaseTest extends BaseTest
             'id' => 'primary', // autoincrement
             'user_id' => 'int,nullable',
         ]);
-        $this->makeFK(User::ROLE, 'user_id', User::ROLE, 'id', 'CASCADE', 'CASCADE');
     }
 }

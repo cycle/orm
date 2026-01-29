@@ -117,14 +117,6 @@ abstract class CaseTest extends BaseTest
             'order_item_id' => 'int,nullable',
             'quantity' => 'int',
         ]);
-
-        $this->makeFK('order_item', 'order_id', 'order', 'id', 'NO ACTION', 'CASCADE');
-
-        $this->makeFK('order_item', 'purchase_order_id', 'purchase_order', 'id', 'NO ACTION', 'CASCADE');
-
-        $this->makeFK('purchase_order_item', 'purchase_order_id', 'purchase_order', 'id', 'NO ACTION', 'CASCADE');
-
-        $this->makeFK('purchase_order_item', 'order_item_id', 'order_item', 'id', 'NO ACTION', 'CASCADE');
     }
 
     private function fillData(): void

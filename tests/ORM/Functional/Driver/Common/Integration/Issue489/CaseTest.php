@@ -15,15 +15,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testSave(): void
     {
         $this->captureWriteQueries();
@@ -36,6 +27,15 @@ abstract class CaseTest extends BaseTest
 
         // Check write queries count
         $this->assertNumWrites(1);
+    }
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

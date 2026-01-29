@@ -44,6 +44,32 @@ abstract class UnitOfWorkTest extends BaseTest
         $this->assertNull($result->getLastError());
     }
 
+    public function testPendingChanges(): void
+    {
+        $eow = new UnitOfWork($this->orm, Runner::outerTransaction());
+
+        $entity = new Post();
+        $entity->title = 'Test title';
+        $entity->content = 'Test';
+
+        $eow->persistState($entity);
+
+        $this->assertTrue($eow->hasPendingChanges());
+
+        $result = $eow->run();
+        $this->assertTrue($eow->hasPendingChanges());
+        $this->assertFalse($result->isSuccess());
+        $this->assertInstanceOf(RunnerException::class, $result->getLastError());
+
+        $this->getDriver()->beginTransaction();
+
+        $result = $result->retry();
+
+        $this->assertFalse($eow->hasPendingChanges());
+        $this->assertTrue($result->isSuccess());
+        $this->assertNull($result->getLastError());
+    }
+
     public function testParallelPersist(): void
     {
         $eow = new UnitOfWork($this->orm);

@@ -20,46 +20,8 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
 {
     use TableTrait;
 
-    protected const
-        CHILD_CONTAINER = 'child_entity';
-    protected const
-        CHILDREN_CONTAINER = 'children';
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->dropDatabase();
-        $this->makeTable(
-            'parent_entity',
-            [
-                'pField1' => 'bigInteger,primary',
-                'pField2' => 'bigInteger,primary',
-                'pField3' => 'integer,nullable',
-                'cField1' => 'bigInteger,nullable',
-                'cField2' => 'bigInteger,nullable',
-            ]
-        );
-        $this->makeTable(
-            'child_entity',
-            [
-                'field1' => 'bigInteger,primary',
-                'field2' => 'bigInteger,primary',
-                'field3' => 'string,nullable',
-                'parent_field1' => 'bigInteger,null',
-                'parent_field2' => 'bigInteger,null',
-            ]
-        );
-
-        $this->makeCompositeFK(
-            'child_entity',
-            ['parent_field1', 'parent_field2'],
-            'parent_entity',
-            ['pField1', 'pField2']
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
+    protected const CHILD_CONTAINER = 'child_entity';
+    protected const CHILDREN_CONTAINER = 'children';
 
     public function testCreateParentWithDoubleReference(): void
     {
@@ -326,6 +288,42 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
 
         $this->assertNull($u->child_entity);
         $this->assertCount(1, $u->children);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->dropDatabase();
+        $this->makeTable(
+            'parent_entity',
+            [
+                'pField1' => 'bigInteger,primary',
+                'pField2' => 'bigInteger,primary',
+                'pField3' => 'integer,nullable',
+                'cField1' => 'bigInteger,nullable',
+                'cField2' => 'bigInteger,nullable',
+            ],
+        );
+        $this->makeTable(
+            'child_entity',
+            [
+                'field1' => 'bigInteger,primary',
+                'field2' => 'bigInteger,primary',
+                'field3' => 'string,nullable',
+                'parent_field1' => 'bigInteger,null',
+                'parent_field2' => 'bigInteger,null',
+            ],
+        );
+
+        $this->makeCompositeFK(
+            'child_entity',
+            ['parent_field1', 'parent_field2'],
+            'parent_entity',
+            ['pField1', 'pField2'],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

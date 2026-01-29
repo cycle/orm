@@ -19,78 +19,6 @@ abstract class HasManySourceTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'level' => 'integer',
-            'message' => 'string',
-        ]);
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['user_id', 'level', 'message'],
-            [
-                [1, 1, 'msg 1'],
-                [1, 2, 'msg 2'],
-                [1, 3, 'msg 3'],
-                [1, 4, 'msg 4'],
-                [2, 1, 'msg 2.1'],
-                [2, 2, 'msg 2.2'],
-                [2, 3, 'msg 2.3'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testSelectUsers(): void
     {
         $s = new Select($this->orm, User::class);
@@ -448,5 +376,77 @@ abstract class HasManySourceTest extends BaseTest
         $this->assertSame('msg 3', $a->comments[1]->message);
 
         $this->assertSame('msg 2.3', $b->comments[0]->message);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'level' => 'integer',
+            'message' => 'string',
+        ]);
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['user_id', 'level', 'message'],
+            [
+                [1, 1, 'msg 1'],
+                [1, 2, 'msg 2'],
+                [1, 3, 'msg 3'],
+                [1, 4, 'msg 4'],
+                [2, 1, 'msg 2.1'],
+                [2, 2, 'msg 2.2'],
+                [2, 3, 'msg 2.3'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'level', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

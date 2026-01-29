@@ -24,7 +24,7 @@ interface MapperInterface
      *
      * @param array $data Raw data. You shouldn't apply typecasting to it.
      */
-    public function init(array $data, string $role = null): object;
+    public function init(array $data, ?string $role = null): object;
 
     /**
      * Cast raw data to configured types.
@@ -44,9 +44,8 @@ interface MapperInterface
      * @param object<T> $entity
      * @param array $data Prepared (typecasted) data
      *
-     * @throws MapperException
-     *
      * @return T
+     * @throws MapperException
      */
     public function hydrate(object $entity, array $data): object;
 

@@ -11,20 +11,6 @@ abstract class BaseTest extends TestCase
 {
     private CollectionFactoryInterface $factory;
 
-    abstract protected function getFactory(): CollectionFactoryInterface;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->factory = $this->getFactory();
-    }
-
-    private function generatorArray()
-    {
-        yield 'foo' => 'bar';
-        yield 'baz' => 'bar';
-    }
-
     public function collectionDataProvider()
     {
         return [
@@ -44,5 +30,19 @@ abstract class BaseTest extends TestCase
                 ]),
             ],
         ];
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->factory = $this->getFactory();
+    }
+
+    abstract protected function getFactory(): CollectionFactoryInterface;
+
+    private function generatorArray()
+    {
+        yield 'foo' => 'bar';
+        yield 'baz' => 'bar';
     }
 }

@@ -64,9 +64,9 @@ final class OrmTest extends TestCase
             factory: new Factory(
                 new DatabaseManager(new DatabaseConfig([])),
                 RelationConfig::getDefault(),
-                new SimpleFactory()
+                new SimpleFactory(),
             ),
-            schema: new Schema([])
+            schema: new Schema([]),
         );
     }
 }

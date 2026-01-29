@@ -1,0 +1,2807 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.14.3@d0b040a91f280f071c1abcb1b77ce3822058725a">
+  <file src="src/Collection/ArrayCollectionFactory.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
+    </DocblockTypeContradiction>
+    <InvalidReturnStatement>
+      <code><![CDATA[match (true) {
+            \is_array($data) => $data,
+            $data instanceof \Traversable => \iterator_to_array($data),
+            default => throw new CollectionFactoryException('Unsupported iterable type.'),
+        }]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[array]]></code>
+    </InvalidReturnType>
+  </file>
+  <file src="src/Collection/DoctrineCollectionFactory.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[$data instanceof PivotedStorage]]></code>
+      <code><![CDATA[\is_a($this->class, PivotedCollection::class)]]></code>
+      <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
+    </DocblockTypeContradiction>
+    <InvalidReturnStatement>
+      <code><![CDATA[new PivotedCollection($data->getElements(), $data->getContext())]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[Collection]]></code>
+    </InvalidReturnType>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data->getContext()]]></code>
+    </MixedArgumentTypeCoercion>
+    <PropertyTypeCoercion>
+      <code><![CDATA[$class === Collection::class ? ArrayCollection::class : $class]]></code>
+    </PropertyTypeCoercion>
+    <TypeDoesNotContainType>
+      <code><![CDATA[\is_a($this->class, PivotedCollection::class)]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="src/Collection/IlluminateCollectionFactory.php">
+    <PropertyTypeCoercion>
+      <code><![CDATA[$class]]></code>
+    </PropertyTypeCoercion>
+    <UnsafeInstantiation>
+      <code><![CDATA[new $this->class($data)]]></code>
+    </UnsafeInstantiation>
+  </file>
+  <file src="src/Collection/LoophpCollectionFactory.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[$data instanceof PivotedStorage]]></code>
+      <code><![CDATA[\is_a($this->class, LoophpPivotedCollection::class)]]></code>
+    </DocblockTypeContradiction>
+    <InvalidReturnStatement>
+      <code><![CDATA[new LoophpPivotedCollection($data->getElements(), $data->getContext())]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[CollectionInterface]]></code>
+    </InvalidReturnType>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data->getContext()]]></code>
+    </MixedArgumentTypeCoercion>
+    <PropertyTypeCoercion>
+      <code><![CDATA[$class === CollectionInterface::class ? Collection::class : $class]]></code>
+    </PropertyTypeCoercion>
+    <TypeDoesNotContainType>
+      <code><![CDATA[\is_a($this->class, LoophpPivotedCollection::class)]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="src/Collection/Pivoted/LoophpPivotedCollection.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[LoophpPivotedCollection]]></code>
+    </ClassMustBeFinal>
+    <ConstructorSignatureMismatch>
+      <code><![CDATA[$elements]]></code>
+    </ConstructorSignatureMismatch>
+    <ImplementedParamTypeMismatch>
+      <code><![CDATA[$elements]]></code>
+    </ImplementedParamTypeMismatch>
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[$this->pivotContext]]></code>
+    </InvalidPropertyAssignmentValue>
+    <InvalidTemplateParam>
+      <code><![CDATA[LoophpPivotedCollection]]></code>
+      <code><![CDATA[LoophpPivotedCollection]]></code>
+    </InvalidTemplateParam>
+    <MissingTemplateParam>
+      <code><![CDATA[parent::fromIterable($elements)]]></code>
+    </MissingTemplateParam>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$iterable instanceof \Traversable ? \iterator_to_array($iterable) : $iterable]]></code>
+    </MixedArgumentTypeCoercion>
+    <ParamNameMismatch>
+      <code><![CDATA[$elements]]></code>
+    </ParamNameMismatch>
+    <TooManyTemplateParams>
+      <code><![CDATA[LoophpPivotedCollection]]></code>
+    </TooManyTemplateParams>
+    <UnsafeGenericInstantiation>
+      <code><![CDATA[new static($iterable instanceof \Traversable ? \iterator_to_array($iterable) : $iterable)]]></code>
+    </UnsafeGenericInstantiation>
+  </file>
+  <file src="src/Collection/Pivoted/PivotedCollection.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PivotedCollection]]></code>
+    </ClassMustBeFinal>
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[$this->pivotContext]]></code>
+    </InvalidPropertyAssignmentValue>
+    <MoreSpecificImplementedParamType>
+      <code><![CDATA[$elements]]></code>
+    </MoreSpecificImplementedParamType>
+  </file>
+  <file src="src/Collection/Pivoted/PivotedStorage.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PivotedStorage]]></code>
+    </ClassMustBeFinal>
+    <MissingTemplateParam>
+      <code><![CDATA[\IteratorAggregate]]></code>
+    </MissingTemplateParam>
+  </file>
+  <file src="src/Command/Database/Delete.php">
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->table]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Command/Database/Insert.php">
+    <EmptyArrayAccess>
+      <code><![CDATA[$returningFields[$this->primaryKeys[0]]]]></code>
+    </EmptyArrayAccess>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$field]]></code>
+      <code><![CDATA[$field]]></code>
+      <code><![CDATA[\array_values($returning)]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[\array_merge($this->columns, $this->mapper?->mapColumns($data) ?? $data)]]></code>
+      <code><![CDATA[array]]></code>
+    </MixedReturnTypeCoercion>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$insertID]]></code>
+    </PossiblyInvalidArgument>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->table]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullReference>
+      <code><![CDATA[mapColumns]]></code>
+    </PossiblyNullReference>
+    <RedundantCondition>
+      <code><![CDATA[$this->mapper->cast([$field => $insertID])[$field]]]></code>
+    </RedundantCondition>
+    <TypeDoesNotContainNull>
+      <code><![CDATA[$this->mapper === null]]></code>
+    </TypeDoesNotContainNull>
+  </file>
+  <file src="src/Command/Database/Update.php">
+    <MixedArgument>
+      <code><![CDATA[$primaryKeys]]></code>
+    </MixedArgument>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[\array_merge(
+            $this->columns,
+            $this->mapper?->mapColumns($data) ?? $data,
+        )]]></code>
+      <code><![CDATA[array]]></code>
+    </MixedReturnTypeCoercion>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->table]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Command/Special/MergeCommand.php">
+    <MissingTemplateParam>
+      <code><![CDATA[\IteratorAggregate]]></code>
+    </MissingTemplateParam>
+    <MixedAssignment>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Command/Special/Sequence.php">
+    <MissingTemplateParam>
+      <code><![CDATA[\IteratorAggregate]]></code>
+    </MissingTemplateParam>
+  </file>
+  <file src="src/Command/Special/WrappedCommand.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$pkColumn]]></code>
+      <code><![CDATA[$table]]></code>
+    </ArgumentTypeCoercion>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$primaryKeys]]></code>
+    </MixedArgumentTypeCoercion>
+    <PossiblyNullArgument>
+      <code><![CDATA[$callable]]></code>
+      <code><![CDATA[$callable]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullFunctionCall>
+      <code><![CDATA[\Closure::bind($this->afterExecute, null, static::class)($this->command)]]></code>
+      <code><![CDATA[\Closure::bind($this->beforeExecute, null, static::class)($this->command)]]></code>
+    </PossiblyNullFunctionCall>
+    <UnsafeInstantiation>
+      <code><![CDATA[new static($command)]]></code>
+    </UnsafeInstantiation>
+  </file>
+  <file src="src/Command/Special/WrappedStoreCommand.php">
+    <NonInvariantDocblockPropertyType>
+      <code><![CDATA[$command]]></code>
+    </NonInvariantDocblockPropertyType>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[$command]]></code>
+    </PropertyNotSetInConstructor>
+  </file>
+  <file src="src/Command/StoreCommand.php">
+    <PossiblyNullPropertyAssignmentValue>
+      <code><![CDATA[$db]]></code>
+    </PossiblyNullPropertyAssignmentValue>
+  </file>
+  <file src="src/Command/Traits/ErrorTrait.php">
+    <MixedAssignment>
+      <code><![CDATA[$n]]></code>
+      <code><![CDATA[$n]]></code>
+      <code><![CDATA[$name]]></code>
+      <code><![CDATA[$name]]></code>
+    </MixedAssignment>
+    <RedundantCondition>
+      <code><![CDATA[$this->waitScope]]></code>
+    </RedundantCondition>
+    <TypeDoesNotContainType>
+      <code><![CDATA[[]]]></code>
+    </TypeDoesNotContainType>
+    <UndefinedThisPropertyFetch>
+      <code><![CDATA[$this->waitContext]]></code>
+      <code><![CDATA[$this->waitContext]]></code>
+      <code><![CDATA[$this->waitContext]]></code>
+      <code><![CDATA[$this->waitScope]]></code>
+    </UndefinedThisPropertyFetch>
+    <UnusedForeachValue>
+      <code><![CDATA[$n]]></code>
+      <code><![CDATA[$n]]></code>
+    </UnusedForeachValue>
+  </file>
+  <file src="src/Command/Traits/ScopeTrait.php">
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[$this->waitScope]]></code>
+    </InvalidPropertyAssignmentValue>
+  </file>
+  <file src="src/Config/RelationConfig.php">
+    <TooManyArguments>
+      <code><![CDATA[new Autowire($loader)]]></code>
+      <code><![CDATA[new Autowire($relation)]]></code>
+    </TooManyArguments>
+  </file>
+  <file src="src/EntityManager.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[EntityManager]]></code>
+    </ClassMustBeFinal>
+    <InvalidThrow>
+      <code><![CDATA[throw $state->getLastError()]]></code>
+    </InvalidThrow>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[$unitOfWork]]></code>
+    </PropertyNotSetInConstructor>
+  </file>
+  <file src="src/EntityManagerInterface.php">
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[static]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="src/Exception/BuilderException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[BuilderException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/CollectionFactoryException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[CollectionFactoryException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/CommandException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[CommandException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/ConfigException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ConfigException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/FactoryTypecastException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[FactoryTypecastException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/HeapException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[HeapException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/LoaderException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[LoaderException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/MapperException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MapperException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/ParserException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ParserException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/PoolException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PoolException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/PromiseException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PromiseException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/Relation/BadRelationValueException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[BadRelationValueException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/Relation/NullException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[NullException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/RunnerException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[RunnerException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/SchemaException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SchemaException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/SelectorException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SelectorException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/SuccessTransactionRetryException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SuccessTransactionRetryException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Exception/TransactionException.php">
+    <MixedArgument>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$relationStatus]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$tuple]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[getRelationStatus]]></code>
+      <code><![CDATA[getRole]]></code>
+      <code><![CDATA[getStatus]]></code>
+    </MixedMethodCall>
+    <MixedPropertyFetch>
+      <code><![CDATA[$tuple->node]]></code>
+      <code><![CDATA[$tuple->state]]></code>
+      <code><![CDATA[$tuple->task]]></code>
+    </MixedPropertyFetch>
+  </file>
+  <file src="src/Exception/TypecastException.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[TypecastException]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Factory.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$role]]></code>
+    </ArgumentTypeCoercion>
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[[
+        SchemaInterface::REPOSITORY => Repository::class,
+        SchemaInterface::SOURCE => Source::class,
+        SchemaInterface::MAPPER => Mapper::class,
+        SchemaInterface::SCOPE => null,
+        SchemaInterface::TYPECAST_HANDLER => null,
+    ]]]></code>
+    </InvalidPropertyAssignmentValue>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->config->getLoader($definition[Relation::TYPE])->resolve(
+            $this->factory,
+            [
+                'ormSchema' => $schema,
+                'sourceProvider' => $sourceProvider,
+                'factory' => $this,
+                'role' => $role,
+                'name' => $relation,
+                'target' => $definition[Relation::TARGET],
+                'schema' => $definition[Relation::SCHEMA],
+            ],
+        )]]></code>
+      <code><![CDATA[$this->config->getRelation($type)->resolve(
+            $this->factory,
+            [
+                'orm' => $orm,
+                'role' => $role,
+                'name' => $relation,
+                'target' => $relSchema[Relation::TARGET],
+                'schema' => $relSchema[Relation::SCHEMA]
+                    + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null]
+                    + [Relation::COLLECTION_TYPE => $relSchema[Relation::COLLECTION_TYPE] ?? null],
+            ],
+        )]]></code>
+    </LessSpecificReturnStatement>
+    <MixedArgument>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$definition[Relation::TYPE]]]></code>
+      <code><![CDATA[$handler]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$schema->define($role, SchemaInterface::DATABASE)]]></code>
+      <code><![CDATA[$table]]></code>
+      <code><![CDATA[$type]]></code>
+      <code><![CDATA[$type]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$rules]]></code>
+      <code><![CDATA[$rules]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$handler]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$table]]></code>
+      <code><![CDATA[$type]]></code>
+      <code><![CDATA[$type]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$relSchema[Relation::SCHEMA]]]></code>
+    </MixedOperand>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[$defaults + $this->defaults]]></code>
+      <code><![CDATA[$this->collectionFactoryAlias]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->collectionFactoryAlias[$name] = $this->factory->make($name)]]></code>
+      <code><![CDATA[$this->factory->make($alias, $parameters)]]></code>
+      <code><![CDATA[$this->factory->make($handler, [
+            'database' => $database,
+            'schema' => $schema,
+            'role' => $role,
+        ])]]></code>
+    </MixedReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[LoaderInterface]]></code>
+      <code><![CDATA[RelationInterface]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$e->getCode()]]></code>
+    </PossiblyInvalidArgument>
+  </file>
+  <file src="src/Heap/Heap.php">
+    <InvalidNullableReturnType>
+      <code><![CDATA[\SplObjectStorage]]></code>
+    </InvalidNullableReturnType>
+    <MissingTemplateParam>
+      <code><![CDATA[\IteratorAggregate]]></code>
+    </MissingTemplateParam>
+    <MixedArgument>
+      <code><![CDATA[$index]]></code>
+      <code><![CDATA[$indexName]]></code>
+      <code><![CDATA[$next[$value]]]></code>
+      <code><![CDATA[$this->paths[$role]]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$indexName]]></code>
+      <code><![CDATA[$key]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$next[$value]]]></code>
+      <code><![CDATA[$next[$value]]]></code>
+      <code><![CDATA[$next[$value]]]></code>
+      <code><![CDATA[$next[$value]]]></code>
+      <code><![CDATA[$removeFrom[$removeKey ?? $value]]]></code>
+      <code><![CDATA[$result[$value]]]></code>
+      <code><![CDATA[$rolePath[$value]]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName]]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName]]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName]]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName]]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName][$value]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$rolePath[$value]]]></code>
+    </MixedArrayAssignment>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$indexName]]]></code>
+      <code><![CDATA[$data[$k]]]></code>
+      <code><![CDATA[$scope[$key]]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName]]]></code>
+    </MixedArrayOffset>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$data[$indexName]]]></code>
+    </MixedArrayTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$index]]></code>
+      <code><![CDATA[$indexKeys]]></code>
+      <code><![CDATA[$indexName]]></code>
+      <code><![CDATA[$indexName]]></code>
+      <code><![CDATA[$indexName]]></code>
+      <code><![CDATA[$k]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$this->storage]]></code>
+      <code><![CDATA[$values]]></code>
+      <code><![CDATA[$values]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$result]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName][$value] ?? null]]></code>
+      <code><![CDATA[$this->paths[$role][$indexName][$value] ?? null]]></code>
+      <code><![CDATA[$this->storage->offsetGet($entity)]]></code>
+    </MixedReturnStatement>
+    <NullableReturnStatement>
+      <code><![CDATA[$this->storage]]></code>
+    </NullableReturnStatement>
+    <PossiblyInvalidClone>
+      <code><![CDATA[clone $this->storage]]></code>
+    </PossiblyInvalidClone>
+    <PossiblyNullArgument>
+      <code><![CDATA[$indexName]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullArrayOffset>
+      <code><![CDATA[$next]]></code>
+      <code><![CDATA[$next]]></code>
+      <code><![CDATA[$next]]></code>
+      <code><![CDATA[$next]]></code>
+      <code><![CDATA[$removeFrom]]></code>
+      <code><![CDATA[$this->paths[$role]]]></code>
+    </PossiblyNullArrayOffset>
+    <PossiblyNullReference>
+      <code><![CDATA[getData]]></code>
+      <code><![CDATA[getData]]></code>
+      <code><![CDATA[offsetExists]]></code>
+      <code><![CDATA[offsetGet]]></code>
+      <code><![CDATA[offsetSet]]></code>
+      <code><![CDATA[offsetUnset]]></code>
+    </PossiblyNullReference>
+    <UnsupportedPropertyReferenceUsage>
+      <code><![CDATA[$result = &$this->paths[$role][$indexName]]]></code>
+      <code><![CDATA[$result = &$this->paths[$role][$indexName]]]></code>
+      <code><![CDATA[$rolePath = &$this->paths[$role][$indexName]]]></code>
+    </UnsupportedPropertyReferenceUsage>
+    <UnusedForeachValue>
+      <code><![CDATA[$values]]></code>
+    </UnusedForeachValue>
+  </file>
+  <file src="src/Heap/Node.php">
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$name]]></code>
+      <code><![CDATA[$this->rawData]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$changes[$name]]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[$state->getTransactionData()]]></code>
+    </MixedPropertyTypeCoercion>
+    <UnusedParam>
+      <code><![CDATA[$relMap]]></code>
+    </UnusedParam>
+  </file>
+  <file src="src/Heap/State.php">
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$column]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$result[$field]]]></code>
+      <code><![CDATA[$result[$field]]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Heap/Traits/WaitFieldTrait.php">
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[$this->waitingFields[$key] ?? false]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Iterator.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$role]]></code>
+    </ArgumentTypeCoercion>
+    <ImplementedReturnTypeMismatch>
+      <code><![CDATA[\Generator<array, array-key|TEntity, mixed, void>]]></code>
+    </ImplementedReturnTypeMismatch>
+    <MixedArgument>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$data['@']]]></code>
+      <code><![CDATA[$data[LoaderInterface::ROLE_KEY]]]></code>
+      <code><![CDATA[$index['@']]]></code>
+    </MixedArrayAccess>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$pk]]]></code>
+      <code><![CDATA[[$pk => $id]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$id]]></code>
+      <code><![CDATA[$index]]></code>
+      <code><![CDATA[$index]]></code>
+      <code><![CDATA[$pk]]></code>
+      <code><![CDATA[$role]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$e ?? $this->entityFactory->make($role, $data, Node::MANAGED, typecast: $this->typecast)]]></code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[\Generator<array, array-key|TEntity, mixed, void>]]></code>
+    </MixedReturnTypeCoercion>
+  </file>
+  <file src="src/Mapper/ClasslessMapper.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->role]]></code>
+    </ArgumentTypeCoercion>
+    <InvalidArgument>
+      <code><![CDATA[\array_keys($this->columns + $this->parentColumns)]]></code>
+    </InvalidArgument>
+    <MissingParamType>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+    </MissingParamType>
+    <MixedArgument>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+    </MixedArgument>
+  </file>
+  <file src="src/Mapper/DatabaseMapper.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$this->source->getTable()]]></code>
+      <code><![CDATA[\count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null]]></code>
+    </ArgumentTypeCoercion>
+    <MixedArgument>
+      <code><![CDATA[$parent]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$pk]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayOffset>
+      <code><![CDATA[$result[$this->columns[$column]]]]></code>
+      <code><![CDATA[$this->columns[$PK]]]></code>
+      <code><![CDATA[$this->columns[\is_int($property) ? $column : $property]]]></code>
+      <code><![CDATA[$this->parentColumns[\is_int($property) ? $column : $property]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$PK]]></code>
+      <code><![CDATA[$column]]></code>
+      <code><![CDATA[$column]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$property]]></code>
+      <code><![CDATA[$property]]></code>
+      <code><![CDATA[$result[$this->columns[$column]]]]></code>
+      <code><![CDATA[$this->generatedFields]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[$this->primaryColumns]]></code>
+      <code><![CDATA[(array) $schema->define($role, SchemaInterface::PRIMARY_KEY)]]></code>
+    </MixedPropertyTypeCoercion>
+  </file>
+  <file src="src/Mapper/Mapper.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[Mapper]]></code>
+    </ClassMustBeFinal>
+    <MixedAssignment>
+      <code><![CDATA[$this->children]]></code>
+      <code><![CDATA[$this->discriminator]]></code>
+      <code><![CDATA[$this->entity]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Mapper/Proxy/ClasslessProxyFactory.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ClasslessProxyFactory]]></code>
+    </ClassMustBeFinal>
+    <InvalidArgument>
+      <code><![CDATA[$this->classMap]]></code>
+    </InvalidArgument>
+    <InvalidArrayAccess>
+      <code><![CDATA[$key[0]]]></code>
+    </InvalidArrayAccess>
+    <InvalidArrayOffset>
+      <code><![CDATA[$this->classMap[$role]]]></code>
+    </InvalidArrayOffset>
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[[]]]></code>
+    </InvalidPropertyAssignmentValue>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$this->classMap[$role]]]></code>
+    </LessSpecificReturnStatement>
+    <MismatchingDocblockPropertyType>
+      <code><![CDATA[array]]></code>
+    </MismatchingDocblockPropertyType>
+    <MixedArgument>
+      <code><![CDATA[$currentData]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$currentData]]></code>
+      <code><![CDATA[$currentData[$key]]]></code>
+      <code><![CDATA[$field]]></code>
+      <code><![CDATA[$relations]]></code>
+      <code><![CDATA[$result[$key[0] === "\0" ? \substr($key, \strrpos($key, "\0", 1) + 1) : $key]]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[new $class()]]></code>
+    </MixedMethodCall>
+    <MixedOperand>
+      <code><![CDATA[$relations]]></code>
+    </MixedOperand>
+    <MixedReturnStatement>
+      <code><![CDATA[$currentData]]></code>
+      <code><![CDATA[$currentData]]></code>
+      <code><![CDATA[$relations + $result]]></code>
+    </MixedReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[class-string]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyFalseOperand>
+      <code><![CDATA[\strrpos($key, "\0", 1)]]></code>
+    </PossiblyFalseOperand>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[object]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedForeachValue>
+      <code><![CDATA[$relation]]></code>
+    </UnusedForeachValue>
+  </file>
+  <file src="src/Mapper/Proxy/Hydrator/ClassPropertiesExtractor.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$objectOrClass]]></code>
+    </ArgumentTypeCoercion>
+    <ClassMustBeFinal>
+      <code><![CDATA[ClassPropertiesExtractor]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Mapper/Proxy/Hydrator/ClosureHydrator.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ClosureHydrator]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$property]]></code>
+      <code><![CDATA[$property]]></code>
+      <code><![CDATA[$property]]></code>
+      <code><![CDATA[$props]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$class]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayOffset>
+      <code><![CDATA[$relMap->getRelations()[$property]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$property]]></code>
+      <code><![CDATA[$property]]></code>
+      <code><![CDATA[$props]]></code>
+      <code><![CDATA[$props]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <PossiblyNullFunctionCall>
+      <code><![CDATA[\Closure::bind($setter, null, $class)($object, $props, $data)]]></code>
+      <code><![CDATA[\Closure::bind(static function (object $object, array $props, array &$data): void {
+                foreach ($props as $property) {
+                    if (!\array_key_exists($property, $data)) {
+                        continue;
+                    }
+
+                    try {
+                        // Use @ to try to ignore deprecations
+                        @$object->{$property} = $data[$property];
+                        unset($data[$property]);
+                    } catch (\Throwable $e) {
+                        if ($e::class === \TypeError::class) {
+                            throw new MapperException(
+                                "Can't hydrate an entity because property and value types are incompatible.",
+                                previous: $e,
+                            );
+                        }
+                    }
+                }
+            }, null, $class)($object, $props, $data)]]></code>
+    </PossiblyNullFunctionCall>
+  </file>
+  <file src="src/Mapper/Proxy/Hydrator/PropertyMap.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PropertyMap]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$properties]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$properties]]></code>
+    </MixedAssignment>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[?string]]></code>
+    </MixedReturnTypeCoercion>
+  </file>
+  <file src="src/Mapper/Proxy/ProxyEntityFactory.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$class]]></code>
+    </ArgumentTypeCoercion>
+    <ClassMustBeFinal>
+      <code><![CDATA[ProxyEntityFactory]]></code>
+    </ClassMustBeFinal>
+    <InvalidArrayAccess>
+      <code><![CDATA[$key[0]]]></code>
+    </InvalidArrayAccess>
+    <InvalidPropertyAssignmentValue>
+      <code><![CDATA[$this->classProperties]]></code>
+    </InvalidPropertyAssignmentValue>
+    <InvalidReturnStatement>
+      <code><![CDATA[$this->classProperties[$entity::class] ??= $this->propertiesExtractor
+            ->extract($entity, \array_keys($relMap->getRelations()))]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[PropertyMap[]]]></code>
+    </InvalidReturnType>
+    <MixedArgument>
+      <code><![CDATA[$currentData]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$properties]]></code>
+      <code><![CDATA[$scope === '' ? $class : $scope]]></code>
+      <code><![CDATA[\array_keys($relMap->getRelations())]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$currentData]]></code>
+      <code><![CDATA[$currentData[$key]]]></code>
+      <code><![CDATA[$name]]></code>
+      <code><![CDATA[$properties]]></code>
+      <code><![CDATA[$result[$key[0] === "\0" ? \substr($key, \strrpos($key, "\0", 1) + 1) : $key]]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$currentData]]></code>
+      <code><![CDATA[$currentData]]></code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[\array_diff_key($this->entityToArray($entity), $relMap->getRelations())]]></code>
+      <code><![CDATA[array<string, mixed>]]></code>
+    </MixedReturnTypeCoercion>
+    <PossiblyFalseArgument>
+      <code><![CDATA[$pos]]></code>
+    </PossiblyFalseArgument>
+    <PossiblyFalseOperand>
+      <code><![CDATA[$pos]]></code>
+      <code><![CDATA[\strrpos($key, "\0", 1)]]></code>
+    </PossiblyFalseOperand>
+    <PossiblyNullFunctionCall>
+      <code><![CDATA[\Closure::bind($this->initializer, null, $scope === '' ? $class : $scope)($proxy, $properties)]]></code>
+    </PossiblyNullFunctionCall>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[object]]></code>
+    </PossiblyUnusedReturnValue>
+    <PropertyTypeCoercion>
+      <code><![CDATA[$this->classMap]]></code>
+    </PropertyTypeCoercion>
+    <UnusedForeachValue>
+      <code><![CDATA[$relation]]></code>
+    </UnusedForeachValue>
+  </file>
+  <file src="src/Mapper/StdMapper.php">
+    <MissingParamType>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+    </MissingParamType>
+    <MixedArgument>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$v->getValue()]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$v]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$entity]]></code>
+    </MixedReturnStatement>
+  </file>
+  <file src="src/Mapper/Traits/SingleTableTrait.php">
+    <MixedArrayOffset>
+      <code><![CDATA[$this->children[$data[$this->discriminator]]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$childClass]]></code>
+      <code><![CDATA[$class]]></code>
+      <code><![CDATA[$class]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/MapperInterface.php">
+    <InvalidDocblock>
+      <code><![CDATA[object<T>]]></code>
+    </InvalidDocblock>
+  </file>
+  <file src="src/ORM.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$role]]></code>
+    </ArgumentTypeCoercion>
+    <InvalidReturnStatement>
+      <code><![CDATA[match ($class) {
+            EntityFactoryInterface::class => $this->entityFactory,
+            EntityProviderInterface::class => $this->entityProvider,
+            SourceProviderInterface::class => $this->sourceProvider,
+            TypecastProviderInterface::class => $this->typecastProvider,
+            IndexProviderInterface::class => $this->indexProvider,
+            MapperProviderInterface::class => $this->mapperProvider,
+            RelationProviderInterface::class => $this->relationProvider,
+            RepositoryProviderInterface::class => $this->repositoryProvider,
+            Options::class => $this->options,
+            default => throw new \InvalidArgumentException("Undefined service `$class`."),
+        }]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[object]]></code>
+    </InvalidReturnType>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->entityFactory->make($role, $data, $status, $typecast)]]></code>
+    </MixedReturnStatement>
+  </file>
+  <file src="src/ORMInterface.php">
+    <ImplementedReturnTypeMismatch>
+      <code><![CDATA[($role is class-string ? TEntity : object)]]></code>
+    </ImplementedReturnTypeMismatch>
+  </file>
+  <file src="src/Parser/AbstractMergeNode.php">
+    <MixedArgument>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[static::OVERWRITE_DATA]]></code>
+    </MixedArgument>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$key]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$key]]></code>
+    </MixedAssignment>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->indexName]]></code>
+    </PossiblyNullArgument>
+    <UnsupportedReferenceUsage>
+      <code><![CDATA[$this->results[] = &$data]]></code>
+    </UnsupportedReferenceUsage>
+  </file>
+  <file src="src/Parser/AbstractNode.php">
+    <InvalidNullableReturnType>
+      <code><![CDATA[ParentMergeNode]]></code>
+    </InvalidNullableReturnType>
+    <MissingReturnType>
+      <code><![CDATA[push]]></code>
+    </MissingReturnType>
+    <MixedArgument>
+      <code><![CDATA[$criteria]]></code>
+      <code><![CDATA[$index]]></code>
+      <code><![CDATA[$subset]]></code>
+      <code><![CDATA[$subset]]></code>
+      <code><![CDATA[$subset[$container]]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$criteria]]></code>
+      <code><![CDATA[$criteria]]></code>
+      <code><![CDATA[$data]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$subset[$container]]]></code>
+      <code><![CDATA[$subset[$container]]]></code>
+      <code><![CDATA[$subset[$container]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$subset[$container]]]></code>
+    </MixedArrayAssignment>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$key]]]></code>
+      <code><![CDATA[$result[$key]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$index]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$result[$key]]]></code>
+      <code><![CDATA[$subset]]></code>
+      <code><![CDATA[$subset]]></code>
+      <code><![CDATA[$subset]]></code>
+    </MixedAssignment>
+    <NullableReturnStatement>
+      <code><![CDATA[$this->mergeParent]]></code>
+    </NullableReturnStatement>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$e->getCode()]]></code>
+    </PossiblyInvalidArgument>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->indexName]]></code>
+    </PossiblyNullArgument>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$data]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[int]]></code>
+    </PossiblyUnusedReturnValue>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[empty($outerKeys)]]></code>
+    </RiskyTruthyFalsyComparison>
+    <UnsupportedReferenceUsage>
+      <code><![CDATA[$subset[$container][] = &$data]]></code>
+    </UnsupportedReferenceUsage>
+  </file>
+  <file src="src/Parser/ArrayNode.php">
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->container]]></code>
+      <code><![CDATA[$this->indexName]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Parser/CompositeTypecast.php">
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="src/Parser/EmbeddedNode.php">
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->container]]></code>
+      <code><![CDATA[$this->indexName]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Parser/MultiKeyCollection.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$keyValue]]></code>
+    </ArgumentTypeCoercion>
+    <InvalidArrayOffset>
+      <code><![CDATA[$pool[$keyValue]]]></code>
+      <code><![CDATA[$pool[$keyValue]]]></code>
+    </InvalidArrayOffset>
+    <MissingClosureParamType>
+      <code><![CDATA[$deep]]></code>
+    </MissingClosureParamType>
+    <MissingClosureReturnType>
+      <code><![CDATA[static function (array $data, $deep) use (&$depth, &$iterator) {]]></code>
+    </MissingClosureReturnType>
+    <MixedArgument>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$pool]]></code>
+      <code><![CDATA[$this->data[$indexName]]]></code>
+      <code><![CDATA[$this->data[$index]]]></code>
+      <code><![CDATA[$this->data[$index]]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedArgument>
+    <MixedArrayAssignment>
+      <code><![CDATA[$pool[]]]></code>
+    </MixedArrayAssignment>
+    <MixedAssignment>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$deep]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$subset]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$deep]]></code>
+    </MixedOperand>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[$this->indexes]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->lastItemKeys[$index]]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedReturnStatement>
+    <UnsupportedPropertyReferenceUsage>
+      <code><![CDATA[$pool = &$this->data[$index]]]></code>
+    </UnsupportedPropertyReferenceUsage>
+    <UnsupportedReferenceUsage>
+      <code><![CDATA[$pool[] = &$data]]></code>
+    </UnsupportedReferenceUsage>
+    <UnusedParam>
+      <code><![CDATA[$useParameter]]></code>
+    </UnusedParam>
+  </file>
+  <file src="src/Parser/OutputNode.php">
+    <UnsupportedReferenceUsage>
+      <code><![CDATA[$this->result[] = &$data]]></code>
+    </UnsupportedReferenceUsage>
+  </file>
+  <file src="src/Parser/ParentMergeNode.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ParentMergeNode]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Parser/ProxyNode.php">
+    <PossiblyNullReference>
+      <code><![CDATA[joinNode]]></code>
+      <code><![CDATA[linkNode]]></code>
+      <code><![CDATA[linkNode]]></code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Parser/SingularNode.php">
+    <MixedAssignment>
+      <code><![CDATA[$data['@role']]]></code>
+      <code><![CDATA[$role]]></code>
+    </MixedAssignment>
+    <PossiblyNullArgument>
+      <code><![CDATA[$this->container]]></code>
+      <code><![CDATA[$this->container]]></code>
+      <code><![CDATA[$this->indexName]]></code>
+      <code><![CDATA[$this->indexName]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Parser/StaticNode.php">
+    <MixedArgument>
+      <code><![CDATA[$index]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$index]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Parser/SubclassMergeNode.php">
+    <InvalidClassConstantType>
+      <code><![CDATA[OVERWRITE_DATA]]></code>
+    </InvalidClassConstantType>
+  </file>
+  <file src="src/Parser/Traits/DuplicateTrait.php">
+    <MixedArgument>
+      <code><![CDATA[$zoom]]></code>
+    </MixedArgument>
+    <MixedArrayAccess>
+      <code><![CDATA[$zoom[$criteria]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$zoom[$criteria]]]></code>
+    </MixedArrayAssignment>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$key]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$key]]></code>
+    </MixedAssignment>
+    <UnsupportedPropertyReferenceUsage>
+      <code><![CDATA[$zoom = &$this->duplicates]]></code>
+    </UnsupportedPropertyReferenceUsage>
+  </file>
+  <file src="src/Parser/Typecast.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[$reflection->getParameters()[1]]]></code>
+    </DocblockTypeContradiction>
+    <MixedArgument>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$data[$key]]]></code>
+      <code><![CDATA[$data[$key]]]></code>
+      <code><![CDATA[$rule]]></code>
+    </MixedAssignment>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[$this->casters]]></code>
+      <code><![CDATA[$this->casters]]></code>
+      <code><![CDATA[$this->casters]]></code>
+      <code><![CDATA[$this->casters]]></code>
+      <code><![CDATA[$this->casters]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[\is_int($value) || \is_string($value) && \preg_match('/^\\d++$/', $value) === 1
+                        ? $rule::tryFrom((int) $value)
+                        : null]]></code>
+      <code><![CDATA[\is_int($value) || \is_string($value) && \preg_match('/^\\d++$/', $value) === 1
+                        ? $rule::tryFrom((int) $value)
+                        : null]]></code>
+      <code><![CDATA[\is_string($value) || \is_numeric($value)
+                        ? $rule::tryFrom((string) $value)
+                        : null]]></code>
+      <code><![CDATA[\is_string($value) || \is_numeric($value)
+                        ? $rule::tryFrom((string) $value)
+                        : null]]></code>
+      <code><![CDATA[\json_decode(
+                        $value,
+                        true,
+                        512,
+                        \JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
+                    )]]></code>
+    </MixedReturnStatement>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$e->getCode()]]></code>
+      <code><![CDATA[$e->getCode()]]></code>
+    </PossiblyInvalidArgument>
+    <PossiblyUndefinedVariable>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+    </PossiblyUndefinedVariable>
+    <RedundantConditionGivenDocblockType>
+      <code><![CDATA[$reflection->getParameters()[1]?->getType()]]></code>
+    </RedundantConditionGivenDocblockType>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[class-string<\BackedEnum>]]></code>
+    </UnnecessaryVarAnnotation>
+  </file>
+  <file src="src/Reference/Promise.php">
+    <MixedArgument>
+      <code><![CDATA[$this->origin->getValue()]]></code>
+    </MixedArgument>
+  </file>
+  <file src="src/Reference/Reference.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[Reference]]></code>
+    </ClassMustBeFinal>
+  </file>
+  <file src="src/Relation/AbstractRelation.php">
+    <MixedArgument>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$this->inversion]]></code>
+    </MixedAssignment>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[(array) $schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $schema[Relation::OUTER_KEY]]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->schema[Relation::CASCADE] ?? false]]></code>
+      <code><![CDATA[$this->schema[Relation::CASCADE] ?? false]]></code>
+    </MixedReturnStatement>
+    <PossiblyNullArgument>
+      <code><![CDATA[$role]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Relation/BelongsTo.php">
+    <MixedArgument>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$nodeValue]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$prefill]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$toReference[$outerKey]]]></code>
+      <code><![CDATA[$values[$this->outerKeys[$i]]]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Relation/BulkLoader.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$role]]></code>
+    </ArgumentTypeCoercion>
+    <DocblockTypeContradiction>
+      <code><![CDATA[\is_scalar($keyValue)]]></code>
+    </DocblockTypeContradiction>
+    <InaccessibleMethod>
+      <code><![CDATA[push]]></code>
+    </InaccessibleMethod>
+    <MixedArgument>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$pool]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$pk]]></code>
+      <code><![CDATA[$pk]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$result[$data[$k]]]]></code>
+    </MixedArrayAccess>
+    <MixedAssignment>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$overwrite[$name]]]></code>
+      <code><![CDATA[$result]]></code>
+      <code><![CDATA[$result]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$result]]></code>
+    </MixedReturnStatement>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[$loader]]></code>
+    </PropertyNotSetInConstructor>
+    <UndefinedMethod>
+      <code><![CDATA[getResult]]></code>
+    </UndefinedMethod>
+    <UnsupportedPropertyReferenceUsage>
+      <code><![CDATA[$pool = &$this->index]]></code>
+    </UnsupportedPropertyReferenceUsage>
+  </file>
+  <file src="src/Relation/Embedded.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$this->target]]></code>
+      <code><![CDATA[$this->target]]></code>
+      <code><![CDATA[$this->target]]></code>
+    </ArgumentTypeCoercion>
+    <MixedArgument>
+      <code><![CDATA[$related]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$field]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$data[$key]]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$scope[$key]]]></code>
+      <code><![CDATA[$this->columns]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[(array) $orm->getSchema()->define($target, SchemaInterface::PRIMARY_KEY)]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$reference->getValue()]]></code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$data === null
+            ? null
+            : $this->mapperProvider->getMapper($this->target)->cast($data)]]></code>
+      <code><![CDATA[?array]]></code>
+    </MixedReturnTypeCoercion>
+    <PossiblyInvalidClone>
+      <code><![CDATA[clone $this->resolve($related, true)]]></code>
+    </PossiblyInvalidClone>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[empty($value)]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Relation/HasMany.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->target]]></code>
+    </ArgumentTypeCoercion>
+    <MixedArgument>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$this->schema[Relation::COLLECTION_TYPE] ?? null]]></code>
+      <code><![CDATA[$this->schema[Relation::WHERE] ?? []]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$item[LoaderInterface::ROLE_KEY]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayOffset>
+      <code><![CDATA[$mappers[$role]]]></code>
+      <code><![CDATA[$mappers[$role]]]></code>
+    </MixedArrayOffset>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$mappers[$role]]]></code>
+    </MixedArrayTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$elements[]]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$scope[$this->outerKeys[$i]]]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$reference->getValue()]]></code>
+      <code><![CDATA[$this->factory->collection(
+            $this->schema[Relation::COLLECTION_TYPE] ?? null,
+        )->collect($data)]]></code>
+    </MixedReturnStatement>
+    <PossiblyNullArgument>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullIterator>
+      <code><![CDATA[$related]]></code>
+    </PossiblyNullIterator>
+    <RedundantCondition>
+      <code><![CDATA[$original]]></code>
+    </RedundantCondition>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[!$data]]></code>
+    </RiskyTruthyFalsyComparison>
+    <TypeDoesNotContainNull>
+      <code><![CDATA[[]]]></code>
+    </TypeDoesNotContainNull>
+    <UnusedVariable>
+      <code><![CDATA[$node]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="src/Relation/HasOne.php">
+    <MixedArgument>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
+    </MixedAssignment>
+    <PossiblyNullArgument>
+      <code><![CDATA[$rTuple]]></code>
+    </PossiblyNullArgument>
+  </file>
+  <file src="src/Relation/ManyToMany.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->pivotRole]]></code>
+      <code><![CDATA[$this->pivotRole]]></code>
+      <code><![CDATA[$this->role]]></code>
+      <code><![CDATA[$this->target]]></code>
+      <code><![CDATA[$this->target]]></code>
+    </ArgumentTypeCoercion>
+    <ClassMustBeFinal>
+      <code><![CDATA[ManyToMany]]></code>
+    </ClassMustBeFinal>
+    <DocblockTypeContradiction>
+      <code><![CDATA[\is_array($pivot)]]></code>
+    </DocblockTypeContradiction>
+    <InvalidReturnStatement>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$relatedStorage->get($parent)]]></code>
+    </InvalidReturnStatement>
+    <MixedArgument>
+      <code><![CDATA[$d]]></code>
+      <code><![CDATA[$data->toArray()]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$factory->make($this->pivotRole, $pivot, Node::MANAGED)]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$original->getContext()->offsetGet($item)]]></code>
+      <code><![CDATA[$pivot]]></code>
+      <code><![CDATA[$pivot]]></code>
+      <code><![CDATA[$pivotRole]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$root->getResult()[0]['output']]]></code>
+      <code><![CDATA[$row]]></code>
+      <code><![CDATA[$targetRole]]></code>
+      <code><![CDATA[$this->entityFactory->make(
+                $this->schema[Relation::THROUGH_ENTITY],
+                $pivot,
+                Node::MANAGED,
+                typecast: true,
+            )]]></code>
+      <code><![CDATA[$this->schema[Relation::COLLECTION_TYPE] ?? null]]></code>
+      <code><![CDATA[$this->schema[Relation::THROUGH_ENTITY]]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$data->getPivotContext()]]></code>
+      <code><![CDATA[$data->toArray()]]></code>
+      <code><![CDATA[$pivot]]></code>
+      <code><![CDATA[$pivot]]></code>
+      <code><![CDATA[$pivot ?? []]]></code>
+      <code><![CDATA[(array) $data]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[\iterator_to_array($data)]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$d[LoaderInterface::ROLE_KEY]]]></code>
+      <code><![CDATA[$pivot['@']]]></code>
+      <code><![CDATA[$pivot['@']]]></code>
+      <code><![CDATA[$pivot[LoaderInterface::ROLE_KEY]]]></code>
+      <code><![CDATA[$root->getResult()[0]['output']]]></code>
+    </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$pivot['@']]]></code>
+      <code><![CDATA[$pivots[]]]></code>
+    </MixedArrayAssignment>
+    <MixedArrayOffset>
+      <code><![CDATA[$pivotData[$entity]]]></code>
+      <code><![CDATA[$pivotData[$entity]]]></code>
+      <code><![CDATA[$pivotMappers[$pivotRole]]]></code>
+      <code><![CDATA[$pivotMappers[$pivotRole]]]></code>
+      <code><![CDATA[$targetMappers[$targetRole]]]></code>
+      <code><![CDATA[$targetMappers[$targetRole]]]></code>
+    </MixedArrayOffset>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$pivotMappers[$pivotRole]]]></code>
+      <code><![CDATA[$targetMappers[$targetRole]]]></code>
+    </MixedArrayTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$d]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$entity]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$pivot]]></code>
+      <code><![CDATA[$pivot]]></code>
+      <code><![CDATA[$pivotData[$entity]]]></code>
+      <code><![CDATA[$pivotData[$entity]]]></code>
+      <code><![CDATA[$pivotRole]]></code>
+      <code><![CDATA[$pivots]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$relatedStorage]]></code>
+      <code><![CDATA[$row]]></code>
+      <code><![CDATA[$scope[$key]]]></code>
+      <code><![CDATA[$targetRole]]></code>
+      <code><![CDATA[$this->pivotRole]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[get]]></code>
+    </MixedMethodCall>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[(array) $this->schema[Relation::THROUGH_INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::THROUGH_OUTER_KEY]]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$reference->getValue()]]></code>
+      <code><![CDATA[$this->factory->collection(
+            $this->schema[Relation::COLLECTION_TYPE] ?? null,
+        )->collect($data)]]></code>
+    </MixedReturnStatement>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$pivot]]></code>
+    </PossiblyInvalidArgument>
+    <PossiblyNullArgument>
+      <code><![CDATA[$data]]></code>
+      <code><![CDATA[$pTuple->state]]></code>
+      <code><![CDATA[$pivot]]></code>
+    </PossiblyNullArgument>
+    <PossiblyNullPropertyFetch>
+      <code><![CDATA[$pTuple->state]]></code>
+    </PossiblyNullPropertyFetch>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$throughOuterKeys]]></code>
+    </PossiblyUnusedProperty>
+    <RedundantCast>
+      <code><![CDATA[(array) $data]]></code>
+    </RedundantCast>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[!$data]]></code>
+    </RiskyTruthyFalsyComparison>
+    <UndefinedInterfaceMethod>
+      <code><![CDATA[toArray]]></code>
+    </UndefinedInterfaceMethod>
+    <UnevaluatedCode>
+      <code><![CDATA[$elements[] = $entity;]]></code>
+      <code><![CDATA[$elements[] = $entity;]]></code>
+    </UnevaluatedCode>
+    <UnusedParam>
+      <code><![CDATA[$relatedNode]]></code>
+    </UnusedParam>
+  </file>
+  <file src="src/Relation/Morphed/BelongsToMorphed.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[BelongsToMorphed]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$this->morphKey]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Relation/Morphed/MorphedHasMany.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MorphedHasMany]]></code>
+    </ClassMustBeFinal>
+    <MixedAssignment>
+      <code><![CDATA[$this->morphKey]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Relation/Morphed/MorphedHasOne.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MorphedHasOne]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$related]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$this->morphKey]]></code>
+    </MixedAssignment>
+    <PossiblyNullOperand>
+      <code><![CDATA[parent::getReferenceScope($node)]]></code>
+    </PossiblyNullOperand>
+  </file>
+  <file src="src/Relation/RefersTo.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[RefersTo]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$related]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Relation/ShadowBelongsTo.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ShadowBelongsTo]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$key]]></code>
+    </MixedArgument>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$key]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$schema[Relation::TARGET]]]></code>
+    </MixedOperand>
+  </file>
+  <file src="src/Relation/ShadowHasMany.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ShadowHasMany]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$related]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$value]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Relation/Traits/HasSomeTrait.php">
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[Tuple]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="src/Relation/Traits/ToOneTrait.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->target]]></code>
+    </ArgumentTypeCoercion>
+    <LessSpecificImplementedReturnType>
+      <code><![CDATA[?array]]></code>
+    </LessSpecificImplementedReturnType>
+    <MixedArgument>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$data]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$scope[$this->outerKeys[$i]]]]></code>
+    </MixedAssignment>
+    <RedundantCondition>
+      <code><![CDATA[$this->mapperProvider->getMapper($role)?->cast($data)]]></code>
+    </RedundantCondition>
+    <TypeDoesNotContainNull>
+      <code><![CDATA[$this->mapperProvider->getMapper($role)]]></code>
+    </TypeDoesNotContainNull>
+  </file>
+  <file src="src/RelationMap.php">
+    <InvalidClass>
+      <code><![CDATA[OrmInterface]]></code>
+    </InvalidClass>
+    <MixedArgument>
+      <code><![CDATA[$container]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$outerRelations]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$relName]]></code>
+      <code><![CDATA[$relName]]></code>
+      <code><![CDATA[$relationSchema]]></code>
+      <code><![CDATA[$relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$name]]></code>
+      <code><![CDATA[$name]]></code>
+      <code><![CDATA[$name]]></code>
+      <code><![CDATA[$outerRole]]></code>
+      <code><![CDATA[(array) $relationSchema[Relation::SCHEMA][Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[(array) $relationSchema[Relation::SCHEMA][Relation::THROUGH_OUTER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$relationSchema[Relation::SCHEMA][Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[$relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$relationSchema[Relation::SCHEMA][Relation::THROUGH_OUTER_KEY]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayOffset>
+      <code><![CDATA[$relations[$relName]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$container]]></code>
+      <code><![CDATA[$innerRelations]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$outerRelations]]></code>
+      <code><![CDATA[$outerRelations]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$relName]]></code>
+      <code><![CDATA[$relName]]></code>
+      <code><![CDATA[$relSchema]]></code>
+      <code><![CDATA[$relSchema]]></code>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[$relationSchema]]></code>
+      <code><![CDATA[$relationType]]></code>
+      <code><![CDATA[$relations]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$relationSchema[Relation::TARGET]]]></code>
+    </MixedOperand>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[$innerRelations]]></code>
+      <code><![CDATA[$this->slaves]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$this->dependencies]]></code>
+      <code><![CDATA[array<string, DependencyInterface>]]></code>
+    </MixedReturnTypeCoercion>
+    <UndefinedInterfaceMethod>
+      <code><![CDATA[getInnerRelations]]></code>
+      <code><![CDATA[getInnerRelations]]></code>
+      <code><![CDATA[getOuterRelations]]></code>
+      <code><![CDATA[getOuterRelations]]></code>
+    </UndefinedInterfaceMethod>
+    <UnusedForeachValue>
+      <code><![CDATA[$relSchema]]></code>
+      <code><![CDATA[$relSchema]]></code>
+    </UnusedForeachValue>
+    <UnusedParam>
+      <code><![CDATA[$outerRelations]]></code>
+    </UnusedParam>
+  </file>
+  <file src="src/Schema.php">
+    <DocblockTypeContradiction>
+      <code><![CDATA[$compareCallback === null]]></code>
+    </DocblockTypeContradiction>
+    <MixedArgument>
+      <code><![CDATA[$child]]></code>
+      <code><![CDATA[$container]]></code>
+      <code><![CDATA[$container]]></code>
+      <code><![CDATA[$container]]></code>
+      <code><![CDATA[$inversion]]></code>
+      <code><![CDATA[$inversion]]></code>
+      <code><![CDATA[$inversion]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$item[self::ENTITY]]]></code>
+      <code><![CDATA[$item[self::PARENT]]]></code>
+      <code><![CDATA[$item[self::RELATIONS]]]></code>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$targetRelations]]></code>
+      <code><![CDATA[$targetRelations]]></code>
+      <code><![CDATA[$this->define($role, self::RELATIONS)]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$role]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$entitySchema[SchemaInterface::RELATIONS]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::CASCADE]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::CASCADE]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::INNER_KEY]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::INVERSION]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::THROUGH_INNER_KEY]]]></code>
+      <code><![CDATA[$item[Relation::SCHEMA][Relation::THROUGH_OUTER_KEY]]]></code>
+      <code><![CDATA[$item[Relation::TARGET]]]></code>
+      <code><![CDATA[$item[Relation::TARGET]]]></code>
+      <code><![CDATA[$item[Relation::TYPE]]]></code>
+      <code><![CDATA[$item[self::CHILDREN]]]></code>
+      <code><![CDATA[$item[self::ENTITY]]]></code>
+      <code><![CDATA[$item[self::ENTITY]]]></code>
+      <code><![CDATA[$item[self::ENTITY]]]></code>
+      <code><![CDATA[$item[self::ENTITY]]]></code>
+      <code><![CDATA[$item[self::PARENT]]]></code>
+      <code><![CDATA[$item[self::PARENT]]]></code>
+      <code><![CDATA[$item[self::PARENT]]]></code>
+      <code><![CDATA[$item[self::RELATIONS]]]></code>
+      <code><![CDATA[$item[self::RELATIONS]]]></code>
+      <code><![CDATA[$item[self::ROLE]]]></code>
+      <code><![CDATA[$item[self::ROLE]]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA][Relation::NULLABLE]]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$rel[Relation::TARGET]]]></code>
+      <code><![CDATA[$rel[Relation::TYPE]]]></code>
+      <code><![CDATA[$rel[Relation::TYPE]]]></code>
+      <code><![CDATA[$relation[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$relation[Relation::SCHEMA][Relation::INVERSION]]]></code>
+      <code><![CDATA[$relation[Relation::TARGET]]]></code>
+      <code><![CDATA[$relations[$relation]]]></code>
+      <code><![CDATA[$schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[$schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[$schema[Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[$schema[Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[$schema[Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$schema[Relation::THROUGH_WHERE]]]></code>
+      <code><![CDATA[$schema[Relation::WHERE]]]></code>
+      <code><![CDATA[$targetRelation[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$targetRelation[Relation::TARGET]]]></code>
+      <code><![CDATA[$targetRelations[$inversion][Relation::SCHEMA]]]></code>
+      <code><![CDATA[$targetRelations[$inversion][Relation::SCHEMA][Relation::INVERSION]]]></code>
+      <code><![CDATA[$targetSchema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[$targetSchema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[$targetSchema[Relation::INVERSION]]]></code>
+      <code><![CDATA[$targetSchema[Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[$targetSchema[Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[$targetSchema[Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$targetSchema[Relation::THROUGH_WHERE]]]></code>
+      <code><![CDATA[$targetSchema[Relation::WHERE]]]></code>
+      <code><![CDATA[$targetSchema[self::RELATIONS]]]></code>
+      <code><![CDATA[$this->schema[$role][$property]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$item[self::ENTITY]]]></code>
+      <code><![CDATA[$item[self::PARENT]]]></code>
+      <code><![CDATA[$item[self::RELATIONS]]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA]]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$rel[Relation::TARGET]]]></code>
+      <code><![CDATA[$rel[Relation::TYPE]]]></code>
+      <code><![CDATA[$result[$role][self::RELATIONS]]]></code>
+      <code><![CDATA[$result[$role][self::RELATIONS][$container]]]></code>
+      <code><![CDATA[$result[$role][self::RELATIONS][$container][Relation::SCHEMA]]]></code>
+      <code><![CDATA[$result[$role][self::RELATIONS][$container][Relation::SCHEMA][Relation::INVERSION]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion][Relation::SCHEMA]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion][Relation::SCHEMA]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion][Relation::SCHEMA][Relation::INVERSION]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion][Relation::SCHEMA][Relation::INVERSION]]]></code>
+    </MixedArrayAssignment>
+    <MixedArrayOffset>
+      <code><![CDATA[$aliases[$aliases[$child]]]]></code>
+      <code><![CDATA[$aliases[$child]]]></code>
+      <code><![CDATA[$aliases[$child]]]></code>
+      <code><![CDATA[$aliases[$item[self::ENTITY]]]]></code>
+      <code><![CDATA[$aliases[$parent]]]></code>
+      <code><![CDATA[$aliases[$target]]]></code>
+      <code><![CDATA[$aliases[$through]]]></code>
+      <code><![CDATA[$result[$roleName][$relName]]]></code>
+      <code><![CDATA[$result[$roleName][$relName]]]></code>
+      <code><![CDATA[$result[$role]]]></code>
+      <code><![CDATA[$result[$target]]]></code>
+      <code><![CDATA[$result[$target]]]></code>
+      <code><![CDATA[$result[$target]]]></code>
+      <code><![CDATA[$result[$target][$handshake ?? ($roleName . '.' . $relName . ':' . $target)]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion]]]></code>
+      <code><![CDATA[$this->aliases[$found]]]></code>
+      <code><![CDATA[$this->classes[$role]]]></code>
+      <code><![CDATA[$this->subclasses[$item[self::PARENT]]]]></code>
+      <code><![CDATA[$this->subclasses[$item[self::PARENT]][$role]]]></code>
+      <code><![CDATA[$this->subclasses[$role]]]></code>
+      <code><![CDATA[$this->subclasses[$role]]]></code>
+    </MixedArrayOffset>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$aliases[$parent]]]></code>
+      <code><![CDATA[$this->subclasses[$role]]]></code>
+      <code><![CDATA[$this->subclasses[$role]]]></code>
+    </MixedArrayTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$aliases[$aliases[$child]]]]></code>
+      <code><![CDATA[$aliases[$child]]]></code>
+      <code><![CDATA[$aliases[$item[self::ENTITY]]]]></code>
+      <code><![CDATA[$aliases[$key]]]></code>
+      <code><![CDATA[$child]]></code>
+      <code><![CDATA[$container]]></code>
+      <code><![CDATA[$entitySchema]]></code>
+      <code><![CDATA[$found]]></code>
+      <code><![CDATA[$found]]></code>
+      <code><![CDATA[$handshake]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item]]></code>
+      <code><![CDATA[$item[self::PARENT]]]></code>
+      <code><![CDATA[$nullable]]></code>
+      <code><![CDATA[$nullable]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$rel]]></code>
+      <code><![CDATA[$relName]]></code>
+      <code><![CDATA[$rel[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$rel[Relation::TARGET]]]></code>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[$relations]]></code>
+      <code><![CDATA[$result[$roleName][$relName]]]></code>
+      <code><![CDATA[$result[$role]]]></code>
+      <code><![CDATA[$result[$target][self::RELATIONS][$inversion][Relation::SCHEMA][Relation::INVERSION]]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$schema]]></code>
+      <code><![CDATA[$schema]]></code>
+      <code><![CDATA[$schema->aliases]]></code>
+      <code><![CDATA[$schema->schema]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$targetHandshake]]></code>
+      <code><![CDATA[$targetRelation]]></code>
+      <code><![CDATA[$targetRelations]]></code>
+      <code><![CDATA[$targetSchema]]></code>
+      <code><![CDATA[$targetSchema]]></code>
+      <code><![CDATA[$targetSchema]]></code>
+      <code><![CDATA[$targetSchema]]></code>
+      <code><![CDATA[$through]]></code>
+      <code><![CDATA[$through]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$relName]]></code>
+      <code><![CDATA[$target]]></code>
+    </MixedOperand>
+    <MixedPropertyTypeCoercion>
+      <code><![CDATA[$this->classes]]></code>
+      <code><![CDATA[$this->subclasses]]></code>
+      <code><![CDATA[$this->subclasses]]></code>
+      <code><![CDATA[$this->subclasses]]></code>
+      <code><![CDATA[$this->subclasses]]></code>
+    </MixedPropertyTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$relations[$relation]]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$this->classes[$rr]
+            ?? $this->schema[$rr][self::ENTITY]
+            ?? throw new SchemaException("Undefined schema `{$role}`, not found.")]]></code>
+      <code><![CDATA[$this->classes[$rr]
+            ?? $this->schema[$rr][self::ENTITY]
+            ?? throw new SchemaException("Undefined schema `{$role}`, not found.")]]></code>
+      <code><![CDATA[$this->schema[$role][SchemaInterface::RELATIONS] ?? []]]></code>
+      <code><![CDATA[$this->schema[$role][SchemaInterface::RELATIONS] ?? []]]></code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$targetContainer]]></code>
+      <code><![CDATA[$this->subclasses[$parent] ?? []]]></code>
+      <code><![CDATA[?string]]></code>
+      <code><![CDATA[array]]></code>
+    </MixedReturnTypeCoercion>
+    <UnsupportedReferenceUsage>
+      <code><![CDATA[$this->subclasses[$item[self::PARENT]][$role] = &$this->subclasses[$role]]]></code>
+    </UnsupportedReferenceUsage>
+    <UnusedMethod>
+      <code><![CDATA[checkBelongsToInversion]]></code>
+      <code><![CDATA[compareManyToMany]]></code>
+    </UnusedMethod>
+    <UnusedParam>
+      <code><![CDATA[$aliases]]></code>
+    </UnusedParam>
+    <UnusedVariable>
+      <code><![CDATA[$nullable]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="src/Select.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$ids]]></code>
+      <code><![CDATA[$this->loader->getTarget()]]></code>
+      <code><![CDATA[$this->loader->getTarget()]]></code>
+      <code><![CDATA[$this->loader->getTarget()]]></code>
+    </ArgumentTypeCoercion>
+    <ClassMustBeFinal>
+      <code><![CDATA[Select]]></code>
+    </ClassMustBeFinal>
+    <InvalidReturnStatement>
+      <code><![CDATA[\iterator_to_array($this->getIterator(), false)]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[list<TEntity>]]></code>
+    </InvalidReturnType>
+    <InvalidTemplateParam>
+      <code><![CDATA[Iterator<TEntity>]]></code>
+    </InvalidTemplateParam>
+    <MissingTemplateParam>
+      <code><![CDATA[\IteratorAggregate]]></code>
+    </MissingTemplateParam>
+    <MixedArgument>
+      <code><![CDATA[$subOption]]></code>
+      <code><![CDATA[$subOption + $options]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$name]]></code>
+      <code><![CDATA[$name]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$pk[$key]]]></code>
+    </MixedArrayTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$prepared[$index][$key]]]></code>
+      <code><![CDATA[$result]]></code>
+      <code><![CDATA[$subOption]]></code>
+      <code><![CDATA[$subOption]]></code>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$values]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$subOption]]></code>
+    </MixedOperand>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->entityFactory->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true)]]></code>
+      <code><![CDATA[\count($ids) > 1
+            ? $this->__call('where', [$pk, new Parameter($ids)])
+            : $this->__call('where', [$pk, \current($ids)])]]></code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$node->getResult()]]></code>
+      <code><![CDATA[Iterator::createWithServices(
+            $this->heap,
+            $this->schema,
+            $this->entityFactory,
+            $this->loader->getTarget(),
+            $this->loadData(),
+            $findInHeap,
+            typecast: true,
+        )]]></code>
+      <code><![CDATA[Iterator<TEntity>]]></code>
+      <code><![CDATA[\array_map([$mapper, 'cast'], $this->loadData(false))]]></code>
+      <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
+      <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
+    </MixedReturnTypeCoercion>
+  </file>
+  <file src="src/Select/AbstractLoader.php">
+    <MixedArgument>
+      <code><![CDATA[$alias]]></code>
+      <code><![CDATA[$options['as']]]></code>
+      <code><![CDATA[$query]]></code>
+      <code><![CDATA[$query]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[$relation]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$schema[Relation::LOAD]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayOffset>
+      <code><![CDATA[$loaders[$alias]]]></code>
+      <code><![CDATA[$loaders[$alias]]]></code>
+      <code><![CDATA[$loaders[$alias]]]></code>
+    </MixedArrayOffset>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$loaders[$alias]]]></code>
+    </MixedArrayTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$alias]]></code>
+      <code><![CDATA[$options['load']]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$query]]></code>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[$relations]]></code>
+      <code><![CDATA[$schema]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$query]]></code>
+      <code><![CDATA[$query]]></code>
+    </MixedReturnStatement>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[iterable<non-empty-string>]]></code>
+    </MixedReturnTypeCoercion>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$relation]]></code>
+    </PossiblyInvalidArgument>
+    <PossiblyInvalidCast>
+      <code><![CDATA[$relation]]></code>
+    </PossiblyInvalidCast>
+    <TooManyArguments>
+      <code><![CDATA[loadChain]]></code>
+      <code><![CDATA[loadRelation]]></code>
+    </TooManyArguments>
+    <UndefinedInterfaceMethod>
+      <code><![CDATA[configureSubQuery]]></code>
+    </UndefinedInterfaceMethod>
+    <UndefinedVariable>
+      <code><![CDATA[$alias]]></code>
+    </UndefinedVariable>
+    <UnsupportedPropertyReferenceUsage>
+      <code><![CDATA[$loaders = &$this->join]]></code>
+      <code><![CDATA[$loaders = &$this->load]]></code>
+    </UnsupportedPropertyReferenceUsage>
+  </file>
+  <file src="src/Select/JoinableLoader.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$target]]></code>
+    </ArgumentTypeCoercion>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$loader]]></code>
+    </LessSpecificReturnStatement>
+    <MixedArgument>
+      <code><![CDATA[$row]]></code>
+      <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
+      <code><![CDATA[$this->factory->make($loader->options['scope'])]]></code>
+      <code><![CDATA[$this->options['minify']]]></code>
+      <code><![CDATA[$this->options['minify']]]></code>
+      <code><![CDATA[$this->schema[$key]]]></code>
+      <code><![CDATA[$this->schema[$key]]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$row]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->options['as']]]></code>
+      <code><![CDATA[$this->options['as']]]></code>
+      <code><![CDATA[$this->options['method']]]></code>
+      <code><![CDATA[$this->options['using']]]></code>
+    </MixedReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[static]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyNullOperand>
+      <code><![CDATA[$this->fieldAlias($this->schema[$key])]]></code>
+      <code><![CDATA[$this->parent->fieldAlias($this->schema[$key])]]></code>
+    </PossiblyNullOperand>
+    <PossiblyNullReference>
+      <code><![CDATA[getAlias]]></code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Select/Loader/BelongsToLoader.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[BelongsToLoader]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::OUTER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+  </file>
+  <file src="src/Select/Loader/EmbeddedLoader.php">
+    <MixedArgument>
+      <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
+      <code><![CDATA[$this->options['minify'] ?? true]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $this->ormSchema->define($this->parent->getTarget(), SchemaInterface::PRIMARY_KEY)]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->options['load'] ?? false]]></code>
+      <code><![CDATA[$this->options['load'] ?? false]]></code>
+    </MixedReturnStatement>
+    <PossiblyNullReference>
+      <code><![CDATA[getAlias]]></code>
+      <code><![CDATA[getTarget]]></code>
+      <code><![CDATA[isLoaded]]></code>
+    </PossiblyNullReference>
+    <UndefinedInterfaceMethod>
+      <code><![CDATA[isLoaded]]></code>
+    </UndefinedInterfaceMethod>
+  </file>
+  <file src="src/Select/Loader/HasManyLoader.php">
+    <MixedArgument>
+      <code><![CDATA[$this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []]]></code>
+      <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::OUTER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+  </file>
+  <file src="src/Select/Loader/HasOneLoader.php">
+    <MixedArgument>
+      <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::OUTER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+  </file>
+  <file src="src/Select/Loader/ManyToManyLoader.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ManyToManyLoader]]></code>
+    </ClassMustBeFinal>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$loader]]></code>
+    </LessSpecificReturnStatement>
+    <MixedArgument>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$outerKeyList[$i]]]></code>
+      <code><![CDATA[$outerKeys[0]]]></code>
+      <code><![CDATA[$parentKeys[$i]]]></code>
+      <code><![CDATA[$schema[Relation::THROUGH_ENTITY]]]></code>
+      <code><![CDATA[$set]]></code>
+      <code><![CDATA[$this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []]]></code>
+      <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
+      <code><![CDATA[$throughOuterKeys[$i]]]></code>
+      <code><![CDATA[[
+                'load' => $loader->isLoaded(),
+                'method' => $options['method'] ?? self::JOIN,
+            ] + ($options['pivot'] ?? [])]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::OUTER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::THROUGH_OUTER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$set]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$options['pivot'] ?? []]]></code>
+    </MixedOperand>
+    <MoreSpecificReturnType>
+      <code><![CDATA[static]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyNullOperand>
+      <code><![CDATA[$this->fieldAlias($key)]]></code>
+      <code><![CDATA[$this->fieldAlias($outerKeyList[$i])]]></code>
+      <code><![CDATA[$this->parent->fieldAlias($parentKeys[$i])]]></code>
+      <code><![CDATA[$this->pivot->fieldAlias($key)]]></code>
+      <code><![CDATA[$this->pivot->fieldAlias($key)]]></code>
+      <code><![CDATA[$this->pivot->fieldAlias($key)]]></code>
+      <code><![CDATA[$this->pivot->fieldAlias($throughOuterKeys[$i])]]></code>
+    </PossiblyNullOperand>
+    <PossiblyNullReference>
+      <code><![CDATA[getAlias]]></code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Select/Loader/Morphed/BelongsToMorphedLoader.php">
+    <InvalidArrayOffset>
+      <code><![CDATA[$schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[$schema[Relation::MORPH_KEY]]]></code>
+      <code><![CDATA[$schema[Relation::OUTER_KEY]]]></code>
+    </InvalidArrayOffset>
+    <MixedArgument>
+      <code><![CDATA[$self->options['minify']]]></code>
+      <code><![CDATA[$self->ormSchema->define($role, SchemaInterface::COLUMNS)]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $self->ormSchema->define($role, SchemaInterface::PRIMARY_KEY)]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess>
+      <code><![CDATA[$ref[$this->morphKey]]]></code>
+      <code><![CDATA[$ref[$this->morphKey]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayOffset>
+      <code><![CDATA[$grouped[$role]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$grouped[$role]]]></code>
+      <code><![CDATA[$ref]]></code>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$roleNode]]></code>
+      <code><![CDATA[$row]]></code>
+      <code><![CDATA[$self->scope]]></code>
+      <code><![CDATA[$this->morphKey]]></code>
+    </MixedAssignment>
+    <MixedMethodCall>
+      <code><![CDATA[parseRow]]></code>
+    </MixedMethodCall>
+    <MixedReturnTypeCoercion>
+      <code><![CDATA[$grouped]]></code>
+      <code><![CDATA[array<non-empty-string, array<non-empty-string, mixed>>]]></code>
+    </MixedReturnTypeCoercion>
+    <PossiblyNullOperand>
+      <code><![CDATA[$this->fieldAlias($this->outerKey[$i])]]></code>
+    </PossiblyNullOperand>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[BelongsToMorphedLoader]]></code>
+      <code><![CDATA[BelongsToMorphedLoader]]></code>
+      <code><![CDATA[BelongsToMorphedLoader]]></code>
+    </PropertyNotSetInConstructor>
+    <PropertyTypeCoercion>
+      <code><![CDATA[(array) $schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $schema[Relation::OUTER_KEY]]]></code>
+    </PropertyTypeCoercion>
+    <RedundantPropertyInitializationCheck>
+      <code><![CDATA[$this->target]]></code>
+      <code><![CDATA[$this->target]]></code>
+      <code><![CDATA[throw new \RuntimeException('Target role is not defined yet.')]]></code>
+      <code><![CDATA[throw new \RuntimeException('Target role is not defined yet.')]]></code>
+    </RedundantPropertyInitializationCheck>
+    <UndefinedMethod>
+      <code><![CDATA[addNode]]></code>
+    </UndefinedMethod>
+    <UnusedReturnValue>
+      <code><![CDATA[SelectQuery]]></code>
+    </UnusedReturnValue>
+  </file>
+  <file src="src/Select/Loader/Morphed/MorphedHasManyLoader.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MorphedHasManyLoader]]></code>
+    </ClassMustBeFinal>
+    <InvalidArrayOffset>
+      <code><![CDATA[[$this->localKey(Relation::MORPH_KEY) => $this->parent->getTarget()]]]></code>
+    </InvalidArrayOffset>
+    <PossiblyNullReference>
+      <code><![CDATA[getTarget]]></code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Select/Loader/Morphed/MorphedHasOneLoader.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[MorphedHasOneLoader]]></code>
+    </ClassMustBeFinal>
+    <InvalidArrayOffset>
+      <code><![CDATA[[$this->localKey(Relation::MORPH_KEY) => $this->parent->getTarget()]]]></code>
+    </InvalidArrayOffset>
+    <PossiblyNullReference>
+      <code><![CDATA[getTarget]]></code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Select/Loader/ParentLoader.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[ParentLoader]]></code>
+    </ClassMustBeFinal>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::OUTER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+  </file>
+  <file src="src/Select/Loader/PivotLoader.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[PivotLoader]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::THROUGH_WHERE] ?? []]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::THROUGH_INNER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->define(SchemaInterface::TABLE)]]></code>
+    </MixedReturnStatement>
+  </file>
+  <file src="src/Select/Loader/SubQueryLoader.php">
+    <MixedArgument>
+      <code><![CDATA[$alias]]></code>
+      <code><![CDATA[$column]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$parentKeys[$i]]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$alias]]></code>
+      <code><![CDATA[$column]]></code>
+      <code><![CDATA[$key]]></code>
+    </MixedAssignment>
+    <MixedOperand>
+      <code><![CDATA[$alias]]></code>
+      <code><![CDATA[$options['as']]]></code>
+    </MixedOperand>
+    <PossiblyNullArrayOffset>
+      <code><![CDATA[$aliases]]></code>
+    </PossiblyNullArrayOffset>
+    <PossiblyNullOperand>
+      <code><![CDATA[$this->parent->fieldAlias($parentKeys[$i])]]></code>
+    </PossiblyNullOperand>
+    <PossiblyNullReference>
+      <code><![CDATA[getAlias]]></code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Select/Loader/SubclassLoader.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[SubclassLoader]]></code>
+    </ClassMustBeFinal>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::INNER_KEY]]]></code>
+      <code><![CDATA[(array) $this->schema[Relation::OUTER_KEY]]]></code>
+    </MixedArgumentTypeCoercion>
+  </file>
+  <file src="src/Select/QueryBuilder.php">
+    <MissingClosureParamType>
+      <code><![CDATA[$q]]></code>
+      <code><![CDATA[$q]]></code>
+    </MissingClosureParamType>
+    <MixedArgument>
+      <code><![CDATA[$q]]></code>
+      <code><![CDATA[$q]]></code>
+    </MixedArgument>
+    <MixedArrayOffset>
+      <code><![CDATA[$result[$k]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$current]]></code>
+      <code><![CDATA[$result]]></code>
+      <code><![CDATA[$result[$k]]]></code>
+      <code><![CDATA[$v]]></code>
+    </MixedAssignment>
+    <PossiblyFalseArgument>
+      <code><![CDATA[$split]]></code>
+    </PossiblyFalseArgument>
+    <PossiblyFalseOperand>
+      <code><![CDATA[$split]]></code>
+    </PossiblyFalseOperand>
+    <PossiblyUndefinedMethod>
+      <code><![CDATA[getParentLoader]]></code>
+    </PossiblyUndefinedMethod>
+    <RiskyTruthyFalsyComparison>
+      <code><![CDATA[\strpos($name, '(')]]></code>
+    </RiskyTruthyFalsyComparison>
+  </file>
+  <file src="src/Select/Repository.php">
+    <ClassMustBeFinal>
+      <code><![CDATA[Repository]]></code>
+    </ClassMustBeFinal>
+    <MissingParamType>
+      <code><![CDATA[$id]]></code>
+    </MissingParamType>
+    <MixedArgument>
+      <code><![CDATA[$id]]></code>
+    </MixedArgument>
+  </file>
+  <file src="src/Select/RootLoader.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$target]]></code>
+    </ArgumentTypeCoercion>
+    <ImpureMethodCall>
+      <code><![CDATA[foreach ($this->getEagerLoaders() as $relation) {
+                $this->loadRelation($relation, [], false, true);
+            }]]></code>
+    </ImpureMethodCall>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+    </LessSpecificReturnStatement>
+    <MixedArgument>
+      <code><![CDATA[$row]]></code>
+      <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$row]]></code>
+    </MixedAssignment>
+    <MoreSpecificReturnType>
+      <code><![CDATA[list<non-empty-string>]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyNullOperand>
+      <code><![CDATA[$this->fieldAlias($key)]]></code>
+      <code><![CDATA[$this->fieldAlias($pk)]]></code>
+    </PossiblyNullOperand>
+  </file>
+  <file src="src/Select/Traits/ChainTrait.php">
+    <PossiblyFalseArgument>
+      <code><![CDATA[$position]]></code>
+    </PossiblyFalseArgument>
+    <PossiblyFalseOperand>
+      <code><![CDATA[$position]]></code>
+    </PossiblyFalseOperand>
+  </file>
+  <file src="src/Select/Traits/ColumnsTrait.php">
+    <MoreSpecificReturnType>
+      <code><![CDATA[array<non-empty-string, non-empty-string>]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyInvalidArrayOffset>
+      <code><![CDATA[$this->columns[$p[0]]]]></code>
+    </PossiblyInvalidArrayOffset>
+  </file>
+  <file src="src/Select/Traits/JoinOneTableTrait.php">
+    <MixedArgument>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$outerKeys[0]]]></code>
+      <code><![CDATA[$parentKeys[$i]]]></code>
+      <code><![CDATA[$set]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$set]]></code>
+    </MixedAssignment>
+    <PossiblyNullOperand>
+      <code><![CDATA[$this->fieldAlias($key)]]></code>
+      <code><![CDATA[$this->fieldAlias($key)]]></code>
+      <code><![CDATA[$this->parent->fieldAlias($parentKeys[$i])]]></code>
+    </PossiblyNullOperand>
+    <PossiblyNullReference>
+      <code><![CDATA[getAlias]]></code>
+    </PossiblyNullReference>
+  </file>
+  <file src="src/Select/Traits/OrderByTrait.php">
+    <InvalidNullableReturnType>
+      <code><![CDATA[SelectQuery]]></code>
+    </InvalidNullableReturnType>
+    <UnusedReturnValue>
+      <code><![CDATA[SelectQuery]]></code>
+    </UnusedReturnValue>
+  </file>
+  <file src="src/Select/Traits/WhereTrait.php">
+    <InvalidNullableReturnType>
+      <code><![CDATA[SelectQuery]]></code>
+    </InvalidNullableReturnType>
+  </file>
+  <file src="src/Select/UpdateLoader.php">
+    <MixedArgument>
+      <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$relation]]></code>
+      <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
+    </MixedArgumentTypeCoercion>
+  </file>
+  <file src="src/Service/Implementation/EntityFactory.php">
+    <MixedArgument>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$castedData]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$key]]]></code>
+      <code><![CDATA[$data[$pk]]]></code>
+      <code><![CDATA[$ids[$key]]]></code>
+      <code><![CDATA[[$pk => $data[$pk]]]]></code>
+    </MixedArrayOffset>
+    <MixedAssignment>
+      <code><![CDATA[$ids[$key]]]></code>
+      <code><![CDATA[$key]]></code>
+      <code><![CDATA[$pk]]></code>
+      <code><![CDATA[$role]]></code>
+    </MixedAssignment>
+    <NoValue>
+      <code><![CDATA[return $mapper->hydrate($e, $relMap->init(
+                        $this,
+                        $node,
+                        \array_intersect_key($castedData, $overwrite),
+                    ));]]></code>
+      <code><![CDATA[return $mapper->hydrate($e, $relMap->init($this, $node, $castedData));]]></code>
+    </NoValue>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$role]]></code>
+      <code><![CDATA[$role]]></code>
+    </PossiblyInvalidArgument>
+    <PossiblyInvalidCast>
+      <code><![CDATA[$role]]></code>
+    </PossiblyInvalidCast>
+  </file>
+  <file src="src/Service/Implementation/IndexProvider.php">
+    <MixedArgument>
+      <code><![CDATA[$keys]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$keys]]></code>
+      <code><![CDATA[$pk]]></code>
+    </MixedAssignment>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->indexes[$entity]]]></code>
+    </MixedReturnStatement>
+  </file>
+  <file src="src/Service/Implementation/MapperProvider.php">
+    <MixedArgument>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$role]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Service/Implementation/RelationProvider.php">
+    <MixedArgument>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$role]]></code>
+    </MixedAssignment>
+    <PropertyTypeCoercion>
+      <code><![CDATA[$this->relMaps]]></code>
+    </PropertyTypeCoercion>
+  </file>
+  <file src="src/Service/Implementation/RepositoryProvider.php">
+    <MixedArgument>
+      <code><![CDATA[$role]]></code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$select]]></code>
+    </MixedArgumentTypeCoercion>
+    <MixedAssignment>
+      <code><![CDATA[$role]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Service/Implementation/RoleResolver.php">
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$node->getRole()]]></code>
+      <code><![CDATA[$this->schema->resolveAlias($entity) ?? throw new ORMException("Unable to resolve role `$entity`.")]]></code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[string]]></code>
+    </MoreSpecificReturnType>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[class-string]]></code>
+    </UnnecessaryVarAnnotation>
+  </file>
+  <file src="src/Service/Implementation/SourceProvider.php">
+    <MoreSpecificImplementedParamType>
+      <code><![CDATA[$entity]]></code>
+    </MoreSpecificImplementedParamType>
+  </file>
+  <file src="src/Transaction.php">
+    <DeprecatedInterface>
+      <code><![CDATA[Transaction]]></code>
+    </DeprecatedInterface>
+    <InvalidThrow>
+      <code><![CDATA[throw $uow->getLastError()]]></code>
+    </InvalidThrow>
+  </file>
+  <file src="src/Transaction/CommandGenerator.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$commands]]></code>
+      <code><![CDATA[$parent]]></code>
+    </ArgumentTypeCoercion>
+    <ClassMustBeFinal>
+      <code><![CDATA[CommandGenerator]]></code>
+    </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$parentKey[$i]]]></code>
+      <code><![CDATA[$pk]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$parent]]></code>
+      <code><![CDATA[$pk]]></code>
+    </MixedAssignment>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$orm]]></code>
+      <code><![CDATA[$orm]]></code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Transaction/Pool.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$node?->getRole() ?? $entity]]></code>
+    </ArgumentTypeCoercion>
+    <MixedArgument>
+      <code><![CDATA[$item]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$item]]></code>
+    </MixedAssignment>
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[$priorityStorage]]></code>
+      <code><![CDATA[$unprocessed]]></code>
+    </PropertyNotSetInConstructor>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[Node|null]]></code>
+      <code><![CDATA[object]]></code>
+      <code><![CDATA[object]]></code>
+      <code><![CDATA[object]]></code>
+    </UnnecessaryVarAnnotation>
+  </file>
+  <file src="src/Transaction/Runner.php">
+    <MixedArgument>
+      <code><![CDATA[$cmd]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$cmd]]></code>
+    </MixedAssignment>
+    <PossiblyNullReference>
+      <code><![CDATA[getDriver]]></code>
+    </PossiblyNullReference>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[DriverInterface]]></code>
+      <code><![CDATA[DriverInterface]]></code>
+    </UnnecessaryVarAnnotation>
+  </file>
+  <file src="src/Transaction/Tuple.php">
+    <PropertyNotSetInConstructor>
+      <code><![CDATA[$mapper]]></code>
+      <code><![CDATA[$node]]></code>
+      <code><![CDATA[$state]]></code>
+    </PropertyNotSetInConstructor>
+  </file>
+  <file src="src/Transaction/TupleStorage.php">
+    <MissingConstructor>
+      <code><![CDATA[$iterators]]></code>
+    </MissingConstructor>
+    <MixedArrayAccess>
+      <code><![CDATA[$collection[$id]]]></code>
+    </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$collection[\spl_object_id($tuple->entity)]]]></code>
+    </MixedArrayAssignment>
+    <MixedAssignment>
+      <code><![CDATA[$collection]]></code>
+      <code><![CDATA[$collection]]></code>
+    </MixedAssignment>
+    <UnsupportedReferenceUsage>
+      <code><![CDATA[$this->iterators[\spl_object_id($cleaner)] = &$iterator]]></code>
+    </UnsupportedReferenceUsage>
+  </file>
+  <file src="src/Transaction/UnitOfWork.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$command instanceof Sequence ? $command->getPrimaryCommand() : $command]]></code>
+    </ArgumentTypeCoercion>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->run()]]></code>
+    </LessSpecificReturnStatement>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$name]]></code>
+    </MixedArgumentTypeCoercion>
+    <MoreSpecificReturnType>
+      <code><![CDATA[static]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyNullReference>
+      <code><![CDATA[run]]></code>
+    </PossiblyNullReference>
+    <RedundantPropertyInitializationCheck>
+      <code><![CDATA[isset($this->pool)]]></code>
+    </RedundantPropertyInitializationCheck>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[Tuple]]></code>
+    </UnnecessaryVarAnnotation>
+  </file>
+</files>

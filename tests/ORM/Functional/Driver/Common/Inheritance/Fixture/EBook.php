@@ -8,6 +8,7 @@ class EBook extends Book
 {
     public string $url;
     public ?int $block_id = null;
+
     /** @var Page[] */
     public array $pages = [];
 }

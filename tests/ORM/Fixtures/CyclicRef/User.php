@@ -9,7 +9,6 @@ class User
 {
     public $id;
     public $email;
-
     public $created_at;
     public $updated_at;
 }

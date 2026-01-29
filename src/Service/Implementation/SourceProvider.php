@@ -20,8 +20,7 @@ final class SourceProvider implements SourceProviderInterface
     public function __construct(
         private FactoryInterface $factory,
         private SchemaInterface $schema,
-    ) {
-    }
+    ) {}
 
     /**
      * @param non-empty-string $entity

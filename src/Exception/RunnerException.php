@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Exception;
 
-class RunnerException extends ORMException
-{
-}
+class RunnerException extends ORMException {}

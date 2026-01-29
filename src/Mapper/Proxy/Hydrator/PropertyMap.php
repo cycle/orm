@@ -13,9 +13,8 @@ class PropertyMap
 
     public function __construct(
         private string $class,
-        private array $properties
-    ) {
-    }
+        private array $properties,
+    ) {}
 
     public function isPublicProperty(string $name): bool
     {

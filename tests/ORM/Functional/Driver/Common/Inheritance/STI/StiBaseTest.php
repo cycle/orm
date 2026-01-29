@@ -24,7 +24,7 @@ abstract class StiBaseTest extends BaseTest
             $this->dbal,
             RelationConfig::getDefault(),
             null,
-            new ArrayCollectionFactory()
+            new ArrayCollectionFactory(),
         ))->withCollectionFactory('doctrine', new DoctrineCollectionFactory());
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()))->withFactory($factory);

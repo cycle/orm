@@ -23,6 +23,63 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
 {
     use TableTrait;
 
+    // Select
+
+    public function testSelectOne(): void
+    {
+        $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+
+        $this->assertNotNull($user->id);
+        $this->assertIsNotObject($user->id->value);
+        $this->assertEquals(1, $user->id->value);
+    }
+
+    /**
+     * Test the Typecaster doesn't type casting twice when data passed via links
+     */
+    public function testSelectMultiple(): void
+    {
+        $users = (new Select($this->orm, User::class))->orderBy('id', 'asc')->fetchAll();
+
+        $this->assertNotNull($users[0]->id);
+        $this->assertIsNotObject($users[0]->id->value);
+        $this->assertEquals(1, $users[0]->id->value);
+    }
+
+    /**
+     * Test the Typecaster doesn't type casting twice when data passed via links
+     */
+    public function testCustomArrayInIterator(): void
+    {
+        $bookData = [
+            'id' => '1',
+            'states' => 'foo|bar',
+            'nested_states' => 'foo|bar',
+            'published_at' => '2020-12-07',
+        ];
+        $pivotData = [
+            'book_id' => '1',
+            'user_id' => '1',
+            'created_at' => '2020-12-09',
+            '@' => &$bookData,
+        ];
+        $userData = [
+            'email' => 'foo@bar',
+            'balance' => '42',
+            'created_at' => '2020-12-09',
+            'books' => [&$pivotData, &$pivotData, &$pivotData],
+            'book' => &$bookData,
+        ];
+
+        $data = [&$userData, &$userData, &$userData];
+
+        $iterator = Iterator::createWithOrm($this->orm, User::class, $data, typecast: true);
+        /** @var User $user */
+        $users = \iterator_to_array($iterator);
+
+        $this->assertCount(3, $users);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -53,7 +110,7 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
             [
                 ['hello@world.com', 100, new \DatetimeImmutable('2020-12-20')],
                 ['another@world.com', 200, new \DatetimeImmutable('2021-12-21')],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('book')->insertMultiple(
@@ -61,7 +118,7 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
             [
                 ['a|b|c', 'a|b|c', new \DatetimeImmutable('2020-11-22')],
                 ['x|y|z', 'x|y|z', new \DatetimeImmutable('2021-11-24')],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('pivot')->insertMultiple(
@@ -73,7 +130,7 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
                 [1, 2, new \DatetimeImmutable('2020-12-25')],
                 [2, 2, new \DatetimeImmutable('2021-12-26')],
                 [3, 2, new \DatetimeImmutable('2021-12-27')],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema([
@@ -147,62 +204,5 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
                 SchemaInterface::RELATIONS => [],
             ],
         ]));
-    }
-
-    // Select
-
-    public function testSelectOne(): void
-    {
-        $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
-
-        $this->assertNotNull($user->id);
-        $this->assertIsNotObject($user->id->value);
-        $this->assertEquals(1, $user->id->value);
-    }
-
-    /**
-     * Test the Typecaster doesn't type casting twice when data passed via links
-     */
-    public function testSelectMultiple(): void
-    {
-        $users = (new Select($this->orm, User::class))->orderBy('id', 'asc')->fetchAll();
-
-        $this->assertNotNull($users[0]->id);
-        $this->assertIsNotObject($users[0]->id->value);
-        $this->assertEquals(1, $users[0]->id->value);
-    }
-
-    /**
-     * Test the Typecaster doesn't type casting twice when data passed via links
-     */
-    public function testCustomArrayInIterator(): void
-    {
-        $bookData = [
-            'id' => '1',
-            'states' => 'foo|bar',
-            'nested_states' => 'foo|bar',
-            'published_at' => '2020-12-07',
-        ];
-        $pivotData = [
-            'book_id' => '1',
-            'user_id' => '1',
-            'created_at' => '2020-12-09',
-            '@' => &$bookData,
-        ];
-        $userData = [
-            'email' => 'foo@bar',
-            'balance' => '42',
-            'created_at' => '2020-12-09',
-            'books' => [&$pivotData, &$pivotData, &$pivotData],
-            'book' => &$bookData,
-        ];
-
-        $data = [&$userData, &$userData, &$userData];
-
-        $iterator = Iterator::createWithOrm($this->orm, User::class, $data, typecast: true);
-        /** @var User $user */
-        $users = \iterator_to_array($iterator);
-
-        $this->assertCount(3, $users);
     }
 }

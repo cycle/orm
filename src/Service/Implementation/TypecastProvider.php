@@ -22,8 +22,7 @@ final class TypecastProvider implements TypecastProviderInterface
         private FactoryInterface $factory,
         private SchemaInterface $schema,
         private SourceProviderInterface $sourceProvider,
-    ) {
-    }
+    ) {}
 
     public function getTypecast(string $role): ?TypecastInterface
     {
@@ -32,7 +31,7 @@ final class TypecastProvider implements TypecastProviderInterface
             : ($this->typecasts[$role] = $this->factory->typecast(
                 $this->schema,
                 $this->sourceProvider->getSource($role)->getDatabase(),
-                $role
+                $role,
             ));
     }
 }

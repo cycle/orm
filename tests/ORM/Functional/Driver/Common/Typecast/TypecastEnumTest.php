@@ -21,62 +21,17 @@ abstract class TypecastEnumTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'user',
-            [
-                'id' => 'primary',
-                'balance' => 'int',
-                'enum_string' => 'string',
-                'enum_int' => 'int',
-            ]
-        );
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['balance', 'enum_string', 'enum_int'],
-            [
-                [100, TypeStringEnum::Admin->value, TypeIntEnum::Admin->value],
-                [200, TypeStringEnum::Guest->value, TypeIntEnum::Guest->value],
-            ]
-        );
-
-        $this->orm = $this->withSchema(
-            new Schema(
-                [
-                    User::class => [
-                        SchemaInterface::ROLE => 'user',
-                        SchemaInterface::MAPPER => Mapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'user',
-                        SchemaInterface::PRIMARY_KEY => 'id',
-                        SchemaInterface::COLUMNS => ['id', 'balance', 'enum_string', 'enum_int'],
-                        SchemaInterface::TYPECAST => [
-                            'id' => 'int',
-                            'balance' => 'int',
-                            'enum_string' => TypeStringEnum::class,
-                            'enum_int' => TypeIntEnum::class,
-                        ],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [],
-                    ],
-                ]
-            )
-        );
-    }
-
     public function testFetchData(): void
     {
         $result = (new Select($this->orm, User::class))->fetchData();
 
         $this->assertSame(
             [TypeStringEnum::Admin, TypeStringEnum::Guest],
-            \array_column($result, 'enum_string')
+            \array_column($result, 'enum_string'),
         );
         $this->assertSame(
             [TypeIntEnum::Admin, TypeIntEnum::Guest],
-            \array_column($result, 'enum_int')
+            \array_column($result, 'enum_int'),
         );
     }
 
@@ -141,5 +96,50 @@ abstract class TypecastEnumTest extends BaseTest
 
         $this->assertSame(TypeStringEnum::Guest, $result2->enum_string);
         $this->assertSame(TypeIntEnum::Guest, $result2->enum_int);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'user',
+            [
+                'id' => 'primary',
+                'balance' => 'int',
+                'enum_string' => 'string',
+                'enum_int' => 'int',
+            ],
+        );
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['balance', 'enum_string', 'enum_int'],
+            [
+                [100, TypeStringEnum::Admin->value, TypeIntEnum::Admin->value],
+                [200, TypeStringEnum::Guest->value, TypeIntEnum::Guest->value],
+            ],
+        );
+
+        $this->orm = $this->withSchema(
+            new Schema(
+                [
+                    User::class => [
+                        SchemaInterface::ROLE => 'user',
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'balance', 'enum_string', 'enum_int'],
+                        SchemaInterface::TYPECAST => [
+                            'id' => 'int',
+                            'balance' => 'int',
+                            'enum_string' => TypeStringEnum::class,
+                            'enum_int' => TypeIntEnum::class,
+                        ],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                ],
+            ),
+        );
     }
 }

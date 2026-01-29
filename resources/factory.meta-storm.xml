@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<meta-storm xmlns="meta-storm">
+    <definitions>
+        <classMethod class="\Cycle\ORM\FactoryInterface" method="mapper" argument="1">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\FactoryInterface" method="loader" argument="2">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\FactoryInterface" method="repository" argument="2">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\FactoryInterface" method="typecast" argument="2">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\FactoryInterface" method="source" argument="1">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\FactoryInterface" method="relation" argument="2">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+    </definitions>
+</meta-storm>

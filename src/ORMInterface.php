@@ -12,6 +12,7 @@ use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Service\RepositoryProviderInterface;
+use Cycle\ORM\Service\RoleResolverInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
 
@@ -25,18 +26,14 @@ interface ORMInterface extends
     MapperProviderInterface,
     RepositoryProviderInterface,
     RelationProviderInterface,
+    RoleResolverInterface,
     IndexProviderInterface
 {
-    /**
-     * Automatically resolve role based on object name or instance.
-     */
-    public function resolveRole(string|object $entity): string;
-
     /**
      * Create new entity based on given role and input data. Method will attempt to re-use
      * already loaded entity.
      *
-     * @template TEntity
+     * @template TEntity of object
      *
      * @param class-string<TEntity>|string $role Entity role or class name.
      * @param array<string, mixed> $data Entity data.
@@ -80,7 +77,7 @@ interface ORMInterface extends
     public function with(
         ?SchemaInterface $schema = null,
         ?FactoryInterface $factory = null,
-        ?HeapInterface $heap = null
+        ?HeapInterface $heap = null,
     ): self;
 
     /**

@@ -31,7 +31,7 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
         State $state,
         ?MapperInterface $mapper,
         /** @var string[] */
-        array $primaryKeys
+        array $primaryKeys,
     ) {
         parent::__construct($db, $table, $state);
         $this->mapper = $mapper;
@@ -68,9 +68,9 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
 
         $data = $this->state->getChanges();
 
-        return array_merge(
+        return \array_merge(
             $this->columns,
-            $this->mapper?->mapColumns($data) ?? $data
+            $this->mapper?->mapColumns($data) ?? $data,
         );
     }
 
@@ -96,13 +96,13 @@ final class Update extends StoreCommand implements ScopeCarrierInterface
                 ->update(
                     $this->table,
                     \array_merge($this->columns, $data),
-                    $this->prepareData($scope)
+                    $this->prepareData($scope),
                 )
                 ->run();
         }
 
         $this->state->updateTransactionData(
-            $fields !== [] && \count($fields) === \count($allChanges) ? null : $fields
+            $fields !== [] && \count($fields) === \count($allChanges) ? null : $fields,
         );
 
         parent::execute();

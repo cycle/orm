@@ -14,39 +14,6 @@ abstract class FollowupTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable('user_snapshots', [
-            'id' => 'primary',
-            'user_id' => 'int',
-            'at' => 'datetime',
-            'action' => 'string',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => UserSnapshotMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testSnapUser(): void
     {
         $u = new User();
@@ -87,14 +54,47 @@ abstract class FollowupTest extends BaseTest
         $this->assertSame('new-email', $snap['email']);
     }
 
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable('user_snapshots', [
+            'id' => 'primary',
+            'user_id' => 'int',
+            'at' => 'datetime',
+            'action' => 'string',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => UserSnapshotMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
+    }
+
     protected function getSnap(User $u): array
     {
         return $this->dbal->database()
-                          ->table('user_snapshots')
-                          ->select('*')
-                          ->where('user_id', $u->id)
-                          ->orderBy('id', 'DESC')
-                          ->limit(1)
-                          ->fetchAll()[0];
+            ->table('user_snapshots')
+            ->select('*')
+            ->where('user_id', $u->id)
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->fetchAll()[0];
     }
 }

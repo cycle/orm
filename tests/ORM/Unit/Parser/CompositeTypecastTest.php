@@ -24,7 +24,6 @@ class CompositeTypecastTest extends TestCase
     private const RULES_RESULT = [
         'baz' => 'bar',
     ];
-
     private const CAST_INITIAL = [
         'foo' => 'foo',
         'bar' => 'bar',
@@ -33,7 +32,6 @@ class CompositeTypecastTest extends TestCase
         'foo' => 'bar_final',
         'bar' => 'bar_final',
     ];
-
     private const UNCAST_INITIAL = [
         'foo' => 'unfoo',
         'bar' => 'unbar',
@@ -42,7 +40,6 @@ class CompositeTypecastTest extends TestCase
         'foo' => 'unbar_final',
         'bar' => 'unbar_final',
     ];
-
     private const OPT_TYPECAST = 0;
     private const OPT_RULES_RETURNS = 1;
     private const OPT_CAST_RETURNS = 2;
@@ -108,7 +105,7 @@ class CompositeTypecastTest extends TestCase
         }
 
         $typecast = new CompositeTypecast(
-            ...array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
+            ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
         $this->assertSame(self::RULES_RESULT, $typecast->setRules(self::RULES_INITIAL));
@@ -135,7 +132,7 @@ class CompositeTypecastTest extends TestCase
         }
 
         $typecast = new CompositeTypecast(
-            ...array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
+            ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
         $this->assertSame(self::CAST_RESULT, $typecast->cast(self::CAST_INITIAL));
@@ -163,7 +160,7 @@ class CompositeTypecastTest extends TestCase
         }
 
         $typecast = new CompositeTypecast(
-            ...array_map(static fn (array $data) => $data[self::OPT_TYPECAST], $casters)
+            ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
         $this->assertSame(self::UNCAST_RESULT, $typecast->uncast(self::UNCAST_INITIAL));

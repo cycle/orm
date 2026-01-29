@@ -17,7 +17,6 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
     private string $name;
     private string $target;
     private array $schema;
-
     private array $innerKeys;
     private bool $cascade;
 
@@ -26,8 +25,8 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
         $this->name = $target . '.' . $name . ':' . $schema[Relation::TARGET];
         $this->target = $target;
         $this->schema = $schema;
-        $this->innerKeys = (array)($schema[Relation::SCHEMA][Relation::OUTER_KEY] ?? []);
-        $this->cascade = (bool)($schema[Relation::SCHEMA][Relation::CASCADE] ?? false);
+        $this->innerKeys = (array) ($schema[Relation::SCHEMA][Relation::OUTER_KEY] ?? []);
+        $this->cascade = (bool) ($schema[Relation::SCHEMA][Relation::CASCADE] ?? false);
     }
 
     public function getInnerKeys(): array
@@ -73,7 +72,7 @@ class ShadowBelongsTo implements ReversedRelationInterface, DependencyInterface
 
     public function isNullable(): bool
     {
-        return (bool)($this->schema[Relation::SCHEMA][Relation::NULLABLE] ?? false);
+        return (bool) ($this->schema[Relation::SCHEMA][Relation::NULLABLE] ?? false);
     }
 
     private function checkFieldsExists(State $state): bool

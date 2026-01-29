@@ -10,9 +10,8 @@ final class Promise implements ReferenceInterface
 {
     public function __construct(
         private ActiveRelationInterface $relation,
-        private ReferenceInterface $origin
-    ) {
-    }
+        private ReferenceInterface $origin,
+    ) {}
 
     public function fetch(): object|iterable|null
     {

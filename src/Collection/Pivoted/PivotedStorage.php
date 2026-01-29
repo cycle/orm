@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Collection\Pivoted;
 
-use SplObjectStorage;
-
 /**
  * Carry information about ordered list of entities and associated pivot context.
  *
@@ -17,17 +15,17 @@ class PivotedStorage implements \IteratorAggregate, \Countable
     /** @var TEntity[] */
     private array $elements;
 
-    /** @var SplObjectStorage<TEntity, TPivot> */
-    private SplObjectStorage $context;
+    /** @var \SplObjectStorage<TEntity, TPivot> */
+    private \SplObjectStorage $context;
 
     /**
      * @param TEntity[] $elements
-     * @param SplObjectStorage<TEntity, TPivot>|null $context
+     * @param \SplObjectStorage<TEntity, TPivot>|null $context
      */
-    public function __construct(array $elements = [], SplObjectStorage $context = null)
+    public function __construct(array $elements = [], ?\SplObjectStorage $context = null)
     {
         $this->elements = $elements;
-        $this->context = $context ?? new SplObjectStorage();
+        $this->context = $context ?? new \SplObjectStorage();
     }
 
     /**
@@ -43,7 +41,7 @@ class PivotedStorage implements \IteratorAggregate, \Countable
         yield from $this->getElements();
     }
 
-    public function getContext(): SplObjectStorage
+    public function getContext(): \SplObjectStorage
     {
         return $this->context;
     }
@@ -53,7 +51,7 @@ class PivotedStorage implements \IteratorAggregate, \Countable
      */
     public function has(object $entity): bool
     {
-        return in_array($entity, $this->elements, true);
+        return \in_array($entity, $this->elements, true);
     }
 
     /**

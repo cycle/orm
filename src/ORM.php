@@ -16,17 +16,18 @@ use Cycle\ORM\Service\Implementation\IndexProvider;
 use Cycle\ORM\Service\Implementation\MapperProvider;
 use Cycle\ORM\Service\Implementation\RelationProvider;
 use Cycle\ORM\Service\Implementation\RepositoryProvider;
+use Cycle\ORM\Service\Implementation\RoleResolver;
 use Cycle\ORM\Service\Implementation\SourceProvider;
 use Cycle\ORM\Service\Implementation\TypecastProvider;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Service\RepositoryProviderInterface;
+use Cycle\ORM\Service\RoleResolverInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\Transaction\CommandGenerator;
 use Cycle\ORM\Transaction\CommandGeneratorInterface;
-use InvalidArgumentException;
 use JetBrains\PhpStorm\ExpectedValues;
 
 /**
@@ -35,50 +36,34 @@ use JetBrains\PhpStorm\ExpectedValues;
 final class ORM implements ORMInterface
 {
     private HeapInterface $heap;
-
     private CommandGeneratorInterface $commandGenerator;
-
     private RelationProvider $relationProvider;
     private SourceProvider $sourceProvider;
     private TypecastProvider $typecastProvider;
-    private EntityFactory $entityFactory;
+    private EntityFactoryInterface $entityFactory;
     private IndexProvider $indexProvider;
     private MapperProvider $mapperProvider;
     private RepositoryProvider $repositoryProvider;
     private EntityProvider $entityProvider;
+    private RoleResolverInterface $roleResolver;
+    private Options $options;
 
     public function __construct(
         private FactoryInterface $factory,
         private SchemaInterface $schema,
-        CommandGeneratorInterface $commandGenerator = null,
-        HeapInterface $heap = null
+        ?CommandGeneratorInterface $commandGenerator = null,
+        ?HeapInterface $heap = null,
+        ?Options $options = null,
     ) {
         $this->heap = $heap ?? new Heap();
         $this->commandGenerator = $commandGenerator ?? new CommandGenerator();
         $this->resetRegistry();
-    }
-
-    /**
-     * Reset related objects cache.
-     */
-    public function __clone()
-    {
-        $this->heap = clone $this->heap;
-        $this->heap->clean();
-
-        $this->resetRegistry();
-    }
-
-    public function __debugInfo(): array
-    {
-        return [
-            'schema' => $this->schema,
-        ];
+        $this->options = $options ?? new Options();
     }
 
     public function resolveRole(string|object $entity): string
     {
-        return $this->entityFactory->resolveRole($entity);
+        return $this->roleResolver->resolveRole($entity);
     }
 
     public function get(string $role, array $scope, bool $load = true): ?object
@@ -111,8 +96,9 @@ final class ORM implements ORMInterface
             RepositoryProviderInterface::class,
             SourceProviderInterface::class,
             TypecastProviderInterface::class,
+            Options::class,
         ])]
-        string $class
+        string $class,
     ): object {
         return match ($class) {
             EntityFactoryInterface::class => $this->entityFactory,
@@ -123,7 +109,8 @@ final class ORM implements ORMInterface
             MapperProviderInterface::class => $this->mapperProvider,
             RelationProviderInterface::class => $this->relationProvider,
             RepositoryProviderInterface::class => $this->repositoryProvider,
-            default => throw new InvalidArgumentException("Undefined service `$class`.")
+            Options::class => $this->options,
+            default => throw new \InvalidArgumentException("Undefined service `$class`."),
         };
     }
 
@@ -140,28 +127,28 @@ final class ORM implements ORMInterface
     public function getMapper(string|object $entity): MapperInterface
     {
         return $this->mapperProvider->getMapper(
-            $this->resolveRole($entity)
+            $this->resolveRole($entity),
         );
     }
 
     public function getRepository(string|object $entity): RepositoryInterface
     {
         return $this->repositoryProvider->getRepository(
-            $this->resolveRole($entity)
+            $this->resolveRole($entity),
         );
     }
 
     public function getSource(string $entity): SourceInterface
     {
         return $this->sourceProvider->getSource(
-            $this->resolveRole($entity)
+            $this->resolveRole($entity),
         );
     }
 
     public function getIndexes(string $entity): array
     {
         return $this->indexProvider->getIndexes(
-            $this->resolveRole($entity)
+            $this->resolveRole($entity),
         );
     }
 
@@ -171,14 +158,15 @@ final class ORM implements ORMInterface
     public function getRelationMap(string $entity): RelationMap
     {
         return $this->relationProvider->getRelationMap(
-            $this->resolveRole($entity)
+            $this->resolveRole($entity),
         );
     }
 
     public function with(
         ?SchemaInterface $schema = null,
         ?FactoryInterface $factory = null,
-        ?HeapInterface $heap = null
+        ?HeapInterface $heap = null,
+        ?Options $options = null,
     ): ORMInterface {
         $heap ??= clone $this->heap;
         $heap->clean();
@@ -187,7 +175,8 @@ final class ORM implements ORMInterface
             factory: $factory ?? $this->factory,
             schema: $schema ?? $this->schema,
             commandGenerator: $this->commandGenerator,
-            heap: $heap
+            heap: $heap,
+            options: $options ?? $this->options,
         );
     }
 
@@ -229,6 +218,24 @@ final class ORM implements ORMInterface
         return $this->with(heap: $heap);
     }
 
+    /**
+     * Reset related objects cache.
+     */
+    public function __clone()
+    {
+        $this->heap = clone $this->heap;
+        $this->heap->clean();
+
+        $this->resetRegistry();
+    }
+
+    public function __debugInfo(): array
+    {
+        return [
+            'schema' => $this->schema,
+        ];
+    }
+
     private function resetRegistry(): void
     {
         $this->indexProvider = new IndexProvider($this->schema);
@@ -242,16 +249,18 @@ final class ORM implements ORMInterface
             $this,
             $this->sourceProvider,
             $this->schema,
-            $this->factory
+            $this->factory,
         );
         $this->entityProvider = new EntityProvider($this->heap, $this->repositoryProvider);
+        $this->roleResolver = new RoleResolver($this->schema, $this->heap);
 
         $this->entityFactory = new EntityFactory(
             $this->heap,
             $this->schema,
             $this->mapperProvider,
             $this->relationProvider,
-            $this->indexProvider
+            $this->indexProvider,
+            $this->roleResolver,
         );
     }
 }

@@ -10,7 +10,6 @@ use Cycle\ORM\Command\CompleteMethodInterface;
 use Cycle\ORM\Command\RollbackMethodInterface;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Exception\RunnerException;
-use Traversable;
 
 final class Runner implements RunnerInterface
 {
@@ -27,13 +26,39 @@ final class Runner implements RunnerInterface
     private int $countExecuted = 0;
 
     private function __construct(
-        private int $mode
-    ) {
+        private int $mode,
+    ) {}
+
+    /**
+     * Create Runner in the 'inner transaction' mode.
+     * In this case the Runner will open new transaction for each used driver connection
+     * and will close they on finish.
+     */
+    public static function innerTransaction(): self
+    {
+        return new self(self::MODE_OPEN_TRANSACTION);
+    }
+
+    /**
+     * Create Runner in the 'outer transaction' mode.
+     * In this case the Runner won't begin transactions, you should do it previously manually.
+     * This mode also means the Runner WON'T commit or rollback opened transactions on success or fail.
+     * But commands that implement CompleteMethodInterface or RollbackMethodInterface will be called.
+     *
+     * @param bool $strict Check transaction statuses before commands running.
+     *        When strict mode is {@see true} and a transaction of any used driver didn't be opened
+     *        the Runner will throw an Exception and stop Unit of Work.
+     *        When strict mode is {@see false} the Runner won't begin/commit/rollback transactions
+     *        and will ignore any transaction statuses.
+     */
+    public static function outerTransaction(bool $strict = true): self
+    {
+        return new self($strict ? self::MODE_CONTINUE_TRANSACTION : self::MODE_IGNORE_TRANSACTION);
     }
 
     public function run(CommandInterface $command): void
     {
-        if ($command instanceof Traversable) {
+        if ($command instanceof \Traversable) {
             foreach ($command as $cmd) {
                 $this->run($cmd);
             }
@@ -110,33 +135,6 @@ final class Runner implements RunnerInterface
         $this->drivers = $this->executed = [];
     }
 
-    /**
-     * Create Runner in the 'inner transaction' mode.
-     * In this case the Runner will open new transaction for each used driver connection
-     * and will close they on finish.
-     */
-    public static function innerTransaction(): self
-    {
-        return new self(self::MODE_OPEN_TRANSACTION);
-    }
-
-    /**
-     * Create Runner in the 'outer transaction' mode.
-     * In this case the Runner won't begin transactions, you should do it previously manually.
-     * This mode also means the Runner WON'T commit or rollback opened transactions on success or fail.
-     * But commands that implement CompleteMethodInterface or RollbackMethodInterface will be called.
-     *
-     * @param bool $strict Check transaction statuses before commands running.
-     *        When strict mode is {@see true} and a transaction of any used driver didn't be opened
-     *        the Runner will throw an Exception and stop Unit of Work.
-     *        When strict mode is {@see false} the Runner won't begin/commit/rollback transactions
-     *        and will ignore any transaction statuses.
-     */
-    public static function outerTransaction(bool $strict = true): self
-    {
-        return new self($strict ? self::MODE_CONTINUE_TRANSACTION : self::MODE_IGNORE_TRANSACTION);
-    }
-
     private function prepareTransaction(DriverInterface $driver): void
     {
         if ($this->mode === self::MODE_IGNORE_TRANSACTION) {
@@ -147,7 +145,7 @@ final class Runner implements RunnerInterface
             if ($driver->getTransactionLevel() === 0) {
                 throw new RunnerException(\sprintf(
                     'The `%s` driver connection has no opened transaction.',
-                    $driver->getType()
+                    $driver->getType(),
                 ));
             }
             return;

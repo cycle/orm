@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<meta-storm xmlns="meta-storm">
+    <definitions>
+        <classMethod class="\Cycle\ORM\ORMInterface" method="resolveRole" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\MapperInterface" method="init" argument="1">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Heap\HeapInterface" method="find" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+    </definitions>
+</meta-storm>

@@ -16,16 +16,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testInsertOnce(): void
     {
         /** @var User $user */
@@ -36,14 +26,14 @@ abstract class CaseTest extends BaseTest
 
         $i = 0;
 
-        $em->persist(new User\Alias($user, (string)++$i));
-        $em->persist(new User\Alias($user, (string)++$i));
+        $em->persist(new User\Alias($user, (string) ++$i));
+        $em->persist(new User\Alias($user, (string) ++$i));
 
-        $em->persist(new User\Email($user, (string)++$i));
-        $em->persist(new User\Email($user, (string)++$i));
+        $em->persist(new User\Email($user, (string) ++$i));
+        $em->persist(new User\Email($user, (string) ++$i));
 
-        $em->persist(new User\Phone($user, (string)++$i));
-        $em->persist(new User\Phone($user, (string)++$i));
+        $em->persist(new User\Phone($user, (string) ++$i));
+        $em->persist(new User\Phone($user, (string) ++$i));
 
         $em->run();
 
@@ -66,7 +56,7 @@ abstract class CaseTest extends BaseTest
                 'alias' => $this->fetchFromTable('user_alias'),
                 'email' => $this->fetchFromTable('user_email'),
                 'phone' => $this->fetchFromTable('user_phone'),
-            ]
+            ],
         );
     }
 
@@ -85,17 +75,17 @@ abstract class CaseTest extends BaseTest
 
         $expected = [];
         for ($id = 1; $id <= $cnt1; $id++) {
-            $em->persist(new User\Alias($user, $v = (string)++$i));
+            $em->persist(new User\Alias($user, $v = (string) ++$i));
             $expected['alias'][] = ['id' => $id, 'value' => $v];
         }
 
         for ($id = 1; $id <= $cnt2; $id++) {
-            $em->persist(new User\Email($user, $v = (string)++$i));
+            $em->persist(new User\Email($user, $v = (string) ++$i));
             $expected['email'][] = ['id' => $id, 'value' => $v];
         }
 
         for ($id = 1; $id <= $cnt3; $id++) {
-            $em->persist(new User\Phone($user, $v = (string)++$i));
+            $em->persist(new User\Phone($user, $v = (string) ++$i));
             $expected['phone'][] = ['id' => $id, 'value' => $v];
         }
         $em->run();
@@ -106,7 +96,7 @@ abstract class CaseTest extends BaseTest
                 'alias' => $this->fetchFromTable('user_alias'),
                 'email' => $this->fetchFromTable('user_email'),
                 'phone' => $this->fetchFromTable('user_phone'),
-            ]
+            ],
         );
     }
 
@@ -200,6 +190,16 @@ abstract class CaseTest extends BaseTest
         self::assertTrue(true);
     }
 
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
+    }
+
     private function fetchFromTable(string $tableName): array
     {
         $db = $this->orm->getSource(User::class)->getDatabase();
@@ -210,7 +210,7 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
         // cast id to int specially for mssql
         return \array_map(function (array $row): array {
-            $row['id'] = (int)$row['id'];
+            $row['id'] = (int) $row['id'];
             return $row;
         }, $rows);
     }

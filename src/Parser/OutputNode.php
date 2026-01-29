@@ -17,20 +17,20 @@ abstract class OutputNode extends AbstractNode
     protected array $result = [];
 
     /**
+     * Get resulted data tree.
+     */
+    public function getResult(): array
+    {
+        return $this->result;
+    }
+
+    /**
      * Destructing.
      */
     public function __destruct()
     {
         $this->result = [];
         parent::__destruct();
-    }
-
-    /**
-     * Get resulted data tree.
-     */
-    public function getResult(): array
-    {
-        return $this->result;
     }
 
     protected function push(array &$data): void

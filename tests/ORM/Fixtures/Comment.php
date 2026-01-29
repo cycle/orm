@@ -11,7 +11,6 @@ use Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface;
 class Comment
 {
     public $id;
-
     public $message;
 
     /** @var User */
@@ -21,9 +20,7 @@ class Comment
     public $favoredBy;
 
     public $parent;
-
     public $level;
-
     public UserWithUUIDPrimaryKey $userWithUuid;
 
     public function __construct()

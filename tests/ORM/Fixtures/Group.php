@@ -10,7 +10,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 class Group
 {
     public $id;
-
     public $name;
 
     /**

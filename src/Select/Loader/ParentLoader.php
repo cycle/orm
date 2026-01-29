@@ -40,7 +40,7 @@ class ParentLoader extends JoinableLoader
         SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         string $role,
-        string $target
+        string $target,
     ) {
         $schemaArray = [
             Relation::INNER_KEY => $ormSchema->define($role, SchemaInterface::PRIMARY_KEY),
@@ -49,11 +49,6 @@ class ParentLoader extends JoinableLoader
         ];
         $this->options['as'] ??= $target;
         parent::__construct($ormSchema, $sourceProvider, $factory, $role, $target, $schemaArray);
-    }
-
-    protected function generateSublassLoaders(): iterable
-    {
-        return [];
     }
 
     public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
@@ -68,6 +63,11 @@ class ParentLoader extends JoinableLoader
         return parent::configureQuery($query);
     }
 
+    protected function generateSubclassLoaders(): iterable
+    {
+        return [];
+    }
+
     protected function getJoinMethod(): string
     {
         return 'INNER';
@@ -78,9 +78,9 @@ class ParentLoader extends JoinableLoader
         return new ParentMergeNode(
             $this->target,
             $this->columnNames(),
-            (array)$this->define(SchemaInterface::PRIMARY_KEY),
-            (array)$this->schema[Relation::OUTER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            (array) $this->define(SchemaInterface::PRIMARY_KEY),
+            (array) $this->schema[Relation::OUTER_KEY],
+            (array) $this->schema[Relation::INNER_KEY],
         );
     }
 }

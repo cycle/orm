@@ -28,6 +28,78 @@ abstract class ManyToManyBelongsToTest extends BaseTest
 {
     use TableTrait;
 
+    public function testCreate(): void
+    {
+        $user = new User();
+        $user->email = 'test';
+
+        $post = new Post();
+        $post->title = 'test title';
+        $post->user = $user;
+        $post->comments = new ArrayCollection(
+            [
+                new Tag(),
+                new Tag(),
+            ],
+        );
+        $post->comments[0]->name = 'name 1';
+        $post->comments[1]->name = 'name 2';
+
+        $collection = $post->comments;
+        $this->save($post);
+        // $this->assertSame($this->orm->getHeap()->get($post)->getRelation('comments'), $post->comments);
+        $this->assertInstanceOf(ArrayCollection::class, $post->comments);
+        $this->assertSame($collection, $post->comments);
+
+        $postId = $post->id;
+
+        $this->orm->getHeap()->clean();
+
+        $p = (new Select($this->orm, Post::class))
+            ->wherePK($postId)->fetchOne();
+
+        $this->assertSame('name 1', $p->comments[0]->name);
+        $this->assertSame('name 2', $p->comments[1]->name);
+    }
+
+    public function testUpdate(): void
+    {
+        $user = new User();
+        $user->email = 'test';
+
+        $post = new Post();
+        $post->title = 'test title';
+        $post->user = $user;
+        $post->comments = new ArrayCollection(
+            [
+                new Tag(),
+                new Tag(),
+            ],
+        );
+        $post->comments[0]->name = 'name 1';
+        $post->comments[1]->name = 'name 2';
+
+        $this->save($post);
+
+        $postId = $post->id;
+        $post->user->email = 'new-email';
+        $post->title = 'new title';
+        $post->comments[0]->name = 'new name';
+
+        $this->save($post);
+        $this->assertInstanceOf(Collection::class, $post->comments);
+
+        $this->orm->getHeap()->clean();
+        /** @var Post $p */
+        $p = (new Select($this->orm, Post::class))
+            ->load('user', ['method' => Select\AbstractLoader::INLOAD])
+            ->wherePK($postId)->fetchOne();
+
+        $this->assertSame('new-email', $p->user->email);
+        $this->assertSame('new title', $p->title);
+        $this->assertSame('new name', $p->comments[0]->name);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -64,7 +136,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
             [
                 ['hello@world.com'],
                 ['another@world.com'],
-            ]
+            ],
         );
         $this->getDatabase()->table('post')->insertMultiple(
             ['user_id', 'title'],
@@ -74,7 +146,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
                 [2, 'Post title 2-1'],
                 [2, 'Post title 2-2'],
                 [2, 'Post title 2-3'],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag')->insertMultiple(
@@ -83,7 +155,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
                 ['tag a'],
                 ['tag b'],
                 ['tag c'],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag_post_map')->insertMultiple(
@@ -92,82 +164,10 @@ abstract class ManyToManyBelongsToTest extends BaseTest
                 [1, 1, 'primary'],
                 [1, 2, 'secondary'],
                 [2, 3, 'primary'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
-    public function testCreate(): void
-    {
-        $user = new User();
-        $user->email = 'test';
-
-        $post = new Post();
-        $post->title = 'test title';
-        $post->user = $user;
-        $post->comments = new ArrayCollection(
-            [
-                new Tag(),
-                new Tag(),
-            ]
-        );
-        $post->comments[0]->name = 'name 1';
-        $post->comments[1]->name = 'name 2';
-
-        $collection = $post->comments;
-        $this->save($post);
-        // $this->assertSame($this->orm->getHeap()->get($post)->getRelation('comments'), $post->comments);
-        $this->assertInstanceOf(ArrayCollection::class, $post->comments);
-        $this->assertSame($collection, $post->comments);
-
-        $postId = $post->id;
-
-        $this->orm->getHeap()->clean();
-
-        $p = (new Select($this->orm, Post::class))
-            ->wherePK($postId)->fetchOne();
-
-        $this->assertSame('name 1', $p->comments[0]->name);
-        $this->assertSame('name 2', $p->comments[1]->name);
-    }
-
-    public function testUpdate(): void
-    {
-        $user = new User();
-        $user->email = 'test';
-
-        $post = new Post();
-        $post->title = 'test title';
-        $post->user = $user;
-        $post->comments = new ArrayCollection(
-            [
-                new Tag(),
-                new Tag(),
-            ]
-        );
-        $post->comments[0]->name = 'name 1';
-        $post->comments[1]->name = 'name 2';
-
-        $this->save($post);
-
-        $postId = $post->id;
-        $post->user->email = 'new-email';
-        $post->title = 'new title';
-        $post->comments[0]->name = 'new name';
-
-        $this->save($post);
-        $this->assertInstanceOf(Collection::class, $post->comments);
-
-        $this->orm->getHeap()->clean();
-        /** @var Post $p */
-        $p = (new Select($this->orm, Post::class))
-            ->load('user', ['method' => Select\AbstractLoader::INLOAD])
-            ->wherePK($postId)->fetchOne();
-
-        $this->assertSame('new-email', $p->user->email);
-        $this->assertSame('new title', $p->title);
-        $this->assertSame('new name', $p->comments[0]->name);
     }
 
     private function getSchemaArray(): array

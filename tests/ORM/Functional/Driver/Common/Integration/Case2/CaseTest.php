@@ -17,6 +17,33 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    public function testRun(): void
+    {
+        $markCriterionResult = (new Select($this->orm, MarkCriterionResult::class))
+            ->wherePK('criterion-1')
+            ->fetchOne();
+        \assert($markCriterionResult instanceof MarkCriterionResult);
+
+        $sub = $markCriterionResult
+            ->markSubcriterionResults
+            ->filter(static fn(MarkSubcriterionResult $item) => $item->id === 'subcriterion-1')
+            ->first();
+        $aspect = $sub->markAspectResults->first();
+        $this->assertNotFalse($aspect);
+        $student = $aspect->student;
+        $student->studentProgresses->add(new StudentProgress('new-progress-42'));
+
+        $this->captureWriteQueries();
+        $this->save($markCriterionResult, $sub, $aspect);
+        $this->assertNumWrites(1);
+
+        $this->orm->getHeap()->clean();
+        $studentProgress = (new Select($this->orm, StudentProgress::class))
+            ->wherePK('new-progress-42')
+            ->fetchOne();
+        $this->assertNotNull($studentProgress);
+    }
+
     public function setUp(): void
     {
         // Init DB
@@ -67,64 +94,37 @@ abstract class CaseTest extends BaseTest
             [
                 ['stud-1', 'Kent'],
                 ['stud-2', 'Kant'],
-            ]
+            ],
         );
         $this->getDatabase()->table('mark_criterion_results')->insertMultiple(
             ['id', 'result_objective', 'student_id'],
             [
                 ['criterion-1', '24', 'stud-1'],
                 ['criterion-2', '42', 'stud-1'],
-            ]
+            ],
         );
         $this->getDatabase()->table('student_progresses')->insertMultiple(
             ['id', 'aspects_entered_count', 'student_id'],
             [
                 ['progress-1', '52', 'stud-1'],
                 ['progress-2', '25', 'stud-1'],
-            ]
+            ],
         );
         $this->getDatabase()->table('mark_subcriterion_results')->insertMultiple(
             ['id', 'result_objective', 'mark_criterion_result_id', 'student_id'],
             [
                 ['subcriterion-1', '63', 'criterion-1', 'stud-1'],
                 ['subcriterion-2', '36', 'criterion-1', 'stud-1'],
-            ]
+            ],
         );
         $this->getDatabase()->table('mark_aspect_results')->insertMultiple(
             ['id', 'marks_requires_attention', 'student_id', 'mark_subcriterion_result_id'],
             [
                 ['aspect-1', '1', 'stud-1', 'subcriterion-1'],
                 ['aspect-2', '0', 'stud-1', 'subcriterion-1'],
-            ]
+            ],
         );
 
         $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
-    public function testRun(): void
-    {
-        $markCriterionResult = (new Select($this->orm, MarkCriterionResult::class))
-            ->wherePK('criterion-1')
-            ->fetchOne();
-        \assert($markCriterionResult instanceof MarkCriterionResult);
-
-        $sub = $markCriterionResult
-            ->markSubcriterionResults
-            ->filter(static fn (MarkSubcriterionResult $item) => $item->id === 'subcriterion-1')
-            ->first();
-        $aspect = $sub->markAspectResults->first();
-        $this->assertNotFalse($aspect);
-        $student = $aspect->student;
-        $student->studentProgresses->add(new StudentProgress('new-progress-42'));
-
-        $this->captureWriteQueries();
-        $this->save($markCriterionResult, $sub, $aspect);
-        $this->assertNumWrites(1);
-
-        $this->orm->getHeap()->clean();
-        $studentProgress = (new Select($this->orm, StudentProgress::class))
-            ->wherePK('new-progress-42')
-            ->fetchOne();
-        $this->assertNotNull($studentProgress);
     }
 }

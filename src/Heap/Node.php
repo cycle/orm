@@ -7,15 +7,9 @@ namespace Cycle\ORM\Heap;
 use Cycle\Database\Injection\ValueInterface;
 use Cycle\ORM\Heap\Traits\RelationTrait;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\Relation\SpecialValue;
 use Cycle\ORM\RelationMap;
-use DateTimeImmutable;
-use DateTimeInterface;
 use JetBrains\PhpStorm\ExpectedValues;
-use Stringable;
-
-use const FILTER_NULL_ON_FAILURE;
-use const FILTER_VALIDATE_BOOLEAN;
-use const SORT_STRING;
 
 /**
  * Node (metadata) carries meta information about entity state, changes forwards data to other points through
@@ -43,17 +37,85 @@ final class Node
         #[ExpectedValues(valuesFromClass: self::class)]
         private int $status,
         private array $data,
-        private string $role
+        private string $role,
     ) {
         $this->updateRawData();
     }
 
     /**
-     * Reset state.
+     * @internal
      */
-    public function __destruct()
+    public static function convertToSolid(mixed $value): mixed
     {
-        unset($this->data, $this->rawData, $this->state, $this->relations);
+        if (!\is_object($value)) {
+            return $value;
+        }
+        if ($value instanceof \DateTimeInterface) {
+            return $value instanceof \DateTimeImmutable ? $value : \DateTimeImmutable::createFromInterface($value);
+        }
+        return $value instanceof \Stringable ? $value->__toString() : $value;
+    }
+
+    public static function compare(mixed $a, mixed $b): int
+    {
+        if ($a === $b) {
+            return 0;
+        }
+        if ($a === null xor $b === null) {
+            return 1;
+        }
+
+        $ta = [\gettype($a), \gettype($b)];
+
+        // array, boolean, double, integer, object, string
+        \sort($ta, \SORT_STRING);
+
+        if ($ta[0] === 'object' || $ta[1] === 'object') {
+            // Both are objects
+            if ($ta[0] === $ta[1]) {
+                if ($a instanceof \DateTimeInterface && $b instanceof \DateTimeInterface) {
+                    return $a <=> $b;
+                }
+                if ($a instanceof ValueInterface && $b instanceof ValueInterface) {
+                    return $a->rawValue() <=> $b->rawValue();
+                }
+                if ($a instanceof \Stringable && $b instanceof \Stringable) {
+                    return $a->__toString() <=> $b->__toString();
+                }
+                return (int) ($a::class !== $b::class || (array) $a !== (array) $b);
+            }
+            // Object and string/int
+            if ($ta[1] === 'string' || $ta[0] === 'integer') {
+                $a = $a instanceof \Stringable ? $a->__toString() : (string) $a;
+                $b = $b instanceof \Stringable ? $b->__toString() : (string) $b;
+                return $a <=> $b;
+            }
+            return -1;
+        }
+
+        if ($ta[1] === 'string') {
+            if ($a === '' || $b === '') {
+                return -1;
+            }
+            if ($ta[0] === 'integer') {
+                return \is_numeric($a) && \is_numeric($b) ? (int) ((string) $a !== (string) $b) : -1;
+            }
+            if ($ta[0] === 'double') {
+                return \is_numeric($a) && \is_numeric($b) ? (int) ((float) $a !== (float) $b) : -1;
+            }
+        }
+
+        if ($ta[0] === 'boolean') {
+            $a = \filter_var($a, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE);
+            $b = \filter_var($b, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE);
+            return (int) ($a !== $b);
+        }
+
+        if ($ta === ['double', 'integer']) {
+            return (int) ((float) $a !== (float) $b);
+        }
+
+        return 1;
     }
 
     public function getRole(): string
@@ -127,9 +189,13 @@ final class Node
      */
     public function syncState(RelationMap $relMap, State $state): array
     {
-        $changes = array_udiff_assoc($state->getTransactionData(), $this->data, [self::class, 'compare']);
+        $changes = \array_udiff_assoc($state->getTransactionData(), $this->data, [self::class, 'compare']);
 
         foreach ($state->getRelations() as $name => $value) {
+            if (SpecialValue::isNotSet($value)) {
+                continue;
+            }
+
             if ($value instanceof ReferenceInterface) {
                 $changes[$name] = $value->hasValue() ? $value->getValue() : $value;
             }
@@ -146,79 +212,11 @@ final class Node
     }
 
     /**
-     * @internal
+     * Reset state.
      */
-    public static function convertToSolid(mixed $value): mixed
+    public function __destruct()
     {
-        if (!\is_object($value)) {
-            return $value;
-        }
-        if ($value instanceof DateTimeInterface) {
-            return $value instanceof DateTimeImmutable ? $value : DateTimeImmutable::createFromInterface($value);
-        }
-        return $value instanceof Stringable ? $value->__toString() : $value;
-    }
-
-    public static function compare(mixed $a, mixed $b): int
-    {
-        if ($a === $b) {
-            return 0;
-        }
-        if ($a === null xor $b === null) {
-            return 1;
-        }
-
-        $ta = [\gettype($a), \gettype($b)];
-
-        // array, boolean, double, integer, object, string
-        \sort($ta, SORT_STRING);
-
-        if ($ta[0] === 'object' || $ta[1] === 'object') {
-            // Both are objects
-            if ($ta[0] === $ta[1]) {
-                if ($a instanceof DateTimeInterface && $b instanceof DateTimeInterface) {
-                    return $a <=> $b;
-                }
-                if ($a instanceof ValueInterface && $b instanceof ValueInterface) {
-                    return $a->rawValue() <=> $b->rawValue();
-                }
-                if ($a instanceof Stringable && $b instanceof Stringable) {
-                    return $a->__toString() <=> $b->__toString();
-                }
-                return (int)($a::class !== $b::class || (array)$a !== (array)$b);
-            }
-            // Object and string/int
-            if ($ta[1] === 'string' || $ta[0] === 'integer') {
-                $a = $a instanceof Stringable ? $a->__toString() : (string)$a;
-                $b = $b instanceof Stringable ? $b->__toString() : (string)$b;
-                return $a <=> $b;
-            }
-            return -1;
-        }
-
-        if ($ta[1] === 'string') {
-            if ($a === '' || $b === '') {
-                return -1;
-            }
-            if ($ta[0] === 'integer') {
-                return \is_numeric($a) && \is_numeric($b) ? (int)((string)$a !== (string)$b) : -1;
-            }
-            if ($ta[0] === 'double') {
-                return \is_numeric($a) && \is_numeric($b) ? (int)((float)$a !== (float)$b) : -1;
-            }
-        }
-
-        if ($ta[0] === 'boolean') {
-            $a = \filter_var($a, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            $b = \filter_var($b, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            return (int)($a !== $b);
-        }
-
-        if ($ta === ['double', 'integer']) {
-            return (int)((float)$a !== (float)$b);
-        }
-
-        return 1;
+        unset($this->data, $this->rawData, $this->state, $this->relations);
     }
 
     private function updateRawData(): void

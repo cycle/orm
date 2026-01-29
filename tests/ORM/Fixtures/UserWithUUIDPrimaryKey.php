@@ -7,10 +7,10 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 class UserWithUUIDPrimaryKey implements ImagedInterface
 {
+    public array $comments = [];
     private $uuid;
     private $email;
     private $balance;
-    public array $comments = [];
 
     public function __construct(UuidPrimaryKey $uuid, string $email, float $balance)
     {

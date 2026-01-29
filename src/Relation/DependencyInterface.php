@@ -9,6 +9,4 @@ namespace Cycle\ORM\Relation;
  *
  * @internal
  */
-interface DependencyInterface extends RelationInterface
-{
-}
+interface DependencyInterface extends RelationInterface {}

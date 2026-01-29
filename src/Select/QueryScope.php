@@ -11,9 +11,8 @@ final class QueryScope implements ScopeInterface
 {
     public function __construct(
         private array $where,
-        private array $orderBy = []
-    ) {
-    }
+        private array $orderBy = [],
+    ) {}
 
     public function apply(QueryBuilder $query): void
     {

@@ -34,10 +34,6 @@ final class TableRenderer
      *      ]
      * );
      *
-     * @param AbstractTable $table
-     * @param array         $columns
-     * @param array         $defaults
-     *
      * @throws SchemaException
      */
     public function renderColumns(AbstractTable $table, array $columns, array $defaults): void
@@ -54,7 +50,7 @@ final class TableRenderer
                 $table->column($name),
                 $type,
                 array_key_exists($name, $defaults),
-                $defaults[$name] ?? null
+                $defaults[$name] ?? null,
             );
         }
 
@@ -82,8 +78,6 @@ final class TableRenderer
      *
      * Attention, column state will be affected!
      *
-     * @param AbstractColumn $column
-     * @param array          $type
      * @param bool           $hasDefault Must be set to true if default value was set by user.
      * @param mixed          $default    Default value declared by record schema.
      *
@@ -108,7 +102,7 @@ final class TableRenderer
             throw new SchemaException(
                 "Invalid column type definition in '{$column->getTable()}'.'{$column->getName()}'",
                 $e->getCode(),
-                $e
+                $e,
             );
         }
 
@@ -126,7 +120,7 @@ final class TableRenderer
             return;
         }
 
-        if (null === $default) {
+        if ($default === null) {
             // default value is stated and NULL, clear what to do
             $column->nullable(true);
         }
@@ -134,20 +128,13 @@ final class TableRenderer
         $column->defaultValue($default);
     }
 
-    /**
-     * @param string $table
-     * @param string $column
-     * @param string $definition
-     *
-     * @return array
-     */
     protected function parse(string $table, string $column, string $definition): array
     {
         if (
             !preg_match(
                 '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<flags>.+))?/i',
                 $definition,
-                $type
+                $type,
             )
         ) {
             throw new SchemaException("Invalid column type definition in '{$table}'.'{$column}'");
@@ -170,12 +157,6 @@ final class TableRenderer
         return $type;
     }
 
-    /**
-     * @param array  $type
-     * @param string $flag
-     *
-     * @return bool
-     */
     protected function hasFlag(array $type, string $flag): bool
     {
         return in_array($flag, $type['flags'], true);
@@ -184,8 +165,6 @@ final class TableRenderer
     /**
      * Cast default value based on column type. Required to prevent conflicts when not nullable
      * column added to existed table with data in.
-     *
-     * @param AbstractColumn $column
      *
      * @return mixed
      */

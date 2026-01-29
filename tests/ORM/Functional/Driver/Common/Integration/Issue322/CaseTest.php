@@ -19,16 +19,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     /**
      * There pivoted collection is replaced with new one but one target is from old collection
      */
@@ -83,6 +73,16 @@ abstract class CaseTest extends BaseTest
         $this->save($post);
         // Delete all previous pivots and add new one
         $this->assertNumWrites(3);
+    }
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

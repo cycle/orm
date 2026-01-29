@@ -34,46 +34,6 @@ abstract class DatetimeTest extends BaseTest
      */
     protected $b;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'time_created' => 'datetime',
-            'balance' => 'float',
-        ]);
-
-        $this->now = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Minsk'));
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'time_created', 'balance'],
-            [
-                ['hello@world.com', $this->a = $this->now->add(new \DateInterval('PT1H')), 100],
-                ['another@world.com', $this->b = $this->now->add(new \DateInterval('PT2H')), 200],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                SchemaInterface::ROLE => 'user',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'user',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'email', 'time_created', 'balance'],
-                SchemaInterface::TYPECAST => [
-                    'id' => 'int',
-                    'balance' => 'float',
-                    'time_created' => 'datetime',
-                ],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -167,11 +127,46 @@ abstract class DatetimeTest extends BaseTest
         $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
     }
 
-    /**
-     * @param \DateTimeInterface $a
-     * @param \DateTimeInterface $b
-     * @param int                $max
-     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'time_created' => 'datetime',
+            'balance' => 'float',
+        ]);
+
+        $this->now = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Minsk'));
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'time_created', 'balance'],
+            [
+                ['hello@world.com', $this->a = $this->now->add(new \DateInterval('PT1H')), 100],
+                ['another@world.com', $this->b = $this->now->add(new \DateInterval('PT2H')), 200],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'email', 'time_created', 'balance'],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'int',
+                    'balance' => 'float',
+                    'time_created' => 'datetime',
+                ],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ]));
+    }
+
     protected function assertSameTimestamp(\DateTimeInterface $a, \DateTimeInterface $b, int $max): void
     {
         $diff = abs($a->getTimestamp() - $b->getTimestamp());

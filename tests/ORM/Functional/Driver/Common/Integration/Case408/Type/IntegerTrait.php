@@ -8,8 +8,7 @@ trait IntegerTrait
 {
     private function __construct(
         private int $id,
-    ) {
-    }
+    ) {}
 
     public static function create(int|string $id): self
     {

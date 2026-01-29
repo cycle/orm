@@ -23,6 +23,17 @@ abstract class ManyToManyLoophpPivotTest extends BaseTest
 {
     use TableTrait;
 
+    public function testPivotedCollection(): void
+    {
+        $data = (new Select($this->orm, User::class))->load('tags')->fetchAll();
+
+        $this->assertInstanceOf(LoophpPivotedCollection::class, $data[0]->tags);
+        $this->assertInstanceOf(LoophpPivotedCollection::class, $data[1]->tags);
+
+        $this->assertSame(4, $data[0]->tags->count());
+        $this->assertSame(3, $data[1]->tags->count());
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -55,7 +66,7 @@ abstract class ManyToManyLoophpPivotTest extends BaseTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag')->insertMultiple(
@@ -67,7 +78,7 @@ abstract class ManyToManyLoophpPivotTest extends BaseTest
                 ['tag d', 4],
                 ['tag e', 5],
                 ['tag f', 6],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag_user_map')->insertMultiple(
@@ -82,7 +93,7 @@ abstract class ManyToManyLoophpPivotTest extends BaseTest
 
                 [2, 4, 2],
                 [2, 6, 3],
-            ]
+            ],
         );
 
         $this->orm = new ORM(
@@ -134,18 +145,7 @@ abstract class ManyToManyLoophpPivotTest extends BaseTest
                     Schema::SCHEMA => [],
                     Schema::RELATIONS => [],
                 ],
-            ])
+            ]),
         );
-    }
-
-    public function testPivotedCollection(): void
-    {
-        $data = (new Select($this->orm, User::class))->load('tags')->fetchAll();
-
-        $this->assertInstanceOf(LoophpPivotedCollection::class, $data[0]->tags);
-        $this->assertInstanceOf(LoophpPivotedCollection::class, $data[1]->tags);
-
-        $this->assertSame(4, $data[0]->tags->count());
-        $this->assertSame(3, $data[1]->tags->count());
     }
 }

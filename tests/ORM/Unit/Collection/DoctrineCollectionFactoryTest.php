@@ -20,6 +20,7 @@ class DoctrineCollectionFactoryTest extends BaseTest
 
     /**
      * @dataProvider collectionDataProvider
+     * @param mixed $data
      */
     public function testCollectShouldReturnArray($data): void
     {
@@ -38,7 +39,7 @@ class DoctrineCollectionFactoryTest extends BaseTest
             new PivotedStorage($array = [
                 'foo' => 'bar',
                 'baz' => 'bar',
-            ])
+            ]),
         );
 
         $this->assertInstanceOf(PivotedCollection::class, $collection);
@@ -53,7 +54,7 @@ class DoctrineCollectionFactoryTest extends BaseTest
                 new PivotedStorage($array = [
                     'foo' => 'bar',
                     'baz' => 'bar',
-                ])
+                ]),
             );
 
         $this->assertInstanceOf(CustomPivotedCollection::class, $collection);
@@ -66,6 +67,4 @@ class DoctrineCollectionFactoryTest extends BaseTest
     }
 }
 
-class CustomPivotedCollection extends PivotedCollection
-{
-}
+class CustomPivotedCollection extends PivotedCollection {}

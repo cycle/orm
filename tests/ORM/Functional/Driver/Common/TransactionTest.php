@@ -16,37 +16,6 @@ abstract class TransactionTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', ['id' => 'primary', 'email' => 'string', 'balance' => 'float',]);
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-                ['test@world.com', 300],
-            ]
-        );
-
-        $this->orm = $this->withSchema(
-            new Schema([
-                User::class => [
-                    Schema::ROLE => 'user',
-                    Schema::MAPPER => TransactionTestMapper::class,
-                    Schema::DATABASE => 'default',
-                    Schema::TABLE => 'user',
-                    Schema::PRIMARY_KEY => 'id',
-                    Schema::COLUMNS => ['id', 'email', 'balance'],
-                    Schema::TYPECAST => ['id' => 'int', 'balance' => 'int'],
-                    Schema::SCHEMA => [],
-                    Schema::RELATIONS => [],
-                ],
-            ])
-        );
-    }
-
     public function testTransactionRollbackShouldResetEntityState()
     {
         $t = new Transaction($this->orm);
@@ -170,7 +139,7 @@ abstract class TransactionTest extends BaseTest
 
             $this->assertSame(
                 150,
-                (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne()->balance
+                (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne()->balance,
             );
 
             // For user with ID 3 Mapper should throw an exception
@@ -233,5 +202,36 @@ abstract class TransactionTest extends BaseTest
         $this->assertSame(150, (new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance);
         $this->assertNull((new Select($this->orm, User::class))->wherePK(2)->fetchOne());
         $this->assertSame(350, (new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne()->balance);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', ['id' => 'primary', 'email' => 'string', 'balance' => 'float',]);
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+                ['test@world.com', 300],
+            ],
+        );
+
+        $this->orm = $this->withSchema(
+            new Schema([
+                User::class => [
+                    Schema::ROLE => 'user',
+                    Schema::MAPPER => TransactionTestMapper::class,
+                    Schema::DATABASE => 'default',
+                    Schema::TABLE => 'user',
+                    Schema::PRIMARY_KEY => 'id',
+                    Schema::COLUMNS => ['id', 'email', 'balance'],
+                    Schema::TYPECAST => ['id' => 'int', 'balance' => 'int'],
+                    Schema::SCHEMA => [],
+                    Schema::RELATIONS => [],
+                ],
+            ]),
+        );
     }
 }

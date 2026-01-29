@@ -24,16 +24,7 @@ class Repository implements RepositoryInterface
     public function __construct(
         /** @readonly */
         protected Select $select,
-    ) {
-    }
-
-    /**
-     * Repositories are always immutable by default.
-     */
-    public function __clone()
-    {
-        $this->select = clone $this->select;
-    }
+    ) {}
 
     public function findByPK($id): ?object
     {
@@ -66,5 +57,13 @@ class Repository implements RepositoryInterface
         $repository->select->forUpdate();
 
         return $repository;
+    }
+
+    /**
+     * Repositories are always immutable by default.
+     */
+    public function __clone()
+    {
+        $this->select = clone $this->select;
     }
 }

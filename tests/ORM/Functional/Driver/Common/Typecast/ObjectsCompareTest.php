@@ -14,45 +14,12 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use DateInterval;
-use DateTime;
 
 final class ObjectsCompareTest extends BaseTest
 {
-    public const DRIVER = 'sqlite';
-
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('book', [
-            'id' => 'primary',
-            'states' => 'string',
-            'nested_states' => 'string',
-            'published_at' => 'datetime',
-        ]);
-
-        $this->orm = $this->withSchema(new Schema([
-            Book::class => [
-                SchemaInterface::ROLE => 'book',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'book',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'states', 'nested_states', 'published_at'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::TYPECAST => [
-                    'id' => 'int',
-                    'states' => [BookStates::class, 'cast'],
-                    'nested_states' => [BookNestedStates::class, 'cast'],
-                    'published_at' => 'datetime',
-                ],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ]));
-    }
+    public const DRIVER = 'sqlite';
 
     public function testCompare(): void
     {
@@ -110,7 +77,7 @@ final class ObjectsCompareTest extends BaseTest
 
         $this->orm->getHeap()->clean();
         $data = (new Select($this->orm, Book::class))->fetchData();
-        $data[0]['published_at'] = new DateTime();
+        $data[0]['published_at'] = new \DateTime();
 
         $fetched = $this->orm->make('book', $data[0], Node::MANAGED, typecast: false);
         $fetched->published_at->setDate(2010, 1, 1);
@@ -129,9 +96,40 @@ final class ObjectsCompareTest extends BaseTest
 
         $interval = $changed->published_at->diff($fetched->published_at);
 
-        $this->assertInstanceOf(DateInterval::class, $interval);
+        $this->assertInstanceOf(\DateInterval::class, $interval);
         $this->assertSame(0, $interval->y);
         $this->assertSame(0, $interval->m);
         $this->assertSame(0, $interval->d);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('book', [
+            'id' => 'primary',
+            'states' => 'string',
+            'nested_states' => 'string',
+            'published_at' => 'datetime',
+        ]);
+
+        $this->orm = $this->withSchema(new Schema([
+            Book::class => [
+                SchemaInterface::ROLE => 'book',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'states', 'nested_states', 'published_at'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'int',
+                    'states' => [BookStates::class, 'cast'],
+                    'nested_states' => [BookNestedStates::class, 'cast'],
+                    'published_at' => 'datetime',
+                ],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ]));
     }
 }

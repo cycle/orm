@@ -93,7 +93,7 @@ class TupleStorageTest extends TestCase
         }
 
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn (): array => $this->iterators)->call($storage));
+        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
 
         $iterator = $storage->getIterator();
         // Start generator
@@ -101,12 +101,12 @@ class TupleStorageTest extends TestCase
             break;
         }
         /** @see TupleStorage::$iterators */
-        self::assertCount(1, (fn (): array => $this->iterators)->call($storage));
+        self::assertCount(1, (fn(): array => $this->iterators)->call($storage));
 
         // Cleanup on iterator destruction
         unset($iterator);
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn (): array => $this->iterators)->call($storage));
+        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
 
         // Cleanup on end of iteration
         $iterator = $storage->getIterator();
@@ -115,16 +115,16 @@ class TupleStorageTest extends TestCase
             // do nothing
         }
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn (): array => $this->iterators)->call($storage));
+        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
     }
 
     public function testDetachWhenIterating(): void
     {
         $storage = new TupleStorage();
-        $tuple1 = $this->createTuple((object)['value' => 1]);
-        $tuple2 = $this->createTuple((object)['value' => 2]);
-        $tuple3 = $this->createTuple((object)['value' => 3]);
-        $tuple4 = $this->createTuple((object)['value' => 4]);
+        $tuple1 = $this->createTuple((object) ['value' => 1]);
+        $tuple2 = $this->createTuple((object) ['value' => 2]);
+        $tuple3 = $this->createTuple((object) ['value' => 3]);
+        $tuple4 = $this->createTuple((object) ['value' => 4]);
 
         $storage->attach($tuple1);
         $storage->attach($tuple2);
@@ -148,10 +148,10 @@ class TupleStorageTest extends TestCase
     public function testCleanupIteratorState(): void
     {
         $storage = new TupleStorage();
-        $tuple1 = $this->createTuple((object)['value' => 1]);
-        $tuple2 = $this->createTuple((object)['value' => 2]);
-        $tuple3 = $this->createTuple((object)['value' => 3]);
-        $tuple4 = $this->createTuple((object)['value' => 4]);
+        $tuple1 = $this->createTuple((object) ['value' => 1]);
+        $tuple2 = $this->createTuple((object) ['value' => 2]);
+        $tuple3 = $this->createTuple((object) ['value' => 3]);
+        $tuple4 = $this->createTuple((object) ['value' => 4]);
 
         $storage->attach($tuple1);
         $storage->attach($tuple2);

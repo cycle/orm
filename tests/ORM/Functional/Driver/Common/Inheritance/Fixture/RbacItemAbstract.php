@@ -31,7 +31,7 @@ class RbacItemAbstract
      */
     public $children;
 
-    public function __construct(string $name, string $description = null)
+    public function __construct(string $name, ?string $description = null)
     {
         $this->name = $name;
         $this->description = $description;

@@ -24,7 +24,6 @@ final class SubQueryLoader extends JoinableLoader
         'using' => null,
         'as' => null,
     ];
-
     private JoinableLoader $loader;
 
     public function __construct(
@@ -32,7 +31,7 @@ final class SubQueryLoader extends JoinableLoader
         SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         JoinableLoader $loader,
-        array $options
+        array $options,
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $loader->name, $loader->getTarget(), $loader->schema);
 
@@ -52,16 +51,16 @@ final class SubQueryLoader extends JoinableLoader
         $queryColumns = $query->getColumns();
 
         $body = $this->loader->source->getDatabase()->select()->from(
-            sprintf('%s AS %s', $this->loader->source->getTable(), $lAlias)
+            \sprintf('%s AS %s', $this->loader->source->getTable(), $lAlias),
         )->columns($queryColumns);
         $body = $this->loader->configureQuery($body);
-        $bodyColumns = array_slice($body->getColumns(), count($queryColumns));
+        $bodyColumns = \array_slice($body->getColumns(), \count($queryColumns));
         $body = $body->columns($bodyColumns);
 
         $aliases = [];
         // Move columns to parent query
         foreach ($bodyColumns as $column) {
-            preg_match('/^([^\\s]+)\\.([^\\s]+) AS ([^\\s]+)$/i', $column, $matches);
+            \preg_match('/^([^\\s]+)\\.([^\\s]+) AS ([^\\s]+)$/i', $column, $matches);
             [, $table, $column, $as] = $matches;
             $queryColumns[] = "$alias.$as AS $as";
             if ($table === $lAlias) {
@@ -70,10 +69,10 @@ final class SubQueryLoader extends JoinableLoader
         }
 
         $query = $query->columns($queryColumns);
-        $parentKeys = (array)$this->schema[Relation::INNER_KEY];
+        $parentKeys = (array) $this->schema[Relation::INNER_KEY];
         $parentPrefix = $this->parent->getAlias() . '.';
         $on = [];
-        foreach ((array)$this->schema[Relation::OUTER_KEY] as $i => $key) {
+        foreach ((array) $this->schema[Relation::OUTER_KEY] as $i => $key) {
             $field = $alias . '.' . $aliases[$this->fieldAlias($key)];
             $on[$field] = $parentPrefix . $this->parent->fieldAlias($parentKeys[$i]);
         }

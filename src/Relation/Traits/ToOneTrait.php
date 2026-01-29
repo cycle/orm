@@ -71,7 +71,7 @@ trait ToOneTrait
         $scope = [];
         $nodeData = $node->getData();
         foreach ($this->innerKeys as $i => $key) {
-            if (!array_key_exists($key, $nodeData)) {
+            if (!\array_key_exists($key, $nodeData)) {
                 return [];
             }
             if ($nodeData[$key] === null) {

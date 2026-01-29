@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Special;
 
-use Closure;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
@@ -14,14 +13,12 @@ use Cycle\ORM\MapperInterface;
 
 class WrappedCommand implements CommandInterface
 {
-    private ?Closure $beforeExecute = null;
-
-    private ?Closure $afterExecute = null;
+    private ?\Closure $beforeExecute = null;
+    private ?\Closure $afterExecute = null;
 
     protected function __construct(
-        protected CommandInterface $command
-    ) {
-    }
+        protected CommandInterface $command,
+    ) {}
 
     public static function createInsert(
         DatabaseInterface $db,
@@ -29,7 +26,7 @@ class WrappedCommand implements CommandInterface
         State $state,
         ?MapperInterface $mapper,
         array $primaryKeys = [],
-        string $pkColumn = null
+        ?string $pkColumn = null,
     ): WrappedStoreCommand {
         return new WrappedStoreCommand(new Insert($db, $table, $state, $mapper, $primaryKeys, $pkColumn));
     }
@@ -39,7 +36,7 @@ class WrappedCommand implements CommandInterface
         string $table,
         State $state,
         ?MapperInterface $mapper,
-        array $primaryKeys = []
+        array $primaryKeys = [],
     ): WrappedStoreCommand {
         return new WrappedStoreCommand(new Update($db, $table, $state, $mapper, $primaryKeys));
     }
@@ -52,14 +49,14 @@ class WrappedCommand implements CommandInterface
     public function withBeforeExecution(?callable $callable): static
     {
         $clone = clone $this;
-        $clone->beforeExecute = $callable instanceof Closure ? $callable : Closure::fromCallable($callable);
+        $clone->beforeExecute = $callable instanceof \Closure ? $callable : \Closure::fromCallable($callable);
         return $clone;
     }
 
     public function withAfterExecution(?callable $callable): static
     {
         $clone = clone $this;
-        $clone->afterExecute = $callable instanceof Closure ? $callable : Closure::fromCallable($callable);
+        $clone->afterExecute = $callable instanceof \Closure ? $callable : \Closure::fromCallable($callable);
         return $clone;
     }
 
@@ -76,11 +73,11 @@ class WrappedCommand implements CommandInterface
     public function execute(): void
     {
         if ($this->beforeExecute !== null) {
-            Closure::bind($this->beforeExecute, null, static::class)($this->command);
+            \Closure::bind($this->beforeExecute, null, static::class)($this->command);
         }
         $this->command->execute();
         if ($this->afterExecute !== null) {
-            Closure::bind($this->afterExecute, null, static::class)($this->command);
+            \Closure::bind($this->afterExecute, null, static::class)($this->command);
         }
     }
 

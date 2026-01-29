@@ -20,6 +20,39 @@ abstract class ExistingNestedRelationTest extends BaseTest
 {
     use TableTrait;
 
+    public function testCreateForExisting(): void
+    {
+        $u = new User();
+        $u->email = 'test@email.com';
+        $u->balance = 1000;
+
+        $this->captureWriteQueries();
+
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+
+        $this->assertNumWrites(1);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $selector = new Select($this->orm, User::class);
+        /** @var User $u */
+        $u = $selector->wherePK($u->id)->fetchOne();
+
+        $c = new Comment();
+        $c->user = $u;
+        $c->message = 'hello world';
+
+        $u->addComment($c);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(1);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -111,38 +144,5 @@ abstract class ExistingNestedRelationTest extends BaseTest
                 ],
             ],
         ]));
-    }
-
-    public function testCreateForExisting(): void
-    {
-        $u = new User();
-        $u->email = 'test@email.com';
-        $u->balance = 1000;
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
-        $this->assertNumWrites(1);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-
-        $selector = new Select($this->orm, User::class);
-        /** @var User $u */
-        $u = $selector->wherePK($u->id)->fetchOne();
-
-        $c = new Comment();
-        $c->user = $u;
-        $c->message = 'hello world';
-
-        $u->addComment($c);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-        $this->assertNumWrites(1);
     }
 }

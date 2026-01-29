@@ -29,7 +29,7 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
-            ]
+            ],
         );
 
         $this->makeTable('profile', [
@@ -44,7 +44,7 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
                 [1, 'image.png'],
                 [2, 'second.png'],
                 [2, 'third.png'],
-            ]
+            ],
         );
 
         $this->makeTable('nested', [
@@ -57,7 +57,7 @@ abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
             ['profile_id_field', 'label'],
             [
                 [1, 'nested-label'],
-            ]
+            ],
         );
 
         $this->makeFK('profile', 'user_id_field', 'user', 'user_pk');

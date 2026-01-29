@@ -50,7 +50,7 @@ class UserSnapshotMapper extends Mapper
             $this->source->getDatabase(),
             'user_snapshots',
             $state,
-            null
+            null,
         )->withBeforeExecution(static function (StoreCommandInterface $command) use ($origin, $state): void {
             $state->register('user_id', $origin->getData()['id']);
         });

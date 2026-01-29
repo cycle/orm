@@ -33,12 +33,12 @@ class TransactionException extends ORMException
                 if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                     continue;
                 }
-                $message .= sprintf("\n - %s (%s)", $name, $relation::class);
+                $message .= \sprintf("\n - %s (%s)", $name, $relation::class);
             }
             $messages[] = $message;
         }
         $messages = \array_unique($messages);
-        $message = "Transaction can't be finished. Some relations can't be resolved:\n" . implode("\n", $messages);
+        $message = "Transaction can't be finished. Some relations can't be resolved:\n" . \implode("\n", $messages);
 
         return new self($message, 0, $e);
     }

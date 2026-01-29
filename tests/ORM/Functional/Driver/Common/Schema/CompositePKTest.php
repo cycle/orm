@@ -243,7 +243,7 @@ abstract class CompositePKTest extends BaseTest
                 'field1' => 'bigInteger,primary',
                 'field2' => 'bigInteger,primary',
                 'field3' => 'integer,nullable',
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema([

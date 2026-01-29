@@ -52,7 +52,7 @@ class OptimisticLockMapper extends Mapper
                 if ($command->getAffectedRows() === 0) {
                     throw new \RuntimeException(sprintf(
                         'The `%s` record is locked.',
-                        $node->getRole()
+                        $node->getRole(),
                     ));
                 }
             });

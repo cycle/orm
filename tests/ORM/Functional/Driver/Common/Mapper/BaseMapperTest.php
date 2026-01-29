@@ -8,6 +8,4 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 
 #[DontGenerateAttribute]
-abstract class BaseMapperTest extends BaseTest
-{
-}
+abstract class BaseMapperTest extends BaseTest {}

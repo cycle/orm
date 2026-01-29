@@ -16,6 +16,7 @@ class ArrayCollectionFactoryTest extends BaseTest
 
     /**
      * @dataProvider collectionDataProvider
+     * @param mixed $data
      */
     public function testCollectShouldReturnArray($data): void
     {

@@ -22,170 +22,71 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
 {
     use TableTrait;
 
-    protected const
-        CHILDREN_CONTAINER = 'pivoted';
-    protected const
-        PARENTS_CONTAINER = 'pivoted';
-    protected const
-        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
-    protected const
-        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
-    protected const
-        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
-    protected const
-        PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202];
-    protected const
-        CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null];
-    protected const
-        CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo1'];
-    protected const
-        CHILD_3 = ['key1' => 2, 'key2' => 1, 'key3' => 'bar1'];
-    protected const
-        CHILD_4 = ['key1' => 3, 'key2' => 3, 'key3' => 'fiz'];
-    protected const
-        PIVOT_1_1 = [
-            'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
-            'child_key1' => self::CHILD_1['key1'], 'child_key2' => self::CHILD_1['key2'],
-            'as' => 'foo1',
-        ];
-    protected const
-        PIVOT_1_2 = [
-            'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
-            'child_key1' => self::CHILD_2['key1'], 'child_key2' => self::CHILD_2['key2'],
-            'as' => 'foo2',
-        ];
-    protected const
-        PIVOT_1_3 = [
-            'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
-            'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
-            'as' => 'foo3',
-        ];
-    protected const
-        PIVOT_2_2 = [
-            'parent_key1' => self::PARENT_2['key1'], 'parent_key2' => self::PARENT_2['key2'],
-            'child_key1' => self::CHILD_2['key1'], 'child_key2' => self::CHILD_2['key2'],
-            'as' => 'bar2',
-        ];
-    protected const
-        PIVOT_2_3 = [
-            'parent_key1' => self::PARENT_2['key1'], 'parent_key2' => self::PARENT_2['key2'],
-            'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
-            'as' => 'bar2',
-        ];
-    protected const
-        PIVOT_3_3 = [
-            'parent_key1' => self::PARENT_3['key1'], 'parent_key2' => self::PARENT_3['key2'],
-            'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
-            'as' => 'baz3',
-        ];
-    protected const
-        PARENT_1_FULL = self::PARENT_1 + [
-            self::CHILDREN_CONTAINER => [
-                ['key1' => 1] + self::PIVOT_1_1 + ['@' => self::CHILD_1],
-                ['key1' => 2] + self::PIVOT_1_2 + ['@' => self::CHILD_2],
-                ['key1' => 3] + self::PIVOT_1_3 + ['@' => self::CHILD_3],
-            ],
-        ];
-    protected const
-        PARENT_2_FULL = self::PARENT_2 + [
-            self::CHILDREN_CONTAINER => [
-                ['key1' => 4] + self::PIVOT_2_2 + ['@' => self::CHILD_2],
-                ['key1' => 5] + self::PIVOT_2_3 + ['@' => self::CHILD_3],
-            ],
-        ];
-    protected const
-        PARENT_3_FULL = self::PARENT_3 + [
-            self::CHILDREN_CONTAINER => [
-                ['key1' => 6] + self::PIVOT_3_3 + ['@' => self::CHILD_3],
-            ],
-        ];
-    protected const
-        PARENT_4_FULL = self::PARENT_4 + [self::CHILDREN_CONTAINER => []];
-    protected const
-        PARENTS_FULL = [
-            self::PARENT_1_FULL,
-            self::PARENT_2_FULL,
-            self::PARENT_3_FULL,
-            self::PARENT_4_FULL,
-        ];
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'parent_entity',
-            [
-                'pField1' => 'bigInteger,primary',
-                'pField2' => 'bigInteger,primary',
-                'pField3' => 'integer,nullable',
-            ]
-        );
-        $this->makeTable(
-            'child_entity',
-            [
-                'field1' => 'bigInteger,primary',
-                'field2' => 'bigInteger,primary',
-                'field3' => 'string,nullable',
-                'parent_field1' => 'bigInteger,null',
-                'parent_field2' => 'bigInteger,null',
-            ]
-        );
-        $this->makeTable('pivot_entity', [
-            'pivot_id' => 'primary',
-            'parent_field_1' => 'bigInteger',
-            'parent_field_2' => 'bigInteger',
-            'child_field_1' => 'bigInteger',
-            'child_field_2' => 'bigInteger',
-            'as' => 'string,nullable',
-        ]);
-
-        $this->makeCompositeFK(
-            'pivot_entity',
-            ['parent_field_1', 'parent_field_2'],
-            'parent_entity',
-            ['pField1', 'pField2']
-        );
-        $this->makeCompositeFK(
-            'pivot_entity',
-            ['child_field_1', 'child_field_2'],
-            'child_entity',
-            ['field1', 'field2']
-        );
-        $this->makeIndex('pivot_entity', ['parent_field_1', 'parent_field_2', 'child_field_1', 'child_field_2'], true);
-
-        $this->getDatabase()->table('parent_entity')->insertMultiple(
-            ['pField1', 'pField2', 'pField3'],
-            [
-                self::PARENT_1,
-                self::PARENT_2,
-                self::PARENT_3,
-                self::PARENT_4,
-            ]
-        );
-        $this->getDatabase()->table('child_entity')->insertMultiple(
-            ['field1', 'field2', 'field3'],
-            [
-                self::CHILD_1,
-                self::CHILD_2,
-                self::CHILD_3,
-                self::CHILD_4,
-            ]
-        );
-        $this->getDatabase()->table('pivot_entity')->insertMultiple(
-            ['parent_field_1', 'parent_field_2', 'child_field_1', 'child_field_2', 'as'],
-            [
-                self::PIVOT_1_1,
-                self::PIVOT_1_2,
-                self::PIVOT_1_3,
-                self::PIVOT_2_2,
-                self::PIVOT_2_3,
-                self::PIVOT_3_3,
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
+    protected const CHILDREN_CONTAINER = 'pivoted';
+    protected const PARENTS_CONTAINER = 'pivoted';
+    protected const PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
+    protected const PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
+    protected const PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
+    protected const PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202];
+    protected const CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null];
+    protected const CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo1'];
+    protected const CHILD_3 = ['key1' => 2, 'key2' => 1, 'key3' => 'bar1'];
+    protected const CHILD_4 = ['key1' => 3, 'key2' => 3, 'key3' => 'fiz'];
+    protected const PIVOT_1_1 = [
+        'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
+        'child_key1' => self::CHILD_1['key1'], 'child_key2' => self::CHILD_1['key2'],
+        'as' => 'foo1',
+    ];
+    protected const PIVOT_1_2 = [
+        'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
+        'child_key1' => self::CHILD_2['key1'], 'child_key2' => self::CHILD_2['key2'],
+        'as' => 'foo2',
+    ];
+    protected const PIVOT_1_3 = [
+        'parent_key1' => self::PARENT_1['key1'], 'parent_key2' => self::PARENT_1['key2'],
+        'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
+        'as' => 'foo3',
+    ];
+    protected const PIVOT_2_2 = [
+        'parent_key1' => self::PARENT_2['key1'], 'parent_key2' => self::PARENT_2['key2'],
+        'child_key1' => self::CHILD_2['key1'], 'child_key2' => self::CHILD_2['key2'],
+        'as' => 'bar2',
+    ];
+    protected const PIVOT_2_3 = [
+        'parent_key1' => self::PARENT_2['key1'], 'parent_key2' => self::PARENT_2['key2'],
+        'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
+        'as' => 'bar2',
+    ];
+    protected const PIVOT_3_3 = [
+        'parent_key1' => self::PARENT_3['key1'], 'parent_key2' => self::PARENT_3['key2'],
+        'child_key1' => self::CHILD_3['key1'], 'child_key2' => self::CHILD_3['key2'],
+        'as' => 'baz3',
+    ];
+    protected const PARENT_1_FULL = self::PARENT_1 + [
+        self::CHILDREN_CONTAINER => [
+            ['key1' => 1] + self::PIVOT_1_1 + ['@' => self::CHILD_1],
+            ['key1' => 2] + self::PIVOT_1_2 + ['@' => self::CHILD_2],
+            ['key1' => 3] + self::PIVOT_1_3 + ['@' => self::CHILD_3],
+        ],
+    ];
+    protected const PARENT_2_FULL = self::PARENT_2 + [
+        self::CHILDREN_CONTAINER => [
+            ['key1' => 4] + self::PIVOT_2_2 + ['@' => self::CHILD_2],
+            ['key1' => 5] + self::PIVOT_2_3 + ['@' => self::CHILD_3],
+        ],
+    ];
+    protected const PARENT_3_FULL = self::PARENT_3 + [
+        self::CHILDREN_CONTAINER => [
+            ['key1' => 6] + self::PIVOT_3_3 + ['@' => self::CHILD_3],
+        ],
+    ];
+    protected const PARENT_4_FULL = self::PARENT_4 + [self::CHILDREN_CONTAINER => []];
+    protected const PARENTS_FULL = [
+        self::PARENT_1_FULL,
+        self::PARENT_2_FULL,
+        self::PARENT_3_FULL,
+        self::PARENT_4_FULL,
+    ];
 
     public function testInitRelation(): void
     {
@@ -494,6 +395,84 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $this->assertCount(2, $u->pivoted);
         $this->assertSame(self::CHILD_1['key3'], $u->pivoted[0]->key3);
         $this->assertSame(self::CHILD_4['key3'], $u->pivoted[1]->key3);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'parent_entity',
+            [
+                'pField1' => 'bigInteger,primary',
+                'pField2' => 'bigInteger,primary',
+                'pField3' => 'integer,nullable',
+            ],
+        );
+        $this->makeTable(
+            'child_entity',
+            [
+                'field1' => 'bigInteger,primary',
+                'field2' => 'bigInteger,primary',
+                'field3' => 'string,nullable',
+                'parent_field1' => 'bigInteger,null',
+                'parent_field2' => 'bigInteger,null',
+            ],
+        );
+        $this->makeTable('pivot_entity', [
+            'pivot_id' => 'primary',
+            'parent_field_1' => 'bigInteger',
+            'parent_field_2' => 'bigInteger',
+            'child_field_1' => 'bigInteger',
+            'child_field_2' => 'bigInteger',
+            'as' => 'string,nullable',
+        ]);
+
+        $this->makeCompositeFK(
+            'pivot_entity',
+            ['parent_field_1', 'parent_field_2'],
+            'parent_entity',
+            ['pField1', 'pField2'],
+        );
+        $this->makeCompositeFK(
+            'pivot_entity',
+            ['child_field_1', 'child_field_2'],
+            'child_entity',
+            ['field1', 'field2'],
+        );
+        $this->makeIndex('pivot_entity', ['parent_field_1', 'parent_field_2', 'child_field_1', 'child_field_2'], true);
+
+        $this->getDatabase()->table('parent_entity')->insertMultiple(
+            ['pField1', 'pField2', 'pField3'],
+            [
+                self::PARENT_1,
+                self::PARENT_2,
+                self::PARENT_3,
+                self::PARENT_4,
+            ],
+        );
+        $this->getDatabase()->table('child_entity')->insertMultiple(
+            ['field1', 'field2', 'field3'],
+            [
+                self::CHILD_1,
+                self::CHILD_2,
+                self::CHILD_3,
+                self::CHILD_4,
+            ],
+        );
+        $this->getDatabase()->table('pivot_entity')->insertMultiple(
+            ['parent_field_1', 'parent_field_2', 'child_field_1', 'child_field_2', 'as'],
+            [
+                self::PIVOT_1_1,
+                self::PIVOT_1_2,
+                self::PIVOT_1_3,
+                self::PIVOT_2_2,
+                self::PIVOT_2_3,
+                self::PIVOT_3_3,
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

@@ -8,6 +8,7 @@ use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Options;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
@@ -23,57 +24,7 @@ abstract class BelongsToRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('profile', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'image' => 'string',
-        ]);
-
-        $this->getDatabase()->table('profile')->insertMultiple(
-            ['user_id', 'image'],
-            [
-                [1, 'image.png'],
-                [2, 'second.png'],
-                [2, 'third.png'],
-            ]
-        );
-
-        $this->makeTable('nested', [
-            'id' => 'primary',
-            'profile_id' => 'integer',
-            'label' => 'string',
-        ]);
-
-        $this->getDatabase()->table('nested')->insertMultiple(
-            ['profile_id', 'label'],
-            [
-                [1, 'nested-label'],
-            ]
-        );
-
-        $this->makeFK('profile', 'user_id', 'user', 'id');
-        $this->makeFK('nested', 'profile_id', 'profile', 'id');
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
+    protected const NULLABLE = false;
 
     public function testFetchRelation(): void
     {
@@ -151,7 +102,7 @@ abstract class BelongsToRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user', ['method' => Select\JoinableLoader::INLOAD])
-                 ->orderBy('profile.id');
+            ->orderBy('profile.id');
 
         $this->assertEquals([
             [
@@ -332,7 +283,7 @@ abstract class BelongsToRelationTest extends BaseTest
                 ],
             ],
         ], (new Select($this->orm, Profile::class))->load('user')->wherePK(
-            1
+            1,
         )->fetchData());
     }
 
@@ -357,7 +308,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-                       ->load('user')->fetchAll();
+            ->load('user')->fetchAll();
 
         $this->assertSame($a->user->id, $a2->user->id);
         $this->assertSame($b->user->id, $b2->user->id);
@@ -365,6 +316,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testSetNullException(): void
     {
+        static::NULLABLE and $this->markTestSkipped();
         $this->expectException(NullException::class);
 
         $s = new Select($this->orm, Profile::class);
@@ -408,17 +360,17 @@ abstract class BelongsToRelationTest extends BaseTest
 
     public function testWhereNested(): void
     {
-        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm, Nested::class);
         $n = $s->with('profile.user')
-               ->where('profile.user.id', 1)
-               ->fetchOne();
+            ->where('profile.user.id', 1)
+            ->fetchOne();
 
         $this->assertSame('nested-label', $n->label);
     }
 
     public function testWhereNestedWithAlias(): void
     {
-        $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
+        $s = new Select($this->orm, Nested::class);
         $n = $s
             ->with('profile.user', ['as' => 'u'])
             ->where('u.id', 1)
@@ -428,18 +380,111 @@ abstract class BelongsToRelationTest extends BaseTest
     }
 
     /**
-     * Nullable BelongsTo relation should not be transformed to RefersTo
+     * If relation property was unset - ignore this field
      */
-    public function testSetNullable(): void
+    public function testUnsetProperty(): void
     {
-        $schema = $this->getSchemaArray();
-        $schema[Profile::class][Schema::RELATIONS]['user'][Relation::SCHEMA][Relation::NULLABLE] = true;
-        $this->orm = $this->withSchema(new Schema($schema));
+        /** @var Profile $profile */
+        $profile = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->load('user')->fetchOne();
 
-        $this->assertInstanceOf(
-            Relation\BelongsTo::class,
-            $this->orm->getRelationMap(Profile::class)->getRelations()['user']
+        unset($profile->user);
+
+        $this->captureWriteQueries();
+        $this->save($profile);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If non-nullable relation property was unset - throw NullException
+     */
+    public function testUnsetPropertyWithoutIgnoreUninitializedRelations(): void
+    {
+        $this->orm = $this->orm->with(options: (new Options())->withIgnoreUninitializedRelations(false));
+        /** @var Profile $profile */
+        $profile = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->load('user')->fetchOne();
+
+        unset($profile->user);
+        $this->expectException(NullException::class);
+
+        $this->captureWriteQueries();
+        try {
+            $this->save($profile);
+        } finally {
+            $this->assertNumWrites(0);
+        }
+    }
+
+    public function testUpdateRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<Profile> $profiles */
+        $profiles = (new Select($this->orm, Profile::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$profiles)->load('user')->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($profiles as $profile) {
+            $profile->user; // force loading
+            static::NULLABLE or $this->assertNotNull($profile->user);
+        }
+        $this->assertNumReads(0);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
         );
+
+        $this->makeTable('profile', [
+            'id' => 'primary',
+            'user_id' => 'integer,nullable',
+            'image' => 'string',
+        ]);
+
+        $this->getDatabase()->table('profile')->insertMultiple(
+            ['user_id', 'image'],
+            [
+                [1, 'image.png'],
+                [2, 'second.png'],
+                [2, 'third.png'],
+            ],
+        );
+
+        $this->makeTable('nested', [
+            'id' => 'primary',
+            'profile_id' => 'integer',
+            'label' => 'string',
+        ]);
+
+        $this->getDatabase()->table('nested')->insertMultiple(
+            ['profile_id', 'label'],
+            [
+                [1, 'nested-label'],
+            ],
+        );
+
+        $this->makeFK('profile', 'user_id', 'user', 'id');
+        $this->makeFK('nested', 'profile_id', 'profile', 'id');
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array
@@ -468,6 +513,7 @@ abstract class BelongsToRelationTest extends BaseTest
                         Relation::TYPE => Relation::BELONGS_TO,
                         Relation::TARGET => User::class,
                         Relation::SCHEMA => [
+                            Relation::NULLABLE => static::NULLABLE,
                             Relation::CASCADE => true,
                             Relation::INNER_KEY => 'user_id',
                             Relation::OUTER_KEY => 'id',

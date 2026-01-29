@@ -21,7 +21,7 @@ class MorphedHasManyLoader extends HasManyLoader
         return $this->setWhere(
             parent::configureQuery($query, $outerKeys),
             $this->isJoined() ? 'onWhere' : 'where',
-            [$this->localKey(Relation::MORPH_KEY) => $this->parent->getTarget()]
+            [$this->localKey(Relation::MORPH_KEY) => $this->parent->getTarget()],
         );
     }
 }

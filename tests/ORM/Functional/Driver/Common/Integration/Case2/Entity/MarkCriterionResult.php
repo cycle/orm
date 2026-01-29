@@ -11,7 +11,6 @@ class MarkCriterionResult
 {
     public ?string $id = null;
     public int $resultObjective = 0;
-
     public ?Student $student;
     public ?string $student_id = null;
 

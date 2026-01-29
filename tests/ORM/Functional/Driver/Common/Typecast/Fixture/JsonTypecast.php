@@ -45,7 +45,7 @@ class JsonTypecast implements CastableInterface, UncastableInterface
 
             $data[$column] = match ($rule) {
                 'json' => 'uncast-json',
-                default => (string) $data[$column]
+                default => (string) $data[$column],
             };
         }
 

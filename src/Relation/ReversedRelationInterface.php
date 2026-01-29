@@ -9,6 +9,4 @@ namespace Cycle\ORM\Relation;
  *
  * @internal
  */
-interface ReversedRelationInterface extends RelationInterface
-{
-}
+interface ReversedRelationInterface extends RelationInterface {}

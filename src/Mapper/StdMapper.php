@@ -12,7 +12,7 @@ use Cycle\ORM\Reference\ReferenceInterface;
  */
 final class StdMapper extends DatabaseMapper
 {
-    public function init(array $data, string $role = null): object
+    public function init(array $data, ?string $role = null): object
     {
         return new \stdClass();
     }
@@ -38,7 +38,7 @@ final class StdMapper extends DatabaseMapper
 
     public function extract($entity): array
     {
-        return get_object_vars($entity);
+        return \get_object_vars($entity);
     }
 
     /**
@@ -46,17 +46,17 @@ final class StdMapper extends DatabaseMapper
      */
     public function fetchFields(object $entity): array
     {
-        return array_intersect_key(
+        return \array_intersect_key(
             $this->extract($entity),
-            $this->columns + $this->parentColumns
+            $this->columns + $this->parentColumns,
         );
     }
 
     public function fetchRelations(object $entity): array
     {
-        return array_intersect_key(
+        return \array_intersect_key(
             $this->extract($entity),
-            $this->relationMap->getRelations()
+            $this->relationMap->getRelations(),
         );
     }
 }

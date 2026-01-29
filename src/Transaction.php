@@ -22,9 +22,8 @@ final class Transaction implements TransactionInterface
 
     public function __construct(
         private ORMInterface $orm,
-        private ?RunnerInterface $runner = null
-    ) {
-    }
+        private ?RunnerInterface $runner = null,
+    ) {}
 
     public function persist(object $entity, int $mode = self::MODE_CASCADE): self
     {

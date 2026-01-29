@@ -18,6 +18,94 @@ abstract class NestedEagerTest extends BaseTest
 {
     use TableTrait;
 
+    public function testFetchEager(): void
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('id', 'ASC');
+
+        $this->assertEquals(
+            [
+                [
+                    'id' => 1,
+                    'email' => 'hello@world.com',
+                    'balance' => 100.0,
+                    'profile' => [
+                        'id' => 1,
+                        'user_id' => 1,
+                        'image' => 'image.png',
+                        'nested' => [
+                            'label' => 'hello',
+                        ],
+                    ],
+                ],
+                [
+                    'id' => 2,
+                    'email' => 'another@world.com',
+                    'balance' => 200.0,
+                    'profile' => null,
+                ],
+                [
+                    'id' => 3,
+                    'email' => 'third@world.com',
+                    'balance' => 150.0,
+                    'profile' => [
+                        'id' => 2,
+                        'user_id' => 3,
+                        'image' => 'third.png',
+                        'nested' => [
+                            'label' => 'hello3',
+                        ],
+                    ],
+                ],
+            ],
+            $selector->fetchData(),
+        );
+    }
+
+    public function testFetchEagerReverse(): void
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->orderBy('user.id', 'DESC');
+
+        $this->assertEquals(
+            [
+                [
+                    'id' => 3,
+                    'email' => 'third@world.com',
+                    'balance' => 150.0,
+                    'profile' => [
+                        'id' => 2,
+                        'user_id' => 3,
+                        'image' => 'third.png',
+                        'nested' => [
+                            'label' => 'hello3',
+                        ],
+                    ],
+                ],
+                [
+                    'id' => 2,
+                    'email' => 'another@world.com',
+                    'balance' => 200.0,
+                    'profile' => null,
+                ],
+                [
+                    'id' => 1,
+                    'email' => 'hello@world.com',
+                    'balance' => 100.0,
+                    'profile' => [
+                        'id' => 1,
+                        'user_id' => 1,
+                        'image' => 'image.png',
+                        'nested' => [
+                            'label' => 'hello',
+                        ],
+                    ],
+                ],
+            ],
+            $selector->fetchData(),
+        );
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -28,7 +116,7 @@ abstract class NestedEagerTest extends BaseTest
                 'id' => 'primary',
                 'email' => 'string',
                 'balance' => 'float',
-            ]
+            ],
         );
 
         $this->makeTable(
@@ -38,7 +126,7 @@ abstract class NestedEagerTest extends BaseTest
                 'user_id' => 'integer,nullable',
                 'image' => 'string',
                 'label' => 'string',
-            ]
+            ],
         );
 
         $this->makeFK('profile', 'user_id', 'user', 'id');
@@ -49,7 +137,7 @@ abstract class NestedEagerTest extends BaseTest
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
                 ['third@world.com', 150],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('profile')->insertMultiple(
@@ -57,7 +145,7 @@ abstract class NestedEagerTest extends BaseTest
             [
                 [1, 'image.png', 'hello'],
                 [3, 'third.png', 'hello3'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(
@@ -113,96 +201,8 @@ abstract class NestedEagerTest extends BaseTest
                         Schema::SCHEMA => [],
                         Schema::RELATIONS => [],
                     ],
-                ]
-            )
-        );
-    }
-
-    public function testFetchEager(): void
-    {
-        $selector = new Select($this->orm, User::class);
-        $selector->orderBy('id', 'ASC');
-
-        $this->assertEquals(
-            [
-                [
-                    'id' => 1,
-                    'email' => 'hello@world.com',
-                    'balance' => 100.0,
-                    'profile' => [
-                        'id' => 1,
-                        'user_id' => 1,
-                        'image' => 'image.png',
-                        'nested' => [
-                            'label' => 'hello',
-                        ],
-                    ],
                 ],
-                [
-                    'id' => 2,
-                    'email' => 'another@world.com',
-                    'balance' => 200.0,
-                    'profile' => null,
-                ],
-                [
-                    'id' => 3,
-                    'email' => 'third@world.com',
-                    'balance' => 150.0,
-                    'profile' => [
-                        'id' => 2,
-                        'user_id' => 3,
-                        'image' => 'third.png',
-                        'nested' => [
-                            'label' => 'hello3',
-                        ],
-                    ],
-                ],
-            ],
-            $selector->fetchData()
-        );
-    }
-
-    public function testFetchEagerReverse(): void
-    {
-        $selector = new Select($this->orm, User::class);
-        $selector->orderBy('user.id', 'DESC');
-
-        $this->assertEquals(
-            [
-                [
-                    'id' => 3,
-                    'email' => 'third@world.com',
-                    'balance' => 150.0,
-                    'profile' => [
-                        'id' => 2,
-                        'user_id' => 3,
-                        'image' => 'third.png',
-                        'nested' => [
-                            'label' => 'hello3',
-                        ],
-                    ],
-                ],
-                [
-                    'id' => 2,
-                    'email' => 'another@world.com',
-                    'balance' => 200.0,
-                    'profile' => null,
-                ],
-                [
-                    'id' => 1,
-                    'email' => 'hello@world.com',
-                    'balance' => 100.0,
-                    'profile' => [
-                        'id' => 1,
-                        'user_id' => 1,
-                        'image' => 'image.png',
-                        'nested' => [
-                            'label' => 'hello',
-                        ],
-                    ],
-                ],
-            ],
-            $selector->fetchData()
+            ),
         );
     }
 }

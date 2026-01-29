@@ -55,9 +55,9 @@ final class Factory implements FactoryInterface
 
     public function __construct(
         private DatabaseProviderInterface $dbal,
-        RelationConfig $config = null,
-        CoreFactory $factory = null,
-        CollectionFactoryInterface $defaultCollectionFactory = null
+        ?RelationConfig $config = null,
+        ?CoreFactory $factory = null,
+        ?CollectionFactoryInterface $defaultCollectionFactory = null,
     ) {
         $this->config = $config ?? RelationConfig::getDefault();
         $this->factory = $factory ?? new Container();
@@ -66,7 +66,7 @@ final class Factory implements FactoryInterface
 
     public function make(
         string $alias,
-        array $parameters = []
+        array $parameters = [],
     ): mixed {
         return $this->factory->make($alias, $parameters);
     }
@@ -79,7 +79,7 @@ final class Factory implements FactoryInterface
         $handlers = [];
 
         // Schema's `typecast` option
-        $rules = (array)$schema->define($role, SchemaInterface::TYPECAST);
+        $rules = (array) $schema->define($role, SchemaInterface::TYPECAST);
         $handler = $schema->define($role, SchemaInterface::TYPECAST_HANDLER)
             ?? $this->defaults[SchemaInterface::TYPECAST_HANDLER];
 
@@ -90,7 +90,7 @@ final class Factory implements FactoryInterface
                     return $parentHandler;
                 }
 
-                $handlers[] = new Typecast($database);
+                $handlers[] = new Typecast($role, $database);
             } elseif (\is_array($handler)) { // We need to use composite typecast for array
                 foreach ($handler as $type) {
                     $handlers[] = $this->makeTypecastHandler($type, $database, $schema, $role);
@@ -103,13 +103,13 @@ final class Factory implements FactoryInterface
                 message: \sprintf(
                     'Bad typecast handler declaration for the `%s` role. %s',
                     $role,
-                    $e->getMessage()
+                    $e->getMessage(),
                 ),
                 code: $e->getCode(),
                 previous: $e,
             );
         }
-        $handler = count($handlers) === 1 ? reset($handlers) : new CompositeTypecast(...$handlers);
+        $handler = \count($handlers) === 1 ? \reset($handlers) : new CompositeTypecast(...$handlers);
         $handler->setRules($rules);
         return $parentHandler === null
             ? $handler
@@ -122,7 +122,7 @@ final class Factory implements FactoryInterface
         $class = $schema->define($role, SchemaInterface::MAPPER) ?? $this->defaults[SchemaInterface::MAPPER];
 
         if (!\is_subclass_of($class, MapperInterface::class)) {
-            throw new TypecastException(sprintf('%s does not implement %s.', $class, MapperInterface::class));
+            throw new TypecastException(\sprintf('%s does not implement %s.', $class, MapperInterface::class));
         }
 
         return $this->factory->make(
@@ -131,7 +131,7 @@ final class Factory implements FactoryInterface
                 'orm' => $orm,
                 'role' => $role,
                 'schema' => $schema->define($role, SchemaInterface::SCHEMA),
-            ]
+            ],
         );
     }
 
@@ -139,7 +139,7 @@ final class Factory implements FactoryInterface
         SchemaInterface $schema,
         SourceProviderInterface $sourceProvider,
         string $role,
-        string $relation
+        string $relation,
     ): LoaderInterface {
         if ($relation === self::PARENT_LOADER) {
             $parent = $schema->define($role, SchemaInterface::PARENT);
@@ -161,17 +161,17 @@ final class Factory implements FactoryInterface
                 'name' => $relation,
                 'target' => $definition[Relation::TARGET],
                 'schema' => $definition[Relation::SCHEMA],
-            ]
+            ],
         );
     }
 
     public function collection(
-        string $name = null
+        ?string $name = null,
     ): CollectionFactoryInterface {
         if ($name === null) {
             return $this->defaultCollectionFactory;
         }
-        if (array_key_exists($name, $this->collectionFactoryAlias)) {
+        if (\array_key_exists($name, $this->collectionFactoryAlias)) {
             return $this->collectionFactoryAlias[$name];
         }
         // Find by interface
@@ -189,7 +189,7 @@ final class Factory implements FactoryInterface
         ORMInterface $orm,
         SchemaInterface $schema,
         string $role,
-        string $relation
+        string $relation,
     ): RelationInterface {
         $relSchema = $schema->defineRelation($role, $relation);
         $type = $relSchema[Relation::TYPE];
@@ -204,11 +204,11 @@ final class Factory implements FactoryInterface
                 'schema' => $relSchema[Relation::SCHEMA]
                     + [Relation::LOAD => $relSchema[Relation::LOAD] ?? null]
                     + [Relation::COLLECTION_TYPE => $relSchema[Relation::COLLECTION_TYPE] ?? null],
-            ]
+            ],
         );
     }
 
-    public function database(string $database = null): DatabaseInterface
+    public function database(?string $database = null): DatabaseInterface
     {
         return $this->dbal->database($database);
     }
@@ -217,7 +217,7 @@ final class Factory implements FactoryInterface
         ORMInterface $orm,
         SchemaInterface $schema,
         string $role,
-        ?Select $select
+        ?Select $select,
     ): RepositoryInterface {
         $class = $schema->define($role, SchemaInterface::REPOSITORY) ?? $this->defaults[SchemaInterface::REPOSITORY];
 
@@ -231,13 +231,13 @@ final class Factory implements FactoryInterface
                 'select' => $select,
                 'orm' => $orm,
                 'role' => $role,
-            ]
+            ],
         );
     }
 
     public function source(
         SchemaInterface $schema,
-        string $role
+        string $role,
     ): SourceInterface {
         /** @var class-string<SourceInterface> $source */
         $source = $schema->define($role, SchemaInterface::SOURCE) ?? $this->defaults[SchemaInterface::SOURCE];
@@ -261,7 +261,7 @@ final class Factory implements FactoryInterface
         }
 
         if (!\is_subclass_of($scope, ScopeInterface::class)) {
-            throw new TypecastException(sprintf('%s does not implement %s.', $scope, ScopeInterface::class));
+            throw new TypecastException(\sprintf('%s does not implement %s.', $scope, ScopeInterface::class));
         }
 
         return $source->withScope(\is_object($scope) ? $scope : $this->factory->make($scope));
@@ -279,7 +279,7 @@ final class Factory implements FactoryInterface
     public function withCollectionFactory(
         string $alias,
         CollectionFactoryInterface $factory,
-        string $interface = null
+        ?string $interface = null,
     ): self {
         $clone = clone $this;
         $interface = $interface ?? $factory->getInterface();
@@ -294,17 +294,15 @@ final class Factory implements FactoryInterface
 
     /**
      * Make typecast handler from giver string or object
-     *
-     * @return TypecastInterface
      */
     private function makeTypecastHandler(
         string|TypecastInterface $handler,
         DatabaseInterface $database,
         SchemaInterface $schema,
-        string $role
+        string $role,
     ): TypecastInterface {
         // If handler is an object we don't need to use factory, we should return it as is
-        if (is_object($handler)) {
+        if (\is_object($handler)) {
             return $handler;
         }
 

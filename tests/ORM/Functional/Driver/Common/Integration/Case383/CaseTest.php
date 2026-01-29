@@ -13,27 +13,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => true]);
-
-        // Init DB
-        parent::setUp();
-
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
-    public function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => false]);
-        $this->driver = null;
-    }
-
     public function test1WithClean(): void
     {
         $user = new Entity\User('test', 'test');
@@ -53,6 +32,27 @@ abstract class CaseTest extends BaseTest
         $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
 
         $this->assertEquals($user->id, $get_user->id);
+    }
+
+    public function setUp(): void
+    {
+        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => true]);
+
+        // Init DB
+        parent::setUp();
+
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+
+        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => false]);
+        $this->driver = null;
     }
 
     private function makeTables(): void

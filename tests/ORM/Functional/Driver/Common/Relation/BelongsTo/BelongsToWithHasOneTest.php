@@ -23,129 +23,6 @@ abstract class BelongsToWithHasOneTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('profile', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'image' => 'string',
-        ]);
-
-        $this->getDatabase()->table('profile')->insertMultiple(
-            ['user_id', 'image'],
-            [
-                [1, 'image.png'],
-                [2, 'second.png'],
-                [2, 'third.png'],
-            ]
-        );
-
-        $this->makeTable('nested', [
-            'id' => 'primary',
-            'profile_id' => 'integer',
-            'label' => 'string',
-        ]);
-
-        $this->getDatabase()->table('nested')->insertMultiple(
-            ['profile_id', 'label'],
-            [
-                [1, 'nested-label'],
-            ]
-        );
-
-        $this->makeFK('profile', 'user_id', 'user', 'id');
-        $this->makeFK('nested', 'profile_id', 'profile', 'id');
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'profile' => [
-                        Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => Profile::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Profile::class => [
-                Schema::ROLE => 'profile',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'profile',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'image'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'user' => [
-                        Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => User::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'user_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                    'nested' => [
-                        Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => Nested::class,
-                        Relation::SCHEMA => [
-                            Relation::NULLABLE => true, // todo set false and connect with nested:profile
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'profile_id',
-                        ],
-                    ],
-                ],
-            ],
-            Nested::class => [
-                Schema::ROLE => 'nested',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'nested',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'profile_id', 'label'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'profile' => [
-                        Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => Profile::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'profile_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                ],
-            ],
-        ]));
-    }
-
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -222,7 +99,7 @@ abstract class BelongsToWithHasOneTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user', ['method' => Select\JoinableLoader::INLOAD])
-                 ->orderBy('profile.id');
+            ->orderBy('profile.id');
 
         $this->assertEquals([
             [
@@ -491,7 +368,7 @@ abstract class BelongsToWithHasOneTest extends BaseTest
                 ],
             ],
         ], (new Select($this->orm, Profile::class))->load('user')->wherePK(
-            1
+            1,
         )->fetchData());
     }
 
@@ -516,7 +393,7 @@ abstract class BelongsToWithHasOneTest extends BaseTest
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
-                       ->load('user')->fetchAll();
+            ->load('user')->fetchAll();
 
         $this->assertSame($a->user->id, $a2->user->id);
         $this->assertSame($b->user->id, $b2->user->id);
@@ -571,8 +448,8 @@ abstract class BelongsToWithHasOneTest extends BaseTest
     {
         $s = new Select($this->orm->withHeap(new Heap()), Nested::class);
         $n = $s->with('profile.user')
-               ->where('profile.user.id', 1)
-               ->fetchOne();
+            ->where('profile.user.id', 1)
+            ->fetchOne();
 
         $this->assertSame('nested-label', $n->label);
     }
@@ -586,5 +463,150 @@ abstract class BelongsToWithHasOneTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame('nested-label', $n->label);
+    }
+
+    public function testUpdateNestedRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<Nested> $nested */
+        $nested = (new Select($this->orm, Nested::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$nested)
+            ->load('profile.user')
+            ->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        foreach ($nested as $item) {
+            $this->assertNotNull($item->profile);
+            $this->assertNotNull($item->profile->user);
+            $this->assertInstanceOf(User::class, $item->profile->user);
+        }
+        $this->assertNumReads(0);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->makeTable('profile', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'image' => 'string',
+        ]);
+
+        $this->getDatabase()->table('profile')->insertMultiple(
+            ['user_id', 'image'],
+            [
+                [1, 'image.png'],
+                [2, 'second.png'],
+                [2, 'third.png'],
+            ],
+        );
+
+        $this->makeTable('nested', [
+            'id' => 'primary',
+            'profile_id' => 'integer',
+            'label' => 'string',
+        ]);
+
+        $this->getDatabase()->table('nested')->insertMultiple(
+            ['profile_id', 'label'],
+            [
+                [1, 'nested-label'],
+            ],
+        );
+
+        $this->makeFK('profile', 'user_id', 'user', 'id');
+        $this->makeFK('nested', 'profile_id', 'profile', 'id');
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'profile' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Profile::class => [
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'user' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => User::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                    'nested' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Nested::class,
+                        Relation::SCHEMA => [
+                            Relation::NULLABLE => true, // todo set false and connect with nested:profile
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'profile_id',
+                        ],
+                    ],
+                ],
+            ],
+            Nested::class => [
+                Schema::ROLE => 'nested',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'nested',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'profile_id', 'label'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'profile' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'profile_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                ],
+            ],
+        ]));
     }
 }

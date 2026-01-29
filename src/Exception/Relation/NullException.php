@@ -6,6 +6,4 @@ namespace Cycle\ORM\Exception\Relation;
 
 use Cycle\ORM\Exception\RelationException;
 
-class NullException extends RelationException
-{
-}
+class NullException extends RelationException {}

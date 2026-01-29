@@ -25,22 +25,6 @@ class InsertCommandTest extends TestCase
     private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
     private State $state;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->mapper = m::mock(MapperInterface::class);
-
-        $this->cmd = new Insert(
-            $this->db = m::mock(DatabaseInterface::class),
-            'table',
-            $this->state = new State(Node::SCHEDULED_INSERT, ['foo' => 'bar']),
-            $this->mapper,
-            ['id'],
-            'foo_id'
-        );
-    }
-
     public function testDatabase(): void
     {
         $this->assertSame($this->db, $this->cmd->getDatabase());
@@ -68,7 +52,7 @@ class InsertCommandTest extends TestCase
         $compiler->shouldReceive('compile')->once()->withArgs(
             function (QueryParameters $params, string $prefix, FragmentInterface $fragment) {
                 return true;
-            }
+            },
         );
 
         $this->mapper->shouldReceive('uncast')
@@ -164,5 +148,21 @@ class InsertCommandTest extends TestCase
         $this->cmd->execute();
 
         $this->assertSame(324, $this->state->getValue('id'));
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mapper = m::mock(MapperInterface::class);
+
+        $this->cmd = new Insert(
+            $this->db = m::mock(DatabaseInterface::class),
+            'table',
+            $this->state = new State(Node::SCHEDULED_INSERT, ['foo' => 'bar']),
+            $this->mapper,
+            ['id'],
+            'foo_id',
+        );
     }
 }

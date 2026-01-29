@@ -17,37 +17,6 @@ abstract class StdMapperTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            'user' => [
-                Schema::MAPPER => StdMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, 'user');
@@ -145,7 +114,7 @@ abstract class StdMapperTest extends BaseTest
                 'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
-            $this->orm->getHeap()->get($result)->getData()
+            $this->orm->getHeap()->get($result)->getData(),
         );
     }
 
@@ -234,5 +203,36 @@ abstract class StdMapperTest extends BaseTest
         $this->assertEquals(2, $result->id);
         $this->assertEquals('another@world.com', $result->email);
         $this->assertEquals(200.0, $result->balance);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            'user' => [
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

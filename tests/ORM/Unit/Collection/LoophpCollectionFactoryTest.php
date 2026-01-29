@@ -9,7 +9,6 @@ use Cycle\ORM\Collection\LoophpCollectionFactory;
 use Cycle\ORM\Collection\Pivoted\LoophpPivotedCollection;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Exception\CollectionFactoryException;
-use IteratorIterator;
 use loophp\collection\CollectionDecorator;
 use loophp\collection\Contract\Collection as CollectionInterface;
 use loophp\collection\Collection;
@@ -23,6 +22,7 @@ class LoophpCollectionFactoryTest extends BaseTest
 
     /**
      * @dataProvider collectionDataProvider
+     * @param mixed $data
      */
     public function testCollectShouldReturnArray($data): void
     {
@@ -49,7 +49,7 @@ class LoophpCollectionFactoryTest extends BaseTest
         $this->expectException(CollectionFactoryException::class);
         $this->expectExceptionMessage('Unsupported collection class `IteratorIterator`.');
 
-        $this->getFactory()->withCollectionClass(IteratorIterator::class);
+        $this->getFactory()->withCollectionClass(\IteratorIterator::class);
     }
 
     /**
@@ -68,7 +68,7 @@ class LoophpCollectionFactoryTest extends BaseTest
      */
     public function testWithCollectionClassCustomClass(mixed $data): void
     {
-        $customClass = new class (Collection::empty()) extends CollectionDecorator {};
+        $customClass = new class(Collection::empty()) extends CollectionDecorator {};
 
         $collection = $this->getFactory()->withCollectionClass($customClass::class)->collect($data);
 
@@ -140,6 +140,4 @@ class LoophpCollectionFactoryTest extends BaseTest
     }
 }
 
-class CustomLoophpPivotedCollection extends LoophpPivotedCollection
-{
-}
+class CustomLoophpPivotedCollection extends LoophpPivotedCollection {}

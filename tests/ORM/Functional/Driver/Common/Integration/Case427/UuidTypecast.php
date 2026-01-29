@@ -55,7 +55,7 @@ class UuidTypecast implements CastableInterface, UncastableInterface
                 TestCase::fail(\sprintf(
                     'Expected UuidInterface, got %s: %s',
                     \get_debug_type($data[$column]),
-                    \print_r($data[$column], true)
+                    \print_r($data[$column], true),
                 ));
             }
 

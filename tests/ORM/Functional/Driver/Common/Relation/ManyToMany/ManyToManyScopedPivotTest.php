@@ -19,69 +19,6 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable('tag', [
-            'id' => 'primary',
-            'level' => 'integer',
-            'name' => 'string',
-        ]);
-
-        $this->makeTable('tag_user_map', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'tag_id' => 'integer',
-            'as' => 'string,nullable',
-            'level' => 'int',
-        ]);
-
-        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
-        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->getDatabase()->table('tag')->insertMultiple(
-            ['name', 'level'],
-            [
-                ['tag a', 1],
-                ['tag b', 2],
-                ['tag c', 3],
-                ['tag d', 4],
-                ['tag e', 5],
-                ['tag f', 6],
-            ]
-        );
-
-        $this->getDatabase()->table('tag_user_map')->insertMultiple(
-            ['user_id', 'tag_id', 'level'],
-            [
-                [1, 1, 1],
-                [1, 2, 2],
-                [2, 3, 1],
-
-                [1, 4, 3],
-                [1, 5, 4],
-
-                [2, 4, 2],
-                [2, 6, 3],
-            ]
-        );
-    }
-
     public function testLoadRelation(): void
     {
         $this->orm = $this->withPivotSchema([
@@ -89,8 +26,8 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
 
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')
-                 ->orderBy('id')
-                 ->orderBy('tags.id');
+            ->orderBy('id')
+            ->orderBy('tags.id');
 
         $this->assertSame([
             [
@@ -313,7 +250,7 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
         $this->orm = $this->withPivotSchema([
             Schema::SCOPE => new Select\QueryScope(
                 ['@.level' => ['>' => 3]],
-                ['@.level' => 'DESC']
+                ['@.level' => 'DESC'],
             ),
         ]);
 
@@ -344,6 +281,69 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
                 ],
             ],
         ], $selector->fetchData());
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable('tag', [
+            'id' => 'primary',
+            'level' => 'integer',
+            'name' => 'string',
+        ]);
+
+        $this->makeTable('tag_user_map', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'tag_id' => 'integer',
+            'as' => 'string,nullable',
+            'level' => 'int',
+        ]);
+
+        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
+        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->getDatabase()->table('tag')->insertMultiple(
+            ['name', 'level'],
+            [
+                ['tag a', 1],
+                ['tag b', 2],
+                ['tag c', 3],
+                ['tag d', 4],
+                ['tag e', 5],
+                ['tag f', 6],
+            ],
+        );
+
+        $this->getDatabase()->table('tag_user_map')->insertMultiple(
+            ['user_id', 'tag_id', 'level'],
+            [
+                [1, 1, 1],
+                [1, 2, 2],
+                [2, 3, 1],
+
+                [1, 4, 3],
+                [1, 5, 4],
+
+                [2, 4, 2],
+                [2, 6, 3],
+            ],
+        );
     }
 
     protected function withPivotSchema(array $pivotSchema, array $relSchema = [])

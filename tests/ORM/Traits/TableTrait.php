@@ -14,8 +14,8 @@ trait TableTrait
         string $table,
         array $columns,
         array $fk = [],
-        array $pk = null,
-        array $defaults = []
+        ?array $pk = null,
+        array $defaults = [],
     ): void {
         $schema = $this->getDatabase()->table($table)->getSchema();
         $renderer = new TableRenderer();
@@ -25,7 +25,7 @@ trait TableTrait
             if (isset($options['from'])) {
                 $column = $options['from'];
             }
-            $fkState = $schema->foreignKey((array)$column)->references($options['table'], (array)$options['column']);
+            $fkState = $schema->foreignKey((array) $column)->references($options['table'], (array) $options['column']);
             $fkState->onUpdate($options['onUpdate'] ?? ForeignKeyInterface::CASCADE);
             $fkState->onDelete($options['onDelete'] ?? ForeignKeyInterface::CASCADE);
         }
@@ -43,11 +43,11 @@ trait TableTrait
         string $to,
         string|array $toColumn,
         string $onDelete = ForeignKeyInterface::CASCADE,
-        string $onUpdate = ForeignKeyInterface::CASCADE
+        string $onUpdate = ForeignKeyInterface::CASCADE,
     ): void {
         $schema = $this->getDatabase()->table($from)->getSchema();
-        $schema->foreignKey((array)$fromKey)
-            ->references($to, (array)$toColumn)
+        $schema->foreignKey((array) $fromKey)
+            ->references($to, (array) $toColumn)
             ->onDelete($onDelete)
             ->onUpdate($onUpdate);
         $schema->save();
@@ -59,7 +59,7 @@ trait TableTrait
         string $to,
         array $toColumns,
         string $onDelete = ForeignKeyInterface::CASCADE,
-        string $onUpdate = ForeignKeyInterface::CASCADE
+        string $onUpdate = ForeignKeyInterface::CASCADE,
     ): void {
         $schema = $this->getDatabase()->table($from)->getSchema();
         $schema->foreignKey($fromKeys)->references($to, $toColumns)->onDelete($onDelete)->onUpdate($onUpdate);
@@ -69,7 +69,7 @@ trait TableTrait
     public function makeIndex(
         string $table,
         array $columns,
-        bool $unique
+        bool $unique,
     ): void {
         $schema = $this->getDatabase()->table($table)->getSchema();
         $schema->index($columns)->unique($unique);

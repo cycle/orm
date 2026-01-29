@@ -29,8 +29,8 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
             throw new CollectionFactoryException(
                 \sprintf(
                     'There is no %s class. To resolve this issue you can install `loophp/collection` package.',
-                    Collection::class
-                )
+                    Collection::class,
+                ),
             );
         }
 
@@ -59,7 +59,7 @@ final class LoophpCollectionFactory implements CollectionFactoryInterface
         if ($class !== Collection::class) {
             throw new CollectionFactoryException(\sprintf(
                 'Unsupported collection class `%s`.',
-                $class
+                $class,
             ));
         }
 

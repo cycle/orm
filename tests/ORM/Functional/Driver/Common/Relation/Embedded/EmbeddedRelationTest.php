@@ -21,60 +21,7 @@ abstract class EmbeddedRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-            'creds_username' => 'string',
-            'creds_password' => 'string',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance', 'creds_username', 'creds_password'],
-            [
-                ['hello@world.com', 100, 'user1', 'pass1'],
-                ['another@world.com', 200, 'user2', 'pass2'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'credentials' => [
-                        Relation::TYPE => Relation::EMBEDDED,
-                        Relation::TARGET => 'user:credentials',
-                        Relation::LOAD => Relation::LOAD_PROMISE,
-                        Relation::SCHEMA => [],
-                    ],
-                ],
-            ],
-            UserCredentials::class => [
-                Schema::ROLE => 'user:credentials',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => [
-                    'id' => 'id',
-                    'username' => 'creds_username',
-                    'password' => 'creds_password',
-                ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
+    protected const NULLABLE = false;
 
     public function testFetchData(): void
     {
@@ -138,7 +85,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->save($u);
         $this->assertNumWrites(1);
 
-        $this->assertSame(3, (int)$u->id);
+        $this->assertSame(3, (int) $u->id);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -174,7 +121,7 @@ abstract class EmbeddedRelationTest extends BaseTest
             ],
             [
                 'id' => $u->id,
-            ]
+            ],
         )->run();
 
         $this->captureWriteQueries();
@@ -413,21 +360,150 @@ abstract class EmbeddedRelationTest extends BaseTest
     {
         $this->expectException(NullException::class);
 
-        $selector = new Select($this->orm, User::class);
-        $u = $selector->orderBy('id', 'ASC')->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->orderBy('id', 'ASC')
+            ->fetchOne();
 
         $u->credentials = null;
 
         $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
+        $this->save($u);
         $this->assertNumWrites(1);
 
-        $selector = new Select($this->orm->withHeap(new Heap()), User::class);
-        $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
+        $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
+            ->load('credentials')
+            ->wherePK($u->id)
+            ->fetchOne();
 
         $this->assertEquals($u->id, $u2->id);
         $this->assertSame('user3', $u2->credentials->username);
+    }
+
+    /**
+     * If relation property was unset - ignore this field
+     */
+    public function testUnsetProperty(): void
+    {
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->with('credentials')->fetchOne();
+
+        unset($user->credentials);
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+    }
+
+    // Embedded Relation doesn't support null yet
+    //
+    // /**
+    //  * If relation is replaced with null - delete the child (set user_id to null)
+    //  */
+    // public function testRemoveChildrenUsingSetNull(): void
+    // {
+    //     /** @var User $user */
+    //     $user = (new Select($this->orm, User::class))
+    //         ->wherePK(1)
+    //         ->with('credentials')->fetchOne();
+    //
+    //     $this->assertInstanceOf(UserCredentials::class, $user->credentials);
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($user);
+    //     $this->assertNumWrites(0);
+    //
+    //     $user->credentials = null;
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($user);
+    //     $this->assertNumWrites(1);
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($user);
+    //     $this->assertNumWrites(0);
+    //
+    //     $this->orm->getHeap()->clean();
+    //     $user = (new Select($this->orm, User::class))
+    //         ->wherePK(1)
+    //         ->with('credentials')->fetchOne();
+    //     $this->assertNull($user->credentials);
+    // }
+    //
+    // public function testUninitializedProperty(): void
+    // {
+    //     $u = new User();
+    //     $u->email = 'many@email.com';
+    //     $u->balance = 900;
+    //     unset($u->credentials);
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($u);
+    //     $this->assertNumWrites(1);
+    //
+    //     self::assertFalse(isset($u->credentials));
+    //
+    //     $u->credentials = null;
+    //
+    //     $this->captureWriteQueries();
+    //     $this->save($u);
+    //     $this->assertNumWrites(0);
+    // }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+            'creds_username' => 'string',
+            'creds_password' => 'string',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance', 'creds_username', 'creds_password'],
+            [
+                ['hello@world.com', 100, 'user1', 'pass1'],
+                ['another@world.com', 200, 'user2', 'pass2'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'credentials' => [
+                        Relation::NULLABLE => static::NULLABLE,
+                        Relation::TYPE => Relation::EMBEDDED,
+                        Relation::TARGET => 'user:credentials',
+                        Relation::LOAD => Relation::LOAD_PROMISE,
+                        Relation::SCHEMA => [],
+                    ],
+                ],
+            ],
+            UserCredentials::class => [
+                Schema::ROLE => 'user:credentials',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => [
+                    'id' => 'id',
+                    'username' => 'creds_username',
+                    'password' => 'creds_password',
+                ],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

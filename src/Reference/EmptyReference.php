@@ -8,9 +8,8 @@ final class EmptyReference implements ReferenceInterface
 {
     public function __construct(
         private string $role,
-        private mixed $value
-    ) {
-    }
+        private mixed $value,
+    ) {}
 
     public function getRole(): string
     {

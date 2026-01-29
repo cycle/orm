@@ -19,6 +19,30 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    public function testSelect(): void
+    {
+        $buyer = (new Select($this->orm, Buyer::class))
+            ->wherePK(4)
+            ->fetchOne();
+
+        $this->assertInstanceOf(Buyer::class, $buyer);
+        $this->assertSame(4, $buyer->id);
+        $this->assertSame('foo', $buyer->address);
+
+        $this->assertCount(2, $buyer->partners);
+
+        $user1 = $buyer->partners[0];
+        $user2 = $buyer->partners[1];
+
+        \assert($user1 instanceof User);
+        \assert($user2 instanceof User);
+
+        $this->assertSame('00000000-0000-0000-0000-000000000001', $user1->id->toString());
+        $this->assertSame('00000000-0000-0000-0000-000000000002', $user2->id->toString());
+        $this->assertSame('John', $user1->name);
+        $this->assertSame('Sam', $user2->name);
+    }
+
     public function setUp(): void
     {
         // Init DB
@@ -60,29 +84,5 @@ abstract class CaseTest extends BaseTest
             ['buyer_id', 'partner_id'],
             [[4, '00000000-0000-0000-0000-000000000001'], [4, '00000000-0000-0000-0000-000000000002']],
         );
-    }
-
-    public function testSelect(): void
-    {
-        $buyer = (new Select($this->orm, Buyer::class))
-            ->wherePK(4)
-            ->fetchOne();
-
-        $this->assertInstanceOf(Buyer::class, $buyer);
-        $this->assertSame(4, $buyer->id);
-        $this->assertSame('foo', $buyer->address);
-
-        $this->assertCount(2, $buyer->partners);
-
-        $user1 = $buyer->partners[0];
-        $user2 = $buyer->partners[1];
-
-        \assert($user1 instanceof User);
-        \assert($user2 instanceof User);
-
-        $this->assertSame('00000000-0000-0000-0000-000000000001', $user1->id->toString());
-        $this->assertSame('00000000-0000-0000-0000-000000000002', $user2->id->toString());
-        $this->assertSame('John', $user1->name);
-        $this->assertSame('Sam', $user2->name);
     }
 }

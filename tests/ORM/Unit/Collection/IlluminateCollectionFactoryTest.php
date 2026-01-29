@@ -17,6 +17,7 @@ class IlluminateCollectionFactoryTest extends BaseTest
 
     /**
      * @dataProvider collectionDataProvider
+     * @param mixed $data
      */
     public function testCollectShouldReturnArray($data): void
     {
@@ -31,6 +32,7 @@ class IlluminateCollectionFactoryTest extends BaseTest
 
     /**
      * @dataProvider collectionDataProvider
+     * @param mixed $data
      */
     public function testCollectShouldReturnArrayForCustomCollection($data): void
     {
@@ -51,6 +53,4 @@ class IlluminateCollectionFactoryTest extends BaseTest
     }
 }
 
-class CustomCollection extends Collection
-{
-}
+class CustomCollection extends Collection {}

@@ -16,15 +16,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testSelectWithJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -78,6 +69,15 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         $this->assertSame('Product-2', $product->title);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

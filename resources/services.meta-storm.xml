@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<meta-storm xmlns="meta-storm">
+    <definitions>
+        <classMethod class="\Cycle\ORM\Service\SourceProviderInterface" method="getSource" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Service\EntityProviderInterface" method="get" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Service\EntityFactoryInterface" method="make" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Service\IndexProviderInterface" method="getIndexes" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Service\RelationProviderInterface" method="getRelationMap" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Service\MapperProviderInterface" method="getMapper" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Service\RepositoryProviderInterface" method="getRepository" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+
+        <classMethod class="\Cycle\ORM\Service\TypecastProviderInterface" method="getTypecast" argument="0">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classMethod>
+    </definitions>
+</meta-storm>

@@ -53,7 +53,7 @@ final class NullHeapTest extends TestCase
         $heap = $this->createHeap();
         $node = new Node(Node::NEW, self::ENTITY_SET_1, 'user');
         $entity = new User();
-        $heap->attach($entity, $node, [(array)self::INDEX_FIELDS_1]);
+        $heap->attach($entity, $node, [(array) self::INDEX_FIELDS_1]);
 
         $this->assertNull($heap->find('user', self::INDEX_FIND_1_1));
     }

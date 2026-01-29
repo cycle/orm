@@ -17,50 +17,6 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('cyclic', [
-            'id' => 'primary',
-            'name' => 'string',
-            'parent_id' => 'integer,nullable',
-        ]);
-
-        $this->getDatabase()->table('cyclic')->insertMultiple(
-            ['parent_id', 'name'],
-            [
-                [null, 'first'],
-                [1, 'second'],
-                [3, 'self-reference'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            'cyclic' => [
-                Schema::MAPPER => StdMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'cyclic',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::FIND_BY_KEYS => ['parent_id'],
-                Schema::COLUMNS => ['id', 'parent_id', 'name'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'cyclic' => [
-                        Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => 'cyclic',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::NULLABLE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                        ],
-                    ],
-                ],
-            ],
-        ]));
-    }
-
     public function testFetchCyclic(): void
     {
         $selector = new Select($this->orm, 'cyclic');
@@ -142,9 +98,57 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
         $this->save($c);
         $this->assertNumWrites(2);
 
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
+
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');
         $c = $selector->load('cyclic')->wherePK($c->id)->fetchOne();
         $this->assertEquals('new', $c->name);
         $this->assertSame($c, $c->cyclic);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('cyclic', [
+            'id' => 'primary',
+            'name' => 'string',
+            'parent_id' => 'integer,nullable',
+        ]);
+
+        $this->getDatabase()->table('cyclic')->insertMultiple(
+            ['parent_id', 'name'],
+            [
+                [null, 'first'],
+                [1, 'second'],
+                [3, 'self-reference'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            'cyclic' => [
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'cyclic',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::FIND_BY_KEYS => ['parent_id'],
+                Schema::COLUMNS => ['id', 'parent_id', 'name'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'cyclic' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => 'cyclic',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                        ],
+                    ],
+                ],
+            ],
+        ]));
     }
 }

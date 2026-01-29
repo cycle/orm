@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity;
 
-use DateTimeImmutable;
-
 class User
 {
     private ?int $id = null;
     private string $login;
     private string $passwordHash;
-    private DateTimeImmutable $created_at;
-    private DateTimeImmutable $updated_at;
+    private \DateTimeImmutable $created_at;
+    private \DateTimeImmutable $updated_at;
 
     /**
      * @var Post[]
@@ -27,14 +25,14 @@ class User
     public function __construct(string $login, string $password)
     {
         $this->login = $login;
-        $this->created_at = new DateTimeImmutable();
-        $this->updated_at = new DateTimeImmutable();
+        $this->created_at = new \DateTimeImmutable();
+        $this->updated_at = new \DateTimeImmutable();
         $this->setPassword($password);
     }
 
     public function getId(): ?string
     {
-        return $this->id === null ? null : (string)$this->id;
+        return $this->id === null ? null : (string) $this->id;
     }
 
     public function getLogin(): string
@@ -59,12 +57,12 @@ class User
         $this->passwordHash = md5($password);
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }
 
-    public function getUpdatedAt(): DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeImmutable
     {
         return $this->updated_at;
     }

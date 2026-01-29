@@ -26,7 +26,7 @@ class Mapper extends DatabaseMapper
     public function __construct(
         ORMInterface $orm,
         protected ProxyEntityFactory $entityFactory,
-        string $role
+        string $role,
     ) {
         parent::__construct($orm, $role);
 
@@ -36,7 +36,7 @@ class Mapper extends DatabaseMapper
         $this->discriminator = $this->schema->define($role, SchemaInterface::DISCRIMINATOR) ?? $this->discriminator;
     }
 
-    public function init(array $data, string $role = null): object
+    public function init(array $data, ?string $role = null): object
     {
         $class = $this->resolveClass($data, $role);
         return $this->entityFactory->create($this->relationMap, $class);
@@ -56,9 +56,9 @@ class Mapper extends DatabaseMapper
 
     public function fetchFields(object $entity): array
     {
-        $values = array_intersect_key(
+        $values = \array_intersect_key(
             $this->entityFactory->extractData($this->relationMap, $entity),
-            $this->columns + $this->parentColumns
+            $this->columns + $this->parentColumns,
         );
         return $values + $this->getDiscriminatorValues($entity);
     }

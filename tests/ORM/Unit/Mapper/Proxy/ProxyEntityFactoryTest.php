@@ -22,13 +22,30 @@ class ProxyEntityFactoryTest extends TestCase
     private ProxyEntityFactory $factory;
     private ORM $orm;
 
+    public function testCreatesObject()
+    {
+        $user = $this->factory->create(RelationMap::build($this->orm, 'user'), User::class);
+
+        $this->assertInstanceOf(EntityProxyInterface::class, $user);
+    }
+
+    public function testCreatesNonExistingObjectShouldThrowException()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(
+            'The entity `hello-world` class does not exist. Proxy factory can not create classless entities.',
+        );
+
+        $this->factory->create(RelationMap::build($this->orm, 'user'), 'hello-world');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->factory = new ProxyEntityFactory(
             new ClosureHydrator(),
-            new ClassPropertiesExtractor()
+            new ClassPropertiesExtractor(),
         );
 
         $factory = $this->createMock(FactoryInterface::class);
@@ -46,24 +63,7 @@ class ProxyEntityFactoryTest extends TestCase
                     SchemaInterface::SCHEMA => [],
                     SchemaInterface::RELATIONS => [],
                 ],
-            ])
+            ]),
         );
-    }
-
-    public function testCreatesObject()
-    {
-        $user = $this->factory->create(RelationMap::build($this->orm, 'user'), User::class);
-
-        $this->assertInstanceOf(EntityProxyInterface::class, $user);
-    }
-
-    public function testCreatesNonExistingObjectShouldThrowException()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage(
-            'The entity `hello-world` class does not exist. Proxy factory can not create classless entities.'
-        );
-
-        $this->factory->create(RelationMap::build($this->orm, 'user'), 'hello-world');
     }
 }

@@ -55,7 +55,7 @@ class HeapTest extends TestCase
         $heap = $this->createHeap();
         $node = new Node(Node::NEW, static::ENTITY_SET_1, 'user');
         $entity = new User();
-        $heap->attach($entity, $node, [(array)static::INDEX_FIELDS_1]);
+        $heap->attach($entity, $node, [(array) static::INDEX_FIELDS_1]);
 
         $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_1_1), 'Found');
     }

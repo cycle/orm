@@ -27,9 +27,7 @@ use Cycle\ORM\Select\SourceInterface;
 abstract class DatabaseMapper implements MapperInterface
 {
     protected SourceInterface $source;
-
     protected array $columns = [];
-
     protected array $parentColumns = [];
 
     /** @var string[] */
@@ -37,14 +35,16 @@ abstract class DatabaseMapper implements MapperInterface
 
     /** @var string[] */
     protected array $primaryKeys;
-    private ?TypecastInterface $typecast;
+
     protected RelationMap $relationMap;
+    private ?TypecastInterface $typecast;
+
     /** @var array<non-empty-string, int> */
     private array $generatedFields;
 
     public function __construct(
         ORMInterface $orm,
-        protected string $role
+        protected string $role,
     ) {
         $this->source = $orm->getSource($role);
         $this->typecast = $orm->getService(TypecastProviderInterface::class)->getTypecast($role);
@@ -65,7 +65,7 @@ abstract class DatabaseMapper implements MapperInterface
             $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
 
-        $this->primaryKeys = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
+        $this->primaryKeys = (array) $schema->define($role, SchemaInterface::PRIMARY_KEY);
         foreach ($this->primaryKeys as $PK) {
             $this->primaryColumns[] = $this->columns[$PK] ?? $PK;
         }
@@ -84,11 +84,11 @@ abstract class DatabaseMapper implements MapperInterface
 
         // Cast relations
         foreach ($this->relationMap->getRelations() as $field => $relation) {
-            if (!array_key_exists($field, $data)) {
+            if (!\array_key_exists($field, $data)) {
                 continue;
             }
             $value = $data[$field];
-            if (!is_array($value) && null !== $value) {
+            if (!\is_array($value) && $value !== null) {
                 continue;
             }
             // break links
@@ -144,7 +144,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getTable(),
             $state,
             $this,
-            $this->primaryKeys
+            $this->primaryKeys,
         );
 
         foreach ($this->primaryKeys as $pk) {
@@ -161,7 +161,7 @@ abstract class DatabaseMapper implements MapperInterface
             $this->source->getDatabase(),
             $this->source->getTable(),
             $state,
-            $this
+            $this,
         );
 
         $state->setStatus(Node::SCHEDULED_DELETE);
@@ -176,14 +176,6 @@ abstract class DatabaseMapper implements MapperInterface
         return $delete;
     }
 
-    /**
-     * Generate next sequential entity ID. Return null to use autoincrement value.
-     */
-    protected function nextPrimaryKey(): ?array
-    {
-        return null;
-    }
-
     public function mapColumns(array &$values): array
     {
         $result = [];
@@ -196,5 +188,13 @@ abstract class DatabaseMapper implements MapperInterface
         }
 
         return $result;
+    }
+
+    /**
+     * Generate next sequential entity ID. Return null to use autoincrement value.
+     */
+    protected function nextPrimaryKey(): ?array
+    {
+        return null;
     }
 }

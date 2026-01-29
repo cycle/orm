@@ -7,6 +7,4 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
-final class CustomCollection extends ArrayCollection
-{
-}
+final class CustomCollection extends ArrayCollection {}

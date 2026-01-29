@@ -6,7 +6,6 @@ namespace Cycle\ORM\Collection\Pivoted;
 
 use loophp\collection\Collection;
 use loophp\collection\CollectionDecorator;
-use SplObjectStorage;
 
 /**
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
@@ -22,17 +21,22 @@ use SplObjectStorage;
  */
 class LoophpPivotedCollection extends CollectionDecorator implements PivotedCollectionInterface, \Countable
 {
-    /** @var SplObjectStorage<TEntity, TPivot> */
-    protected SplObjectStorage $pivotContext;
+    /** @var \SplObjectStorage<TEntity, TPivot> */
+    protected \SplObjectStorage $pivotContext;
 
     /**
      * @param array<TKey, TEntity> $elements
-     * @param SplObjectStorage<TEntity, TPivot>|null $pivotData
+     * @param \SplObjectStorage<TEntity, TPivot>|null $pivotData
      */
-    final public function __construct(array $elements = [], SplObjectStorage $pivotData = null)
+    final public function __construct(array $elements = [], ?\SplObjectStorage $pivotData = null)
     {
         parent::__construct(Collection::fromIterable($elements));
-        $this->pivotContext = $pivotData ?? new SplObjectStorage();
+        $this->pivotContext = $pivotData ?? new \SplObjectStorage();
+    }
+
+    public static function fromIterable(iterable $iterable): static
+    {
+        return new static($iterable instanceof \Traversable ? \iterator_to_array($iterable) : $iterable);
     }
 
     public function hasPivot(object $element): bool
@@ -50,7 +54,7 @@ class LoophpPivotedCollection extends CollectionDecorator implements PivotedColl
         $this->pivotContext[$element] = $pivot;
     }
 
-    public function getPivotContext(): SplObjectStorage
+    public function getPivotContext(): \SplObjectStorage
     {
         return $this->pivotContext;
     }
@@ -58,11 +62,6 @@ class LoophpPivotedCollection extends CollectionDecorator implements PivotedColl
     public function count(): int
     {
         return \iterator_count($this->innerCollection);
-    }
-
-    public static function fromIterable(iterable $iterable): static
-    {
-        return new static($iterable instanceof \Traversable ? \iterator_to_array($iterable) : $iterable);
     }
 
     /**

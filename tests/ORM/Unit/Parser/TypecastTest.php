@@ -10,23 +10,25 @@ use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Tests\Fixtures\Enum\CustomStringable;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
+use Cycle\ORM\Tests\Fixtures\StaticCallableRule;
 use Cycle\ORM\Tests\Fixtures\Uuid;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use ReflectionEnum;
 
 class TypecastTest extends TestCase
 {
     private Typecast $typecast;
     private m\LegacyMockInterface|m\MockInterface|DatabaseInterface $db;
 
-    protected function setUp(): void
+    public static function callablesWithArgs(): iterable
     {
-        parent::setUp();
-
-        $this->typecast = new Typecast(
-            $this->db = m::mock(DatabaseInterface::class)
-        );
+        yield [[StaticCallableRule::class, 'invoke'], ['bar'], true];
+        yield [[StaticCallableRule::class, 'invoke'], [['bar']], true];
+        yield [[StaticCallableRule::class, 'invoke'], ['argument' => ['bar']], true];
+        yield [[StaticCallableRule::class, 'invokeVariadic'], ['foo' => 'bar'], true];
+        yield [[StaticCallableRule::class, 'invokeWithoutDatabaseVariadic'], ['foo' => 'bar'], false];
+        yield [[StaticCallableRule::class, 'invokeWithoutDatabaseVariadic'], [1, 2, 42], false];
+        yield [[StaticCallableRule::class, 'invokeWithoutDatabase'], [69], false];
     }
 
     public function testSetRules(): void
@@ -36,9 +38,10 @@ class TypecastTest extends TestCase
             'guest' => 'bool',
             'bonus' => 'float',
             'date' => 'datetime',
-            'slug' => fn (string $value) => strtolower($value),
+            'slug' => fn(string $value) => strtolower($value),
             'title' => 'strtoupper',
             'test' => [Uuid::class, 'create'],
+            'callable' => [StaticCallableRule::class, 'invoke', ['foo' => 'bar']],
             'uuid' => 'uuid',
             'settings' => 'json',
         ];
@@ -61,7 +64,7 @@ class TypecastTest extends TestCase
         if (\PHP_VERSION_ID < 80100) {
             return;
         }
-        $getCase = static fn (string $enum, string $case) => (new ReflectionEnum($enum))
+        $getCase = static fn(string $enum, string $case) => (new \ReflectionEnum($enum))
             ->getCase($case)
             ->getValue();
 
@@ -161,6 +164,26 @@ class TypecastTest extends TestCase
         $this->assertSame('71ceb213-ec3d-4ae5-911b-ba042abfb204', $result['uuid']->toString());
     }
 
+    /**
+     * @dataProvider callablesWithArgs
+     */
+    public function testCastCallableWithArguments(array $callable, array $args, bool $hasDatabase): void
+    {
+        $this->typecast->setRules(['callable' => [...$callable, $args]]);
+
+        $result = $this->typecast->cast(['callable' => 'baz'])['callable'];
+
+        $this->assertSame('baz', $result['value'], 'Value should be "baz"');
+        $hasDatabase and $this->assertInstanceOf(DatabaseInterface::class, $result['database'], 'Database passed');
+
+        $isVariadic = (new \ReflectionFunction(\Closure::fromCallable($callable)))->isVariadic();
+        $this->assertSame(
+            $isVariadic ? $args : \array_values($args),
+            $result['arguments'],
+            'Arguments must be the same as passed',
+        );
+    }
+
     public function testCastJsonValue(): void
     {
         $this->typecast->setRules(['foo' => 'json', 'baz' => 'json']);
@@ -189,5 +212,15 @@ class TypecastTest extends TestCase
         $this->assertSame(json_encode(['foo' => 'bar']), $data['foo']);
         $this->assertSame(['bar' => 'baz'], $data['bar']);
         $this->assertNull($data['baz']);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->typecast = new Typecast(
+            'role',
+            $this->db = m::mock(DatabaseInterface::class),
+        );
     }
 }

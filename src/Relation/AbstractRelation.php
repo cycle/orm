@@ -33,7 +33,6 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     protected array $outerKeys;
 
     protected ?string $inversion;
-
     protected MapperProviderInterface $mapperProvider;
     protected SchemaInterface $ormSchema;
 
@@ -45,24 +44,18 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
         private string $role,
         protected string $name,
         protected string $target,
-        protected array $schema
+        protected array $schema,
     ) {
         $this->ormSchema = $orm->getSchema();
         $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
-        $this->innerKeys = (array)$schema[Relation::INNER_KEY];
-        $this->outerKeys = (array)$schema[Relation::OUTER_KEY];
+        $this->innerKeys = (array) $schema[Relation::INNER_KEY];
+        $this->outerKeys = (array) $schema[Relation::OUTER_KEY];
         $this->inversion = $schema[Relation::INVERSION] ?? null;
     }
 
     public function getInnerKeys(): array
     {
         return $this->innerKeys;
-    }
-
-    public function __toString(): string
-    {
-        // this is incorrect class
-        return sprintf('`%s` (%s)->%s', $this->name, $this::class, $this->target);
     }
 
     public function getName(): string
@@ -78,6 +71,12 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
     public function isCascade(): bool
     {
         return $this->schema[Relation::CASCADE] ?? false;
+    }
+
+    public function __toString(): string
+    {
+        // this is incorrect class
+        return \sprintf('`%s` (%s)->%s', $this->name, $this::class, $this->target);
     }
 
     protected function isNullable(): bool
@@ -98,7 +97,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
      */
     protected function assertValid(Node $related): void
     {
-        if ($related->getRole() === $this->target || in_array($related->getRole(), $this->targets, true)) {
+        if ($related->getRole() === $this->target || \in_array($related->getRole(), $this->targets, true)) {
             return;
         }
         $role = $this->ormSchema->resolveAlias($related->getRole());
@@ -115,7 +114,7 @@ abstract class AbstractRelation implements ActiveRelationInterface, \Stringable
             }
             $role = $parent;
         } while ($parent !== null);
-        throw new RelationException(sprintf('Unable to link %s, given `%s`.', (string)$this, $related->getRole()));
+        throw new RelationException(\sprintf('Unable to link %s, given `%s`.', (string) $this, $related->getRole()));
     }
 
     protected function registerWaitingFields(State $state, bool $required = true): void

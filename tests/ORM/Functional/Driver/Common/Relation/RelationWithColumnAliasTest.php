@@ -24,76 +24,6 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id_int' => 'primary',
-            'email_str' => 'string',
-            'balance_float' => 'float',
-        ]);
-
-        $this->makeTable('comment', [
-            'id_int' => 'primary',
-            'user_id_int' => 'integer',
-            'message_str' => 'string',
-        ]);
-
-        $this->makeFK('comment', 'user_id_int', 'user', 'id_int');
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email_str', 'balance_float'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['user_id_int', 'message_str'],
-            [
-                [1, 'msg 1'],
-                [1, 'msg 2'],
-                [1, 'msg 3'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id' => 'id_int', 'user_id' => 'user_id_int', 'message' => 'message_str'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
-            ],
-        ]));
-    }
-
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -209,8 +139,8 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
-                 ->where('id', 1)
-                 ->orderBy('user.id');
+            ->where('id', 1)
+            ->orderBy('user.id');
 
         $this->assertEquals([
             [
@@ -242,8 +172,8 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])
-                 ->where('@.id', 1)
-                 ->orderBy('user.id');
+            ->where('@.id', 1)
+            ->orderBy('user.id');
 
         $this->assertEquals([
             [
@@ -346,7 +276,7 @@ abstract class RelationWithColumnAliasTest extends BaseTest
             ->with('comments')
             ->where(
                 'comments.id',
-                new Expression($selector->getBuilder()->resolve('user.id'))
+                new Expression($selector->getBuilder()->resolve('user.id')),
             )->fetchAll();
 
         $this->assertCount(1, $all);
@@ -553,5 +483,75 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $this->assertEquals(2, $b->comments[1]->id);
 
         $this->assertEquals('new b', $b->comments[0]->message);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id_int' => 'primary',
+            'email_str' => 'string',
+            'balance_float' => 'float',
+        ]);
+
+        $this->makeTable('comment', [
+            'id_int' => 'primary',
+            'user_id_int' => 'integer',
+            'message_str' => 'string',
+        ]);
+
+        $this->makeFK('comment', 'user_id_int', 'user', 'id_int');
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email_str', 'balance_float'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['user_id_int', 'message_str'],
+            [
+                [1, 'msg 1'],
+                [1, 'msg 2'],
+                [1, 'msg 3'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id' => 'id_int', 'user_id' => 'user_id_int', 'message' => 'message_str'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => SortByIDScope::class,
+            ],
+        ]));
     }
 }

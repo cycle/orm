@@ -23,44 +23,6 @@ abstract class EnumTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'balance' => 'int',
-            'type_str' => 'string',
-            'type_int' => 'int',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['balance', 'type_str', 'type_int'],
-            [
-                [56, TypeStringEnum::Guest->value, TypeIntEnum::Guest->value],
-                [42, TypeStringEnum::User->value, TypeIntEnum::User->value],
-                [69, TypeStringEnum::Admin->value, TypeIntEnum::Admin->value],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                SchemaInterface::ROLE => 'user',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'user',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'balance', 'type_str', 'type_int'],
-                SchemaInterface::TYPECAST => [
-                    'type_str' => \Closure::fromCallable([TypeStringEnum::class, 'make']),
-                    'type_int' => \Closure::fromCallable([TypeIntEnum::class, 'make']),
-                ],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testFetchRawData(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -86,7 +48,7 @@ abstract class EnumTest extends BaseTest
                     'type_int' => 2,
                 ],
             ],
-            $selector->fetchData(typecast: false)
+            $selector->fetchData(typecast: false),
         );
     }
 
@@ -115,7 +77,7 @@ abstract class EnumTest extends BaseTest
                     'type_int' => TypeIntEnum::Admin,
                 ],
             ],
-            $selector->fetchData()
+            $selector->fetchData(),
         );
     }
 
@@ -137,5 +99,43 @@ abstract class EnumTest extends BaseTest
         } catch (\Throwable) {
             $this->markTestSkipped("Can't save a Enum value because it is not supported yet.");
         }
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'balance' => 'int',
+            'type_str' => 'string',
+            'type_int' => 'int',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['balance', 'type_str', 'type_int'],
+            [
+                [56, TypeStringEnum::Guest->value, TypeIntEnum::Guest->value],
+                [42, TypeStringEnum::User->value, TypeIntEnum::User->value],
+                [69, TypeStringEnum::Admin->value, TypeIntEnum::Admin->value],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'balance', 'type_str', 'type_int'],
+                SchemaInterface::TYPECAST => [
+                    'type_str' => \Closure::fromCallable([TypeStringEnum::class, 'make']),
+                    'type_int' => \Closure::fromCallable([TypeIntEnum::class, 'make']),
+                ],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ]));
     }
 }

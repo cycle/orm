@@ -62,7 +62,7 @@ final class Insert extends StoreCommand
             $this->appendix = [];
         }
         $data = $this->state->getData();
-        return array_merge($this->columns, $this->mapper?->mapColumns($data) ?? $data);
+        return \array_merge($this->columns, $this->mapper?->mapColumns($data) ?? $data);
     }
 
     /**
@@ -135,7 +135,7 @@ final class Insert extends StoreCommand
                 if (!isset($data[$fpk])) {
                     $state->register(
                         $fpk,
-                        $this->mapper === null ? $insertID : $this->mapper->cast([$fpk => $insertID])[$fpk]
+                        $this->mapper === null ? $insertID : $this->mapper->cast([$fpk => $insertID])[$fpk],
                     );
                 }
             }

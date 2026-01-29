@@ -18,6 +18,23 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
 {
     use TableTrait;
 
+    public function testCreateCyclicWithExisting(): void
+    {
+        $u = new User();
+        $u->email = 'hello@world.com';
+        $u->balance = 1;
+
+        $tag = $this->orm->getRepository(Tag::class)->findByPK(1);
+
+        $tag->users->add($u);
+        $u->tags->add($tag);
+
+        $t = new Transaction($this->orm);
+        $t->persist($tag);
+
+        $t->run();
+    }
+
     public function setUp(): void
     {
         if (!version_compare(PHP_VERSION, '7.4', '>=')) {
@@ -54,7 +71,7 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag')->insertMultiple(
@@ -63,7 +80,7 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
                 ['tag a'],
                 ['tag b'],
                 ['tag c'],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag_user_map')->insertMultiple(
@@ -72,7 +89,7 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
                 [1, 1, 'primary'],
                 [1, 2, 'secondary'],
                 [2, 3, 'primary'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema([
@@ -144,22 +161,5 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
-    }
-
-    public function testCreateCyclicWithExisting(): void
-    {
-        $u = new User();
-        $u->email = 'hello@world.com';
-        $u->balance = 1;
-
-        $tag = $this->orm->getRepository(Tag::class)->findByPK(1);
-
-        $tag->users->add($u);
-        $u->tags->add($tag);
-
-        $t = new Transaction($this->orm);
-        $t->persist($tag);
-
-        $t->run();
     }
 }

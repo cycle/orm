@@ -15,33 +15,8 @@ class Uuid implements ValueInterface
     private $uuid;
 
     /**
-     * @return string
-     */
-    public function rawValue(): string
-    {
-        return $this->uuid->getBytes();
-    }
-
-    /**
-     * @return int
-     */
-    public function rawType(): int
-    {
-        return \PDO::PARAM_LOB;
-    }
-
-    /**
-     * @return string
-     */
-    public function toString()
-    {
-        return $this->uuid->toString();
-    }
-
-    /**
      * @throws \Exception
      *
-     * @return Uuid
      */
     public static function create(): self
     {
@@ -53,9 +28,7 @@ class Uuid implements ValueInterface
 
     /**
      * @param string            $value
-     * @param DatabaseInterface $db
      *
-     * @return Uuid
      */
     public static function parse($value, DatabaseInterface $db): self
     {
@@ -68,5 +41,23 @@ class Uuid implements ValueInterface
         $uuid->uuid = UuidBody::fromBytes((string) $value);
 
         return $uuid;
+    }
+
+    public function rawValue(): string
+    {
+        return $this->uuid->getBytes();
+    }
+
+    public function rawType(): int
+    {
+        return \PDO::PARAM_LOB;
+    }
+
+    /**
+     * @return string
+     */
+    public function toString()
+    {
+        return $this->uuid->toString();
     }
 }

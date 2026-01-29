@@ -18,6 +18,41 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
 {
     use TableTrait;
 
+    public function testCreateCyclicWithExistingSingleTimestamp(): void
+    {
+        $u = new User();
+        $u->email = 'hello@world.com';
+        $u->balance = 1;
+
+        $tag = $this->orm->getRepository(Tag::class)->findByPK(1);
+
+        $tag->users->add($u);
+        $u->tags->add($tag);
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($tag);
+        $t->run();
+        $this->assertNumWrites(2);
+    }
+
+    public function testCreateCyclicWithNewSingleTimestamp(): void
+    {
+        $u = new User();
+        $u->email = 'hello@world.com';
+        $u->balance = 1;
+
+        $tag = new Tag();
+        $tag->name = 'new tag';
+
+        $tag->users->add($u);
+        $u->tags->add($tag);
+
+        $this->captureWriteQueries();
+        $this->save($tag);
+        $this->assertNumWrites(3);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -30,7 +65,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
                 'balance' => 'float',
                 'created_at' => 'datetime',
                 'updated_at' => 'datetime',
-            ]
+            ],
         );
 
         $this->makeTable(
@@ -40,7 +75,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
                 'name' => 'string',
                 'created_at' => 'datetime',
                 'updated_at' => 'datetime',
-            ]
+            ],
         );
 
         $this->makeTable(
@@ -52,7 +87,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
                 'as' => 'string,nullable',
                 'created_at' => 'datetime',
                 'updated_at' => 'datetime',
-            ]
+            ],
         );
 
         $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
@@ -64,7 +99,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag')->insertMultiple(
@@ -73,7 +108,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
                 ['tag a'],
                 ['tag b'],
                 ['tag c'],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('tag_user_map')->insertMultiple(
@@ -82,7 +117,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
                 [1, 1, 'primary'],
                 [1, 2, 'secondary'],
                 [2, 3, 'primary'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(
@@ -155,43 +190,8 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
                         Schema::SCHEMA => [],
                         Schema::RELATIONS => [],
                     ],
-                ]
-            )
+                ],
+            ),
         );
-    }
-
-    public function testCreateCyclicWithExistingSingleTimestamp(): void
-    {
-        $u = new User();
-        $u->email = 'hello@world.com';
-        $u->balance = 1;
-
-        $tag = $this->orm->getRepository(Tag::class)->findByPK(1);
-
-        $tag->users->add($u);
-        $u->tags->add($tag);
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($tag);
-        $t->run();
-        $this->assertNumWrites(2);
-    }
-
-    public function testCreateCyclicWithNewSingleTimestamp(): void
-    {
-        $u = new User();
-        $u->email = 'hello@world.com';
-        $u->balance = 1;
-
-        $tag = new Tag();
-        $tag->name = 'new tag';
-
-        $tag->users->add($u);
-        $u->tags->add($tag);
-
-        $this->captureWriteQueries();
-        $this->save($tag);
-        $this->assertNumWrites(3);
     }
 }

@@ -19,26 +19,6 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user_with_uuid_pk', [
-            'uuid' => 'string(36),primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable('comment_with_uuid_user', [
-            'id' => 'primary',
-            'message' => 'string,nullable',
-            'parent_id' => 'integer,nullable',
-            'user_id' => 'string(36),nullable',
-        ]);
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     public function testNestedWithUuidPK(): void
     {
         $uuid = Uuid::uuid4();
@@ -66,7 +46,7 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
 
         $this->assertInstanceOf(
             UserWithUUIDPrimaryKey::class,
-            $this->orm->getRepository(UserWithUUIDPrimaryKey::class)->findOne()
+            $this->orm->getRepository(UserWithUUIDPrimaryKey::class)->findOne(),
         );
 
         $this->assertInstanceOf(Comment::class, $first);
@@ -75,6 +55,26 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
         $this->assertInstanceOf(Comment::class, $second);
         $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $second->userWithUuid);
         $this->assertInstanceOf(Comment::class, $second->parent);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user_with_uuid_pk', [
+            'uuid' => 'string(36),primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable('comment_with_uuid_user', [
+            'id' => 'primary',
+            'message' => 'string,nullable',
+            'parent_id' => 'integer,nullable',
+            'user_id' => 'string(36),nullable',
+        ]);
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

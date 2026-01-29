@@ -9,6 +9,5 @@ class Image
 {
     public $id;
     public $parent;
-
     public $url;
 }

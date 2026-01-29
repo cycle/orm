@@ -32,7 +32,7 @@ class CommandGenerator implements CommandGeneratorInterface
         return match (\count($commands)) {
             0 => null,
             1 => \current($commands),
-            default => $this->buildStoreSequence($schema, $commands, $tuple, $entityCommand)
+            default => $this->buildStoreSequence($schema, $commands, $tuple, $entityCommand),
         };
     }
 
@@ -50,7 +50,7 @@ class CommandGenerator implements CommandGeneratorInterface
         $schema = $orm->getSchema();
         $parents = $commands = [];
         $parent = $schema->define($tuple->node->getRole(), SchemaInterface::PARENT);
-        while (is_string($parent)) {
+        while (\is_string($parent)) {
             \array_unshift($parents, $parent);
             $parent = $schema->define($parent, SchemaInterface::PARENT);
         }
@@ -83,7 +83,7 @@ class CommandGenerator implements CommandGeneratorInterface
         ORMInterface $orm,
         Tuple $tuple,
         string $parentRole,
-        bool $isNew
+        bool $isNew,
     ): ?CommandInterface {
         $parentMapper = $orm->getMapper($parentRole);
         return $isNew
@@ -98,7 +98,7 @@ class CommandGenerator implements CommandGeneratorInterface
         SchemaInterface $schema,
         array $commands,
         Tuple $tuple,
-        ?CommandInterface $primaryCommand = null
+        ?CommandInterface $primaryCommand = null,
     ): CommandInterface {
         $parent = null;
         $result = [];
@@ -113,15 +113,15 @@ class CommandGenerator implements CommandGeneratorInterface
             $command = WrappedStoreCommand::wrapStoreCommand($command);
 
             // Transact PK from previous parent to current
-            $parentKey = (array)($schema->define($role, SchemaInterface::PARENT_KEY)
+            $parentKey = (array) ($schema->define($role, SchemaInterface::PARENT_KEY)
                 ?? $schema->define($parent, SchemaInterface::PRIMARY_KEY));
-            $primaryKey = (array)$schema->define($role, SchemaInterface::PRIMARY_KEY);
+            $primaryKey = (array) $schema->define($role, SchemaInterface::PRIMARY_KEY);
             $result[] = $command->withBeforeExecution(
                 static function (StoreCommandInterface $command) use ($tuple, $parentKey, $primaryKey): void {
                     foreach ($primaryKey as $i => $pk) {
                         $command->registerAppendix($pk, $tuple->state->getValue($parentKey[$i]));
                     }
-                }
+                },
             );
             $parent = $role;
         }

@@ -19,40 +19,6 @@ abstract class UUIDTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'user_with_uuid_primary_key',
-            [
-                'uuid' => 'string(36),primary',
-                'email' => 'string',
-                'balance' => 'float',
-            ]
-        );
-
-        $this->orm = $this->withSchema(
-            new Schema(
-                [
-                    UserWithUUIDPrimaryKey::class => [
-                        SchemaInterface::ROLE => 'user_with_uuid_primary_key',
-                        SchemaInterface::MAPPER => Mapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'user_with_uuid_primary_key',
-                        SchemaInterface::PRIMARY_KEY => 'uuid',
-                        SchemaInterface::COLUMNS => ['uuid', 'email', 'balance'],
-                        SchemaInterface::TYPECAST => [
-                            'uuid' => [UuidPrimaryKey::class, 'typecast'],
-                        ],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [],
-                    ],
-                ]
-            )
-        );
-    }
-
     public function testCreate(): void
     {
         $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey(Uuid::uuid4()->toString()), 'hello@world.com', 500);
@@ -73,13 +39,13 @@ abstract class UUIDTest extends BaseTest
 
         $this->save($e);
 
-        $this->assertEquals($uuid, (string)$e->getID());
+        $this->assertEquals($uuid, (string) $e->getID());
 
         $this->orm = $this->orm->withHeap(new Heap());
         $result = (new Select($this->orm, UserWithUUIDPrimaryKey::class))->fetchData();
 
         $this->assertInstanceOf(UuidPrimaryKey::class, $result[0]['uuid']);
-        $this->assertEquals((string)$e->getID(), (string)$result[0]['uuid']);
+        $this->assertEquals((string) $e->getID(), (string) $result[0]['uuid']);
     }
 
     public function testUpdate(): void
@@ -89,13 +55,13 @@ abstract class UUIDTest extends BaseTest
 
         $this->save($e);
 
-        $this->assertEquals($uuid, (string)$e->getID());
+        $this->assertEquals($uuid, (string) $e->getID());
 
         $this->orm = $this->orm->withHeap(new Heap());
         $result = (new Select($this->orm, UserWithUUIDPrimaryKey::class))->fetchOne();
 
         $this->assertInstanceOf(UuidPrimaryKey::class, $result->getID());
-        $this->assertEquals((string)$e->getID(), (string)$result->getID());
+        $this->assertEquals((string) $e->getID(), (string) $result->getID());
 
         $result->setEmail('new-mail@test.loc');
 
@@ -106,5 +72,39 @@ abstract class UUIDTest extends BaseTest
 
         $this->assertInstanceOf(UuidPrimaryKey::class, $result2->getID());
         $this->assertEquals($result->getEmail(), $result2->getEmail());
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'user_with_uuid_primary_key',
+            [
+                'uuid' => 'string(36),primary',
+                'email' => 'string',
+                'balance' => 'float',
+            ],
+        );
+
+        $this->orm = $this->withSchema(
+            new Schema(
+                [
+                    UserWithUUIDPrimaryKey::class => [
+                        SchemaInterface::ROLE => 'user_with_uuid_primary_key',
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user_with_uuid_primary_key',
+                        SchemaInterface::PRIMARY_KEY => 'uuid',
+                        SchemaInterface::COLUMNS => ['uuid', 'email', 'balance'],
+                        SchemaInterface::TYPECAST => [
+                            'uuid' => [UuidPrimaryKey::class, 'typecast'],
+                        ],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                ],
+            ),
+        );
     }
 }

@@ -18,15 +18,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testSelect(): void
     {
         $uuid = Uuid::uuid7();
@@ -44,7 +35,7 @@ abstract class CaseTest extends BaseTest
         // Get entity
         (new Select($this->orm, Entity\Account::class))
             ->load('identity.profile')
-            ->wherePK((string)$uuid)
+            ->wherePK((string) $uuid)
             ->fetchOne();
 
         // There is no any exception like this:
@@ -59,6 +50,15 @@ abstract class CaseTest extends BaseTest
 
         // To avoid `Entity and State are not in sync` exception
         $this->orm->getHeap()->clean();
+    }
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

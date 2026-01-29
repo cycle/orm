@@ -20,20 +20,20 @@ use Doctrine\Common\Collections\Collection;
  */
 final class DoctrineCollectionFactory implements CollectionFactoryInterface
 {
+    /** @var class-string<TCollection> */
+    private string $class = ArrayCollection::class;
+
     public function __construct()
     {
-        if (!class_exists(ArrayCollection::class, true)) {
+        if (!\class_exists(ArrayCollection::class, true)) {
             throw new CollectionFactoryException(
-                sprintf(
+                \sprintf(
                     'There is no %s class. To resolve this issue you can install `doctrine/collections` package.',
-                    ArrayCollection::class
-                )
+                    ArrayCollection::class,
+                ),
             );
         }
     }
-
-    /** @var class-string<TCollection> */
-    private string $class = ArrayCollection::class;
 
     public function getInterface(): ?string
     {
@@ -54,7 +54,7 @@ final class DoctrineCollectionFactory implements CollectionFactoryInterface
                 return new PivotedCollection($data->getElements(), $data->getContext());
             }
 
-            if (is_a($this->class, PivotedCollection::class)) {
+            if (\is_a($this->class, PivotedCollection::class)) {
                 return new $this->class($data->getElements(), $data->getContext());
             }
         }

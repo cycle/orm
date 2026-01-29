@@ -14,11 +14,6 @@ abstract class RunnerTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
-
     // Mode OPEN_TRANSACTION
 
     public function testInnerTransactionRun(): void
@@ -139,5 +134,10 @@ abstract class RunnerTest extends BaseTest
         $runner->rollback();
 
         $this->assertSame(1, $this->getDriver()->getTransactionLevel());
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
     }
 }

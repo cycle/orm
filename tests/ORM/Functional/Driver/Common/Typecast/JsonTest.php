@@ -16,75 +16,10 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\JsonTypecast;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Throwable;
 
 abstract class JsonTest extends BaseTest
 {
     use TableTrait;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(table: 'users', columns: [
-            'id' => 'primary',
-            'email' => 'string',
-            'settings' => 'text',
-            'settings_nullable' => 'text,nullable',
-            'json_serializable' => 'text,nullable',
-        ], defaults: ['settings' => null, 'settings_nullable' => null, 'json_serializable' => null]);
-
-        $this->getDatabase()->table('users')->insertOne(
-            [
-                'email' => 'hello@world.com',
-                'settings' => \json_encode(['theme' => 'dark']),
-                'settings_nullable' => null,
-                'json_serializable' => null,
-            ],
-        );
-        $this->getDatabase()->table('users')->insertOne(
-            [
-                'email' => 'another@world.com',
-                'settings' => \json_encode(['grids' => ['products' => ['columns' => ['id', 'title']]]]),
-                'settings_nullable' => \json_encode(['theme' => 'dark']),
-                'json_serializable' => null,
-            ],
-        );
-
-        $mapping = [
-            SchemaInterface::ROLE => 'user',
-            SchemaInterface::MAPPER => Mapper::class,
-            SchemaInterface::DATABASE => 'default',
-            SchemaInterface::TABLE => 'users',
-            SchemaInterface::PRIMARY_KEY => 'id',
-            SchemaInterface::COLUMNS => [
-                'id' => 'id',
-                'email' => 'email',
-                'settings' => 'settings',
-                'settingsNullable' => 'settings_nullable',
-                'jsonSerializable' => 'json_serializable',
-            ],
-            SchemaInterface::TYPECAST => [
-                'id' => 'int',
-                'settings' => 'json',
-                'settingsNullable' => 'json',
-                'jsonSerializable' => 'json',
-            ],
-            SchemaInterface::SCHEMA => [],
-            SchemaInterface::RELATIONS => [],
-        ];
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => $mapping,
-            Admin::class => [
-                SchemaInterface::ROLE => 'admin',
-                SchemaInterface::TYPECAST_HANDLER => [
-                    JsonTypecast::class,
-                    Typecast::class,
-                ],
-            ] + $mapping,
-        ]));
-    }
 
     public function testFetchAll(): void
     {
@@ -144,7 +79,7 @@ abstract class JsonTest extends BaseTest
     }
 
     /**
-     * @throws Throwable
+     * @throws \Throwable
      */
     public function testStoresEmptyArraySettings(): void
     {
@@ -226,7 +161,7 @@ abstract class JsonTest extends BaseTest
         $result = $this->getDatabase()->table('users')->select()->where('id', $e->id)->fetchAll();
         $this->assertEquals(
             (new JsonSerializableClass())->jsonSerialize(),
-            \json_decode($result[0]['json_serializable'], true)
+            \json_decode($result[0]['json_serializable'], true),
         );
     }
 
@@ -269,5 +204,69 @@ abstract class JsonTest extends BaseTest
 
         $result = $this->getDatabase()->table('users')->select()->where('id', $e->id)->fetchAll();
         $this->assertSame('uncast-json', $result[0]['settings']);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(table: 'users', columns: [
+            'id' => 'primary',
+            'email' => 'string',
+            'settings' => 'text',
+            'settings_nullable' => 'text,nullable',
+            'json_serializable' => 'text,nullable',
+        ], defaults: ['settings' => null, 'settings_nullable' => null, 'json_serializable' => null]);
+
+        $this->getDatabase()->table('users')->insertOne(
+            [
+                'email' => 'hello@world.com',
+                'settings' => \json_encode(['theme' => 'dark']),
+                'settings_nullable' => null,
+                'json_serializable' => null,
+            ],
+        );
+        $this->getDatabase()->table('users')->insertOne(
+            [
+                'email' => 'another@world.com',
+                'settings' => \json_encode(['grids' => ['products' => ['columns' => ['id', 'title']]]]),
+                'settings_nullable' => \json_encode(['theme' => 'dark']),
+                'json_serializable' => null,
+            ],
+        );
+
+        $mapping = [
+            SchemaInterface::ROLE => 'user',
+            SchemaInterface::MAPPER => Mapper::class,
+            SchemaInterface::DATABASE => 'default',
+            SchemaInterface::TABLE => 'users',
+            SchemaInterface::PRIMARY_KEY => 'id',
+            SchemaInterface::COLUMNS => [
+                'id' => 'id',
+                'email' => 'email',
+                'settings' => 'settings',
+                'settingsNullable' => 'settings_nullable',
+                'jsonSerializable' => 'json_serializable',
+            ],
+            SchemaInterface::TYPECAST => [
+                'id' => 'int',
+                'settings' => 'json',
+                'settingsNullable' => 'json',
+                'jsonSerializable' => 'json',
+            ],
+            SchemaInterface::SCHEMA => [],
+            SchemaInterface::RELATIONS => [],
+        ];
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => $mapping,
+            Admin::class => [
+                SchemaInterface::ROLE => 'admin',
+                SchemaInterface::TYPECAST_HANDLER => [
+                    JsonTypecast::class,
+                    Typecast::class,
+                ],
+            ] + $mapping,
+        ]));
     }
 }

@@ -8,7 +8,6 @@ class Currency
 {
     public function __construct(
         public string $code,
-        public string $name
-    ) {
-    }
+        public string $name,
+    ) {}
 }

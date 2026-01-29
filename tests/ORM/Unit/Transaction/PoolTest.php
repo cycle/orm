@@ -9,7 +9,6 @@ use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 
 class PoolTest extends TestCase
 {
@@ -17,7 +16,7 @@ class PoolTest extends TestCase
     {
         $orm = m::mock(ORMInterface::class);
         $pool = new Pool($orm);
-        $entity = new stdClass();
+        $entity = new \stdClass();
 
         $pool->attach($entity, Tuple::TASK_DELETE, false);
         $pool->attach($entity, Tuple::TASK_DELETE, false);

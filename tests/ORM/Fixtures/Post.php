@@ -20,6 +20,5 @@ class Post implements ImagedInterface
     public $comments;
 
     public ?Post $parent = null;
-
     public UserWithUUIDPrimaryKey $userWithUuidPK;
 }

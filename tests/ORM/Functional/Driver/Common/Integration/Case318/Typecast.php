@@ -34,7 +34,7 @@ final class Typecast implements CastableInterface, UncastableInterface
             }
             $data[$column] = match ($rule) {
                 'uuid' => Uuid::fromString($data[$column]),
-                default => $data[$column]
+                default => $data[$column],
             };
         }
 
@@ -50,7 +50,7 @@ final class Typecast implements CastableInterface, UncastableInterface
 
             $data[$column] = match ($rule) {
                 'uuid' => $data[$column] instanceof UuidInterface ? $data[$column]->toString() : $data[$column],
-                default => (string) $data[$column]
+                default => (string) $data[$column],
             };
         }
 

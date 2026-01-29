@@ -13,9 +13,8 @@ abstract class DatabaseCommand implements CommandInterface
     public function __construct(
         /** @internal */
         protected DatabaseInterface $db,
-        protected ?string $table = null
-    ) {
-    }
+        protected ?string $table = null,
+    ) {}
 
     public function getDatabase(): ?DatabaseInterface
     {

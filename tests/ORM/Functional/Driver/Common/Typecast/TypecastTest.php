@@ -28,110 +28,6 @@ abstract class TypecastTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable('book', [
-            'id' => 'primary',
-            'user_id' => 'int',
-            'states' => 'string',
-            'nested_states' => 'string',
-            'published_at' => 'datetime',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            'user' => [
-                SchemaInterface::ENTITY => User::class,
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'user',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'email', 'balance'],
-                SchemaInterface::TYPECAST => [
-                    'id' => [IDCaster::class, 'wrap'],
-                    'balance' => [IDCaster::class, 'wrap'],
-                ],
-                SchemaInterface::RELATIONS => [
-                    'books' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Book::class,
-                        Relation::LOAD => Relation::LOAD_EAGER,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::NULLABLE => false,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            'book' => [
-                SchemaInterface::ENTITY => Book::class,
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'book',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'user_id', 'states', 'nested_states', 'published_at'],
-                SchemaInterface::TYPECAST => [
-                    'id' => 'int',
-                    'user_id' => 'int',
-                    'states' => [BookStates::class, 'cast'],
-                    'nested_states' => [BookNestedStates::class, 'cast'],
-                    'published_at' => 'datetime',
-                ],
-                SchemaInterface::RELATIONS => [],
-            ],
-            'book2' => [
-                SchemaInterface::ENTITY => Book2::class,
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'book',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'title', 'description'],
-                SchemaInterface::TYPECAST_HANDLER => [
-                    ParentTypecast::class,
-                    Typecast::class,
-                ],
-                SchemaInterface::TYPECAST => [
-                    'id' => 'uuid',
-                    'title' => ['foo' => 'bar'],
-                    'description' => fn () => 'wrong description',
-                ],
-                SchemaInterface::RELATIONS => [],
-            ],
-            'book3' => [
-                SchemaInterface::ENTITY => Book2::class,
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::PARENT => 'book2',
-                SchemaInterface::TABLE => 'book',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'title'],
-                SchemaInterface::TYPECAST_HANDLER => [JsonTypecast::class, UuidTypecast::class],
-                SchemaInterface::TYPECAST => [
-                    'id' => 'uuid',
-                    'title' => 'json',
-                ],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ]));
-    }
-
     // Insert command
 
     public function testAIIdTypecastingOnInsert(): void
@@ -196,7 +92,7 @@ abstract class TypecastTest extends BaseTest
 
         $this->assertSame($user1, $user2);
         $this->assertNotNull($user1->id);
-        $this->assertSame(200, $user1->balance->value);
+        $this->assertSame(50, $user1->balance->value, 'non-relation field must not be overwritten');
 
         // no exceptions thrown
         $this->save($user1);
@@ -269,5 +165,109 @@ abstract class TypecastTest extends BaseTest
         $this->assertNotNull($users[0]->id);
         $this->assertIsNotObject($users[0]->id->value);
         $this->assertEquals(1, $users[0]->id->value);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable('book', [
+            'id' => 'primary',
+            'user_id' => 'int',
+            'states' => 'string',
+            'nested_states' => 'string',
+            'published_at' => 'datetime',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            'user' => [
+                SchemaInterface::ENTITY => User::class,
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'email', 'balance'],
+                SchemaInterface::TYPECAST => [
+                    'id' => [IDCaster::class, 'wrap'],
+                    'balance' => [IDCaster::class, 'wrap'],
+                ],
+                SchemaInterface::RELATIONS => [
+                    'books' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Book::class,
+                        Relation::LOAD => Relation::LOAD_EAGER,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => false,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            'book' => [
+                SchemaInterface::ENTITY => Book::class,
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'user_id', 'states', 'nested_states', 'published_at'],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'int',
+                    'user_id' => 'int',
+                    'states' => [BookStates::class, 'cast'],
+                    'nested_states' => [BookNestedStates::class, 'cast'],
+                    'published_at' => 'datetime',
+                ],
+                SchemaInterface::RELATIONS => [],
+            ],
+            'book2' => [
+                SchemaInterface::ENTITY => Book2::class,
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'title', 'description'],
+                SchemaInterface::TYPECAST_HANDLER => [
+                    ParentTypecast::class,
+                    Typecast::class,
+                ],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'uuid',
+                    'title' => ['foo' => 'bar'],
+                    'description' => fn() => 'wrong description',
+                ],
+                SchemaInterface::RELATIONS => [],
+            ],
+            'book3' => [
+                SchemaInterface::ENTITY => Book2::class,
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::PARENT => 'book2',
+                SchemaInterface::TABLE => 'book',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'title'],
+                SchemaInterface::TYPECAST_HANDLER => [JsonTypecast::class, UuidTypecast::class],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'uuid',
+                    'title' => 'json',
+                ],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ]));
     }
 }

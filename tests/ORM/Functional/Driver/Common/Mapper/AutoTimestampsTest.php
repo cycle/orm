@@ -18,45 +18,6 @@ abstract class AutoTimestampsTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'user',
-            [
-                'id' => 'primary',
-                'email' => 'string',
-                'balance' => 'float',
-                'created_at' => 'datetime',
-                'updated_at' => 'datetime',
-            ]
-        );
-
-        $this->orm = $this->withSchema(
-            new Schema(
-                [
-                    User::class => [
-                        SchemaInterface::ROLE => 'user',
-                        SchemaInterface::MAPPER => TimestampedMapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'user',
-                        SchemaInterface::PRIMARY_KEY => 'id',
-                        SchemaInterface::COLUMNS => ['id', 'email', 'balance', 'created_at', 'updated_at'],
-                        SchemaInterface::TYPECAST => [
-                            'id' => 'int',
-                            'balance' => 'float',
-                            'created_at' => 'datetime',
-                            'updated_at' => 'datetime',
-                        ],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [],
-                    ],
-                ]
-            )
-        );
-    }
-
     public function testCreate(): void
     {
         $u = new User();
@@ -107,5 +68,44 @@ abstract class AutoTimestampsTest extends BaseTest
         $this->captureWriteQueries();
         $this->save($u);
         $this->assertNumWrites(1);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'user',
+            [
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float',
+                'created_at' => 'datetime',
+                'updated_at' => 'datetime',
+            ],
+        );
+
+        $this->orm = $this->withSchema(
+            new Schema(
+                [
+                    User::class => [
+                        SchemaInterface::ROLE => 'user',
+                        SchemaInterface::MAPPER => TimestampedMapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'email', 'balance', 'created_at', 'updated_at'],
+                        SchemaInterface::TYPECAST => [
+                            'id' => 'int',
+                            'balance' => 'float',
+                            'created_at' => 'datetime',
+                            'updated_at' => 'datetime',
+                        ],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                ],
+            ),
+        );
     }
 }

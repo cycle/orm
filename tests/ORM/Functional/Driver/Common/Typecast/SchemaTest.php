@@ -27,8 +27,8 @@ use Spiral\Core\Container;
 final class SchemaTest extends BaseTest
 {
     public const DRIVER = 'sqlite';
-
     private const PRIMARY_ROLE = 'book';
+
     private ?Container $container;
 
     public function setUpOrm(array $bookSchema = [], array $factoryDefinitions = []): void
@@ -41,10 +41,10 @@ final class SchemaTest extends BaseTest
                 RelationConfig::getDefault(),
                 new SimpleFactory(
                     $factoryDefinitions,
-                    static fn (string|object $alias, array $parameters = []): mixed => \is_string($alias)
-                        ? $container->make($alias, $parameters) : $alias
+                    static fn(string|object $alias, array $parameters = []): mixed => \is_string($alias)
+                        ? $container->make($alias, $parameters) : $alias,
                 ),
-                new ArrayCollectionFactory()
+                new ArrayCollectionFactory(),
             ),
             new Schema([
                 Book::class => $bookSchema + [
@@ -81,7 +81,7 @@ final class SchemaTest extends BaseTest
                     SchemaInterface::COLUMNS => ['id', 'baz'],
                     SchemaInterface::TYPECAST => ['baz' => 'int'],
                 ],
-            ])
+            ]),
         );
     }
 
@@ -89,7 +89,7 @@ final class SchemaTest extends BaseTest
     {
         $this->expectException(FactoryTypecastException::class);
         $this->expectExceptionMessageMatches(
-            '/Bad typecast handler declaration for the `book` role./'
+            '/Bad typecast handler declaration for the `book` role./',
         );
 
         $this->setUpOrm([
@@ -107,7 +107,7 @@ final class SchemaTest extends BaseTest
 
         $this->expectException(FactoryTypecastException::class);
         $this->expectExceptionMessage(
-            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
+            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned',
         );
 
         $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
@@ -126,7 +126,7 @@ final class SchemaTest extends BaseTest
 
         $this->expectException(FactoryTypecastException::class);
         $this->expectExceptionMessage(
-            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned'
+            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\InvalidTypecaster returned',
         );
 
         $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
@@ -224,7 +224,7 @@ final class SchemaTest extends BaseTest
             ->willReturn(['foo' => 'bar2']); // passes to Composite typecast
 
         $this->container = new Container();
-        $this->container->bindSingleton('bar-foo', fn () => $containerTypecast);
+        $this->container->bindSingleton('bar-foo', fn() => $containerTypecast);
 
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => [

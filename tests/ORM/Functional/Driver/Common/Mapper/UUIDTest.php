@@ -29,83 +29,6 @@ abstract class UUIDTest extends BaseTest
     private $c2;
     private $c3;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'string(36),primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable('comment', [
-            'id' => 'string(36),primary',
-            'user_id' => 'string(36)',
-            'message' => 'string',
-        ]);
-
-        $this->makeFK('comment', 'user_id', 'user', 'id');
-
-        // seed
-        $this->u1 = Uuid::uuid4()->toString();
-        $this->u2 = Uuid::uuid4()->toString();
-        $this->c1 = Uuid::uuid4()->toString();
-        $this->c2 = Uuid::uuid4()->toString();
-        $this->c3 = Uuid::uuid4()->toString();
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['id', 'email', 'balance'],
-            [
-                [$this->u1, 'hello@world.com', 100],
-                [$this->u2, 'another@world.com', 200],
-            ]
-        );
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['id', 'user_id', 'message'],
-            [
-                [$this->c1, $this->u1, 'msg 1'],
-                [$this->c2, $this->u1, 'msg 2'],
-                [$this->c3, $this->u1, 'msg 3'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => UUIDMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => UUIDMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::SCOPE => SortByMsgScope::class,
-            ],
-        ]));
-    }
-
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -385,5 +308,82 @@ abstract class UUIDTest extends BaseTest
         $this->assertEquals($this->c1, $b->comments[1]->id);
 
         $this->assertEquals('new b', $b->comments[1]->message);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'string(36),primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable('comment', [
+            'id' => 'string(36),primary',
+            'user_id' => 'string(36)',
+            'message' => 'string',
+        ]);
+
+        $this->makeFK('comment', 'user_id', 'user', 'id');
+
+        // seed
+        $this->u1 = Uuid::uuid4()->toString();
+        $this->u2 = Uuid::uuid4()->toString();
+        $this->c1 = Uuid::uuid4()->toString();
+        $this->c2 = Uuid::uuid4()->toString();
+        $this->c3 = Uuid::uuid4()->toString();
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['id', 'email', 'balance'],
+            [
+                [$this->u1, 'hello@world.com', 100],
+                [$this->u2, 'another@world.com', 200],
+            ],
+        );
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['id', 'user_id', 'message'],
+            [
+                [$this->c1, $this->u1, 'msg 1'],
+                [$this->c2, $this->u1, 'msg 2'],
+                [$this->c3, $this->u1, 'msg 3'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => UUIDMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => UUIDMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => SortByMsgScope::class,
+            ],
+        ]));
     }
 }

@@ -11,33 +11,21 @@ use Cycle\Database\DatabaseInterface;
 
 class DifferentSource implements SourceInterface
 {
-    /**
-     * @inheritDoc
-     */
     public function getDatabase(): DatabaseInterface
     {
         throw new \RuntimeException('Not implemented.');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getTable(): string
     {
         throw new \RuntimeException('Not implemented.');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function withScope(?ScopeInterface $scope): SourceInterface
     {
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getScope(): ?ScopeInterface
     {
         return null;

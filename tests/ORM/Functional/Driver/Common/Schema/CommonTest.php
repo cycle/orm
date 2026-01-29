@@ -23,67 +23,6 @@ abstract class CommonTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'active' => 'bool',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable(
-            'user_with_uuid_primary_key',
-            [
-                'uuid' => 'string(36),primary',
-                'email' => 'string',
-                'balance' => 'float',
-            ]
-        );
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'active', 'balance'],
-            [
-                ['hello@world.com', true, 100],
-                ['another@world.com', false, 200],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                SchemaInterface::ROLE => 'user',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'user',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'email', 'active', 'balance'],
-                SchemaInterface::TYPECAST => [
-                    'id' => 'int',
-                    'active' => 'bool',
-                    'balance' => 'float',
-                ],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-                SchemaInterface::SCOPE => SortByIDScope::class,
-            ],
-            UserWithUUIDPrimaryKey::class => [
-                SchemaInterface::ROLE => 'user_with_uuid_primary_key',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'user_with_uuid_primary_key',
-                SchemaInterface::PRIMARY_KEY => 'uuid',
-                SchemaInterface::COLUMNS => ['uuid', 'email', 'balance'],
-                SchemaInterface::TYPECAST => [
-                    'uuid' => [UuidPrimaryKey::class, 'typecast'],
-                ],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -200,7 +139,7 @@ abstract class CommonTest extends BaseTest
                 'active' => true,
                 'balance' => 100.0,
             ],
-            $this->orm->getHeap()->get($result)->getData()
+            $this->orm->getHeap()->get($result)->getData(),
         );
     }
 
@@ -294,5 +233,66 @@ abstract class CommonTest extends BaseTest
         $this->assertSame(2, $result->id);
         $this->assertSame('another@world.com', $result->email);
         $this->assertSame(200.0, $result->balance);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'active' => 'bool',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable(
+            'user_with_uuid_primary_key',
+            [
+                'uuid' => 'string(36),primary',
+                'email' => 'string',
+                'balance' => 'float',
+            ],
+        );
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'active', 'balance'],
+            [
+                ['hello@world.com', true, 100],
+                ['another@world.com', false, 200],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'email', 'active', 'balance'],
+                SchemaInterface::TYPECAST => [
+                    'id' => 'int',
+                    'active' => 'bool',
+                    'balance' => 'float',
+                ],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+                SchemaInterface::SCOPE => SortByIDScope::class,
+            ],
+            UserWithUUIDPrimaryKey::class => [
+                SchemaInterface::ROLE => 'user_with_uuid_primary_key',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'user_with_uuid_primary_key',
+                SchemaInterface::PRIMARY_KEY => 'uuid',
+                SchemaInterface::COLUMNS => ['uuid', 'email', 'balance'],
+                SchemaInterface::TYPECAST => [
+                    'uuid' => [UuidPrimaryKey::class, 'typecast'],
+                ],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ]));
     }
 }

@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper\ProxyEntityMapper;
 
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Options;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -20,6 +21,163 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     public const DRIVER = 'sqlite';
 
+    public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
+    {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false),
+        );
+
+        $profile = new EntityWithRelationHydrationProfile('test');
+        $profile->user_id = 1;
+
+        $this->save($profile);
+        $this->assertEquals(1, $profile->getUser()->id);
+        // todo should be check?
+        // $this->assertInstanceOf(ReferenceInterface::class, $profile->getRefersUser());
+    }
+
+    public function testRelationWithMixedTypeShouldBeFilledAsReference(): void
+    {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false),
+        );
+
+        $user = new EntityWithMixedTypeRelation();
+        $user->email = 'foo@bar.com';
+        $user->friend_id = 1;
+
+        $this->save($user);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $user->friend);
+    }
+
+    public function testRelationExistedInHeapMustFilledAsEntity(): void
+    {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false),
+        );
+
+        $user = new EntityWithMixedTypeRelation();
+        $user->email = 'foo@bar.com';
+        $user->friend_id = 1;
+
+        $this->orm->getRepository(EntityWithMixedTypeRelation::class)->findByPK(1);
+
+        $this->save($user);
+        $this->assertInstanceOf(EntityWithMixedTypeRelation::class, $user->friend);
+    }
+
+    public function testPrivateHasManyRelationPropertyWithoutProxyShouldBeFilled(): void
+    {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false),
+        );
+
+        $profile = new EntityWithRelationHydrationProfile('test');
+        $user = new EntityWithRelationHydrationUser('admin@site.com');
+        $user->profiles[] = $profile;
+
+        $this->save($user);
+
+        $this->assertSame($user, $profile->getUser());
+    }
+
+    public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled(): void
+    {
+        $this->orm = $this->orm->with(
+            options: (new Options())->withIgnoreUninitializedRelations(false),
+        );
+
+        $tagContext = new EntityWithRelationHydrationTagContext();
+        $tagContext->user_id = 1;
+        $tagContext->tag_id = 2;
+
+        $this->save($tagContext);
+
+        $this->assertInstanceOf(ReferenceInterface::class, $tagContext->getTag());
+        $this->assertInstanceOf(ReferenceInterface::class, $tagContext->getUser());
+    }
+
+    /**
+     * TODO: error with shadow belongs to
+     */
+    public function testPrivateMorphBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
+    {
+        $profile = new EntityWithRelationHydrationProfile('test');
+        $profile->user_id = 1;
+
+        $avatar = new EntityWithRelationHydrationImage();
+        $avatar->url = 'http://site.com';
+        $avatar->setParent($profile);
+
+        $this->save($avatar);
+    }
+
+    public function testPrivateRelationPropertyShouldBeFilled(): void
+    {
+        $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
+
+        $profile = $selector
+            ->load('user.profile')
+            ->fetchOne();
+
+        $this->assertEquals('1', $profile->getUser()->id);
+        $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
+        $this->assertSame($profile, $profile->getUser()->getProfile());
+    }
+
+    public function testLazyLoad(): void
+    {
+        $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
+
+        $profile = $selector
+            ->fetchOne();
+
+        $this->assertEquals('1', $profile->getUser()->id);
+        $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
+        $this->assertSame($profile, $profile->getUser()->getProfile());
+    }
+
+    public function testChangeLazyOverloadedArray(): void
+    {
+        $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
+            ->fetchOne();
+
+        try {
+            $user->profiles[] = 'test-value';
+            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
+        } catch (AssertionFailedError $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            $this->stringStartsWith('Indirect modification of overloaded property')->evaluate($e->getMessage());
+            // That's OK
+        }
+
+        // $user->profile now loaded
+        $user->profiles[] = 'test-value';
+        $this->assertContains('test-value', $user->profiles);
+    }
+
+    public function testGetLinkValueFromLazyOverloadedRelation(): void
+    {
+        $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
+            ->fetchOne();
+
+        try {
+            $collection = &$user->profiles;
+            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
+        } catch (AssertionFailedError $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            $this->stringStartsWith('Indirect modification of overloaded property')->evaluate($e->getMessage());
+            // That's OK
+        }
+        // $user->profile now loaded
+        $collection = &$user->profiles;
+        $collection[] = 'test-value';
+        $this->assertContains('test-value', $user->profiles);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -32,17 +190,17 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         $this->getDatabase()->table('user')->insertMultiple(
             ['email'],
-            [['hello@world.com'],]
+            [['hello@world.com'],],
         );
 
         $this->getDatabase()->table('profile')->insertMultiple(
             ['user_id', 'name'],
-            [[1, 'John Smith'],]
+            [[1, 'John Smith'],],
         );
 
         $this->getDatabase()->table('tag')->insertMultiple(
             ['name'],
-            [['tag a'], ['tag b'], ['tag c'],]
+            [['tag a'], ['tag b'], ['tag c'],],
         );
 
         $this->orm = $this->withSchema(new Schema([
@@ -240,143 +398,6 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
             ],
         ]));
     }
-
-    public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
-    {
-        $profile = new EntityWithRelationHydrationProfile('test');
-        $profile->user_id = 1;
-
-        $this->save($profile);
-        $this->assertEquals(1, $profile->getUser()->id);
-        // todo should be check?
-        // $this->assertInstanceOf(ReferenceInterface::class, $profile->getRefersUser());
-    }
-
-    public function testRelationWithMixedTypeShouldBeFilledAsReference(): void
-    {
-        $user = new EntityWithMixedTypeRelation();
-        $user->email = 'foo@bar.com';
-        $user->friend_id = 1;
-
-        $this->save($user);
-
-        $this->assertInstanceOf(ReferenceInterface::class, $user->friend);
-    }
-
-    public function testRelationExistedInHeapMustFilledAsEntity(): void
-    {
-        $user = new EntityWithMixedTypeRelation();
-        $user->email = 'foo@bar.com';
-        $user->friend_id = 1;
-
-        $this->orm->getRepository(EntityWithMixedTypeRelation::class)->findByPK(1);
-
-        $this->save($user);
-        $this->assertInstanceOf(EntityWithMixedTypeRelation::class, $user->friend);
-    }
-
-    public function testPrivateHasManyRelationPropertyWithoutProxyShouldBeFilled(): void
-    {
-        $profile = new EntityWithRelationHydrationProfile('test');
-        $user = new EntityWithRelationHydrationUser('admin@site.com');
-        $user->profiles[] = $profile;
-
-        $this->save($user);
-
-        $this->assertSame($user, $profile->getUser());
-    }
-
-    public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled(): void
-    {
-        $tagContext = new EntityWithRelationHydrationTagContext();
-        $tagContext->user_id = 1;
-        $tagContext->tag_id = 2;
-
-        $this->save($tagContext);
-
-        $this->assertInstanceOf(ReferenceInterface::class, $tagContext->getTag());
-        $this->assertInstanceOf(ReferenceInterface::class, $tagContext->getUser());
-    }
-
-    /**
-     * TODO: error with shadow belongs to
-     */
-    public function testPrivateMorphBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
-    {
-        $profile = new EntityWithRelationHydrationProfile('test');
-        $profile->user_id = 1;
-
-        $avatar = new EntityWithRelationHydrationImage();
-        $avatar->url = 'http://site.com';
-        $avatar->setParent($profile);
-
-        $this->save($avatar);
-    }
-
-    public function testPrivateRelationPropertyShouldBeFilled(): void
-    {
-        $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
-
-        $profile = $selector
-            ->load('user.profile')
-            ->fetchOne();
-
-        $this->assertEquals('1', $profile->getUser()->id);
-        $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
-        $this->assertSame($profile, $profile->getUser()->getProfile());
-    }
-
-    public function testLazyLoad(): void
-    {
-        $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
-
-        $profile = $selector
-            ->fetchOne();
-
-        $this->assertEquals('1', $profile->getUser()->id);
-        $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
-        $this->assertSame($profile, $profile->getUser()->getProfile());
-    }
-
-    public function testChangeLazyOverloadedArray(): void
-    {
-        $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
-            ->fetchOne();
-
-        try {
-            $user->profiles[] = 'test-value';
-            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
-        } catch (AssertionFailedError $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            $this->stringStartsWith('Indirect modification of overloaded property')->evaluate($e->getMessage());
-            // That's OK
-        }
-
-        // $user->profile now loaded
-        $user->profiles[] = 'test-value';
-        $this->assertContains('test-value', $user->profiles);
-    }
-
-    public function testGetLinkValueFromLazyOverloadedRelation(): void
-    {
-        $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
-            ->fetchOne();
-
-        try {
-            $collection = &$user->profiles;
-            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
-        } catch (AssertionFailedError $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            $this->stringStartsWith('Indirect modification of overloaded property')->evaluate($e->getMessage());
-            // That's OK
-        }
-        // $user->profile now loaded
-        $collection = &$user->profiles;
-        $collection[] = 'test-value';
-        $this->assertContains('test-value', $user->profiles);
-    }
 }
 
 class EntityWithRelationHydrationUser
@@ -410,11 +431,11 @@ class EntityWithRelationHydrationUser
 class EntityWithRelationHydrationProfile
 {
     public $id;
+    public $user_id;
     private $name;
     private EntityWithRelationHydrationUser $user;
     private object $refers_user;
     private EntityWithRelationHydrationImage $avatar;
-    public $user_id;
 
     public function __construct(string $name)
     {
@@ -456,11 +477,10 @@ class EntityWithRelationHydrationTag
 
 class EntityWithRelationHydrationTagContext
 {
-    private $user;
-    private ReferenceInterface $tag;
-
     public $tag_id;
     public $user_id;
+    private $user;
+    private ReferenceInterface $tag;
 
     public function getTag(): ReferenceInterface
     {
@@ -476,8 +496,8 @@ class EntityWithRelationHydrationTagContext
 
 class EntityWithRelationHydrationImage
 {
-    private mixed $parent;
     public $url;
+    private mixed $parent;
 
     public function setParent($parent): void
     {

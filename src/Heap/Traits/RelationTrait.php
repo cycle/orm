@@ -16,7 +16,7 @@ trait RelationTrait
 
     public function hasRelation(string $name): bool
     {
-        return array_key_exists($name, $this->relations);
+        return \array_key_exists($name, $this->relations);
     }
 
     public function getRelation(string $name): mixed

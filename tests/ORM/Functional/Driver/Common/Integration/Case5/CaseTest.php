@@ -15,6 +15,24 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    public function testSelect(): void
+    {
+        /** @var Buyer $buyer */
+        $buyer = (new Select($this->orm, Buyer::class))
+            ->wherePK(1)
+            ->fetchOne();
+
+        // It's important. $buyer->partners - will trigger relation load and we test it
+        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
+            return $element->id === 2;
+        }));
+        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
+            return $element->id === 3;
+        }));
+        $this->assertCount(2, $buyer->partners);
+        $this->assertSame('lab', $buyer->badge->label);
+    }
+
     public function setUp(): void
     {
         // Init DB
@@ -60,23 +78,5 @@ abstract class CaseTest extends BaseTest
             ['buyer_id', 'partner_id'],
             [[1, 2], [1, 3]],
         );
-    }
-
-    public function testSelect(): void
-    {
-        /** @var Buyer $buyer */
-        $buyer = (new Select($this->orm, Buyer::class))
-            ->wherePK(1)
-            ->fetchOne();
-
-        // It's important. $buyer->partners - will trigger relation load and we test it
-        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
-            return $element->id === 2;
-        }));
-        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
-            return $element->id === 3;
-        }));
-        $this->assertCount(2, $buyer->partners);
-        $this->assertSame('lab', $buyer->badge->label);
     }
 }

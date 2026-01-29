@@ -10,13 +10,12 @@ use Cycle\Database\DatabaseInterface;
 abstract class StoreCommand extends DatabaseCommand implements StoreCommandInterface
 {
     protected array $columns = [];
-
     protected array $appendix = [];
 
     public function __construct(
         DatabaseInterface $db,
         ?string $table,
-        protected State $state
+        protected State $state,
     ) {
         parent::__construct($db, $table);
     }

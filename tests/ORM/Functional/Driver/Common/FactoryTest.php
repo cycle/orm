@@ -23,25 +23,6 @@ abstract class FactoryTest extends BaseTest
      */
     private $factory;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-
-        $this->factory = new Factory($this->dbal);
-    }
-
     public function testShouldMakeDefaultMapper(): void
     {
         $mapper = $this->factory->mapper($this->orm, 'user');
@@ -77,7 +58,7 @@ abstract class FactoryTest extends BaseTest
             $this->orm,
             $this->orm->getSchema(),
             'user',
-            new Select($this->orm, 'user')
+            new Select($this->orm, 'user'),
         );
 
         $this->assertInstanceOf(Repository::class, $result);
@@ -93,7 +74,7 @@ abstract class FactoryTest extends BaseTest
             $this->orm,
             $this->orm->getSchema(),
             'user',
-            new Select($this->orm, 'user')
+            new Select($this->orm, 'user'),
         );
 
         $this->assertInstanceOf(UserRepository::class, $result);
@@ -137,5 +118,24 @@ abstract class FactoryTest extends BaseTest
         $this->expectException(TypecastException::class);
 
         $this->factory->source($this->orm->getSchema(), 'user');
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
+
+        $this->factory = new Factory($this->dbal);
     }
 }

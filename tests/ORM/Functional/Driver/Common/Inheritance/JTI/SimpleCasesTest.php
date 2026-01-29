@@ -60,69 +60,6 @@ abstract class SimpleCasesTest extends JtiBaseTest
     protected const MANAGER_ROLE = 'manager';
     protected const PROGRAMATOR_ROLE = 'programator';
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('employee', [
-            'id' => 'integer',
-            'name_column' => 'string',
-            'age' => 'integer,nullable',
-        ], pk: ['id']);
-        $this->makeTable('engineer', [
-            'id' => 'integer',
-            'level' => 'integer',
-        ], fk: [
-            'id' => ['table' => 'employee', 'column' => 'id'],
-        ], pk: ['id']);
-        $this->makeTable('programator', [
-            'id' => 'integer',
-            'language' => 'string',
-        ], fk: [
-            'id' => ['table' => 'engineer', 'column' => 'id'],
-        ], pk: ['id']);
-        $this->makeTable('manager', [
-            'id' => 'integer',
-            'rank' => 'string',
-        ], fk: [
-            'id' => ['table' => 'employee', 'column' => 'id'],
-        ], pk: ['id']);
-
-        $this->getDatabase()->table('employee')->insertMultiple(
-            ['id', 'name_column', 'age'],
-            [
-                self::EMPLOYEE_1,
-                self::EMPLOYEE_2,
-                self::EMPLOYEE_3,
-                self::EMPLOYEE_4,
-            ]
-        );
-
-        $this->getDatabase()->table('engineer')->insertMultiple(
-            ['id', 'level'],
-            [
-                self::ENGINEER_2,
-                self::ENGINEER_4,
-            ]
-        );
-
-        $this->getDatabase()->table('programator')->insertMultiple(
-            ['id', 'language'],
-            [
-                self::PROGRAMATOR_2,
-                self::PROGRAMATOR_4,
-            ]
-        );
-
-        $this->getDatabase()->table('manager')->insertMultiple(
-            ['id', 'rank'],
-            [
-                self::MANAGER_1,
-                self::MANAGER_3,
-            ]
-        );
-    }
-
     // Select
 
     public function testSelectEmployeeHierarchyByPK(): void
@@ -374,7 +311,7 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertNull(
             (new Select($this->orm, static::PROGRAMATOR_ROLE))
                 ->wherePK(static::PROGRAMATOR_2_PK)
-                ->fetchOne()
+                ->fetchOne(),
         );
         $this->assertNull((new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
@@ -382,6 +319,69 @@ abstract class SimpleCasesTest extends JtiBaseTest
         $this->assertNotNull((new Select($this->orm, static::EMPLOYEE_ROLE))
             ->loadSubclasses(false)
             ->wherePK(static::EMPLOYEE_2_PK)->fetchOne());
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('employee', [
+            'id' => 'integer',
+            'name_column' => 'string',
+            'age' => 'integer,nullable',
+        ], pk: ['id']);
+        $this->makeTable('engineer', [
+            'id' => 'integer',
+            'level' => 'integer',
+        ], fk: [
+            'id' => ['table' => 'employee', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeTable('programator', [
+            'id' => 'integer',
+            'language' => 'string',
+        ], fk: [
+            'id' => ['table' => 'engineer', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeTable('manager', [
+            'id' => 'integer',
+            'rank' => 'string',
+        ], fk: [
+            'id' => ['table' => 'employee', 'column' => 'id'],
+        ], pk: ['id']);
+
+        $this->getDatabase()->table('employee')->insertMultiple(
+            ['id', 'name_column', 'age'],
+            [
+                self::EMPLOYEE_1,
+                self::EMPLOYEE_2,
+                self::EMPLOYEE_3,
+                self::EMPLOYEE_4,
+            ],
+        );
+
+        $this->getDatabase()->table('engineer')->insertMultiple(
+            ['id', 'level'],
+            [
+                self::ENGINEER_2,
+                self::ENGINEER_4,
+            ],
+        );
+
+        $this->getDatabase()->table('programator')->insertMultiple(
+            ['id', 'language'],
+            [
+                self::PROGRAMATOR_2,
+                self::PROGRAMATOR_4,
+            ],
+        );
+
+        $this->getDatabase()->table('manager')->insertMultiple(
+            ['id', 'rank'],
+            [
+                self::MANAGER_1,
+                self::MANAGER_3,
+            ],
+        );
     }
 
     protected function getSchemaArray(): array

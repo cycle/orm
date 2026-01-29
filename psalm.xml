@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <psalm
-    errorLevel="4"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorBaseline="psalm-baseline.xml"
+    errorLevel="1"
 >
     <projectFiles>
         <directory name="src" />
@@ -12,6 +13,10 @@
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
+        <MissingOverrideAttribute errorLevel="suppress" />
+        <PossiblyUnusedMethod errorLevel="suppress" />
+        <MissingClassConstType errorLevel="suppress" />
+        <UnusedClass errorLevel="suppress" />
         <UndefinedAttributeClass>
             <errorLevel type="suppress">
                 <referencedClass name="JetBrains\PhpStorm\ExpectedValues" />
@@ -19,10 +24,5 @@
                 <referencedClass name="JetBrains\PhpStorm\Pure" />
             </errorLevel>
         </UndefinedAttributeClass>
-        <UndefinedClass>
-            <errorLevel type="suppress">
-                <referencedClass name="BackedEnum" />
-            </errorLevel>
-        </UndefinedClass>
     </issueHandlers>
 </psalm>

@@ -18,6 +18,40 @@ abstract class Eager2Test extends BaseTest
 {
     use TableTrait;
 
+    public function testFetchEager(): void
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $this->assertEquals([
+            [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+            ],
+            [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+            ],
+        ], $selector->fetchData());
+    }
+
+    public function testFetchEager2(): void
+    {
+        $selector = new Select($this->orm, User::class);
+        $selector->where('profile.id', '>', 0);
+
+        $this->assertCount(3, $selector->buildQuery()->getColumns());
+
+        $this->assertEquals([
+            [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+            ],
+        ], $selector->fetchData());
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -48,14 +82,14 @@ abstract class Eager2Test extends BaseTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('profile')->insertMultiple(
             ['user_id', 'image'],
             [
                 [1, 'image.png'],
-            ]
+            ],
         );
 
 
@@ -63,7 +97,7 @@ abstract class Eager2Test extends BaseTest
             ['profile_id', 'label'],
             [
                 [1, 'nested-label'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema([
@@ -120,39 +154,5 @@ abstract class Eager2Test extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
-    }
-
-    public function testFetchEager(): void
-    {
-        $selector = new Select($this->orm, User::class);
-
-        $this->assertEquals([
-            [
-                'id' => 1,
-                'email' => 'hello@world.com',
-                'balance' => 100.0,
-            ],
-            [
-                'id' => 2,
-                'email' => 'another@world.com',
-                'balance' => 200.0,
-            ],
-        ], $selector->fetchData());
-    }
-
-    public function testFetchEager2(): void
-    {
-        $selector = new Select($this->orm, User::class);
-        $selector->where('profile.id', '>', 0);
-
-        $this->assertCount(3, $selector->buildQuery()->getColumns());
-
-        $this->assertEquals([
-            [
-                'id' => 1,
-                'email' => 'hello@world.com',
-                'balance' => 100.0,
-            ],
-        ], $selector->fetchData());
     }
 }

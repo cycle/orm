@@ -16,6 +16,22 @@ abstract class PaginateTest extends BaseTest
 {
     use TableTrait;
 
+    public function testFetchData(): void
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $this->assertSame(100, $selector->count());
+    }
+
+    public function testPaginate(): void
+    {
+        $selector = new Select($this->orm, User::class);
+
+        (new Paginator(10))->paginate($selector);
+
+        $this->assertCount(10, $selector->fetchData());
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -44,21 +60,5 @@ abstract class PaginateTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
-    }
-
-    public function testFetchData(): void
-    {
-        $selector = new Select($this->orm, User::class);
-
-        $this->assertSame(100, $selector->count());
-    }
-
-    public function testPaginate(): void
-    {
-        $selector = new Select($this->orm, User::class);
-
-        (new Paginator(10))->paginate($selector);
-
-        $this->assertCount(10, $selector->fetchData());
     }
 }

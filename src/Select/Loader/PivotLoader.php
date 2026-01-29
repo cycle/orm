@@ -44,7 +44,7 @@ class PivotLoader extends JoinableLoader
         $this->setWhere(
             $query,
             $this->isJoined() ? 'onWhere' : 'where',
-            $this->options['where'] ?? $this->schema[Relation::THROUGH_WHERE] ?? []
+            $this->options['where'] ?? $this->schema[Relation::THROUGH_WHERE] ?? [],
         );
 
         return parent::configureQuery($query, $outerKeys);
@@ -54,9 +54,9 @@ class PivotLoader extends JoinableLoader
     {
         return new ArrayNode(
             $this->columnNames(),
-            (array)$this->define(SchemaInterface::PRIMARY_KEY),
-            (array)$this->schema[Relation::THROUGH_INNER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            (array) $this->define(SchemaInterface::PRIMARY_KEY),
+            (array) $this->schema[Relation::THROUGH_INNER_KEY],
+            (array) $this->schema[Relation::INNER_KEY],
         );
     }
 }

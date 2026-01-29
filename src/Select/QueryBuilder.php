@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Closure;
 use Cycle\ORM\Exception\BuilderException;
 use JetBrains\PhpStorm\ExpectedValues;
 use Cycle\Database\Driver\Compiler;
@@ -48,28 +47,8 @@ final class QueryBuilder
     public function __construct(
         private SelectQuery $query,
         /** @internal */
-        private AbstractLoader $loader
-    ) {
-    }
-
-    /**
-     * Forward call to underlying target.
-     *
-     * @return mixed|SelectQuery
-     */
-    public function __call(string $func, array $args)
-    {
-        $result = \call_user_func_array(
-            $this->targetFunc($func),
-            $this->isJoin($func) ? $args : $this->proxyArgs($args)
-        );
-
-        if ($result === $this->query) {
-            return $this;
-        }
-
-        return $result;
-    }
+        private AbstractLoader $loader,
+    ) {}
 
     /**
      * Get currently associated query. Immutable.
@@ -92,7 +71,7 @@ final class QueryBuilder
      */
     public function withForward(
         #[ExpectedValues(values: ['where', 'onWhere'])]
-        string $forward = null
+        ?string $forward = null,
     ): self {
         $builder = clone $this;
         $builder->forward = $forward;
@@ -169,13 +148,32 @@ final class QueryBuilder
     }
 
     /**
+     * Forward call to underlying target.
+     *
+     * @return mixed|SelectQuery
+     */
+    public function __call(string $func, array $args)
+    {
+        $result = \call_user_func_array(
+            $this->targetFunc($func),
+            $this->isJoin($func) ? $args : $this->proxyArgs($args),
+        );
+
+        if ($result === $this->query) {
+            return $this;
+        }
+
+        return $result;
+    }
+
+    /**
      * Find loader associated with given entity/relation alias.
      *
      * @param bool $autoload When set to true relation will be automatically loaded.
      */
     private function findLoader(string $name, bool $autoload = true): ?LoaderInterface
     {
-        if (strpos($name, '(')) {
+        if (\strpos($name, '(')) {
             // expressions are not allowed
             return null;
         }
@@ -195,15 +193,15 @@ final class QueryBuilder
     private function targetFunc(string $call): callable
     {
         if ($this->forward != null) {
-            switch (strtolower($call)) {
+            switch (\strtolower($call)) {
                 case 'where':
                     $call = $this->forward;
                     break;
                 case 'orwhere':
-                    $call = 'or' . ucfirst($this->forward);
+                    $call = 'or' . \ucfirst($this->forward);
                     break;
                 case 'andwhere':
-                    $call = 'and' . ucfirst($this->forward);
+                    $call = 'and' . \ucfirst($this->forward);
                     break;
             }
         }
@@ -229,7 +227,7 @@ final class QueryBuilder
             $args[0] = $this->walkRecursive($args[0], [$this, 'wrap']);
         }
 
-        if ($args[0] instanceof Closure) {
+        if ($args[0] instanceof \Closure) {
             $args[0] = function ($q) use ($args): void {
                 $args[0]($this->withQuery($q));
             };
@@ -249,7 +247,7 @@ final class QueryBuilder
             $identifier = $this->resolve($identifier);
         }
 
-        if ($value instanceof Closure) {
+        if ($value instanceof \Closure) {
             $value = function ($q) use ($value): void {
                 $value($this->withQuery($q));
             };

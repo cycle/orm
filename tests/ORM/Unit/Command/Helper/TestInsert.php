@@ -18,20 +18,12 @@ class TestInsert extends DatabaseCommand
     /** @var array */
     protected $data;
 
-    /**
-     * @param DatabaseInterface $db
-     * @param string            $table
-     * @param array             $data
-     */
-    public function __construct(DatabaseInterface $db, string $table, array $data = [], callable $generateID = null)
+    public function __construct(DatabaseInterface $db, string $table, array $data = [], ?callable $generateID = null)
     {
         parent::__construct($db, $table);
         $this->data = $data;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function isReady(): bool
     {
         return true;
@@ -40,7 +32,6 @@ class TestInsert extends DatabaseCommand
     /**
      * Insert values, context not included.
      *
-     * @return array
      */
     public function getData(): array
     {

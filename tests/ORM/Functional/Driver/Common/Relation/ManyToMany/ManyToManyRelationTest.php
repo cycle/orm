@@ -21,61 +21,6 @@ abstract class ManyToManyRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable('tag', [
-            'id' => 'primary',
-            'name' => 'string',
-        ]);
-
-        $this->makeTable('tag_user_map', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'tag_id' => 'integer',
-            'as' => 'string,nullable',
-        ]);
-
-        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
-        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
-        $this->makeIndex('tag_user_map', ['user_id', 'tag_id'], true);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->getDatabase()->table('tag')->insertMultiple(
-            ['name'],
-            [
-                ['tag a'],
-                ['tag b'],
-                ['tag c'],
-            ]
-        );
-
-        $this->getDatabase()->table('tag_user_map')->insertMultiple(
-            ['user_id', 'tag_id', 'as'],
-            [
-                [1, 1, 'primary'],
-                [1, 2, 'secondary'],
-                [2, 3, 'primary'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
@@ -273,7 +218,7 @@ abstract class ManyToManyRelationTest extends BaseTest
             [
                 $t1,
                 $t2,
-            ]
+            ],
         );
 
         $this->save($u);
@@ -522,14 +467,51 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->orm->getHeap()->clean();
     }
 
-    /**
-     * If collection is replaced with null or unset - remove all children
-     */
-    public function testRemoveRelatedUsingUnset(): void
+    public function testUninitializedProperty(): void
     {
-        /**
-         * @var User $user
-         */
+        $u = new User();
+        $u->email = 'many@email.com';
+        $u->balance = 900;
+        unset($u->tags);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+
+        self::assertFalse(isset($u->tags));
+
+        $u->tags = [];
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If relation property was unset - ignore this field
+     */
+    public function testUnsetProperty(): void
+    {
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))->load('tags')->fetchOne(['id' => 1]);
+
+        $this->assertInstanceOf(Collection::class, $user->tags);
+        $this->assertCount(2, $user->tags);
+
+        unset($user->tags);
+
+        // Ignore uninitialized collection
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
+    }
+
+    /**
+     * If collection is replaced with null - remove all children
+     */
+    public function testRemoveChildrenUsingSetNull(): void
+    {
+        /** @var User $user */
         $user = (new Select($this->orm, User::class))->load('tags')->fetchOne(['id' => 1]);
 
         $this->assertInstanceOf(Collection::class, $user->tags);
@@ -539,7 +521,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->save($user);
         $this->assertNumWrites(0);
 
-        unset($user->tags);
+        $user->tags = null;
 
         $this->captureWriteQueries();
         $this->save($user);
@@ -553,6 +535,61 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $user = (new Select($this->orm, User::class))->load('tags')->fetchOne(['id' => 1]);
         $this->assertCount(0, $user->tags);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable('tag', [
+            'id' => 'primary',
+            'name' => 'string',
+        ]);
+
+        $this->makeTable('tag_user_map', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'tag_id' => 'integer',
+            'as' => 'string,nullable',
+        ]);
+
+        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
+        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
+        $this->makeIndex('tag_user_map', ['user_id', 'tag_id'], true);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->getDatabase()->table('tag')->insertMultiple(
+            ['name'],
+            [
+                ['tag a'],
+                ['tag b'],
+                ['tag c'],
+            ],
+        );
+
+        $this->getDatabase()->table('tag_user_map')->insertMultiple(
+            ['user_id', 'tag_id', 'as'],
+            [
+                [1, 1, 'primary'],
+                [1, 2, 'secondary'],
+                [2, 3, 'primary'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

@@ -20,10 +20,8 @@ interface StateInterface
 
     /**
      * The reason of failed transaction.
-     *
-     * @return Throwable|null
      */
-    public function getLastError(): ?Throwable;
+    public function getLastError(): ?\Throwable;
 
     /**
      * Try to rerun transaction if previous run has been failed.

@@ -28,9 +28,9 @@ final class MergeCommand implements CommandInterface, \IteratorAggregate, \Count
             $primary = $primary->getPrimaryCommand();
         }
         if (!$primary instanceof StoreCommandInterface) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new \InvalidArgumentException(\sprintf(
                 'Parameter `$primary` must be instance of %s.',
-                StoreCommandInterface::class
+                StoreCommandInterface::class,
             ));
         }
         $this->primary = $primary;

@@ -19,12 +19,12 @@ final class IlluminateCollectionFactory implements CollectionFactoryInterface
 
     public function __construct()
     {
-        if (!class_exists(Collection::class, true)) {
+        if (!\class_exists(Collection::class, true)) {
             throw new CollectionFactoryException(
-                sprintf(
+                \sprintf(
                     'There is no %s class. To resolve this issue you can install `illuminate/collections` package.',
-                    Collection::class
-                )
+                    Collection::class,
+                ),
             );
         }
     }

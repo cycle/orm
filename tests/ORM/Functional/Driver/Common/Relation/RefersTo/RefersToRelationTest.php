@@ -20,28 +20,6 @@ abstract class RefersToRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-            'comment_id' => 'integer,nullable',
-        ]);
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'message' => 'string',
-        ], [
-            'user_id' => ['table' => 'user', 'column' => 'id'],
-        ]);
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     public function testCreateUserWithDoubleReference(): void
     {
         $u = new User();
@@ -195,14 +173,15 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->captureWriteQueries();
 
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
         $this->assertNumWrites(3);
 
-        $this->orm = $this->orm->withHeap(new Heap());
-        $s = new Select($this->orm, User::class);
-        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+        $this->orm->getHeap()->clean();
+        $u = (new Select($this->orm, User::class))
+            ->load('lastComment')
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertNotNull($u->lastComment);
         $this->assertCount(1, $u->comments);
@@ -211,15 +190,16 @@ abstract class RefersToRelationTest extends BaseTest
         $u->lastComment = null;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
+        $this->save($u);
         $this->assertNumWrites(1);
 
-        $this->orm = $this->orm->withHeap(new Heap());
-        $s = new Select($this->orm, User::class);
+        $this->orm->getHeap()->clean();
 
-        $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
+        $u = (new Select($this->orm, User::class))
+            ->load('lastComment')
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
 
         $this->assertNull($u->lastComment);
         $this->assertCount(1, $u->comments);
@@ -236,8 +216,97 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->assertInstanceOf(
             Relation\BelongsTo::class,
-            $this->orm->getRelationMap(User::class)->getRelations()['lastComment']
+            $this->orm->getRelationMap(User::class)->getRelations()['lastComment'],
         );
+    }
+
+    /**
+     * If relation property was unset - ignore this field
+     */
+    public function testUnsetProperty(): void
+    {
+        $u = new User();
+        $u->email = 'email@email.com';
+        $u->balance = 100;
+
+        $c = new Comment();
+        $c->message = 'last comment';
+
+        $u->addComment($c);
+
+        $this->save($u);
+        $this->orm->getHeap()->clean();
+
+        /** @var User $u */
+        $u = (new Select($this->orm, User::class))
+            ->load('lastComment')
+            ->load('comments')
+            ->wherePK(1)
+            ->fetchOne();
+
+        self::assertNotNull($u->lastComment);
+        unset($u->lastComment);
+
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+    }
+
+    public function testUpdateRelation(): void
+    {
+        // Prepare data
+        $u = new User();
+        $u->email = 'email@email.com';
+        $u->balance = 100;
+        $c1 = new Comment();
+        $c1->message = 'last comment';
+        $c2 = new Comment();
+        $c2->message = 'new last comment';
+        $u->addComment($c1);
+        $u->addComment($c2);
+        $u->lastComment = $c2;
+        $this->save($u);
+        $this->orm->getHeap()->clean();
+        $id = $u->id;
+        unset($u, $c1, $c2);
+
+        $this->captureReadQueries();
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))->wherePK($id)->fetchOne();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader($user)
+            ->load('lastComment')
+            ->load('comments')->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        $this->assertNotEmpty($user->comments);
+        $this->assertNotNull($user->lastComment);
+        $this->assertNumReads(0);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+            'comment_id' => 'integer,nullable',
+        ]);
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'message' => 'string',
+        ], [
+            'user_id' => ['table' => 'user', 'column' => 'id'],
+        ]);
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

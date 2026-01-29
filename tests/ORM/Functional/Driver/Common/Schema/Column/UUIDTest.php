@@ -19,35 +19,6 @@ abstract class UUIDTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'uuid' => 'binary(16)',
-            'email' => 'string',
-            'balance' => 'float',
-        ], [], null, ['uuid' => null]);
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'uuid', 'email', 'balance'],
-                Schema::TYPECAST => [
-                    'id' => 'int',
-                    'uuid' => [Uuid::class, 'parse'],
-                    'balance' => 'float',
-                ],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testCreate(): void
     {
         $e = new User();
@@ -129,5 +100,34 @@ abstract class UUIDTest extends BaseTest
 
         $this->assertInstanceOf(Uuid::class, $result2->uuid);
         $this->assertEquals($result->uuid->toString(), $result2->uuid->toString());
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'uuid' => 'binary(16)',
+            'email' => 'string',
+            'balance' => 'float',
+        ], [], null, ['uuid' => null]);
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'uuid', 'email', 'balance'],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                    'uuid' => [Uuid::class, 'parse'],
+                    'balance' => 'float',
+                ],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

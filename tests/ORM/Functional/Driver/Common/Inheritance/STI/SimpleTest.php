@@ -52,6 +52,7 @@ abstract class SimpleTest extends StiBaseTest
         self::EMPLOYEE_3_LOADED,
         self::EMPLOYEE_4_LOADED,
     ];
+
     // Filtered on discriminator value
     protected const EMPLOYEES_LOADED_ALL = [self::EMPLOYEE_2_LOADED, self::EMPLOYEE_4_LOADED];
     protected const MANAGERS_LOADED_ALL = [self::EMPLOYEE_1_LOADED, self::EMPLOYEE_3_LOADED];
@@ -60,26 +61,6 @@ abstract class SimpleTest extends StiBaseTest
      * Discriminator column name
      */
     protected static string $discriminator = 'discriminator_value';
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('employee_table', [
-            static::$discriminator => 'string,nullable',
-            'id' => 'primary',
-            'name' => 'string',
-            'email' => 'string',
-            'age' => 'int',
-        ]);
-
-        $this->getDatabase()->table('employee_table')->insertMultiple(
-            [static::$discriminator, 'name', 'email', 'age'],
-            [self::EMPLOYEE_1, self::EMPLOYEE_2, self::EMPLOYEE_3, self::EMPLOYEE_4]
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
 
     // Basics
 
@@ -203,6 +184,26 @@ abstract class SimpleTest extends StiBaseTest
         $loadedEntity = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($entity->id)->fetchData();
         $this->assertSame(static::MANAGER_VALUE . '_two', $loadedEntity[0]['_type']);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('employee_table', [
+            static::$discriminator => 'string,nullable',
+            'id' => 'primary',
+            'name' => 'string',
+            'email' => 'string',
+            'age' => 'int',
+        ]);
+
+        $this->getDatabase()->table('employee_table')->insertMultiple(
+            [static::$discriminator, 'name', 'email', 'age'],
+            [self::EMPLOYEE_1, self::EMPLOYEE_2, self::EMPLOYEE_3, self::EMPLOYEE_4],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     protected function getSchemaArray(): array

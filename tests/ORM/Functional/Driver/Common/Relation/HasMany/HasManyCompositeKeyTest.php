@@ -23,94 +23,26 @@ abstract class HasManyCompositeKeyTest extends BaseTest
 {
     use TableTrait;
 
-    protected const
-        CHILD_CONTAINER = 'children';
-    protected const
-        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
-    protected const
-        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
-    protected const
-        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
-    protected const
-        PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202];
-    protected const
-        CHILD_1_1 = ['key1' => 1, 'key2' => 1, 'key3' => null, 'parent_key1' => 1, 'parent_key2' => 1];
-    protected const
-        CHILD_1_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo1', 'parent_key1' => 1, 'parent_key2' => 1];
-    protected const
-        CHILD_1_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar1', 'parent_key1' => 1, 'parent_key2' => 1];
-    protected const
-        CHILD_2_1 = ['key1' => 2, 'key2' => 1, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2];
-    protected const
-        CHILD_3_1 = ['key1' => 3, 'key2' => 1, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1];
-    protected const
-        PARENT_1_FULL = self::PARENT_1 + [self::CHILD_CONTAINER => [self::CHILD_1_1, self::CHILD_1_2, self::CHILD_1_3]];
-    protected const
-        PARENT_2_FULL = self::PARENT_2 + [self::CHILD_CONTAINER => [self::CHILD_2_1]];
-    protected const
-        PARENT_3_FULL = self::PARENT_3 + [self::CHILD_CONTAINER => [self::CHILD_3_1]];
-    protected const
-        PARENT_4_FULL = self::PARENT_4 + [self::CHILD_CONTAINER => []];
-    protected const
-        SET_FULL = [
-            self::PARENT_1_FULL,
-            self::PARENT_2_FULL,
-            self::PARENT_3_FULL,
-            self::PARENT_4_FULL,
-        ];
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'parent_entity',
-            [
-                'pField1' => 'bigInteger,primary',
-                'pField2' => 'bigInteger,primary',
-                'pField3' => 'integer,nullable',
-            ]
-        );
-        $this->makeTable(
-            'child_entity',
-            [
-                'field1' => 'bigInteger,primary',
-                'field2' => 'bigInteger,primary',
-                'field3' => 'string,nullable',
-                'parent_field1' => 'bigInteger,null',
-                'parent_field2' => 'bigInteger,null',
-            ]
-        );
-
-        $this->makeCompositeFK(
-            'child_entity',
-            ['parent_field1', 'parent_field2'],
-            'parent_entity',
-            ['pField1', 'pField2']
-        );
-
-        $this->getDatabase()->table('parent_entity')->insertMultiple(
-            ['pField1', 'pField2', 'pField3'],
-            [
-                self::PARENT_1,
-                self::PARENT_2,
-                self::PARENT_3,
-                self::PARENT_4,
-            ]
-        );
-        $this->getDatabase()->table('child_entity')->insertMultiple(
-            ['field1', 'field2', 'field3', 'parent_field1', 'parent_field2'],
-            [
-                self::CHILD_1_1,
-                self::CHILD_1_2,
-                self::CHILD_1_3,
-                self::CHILD_2_1,
-                self::CHILD_3_1,
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
+    protected const CHILD_CONTAINER = 'children';
+    protected const PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
+    protected const PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
+    protected const PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
+    protected const PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202];
+    protected const CHILD_1_1 = ['key1' => 1, 'key2' => 1, 'key3' => null, 'parent_key1' => 1, 'parent_key2' => 1];
+    protected const CHILD_1_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo1', 'parent_key1' => 1, 'parent_key2' => 1];
+    protected const CHILD_1_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar1', 'parent_key1' => 1, 'parent_key2' => 1];
+    protected const CHILD_2_1 = ['key1' => 2, 'key2' => 1, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2];
+    protected const CHILD_3_1 = ['key1' => 3, 'key2' => 1, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1];
+    protected const PARENT_1_FULL = self::PARENT_1 + [self::CHILD_CONTAINER => [self::CHILD_1_1, self::CHILD_1_2, self::CHILD_1_3]];
+    protected const PARENT_2_FULL = self::PARENT_2 + [self::CHILD_CONTAINER => [self::CHILD_2_1]];
+    protected const PARENT_3_FULL = self::PARENT_3 + [self::CHILD_CONTAINER => [self::CHILD_3_1]];
+    protected const PARENT_4_FULL = self::PARENT_4 + [self::CHILD_CONTAINER => []];
+    protected const SET_FULL = [
+        self::PARENT_1_FULL,
+        self::PARENT_2_FULL,
+        self::PARENT_3_FULL,
+        self::PARENT_4_FULL,
+    ];
 
     public function testInitRelation(): void
     {
@@ -245,7 +177,7 @@ abstract class HasManyCompositeKeyTest extends BaseTest
                     ],
                 ],
             ],
-            $selector->wherePK([91, 91])->fetchData()
+            $selector->wherePK([91, 91])->fetchData(),
         );
     }
 
@@ -402,6 +334,59 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         $this->assertSame(self::CHILD_1_2['key2'], $d->children[1]->key2);
 
         $this->assertSame('new value', $d->children[0]->key3);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'parent_entity',
+            [
+                'pField1' => 'bigInteger,primary',
+                'pField2' => 'bigInteger,primary',
+                'pField3' => 'integer,nullable',
+            ],
+        );
+        $this->makeTable(
+            'child_entity',
+            [
+                'field1' => 'bigInteger,primary',
+                'field2' => 'bigInteger,primary',
+                'field3' => 'string,nullable',
+                'parent_field1' => 'bigInteger,null',
+                'parent_field2' => 'bigInteger,null',
+            ],
+        );
+
+        $this->makeCompositeFK(
+            'child_entity',
+            ['parent_field1', 'parent_field2'],
+            'parent_entity',
+            ['pField1', 'pField2'],
+        );
+
+        $this->getDatabase()->table('parent_entity')->insertMultiple(
+            ['pField1', 'pField2', 'pField3'],
+            [
+                self::PARENT_1,
+                self::PARENT_2,
+                self::PARENT_3,
+                self::PARENT_4,
+            ],
+        );
+        $this->getDatabase()->table('child_entity')->insertMultiple(
+            ['field1', 'field2', 'field3', 'parent_field1', 'parent_field2'],
+            [
+                self::CHILD_1_1,
+                self::CHILD_1_2,
+                self::CHILD_1_3,
+                self::CHILD_2_1,
+                self::CHILD_3_1,
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

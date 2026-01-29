@@ -14,48 +14,6 @@ class EntityHydrationTest extends BaseMapperTest
 {
     public const DRIVER = 'sqlite';
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->orm = $this->withSchema(
-            new Schema(
-                [
-                    EntityHydrationUser::class => [
-                        SchemaInterface::MAPPER => Mapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'user',
-                        SchemaInterface::PRIMARY_KEY => 'uuid',
-                        SchemaInterface::COLUMNS => ['id', 'username', 'email'],
-                        SchemaInterface::TYPECAST => [],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [],
-                    ],
-                    ExtendedEntityHydrationUser::class => [
-                        SchemaInterface::MAPPER => Mapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'user',
-                        SchemaInterface::PRIMARY_KEY => 'uuid',
-                        SchemaInterface::COLUMNS => ['id', 'username', 'email', 'isVerified', 'profileId'],
-                        SchemaInterface::TYPECAST => [],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [],
-                    ],
-                    EntityHydrationIdentityUser::class => [
-                        SchemaInterface::MAPPER => Mapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'user',
-                        SchemaInterface::PRIMARY_KEY => 'id',
-                        SchemaInterface::COLUMNS => ['id', 'value'],
-                        SchemaInterface::TYPECAST => [],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [],
-                    ],
-                ]
-            )
-        );
-    }
-
     public function testDataForBaseClassShouldBeExtracted(): void
     {
         $user = new EntityHydrationUser(123, 'guest', 'guest@site.com');
@@ -184,6 +142,48 @@ class EntityHydrationTest extends BaseMapperTest
             throw $e;
         }
     }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->orm = $this->withSchema(
+            new Schema(
+                [
+                    EntityHydrationUser::class => [
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'uuid',
+                        SchemaInterface::COLUMNS => ['id', 'username', 'email'],
+                        SchemaInterface::TYPECAST => [],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                    ExtendedEntityHydrationUser::class => [
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'uuid',
+                        SchemaInterface::COLUMNS => ['id', 'username', 'email', 'isVerified', 'profileId'],
+                        SchemaInterface::TYPECAST => [],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                    EntityHydrationIdentityUser::class => [
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'value'],
+                        SchemaInterface::TYPECAST => [],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                ],
+            ),
+        );
+    }
 }
 // phpcs:disable
 class EntityHydrationIdentityUser
@@ -205,18 +205,6 @@ class EntityHydrationUser
         $this->email = $email;
     }
 
-    public function __set(string $name, $value): void
-    {
-        $this->attributes[$name] = $value;
-    }
-
-    public function __get(string $name)
-    {
-        if (isset($this->attributes[$name])) {
-            return $this->attributes[$name];
-        }
-    }
-
     public function getId(): int
     {
         return $this->id;
@@ -235,6 +223,18 @@ class EntityHydrationUser
     public function getAttributes(): array
     {
         return $this->attributes;
+    }
+
+    public function __set(string $name, $value): void
+    {
+        $this->attributes[$name] = $value;
+    }
+
+    public function __get(string $name)
+    {
+        if (isset($this->attributes[$name])) {
+            return $this->attributes[$name];
+        }
     }
 }
 

@@ -17,133 +17,6 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-            'comment_id' => 'integer,nullable',
-        ]);
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'message' => 'string',
-        ], [
-            'user_id' => ['table' => 'user', 'column' => 'id'],
-        ]);
-
-        $this->makeTable('favorites', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'comment_id' => 'integer',
-        ]);
-
-        $this->makeFK('comment', 'user_id', 'user', 'id');
-        $this->makeFK(
-            'favorites',
-            'user_id',
-            'user',
-            'id',
-            ForeignKeyInterface::NO_ACTION,
-            ForeignKeyInterface::NO_ACTION
-        );
-        $this->makeFK(
-            'favorites',
-            'comment_id',
-            'comment',
-            'id',
-            ForeignKeyInterface::NO_ACTION,
-            ForeignKeyInterface::NO_ACTION
-        );
-        $this->orm = $this->withSchema(new Schema([
-            'user' => [
-                Schema::MAPPER => StdMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance', 'comment_id'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'lastComment' => [
-                        Relation::TYPE => Relation::REFERS_TO,
-                        Relation::TARGET => 'comment',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'comment_id',
-                            Relation::OUTER_KEY => 'id',
-                            Relation::NULLABLE => true,
-                        ],
-                    ],
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => 'comment',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                    'favorites' => [
-                        Relation::TYPE => Relation::MANY_TO_MANY,
-                        Relation::TARGET => 'comment',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::THROUGH_ENTITY => 'favorite',
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'id',
-                            Relation::THROUGH_INNER_KEY => 'user_id',
-                            Relation::THROUGH_OUTER_KEY => 'comment_id',
-                        ],
-                    ],
-                ],
-            ],
-            'comment' => [
-                Schema::MAPPER => StdMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'user' => [
-                        Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => 'user',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'user_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                    'favoredBy' => [
-                        Relation::TYPE => Relation::MANY_TO_MANY,
-                        Relation::TARGET => 'user',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::THROUGH_ENTITY => 'favorite',
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'id',
-                            Relation::THROUGH_INNER_KEY => 'comment_id',
-                            Relation::THROUGH_OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            'favorite' => [
-                Schema::MAPPER => StdMapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'favorites',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'comment_id'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testCreate(): void
     {
         $u = $this->orm->make('user');
@@ -232,12 +105,12 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
 
         $fav = [
-            (string)$u1->favorites[0]->favoredBy[0]->id,
-            (string)$u1->favorites[0]->favoredBy[1]->id,
+            (string) $u1->favorites[0]->favoredBy[0]->id,
+            (string) $u1->favorites[0]->favoredBy[1]->id,
         ];
 
-        $this->assertContains((string)$u->id, $fav);
-        $this->assertContains((string)$u2->id, $fav);
+        $this->assertContains((string) $u->id, $fav);
+        $this->assertContains((string) $u2->id, $fav);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -248,8 +121,8 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
             ->load('favorites')
             ->wherePK($u2->id)->fetchOne();
 
-        $this->assertEquals((string)$u1->id, $u2->id);
-        $this->assertEquals((string)$u1->favorites[0]->id, $u2->favorites[0]->id);
+        $this->assertEquals((string) $u1->id, $u2->id);
+        $this->assertEquals((string) $u1->favorites[0]->id, $u2->favorites[0]->id);
     }
 
     public function testCreateMultipleLinkedTreesExchange(): void
@@ -289,5 +162,132 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $this->captureWriteQueries();
         $this->save($u, $u2);
         $this->assertNumWrites(0);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+            'comment_id' => 'integer,nullable',
+        ]);
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'message' => 'string',
+        ], [
+            'user_id' => ['table' => 'user', 'column' => 'id'],
+        ]);
+
+        $this->makeTable('favorites', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'comment_id' => 'integer',
+        ]);
+
+        $this->makeFK('comment', 'user_id', 'user', 'id');
+        $this->makeFK(
+            'favorites',
+            'user_id',
+            'user',
+            'id',
+            ForeignKeyInterface::NO_ACTION,
+            ForeignKeyInterface::NO_ACTION,
+        );
+        $this->makeFK(
+            'favorites',
+            'comment_id',
+            'comment',
+            'id',
+            ForeignKeyInterface::NO_ACTION,
+            ForeignKeyInterface::NO_ACTION,
+        );
+        $this->orm = $this->withSchema(new Schema([
+            'user' => [
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance', 'comment_id'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'lastComment' => [
+                        Relation::TYPE => Relation::REFERS_TO,
+                        Relation::TARGET => 'comment',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'comment_id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::NULLABLE => true,
+                        ],
+                    ],
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => 'comment',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                    'favorites' => [
+                        Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::TARGET => 'comment',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => 'favorite',
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::THROUGH_INNER_KEY => 'user_id',
+                            Relation::THROUGH_OUTER_KEY => 'comment_id',
+                        ],
+                    ],
+                ],
+            ],
+            'comment' => [
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'user' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => 'user',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                    'favoredBy' => [
+                        Relation::TYPE => Relation::MANY_TO_MANY,
+                        Relation::TARGET => 'user',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::THROUGH_ENTITY => 'favorite',
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'id',
+                            Relation::THROUGH_INNER_KEY => 'comment_id',
+                            Relation::THROUGH_OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            'favorite' => [
+                Schema::MAPPER => StdMapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'favorites',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'comment_id'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

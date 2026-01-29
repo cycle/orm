@@ -23,7 +23,7 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
         private string $name,
         private string $target,
         private array $innerKeys,
-        private array $outerKeys
+        private array $outerKeys,
     ) {
         $this->targetContainer = $name . ':' . $target;
     }
@@ -58,16 +58,9 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
 
         foreach ($related as $item) {
             $rTuple = $pool->offsetGet($item);
-            assert($rTuple !== null);
+            \assert($rTuple !== null);
             $this->applyChanges($tuple->state, $rTuple->state);
             $rTuple->state->setRelationStatus($this->targetContainer, RelationInterface::STATUS_RESOLVED);
-        }
-    }
-
-    private function applyChanges(State $from, State $to): void
-    {
-        foreach ($this->innerKeys as $i => $innerKey) {
-            $to->register($this->outerKeys[$i], $from->getValue($innerKey));
         }
     }
 
@@ -84,5 +77,12 @@ class ShadowHasMany implements ReversedRelationInterface, DependencyInterface
     public function isCascade(): bool
     {
         return true;
+    }
+
+    private function applyChanges(State $from, State $to): void
+    {
+        foreach ($this->innerKeys as $i => $innerKey) {
+            $to->register($this->outerKeys[$i], $from->getValue($innerKey));
+        }
     }
 }

@@ -9,7 +9,6 @@ class UserCredentials
 {
     public $username;
     public $password;
-
     public $unmapped_public_property;
     private $unmapped_private_property;
 }

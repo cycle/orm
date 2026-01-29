@@ -33,7 +33,7 @@ final class State
         #[ExpectedValues(valuesFromClass: Node::class)]
         private int $state,
         private array $data,
-        private array $transactionRaw = []
+        private array $transactionRaw = [],
     ) {
         $this->transactionData = $state === Node::NEW ? [] : $data;
     }
@@ -55,7 +55,7 @@ final class State
         $this->storage[$type][] = $node;
     }
 
-    public function clearStorage(string $type = null): void
+    public function clearStorage(?string $type = null): void
     {
         if ($type === null) {
             $this->storage = [];
@@ -106,7 +106,7 @@ final class State
         return $this->transactionData;
     }
 
-    public function updateTransactionData(array $fields = null): void
+    public function updateTransactionData(?array $fields = null): void
     {
         if ($fields === null) {
             foreach ($this->data as $field => $value) {
@@ -120,7 +120,7 @@ final class State
         }
         $changes = false;
         foreach ($this->data as $field => $value) {
-            if (in_array($field, $fields, true)) {
+            if (\in_array($field, $fields, true)) {
                 $this->transactionData[$field] = $this->data[$field];
                 if (\array_key_exists($field, $this->transactionRaw)) {
                     $this->transactionRaw[$field] = Node::convertToSolid($this->data[$field]);
@@ -152,7 +152,7 @@ final class State
             }
             $c = Node::compare(
                 $value,
-                \array_key_exists($field, $this->transactionRaw) ? $this->transactionRaw[$field] : $this->transactionData[$field]
+                \array_key_exists($field, $this->transactionRaw) ? $this->transactionRaw[$field] : $this->transactionData[$field],
             );
             if ($c !== 0) {
                 $result[$field] = $value;
@@ -185,15 +185,10 @@ final class State
         return $this->waitingFields === [];
     }
 
-    public function __destruct()
-    {
-        unset($this->relations, $this->storage, $this->data, $this->transactionData);
-    }
-
     public function setRelationStatus(
         string $name,
         #[ExpectedValues(valuesFromClass: RelationInterface::class)]
-        int $status
+        int $status,
     ): void {
         $this->relationStatus[$name] = $status;
     }
@@ -202,5 +197,10 @@ final class State
     public function getRelationStatus(string $name): int
     {
         return $this->relationStatus[$name] ?? RelationInterface::STATUS_PREPARE;
+    }
+
+    public function __destruct()
+    {
+        unset($this->relations, $this->storage, $this->data, $this->transactionData);
     }
 }

@@ -19,6 +19,101 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
 {
     use TableTrait;
 
+    public function testCreate(): void
+    {
+        $u = new User();
+        $u->email = 'test@email.com';
+
+        $p = new Post();
+        $p->title = 'Title';
+        $p->content = 'Hello World';
+
+        $c = new Comment();
+        $c->user = $u;
+        $c->message = 'hello hello';
+
+        $p->addComment($c);
+
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(4);
+
+        // no changes!
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+        $selector = new Select($this->orm, Post::class);
+        $selector->load('lastComment.user')
+            ->load('comments.user');
+
+        $p1 = $selector->wherePK(1)->fetchOne();
+
+        $this->assertEquals($p->id, $p1->id);
+        $this->assertEquals($p->lastComment->id, $p1->lastComment->id);
+
+        $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
+        $this->assertEquals($p->comments[0]->id, $p1->comments[0]->id);
+        $this->assertEquals($p1->id, $p1->comments[0]->post_id);
+    }
+
+    public function testReferenceUpdate(): void
+    {
+        $u1 = new User();
+        $u1->email = 'test@email.com';
+
+        $u2 = new User();
+        $u2->email = 'test2@email.com';
+
+        $p = new Post();
+        $p->title = 'Title';
+        $p->content = 'Hello World';
+
+        $c1 = new Comment();
+        $c1->user = $u1;
+        $c1->message = 'hello hello';
+
+        $c2 = new Comment();
+        $c2->user = $u2;
+        $c2->message = 'hi hi';
+
+        $p->addComment($c1);
+        $p->addComment($c2);
+
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(6);
+
+        $c3 = new Comment();
+        $c3->user = $u2;
+        $c3->message = 'hello again 2';
+
+        $p->addComment($c3);
+
+        $this->captureWriteQueries();
+        $this->save($p);
+        // Insert new comment, update post.lastComment
+        $this->assertNumWrites(2);
+
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        $p1 = (new Select($this->orm, Post::class))
+            ->load('lastComment.user')
+            ->load('comments.user')
+            ->wherePK($p->id)->fetchOne();
+
+        $pCommentIds = array_column($p->comments->toArray(), 'id');
+        $p1CommentIds = array_column($p1->comments->toArray(), 'id');
+        sort($pCommentIds);
+        sort($p1CommentIds);
+
+        $this->assertEquals($p1->lastComment->id, $c3->id);
+        $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
+        $this->assertEquals($pCommentIds, $p1CommentIds);
+        $this->assertEquals($p1->id, $p1->comments[0]->post_id);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -110,100 +205,5 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
                 ],
             ],
         ]));
-    }
-
-    public function testCreate(): void
-    {
-        $u = new User();
-        $u->email = 'test@email.com';
-
-        $p = new Post();
-        $p->title = 'Title';
-        $p->content = 'Hello World';
-
-        $c = new Comment();
-        $c->user = $u;
-        $c->message = 'hello hello';
-
-        $p->addComment($c);
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(4);
-
-        // no changes!
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-        $selector = new Select($this->orm, Post::class);
-        $selector->load('lastComment.user')
-                 ->load('comments.user');
-
-        $p1 = $selector->wherePK(1)->fetchOne();
-
-        $this->assertEquals($p->id, $p1->id);
-        $this->assertEquals($p->lastComment->id, $p1->lastComment->id);
-
-        $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
-        $this->assertEquals($p->comments[0]->id, $p1->comments[0]->id);
-        $this->assertEquals($p1->id, $p1->comments[0]->post_id);
-    }
-
-    public function testReferenceUpdate(): void
-    {
-        $u1 = new User();
-        $u1->email = 'test@email.com';
-
-        $u2 = new User();
-        $u2->email = 'test2@email.com';
-
-        $p = new Post();
-        $p->title = 'Title';
-        $p->content = 'Hello World';
-
-        $c1 = new Comment();
-        $c1->user = $u1;
-        $c1->message = 'hello hello';
-
-        $c2 = new Comment();
-        $c2->user = $u2;
-        $c2->message = 'hi hi';
-
-        $p->addComment($c1);
-        $p->addComment($c2);
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(6);
-
-        $c3 = new Comment();
-        $c3->user = $u2;
-        $c3->message = 'hello again 2';
-
-        $p->addComment($c3);
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        // Insert new comment, update post.lastComment
-        $this->assertNumWrites(2);
-
-        $this->orm = $this->orm->withHeap(new Heap());
-
-        $p1 = (new Select($this->orm, Post::class))
-            ->load('lastComment.user')
-            ->load('comments.user')
-            ->wherePK($p->id)->fetchOne();
-
-        $pCommentIds = array_column($p->comments->toArray(), 'id');
-        $p1CommentIds = array_column($p1->comments->toArray(), 'id');
-        sort($pCommentIds);
-        sort($p1CommentIds);
-
-        $this->assertEquals($p1->lastComment->id, $c3->id);
-        $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
-        $this->assertEquals($pCommentIds, $p1CommentIds);
-        $this->assertEquals($p1->id, $p1->comments[0]->post_id);
     }
 }

@@ -46,7 +46,7 @@ class HasManyLoader extends JoinableLoader
         FactoryInterface $factory,
         string $name,
         string $target,
-        array $schema
+        array $schema,
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $name, $target, $schema);
         $this->options['where'] = $schema[Relation::WHERE] ?? [];
@@ -70,14 +70,14 @@ class HasManyLoader extends JoinableLoader
         $this->setWhere(
             $query,
             $this->isJoined() ? 'onWhere' : 'where',
-            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? [],
         );
 
         // user specified ORDER_BY rules
         $this->setOrderBy(
             $query,
             $this->getAlias(),
-            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []
+            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? [],
         );
 
         return parent::configureQuery($query);
@@ -87,9 +87,9 @@ class HasManyLoader extends JoinableLoader
     {
         return new ArrayNode(
             $this->columnNames(),
-            (array)$this->define(SchemaInterface::PRIMARY_KEY),
-            (array)$this->schema[Relation::OUTER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            (array) $this->define(SchemaInterface::PRIMARY_KEY),
+            (array) $this->schema[Relation::OUTER_KEY],
+            (array) $this->schema[Relation::INNER_KEY],
         );
     }
 }

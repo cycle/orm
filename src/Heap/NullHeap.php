@@ -30,15 +30,9 @@ final class NullHeap implements HeapInterface
         return null;
     }
 
-    public function attach(object $entity, Node $node, array $index = []): void
-    {
-    }
+    public function attach(object $entity, Node $node, array $index = []): void {}
 
-    public function detach(object $entity): void
-    {
-    }
+    public function detach(object $entity): void {}
 
-    public function clean(): void
-    {
-    }
+    public function clean(): void {}
 }

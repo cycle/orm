@@ -9,7 +9,6 @@ class Comment
 {
     public $id;
     public $post_id;
-
     public $message;
 
     /** @var User */

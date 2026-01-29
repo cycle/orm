@@ -10,10 +10,8 @@ class Preference
     public $tenant;
     public $tenant_id;
     public $id;
-
     public $flag;
     public $option;
-
     public $created_at;
     public $updated_at;
 }

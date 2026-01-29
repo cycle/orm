@@ -17,15 +17,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testSelect(): void
     {
         $groupUuid = Uuid::uuid4();
@@ -49,6 +40,15 @@ abstract class CaseTest extends BaseTest
         $groups = $user->groups;
 
         $this->assertEquals($groupUuid, $groups[0]->uuid);
+    }
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

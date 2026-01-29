@@ -37,7 +37,7 @@ class GeneratedColumnTest extends CommonClass
                 [Uuid::uuid4()->toString()],
                 [Uuid::uuid4()->toString()],
                 [Uuid::uuid4()->toString()],
-            ]
+            ],
         );
 
         $schema = $this->getDatabase()->table('document')->getSchema();

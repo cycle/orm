@@ -21,7 +21,7 @@ final class EmbeddedNode extends AbstractNode
             $this->container,
             $this->indexName,
             self::LAST_REFERENCE,
-            $data
+            $data,
         );
     }
 }

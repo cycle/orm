@@ -1,0 +1,16 @@
+---
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - '*'
+
+name: Fix Code Style
+
+jobs:
+  cs-fix:
+    permissions:
+      contents: write
+    uses: spiral/gh-actions/.github/workflows/cs-fix.yml@master
+
+...

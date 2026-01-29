@@ -21,97 +21,6 @@ abstract class MapperTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'user',
-            [
-                'id' => 'primary',
-                'email' => 'string',
-                'balance' => 'float,nullable',
-                'protected' => 'int,nullable',
-                'private' => 'int,nullable',
-            ]
-        );
-
-        $this->makeTable(
-            'post',
-            [
-                'id' => 'primary',
-                'user_id' => 'int',
-            ]
-        );
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance', 'protected', 'private'],
-            [
-                ['hello@world.com', 100, 12, 13],
-                ['another@world.com', 200, 14, 15],
-            ]
-        );
-        $this->getDatabase()->table('post')->insertMultiple(
-            ['user_id'],
-            [
-                [1],
-                [1],
-                [1],
-            ]
-        );
-
-        $this->orm = $this->withSchema(
-            new Schema(
-                [
-                    User::class => [
-                        SchemaInterface::ROLE => 'user',
-                        SchemaInterface::MAPPER => Mapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'user',
-                        SchemaInterface::PRIMARY_KEY => 'id',
-                        SchemaInterface::COLUMNS => ['id', 'email', 'balance', 'protected', 'private'],
-                        SchemaInterface::TYPECAST => ['balance' => 'float'],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [
-                            'protectedRelation' => [
-                                Relation::TYPE => Relation::HAS_MANY,
-                                Relation::TARGET => 'post',
-                                Relation::LOAD => Relation::LOAD_EAGER,
-                                Relation::SCHEMA => [
-                                    Relation::CASCADE => true,
-                                    Relation::NULLABLE => false,
-                                    Relation::INNER_KEY => 'id',
-                                    Relation::OUTER_KEY => 'user',
-                                ],
-                            ],
-                            'privateRelation' => [
-                                Relation::TYPE => Relation::HAS_MANY,
-                                Relation::TARGET => 'post',
-                                Relation::LOAD => Relation::LOAD_EAGER,
-                                Relation::SCHEMA => [
-                                    Relation::CASCADE => true,
-                                    Relation::NULLABLE => false,
-                                    Relation::INNER_KEY => 'id',
-                                    Relation::OUTER_KEY => 'user',
-                                ],
-                            ],
-                        ],
-                    ],
-                    Post::class => [
-                        SchemaInterface::ROLE => 'post',
-                        SchemaInterface::MAPPER => Mapper::class,
-                        SchemaInterface::DATABASE => 'default',
-                        SchemaInterface::TABLE => 'post',
-                        SchemaInterface::PRIMARY_KEY => 'id',
-                        SchemaInterface::COLUMNS => ['id', 'user' => 'user_id'],
-                        SchemaInterface::SCHEMA => [],
-                        SchemaInterface::RELATIONS => [],
-                    ],
-                ]
-            )
-        );
-    }
-
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -145,7 +54,7 @@ abstract class MapperTest extends BaseTest
                     'privateRelation' => [],
                 ],
             ],
-            $selector->fetchData()
+            $selector->fetchData(),
         );
     }
 
@@ -318,7 +227,7 @@ abstract class MapperTest extends BaseTest
                 'protected' => 12,
                 'private' => 13,
             ],
-            $this->orm->getHeap()->get($result)->getData()
+            $this->orm->getHeap()->get($result)->getData(),
         );
     }
 
@@ -419,19 +328,17 @@ abstract class MapperTest extends BaseTest
         $this->assertSame('test@email.com', $u->email);
 
         $u2 = $this->orm->getRepository(User::class)->findByPK(1);
-        $this->assertSame('hello@world.com', $u2->email);
+        $this->assertSame('test@email.com', $u2->email);
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
         $this->assertSame('hello@world.com', $u3->email);
 
         $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(0);
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
-        $this->assertSame('hello@world.com', $u4->email);
+        $this->assertSame('test@email.com', $u4->email);
     }
 
     public function testNullableValuesInASndOut(): void
@@ -461,5 +368,96 @@ abstract class MapperTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         $this->assertNull($u->balance);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'user',
+            [
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float,nullable',
+                'protected' => 'int,nullable',
+                'private' => 'int,nullable',
+            ],
+        );
+
+        $this->makeTable(
+            'post',
+            [
+                'id' => 'primary',
+                'user_id' => 'int',
+            ],
+        );
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance', 'protected', 'private'],
+            [
+                ['hello@world.com', 100, 12, 13],
+                ['another@world.com', 200, 14, 15],
+            ],
+        );
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['user_id'],
+            [
+                [1],
+                [1],
+                [1],
+            ],
+        );
+
+        $this->orm = $this->withSchema(
+            new Schema(
+                [
+                    User::class => [
+                        SchemaInterface::ROLE => 'user',
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'user',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'email', 'balance', 'protected', 'private'],
+                        SchemaInterface::TYPECAST => ['balance' => 'float'],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [
+                            'protectedRelation' => [
+                                Relation::TYPE => Relation::HAS_MANY,
+                                Relation::TARGET => 'post',
+                                Relation::LOAD => Relation::LOAD_EAGER,
+                                Relation::SCHEMA => [
+                                    Relation::CASCADE => true,
+                                    Relation::NULLABLE => false,
+                                    Relation::INNER_KEY => 'id',
+                                    Relation::OUTER_KEY => 'user',
+                                ],
+                            ],
+                            'privateRelation' => [
+                                Relation::TYPE => Relation::HAS_MANY,
+                                Relation::TARGET => 'post',
+                                Relation::LOAD => Relation::LOAD_EAGER,
+                                Relation::SCHEMA => [
+                                    Relation::CASCADE => true,
+                                    Relation::NULLABLE => false,
+                                    Relation::INNER_KEY => 'id',
+                                    Relation::OUTER_KEY => 'user',
+                                ],
+                            ],
+                        ],
+                    ],
+                    Post::class => [
+                        SchemaInterface::ROLE => 'post',
+                        SchemaInterface::MAPPER => Mapper::class,
+                        SchemaInterface::DATABASE => 'default',
+                        SchemaInterface::TABLE => 'post',
+                        SchemaInterface::PRIMARY_KEY => 'id',
+                        SchemaInterface::COLUMNS => ['id', 'user' => 'user_id'],
+                        SchemaInterface::SCHEMA => [],
+                        SchemaInterface::RELATIONS => [],
+                    ],
+                ],
+            ),
+        );
     }
 }

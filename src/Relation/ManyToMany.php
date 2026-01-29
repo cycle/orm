@@ -26,8 +26,6 @@ use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Transaction\Pool;
 use Cycle\ORM\Transaction\Tuple;
-use SplObjectStorage;
-use Traversable;
 
 /**
  * @internal
@@ -41,7 +39,6 @@ class ManyToMany extends Relation\AbstractRelation
     protected array $throughOuterKeys;
 
     protected string $pivotRole;
-
     protected EntityFactoryInterface $entityFactory;
     protected SourceProviderInterface $sourceProvider;
     protected FactoryInterface $factory;
@@ -52,7 +49,7 @@ class ManyToMany extends Relation\AbstractRelation
         private string $role,
         string $name,
         string $target,
-        array $schema
+        array $schema,
     ) {
         parent::__construct($orm, $role, $name, $target, $schema);
         $this->heap = $orm->getHeap();
@@ -61,8 +58,8 @@ class ManyToMany extends Relation\AbstractRelation
         $this->factory = $orm->getFactory();
         $this->pivotRole = $this->schema[Relation::THROUGH_ENTITY];
 
-        $this->throughInnerKeys = (array)$this->schema[Relation::THROUGH_INNER_KEY];
-        $this->throughOuterKeys = (array)$this->schema[Relation::THROUGH_OUTER_KEY];
+        $this->throughInnerKeys = (array) $this->schema[Relation::THROUGH_INNER_KEY];
+        $this->throughOuterKeys = (array) $this->schema[Relation::THROUGH_OUTER_KEY];
     }
 
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
@@ -87,7 +84,11 @@ class ManyToMany extends Relation\AbstractRelation
         if ($related instanceof ReferenceInterface && $this->resolve($related, true) !== null) {
             $related = $related->getValue();
             $tuple->state->setRelation($this->getName(), $related);
+        } elseif (SpecialValue::isNotSet($related)) {
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
         }
+
         $related = $this->extractRelated($related, $original);
         // $tuple->state->setStorage($this->pivotEntity, $related);
         $tuple->state->setRelation($this->getName(), $related);
@@ -128,7 +129,7 @@ class ManyToMany extends Relation\AbstractRelation
     public function init(EntityFactoryInterface $factory, Node $node, array $data): iterable
     {
         $elements = [];
-        $pivotData = new SplObjectStorage();
+        $pivotData = new \SplObjectStorage();
 
         $iterator = Iterator::createWithServices(
             $this->heap,
@@ -136,7 +137,7 @@ class ManyToMany extends Relation\AbstractRelation
             $this->entityFactory,
             $this->target,
             $data,
-            true
+            true,
         );
         foreach ($iterator as $pivot => $entity) {
             if (!\is_array($pivot)) {
@@ -187,7 +188,7 @@ class ManyToMany extends Relation\AbstractRelation
     public function collect(mixed $data): iterable
     {
         return $this->factory->collection(
-            $this->schema[Relation::COLLECTION_TYPE] ?? null
+            $this->schema[Relation::COLLECTION_TYPE] ?? null,
         )->collect($data);
     }
 
@@ -197,12 +198,12 @@ class ManyToMany extends Relation\AbstractRelation
             $data instanceof PivotedStorage => $data,
             $data instanceof PivotedCollectionInterface => new PivotedStorage(
                 $data->toArray(),
-                $data->getPivotContext()
+                $data->getPivotContext(),
             ),
             $data instanceof \Doctrine\Common\Collections\Collection => new PivotedStorage($data->toArray()),
             $data === null => new PivotedStorage(),
-            $data instanceof Traversable => new PivotedStorage(iterator_to_array($data)),
-            default => new PivotedStorage((array)$data),
+            $data instanceof \Traversable => new PivotedStorage(\iterator_to_array($data)),
+            default => new PivotedStorage((array) $data),
         };
     }
 
@@ -270,7 +271,7 @@ class ManyToMany extends Relation\AbstractRelation
             $this->factory,
             $source->getTable(),
             $this->target,
-            $this->schema
+            $this->schema,
         );
 
         /** @var ManyToManyLoader $loader */
@@ -284,8 +285,8 @@ class ManyToMany extends Relation\AbstractRelation
 
         // we are going to add pivot node into virtual root node (only ID) to aggregate the results
         $root = new RootNode(
-            (array)$this->schema[Relation::INNER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            (array) $this->schema[Relation::INNER_KEY],
+            (array) $this->schema[Relation::INNER_KEY],
         );
 
         $node = $loader->createNode();
@@ -304,7 +305,7 @@ class ManyToMany extends Relation\AbstractRelation
         $loader->withContext($loader, ['method' => JoinableLoader::INLOAD])->loadData($node);
 
         $elements = [];
-        $pivotData = new SplObjectStorage();
+        $pivotData = new \SplObjectStorage();
         $iterator = Iterator::createWithServices(
             $this->heap,
             $this->ormSchema,
@@ -312,14 +313,14 @@ class ManyToMany extends Relation\AbstractRelation
             $this->target,
             $root->getResult()[0]['output'],
             true,
-            typecast: true
+            typecast: true,
         );
         foreach ($iterator as $pivot => $entity) {
             $pivotData[$entity] = $this->entityFactory->make(
                 $this->schema[Relation::THROUGH_ENTITY],
                 $pivot,
                 Node::MANAGED,
-                typecast: true
+                typecast: true,
             );
 
             $elements[] = $entity;
@@ -334,15 +335,6 @@ class ManyToMany extends Relation\AbstractRelation
         foreach ($this->innerKeys as $i => $innerKey) {
             $state->register($this->throughInnerKeys[$i], $parentState->getValue($innerKey));
         }
-    }
-
-    private function deleteChild(Pool $pool, ?object $pivot, object $child, ?Node $relatedNode = null): void
-    {
-        // todo: add supporting for nullable pivot entities?
-        if ($pivot !== null) {
-            $pool->attachDelete($pivot, $this->isCascade());
-        }
-        $pool->attachStore($child, true);
     }
 
     protected function newLink(Pool $pool, Tuple $tuple, PivotedStorage $storage, object $related): void
@@ -393,6 +385,15 @@ class ManyToMany extends Relation\AbstractRelation
         $entity = $this->entityFactory->make($this->pivotRole, $pivot ?? []);
         $storage->set($rTuple->entity, $entity);
         return $entity;
+    }
+
+    private function deleteChild(Pool $pool, ?object $pivot, object $child, ?Node $relatedNode = null): void
+    {
+        // todo: add supporting for nullable pivot entities?
+        if ($pivot !== null) {
+            $pool->attachDelete($pivot, $this->isCascade());
+        }
+        $pool->attachStore($child, true);
     }
 
     private function finalize(Pool $pool, Tuple $tuple, mixed $related): void

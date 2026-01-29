@@ -17,6 +17,21 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    public function testSelect(): void
+    {
+        $model = (new Select($this->orm, Entity\Node::class))
+            ->wherePK(2)
+            ->fetchOne();
+
+        $this->save($model);
+
+        $model = (new Select($this->orm, Entity\Node::class))
+            ->wherePK(3)
+            ->fetchOne();
+
+        $this->save($model);
+    }
+
     public function setUp(): void
     {
         // Init DB
@@ -39,20 +54,5 @@ abstract class CaseTest extends BaseTest
                 [3, 'level 2', 2],
             ],
         );
-    }
-
-    public function testSelect(): void
-    {
-        $model = (new Select($this->orm, Entity\Node::class))
-            ->wherePK(2)
-            ->fetchOne();
-
-        $this->save($model);
-
-        $model = (new Select($this->orm, Entity\Node::class))
-            ->wherePK(3)
-            ->fetchOne();
-
-        $this->save($model);
     }
 }

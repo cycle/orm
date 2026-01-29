@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity;
 
-use DateTimeImmutable;
-
 class Tag
 {
     private ?int $id = null;
     private string $label;
-    private DateTimeImmutable $created_at;
+    private \DateTimeImmutable $created_at;
+
     /**
      * @var Post[]
      */
@@ -19,7 +18,7 @@ class Tag
     public function __construct(string $label)
     {
         $this->label = $label;
-        $this->created_at = new DateTimeImmutable();
+        $this->created_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -37,7 +36,7 @@ class Tag
         $this->label = $label;
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }

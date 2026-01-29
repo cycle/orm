@@ -12,6 +12,7 @@
         "docs": "https://cycle-orm.dev/docs",
         "chat": "https://discord.gg/spiralphp"
     },
+    "keywords": ["mysql", "mssql", "sqlite", "postgresql", "orm", "sql", "query-builder", "data-mapper"],
     "authors": [
         {
             "name": "Anton Titov (wolfy-j)",
@@ -45,14 +46,15 @@
     },
     "require-dev": {
         "doctrine/collections": "^1.6 || ^2.0",
-        "illuminate/collections": "^8.0",
+        "illuminate/collections": "9 - 11",
         "loophp/collection": "^6.0 || ^7.0",
         "mockery/mockery": "^1.1",
         "phpunit/phpunit": "^9.5",
         "ramsey/uuid": "^4.0",
+        "spiral/code-style": "~2.2.0",
         "spiral/tokenizer": "^2.8 || ^3.0",
         "symfony/var-dumper": "^5.2 || ^6.0 || ^7.0",
-        "vimeo/psalm": "5.21"
+        "vimeo/psalm": "5.21 || ^6.8"
     },
     "autoload": {
         "psr-4": {
@@ -63,5 +65,17 @@
         "psr-4": {
             "Cycle\\ORM\\Tests\\": "tests/ORM/"
         }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "cs:diff": "php-cs-fixer fix --dry-run -v --diff",
+        "cs:fix": "php-cs-fixer fix -v",
+        "psalm": "psalm",
+        "psalm:baseline": "psalm --set-baseline=psalm-baseline.xml",
+        "test": "phpunit --color=always",
+        "test:unit": "phpunit --exclude-group driver --colors=always",
+        "test:sqlite": "phpunit --group driver-sqlite --colors=always"
     }
 }

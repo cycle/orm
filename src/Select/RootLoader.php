@@ -29,13 +29,12 @@ final class RootLoader extends AbstractLoader
     use ColumnsTrait;
     use ScopeTrait;
 
-    /** @var array */
     protected array $options = [
         'load' => true,
         'scope' => true,
     ];
-
     private SelectQuery $query;
+    private bool $forceGroupBy = false;
 
     /**
      * @param bool $loadRelations Define loading eager relations and JTI hierarchy.
@@ -49,7 +48,7 @@ final class RootLoader extends AbstractLoader
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $target);
         $this->query = $this->source->getDatabase()->select()->from(
-            sprintf('%s AS %s', $this->source->getTable(), $this->getAlias())
+            \sprintf('%s AS %s', $this->source->getTable(), $this->getAlias()),
         );
         $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
 
@@ -60,15 +59,6 @@ final class RootLoader extends AbstractLoader
         }
     }
 
-    /**
-     * Clone the underlying query.
-     */
-    public function __clone()
-    {
-        $this->query = clone $this->query;
-        parent::__clone();
-    }
-
     public function getAlias(): string
     {
         return $this->target;
@@ -77,10 +67,11 @@ final class RootLoader extends AbstractLoader
     /**
      * Primary column name list with table name like `table.column`.
      *
-     * @return string|string[]
+     * @return non-empty-string|non-empty-array<non-empty-string>
      */
     public function getPK(): array|string
     {
+        /** @var non-empty-string|non-empty-array<non-empty-string> $pk */
         $pk = $this->define(SchemaInterface::PRIMARY_KEY);
         if (\is_array($pk)) {
             $result = [];
@@ -100,7 +91,7 @@ final class RootLoader extends AbstractLoader
      */
     public function getPrimaryFields(): array
     {
-        return (array)$this->define(SchemaInterface::PRIMARY_KEY);
+        return (array) $this->define(SchemaInterface::PRIMARY_KEY);
     }
 
     /**
@@ -143,15 +134,36 @@ final class RootLoader extends AbstractLoader
         return true;
     }
 
+    /**
+     * Add selected columns to GROUP BY clause.
+     *
+     * Might be useful when deduplication is required because of JOINs or other conditions.
+     *
+     * @param bool $force When set to true, GROUP BY will be forced.
+     */
+    public function forceGroupBy(bool $force = true): void
+    {
+        $this->forceGroupBy = $force;
+    }
+
+    /**
+     * Clone the underlying query.
+     */
+    public function __clone()
+    {
+        $this->query = clone $this->query;
+        parent::__clone();
+    }
+
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         return parent::configureQuery(
-            $this->mountColumns($query, true, '', true)
+            $this->mountColumns($query, true, '', true, $this->forceGroupBy),
         );
     }
 
     protected function initNode(): RootNode
     {
-        return new RootNode($this->columnNames(), (array)$this->define(SchemaInterface::PRIMARY_KEY));
+        return new RootNode($this->columnNames(), (array) $this->define(SchemaInterface::PRIMARY_KEY));
     }
 }

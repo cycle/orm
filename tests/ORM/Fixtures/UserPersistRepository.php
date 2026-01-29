@@ -15,10 +15,6 @@ class UserPersistRepository extends Repository
     /** @var Transaction */
     private $transaction;
 
-    /**
-     * @param Select       $select
-     * @param ORMInterface $orm
-     */
     public function __construct(Select $select, ORMInterface $orm)
     {
         parent::__construct($select);
@@ -26,8 +22,6 @@ class UserPersistRepository extends Repository
     }
 
     /**
-     * @param User $user
-     * @param bool $cascade
      *
      * @throws \Throwable
      */
@@ -35,7 +29,7 @@ class UserPersistRepository extends Repository
     {
         $this->transaction->persist(
             $user,
-            $cascade ? Transaction::MODE_CASCADE : Transaction::MODE_ENTITY_ONLY
+            $cascade ? Transaction::MODE_CASCADE : Transaction::MODE_ENTITY_ONLY,
         );
 
         $this->transaction->run(); // transaction is clean after run

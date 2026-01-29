@@ -9,7 +9,6 @@ use Cycle\ORM\Reference\ReferenceInterface;
 class Engineer extends Employee
 {
     public ?int $role_id = null;
-
     public int $level = 0;
     public ?string $rank = null;
     public null|Book|ReferenceInterface $tech_book = null;

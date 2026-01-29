@@ -6,7 +6,6 @@ namespace Cycle\ORM\Mapper\Proxy;
 
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
-use RuntimeException;
 
 /**
  * @internal
@@ -20,7 +19,7 @@ trait ClasslessProxyTrait
     {
         $relation = $this->__cycle_orm_rel_map->getRelations()[$name] ?? null;
         if ($relation === null) {
-            throw new RuntimeException(sprintf('Undefined property %s.%s.', static::class, $name));
+            throw new \RuntimeException(\sprintf('Undefined property %s.%s.', static::class, $name));
         }
         $value = $this->__cycle_orm_rel_data[$name] ?? null;
         if ($value instanceof ReferenceInterface) {
@@ -33,7 +32,7 @@ trait ClasslessProxyTrait
 
     public function __set(string $name, mixed $value): void
     {
-        if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
+        if (!\array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
             $this->$name = $value;
             return;
         }
@@ -49,7 +48,7 @@ trait ClasslessProxyTrait
 
     public function __debugInfo(): array
     {
-        $result = (array)$this;
+        $result = (array) $this;
         unset($result['__cycle_orm_rel_map'], $result['__cycle_orm_rel_data'], $result['__cycle_orm_relation_props']);
         return $result;
     }

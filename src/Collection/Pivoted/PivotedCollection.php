@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Collection\Pivoted;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use SplObjectStorage;
 
 /**
  * Collection with associated relation context. Attention, pivot context is lost when collection is partitioned or
@@ -21,17 +20,17 @@ use SplObjectStorage;
  */
 class PivotedCollection extends ArrayCollection implements PivotedCollectionInterface
 {
-    /** @var SplObjectStorage<TEntity, TPivot> */
-    protected SplObjectStorage $pivotContext;
+    /** @var \SplObjectStorage<TEntity, TPivot> */
+    protected \SplObjectStorage $pivotContext;
 
     /**
      * @param array<TKey, TEntity> $elements
-     * @param SplObjectStorage<TEntity, TPivot>|null $pivotData
+     * @param \SplObjectStorage<TEntity, TPivot>|null $pivotData
      */
-    final public function __construct(array $elements = [], SplObjectStorage $pivotData = null)
+    final public function __construct(array $elements = [], ?\SplObjectStorage $pivotData = null)
     {
         parent::__construct($elements);
-        $this->pivotContext = $pivotData ?? new SplObjectStorage();
+        $this->pivotContext = $pivotData ?? new \SplObjectStorage();
     }
 
     public function hasPivot(object $element): bool
@@ -49,7 +48,7 @@ class PivotedCollection extends ArrayCollection implements PivotedCollectionInte
         $this->pivotContext[$element] = $pivot;
     }
 
-    public function getPivotContext(): SplObjectStorage
+    public function getPivotContext(): \SplObjectStorage
     {
         return $this->pivotContext;
     }

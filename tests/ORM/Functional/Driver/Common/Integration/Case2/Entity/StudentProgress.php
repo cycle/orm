@@ -11,6 +11,5 @@ class StudentProgress
     public function __construct(
         public ?string $id = null,
         public int $aspectsEnteredCount = 0,
-    ) {
-    }
+    ) {}
 }

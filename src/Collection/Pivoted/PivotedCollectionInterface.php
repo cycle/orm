@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Collection\Pivoted;
 
-use SplObjectStorage;
-
 /**
  * Carries pivot data associated with each element.
  *
@@ -41,5 +39,5 @@ interface PivotedCollectionInterface
     /**
      * Get all associated pivot data.
      */
-    public function getPivotContext(): SplObjectStorage;
+    public function getPivotContext(): \SplObjectStorage;
 }

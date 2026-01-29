@@ -7,9 +7,7 @@ namespace Cycle\ORM\Tests\Unit\Heap;
 use Cycle\Database\Injection\ValueInterface;
 use Cycle\ORM\Heap\Node;
 use DateTime;
-use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
-use Stringable;
 
 class NodeComparisonTest extends TestCase
 {
@@ -39,12 +37,12 @@ class NodeComparisonTest extends TestCase
         ];
 
         // Datetime
-        $t = new DateTime();
+        $t = new \DateTime();
         yield 'same datetime object' => [$t, $t];
-        yield 'same mutable and immutable' => [$t, DateTimeImmutable::createFromInterface($t)];
+        yield 'same mutable and immutable' => [$t, \DateTimeImmutable::createFromInterface($t)];
         yield 'different objects from same mutable' => [
-            DateTimeImmutable::createFromInterface($t),
-            DateTimeImmutable::createFromInterface($t),
+            \DateTimeImmutable::createFromInterface($t),
+            \DateTimeImmutable::createFromInterface($t),
         ];
         // Custom object
         $obj = $this->createStringableObject('obj');
@@ -58,7 +56,7 @@ class NodeComparisonTest extends TestCase
         $obj1 = $this->createStringableObject('obj');
         $obj2 = $this->createStringableObject('o', 'b', 'j');
         \assert($obj1->__toString() === $obj2->__toString());
-        \assert((array)$obj1 !== (array)$obj2);
+        \assert((array) $obj1 !== (array) $obj2);
         yield 'different custom objects with same result from __toString()' => [$obj1, $obj2];
 
         yield 'Stringable and string' => [$obj1, 'obj'];
@@ -103,7 +101,7 @@ class NodeComparisonTest extends TestCase
             [true, 0],
         ];
         // Datetime
-        yield 'different Datetime same second' => [new DateTimeImmutable(), new DateTimeImmutable()];
+        yield 'different Datetime same second' => [new \DateTimeImmutable(), new \DateTimeImmutable()];
         // Custom object
         yield 'different objects' => [$this->createStringableObject('foo'), $this->createStringableObject('bar')];
         yield 'Different objects with ValueInterface' => [
@@ -120,7 +118,7 @@ class NodeComparisonTest extends TestCase
             $this->createNotStringableObject2(null, 'foo'),
         ];
         yield 'Datetime and not Stringable' => [
-            new DateTimeImmutable(),
+            new \DateTimeImmutable(),
             $this->createNotStringableObject(null, 'foo'),
         ];
     }
@@ -148,16 +146,14 @@ class NodeComparisonTest extends TestCase
             \get_debug_type($a),
             \var_export($a, true),
             \get_debug_type($b),
-            \var_export($b, true)
+            \var_export($b, true),
         );
     }
 
     private function createObjectWithValueInterface(string ...$toConcat): object
     {
-        return new class ($toConcat) implements ValueInterface {
-            public function __construct(private array $toConcat)
-            {
-            }
+        return new class($toConcat) implements ValueInterface {
+            public function __construct(private array $toConcat) {}
 
             public function rawValue(): string
             {
@@ -173,10 +169,8 @@ class NodeComparisonTest extends TestCase
 
     private function createStringableObject(string ...$toConcat): object
     {
-        return new class ($toConcat) implements Stringable {
-            public function __construct(private array $toConcat)
-            {
-            }
+        return new class($toConcat) implements \Stringable {
+            public function __construct(private array $toConcat) {}
 
             public function __toString(): string
             {
@@ -187,23 +181,21 @@ class NodeComparisonTest extends TestCase
 
     private function createNotStringableObject(mixed $a = null, mixed $b = null): object
     {
-        return new class ($a, $b) {
+        return new class($a, $b) {
             public function __construct(
                 private mixed $a,
                 private mixed $b,
-            ) {
-            }
+            ) {}
         };
     }
 
     private function createNotStringableObject2(mixed $a = null, mixed $b = null): object
     {
-        return new class ($a, $b) {
+        return new class($a, $b) {
             public function __construct(
                 private mixed $a,
                 private mixed $b,
-            ) {
-            }
+            ) {}
         };
     }
 }

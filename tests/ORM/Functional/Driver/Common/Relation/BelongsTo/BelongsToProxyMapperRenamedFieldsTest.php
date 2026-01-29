@@ -41,7 +41,7 @@ abstract class BelongsToProxyMapperRenamedFieldsTest extends BelongsToProxyMappe
             ['email', 'balance'],
             [
                 ['hello@world.com', 100],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('profile')->insertMultiple(
@@ -50,14 +50,14 @@ abstract class BelongsToProxyMapperRenamedFieldsTest extends BelongsToProxyMappe
                 [1, 'image.png'],
                 [2, 'second.png'],
                 [null, 'third.png'],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('nested')->insertMultiple(
             ['profile_id_field', 'label'],
             [
                 [1, 'nested-label'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema([

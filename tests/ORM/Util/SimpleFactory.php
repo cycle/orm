@@ -11,14 +11,14 @@ use Spiral\Core\FactoryInterface;
 final class SimpleFactory implements FactoryInterface
 {
     private array $definitions;
-    private Closure $factory;
+    private \Closure $factory;
 
     /**
      * @param array $definitions List of items that will be cloned
-     * @param Closure|null $factory Should be closure that works
+     * @param \Closure|null $factory Should be closure that works
      *        like FactoryInterface::make(string $alias, array $parameters): mixed
      */
-    public function __construct(array $definitions = [], Closure $factory = null)
+    public function __construct(array $definitions = [], ?\Closure $factory = null)
     {
         $this->definitions = $definitions;
         $this->factory = $factory ?? static function (string $alias, array $parameters = []): void {

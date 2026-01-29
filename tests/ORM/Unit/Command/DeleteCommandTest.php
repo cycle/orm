@@ -27,7 +27,7 @@ class DeleteCommandTest extends TestCase
             m::mock(DatabaseInterface::class),
             'table',
             $state,
-            $this->mapper
+            $this->mapper,
         );
 
         $cmd->execute();

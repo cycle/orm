@@ -21,22 +21,6 @@ class UpdateCommandTest extends TestCase
     private DatabaseInterface $db;
     private State $state;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->mapper = m::mock(MapperInterface::class);
-        $this->state = new State(Node::SCHEDULED_UPDATE, ['foo' => 'bar']);
-
-        $this->cmd = new Update(
-            $this->db = m::mock(DatabaseInterface::class),
-            'table',
-            $this->state,
-            $this->mapper,
-            []
-        );
-    }
-
     public function testIsEmpty(): void
     {
         $this->assertTrue($this->cmd->isReady());
@@ -133,5 +117,21 @@ class UpdateCommandTest extends TestCase
 
         $this->assertSame(['foo' => 'bar', 'name' => 'new value'], $this->state->getData());
         $this->assertSame(0, $this->cmd->getAffectedRows());
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mapper = m::mock(MapperInterface::class);
+        $this->state = new State(Node::SCHEDULED_UPDATE, ['foo' => 'bar']);
+
+        $this->cmd = new Update(
+            $this->db = m::mock(DatabaseInterface::class),
+            'table',
+            $this->state,
+            $this->mapper,
+            [],
+        );
     }
 }

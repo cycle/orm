@@ -18,38 +18,6 @@ abstract class EntityManagerTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('post', [
-            'id' => 'primary',
-            'title' => 'string',
-            'content' => 'string',
-        ]);
-
-        $this->getDatabase()->table('post')->insertMultiple(
-            ['title', 'content'],
-            [
-                ['foo', 'foofoo'],
-                ['bar', 'barbar'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            Post::class => [
-                SchemaInterface::ROLE => 'post',
-                SchemaInterface::MAPPER => Mapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'post',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'title', 'content'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testClean(): void
     {
         $em = new EntityManager($this->orm);
@@ -259,6 +227,38 @@ abstract class EntityManagerTest extends BaseTest
 
         $this->assertFalse($result->isSuccess());
         $this->assertInstanceOf(ConstrainException::class, $result->getLastError());
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('post', [
+            'id' => 'primary',
+            'title' => 'string',
+            'content' => 'string',
+        ]);
+
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['title', 'content'],
+            [
+                ['foo', 'foofoo'],
+                ['bar', 'barbar'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            Post::class => [
+                SchemaInterface::ROLE => 'post',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'post',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'title', 'content'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ]));
     }
 
     // todo test parallel transactions running

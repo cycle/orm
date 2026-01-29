@@ -17,55 +17,6 @@ abstract class JsonMethodsTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('users', ['id' => 'primary', 'user_settings' => 'json,nullable']);
-        $this->makeTable('posts', ['id' => 'primary', 'title' => 'string', 'user_id' => 'integer']);
-
-        $this->getDatabase()->table('users')->insertMultiple(
-            ['user_settings'],
-            [[\json_encode(['theme' => 'dark', 'foo' => ['bar', 'baz']])], [\json_encode(['theme' => 'light'])]]
-        );
-        $this->getDatabase()->table('posts')->insertMultiple(['title', 'user_id'], [['Post 1', 1], ['Post 2', 2]]);
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'users',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id' => 'id', 'settings' => 'user_settings'],
-                Schema::SCHEMA => [],
-                Schema::TYPECAST => ['id' => 'int', 'settings' => 'json'],
-                Schema::RELATIONS => [],
-            ],
-            Post::class => [
-                Schema::ROLE => 'post',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'posts',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'title', 'user_id'],
-                Schema::SCHEMA => [],
-                Schema::TYPECAST => ['id' => 'int'],
-                Schema::RELATIONS => [
-                    'user' => [
-                        Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => 'user',
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'user_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                ],
-            ],
-        ]));
-    }
-
     public function testWhereJson(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -316,5 +267,54 @@ abstract class JsonMethodsTest extends BaseTest
 
         $this->assertSame(1, $post->id);
         $this->assertEquals(['theme' => 'dark', 'foo' => ['bar', 'baz']], $post->user->settings);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('users', ['id' => 'primary', 'user_settings' => 'json,nullable']);
+        $this->makeTable('posts', ['id' => 'primary', 'title' => 'string', 'user_id' => 'integer']);
+
+        $this->getDatabase()->table('users')->insertMultiple(
+            ['user_settings'],
+            [[\json_encode(['theme' => 'dark', 'foo' => ['bar', 'baz']])], [\json_encode(['theme' => 'light'])]],
+        );
+        $this->getDatabase()->table('posts')->insertMultiple(['title', 'user_id'], [['Post 1', 1], ['Post 2', 2]]);
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'users',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id' => 'id', 'settings' => 'user_settings'],
+                Schema::SCHEMA => [],
+                Schema::TYPECAST => ['id' => 'int', 'settings' => 'json'],
+                Schema::RELATIONS => [],
+            ],
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'posts',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'title', 'user_id'],
+                Schema::SCHEMA => [],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::RELATIONS => [
+                    'user' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => 'user',
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                ],
+            ],
+        ]));
     }
 }

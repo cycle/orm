@@ -27,17 +27,17 @@ trait JoinOneTableTrait
     {
         $localPrefix = $this->getAlias() . '.';
         $parentPrefix = $this->parent->getAlias() . '.';
-        $parentKeys = (array)$this->schema[Relation::INNER_KEY];
+        $parentKeys = (array) $this->schema[Relation::INNER_KEY];
 
         $on = [];
-        foreach ((array)$this->schema[Relation::OUTER_KEY] as $i => $key) {
+        foreach ((array) $this->schema[Relation::OUTER_KEY] as $i => $key) {
             $field = $localPrefix . $this->fieldAlias($key);
             $on[$field] = $parentPrefix . $this->parent->fieldAlias($parentKeys[$i]);
         }
 
         $query->join(
             $this->getJoinMethod(),
-            $this->getJoinTable()
+            $this->getJoinTable(),
         )->on($on);
     }
 
@@ -46,19 +46,19 @@ trait JoinOneTableTrait
         $localPrefix = $this->getAlias() . '.';
 
         $fields = [];
-        foreach ((array)$this->schema[Relation::OUTER_KEY] as $key) {
+        foreach ((array) $this->schema[Relation::OUTER_KEY] as $key) {
             $fields[] = $localPrefix . $this->fieldAlias($key);
         }
 
         if (\count($fields) === 1) {
-            $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
+            $query->andWhere($fields[0], 'IN', new Parameter(\array_column($outerKeys, \key($outerKeys[0]))));
         } else {
             $query->andWhere(
-                static function (SelectQuery $select) use ($outerKeys, $fields) {
+                static function (SelectQuery $select) use ($outerKeys, $fields): void {
                     foreach ($outerKeys as $set) {
-                        $select->orWhere(array_combine($fields, array_values($set)));
+                        $select->orWhere(\array_combine($fields, \array_values($set)));
                     }
-                }
+                },
             );
         }
     }

@@ -12,9 +12,8 @@ final class Source implements SourceInterface
 
     public function __construct(
         private DatabaseInterface $database,
-        private string $table
-    ) {
-    }
+        private string $table,
+    ) {}
 
     public function getDatabase(): DatabaseInterface
     {

@@ -24,7 +24,7 @@ abstract class TableRendererTest extends BaseTest
             ],
             [
                 'name' => 'default',
-            ]
+            ],
         );
 
         $table = $this->reload($table);
@@ -50,7 +50,7 @@ abstract class TableRendererTest extends BaseTest
             ],
             [
                 'name' => null,
-            ]
+            ],
         );
 
         $table = $this->reload($table);
@@ -74,7 +74,7 @@ abstract class TableRendererTest extends BaseTest
                 'id' => 'primary',
                 'name' => 'string,null',
             ],
-            []
+            [],
         );
 
         $table = $this->reload($table);
@@ -97,7 +97,7 @@ abstract class TableRendererTest extends BaseTest
                 'id' => 'primary',
                 'name' => 'string,nullable',
             ],
-            []
+            [],
         );
 
         $table = $this->reload($table);
@@ -120,7 +120,7 @@ abstract class TableRendererTest extends BaseTest
                 'id' => 'primary',
                 'name' => 'enum(active,disabled)',
             ],
-            []
+            [],
         );
 
         $table = $this->reload($table);
@@ -148,7 +148,7 @@ abstract class TableRendererTest extends BaseTest
             ],
             [
                 'name' => null,
-            ]
+            ],
         );
 
         $table = $this->reload($table);
@@ -176,7 +176,7 @@ abstract class TableRendererTest extends BaseTest
             ],
             [
                 'name' => 'disabled',
-            ]
+            ],
         );
 
         $table = $this->reload($table);
@@ -203,7 +203,7 @@ abstract class TableRendererTest extends BaseTest
             [
                 'column' => '~',
             ],
-            []
+            [],
         );
     }
 
@@ -219,7 +219,7 @@ abstract class TableRendererTest extends BaseTest
             [
                 'column' => 'enum(a',
             ],
-            []
+            [],
         );
     }
 
@@ -235,15 +235,10 @@ abstract class TableRendererTest extends BaseTest
             [
                 'column' => 'master',
             ],
-            []
+            [],
         );
     }
 
-    /**
-     * @param AbstractTable $table
-     *
-     * @return AbstractTable
-     */
     private function reload(AbstractTable $table): AbstractTable
     {
         $table->save();

@@ -6,6 +6,4 @@ namespace Cycle\ORM\Tests\Fixtures;
 
 use Cycle\Database\Query\InsertQuery;
 
-class TestInsertCommand extends InsertQuery
-{
-}
+class TestInsertCommand extends InsertQuery {}

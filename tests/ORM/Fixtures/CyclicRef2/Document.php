@@ -9,14 +9,10 @@ class Document
 {
     public $tenant_id;
     public $id;
-
     public $tenant;
-
     public $preference_id;
     public $preference;
-
     public $body;
-
     public $created_at;
     public $updated_at;
 }

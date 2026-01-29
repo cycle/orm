@@ -9,9 +9,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue380\Entity\User;
 class Phone
 {
     public int $id;
-
     public string $value;
-
     public User $user;
 
     public function __construct(User $user, string $value)

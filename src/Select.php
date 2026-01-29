@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
-use Countable;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
@@ -15,8 +14,6 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Select\ScopeInterface;
-use InvalidArgumentException;
-use IteratorAggregate;
 use Spiral\Pagination\PaginableInterface;
 
 /**
@@ -52,7 +49,7 @@ use Spiral\Pagination\PaginableInterface;
  *
  * @template-covariant TEntity of object
  */
-class Select implements IteratorAggregate, Countable, PaginableInterface
+class Select implements \IteratorAggregate, \Countable, PaginableInterface
 {
     // load relation data within same query
     public const SINGLE_QUERY = JoinableLoader::INLOAD;
@@ -60,8 +57,10 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     // load related data after the query
     public const OUTER_QUERY = JoinableLoader::POSTLOAD;
 
+    protected int $limit = 0;
+    protected int $offset = 0;
+    protected bool $allowGroupBy;
     private RootLoader $loader;
-
     private QueryBuilder $builder;
     private MapperProviderInterface $mapperProvider;
     private Heap\HeapInterface $heap;
@@ -73,57 +72,19 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function __construct(
         ORMInterface $orm,
-        string $role
+        string $role,
     ) {
         $this->heap = $orm->getHeap();
         $this->schema = $orm->getSchema();
         $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
         $this->entityFactory = $orm->getService(EntityFactoryInterface::class);
+        $this->allowGroupBy = $orm->getService(Options::class)->groupByToDeduplicate;
         $this->loader = new RootLoader(
             $orm->getSchema(),
             $orm->getService(SourceProviderInterface::class),
             $orm->getFactory(),
-            $orm->resolveRole($role)
+            $orm->resolveRole($role),
         );
-        $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
-    }
-
-    /**
-     * Remove nested loaders and clean ORM link.
-     */
-    public function __destruct()
-    {
-        unset($this->loader, $this->builder);
-    }
-
-    /**
-     * Bypassing call to primary select query.
-     */
-    public function __call(string $name, array $arguments): mixed
-    {
-        if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            // aggregations
-            return $this->builder->withQuery(
-                $this->loader->buildQuery()
-            )->__call($name, $arguments);
-        }
-
-        $result = $this->builder->__call($name, $arguments);
-        if ($result instanceof QueryBuilder) {
-            return $this;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Cloning with loader tree cloning.
-     *
-     * @attention at this moment binded query parameters would't be cloned!
-     */
-    public function __clone()
-    {
-        $this->loader = clone $this->loader;
         $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
     }
 
@@ -132,7 +93,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @return static<TEntity>
      */
-    public function scope(ScopeInterface $scope = null): self
+    public function scope(?ScopeInterface $scope = null): self
     {
         $this->loader->setScope($scope);
 
@@ -152,7 +113,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function buildQuery(): SelectQuery
     {
-        return $this->loader->buildQuery();
+        return $this->addGroupByPK()->loader->buildQuery();
     }
 
     /**
@@ -173,22 +134,21 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
 
         return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
-            : $this->__call('where', [$pk, current($ids)]);
+            : $this->__call('where', [$pk, \current($ids)]);
     }
 
     /**
      * Attention, column will be quoted by driver!
      *
-     * @param string|null $column When column is null DISTINCT(PK) will be generated.
+     * @param non-empty-string|null $column When column is null DISTINCT(PK) will be generated.
      */
-    public function count(string $column = null): int
+    public function count(?string $column = null): int
     {
         if ($column === null) {
-            // @tuneyourserver solves the issue with counting on queries with joins.
-            $pk = $this->loader->getPK();
-            $column = \is_array($pk)
+            $pk = (array) $this->loader->getPK();
+            $column = \count($pk) > 1
                 ? '*'
-                : \sprintf('DISTINCT(%s)', $pk);
+                : \sprintf('DISTINCT(%s)', \reset($pk));
         }
 
         return (int) $this->__call('count', [$column]);
@@ -199,6 +159,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function limit(int $limit): self
     {
+        $this->limit = $limit;
         $this->loader->getQuery()->limit($limit);
 
         return $this;
@@ -209,6 +170,7 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function offset(int $offset): self
     {
+        $this->offset = $offset;
         $this->loader->getQuery()->offset($offset);
 
         return $this;
@@ -223,36 +185,34 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * Examples:
      *
-     * // Select users and load their comments (will cast 2 queries, HAS_MANY comments)
-     * User::find()->with('comments');
+     *     // Select users and load their comments (will cast 2 queries, HAS_MANY comments)
+     *     User::find()->with('comments');
      *
-     * // You can load chain of relations - select user and load their comments and post related to
-     * //comment
-     * User::find()->with('comments.post');
+     *     // You can load chain of relations - select user and load their comments and post related to comment
+     *     User::find()->with('comments.post');
      *
-     * // We can also specify custom where conditions on data loading, let's load only public
-     * // comments.
-     * User::find()->load('comments', [
-     *      'where' => ['{@}.status' => 'public']
-     * ]);
+     *     // We can also specify custom where conditions on data loading, let's load only public comments.
+     *     User::find()->load('comments', [
+     *         'where' => ['{@}.status' => 'public']
+     *     ]);
      *
      * Please note using "{@}" column name, this placeholder is required to prevent collisions and
      * it will be automatically replaced with valid table alias of pre-loaded comments table.
      *
-     * // In case where your loaded relation is MANY_TO_MANY you can also specify pivot table
-     * // conditions, let's pre-load all approved user tags, we can use same placeholder for pivot
-     * // table alias
-     * User::find()->load('tags', [
-     *      'wherePivot' => ['{@}.approved' => true]
-     * ]);
+     *     // In case where your loaded relation is MANY_TO_MANY you can also specify pivot table
+     *     // conditions, let's pre-load all approved user tags, we can use same placeholder for pivot
+     *     // table alias
+     *     User::find()->load('tags', [
+     *          'wherePivot' => ['{@}.approved' => true]
+     *     ]);
      *
-     * // In most of cases you don't need to worry about how data was loaded, using external query
-     * // or left join, however if you want to change such behaviour you can force load method
-     * // using {@see Select::SINGLE_QUERY}
-     * User::find()->load('tags', [
-     *      'method'     => Select::SINGLE_QUERY,
-     *      'wherePivot' => ['{@}.approved' => true]
-     * ]);
+     *     // In most of cases you don't need to worry about how data was loaded, using external query
+     *     // or left join, however if you want to change such behaviour you can force load method
+     *     // using {@see Select::SINGLE_QUERY}
+     *     User::find()->load('tags', [
+     *          'method'     => Select::SINGLE_QUERY,
+     *          'wherePivot' => ['{@}.approved' => true]
+     *     ]);
      *
      * Attention, you will not be able to correctly paginate in this case and only ORM loaders
      * support different loading types.
@@ -260,7 +220,8 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      * You can specify multiple loaders using array as first argument.
      *
      * Example:
-     * User::find()->load(['posts', 'comments', 'profile']);
+     *
+     *     User::find()->load(['posts', 'comments', 'profile']);
      *
      * Attention, consider disabling entity map if you want to use recursive loading (i.e
      * post.tags.posts), but first think why you even need recursive relation loading.
@@ -306,90 +267,79 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * Examples:
      *
-     * Find all users who have comments comments
-     * ```php
-     * User::find()->with('comments');
-     * ```
+     *     // Find all users who have comments comments
+     *     User::find()->with('comments');
      *
-     * Find all users who have approved comments (we can use comments table alias in where statement)
-     * ```php
-     * User::find()->with('comments')->where('comments.approved', true);
-     * ```
+     *     // Find all users who have approved comments (we can use comments table alias in where statement)
+     *     User::find()->with('comments')->where('comments.approved', true);
      *
-     * Find all users who have posts which have approved comments
-     * ```php
-     * User::find()->with('posts.comments')->where('posts_comments.approved', true);
-     * ```
+     *     // Find all users who have posts which have approved comments
+     *     User::find()->with('posts.comments')->where('posts_comments.approved', true);
      *
-     * Custom join alias for post comments relation
-     * ```php
-     * $user->with('posts.comments', [
-     *      'as' => 'comments'
-     * ])->where('comments.approved', true);
-     * ```
+     *     // Custom join alias for post comments relation
+     *     $user->with('posts.comments', [
+     *         'as' => 'comments'
+     *     ])->where('comments.approved', true);
      *
-     * If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation
-     * name plus "_pivot" postfix. Let's load all users with approved tags.
-     * ```php
-     * $user->with('tags')->where('tags_pivot.approved', true);
-     * ```
+     *     // If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation name plus "_pivot" postfix. Let's load all users with approved tags.
+     *     $user->with('tags')->where('tags_pivot.approved', true);
      *
-     * You can also use custom alias for pivot table as well
-     * ```php
-     * User::find()->with('tags', [
-     *      'pivotAlias' => 'tags_connection'
-     * ])
-     * ->where('tags_connection.approved', false);
-     * ```
+     *     // You can also use custom alias for pivot table as well
+     *     User::find()->with('tags', [
+     *         'pivotAlias' => 'tags_connection'
+     *     ])
+     *     ->where('tags_connection.approved', false);
+     *
      *
      * You can safely combine with() and load() methods.
      *
-     * Load all users with approved comments and pre-load all their comments
-     * ```php
-     * User::find()->with('comments')->where('comments.approved', true)->load('comments');
-     * ```
+     *     // Load all users with approved comments and pre-load all their comments
+     *     User::find()
+     *         ->with('comments')
+     *         ->where('comments.approved', true)->load('comments');
      *
      * You can also use custom conditions in this case, let's find all users with approved
      * comments and pre-load such approved comments
-     * ```php
-     * User::find()->with('comments')
+     *
+     *     User::find()
+     *             ->with('comments')
      *             ->where('comments.approved', true)
      *             ->load('comments', [
-     *                  'where' => ['{@}.approved' => true]
-     *              ]);
-     * ```
+     *                 'where' => ['{@}.approved' => true]
+     *             ]);
      *
      * As you might notice previous construction will create 2 queries, however we can simplify
      * this construction to use already joined table as source of data for relation via "using" keyword
-     * ```php
-     * User::find()->with('comments')
-     *             ->where('comments.approved', true)
-     *             ->load('comments', ['using' => 'comments']);
-     * ```
+     *
+     *     User::find()
+     *         ->with('comments')
+     *         ->where('comments.approved', true)
+     *         ->load('comments', ['using' => 'comments']);
      *
      * You will get only one query with INNER JOIN, to better understand this example let's use
      * custom alias for comments in with() method.
-     * ```php
-     * User::find()->with('comments', ['as' => 'commentsR'])
-     *             ->where('commentsR.approved', true)
-     *             ->load('comments', ['using' => 'commentsR']);
-     * ```
+     *
+     *     User::find()
+     *         ->with('comments', ['as' => 'commentsR'])
+     *         ->where('commentsR.approved', true)
+     *         ->load('comments', ['using' => 'commentsR']);
      *
      * To use with() twice on the same relation, you can use `alias` option.
-     * ```php
-     * Country::find()
-     *     // Find all translations
-     *     ->with('translations', [ 'as' => 'trans'])
-     *     ->load('translations', ['using' => 'trans'])
-     *     // Second `with` for sorting only
-     *     ->with('translations', [
-     *         'as' => 'transEn', // Alias for SQL
-     *         'alias' => 'translations-en', // Alias for ORM to not to overwrite previous `with`
-     *         'method' => JoinableLoader::LEFT_JOIN,
-     *         'where' => ['locale' => 'en'],
-     *     ])
-     *     ->orderBy('transEn.title', 'ASC');
-     * ```
+     *
+     *     Country::find()
+     *         // Find all translations
+     *         ->with('translations', [ 'as' => 'trans'])
+     *         ->load('translations', ['using' => 'trans'])
+     *         // Second `with` for sorting only
+     *         ->with('translations', [
+     *             // Alias for SQL
+     *             'as' => 'transEn',
+     *             // Alias for ORM to not to overwrite previous `with`
+     *              'alias' => 'translations-en',
+     *              'method' => JoinableLoader::LEFT_JOIN,
+     *              'where' => ['locale' => 'en'],
+     *          ])
+     *          ->orderBy('transEn.title', 'ASC');
      *
      * @return static<TEntity>
      *
@@ -421,12 +371,10 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      *
      * @return TEntity|null
      */
-    public function fetchOne(array $query = null): ?object
+    public function fetchOne(?array $query = null): ?object
     {
         $select = (clone $this)->where($query)->limit(1);
-        $node = $select->loader->createNode();
-        $select->loader->loadData($node, true);
-        $data = $node->getResult();
+        $data = $select->loadData();
 
         if (!isset($data[0])) {
             return null;
@@ -451,37 +399,31 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
      */
     public function getIterator(bool $findInHeap = false): Iterator
     {
-        $node = $this->loader->createNode();
-        $this->loader->loadData($node, true);
-
         return Iterator::createWithServices(
             $this->heap,
             $this->schema,
             $this->entityFactory,
             $this->loader->getTarget(),
-            $node->getResult(),
+            $this->loadData(),
             $findInHeap,
-            typecast: true
+            typecast: true,
         );
     }
 
     /**
      * Load data tree from database and linked loaders in a form of array.
      *
-     * @return array<array-key, array<string, mixed>>
+     * @return array<array-key, array<non-empty-string, mixed>>
      */
     public function fetchData(bool $typecast = true): iterable
     {
-        $node = $this->loader->createNode();
-        $this->loader->loadData($node, false);
-
         if (!$typecast) {
-            return $node->getResult();
+            return $this->loadData(false);
         }
 
         $mapper = $this->mapperProvider->getMapper($this->loader->getTarget());
 
-        return \array_map([$mapper, 'cast'], $node->getResult());
+        return \array_map([$mapper, 'cast'], $this->loadData(false));
     }
 
     /**
@@ -499,6 +441,57 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
     }
 
     /**
+     * Bypassing call to primary select query.
+     */
+    public function __call(string $name, array $arguments): mixed
+    {
+        if (\in_array(\strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
+            // aggregations
+            return $this->builder->withQuery(
+                $this->buildQuery(),
+            )->__call($name, $arguments);
+        }
+
+        $result = $this->builder->__call($name, $arguments);
+        if ($result instanceof QueryBuilder) {
+            return $this;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Cloning with loader tree cloning.
+     *
+     * @attention at this moment binded query parameters would't be cloned!
+     */
+    public function __clone()
+    {
+        $this->loader = clone $this->loader;
+        $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
+    }
+
+    /**
+     * Remove nested loaders and clean ORM link.
+     */
+    public function __destruct()
+    {
+        unset($this->loader, $this->builder);
+    }
+
+    /**
+     * @param bool $addRole If true, the role name with the key `@role` will be added to the result set.
+     * @return array<array-key, array<non-empty-string, mixed>>
+     */
+    protected function loadData(bool $addRole = true): array
+    {
+        $self = $this->addGroupByPK();
+        $node = $self->loader->createNode();
+        $self->loader->loadData($node, $addRole);
+        return $node->getResult();
+    }
+
+    /**
      * @param list<non-empty-string> $pk
      * @param list<array|int|object|string> $args
      *
@@ -510,18 +503,18 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
         foreach ($args as $index => $values) {
             $values = $values instanceof Parameter ? $values->getValue() : $values;
             if (!\is_array($values)) {
-                throw new InvalidArgumentException('Composite primary key must be defined using an array.');
+                throw new \InvalidArgumentException('Composite primary key must be defined using an array.');
             }
             if (\count($pk) !== \count($values)) {
-                throw new InvalidArgumentException(
-                    \sprintf('Primary key should contain %d values.', \count($pk))
+                throw new \InvalidArgumentException(
+                    \sprintf('Primary key should contain %d values.', \count($pk)),
                 );
             }
 
             $isAssoc = !\array_is_list($values);
             foreach ($values as $key => $value) {
                 if ($isAssoc && !\in_array($key, $pk, true)) {
-                    throw new InvalidArgumentException(\sprintf('Primary key `%s` not found.', $key));
+                    throw new \InvalidArgumentException(\sprintf('Primary key `%s` not found.', $key));
                 }
 
                 $key = $isAssoc ? $key : $pk[$key];
@@ -529,12 +522,37 @@ class Select implements IteratorAggregate, Countable, PaginableInterface
             }
         }
 
-        $this->__call('where', [static function (Select\QueryBuilder $q) use ($prepared) {
+        $this->__call('where', [static function (Select\QueryBuilder $q) use ($prepared): void {
             foreach ($prepared as $set) {
                 $q->orWhere($set);
             }
         }]);
 
         return $this;
+    }
+
+    /**
+     * Add group by for all primary keys if necessary.
+     *
+     * This is required to prevent duplicates in the result set when using LIMIT and OFFSET.
+     *
+     * @return static<TEntity> Original $this or cloned instance with group by added.
+     */
+    private function addGroupByPK(): self
+    {
+        if (!$this->allowGroupBy || $this->limit <= 1 && $this->offset === 0) {
+            return $this;
+        }
+
+        // Check if there are no joins in the query
+        if ($this->loader->getJoinedLoaders() === []) {
+            // No joins, we can safely return the original instance
+            return $this;
+        }
+
+        $self = clone $this;
+        $self->loader->forceGroupBy();
+
+        return $self;
     }
 }

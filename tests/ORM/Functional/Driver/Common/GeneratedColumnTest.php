@@ -16,13 +16,55 @@ use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 use Cycle\ORM\Transaction;
-use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
 #[DontGenerateAttribute]
 abstract class GeneratedColumnTest extends BaseTest
 {
     use TableTrait;
+
+    public function testPersist(): void
+    {
+        $u = new User();
+        $u->id = Uuid::uuid4()->toString();
+
+        $this->save($u);
+
+        $this->assertNotNull($u->balance);
+
+        $this->orm->getHeap()->clean();
+
+        $s = (new Select($this->orm, User::class))->wherePK($u->id)->fetchOne();
+
+        $this->assertSame($u->balance, $s->balance);
+    }
+
+    public function testPersistMultipleSerial(): void
+    {
+        $d1 = new Document();
+
+        $d2 = new Document();
+        $d2->body = 213;
+        $d2->created_at = $d2->updated_at = new \DateTimeImmutable('2020-01-01');
+
+        $d3 = new Document();
+        $d3->created_at = $d3->updated_at = new \DateTimeImmutable('2020-01-01');
+
+
+        $this->save($d1, $d2, $d3);
+
+        $this->assertEquals(1, $d1->id);
+        $this->assertEquals(1, $d1->body);
+        $this->assertNotSame('2020-01-01', $d1->created_at->format('Y-m-d'));
+        $this->assertEquals(2, $d2->id);
+        $this->assertEquals(213, $d2->body);
+        $this->assertSame('2020-01-01', $d2->created_at->format('Y-m-d'));
+        $this->assertEquals(3, $d3->id);
+        $this->assertEquals(2, $d3->body);
+        $this->assertSame('2020-01-01', $d3->created_at->format('Y-m-d'));
+    }
+
+    abstract public function createTables(): void;
 
     public function setUp(): void
     {
@@ -67,57 +109,16 @@ abstract class GeneratedColumnTest extends BaseTest
         ]));
     }
 
-    public function testPersist(): void
-    {
-        $u = new User();
-        $u->id = Uuid::uuid4()->toString();
-
-        $this->save($u);
-
-        $this->assertNotNull($u->balance);
-
-        $this->orm->getHeap()->clean();
-
-        $s = (new Select($this->orm, User::class))->wherePK($u->id)->fetchOne();
-
-        $this->assertSame($u->balance, $s->balance);
-    }
-
-    public function testPersistMultipleSerial(): void
-    {
-        $d1 = new Document();
-
-        $d2 = new Document();
-        $d2->body = 213;
-        $d2->created_at = $d2->updated_at = new DateTimeImmutable('2020-01-01');
-
-        $d3 = new Document();
-        $d3->created_at = $d3->updated_at = new DateTimeImmutable('2020-01-01');
-
-
-        $this->save($d1, $d2, $d3);
-
-        $this->assertEquals(1, $d1->id);
-        $this->assertEquals(1, $d1->body);
-        $this->assertNotSame('2020-01-01', $d1->created_at->format('Y-m-d'));
-        $this->assertEquals(2, $d2->id);
-        $this->assertEquals(213, $d2->body);
-        $this->assertSame('2020-01-01', $d2->created_at->format('Y-m-d'));
-        $this->assertEquals(3, $d3->id);
-        $this->assertEquals(2, $d3->body);
-        $this->assertSame('2020-01-01', $d3->created_at->format('Y-m-d'));
-    }
-
     protected function getCommandGenerator(): ?Transaction\CommandGeneratorInterface
     {
-        return new class () extends Transaction\CommandGenerator {
+        return new class extends Transaction\CommandGenerator {
             protected function storeEntity(ORMInterface $orm, Transaction\Tuple $tuple, bool $isNew): ?CommandInterface
             {
                 /** @var CommandInterface|null $command */
                 $command = parent::storeEntity($orm, $tuple, $isNew);
 
                 if ($command !== null && $tuple->entity instanceof Document && empty($tuple->entity->updated_at)) {
-                    $now = new DateTimeImmutable();
+                    $now = new \DateTimeImmutable();
                     $tuple->state->register('updated_at', $now);
                     $tuple->entity->updated_at = $now;
                 }
@@ -126,6 +127,4 @@ abstract class GeneratedColumnTest extends BaseTest
             }
         };
     }
-
-    abstract public function createTables(): void;
 }

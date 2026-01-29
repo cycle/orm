@@ -26,15 +26,10 @@ abstract class AbstractMergeNode extends AbstractNode
         array $columns,
         array $primaryKeys,
         protected array $innerKeys,
-        ?array $outerKeys
+        ?array $outerKeys,
     ) {
         parent::__construct($columns, $outerKeys);
         $this->setDuplicateCriteria($primaryKeys);
-    }
-
-    protected function push(array &$data): void
-    {
-        $this->results[] = &$data;
     }
 
     public function mergeInheritanceNodes(bool $includeRole = false): void
@@ -54,10 +49,15 @@ abstract class AbstractMergeNode extends AbstractNode
                 $this->indexName,
                 $this->intersectData($this->innerKeys, $item),
                 $item + $roleField,
-                static::OVERWRITE_DATA
+                static::OVERWRITE_DATA,
             );
         }
         $this->results = [];
+    }
+
+    protected function push(array &$data): void
+    {
+        $this->results[] = &$data;
     }
 
     /**

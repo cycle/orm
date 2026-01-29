@@ -21,127 +21,6 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('post', [
-            'id' => 'primary',
-            'user_id' => 'integer,nullable',
-            'title' => 'string',
-            'content' => 'string',
-        ]);
-
-        $this->getDatabase()->table('post')->insertMultiple(
-            ['title', 'user_id', 'content'],
-            [
-                ['post 1', 1, 'post 1 body'],
-                ['post 2', 1, 'post 2 body'],
-                ['post 3', 2, 'post 3 body'],
-                ['post 4', 2, 'post 4 body'],
-            ]
-        );
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'parent_id' => 'integer',
-            'parent_type' => 'string',
-            'message' => 'string',
-        ]);
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['parent_id', 'parent_type', 'message'],
-            [
-                [1, 'user', 'first comment'],
-                [1, 'user', 'second comment'],
-                [1, 'user', 'third comment'],
-
-                [1, 'post', 'post 1 comment'],
-                [2, 'post', 'post 2 comment'],
-                [1, 'post', 'post 1.1 comment'],
-                [2, 'post', 'post 2.1 comment'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'comments' => [
-                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type',
-                        ],
-                    ],
-                    'posts' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Post::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Post::class => [
-                Schema::ROLE => 'post',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'post',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'comments' => [
-                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                            Relation::MORPH_KEY => 'parent_type',
-                        ],
-                    ],
-                ],
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -507,5 +386,158 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $this->assertTrue($b->comments->exists(function ($i, $c) {
             return $c->message == 'post 1.1 comment';
         }));
+    }
+
+    public function testUpdateRelationSortedById(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)
+            ->load('comments', [
+                'orderBy' => ['id' => 'DESC'],
+            ])->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $checked = false;
+        foreach ($users as $user) {
+            $this->assertIsIterable($user->comments);
+            // Check order
+            if (\count($user->comments) > 1) {
+                self::assertGreaterThan(
+                    $user->comments->offsetGet(1)->id,
+                    $user->comments->offsetGet(0)->id,
+                );
+                $checked = true;
+            }
+        }
+
+        $this->assertTrue($checked, 'No comments to check order.');
+        $this->assertNumReads(0);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->makeTable('post', [
+            'id' => 'primary',
+            'user_id' => 'integer,nullable',
+            'title' => 'string',
+            'content' => 'string',
+        ]);
+
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['title', 'user_id', 'content'],
+            [
+                ['post 1', 1, 'post 1 body'],
+                ['post 2', 1, 'post 2 body'],
+                ['post 3', 2, 'post 3 body'],
+                ['post 4', 2, 'post 4 body'],
+            ],
+        );
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'parent_id' => 'integer',
+            'parent_type' => 'string',
+            'message' => 'string',
+        ]);
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['parent_id', 'parent_type', 'message'],
+            [
+                [1, 'user', 'first comment'],
+                [1, 'user', 'second comment'],
+                [1, 'user', 'third comment'],
+
+                [1, 'post', 'post 1 comment'],
+                [2, 'post', 'post 2 comment'],
+                [1, 'post', 'post 1.1 comment'],
+                [2, 'post', 'post 2.1 comment'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type',
+                        ],
+                    ],
+                    'posts' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Post::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'title', 'content'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::MORPHED_HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                            Relation::MORPH_KEY => 'parent_type',
+                        ],
+                    ],
+                ],
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

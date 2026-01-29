@@ -19,100 +19,6 @@ abstract class EmbeddedLoaderTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-            'creds_username' => 'string',
-            'creds_password' => 'string',
-            'creds_num_logins' => 'int',
-        ]);
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'user_id' => 'integer,null',
-            'message' => 'string',
-        ]);
-
-        $this->makeFK('comment', 'user_id', 'user', 'id');
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance', 'creds_username', 'creds_password', 'creds_num_logins'],
-            [
-                ['hello@world.com', 100, 'user1', 'pass1', 0],
-                ['another@world.com', 200, 'user2', 'pass2', 1],
-            ]
-        );
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['user_id', 'message'],
-            [
-                [1, 'msg 1'],
-                [1, 'msg 2'],
-                [2, 'msg 3'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'credentials' => [
-                        Relation::TYPE => Relation::EMBEDDED,
-                        Relation::TARGET => UserCredentials::class,
-                        Relation::LOAD => null,
-                        Relation::SCHEMA => [],
-                    ],
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            UserCredentials::class => [
-                Schema::ROLE => 'user_credentials',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => [
-                    'id' => 'id',
-                    'username' => 'creds_username',
-                    'password' => 'creds_password',
-                    'num_logins' => 'creds_num_logins',
-                ],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-                Schema::SCOPE => SortByIDScope::class,
-            ],
-        ]));
-    }
-
     public function testLoadDataNoRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -428,5 +334,99 @@ abstract class EmbeddedLoaderTest extends BaseTest
                 ],
             ],
         ], $selector->fetchData());
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+            'creds_username' => 'string',
+            'creds_password' => 'string',
+            'creds_num_logins' => 'int',
+        ]);
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'user_id' => 'integer,null',
+            'message' => 'string',
+        ]);
+
+        $this->makeFK('comment', 'user_id', 'user', 'id');
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance', 'creds_username', 'creds_password', 'creds_num_logins'],
+            [
+                ['hello@world.com', 100, 'user1', 'pass1', 0],
+                ['another@world.com', 200, 'user2', 'pass2', 1],
+            ],
+        );
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['user_id', 'message'],
+            [
+                [1, 'msg 1'],
+                [1, 'msg 2'],
+                [2, 'msg 3'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'credentials' => [
+                        Relation::TYPE => Relation::EMBEDDED,
+                        Relation::TARGET => UserCredentials::class,
+                        Relation::LOAD => null,
+                        Relation::SCHEMA => [],
+                    ],
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            UserCredentials::class => [
+                Schema::ROLE => 'user_credentials',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => [
+                    'id' => 'id',
+                    'username' => 'creds_username',
+                    'password' => 'creds_password',
+                    'num_logins' => 'creds_num_logins',
+                ],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+                Schema::SCOPE => SortByIDScope::class,
+            ],
+        ]));
     }
 }

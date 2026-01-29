@@ -14,14 +14,14 @@ final class BookNestedStates
         $this->states = $this->create($states);
     }
 
-    public function __toString(): string
-    {
-        return implode('|', array_column($this->states, 'title'));
-    }
-
     public static function cast(string $value): self
     {
         return new self(explode('|', $value));
+    }
+
+    public function __toString(): string
+    {
+        return implode('|', array_column($this->states, 'title'));
     }
 
     private function create(array $states): array

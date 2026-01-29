@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case1\Entity;
 
-use DateTimeImmutable;
-
 class Post
 {
     private ?int $id = null;
@@ -13,17 +11,20 @@ class Post
     private string $title = '';
     private bool $public = false;
     private string $content = '';
-    private DateTimeImmutable $created_at;
-    private DateTimeImmutable $updated_at;
-    private ?DateTimeImmutable $published_at = null;
-    private ?DateTimeImmutable $deleted_at = null;
+    private \DateTimeImmutable $created_at;
+    private \DateTimeImmutable $updated_at;
+    private ?\DateTimeImmutable $published_at = null;
+    private ?\DateTimeImmutable $deleted_at = null;
     private User $user;
     private ?int $user_id = null;
+
     /**
      * @var Tag[]
      */
     private array $tags = [];
+
     private ?int $tag_id = null;
+
     /**
      * @var Comment[]
      */
@@ -33,8 +34,8 @@ class Post
     {
         $this->title = $title;
         $this->content = $content;
-        $this->created_at = new DateTimeImmutable();
-        $this->updated_at = new DateTimeImmutable();
+        $this->created_at = new \DateTimeImmutable();
+        $this->updated_at = new \DateTimeImmutable();
         $this->resetSlug();
     }
 
@@ -83,17 +84,17 @@ class Post
         $this->public = $public;
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }
 
-    public function getUpdatedAt(): DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeImmutable
     {
         return $this->updated_at;
     }
 
-    public function getDeletedAt(): ?DateTimeImmutable
+    public function getDeletedAt(): ?\DateTimeImmutable
     {
         return $this->deleted_at;
     }
@@ -108,12 +109,12 @@ class Post
         return $this->user;
     }
 
-    public function getPublishedAt(): ?DateTimeImmutable
+    public function getPublishedAt(): ?\DateTimeImmutable
     {
         return $this->published_at;
     }
 
-    public function setPublishedAt(?DateTimeImmutable $published_at): void
+    public function setPublishedAt(?\DateTimeImmutable $published_at): void
     {
         $this->published_at = $published_at;
     }

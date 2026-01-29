@@ -25,7 +25,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
         DatabaseInterface $db,
         string $table,
         private State $state,
-        ?MapperInterface $mapper
+        ?MapperInterface $mapper,
     ) {
         parent::__construct($db, $table);
         $this->mapper = $mapper;
@@ -49,7 +49,7 @@ final class Delete extends DatabaseCommand implements ScopeCarrierInterface
 
         $this->affectedRows = $this->db->delete(
             $this->table,
-            $this->prepareData($scope)
+            $this->prepareData($scope),
         )->run();
         $this->state->setStatus(Node::DELETED);
 

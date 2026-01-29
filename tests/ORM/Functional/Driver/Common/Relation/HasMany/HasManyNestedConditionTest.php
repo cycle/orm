@@ -20,116 +20,6 @@ abstract class HasManyNestedConditionTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-
-        $this->makeTable('post', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'title' => 'string',
-        ]);
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'user_id' => 'integer,null',
-            'post_id' => 'integer',
-            'message' => 'string',
-        ]);
-
-        $this->makeFK('post', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
-        $this->makeFK('comment', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
-        $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->getDatabase()->table('post')->insertMultiple(
-            ['user_id', 'title'],
-            [
-                [1, 'post 1'],
-                [1, 'post 2'],
-                [1, 'post 3'],
-                [2, 'post 4'],
-            ]
-        );
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['user_id', 'post_id', 'message'],
-            [
-                [1, 1, 'msg 1'],
-                [2, 1, 'msg 2'],
-                [2, 2, 'msg 3'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'posts' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Post::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                ],
-            ],
-            Post::class => [
-                Schema::ROLE => 'post',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'post',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'title'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'comments' => [
-                        Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'post_id',
-                        ],
-                    ],
-                ],
-                Schema::SCOPE => SortByIDScope::class,
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'post_id', 'message'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -243,8 +133,8 @@ abstract class HasManyNestedConditionTest extends BaseTest
         $users->load('posts', [
             'where' => function (Select\QueryBuilder $qb): void {
                 $qb->distinct()
-                   ->with('comments', ['method' => Select\JoinableLoader::LEFT_JOIN])
-                   ->where('comments.id', '=', null);
+                    ->with('comments', ['method' => Select\JoinableLoader::LEFT_JOIN])
+                    ->where('comments.id', '=', null);
             },
         ])->orderBy('user.id');
 
@@ -283,11 +173,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
         $users->load('posts', [
             'where' => function (Select\QueryBuilder $qb): void {
                 $qb->distinct()
-                   ->where(
-                       'comments.user_id',
-                       '=',
-                       new Expression($qb->resolve('user_id'))
-                   );
+                    ->where(
+                        'comments.user_id',
+                        '=',
+                        new Expression($qb->resolve('user_id')),
+                    );
             },
         ])->orderBy('user.id');
 
@@ -353,5 +243,142 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 'posts' => [],
             ],
         ], $users->fetchData());
+    }
+
+    public function testUpdateNestedRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)
+            ->load('posts.comments')
+            ->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            $this->assertIsIterable($user->posts);
+            foreach ($user->posts as $post) {
+                $this->assertIsIterable($post->comments);
+                // Verify comments are loaded
+                foreach ($post->comments as $comment) {
+                    $this->assertNotNull($comment->message);
+                }
+            }
+        }
+        $this->assertNumReads(0);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+
+        $this->makeTable('post', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'title' => 'string',
+        ]);
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'user_id' => 'integer,null',
+            'post_id' => 'integer',
+            'message' => 'string',
+        ]);
+
+        $this->makeFK('post', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
+        $this->makeFK('comment', 'user_id', 'user', 'id', 'NO ACTION', 'NO ACTION');
+        $this->makeFK('comment', 'post_id', 'post', 'id', 'NO ACTION', 'NO ACTION');
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['user_id', 'title'],
+            [
+                [1, 'post 1'],
+                [1, 'post 2'],
+                [1, 'post 3'],
+                [2, 'post 4'],
+            ],
+        );
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['user_id', 'post_id', 'message'],
+            [
+                [1, 1, 'msg 1'],
+                [2, 1, 'msg 2'],
+                [2, 2, 'msg 3'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'posts' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Post::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Post::class => [
+                Schema::ROLE => 'post',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'post',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'title'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'comments' => [
+                        Relation::TYPE => Relation::HAS_MANY,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'post_id',
+                        ],
+                    ],
+                ],
+                Schema::SCOPE => SortByIDScope::class,
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'post_id', 'message'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

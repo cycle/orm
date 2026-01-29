@@ -11,6 +11,4 @@ namespace Cycle\ORM;
  *
  * @internal
  */
-interface EntityProxyInterface
-{
-}
+interface EntityProxyInterface {}

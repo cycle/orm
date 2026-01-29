@@ -7,8 +7,6 @@ namespace Cycle\ORM\Service\Implementation;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\SchemaInterface;
 
-use const SORT_REGULAR;
-
 /**
  * @internal
  */
@@ -18,8 +16,7 @@ final class IndexProvider implements IndexProviderInterface
 
     public function __construct(
         private SchemaInterface $schema,
-    ) {
-    }
+    ) {}
 
     public function getIndexes(string $entity): array
     {
@@ -30,6 +27,6 @@ final class IndexProvider implements IndexProviderInterface
         $pk = $this->schema->define($entity, SchemaInterface::PRIMARY_KEY);
         $keys = $this->schema->define($entity, SchemaInterface::FIND_BY_KEYS) ?? [];
 
-        return $this->indexes[$entity] = \array_unique(\array_merge([$pk], $keys), SORT_REGULAR);
+        return $this->indexes[$entity] = \array_unique(\array_merge([$pk], $keys), \SORT_REGULAR);
     }
 }

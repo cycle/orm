@@ -7,7 +7,6 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture;
 class Manager extends Employee
 {
     public ?int $role_id = null;
-
     public ?int $level = null;
     public string $rank = 'none';
 }

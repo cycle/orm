@@ -18,52 +18,6 @@ abstract class DeepCyclicTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('cyclic', [
-            'id' => 'primary',
-            'name' => 'string',
-            'parent_id' => 'integer,nullable',
-            'other_id' => 'integer,nullable',
-        ]);
-
-        $this->orm = $this->withSchema(new Schema([
-            Cyclic::class => [
-                Schema::ROLE => 'cyclic',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'cyclic',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'parent_id', 'other_id', 'name'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'cyclic' => [
-                        Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => Cyclic::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::NULLABLE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'parent_id',
-                        ],
-                    ],
-                    'other' => [
-                        Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => Cyclic::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::NULLABLE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'other_id',
-                        ],
-                    ],
-                ],
-            ],
-        ]));
-    }
-
     public function testCreateDeepCyclic(): void
     {
         $c1 = new Cyclic('C1');
@@ -261,5 +215,51 @@ abstract class DeepCyclicTest extends BaseTest
         $this->assertSame($c4->other, $c1);
         $this->assertSame($c1->other, $c5);
         $this->assertSame($c5->other, $c2);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('cyclic', [
+            'id' => 'primary',
+            'name' => 'string',
+            'parent_id' => 'integer,nullable',
+            'other_id' => 'integer,nullable',
+        ]);
+
+        $this->orm = $this->withSchema(new Schema([
+            Cyclic::class => [
+                Schema::ROLE => 'cyclic',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'cyclic',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'parent_id', 'other_id', 'name'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'cyclic' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Cyclic::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'parent_id',
+                        ],
+                    ],
+                    'other' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Cyclic::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'other_id',
+                        ],
+                    ],
+                ],
+            ],
+        ]));
     }
 }

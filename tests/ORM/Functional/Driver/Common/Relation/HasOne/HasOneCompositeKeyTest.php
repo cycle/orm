@@ -23,130 +23,38 @@ abstract class HasOneCompositeKeyTest extends BaseTest
 {
     use TableTrait;
 
-    protected const
-        CHILD_CONTAINER = 'child_entity';
-    protected const
-        NESTED_CONTAINER = 'nested';
-    protected const
-        PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
-    protected const
-        PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
-    protected const
-        PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
-    protected const
-        PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202];
-    protected const
-        CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null, 'parent_key1' => 1, 'parent_key2' => 1];
-    protected const
-        CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2];
-    protected const
-        CHILD_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1];
-    protected const
-        NESTED_1 = ['key3' => 'foo', 'parent_key1' => 1, 'parent_key2' => 1];
-    protected const
-        PARENT_1_LOADED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1];
-    protected const
-        PARENT_2_LOADED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2];
-    protected const
-        PARENT_3_LOADED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3];
-    protected const
-        PARENT_4_LOADED = self::PARENT_4 + [self::CHILD_CONTAINER => null];
-    protected const
-        PARENT_1_NESTED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1 + [
-            self::NESTED_CONTAINER => self::NESTED_1 + ['key1' => 1],
-        ]];
-    protected const
-        PARENT_2_NESTED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2 + [self::NESTED_CONTAINER => null]];
-    protected const
-        PARENT_3_NESTED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3 + [self::NESTED_CONTAINER => null]];
-    protected const
-        PARENT_4_NESTED = self::PARENT_4 + [self::CHILD_CONTAINER => null];
-    protected const
-        FULL_LOADED = [
-            self::PARENT_1_LOADED,
-            self::PARENT_2_LOADED,
-            self::PARENT_3_LOADED,
-            self::PARENT_4_LOADED,
-        ];
-    protected const
-        FULL_NESTED = [
-            self::PARENT_1_NESTED,
-            self::PARENT_2_NESTED,
-            self::PARENT_3_NESTED,
-            self::PARENT_4_NESTED,
-        ];
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'parent_entity',
-            [
-                'pField1' => 'bigInteger,primary',
-                'pField2' => 'bigInteger,primary',
-                'pField3' => 'integer,nullable',
-            ]
-        );
-        $this->makeTable(
-            'child_entity',
-            [
-                'field1' => 'bigInteger,primary',
-                'field2' => 'bigInteger,primary',
-                'field3' => 'string,nullable',
-                'parent_field1' => 'bigInteger,null',
-                'parent_field2' => 'bigInteger,null',
-            ]
-        );
-        $this->makeTable(
-            'nested_entity',
-            [
-                'field1' => 'primary',
-                'field3' => 'string,null',
-                'parent_field1' => 'bigInteger,null',
-                'parent_field2' => 'bigInteger,null',
-            ]
-        );
-
-        $this->makeCompositeFK(
-            'child_entity',
-            ['parent_field1', 'parent_field2'],
-            'parent_entity',
-            ['pField1', 'pField2']
-        );
-        $this->makeCompositeFK(
-            'nested_entity',
-            ['parent_field1', 'parent_field2'],
-            'child_entity',
-            ['field1', 'field2']
-        );
-
-        $this->getDatabase()->table('parent_entity')->insertMultiple(
-            ['pField1', 'pField2', 'pField3'],
-            [
-                self::PARENT_1,
-                self::PARENT_2,
-                self::PARENT_3,
-                self::PARENT_4,
-            ]
-        );
-        $this->getDatabase()->table('child_entity')->insertMultiple(
-            ['field1', 'field2', 'field3', 'parent_field1', 'parent_field2'],
-            [
-                self::CHILD_1,
-                self::CHILD_2,
-                self::CHILD_3,
-            ]
-        );
-        $this->getDatabase()->table('nested_entity')->insertMultiple(
-            ['field3', 'parent_field1', 'parent_field2'],
-            [
-                self::NESTED_1,
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
+    protected const CHILD_CONTAINER = 'child_entity';
+    protected const NESTED_CONTAINER = 'nested';
+    protected const PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
+    protected const PARENT_2 = ['key1' => 1, 'key2' => 2, 'key3' => 102];
+    protected const PARENT_3 = ['key1' => 2, 'key2' => 1, 'key3' => 201];
+    protected const PARENT_4 = ['key1' => 2, 'key2' => 2, 'key3' => 202];
+    protected const CHILD_1 = ['key1' => 1, 'key2' => 1, 'key3' => null, 'parent_key1' => 1, 'parent_key2' => 1];
+    protected const CHILD_2 = ['key1' => 1, 'key2' => 2, 'key3' => 'foo2', 'parent_key1' => 1, 'parent_key2' => 2];
+    protected const CHILD_3 = ['key1' => 1, 'key2' => 3, 'key3' => 'bar3', 'parent_key1' => 2, 'parent_key2' => 1];
+    protected const NESTED_1 = ['key3' => 'foo', 'parent_key1' => 1, 'parent_key2' => 1];
+    protected const PARENT_1_LOADED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1];
+    protected const PARENT_2_LOADED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2];
+    protected const PARENT_3_LOADED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3];
+    protected const PARENT_4_LOADED = self::PARENT_4 + [self::CHILD_CONTAINER => null];
+    protected const PARENT_1_NESTED = self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1 + [
+        self::NESTED_CONTAINER => self::NESTED_1 + ['key1' => 1],
+    ]];
+    protected const PARENT_2_NESTED = self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2 + [self::NESTED_CONTAINER => null]];
+    protected const PARENT_3_NESTED = self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3 + [self::NESTED_CONTAINER => null]];
+    protected const PARENT_4_NESTED = self::PARENT_4 + [self::CHILD_CONTAINER => null];
+    protected const FULL_LOADED = [
+        self::PARENT_1_LOADED,
+        self::PARENT_2_LOADED,
+        self::PARENT_3_LOADED,
+        self::PARENT_4_LOADED,
+    ];
+    protected const FULL_NESTED = [
+        self::PARENT_1_NESTED,
+        self::PARENT_2_NESTED,
+        self::PARENT_3_NESTED,
+        self::PARENT_4_NESTED,
+    ];
 
     public function testHasInSchema(): void
     {
@@ -397,8 +305,8 @@ abstract class HasOneCompositeKeyTest extends BaseTest
     {
         $selector = new Select($this->orm, CompositePK::class);
         /**
-         * @var $a CompositePK
-         * @var $b CompositePK
+         * @var CompositePK $a
+         * @var CompositePK $b
          */
         [$a, $b] = $selector->load('child_entity')
             ->where('parent_entity.key3', '>', 200)
@@ -425,7 +333,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $this->assertNotNull($b->child_entity);
         $this->assertEquals(
             [$compareChild->key1, $compareChild->key2],
-            [$b->child_entity->key1, $b->child_entity->key2]
+            [$b->child_entity->key1, $b->child_entity->key2],
         );
     }
 
@@ -613,13 +521,14 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $this->save($u);
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(CompositePK::class)
-                        ->select()->load('child_entity')->wherePK([1, 1])->fetchOne();
+            ->select()->load('child_entity')->wherePK([1, 1])->fetchOne();
 
         $this->assertSame('new', $u4->child_entity->key3);
     }
 
     public function testOverwritePromisedRelation(): void
     {
+        // The relation `child_entity` will not be loaded
         $u = (new Select($this->orm, CompositePK::class))->wherePK([1, 1])->fetchOne();
 
         $newCompositePKChild = new CompositePKChild();
@@ -635,12 +544,85 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->wherePK([1, 1])->fetchOne();
 
         $this->assertSame($u, $u2);
-        // Overwritten
-        $this->assertSame(self::CHILD_1['key3'], $u2->child_entity->key3);
+        // Relation was not overwritten
+        $this->assertSame('new', $u2->child_entity->key3);
 
         $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
-        $this->assertNumWrites(0);
+        $this->save($u);
+        // Add a new pivot and delete the old one
+        $this->assertNumWrites(2);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'parent_entity',
+            [
+                'pField1' => 'bigInteger,primary',
+                'pField2' => 'bigInteger,primary',
+                'pField3' => 'integer,nullable',
+            ],
+        );
+        $this->makeTable(
+            'child_entity',
+            [
+                'field1' => 'bigInteger,primary',
+                'field2' => 'bigInteger,primary',
+                'field3' => 'string,nullable',
+                'parent_field1' => 'bigInteger,null',
+                'parent_field2' => 'bigInteger,null',
+            ],
+        );
+        $this->makeTable(
+            'nested_entity',
+            [
+                'field1' => 'primary',
+                'field3' => 'string,null',
+                'parent_field1' => 'bigInteger,null',
+                'parent_field2' => 'bigInteger,null',
+            ],
+        );
+
+        $this->makeCompositeFK(
+            'child_entity',
+            ['parent_field1', 'parent_field2'],
+            'parent_entity',
+            ['pField1', 'pField2'],
+        );
+        $this->makeCompositeFK(
+            'nested_entity',
+            ['parent_field1', 'parent_field2'],
+            'child_entity',
+            ['field1', 'field2'],
+        );
+
+        $this->getDatabase()->table('parent_entity')->insertMultiple(
+            ['pField1', 'pField2', 'pField3'],
+            [
+                self::PARENT_1,
+                self::PARENT_2,
+                self::PARENT_3,
+                self::PARENT_4,
+            ],
+        );
+        $this->getDatabase()->table('child_entity')->insertMultiple(
+            ['field1', 'field2', 'field3', 'parent_field1', 'parent_field2'],
+            [
+                self::CHILD_1,
+                self::CHILD_2,
+                self::CHILD_3,
+            ],
+        );
+        $this->getDatabase()->table('nested_entity')->insertMultiple(
+            ['field3', 'parent_field1', 'parent_field2'],
+            [
+                self::NESTED_1,
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

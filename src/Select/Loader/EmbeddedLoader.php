@@ -22,7 +22,6 @@ final class EmbeddedLoader implements JoinableInterface
     use ColumnsTrait;
 
     private ?LoaderInterface $parent = null;
-
     private array $options = [
         'load' => false,
         'minify' => true,
@@ -30,31 +29,15 @@ final class EmbeddedLoader implements JoinableInterface
 
     public function __construct(
         private SchemaInterface $ormSchema,
-        private string $target
+        private string $target,
     ) {
         // never duplicate primary key in data selection
-        $primaryKey = (array)$this->define(SchemaInterface::PRIMARY_KEY);
+        $primaryKey = (array) $this->define(SchemaInterface::PRIMARY_KEY);
         foreach ($this->normalizeColumns($this->define(SchemaInterface::COLUMNS)) as $internal => $external) {
             if (!\in_array($internal, $primaryKey, true)) {
                 $this->columns[$internal] = $external;
             }
         }
-    }
-
-    /**
-     * Destruct loader.
-     */
-    public function __destruct()
-    {
-        unset($this->parent);
-    }
-
-    /**
-     * Ensure state of every nested loader.
-     */
-    public function __clone()
-    {
-        $this->parent = null;
     }
 
     public function getAlias(): string
@@ -103,13 +86,37 @@ final class EmbeddedLoader implements JoinableInterface
     {
         return new EmbeddedNode(
             $this->columnNames(),
-            (array)$this->ormSchema->define($this->parent->getTarget(), SchemaInterface::PRIMARY_KEY)
+            (array) $this->ormSchema->define($this->parent->getTarget(), SchemaInterface::PRIMARY_KEY),
         );
     }
 
     public function loadData(AbstractNode $node, bool $includeRole = false): void
     {
         // embedded entities does not support inner loaders... for now! :)
+    }
+
+    public function setSubclassesLoading(bool $enabled): void {}
+
+    public function isHierarchical(): bool
+    {
+        // Embedded can't be hierarchical
+        return false;
+    }
+
+    /**
+     * Ensure state of every nested loader.
+     */
+    public function __clone()
+    {
+        $this->parent = null;
+    }
+
+    /**
+     * Destruct loader.
+     */
+    public function __destruct()
+    {
+        unset($this->parent);
     }
 
     /**
@@ -120,15 +127,5 @@ final class EmbeddedLoader implements JoinableInterface
     protected function define(int $property)
     {
         return $this->ormSchema->define($this->target, $property);
-    }
-
-    public function setSubclassesLoading(bool $enabled): void
-    {
-    }
-
-    public function isHierarchical(): bool
-    {
-        // Embedded can't be hierarchical
-        return false;
     }
 }

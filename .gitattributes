@@ -1,5 +1,6 @@
-/.github          export-ignore
-/.editorconfig    export-ignore
-/.gitattributes   export-ignore
-/.gitignore       export-ignore
-/tests            export-ignore
+/.*      export-ignore
+/tests   export-ignore
+/*.xml   export-ignore
+/*.yml   export-ignore
+/*.lock  export-ignore
+/*.dist  export-ignore

@@ -47,7 +47,7 @@ trait DuplicateTrait
         }
 
         return \count($this->duplicateCriteria) === 1
-            ? $this->deduplicateSingle(current($this->duplicateCriteria), $data)
+            ? $this->deduplicateSingle(\current($this->duplicateCriteria), $data)
             : $this->deduplicateMultiple($this->duplicateCriteria, $data);
     }
 
@@ -58,9 +58,9 @@ trait DuplicateTrait
         $count = \count($keys);
         foreach ($keys as $key) {
             --$count;
-            $criteria = (string)$data[$key];
+            $criteria = (string) $data[$key];
 
-            if (!$search || !array_key_exists($criteria, $zoom)) {
+            if (!$search || !\array_key_exists($criteria, $zoom)) {
                 $search = false;
                 if ($count === 0) {
                     $zoom[$criteria] = &$data;
@@ -78,7 +78,7 @@ trait DuplicateTrait
 
     private function deduplicateSingle(string $key, array &$data): bool
     {
-        $criteria = (string)$data[$key];
+        $criteria = (string) $data[$key];
 
         if (isset($this->duplicates[$criteria])) {
             // duplicate is presented, let's reduplicate

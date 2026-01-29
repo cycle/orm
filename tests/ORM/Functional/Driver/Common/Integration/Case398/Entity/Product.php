@@ -12,6 +12,5 @@ class Product
 
     public function __construct(
         public string $title,
-    ) {
-    }
+    ) {}
 }

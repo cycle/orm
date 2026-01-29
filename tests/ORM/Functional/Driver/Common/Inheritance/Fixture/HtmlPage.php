@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture;
 
-class HtmlPage extends Page
-{
-}
+class HtmlPage extends Page {}

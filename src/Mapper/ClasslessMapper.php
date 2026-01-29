@@ -18,9 +18,9 @@ final class ClasslessMapper extends DatabaseMapper
         $this->entityFactory = new ClasslessProxyFactory();
     }
 
-    public function init(array $data, string $role = null): object
+    public function init(array $data, ?string $role = null): object
     {
-        return $this->entityFactory->create($this->relationMap, $this->role, array_keys($this->columns + $this->parentColumns));
+        return $this->entityFactory->create($this->relationMap, $this->role, \array_keys($this->columns + $this->parentColumns));
     }
 
     public function hydrate($entity, array $data): object
@@ -39,9 +39,9 @@ final class ClasslessMapper extends DatabaseMapper
      */
     public function fetchFields(object $entity): array
     {
-        return array_intersect_key(
+        return \array_intersect_key(
             $this->entityFactory->extractData($this->relationMap, $entity),
-            $this->columns + $this->parentColumns
+            $this->columns + $this->parentColumns,
         );
     }
 

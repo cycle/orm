@@ -17,45 +17,6 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'user',
-            [
-                'id' => 'primary',
-                'email' => 'string',
-                'balance' => 'float,nullable',
-            ]
-        );
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->orm = $this->withSchema(
-            new Schema(
-                [
-                    'user' => [
-                        Schema::MAPPER => ClasslessMapper::class,
-                        Schema::DATABASE => 'default',
-                        Schema::TABLE => 'user',
-                        Schema::PRIMARY_KEY => 'id',
-                        Schema::COLUMNS => ['id', 'email', 'balance'],
-                        Schema::TYPECAST => ['balance' => 'float'],
-                        Schema::SCHEMA => [],
-                        Schema::RELATIONS => [],
-                    ],
-                ]
-            )
-        );
-    }
-
     public function testFetchData(): void
     {
         $this->assertEquals(
@@ -71,7 +32,7 @@ abstract class ClasslessMapperTest extends BaseMapperTest
                     'balance' => 200.0,
                 ],
             ],
-            (new Select($this->orm, 'user'))->fetchData()
+            (new Select($this->orm, 'user'))->fetchData(),
         );
     }
 
@@ -201,7 +162,7 @@ abstract class ClasslessMapperTest extends BaseMapperTest
                 'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
-            $this->orm->getHeap()->get($result)->getData()
+            $this->orm->getHeap()->get($result)->getData(),
         );
     }
 
@@ -298,11 +259,13 @@ abstract class ClasslessMapperTest extends BaseMapperTest
     public function testLoadOverwriteValues(): void
     {
         $u = $this->orm->getRepository('user')->findByPK(1);
+        $this->assertSame('hello@world.com', $u->email);
         $u->email = 'test@email.com';
         $this->assertSame('test@email.com', $u->email);
 
         $u2 = $this->orm->getRepository('user')->findByPK(1);
-        $this->assertSame('hello@world.com', $u2->email);
+        self::assertSame($u, $u2);
+        $this->assertSame('test@email.com', $u2->email);
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
         $this->assertSame('hello@world.com', $u3->email);
@@ -311,10 +274,10 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $t = new Transaction($this->orm);
         $t->persist($u);
         $t->run();
-        $this->assertNumWrites(0);
+        $this->assertNumWrites(1);
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
-        $this->assertSame('hello@world.com', $u4->email);
+        $this->assertSame('test@email.com', $u4->email);
     }
 
     public function testNullableValuesInASndOut(): void
@@ -344,5 +307,44 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository('user')->findByPK(1);
         $this->assertNull($u->balance);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'user',
+            [
+                'id' => 'primary',
+                'email' => 'string',
+                'balance' => 'float,nullable',
+            ],
+        );
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->orm = $this->withSchema(
+            new Schema(
+                [
+                    'user' => [
+                        Schema::MAPPER => ClasslessMapper::class,
+                        Schema::DATABASE => 'default',
+                        Schema::TABLE => 'user',
+                        Schema::PRIMARY_KEY => 'id',
+                        Schema::COLUMNS => ['id', 'email', 'balance'],
+                        Schema::TYPECAST => ['balance' => 'float'],
+                        Schema::SCHEMA => [],
+                        Schema::RELATIONS => [],
+                    ],
+                ],
+            ),
+        );
     }
 }

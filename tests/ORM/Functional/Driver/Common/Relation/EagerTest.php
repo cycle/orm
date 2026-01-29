@@ -18,6 +18,35 @@ abstract class EagerTest extends BaseTest
 {
     use TableTrait;
 
+    public function testFetchEager(): void
+    {
+        $selector = new Select($this->orm, User::class);
+
+        $this->assertEquals([
+            [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
+                    'id' => 1,
+                    'user_id' => 1,
+                    'image' => 'image.png',
+                    'nested' => [
+                        'id' => 1,
+                        'profile_id' => 1,
+                        'label' => 'nested-label',
+                    ],
+                ],
+            ],
+            [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'profile' => null,
+            ],
+        ], $selector->fetchData());
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -48,14 +77,14 @@ abstract class EagerTest extends BaseTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('profile')->insertMultiple(
             ['user_id', 'image'],
             [
                 [1, 'image.png'],
-            ]
+            ],
         );
 
 
@@ -63,7 +92,7 @@ abstract class EagerTest extends BaseTest
             ['profile_id', 'label'],
             [
                 [1, 'nested-label'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema([
@@ -120,34 +149,5 @@ abstract class EagerTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
-    }
-
-    public function testFetchEager(): void
-    {
-        $selector = new Select($this->orm, User::class);
-
-        $this->assertEquals([
-            [
-                'id' => 1,
-                'email' => 'hello@world.com',
-                'balance' => 100.0,
-                'profile' => [
-                    'id' => 1,
-                    'user_id' => 1,
-                    'image' => 'image.png',
-                    'nested' => [
-                        'id' => 1,
-                        'profile_id' => 1,
-                        'label' => 'nested-label',
-                    ],
-                ],
-            ],
-            [
-                'id' => 2,
-                'email' => 'another@world.com',
-                'balance' => 200.0,
-                'profile' => null,
-            ],
-        ], $selector->fetchData());
     }
 }

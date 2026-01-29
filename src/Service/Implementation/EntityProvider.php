@@ -16,8 +16,7 @@ final class EntityProvider implements EntityProviderInterface
     public function __construct(
         private HeapInterface $heap,
         private RepositoryProviderInterface $repositoryProvider,
-    ) {
-    }
+    ) {}
 
     public function get(string $role, array $scope, bool $load = true): ?object
     {

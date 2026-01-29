@@ -40,14 +40,14 @@ final class Embedded implements SameRowRelationInterface
         /** @internal */
         ORMInterface $orm,
         private string $name,
-        private string $target
+        private string $target,
     ) {
         $this->mapperProvider = $orm->getService(MapperProviderInterface::class);
         $this->entityProvider = $orm->getService(EntityProviderInterface::class);
         $this->mapper = $this->mapperProvider->getMapper($target);
 
         // this relation must manage column association manually, bypassing related mapper
-        $this->primaryKeys = (array)$orm->getSchema()->define($target, SchemaInterface::PRIMARY_KEY);
+        $this->primaryKeys = (array) $orm->getSchema()->define($target, SchemaInterface::PRIMARY_KEY);
         $this->columns = $orm->getSchema()->define($target, SchemaInterface::COLUMNS);
     }
 
@@ -109,31 +109,23 @@ final class Embedded implements SameRowRelationInterface
         return $scope === [] ? new EmptyReference($this->target, null) : new Reference($this->target, $scope);
     }
 
-    private function getReferenceScope(Node $node): ?array
-    {
-        $scope = [];
-        $nodeData = $node->getData();
-        foreach ($this->primaryKeys as $key) {
-            $value = $nodeData[$key] ?? null;
-            if (empty($value)) {
-                return null;
-            }
-            $scope[$key] = $value;
-        }
-        return $scope;
-    }
-
     public function prepare(Pool $pool, Tuple $tuple, mixed $related, bool $load = true): void
     {
         // $related = $tuple->state->getRelation($this->getName());
         // $pool->attach($related, Tuple::TASK_STORE, false);
     }
 
-    public function queue(Pool $pool, Tuple $tuple, StoreCommandInterface $command = null): void
+    public function queue(Pool $pool, Tuple $tuple, ?StoreCommandInterface $command = null): void
     {
         if ($tuple->task !== Tuple::TASK_STORE) {
             return;
         }
+
+        if (!$tuple->state->hasRelation($this->getName())) {
+            $tuple->state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+            return;
+        }
+
         $related = $tuple->state->getRelation($this->getName());
 
         // Master Node
@@ -180,17 +172,6 @@ final class Embedded implements SameRowRelationInterface
         $tuple->state->setRelationStatus($rTuple->node->getRole() . ':' . $this->getName(), RelationInterface::STATUS_RESOLVED);
     }
 
-    private function getChanges(object $related, State $state): array
-    {
-        $data = array_intersect_key($this->mapper->extract($related), $this->columns);
-        // Embedded entity does not override PK values of the parent
-        foreach ($this->primaryKeys as $key) {
-            unset($data[$key]);
-        }
-
-        return array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
-    }
-
     /**
      * Resolve the reference to the object.
      */
@@ -205,5 +186,30 @@ final class Embedded implements SameRowRelationInterface
             $reference->setValue($result);
         }
         return $result;
+    }
+
+    private function getReferenceScope(Node $node): ?array
+    {
+        $scope = [];
+        $nodeData = $node->getData();
+        foreach ($this->primaryKeys as $key) {
+            $value = $nodeData[$key] ?? null;
+            if (empty($value)) {
+                return null;
+            }
+            $scope[$key] = $value;
+        }
+        return $scope;
+    }
+
+    private function getChanges(object $related, State $state): array
+    {
+        $data = \array_intersect_key($this->mapper->extract($related), $this->columns);
+        // Embedded entity does not override PK values of the parent
+        foreach ($this->primaryKeys as $key) {
+            unset($data[$key]);
+        }
+
+        return \array_udiff_assoc($data, $state->getTransactionData(), [Node::class, 'compare']);
     }
 }

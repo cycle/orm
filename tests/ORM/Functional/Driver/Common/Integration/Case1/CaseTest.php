@@ -19,12 +19,47 @@ abstract class CaseTest extends BaseTest
 
     /** @var User[] */
     private array $users = [];
+
     /** @var Tag[] */
     private array $tags = [];
-    private int $iterator = 0;
 
+    private int $iterator = 0;
     private ?float $startTime = null;
     private array $memories = [];
+
+    public function countProvider(): array
+    {
+        return [
+            '1 item' => [1],
+            '2 items' => [2],
+            '10 items' => [10],
+            '20 items' => [20],
+            // '50 items' => [50],
+        ];
+    }
+
+    /**
+     * @dataProvider countProvider
+     */
+    public function testRun(int $count): void
+    {
+        $generator = $this->generate($count);
+
+        while ($generator->valid()) {
+            $this->snapMemory($generator->current());
+            $generator->next();
+        }
+
+        // Reset state
+        $this->resetState(false);
+        $this->orm->getHeap()->clean();
+        $this->snapMemory('Clean state');
+
+        // No errors
+        $this->assertTrue(true);
+
+        // $this->printDebug();
+    }
 
     public function setUp(): void
     {
@@ -85,40 +120,6 @@ abstract class CaseTest extends BaseTest
         $this->makeFK('post_tag', 'tag_id', 'tag', 'id', 'NO ACTION', 'CASCADE');
 
         $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
-    public function countProvider(): array
-    {
-        return [
-            '1 item' => [1],
-            '2 items' => [2],
-            '10 items' => [10],
-            '20 items' => [20],
-            // '50 items' => [50],
-        ];
-    }
-
-    /**
-     * @dataProvider countProvider
-     */
-    public function testRun(int $count): void
-    {
-        $generator = $this->generate($count);
-
-        while ($generator->valid()) {
-            $this->snapMemory($generator->current());
-            $generator->next();
-        }
-
-        // Reset state
-        $this->resetState(false);
-        $this->orm->getHeap()->clean();
-        $this->snapMemory('Clean state');
-
-        // No errors
-        $this->assertTrue(true);
-
-        // $this->printDebug();
     }
 
     /**
@@ -189,7 +190,7 @@ abstract class CaseTest extends BaseTest
                 $post->setPublishedAt(new \DateTimeImmutable(date('r', random_int(strtotime('-2 years'), time()))));
             }
             // link tags
-            $postTags = (array)array_rand($this->tags, random_int(1, count($this->tags)));
+            $postTags = (array) array_rand($this->tags, random_int(1, count($this->tags)));
             foreach ($postTags as $tagId) {
                 $tag = $this->tags[$tagId];
                 $post->addTag($tag);

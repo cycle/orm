@@ -18,16 +18,15 @@ use Cycle\ORM\Select;
  */
 final class RepositoryProvider implements RepositoryProviderInterface
 {
-    /** @var array<non-empty-string, RepositoryInterface> */
+    /** @var array<non-empty-string, RepositoryInterface<object>> */
     private array $repositories = [];
 
     public function __construct(
         private ?ORMInterface $orm,
         private SourceProviderInterface $sourceProvider,
         private SchemaInterface $schema,
-        private FactoryInterface $factory
-    ) {
-    }
+        private FactoryInterface $factory,
+    ) {}
 
     public function getRepository(string $entity): RepositoryInterface
     {

@@ -8,11 +8,27 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Functional\Driver\Common\Mapper\BaseMapperTest;
-use ReflectionClass;
 
 class EntityWithRelationCreationTest extends BaseMapperTest
 {
     public const DRIVER = 'sqlite';
+
+    public function testProxyEntityRelationPropertiesShouldBeUnsetAfterCreation(): void
+    {
+        $mapper = $this->orm->getMapper(EntityWithRelationCreationUser::class);
+
+        $emptyObject = $mapper->init([]);
+
+        $refl = new \ReflectionClass(EntityWithRelationCreationAbstractUser::class);
+
+        $profileProperty = $refl->getProperty('profile');
+        $profileProperty->setAccessible(true);
+
+        $this->assertFalse($profileProperty->isInitialized($emptyObject));
+        $this->assertEquals(123, $emptyObject->id);
+        $this->assertEquals('test', $emptyObject->getUsername());
+        $this->assertEquals('test@site.com', $emptyObject->getEmail());
+    }
 
     public function setUp(): void
     {
@@ -41,26 +57,9 @@ class EntityWithRelationCreationTest extends BaseMapperTest
                             ],
                         ],
                     ],
-                ]
-            )
+                ],
+            ),
         );
-    }
-
-    public function testProxyEntityRelationPropertiesShouldBeUnsetAfterCreation(): void
-    {
-        $mapper = $this->orm->getMapper(EntityWithRelationCreationUser::class);
-
-        $emptyObject = $mapper->init([]);
-
-        $refl = new ReflectionClass(EntityWithRelationCreationAbstractUser::class);
-
-        $profileProperty = $refl->getProperty('profile');
-        $profileProperty->setAccessible(true);
-
-        $this->assertFalse($profileProperty->isInitialized($emptyObject));
-        $this->assertEquals(123, $emptyObject->id);
-        $this->assertEquals('test', $emptyObject->getUsername());
-        $this->assertEquals('test@site.com', $emptyObject->getEmail());
     }
 }
 

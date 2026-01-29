@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
-use Closure;
 use Cycle\ORM\EntityProxyInterface;
 use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Reference\ReferenceInterface;
@@ -43,7 +42,7 @@ class ClosureHydrator
                 if ($e::class === \TypeError::class) {
                     throw new MapperException(
                         "Can't hydrate an entity because property and value types are incompatible.",
-                        previous: $e
+                        previous: $e,
                     );
                 }
             }
@@ -62,9 +61,9 @@ class ClosureHydrator
                 continue;
             }
 
-            Closure::bind(static function (object $object, array $props, array &$data): void {
+            \Closure::bind(static function (object $object, array $props, array &$data): void {
                 foreach ($props as $property) {
-                    if (!array_key_exists($property, $data)) {
+                    if (!\array_key_exists($property, $data)) {
                         continue;
                     }
 
@@ -76,7 +75,7 @@ class ClosureHydrator
                         if ($e::class === \TypeError::class) {
                             throw new MapperException(
                                 "Can't hydrate an entity because property and value types are incompatible.",
-                                previous: $e
+                                previous: $e,
                             );
                         }
                     }
@@ -138,7 +137,7 @@ class ClosureHydrator
                 continue;
             }
 
-            Closure::bind($setter, null, $class)($object, $props, $data);
+            \Closure::bind($setter, null, $class)($object, $props, $data);
         }
     }
 }

@@ -16,16 +16,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testSelect(): void
     {
         /** @var User $user */
@@ -42,6 +32,16 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
         $this->assertNull($user->billing);
         $this->assertSame(200, $user->otherEmbedded->propertyInt);
+    }
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

@@ -17,6 +17,44 @@ abstract class SelectorTest extends BaseTest
 {
     use TableTrait;
 
+    public function testStableStatement(): void
+    {
+        $s = new Select($this->orm, User::class);
+        $s->load('comments', ['method' => JoinableLoader::INLOAD]);
+
+        $s2 = new Select($this->orm, User::class);
+        $s2->load('comments', ['method' => JoinableLoader::INLOAD]);
+
+        $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());
+    }
+
+    public function testSelectCustomSQL(): void
+    {
+        $s = new Select($this->orm, User::class);
+        $s->with('comments', ['method' => JoinableLoader::INLOAD]);
+
+        $query = $s->buildQuery()->columns(
+            'user.id',
+            'SUM(user.balance) as balance',
+            'COUNT(user_comments.id) as count_comments',
+        )->groupBy('user.id')->orderBy('user.id');
+
+        $result = $query->fetchAll();
+
+        $this->assertEquals([
+            [
+                'id' => 1,
+                'balance' => 400.0,
+                'count_comments' => 4,
+            ],
+            [
+                'id' => 2,
+                'balance' => 600.0,
+                'count_comments' => 3,
+            ],
+        ], $result);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -32,7 +70,7 @@ abstract class SelectorTest extends BaseTest
             [
                 ['hello@world.com', 100],
                 ['another@world.com', 200],
-            ]
+            ],
         );
 
         $this->makeTable('comment', [
@@ -52,7 +90,7 @@ abstract class SelectorTest extends BaseTest
                 [2, 1, 'msg 2.1'],
                 [2, 2, 'msg 2.2'],
                 [2, 3, 'msg 2.3'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(new Schema([
@@ -87,43 +125,5 @@ abstract class SelectorTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
-    }
-
-    public function testStableStatement(): void
-    {
-        $s = new Select($this->orm, User::class);
-        $s->load('comments', ['method' => JoinableLoader::INLOAD]);
-
-        $s2 = new Select($this->orm, User::class);
-        $s2->load('comments', ['method' => JoinableLoader::INLOAD]);
-
-        $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());
-    }
-
-    public function testSelectCustomSQL(): void
-    {
-        $s = new Select($this->orm, User::class);
-        $s->with('comments', ['method' => JoinableLoader::INLOAD]);
-
-        $query = $s->buildQuery()->columns(
-            'user.id',
-            'SUM(user.balance) as balance',
-            'COUNT(user_comments.id) as count_comments'
-        )->groupBy('user.id')->orderBy('user.id');
-
-        $result = $query->fetchAll();
-
-        $this->assertEquals([
-            [
-                'id' => 1,
-                'balance' => 400.0,
-                'count_comments' => 4,
-            ],
-            [
-                'id' => 2,
-                'balance' => 600.0,
-                'count_comments' => 3,
-            ],
-        ], $result);
     }
 }

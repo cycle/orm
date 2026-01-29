@@ -16,31 +16,6 @@ abstract class OptimisticLockTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('post', [
-            'id' => 'primary',
-            'title' => 'string',
-            'content' => 'string',
-            'lock' => 'string',
-        ]);
-
-        $this->orm = $this->withSchema(new Schema([
-            Post::class => [
-                SchemaInterface::ROLE => 'post',
-                SchemaInterface::MAPPER => OptimisticLockMapper::class,
-                SchemaInterface::DATABASE => 'default',
-                SchemaInterface::TABLE => 'post',
-                SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', 'title', 'content', 'lock'],
-                SchemaInterface::SCHEMA => [],
-                SchemaInterface::RELATIONS => [],
-            ],
-        ]));
-    }
-
     /**
      * Check the mapper works fine in a normal create and update cases
      */
@@ -119,5 +94,30 @@ abstract class OptimisticLockTest extends BaseTest
         } finally {
             $this->orm->getHeap()->clean();
         }
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('post', [
+            'id' => 'primary',
+            'title' => 'string',
+            'content' => 'string',
+            'lock' => 'string',
+        ]);
+
+        $this->orm = $this->withSchema(new Schema([
+            Post::class => [
+                SchemaInterface::ROLE => 'post',
+                SchemaInterface::MAPPER => OptimisticLockMapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'post',
+                SchemaInterface::PRIMARY_KEY => 'id',
+                SchemaInterface::COLUMNS => ['id', 'title', 'content', 'lock'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ]));
     }
 }

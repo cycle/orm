@@ -82,7 +82,7 @@ abstract class RenamedPKTest extends BaseTest
             [
                 'identity_id' => 'bigInteger',
                 'identity_key' => 'integer,nullable',
-            ]
+            ],
         );
     }
 
@@ -93,7 +93,7 @@ abstract class RenamedPKTest extends BaseTest
             [
                 'identity_id' => 'primary',
                 'identity_key' => 'integer,nullable',
-            ]
+            ],
         );
     }
 

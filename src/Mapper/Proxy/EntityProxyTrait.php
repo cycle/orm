@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy;
 
-use Closure;
 use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\RelationMap;
-use RuntimeException;
 
 /**
  * @internal
@@ -23,7 +21,7 @@ trait EntityProxyTrait
     {
         $relation = $this->__cycle_orm_rel_map->getRelations()[$name] ?? null;
         if ($relation === null) {
-            return method_exists(parent::class, '__get')
+            return \method_exists(parent::class, '__get')
                 ? parent::__get($name)
                 : $this->$name;
         }
@@ -36,7 +34,7 @@ trait EntityProxyTrait
             return $value;
         }
 
-        throw new RuntimeException(sprintf('Property %s.%s is not initialized.', get_parent_class(static::class), $name));
+        throw new \RuntimeException(\sprintf('Property %s.%s is not initialized.', \get_parent_class(static::class), $name));
     }
 
     public function __unset(string $name): void
@@ -46,7 +44,7 @@ trait EntityProxyTrait
             if ($propertyClass === PropertyMap::PUBLIC_CLASS) {
                 unset($this->$name);
             } else {
-                Closure::bind(static function (object $object, string $property): void {
+                \Closure::bind(static function (object $object, string $property): void {
                     unset($object->{$property});
                 }, null, $propertyClass)($this, $name);
             }
@@ -58,10 +56,16 @@ trait EntityProxyTrait
 
     public function __set(string $name, $value): void
     {
-        if (!array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
-            if (method_exists(parent::class, '__set')) {
-                parent::__set($name, $value);
+        if (!\array_key_exists($name, $this->__cycle_orm_rel_map->getRelations())) {
+            if (!\method_exists(parent::class, '__set')) {
+                throw new \Error(\sprintf(
+                    'Cannot access non-public property %s::$%s',
+                    \get_parent_class(static::class),
+                    $name,
+                ));
             }
+
+            parent::__set($name, $value);
             return;
         }
 
@@ -75,7 +79,7 @@ trait EntityProxyTrait
         if ($propertyClass === PropertyMap::PUBLIC_CLASS) {
             $this->$name = $value;
         } else {
-            Closure::bind(static function (object $object, string $property, $value): void {
+            \Closure::bind(static function (object $object, string $property, $value): void {
                 $object->{$property} = $value;
             }, null, $propertyClass)($this, $name, $value);
         }
@@ -83,7 +87,7 @@ trait EntityProxyTrait
 
     public function __debugInfo(): array
     {
-        $result = method_exists(parent::class, '__debugInfo') ? parent::__debugInfo() : (array)$this;
+        $result = \method_exists(parent::class, '__debugInfo') ? parent::__debugInfo() : (array) $this;
         unset($result['__cycle_orm_rel_map'], $result['__cycle_orm_rel_data'], $result['__cycle_orm_relation_props']);
         return $result;
     }

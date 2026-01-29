@@ -26,7 +26,7 @@ abstract class JtiBaseTest extends BaseTest
             $this->dbal,
             RelationConfig::getDefault(),
             null,
-            new ArrayCollectionFactory()
+            new ArrayCollectionFactory(),
         );
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()))->withFactory($factory);
     }

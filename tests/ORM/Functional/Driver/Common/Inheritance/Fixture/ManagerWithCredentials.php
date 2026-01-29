@@ -9,7 +9,6 @@ use Cycle\ORM\Tests\Fixtures\UserCredentials;
 class ManagerWithCredentials extends Employee
 {
     public ?int $role_id = null;
-
     public ?int $level = null;
     public string $rank = 'none';
     public ?UserCredentials $credentials = null;

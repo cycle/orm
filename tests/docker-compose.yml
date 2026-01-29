@@ -1,12 +1,10 @@
-version: "3"
-
 services:
   cycle-sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     ports:
       - "11433:1433"
     environment:
-      SA_PASSWORD: "SSpaSS__1"
+      SA_PASSWORD: "YourStrong!Passw0rd"
       ACCEPT_EULA: "Y"
 
   cycle-mysql_latest:
@@ -20,7 +18,7 @@ services:
       - "13306:3306"
     environment:
       MYSQL_DATABASE: "spiral"
-      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_ROOT_PASSWORD: "YourStrong!Passw0rd"
       MYSQL_ROOT_HOST: "%"
 
   cycle-postgres:
@@ -31,4 +29,4 @@ services:
     environment:
       POSTGRES_DB: "spiral"
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_PASSWORD: "YourStrong!Passw0rd"

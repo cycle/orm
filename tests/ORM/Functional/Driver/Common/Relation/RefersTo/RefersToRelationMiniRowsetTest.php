@@ -19,54 +19,6 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'comment_id' => 'integer,nullable',
-        ]);
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-        ]);
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'comment_id'],
-                Schema::TYPECAST => ['id' => 'int', 'comment_id' => 'int'],
-                Schema::RELATIONS => [
-                    'lastComment' => [
-                        Relation::TYPE => Relation::REFERS_TO,
-                        Relation::TARGET => Comment::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::NULLABLE => true,
-                            Relation::INNER_KEY => 'comment_id',
-                            Relation::OUTER_KEY => 'id',
-                        ],
-                    ],
-                ],
-            ],
-            Comment::class => [
-                Schema::ROLE => 'comment',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'comment',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id'],
-                Schema::TYPECAST => ['id' => 'int'],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testCreateEmptyComment(): void
     {
         $c = new Comment();
@@ -140,5 +92,53 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
         $this->assertSame(['id' => 1, 'comment_id' => 1], $userData[0]);
         $this->assertSame(['id' => 1], $commentData[0]);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'comment_id' => 'integer,nullable',
+        ]);
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+        ]);
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'comment_id'],
+                Schema::TYPECAST => ['id' => 'int', 'comment_id' => 'int'],
+                Schema::RELATIONS => [
+                    'lastComment' => [
+                        Relation::TYPE => Relation::REFERS_TO,
+                        Relation::TARGET => Comment::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
+                            Relation::INNER_KEY => 'comment_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                ],
+            ],
+            Comment::class => [
+                Schema::ROLE => 'comment',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'comment',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id'],
+                Schema::TYPECAST => ['id' => 'int'],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

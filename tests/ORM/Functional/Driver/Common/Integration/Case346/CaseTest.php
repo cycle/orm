@@ -14,16 +14,6 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testSelect(): void
     {
         /** @var Entity\Post $post */
@@ -40,6 +30,16 @@ abstract class CaseTest extends BaseTest
         $this->assertSame(2, $post->user_id);
         $this->assertSame(2, $post->user->id);
         $this->orm->getHeap()->clean();
+    }
+
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
     }
 
     private function makeTables(): void

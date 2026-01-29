@@ -57,66 +57,10 @@ abstract class SingleTableTest extends SimpleCasesTest
     ];
     protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
     protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+
     // todo: remove when STI will support classless entities and Schema::CHILDREN's roles
     protected const PROGRAMATOR_ROLE = Programator::class;
     protected const ENGINEER_ROLE = Engineer::class;
-
-    public function setUp(): void
-    {
-        JtiBaseTest::setUp();
-
-        $this->makeTable('employee_table', [
-            'employee_id_column' => 'primary',
-            'name_column' => 'string',
-            'age' => 'integer,nullable',
-        ]);
-
-        $this->makeTable('role_table', [
-            'role_id_column' => 'integer,nullable',
-            'subrole_id_column' => 'integer,nullable',
-            'discriminator' => 'string,nullable',
-            'level' => 'integer,nullable',
-            'rank' => 'string,nullable',
-            'language' => 'string,nullable',
-        ], fk: [
-            'role_id_column' => ['table' => 'employee_table', 'column' => 'employee_id_column'],
-        ]);
-        $this->makeIndex('role_table', ['role_id_column', 'subrole_id_column'], true);
-        $this->makeFK(
-            'role_table',
-            ['subrole_id_column', 'role_id_column'],
-            'role_table',
-            ['role_id_column', 'subrole_id_column'],
-            'NO ACTION',
-            'NO ACTION'
-        );
-
-        $this->getDatabase()->table('employee_table')->insertMultiple(
-            ['name_column', 'age'],
-            \array_map(static fn (array $value): array => \array_diff_key($value, ['employee_id' => 1]), [
-                self::EMPLOYEE_1,
-                self::EMPLOYEE_2,
-                self::EMPLOYEE_3,
-                self::EMPLOYEE_4,
-            ])
-        );
-        $this->getDatabase()->table('role_table')->insertMultiple(
-            ['discriminator', 'role_id_column', 'level', 'rank'],
-            [
-                self::MANAGER_1,
-                self::ENGINEER_2,
-                self::MANAGER_3,
-                self::ENGINEER_4,
-            ]
-        );
-        $this->getDatabase()->table('role_table')->insertMultiple(
-            ['subrole_id_column', 'language'],
-            [
-                self::PROGRAMATOR_2,
-                self::PROGRAMATOR_4,
-            ]
-        );
-    }
 
     public function testFetchAllChildren(): void
     {
@@ -232,6 +176,63 @@ abstract class SingleTableTest extends SimpleCasesTest
         $this->assertSame('Merlin', $programator->name);
         $this->assertSame(50, $programator->level);
         $this->assertSame('VanillaJS', $programator->language);
+    }
+
+    public function setUp(): void
+    {
+        JtiBaseTest::setUp();
+
+        $this->makeTable('employee_table', [
+            'employee_id_column' => 'primary',
+            'name_column' => 'string',
+            'age' => 'integer,nullable',
+        ]);
+
+        $this->makeTable('role_table', [
+            'role_id_column' => 'integer,nullable',
+            'subrole_id_column' => 'integer,nullable',
+            'discriminator' => 'string,nullable',
+            'level' => 'integer,nullable',
+            'rank' => 'string,nullable',
+            'language' => 'string,nullable',
+        ], fk: [
+            'role_id_column' => ['table' => 'employee_table', 'column' => 'employee_id_column'],
+        ]);
+        $this->makeIndex('role_table', ['role_id_column', 'subrole_id_column'], true);
+        $this->makeFK(
+            'role_table',
+            ['subrole_id_column', 'role_id_column'],
+            'role_table',
+            ['role_id_column', 'subrole_id_column'],
+            'NO ACTION',
+            'NO ACTION',
+        );
+
+        $this->getDatabase()->table('employee_table')->insertMultiple(
+            ['name_column', 'age'],
+            \array_map(static fn(array $value): array => \array_diff_key($value, ['employee_id' => 1]), [
+                self::EMPLOYEE_1,
+                self::EMPLOYEE_2,
+                self::EMPLOYEE_3,
+                self::EMPLOYEE_4,
+            ]),
+        );
+        $this->getDatabase()->table('role_table')->insertMultiple(
+            ['discriminator', 'role_id_column', 'level', 'rank'],
+            [
+                self::MANAGER_1,
+                self::ENGINEER_2,
+                self::MANAGER_3,
+                self::ENGINEER_4,
+            ],
+        );
+        $this->getDatabase()->table('role_table')->insertMultiple(
+            ['subrole_id_column', 'language'],
+            [
+                self::PROGRAMATOR_2,
+                self::PROGRAMATOR_4,
+            ],
+        );
     }
 
     protected function getSchemaArray(): array

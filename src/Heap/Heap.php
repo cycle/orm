@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use IteratorAggregate;
-use SplObjectStorage;
-use UnexpectedValueException;
-
-final class Heap implements HeapInterface, IteratorAggregate
+final class Heap implements HeapInterface, \IteratorAggregate
 {
     private const INDEX_KEY_SEPARATOR = ':';
 
-    private ?SplObjectStorage $storage = null;
-
+    private ?\SplObjectStorage $storage = null;
     private array $paths = [];
 
     public function __construct()
@@ -21,17 +16,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         $this->clean();
     }
 
-    public function __destruct()
-    {
-        $this->clean();
-    }
-
-    public function __clone()
-    {
-        $this->storage = clone $this->storage;
-    }
-
-    public function getIterator(): SplObjectStorage
+    public function getIterator(): \SplObjectStorage
     {
         return $this->storage;
     }
@@ -45,14 +30,14 @@ final class Heap implements HeapInterface, IteratorAggregate
     {
         try {
             return $this->storage->offsetGet($entity);
-        } catch (UnexpectedValueException) {
+        } catch (\UnexpectedValueException) {
             return null;
         }
     }
 
     public function find(string $role, array $scope): ?object
     {
-        if (!array_key_exists($role, $this->paths) || $this->paths[$role] === []) {
+        if (!\array_key_exists($role, $this->paths) || $this->paths[$role] === []) {
             return null;
         }
 
@@ -61,26 +46,26 @@ final class Heap implements HeapInterface, IteratorAggregate
             case 0:
                 return null;
             case 1:
-                $indexName = key($scope);
+                $indexName = \key($scope);
                 break;
             default:
                 $isComposite = true;
-                $indexName = implode(self::INDEX_KEY_SEPARATOR, array_keys($scope));
+                $indexName = \implode(self::INDEX_KEY_SEPARATOR, \array_keys($scope));
         }
 
         if (!$isComposite) {
-            $value = (string) current($scope);
+            $value = (string) \current($scope);
             return $this->paths[$role][$indexName][$value] ?? null;
         }
         $result = null;
         // Find index
-        if (!array_key_exists($indexName, $this->paths[$role])) {
-            $scopeKeys = array_keys($scope);
+        if (!\array_key_exists($indexName, $this->paths[$role])) {
+            $scopeKeys = \array_keys($scope);
             $scopeCount = \count($scopeKeys);
             foreach ($this->paths[$role] as $indexName => $values) {
-                $indexKeys = explode(self::INDEX_KEY_SEPARATOR, $indexName);
+                $indexKeys = \explode(self::INDEX_KEY_SEPARATOR, $indexName);
                 $keysCount = \count($indexKeys);
-                if ($keysCount <= $scopeCount && \count(array_intersect($indexKeys, $scopeKeys)) === $keysCount) {
+                if ($keysCount <= $scopeCount && \count(\array_intersect($indexKeys, $scopeKeys)) === $keysCount) {
                     $result = &$this->paths[$role][$indexName];
                     break;
                 }
@@ -92,7 +77,7 @@ final class Heap implements HeapInterface, IteratorAggregate
         } else {
             $result = &$this->paths[$role][$indexName];
         }
-        $indexKeys ??= explode(self::INDEX_KEY_SEPARATOR, $indexName);
+        $indexKeys ??= \explode(self::INDEX_KEY_SEPARATOR, $indexName);
         foreach ($indexKeys as $key) {
             $value = (string) $scope[$key];
             if (!isset($result[$value])) {
@@ -125,11 +110,11 @@ final class Heap implements HeapInterface, IteratorAggregate
                     case 0:
                         continue 2;
                     case 1:
-                        $indexName = current($key);
+                        $indexName = \current($key);
                         break;
                     default:
                         $isComposite = true;
-                        $indexName = implode(self::INDEX_KEY_SEPARATOR, $key);
+                        $indexName = \implode(self::INDEX_KEY_SEPARATOR, $key);
                 }
             } else {
                 $indexName = $key;
@@ -143,7 +128,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                     if (!isset($data[$k])) {
                         continue 2;
                     }
-                    $value = (string)$data[$k];
+                    $value = (string) $data[$k];
                     $rolePath = &$rolePath[$value];
                 }
                 $rolePath = $entity;
@@ -151,7 +136,7 @@ final class Heap implements HeapInterface, IteratorAggregate
                 if (!isset($data[$indexName])) {
                     continue;
                 }
-                $value = (string)$data[$indexName];
+                $value = (string) $data[$indexName];
                 $rolePath[$value] = $entity;
             }
         }
@@ -178,7 +163,17 @@ final class Heap implements HeapInterface, IteratorAggregate
     public function clean(): void
     {
         $this->paths = [];
-        $this->storage = new SplObjectStorage();
+        $this->storage = new \SplObjectStorage();
+    }
+
+    public function __clone()
+    {
+        $this->storage = clone $this->storage;
+    }
+
+    public function __destruct()
+    {
+        $this->clean();
     }
 
     private function eraseIndexes(string $role, array $data, object $entity): void
@@ -190,13 +185,13 @@ final class Heap implements HeapInterface, IteratorAggregate
             if (empty($values)) {
                 continue;
             }
-            $keys = explode(self::INDEX_KEY_SEPARATOR, $index);
+            $keys = \explode(self::INDEX_KEY_SEPARATOR, $index);
             $j = \count($keys) - 1;
             $next = &$values;
             $removeFrom = &$next;
             // Walk index
             foreach ($keys as $i => $key) {
-                $value = isset($data[$key]) ? (string)$data[$key] : null;
+                $value = isset($data[$key]) ? (string) $data[$key] : null;
                 if ($value === null || !isset($next[$value])) {
                     continue 2;
                 }

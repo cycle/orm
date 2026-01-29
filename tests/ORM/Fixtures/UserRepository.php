@@ -9,11 +9,6 @@ use Cycle\ORM\Select\Repository;
 
 class UserRepository extends Repository
 {
-    /**
-     * @param string $email
-     *
-     * @return User|null
-     */
     public function findByEmail(string $email): ?User
     {
         return $this->findOne(compact('email'));

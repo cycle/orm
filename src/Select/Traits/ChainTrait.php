@@ -25,7 +25,7 @@ trait ChainTrait
      */
     protected function isChain(string $relation): bool
     {
-        return str_contains($relation, '.');
+        return \str_contains($relation, '.');
     }
 
     /**
@@ -39,18 +39,18 @@ trait ChainTrait
      */
     protected function loadChain(string $chain, array $options, bool $join, bool $load): LoaderInterface
     {
-        $position = strpos($chain, '.');
+        $position = \strpos($chain, '.');
 
         // chain of relations provided (relation.nestedRelation)
-        $child = $this->loadRelation(substr($chain, 0, $position), [], $join, $load);
+        $child = $this->loadRelation(\substr($chain, 0, $position), [], $join, $load);
 
         if (!$child instanceof AbstractLoader) {
             throw new LoaderException(
-                sprintf('Loader `%s` does not support chain relation loading.', $child::class)
+                \sprintf('Loader `%s` does not support chain relation loading.', $child::class),
             );
         }
 
         // load nested relation through chain (chainOptions prior to user options)
-        return $child->loadRelation(substr($chain, $position + 1), $options, $join, $load);
+        return $child->loadRelation(\substr($chain, $position + 1), $options, $join, $load);
     }
 }

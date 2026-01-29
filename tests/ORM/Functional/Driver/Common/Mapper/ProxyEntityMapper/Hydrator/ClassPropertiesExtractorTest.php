@@ -11,13 +11,6 @@ class ClassPropertiesExtractorTest extends TestCase
 {
     private ClassPropertiesExtractor $extractor;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->extractor = new ClassPropertiesExtractor();
-    }
-
     public function testPropertyFromBaseClassShouldBeExtracted(): void
     {
         $class = User::class;
@@ -126,6 +119,13 @@ class ClassPropertiesExtractorTest extends TestCase
                 'tags' => 'tags',
             ],
         ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->extractor = new ClassPropertiesExtractor();
     }
 }
 

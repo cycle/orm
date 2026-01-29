@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<meta-storm xmlns="meta-storm">
+    <definitions>
+        <classConstructor class="\Cycle\ORM\Select" argument="1">
+            <collection name="cycle/orm:entity-class" argument="0" />
+            <collection name="cycle/orm:entity-role" argument="0" />
+        </classConstructor>
+    </definitions>
+</meta-storm>

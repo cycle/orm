@@ -16,9 +16,9 @@ class UuidPrimaryKey
         $this->id = $id;
     }
 
-    public function __toString(): string
+    public static function typecast($value, DatabaseInterface $database)
     {
-        return $this->id;
+        return new self($value);
     }
 
     public function getId(): string
@@ -26,8 +26,8 @@ class UuidPrimaryKey
         return $this->id;
     }
 
-    public static function typecast($value, DatabaseInterface $database)
+    public function __toString(): string
     {
-        return new self($value);
+        return $this->id;
     }
 }

@@ -29,11 +29,6 @@ class MorphedHasOne extends HasOne
         $this->morphKey = $schema[Relation::MORPH_KEY];
     }
 
-    protected function getReferenceScope(Node $node): ?array
-    {
-        return parent::getReferenceScope($node) + [$this->morphKey => $node->getRole()];
-    }
-
     public function queue(Pool $pool, Tuple $tuple): void
     {
         parent::queue($pool, $tuple);
@@ -53,6 +48,11 @@ class MorphedHasOne extends HasOne
         if (($data[$this->morphKey] ?? null) !== $role) {
             $rTuple->state->register($this->morphKey, $role);
         }
+    }
+
+    protected function getReferenceScope(Node $node): ?array
+    {
+        return parent::getReferenceScope($node) + [$this->morphKey => $node->getRole()];
     }
 
     protected function getTargetRelationName(): string

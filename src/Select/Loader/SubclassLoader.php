@@ -41,7 +41,7 @@ class SubclassLoader extends JoinableLoader
         SourceProviderInterface $sourceProvider,
         FactoryInterface $factory,
         string $role,
-        string $target
+        string $target,
     ) {
         $schemaArray = [
             Relation::INNER_KEY => $ormSchema->define($target, SchemaInterface::PARENT_KEY)
@@ -74,9 +74,9 @@ class SubclassLoader extends JoinableLoader
         return new SubclassMergeNode(
             $this->target,
             $this->columnNames(),
-            (array)$this->define(SchemaInterface::PRIMARY_KEY),
-            (array)$this->schema[Relation::OUTER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            (array) $this->define(SchemaInterface::PRIMARY_KEY),
+            (array) $this->schema[Relation::OUTER_KEY],
+            (array) $this->schema[Relation::INNER_KEY],
         );
     }
 

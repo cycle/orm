@@ -21,70 +21,6 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('post', [
-            'id' => 'primary',
-            'user_id' => 'integer,nullable',
-            'title' => 'string',
-            'content' => 'string',
-        ]);
-
-        $this->getDatabase()->table('post')->insertMultiple(
-            ['title', 'user_id', 'content'],
-            [
-                ['post 1', 1, 'post 1 body'],
-                ['post 2', 1, 'post 2 body'],
-                ['post 3', 2, 'post 3 body'],
-                ['post 4', 2, 'post 4 body'],
-            ]
-        );
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'parent_id' => 'integer',
-            'parent_type' => 'string',
-            'level' => 'int',
-            'message' => 'string',
-        ]);
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['parent_id', 'parent_type', 'level', 'message',],
-            [
-                [1, 'user', 1, 'msg 1'],
-                [1, 'user', 2, 'msg 2'],
-                [1, 'user', 3, 'msg 3'],
-                [1, 'user', 4, 'msg 4'],
-                [2, 'user', 1, 'msg 2.1'],
-                [2, 'user', 2, 'msg 2.2'],
-                [2, 'user', 3, 'msg 2.3'],
-                [1, 'post', 1, 'p.msg 1'],
-                [1, 'post', 2, 'p.msg 2'],
-                [1, 'post', 3, 'p.msg 3'],
-                [1, 'post', 4, 'p.msg 4'],
-                [2, 'post', 1, 'p.msg 2.1'],
-                [2, 'post', 2, 'p.msg 2.2'],
-                [2, 'post', 3, 'p.msg 2.3'],
-            ]
-        );
-    }
-
     public function testOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -572,6 +508,70 @@ abstract class MorphedHasManyScopeTest extends BaseTest
         (new Select($this->orm, User::class))->load('comments', [
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->makeTable('post', [
+            'id' => 'primary',
+            'user_id' => 'integer,nullable',
+            'title' => 'string',
+            'content' => 'string',
+        ]);
+
+        $this->getDatabase()->table('post')->insertMultiple(
+            ['title', 'user_id', 'content'],
+            [
+                ['post 1', 1, 'post 1 body'],
+                ['post 2', 1, 'post 2 body'],
+                ['post 3', 2, 'post 3 body'],
+                ['post 4', 2, 'post 4 body'],
+            ],
+        );
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'parent_id' => 'integer',
+            'parent_type' => 'string',
+            'level' => 'int',
+            'message' => 'string',
+        ]);
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['parent_id', 'parent_type', 'level', 'message',],
+            [
+                [1, 'user', 1, 'msg 1'],
+                [1, 'user', 2, 'msg 2'],
+                [1, 'user', 3, 'msg 3'],
+                [1, 'user', 4, 'msg 4'],
+                [2, 'user', 1, 'msg 2.1'],
+                [2, 'user', 2, 'msg 2.2'],
+                [2, 'user', 3, 'msg 2.3'],
+                [1, 'post', 1, 'p.msg 1'],
+                [1, 'post', 2, 'p.msg 2'],
+                [1, 'post', 3, 'p.msg 3'],
+                [1, 'post', 4, 'p.msg 4'],
+                [2, 'post', 1, 'p.msg 2.1'],
+                [2, 'post', 2, 'p.msg 2.2'],
+                [2, 'post', 3, 'p.msg 2.3'],
+            ],
+        );
     }
 
     protected function withCommentsSchema(array $relationSchema)

@@ -17,38 +17,6 @@ abstract class ColumnAliasesTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id_int' => 'primary',
-            'email_str' => 'string',
-            'balance_float' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email_str', 'balance_float'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testStore(): void
     {
         $e = new User();
@@ -163,5 +131,37 @@ abstract class ColumnAliasesTest extends BaseTest
         $this->assertEquals(2, $result[1]->id);
         $this->assertEquals('another@world.com', $result[1]->email);
         $this->assertEquals(200.0, $result[1]->balance);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id_int' => 'primary',
+            'email_str' => 'string',
+            'balance_float' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email_str', 'balance_float'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id' => 'id_int', 'email' => 'email_str', 'balance' => 'balance_float'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

@@ -92,171 +92,6 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
     protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
     protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
 
-    public function setUp(): void
-    {
-        JtiBaseTest::setUp();
-
-        $this->makeTable('book_table', [
-            'id' => 'primary',
-            'title' => 'string',
-        ]);
-        $this->makeTable('ebook_table', [
-            'id' => 'integer',
-            'block_id' => 'integer, nullable',
-            'url' => 'string',
-        ], fk: [
-            'id' => ['table' => 'book_table', 'column' => 'id'],
-        ], pk: ['id']);
-        $this->makeIndex('ebook_table', ['block_id'], true);
-
-        $this->makeTable('human_table', [
-            'id' => 'primary',
-            'birthday' => 'date,nullable',
-        ], pk: ['id']);
-        $this->makeTable('employee_table', [
-            'id' => 'integer',
-            'name' => 'string',
-            'book_id' => 'integer,nullable',
-        ], fk: [
-            'id' => ['table' => 'human_table', 'column' => 'id'],
-            'book_id' => ['table' => 'book_table', 'column' => 'id'],
-        ], pk: ['id']);
-
-        $this->makeTable('engineer_table', [
-            'id' => 'integer',
-            'level' => 'integer',
-            'tech_book_id' => 'integer,nullable',
-        ], fk: [
-            'id' => ['table' => 'employee_table', 'column' => 'id'],
-        ], pk: ['id']);
-
-        $this->makeTable('programator_table', [
-            'id' => 'integer',
-            'language' => 'string',
-        ], fk: [
-            'id' => ['table' => 'engineer_table', 'column' => 'id'],
-        ], pk: ['id']);
-        $this->makeTable('manager_table', [
-            'id' => 'integer',
-            'rank' => 'string',
-        ], fk: [
-            'id' => ['table' => 'employee_table', 'column' => 'id'],
-        ], pk: ['id']);
-        $this->makeTable('page_table', [
-            'id' => 'primary',
-            'block_id' => 'integer,nullable',
-            'owner_id' => 'integer,nullable',
-            'title' => 'string',
-            'content' => 'string',
-        ], fk: [
-            'block_id' => ['table' => 'ebook_table', 'column' => 'block_id', 'onDelete' => 'SET NULL'],
-        ]);
-
-        $this->makeTable('html_page_table', [
-            'id' => 'integer',
-        ], fk: [
-            'id' => ['table' => 'page_table', 'column' => 'id'],
-        ], pk: ['id']);
-        $this->makeTable('markdown_page_table', [
-            'id' => 'integer',
-        ], fk: [
-            'id' => ['table' => 'page_table', 'column' => 'id'],
-        ], pk: ['id']);
-        $this->makeTable('tool_table', [
-            'id' => 'primary',
-            'engineer_id' => 'integer',
-            'title' => 'string',
-        ]);
-
-        $this->getDatabase()->table('book_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::BOOK_1), ['id'])),
-            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
-                self::BOOK_1,
-                self::BOOK_2,
-                self::BOOK_3,
-                self::BOOK_4,
-            ])
-        );
-        $this->getDatabase()->table('ebook_table')->insertMultiple(
-            array_keys(static::EBOOK_3),
-            [
-                self::EBOOK_3,
-                self::EBOOK_4,
-            ]
-        );
-        $this->getDatabase()->table('human_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::HUMAN_1), ['id'])),
-            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
-                self::HUMAN_1,
-                self::HUMAN_2,
-                self::HUMAN_3,
-                self::HUMAN_4,
-            ])
-        );
-        $this->getDatabase()->table('employee_table')->insertMultiple(
-            array_keys(static::EMPLOYEE_1),
-            [
-                self::EMPLOYEE_1,
-                self::EMPLOYEE_2,
-                self::EMPLOYEE_3,
-                self::EMPLOYEE_4,
-            ]
-        );
-        $this->getDatabase()->table('engineer_table')->insertMultiple(
-            array_keys(static::ENGINEER_2),
-            [
-                self::ENGINEER_2,
-                self::ENGINEER_4,
-            ]
-        );
-        $this->getDatabase()->table('programator_table')->insertMultiple(
-            array_keys(static::PROGRAMATOR_2),
-            [
-                self::PROGRAMATOR_2,
-                self::PROGRAMATOR_4,
-            ]
-        );
-        $this->getDatabase()->table('manager_table')->insertMultiple(
-            array_keys(static::MANAGER_1),
-            [
-                self::MANAGER_1,
-                self::MANAGER_3,
-            ]
-        );
-        $this->getDatabase()->table('page_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::PAGE_1), ['id'])),
-            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
-                self::PAGE_1,
-                self::PAGE_2,
-                self::PAGE_3,
-                self::PAGE_4,
-                self::PAGE_5,
-            ])
-        );
-        $this->getDatabase()->table('html_page_table')->insertMultiple(
-            array_keys(static::HTML_PAGE_2),
-            [
-                static::HTML_PAGE_2,
-            ]
-        );
-        $this->getDatabase()->table('markdown_page_table')->insertMultiple(
-            array_keys(static::MARKDOWN_PAGE_1),
-            [
-                static::MARKDOWN_PAGE_1,
-                static::MARKDOWN_PAGE_5,
-            ]
-        );
-        $this->getDatabase()->table('tool_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::TOOL_1), ['id'])),
-            \array_map(static fn (array $value): array => \array_diff_key($value, ['id' => 1]), [
-                self::TOOL_1,
-                self::TOOL_2,
-                self::TOOL_3,
-                self::TOOL_4,
-            ])
-        );
-    }
-
     /**
      * Subclasses in relations should be loaded and initialized
      */
@@ -396,6 +231,171 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         // $this->captureWriteQueries();
         // $this->save($entity);
         // $this->assertNumWrites(0);
+    }
+
+    public function setUp(): void
+    {
+        JtiBaseTest::setUp();
+
+        $this->makeTable('book_table', [
+            'id' => 'primary',
+            'title' => 'string',
+        ]);
+        $this->makeTable('ebook_table', [
+            'id' => 'integer',
+            'block_id' => 'integer, nullable',
+            'url' => 'string',
+        ], fk: [
+            'id' => ['table' => 'book_table', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeIndex('ebook_table', ['block_id'], true);
+
+        $this->makeTable('human_table', [
+            'id' => 'primary',
+            'birthday' => 'date,nullable',
+        ], pk: ['id']);
+        $this->makeTable('employee_table', [
+            'id' => 'integer',
+            'name' => 'string',
+            'book_id' => 'integer,nullable',
+        ], fk: [
+            'id' => ['table' => 'human_table', 'column' => 'id'],
+            'book_id' => ['table' => 'book_table', 'column' => 'id'],
+        ], pk: ['id']);
+
+        $this->makeTable('engineer_table', [
+            'id' => 'integer',
+            'level' => 'integer',
+            'tech_book_id' => 'integer,nullable',
+        ], fk: [
+            'id' => ['table' => 'employee_table', 'column' => 'id'],
+        ], pk: ['id']);
+
+        $this->makeTable('programator_table', [
+            'id' => 'integer',
+            'language' => 'string',
+        ], fk: [
+            'id' => ['table' => 'engineer_table', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeTable('manager_table', [
+            'id' => 'integer',
+            'rank' => 'string',
+        ], fk: [
+            'id' => ['table' => 'employee_table', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeTable('page_table', [
+            'id' => 'primary',
+            'block_id' => 'integer,nullable',
+            'owner_id' => 'integer,nullable',
+            'title' => 'string',
+            'content' => 'string',
+        ], fk: [
+            'block_id' => ['table' => 'ebook_table', 'column' => 'block_id', 'onDelete' => 'SET NULL'],
+        ]);
+
+        $this->makeTable('html_page_table', [
+            'id' => 'integer',
+        ], fk: [
+            'id' => ['table' => 'page_table', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeTable('markdown_page_table', [
+            'id' => 'integer',
+        ], fk: [
+            'id' => ['table' => 'page_table', 'column' => 'id'],
+        ], pk: ['id']);
+        $this->makeTable('tool_table', [
+            'id' => 'primary',
+            'engineer_id' => 'integer',
+            'title' => 'string',
+        ]);
+
+        $this->getDatabase()->table('book_table')->insertMultiple(
+            \array_values(\array_diff(\array_keys(static::BOOK_1), ['id'])),
+            \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
+                self::BOOK_1,
+                self::BOOK_2,
+                self::BOOK_3,
+                self::BOOK_4,
+            ]),
+        );
+        $this->getDatabase()->table('ebook_table')->insertMultiple(
+            array_keys(static::EBOOK_3),
+            [
+                self::EBOOK_3,
+                self::EBOOK_4,
+            ],
+        );
+        $this->getDatabase()->table('human_table')->insertMultiple(
+            \array_values(\array_diff(\array_keys(static::HUMAN_1), ['id'])),
+            \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
+                self::HUMAN_1,
+                self::HUMAN_2,
+                self::HUMAN_3,
+                self::HUMAN_4,
+            ]),
+        );
+        $this->getDatabase()->table('employee_table')->insertMultiple(
+            array_keys(static::EMPLOYEE_1),
+            [
+                self::EMPLOYEE_1,
+                self::EMPLOYEE_2,
+                self::EMPLOYEE_3,
+                self::EMPLOYEE_4,
+            ],
+        );
+        $this->getDatabase()->table('engineer_table')->insertMultiple(
+            array_keys(static::ENGINEER_2),
+            [
+                self::ENGINEER_2,
+                self::ENGINEER_4,
+            ],
+        );
+        $this->getDatabase()->table('programator_table')->insertMultiple(
+            array_keys(static::PROGRAMATOR_2),
+            [
+                self::PROGRAMATOR_2,
+                self::PROGRAMATOR_4,
+            ],
+        );
+        $this->getDatabase()->table('manager_table')->insertMultiple(
+            array_keys(static::MANAGER_1),
+            [
+                self::MANAGER_1,
+                self::MANAGER_3,
+            ],
+        );
+        $this->getDatabase()->table('page_table')->insertMultiple(
+            \array_values(\array_diff(\array_keys(static::PAGE_1), ['id'])),
+            \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
+                self::PAGE_1,
+                self::PAGE_2,
+                self::PAGE_3,
+                self::PAGE_4,
+                self::PAGE_5,
+            ]),
+        );
+        $this->getDatabase()->table('html_page_table')->insertMultiple(
+            array_keys(static::HTML_PAGE_2),
+            [
+                static::HTML_PAGE_2,
+            ],
+        );
+        $this->getDatabase()->table('markdown_page_table')->insertMultiple(
+            array_keys(static::MARKDOWN_PAGE_1),
+            [
+                static::MARKDOWN_PAGE_1,
+                static::MARKDOWN_PAGE_5,
+            ],
+        );
+        $this->getDatabase()->table('tool_table')->insertMultiple(
+            \array_values(\array_diff(\array_keys(static::TOOL_1), ['id'])),
+            \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
+                self::TOOL_1,
+                self::TOOL_2,
+                self::TOOL_3,
+                self::TOOL_4,
+            ]),
+        );
     }
 
     protected function getSchemaArray(): array

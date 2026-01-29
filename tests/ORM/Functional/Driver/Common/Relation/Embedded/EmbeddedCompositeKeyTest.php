@@ -19,60 +19,22 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
 {
     use TableTrait;
 
-    protected const
-        CHILD_CONTAINER = 'child_entity';
-    protected const
-        CHILD_ROLE = 'parent_entity:' . self::CHILD_CONTAINER;
-    protected const
-        KEY_1 = ['key1' => 1, 'key2' => 1];
-    protected const
-        KEY_2 = ['key1' => 1, 'key2' => 2];
-    protected const
-        KEY_3 = ['key1' => 2, 'key2' => 1];
-    protected const
-        PARENT_1 = ['key3' => 1];
-    protected const
-        PARENT_2 = ['key3' => 2];
-    protected const
-        PARENT_3 = ['key3' => 3];
-    protected const
-        CHILD_1 = ['key3' => 'foo'];
-    protected const
-        CHILD_2 = ['key3' => 'bar'];
-    protected const
-        CHILD_3 = ['key3' => 'baz'];
-    protected const
-        ALL_LOADED = [
-            self::KEY_1 + self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1],
-            self::KEY_2 + self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2],
-            self::KEY_3 + self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3],
-        ];
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable(
-            'parent_entity',
-            [
-                'pField1' => 'bigInteger,primary',
-                'pField2' => 'bigInteger,primary',
-                'pField3' => 'integer',
-                'cField3' => 'string',
-            ]
-        );
-
-        $this->getDatabase()->table('parent_entity')->insertMultiple(
-            ['pField1', 'pField2', 'pField3', 'cField3'],
-            [
-                array_merge(self::KEY_1, array_values(self::PARENT_1), array_values(self::CHILD_1)),
-                array_merge(self::KEY_2, array_values(self::PARENT_2), array_values(self::CHILD_2)),
-                array_merge(self::KEY_3, array_values(self::PARENT_3), array_values(self::CHILD_3)),
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
+    protected const CHILD_CONTAINER = 'child_entity';
+    protected const CHILD_ROLE = 'parent_entity:' . self::CHILD_CONTAINER;
+    protected const KEY_1 = ['key1' => 1, 'key2' => 1];
+    protected const KEY_2 = ['key1' => 1, 'key2' => 2];
+    protected const KEY_3 = ['key1' => 2, 'key2' => 1];
+    protected const PARENT_1 = ['key3' => 1];
+    protected const PARENT_2 = ['key3' => 2];
+    protected const PARENT_3 = ['key3' => 3];
+    protected const CHILD_1 = ['key3' => 'foo'];
+    protected const CHILD_2 = ['key3' => 'bar'];
+    protected const CHILD_3 = ['key3' => 'baz'];
+    protected const ALL_LOADED = [
+        self::KEY_1 + self::PARENT_1 + [self::CHILD_CONTAINER => self::CHILD_1],
+        self::KEY_2 + self::PARENT_2 + [self::CHILD_CONTAINER => self::CHILD_2],
+        self::KEY_3 + self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3],
+    ];
 
     public function testFetchData(): void
     {
@@ -160,7 +122,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
             [
                 'pField1' => $u->key1,
                 'pField2' => $u->key2,
-            ]
+            ],
         )->run();
 
         $this->captureWriteQueries();
@@ -396,6 +358,32 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         $this->assertSame($u->key1, $u2->key1);
         $this->assertSame($u->key2, $u2->key2);
         $this->assertSame('user3', $u2->child_entity->key3);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable(
+            'parent_entity',
+            [
+                'pField1' => 'bigInteger,primary',
+                'pField2' => 'bigInteger,primary',
+                'pField3' => 'integer',
+                'cField3' => 'string',
+            ],
+        );
+
+        $this->getDatabase()->table('parent_entity')->insertMultiple(
+            ['pField1', 'pField2', 'pField3', 'cField3'],
+            [
+                array_merge(self::KEY_1, array_values(self::PARENT_1), array_values(self::CHILD_1)),
+                array_merge(self::KEY_2, array_values(self::PARENT_2), array_values(self::CHILD_2)),
+                array_merge(self::KEY_3, array_values(self::PARENT_3), array_values(self::CHILD_3)),
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     private function getSchemaArray(): array

@@ -11,7 +11,6 @@ class TargetGroup
 {
     private ?TargetGroupId $id = null;
     private TargetGroupName $name;
-
     private iterable $targets = [];
     private iterable $manyTargets = [];
 

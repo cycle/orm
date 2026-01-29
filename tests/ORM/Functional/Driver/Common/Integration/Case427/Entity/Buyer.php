@@ -11,6 +11,5 @@ class Buyer
     public function __construct(
         public int $id,
         public string $address,
-    ) {
-    }
+    ) {}
 }

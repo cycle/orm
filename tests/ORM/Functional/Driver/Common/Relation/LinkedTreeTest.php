@@ -20,83 +20,6 @@ abstract class LinkedTreeTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('nested', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'owner_id' => 'integer',
-            'label' => 'string',
-        ]);
-
-        $this->makeFK('nested', 'user_id', 'user', 'id');
-
-        $this->getDatabase()->table('nested')->insertMultiple(
-            ['user_id', 'owner_id', 'label'],
-            [
-                [1, 2, 'nested-label'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'user',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'email', 'balance'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [
-                    'nested' => [
-                        Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => Nested::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'user_id',
-                        ],
-                    ],
-                    'owned' => [
-                        Relation::TYPE => Relation::HAS_ONE,
-                        Relation::TARGET => Nested::class,
-                        Relation::SCHEMA => [
-                            Relation::CASCADE => true,
-                            Relation::INNER_KEY => 'id',
-                            Relation::OUTER_KEY => 'owner_id',
-                        ],
-                    ],
-                ],
-            ],
-            Nested::class => [
-                Schema::ROLE => 'nested',
-                Schema::MAPPER => Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'nested',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => ['id', 'user_id', 'owner_id', 'label'],
-                Schema::SCHEMA => [],
-                Schema::RELATIONS => [],
-            ],
-        ]));
-    }
-
     public function testFetchRelations(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -190,5 +113,82 @@ abstract class LinkedTreeTest extends BaseTest
 
         [$u1, $u2] = $selector->fetchAll();
         $this->assertSame($u1->nested, $u2->owned);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->makeTable('nested', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'owner_id' => 'integer',
+            'label' => 'string',
+        ]);
+
+        $this->makeFK('nested', 'user_id', 'user', 'id');
+
+        $this->getDatabase()->table('nested')->insertMultiple(
+            ['user_id', 'owner_id', 'label'],
+            [
+                [1, 2, 'nested-label'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'nested' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Nested::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                    'owned' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Nested::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'owner_id',
+                        ],
+                    ],
+                ],
+            ],
+            Nested::class => [
+                Schema::ROLE => 'nested',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'nested',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'owner_id', 'label'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
     }
 }

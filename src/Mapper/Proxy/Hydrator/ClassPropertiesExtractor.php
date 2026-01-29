@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy\Hydrator;
 
-use ReflectionClass;
-use ReflectionProperty;
-
 /**
  * @internal
  */
@@ -20,16 +17,15 @@ class ClassPropertiesExtractor
      *
      * @param string[] $relations
      *
-     * @throws \ReflectionException
-     *
      * @return array<string, PropertyMap>
+     * @throws \ReflectionException
      */
     public function extract(string|object $objectOrClass, array $relations): array
     {
         $classProperties = [];
         $relationProperties = [];
 
-        $reflection = new ReflectionClass($objectOrClass);
+        $reflection = new \ReflectionClass($objectOrClass);
 
         $properties = $this->findAllInstanceProperties($reflection);
         foreach ($properties as $property) {
@@ -54,9 +50,9 @@ class ClassPropertiesExtractor
      * Find all class properties recursively using class hierarchy without
      * removing name redefinitions
      *
-     * @return ReflectionProperty[]
+     * @return \ReflectionProperty[]
      */
-    private function findAllInstanceProperties(?ReflectionClass $class = null): array
+    private function findAllInstanceProperties(?\ReflectionClass $class = null): array
     {
         if ($class === null) {
             return [];
@@ -66,8 +62,8 @@ class ClassPropertiesExtractor
             $this->findAllInstanceProperties($class->getParentClass() ?: null),
             \array_filter(
                 $class->getProperties(),
-                static fn (ReflectionProperty $property): bool => !$property->isStatic()
-            )
+                static fn(\ReflectionProperty $property): bool => !$property->isStatic(),
+            ),
         );
     }
 }

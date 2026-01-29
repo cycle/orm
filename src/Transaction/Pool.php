@@ -10,7 +10,6 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use JetBrains\PhpStorm\ExpectedValues;
-use Traversable;
 
 /**
  * @internal
@@ -41,7 +40,7 @@ final class Pool implements \Countable
     private bool $iterating = false;
 
     public function __construct(
-        private ORMInterface $orm
+        private ORMInterface $orm,
     ) {
         $this->storage = new TupleStorage();
         $this->all = new TupleStorage();
@@ -61,7 +60,7 @@ final class Pool implements \Countable
         ?State $state = null,
         ?int $status = null,
         bool $highPriority = false,
-        bool $persist = false
+        bool $persist = false,
     ): Tuple {
         // Find existing
         $tuple = $this->offsetGet($entity);
@@ -84,39 +83,13 @@ final class Pool implements \Countable
         return $this->smartAttachTuple($tuple, $highPriority, $persist);
     }
 
-    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false, bool $snap = false): Tuple
-    {
-        if ($tuple->status === Tuple::STATUS_PROCESSED) {
-            $this->all->attach($tuple);
-            return $tuple;
-        }
-        if ($tuple->status === Tuple::STATUS_PREPARING && $this->all->contains($tuple->entity)) {
-            return $this->all->getTuple($tuple->entity);
-        }
-        $this->all->attach($tuple);
-
-        if ($this->iterating || $snap) {
-            $this->snap($tuple);
-        }
-
-        if (isset($tuple->node) && $tuple->task === Tuple::TASK_DELETE) {
-            $tuple->state->setStatus(Node::SCHEDULED_DELETE);
-        }
-        if (($this->priorityAutoAttach || $highPriority) && $tuple->status === Tuple::STATUS_PREPARING) {
-            $this->priorityStorage->attach($tuple);
-        } else {
-            $this->storage->attach($tuple);
-        }
-        return $tuple;
-    }
-
     public function attachStore(
         object $entity,
         bool $cascade,
         ?Node $node = null,
         ?State $state = null,
         bool $highPriority = false,
-        bool $persist = false
+        bool $persist = false,
     ): Tuple {
         return $this->attach($entity, Tuple::TASK_STORE, $cascade, $node, $state, null, $highPriority, $persist);
     }
@@ -125,7 +98,7 @@ final class Pool implements \Countable
         object $entity,
         bool $cascade,
         ?Node $node = null,
-        ?State $state = null
+        ?State $state = null,
     ): Tuple {
         return $this->attach($entity, Tuple::TASK_DELETE, $cascade, $node, $state);
     }
@@ -138,9 +111,9 @@ final class Pool implements \Countable
     /**
      * Smart iterator
      *
-     * @return Traversable<object, Tuple>
+     * @return \Traversable<object, Tuple>
      */
-    public function openIterator(): Traversable
+    public function openIterator(): \Traversable
     {
         if ($this->iterating) {
             throw new \RuntimeException('Iterator is already open.');
@@ -218,6 +191,8 @@ final class Pool implements \Countable
                         $tuple->status = Tuple::STATUS_WAITED;
                     } elseif ($tuple->status === Tuple::STATUS_DEFERRED) {
                         $tuple->status = Tuple::STATUS_PROPOSED;
+                    } elseif ($tuple->status === Tuple::STATUS_DEFERRED_RESOLVED) {
+                        $tuple->status = Tuple::STATUS_PROPOSED_RESOLVED;
                     }
                     yield $entity => $tuple;
                     $this->trashIt($entity, $tuple, $this->storage);
@@ -235,6 +210,7 @@ final class Pool implements \Countable
                     $this->unprocessed = [];
                     continue;
                 }
+
                 if ($this->happens === 0 && (\count($pool) > 0 || $hasUnresolved)) {
                     throw new PoolException('Pool has gone into an infinite loop.');
                 }
@@ -282,6 +258,32 @@ final class Pool implements \Countable
         $this->priorityEnabled = false;
         $this->priorityAutoAttach = false;
         unset($this->priorityStorage, $this->unprocessed);
+    }
+
+    private function smartAttachTuple(Tuple $tuple, bool $highPriority = false, bool $snap = false): Tuple
+    {
+        if ($tuple->status === Tuple::STATUS_PROCESSED) {
+            $this->all->attach($tuple);
+            return $tuple;
+        }
+        if ($tuple->status === Tuple::STATUS_PREPARING && $this->all->contains($tuple->entity)) {
+            return $this->all->getTuple($tuple->entity);
+        }
+        $this->all->attach($tuple);
+
+        if ($this->iterating || $snap) {
+            $this->snap($tuple);
+        }
+
+        if (isset($tuple->node) && $tuple->task === Tuple::TASK_DELETE) {
+            $tuple->state->setStatus(Node::SCHEDULED_DELETE);
+        }
+        if (($this->priorityAutoAttach || $highPriority) && $tuple->status === Tuple::STATUS_PREPARING) {
+            $this->priorityStorage->attach($tuple);
+        } else {
+            $this->storage->attach($tuple);
+        }
+        return $tuple;
     }
 
     /**

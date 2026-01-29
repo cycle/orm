@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 use Spiral\Tokenizer;
 
-error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 //Composer
@@ -65,7 +65,7 @@ foreach ($classes as $class) {
     $path = str_replace(
         [\str_replace('\\', '/', __DIR__), 'ORM/Functional/Driver/Common/'],
         '',
-        \str_replace('\\', '/', $class->getFileName())
+        \str_replace('\\', '/', $class->getFileName()),
     );
 
     $path = ltrim($path, '/');
@@ -82,7 +82,7 @@ foreach ($classes as $class) {
         $namespace = str_replace(
             'Cycle\\ORM\\Tests\\Functional\\Driver\\Common',
             $details['namespace'],
-            $class->getNamespaceName()
+            $class->getNamespaceName(),
         );
 
         if (!is_dir($dir)) {
@@ -116,8 +116,8 @@ PHP,
                 $class->getName(),
                 $driver,
                 $class->getShortName(),
-                $driver
-            )
+                $driver,
+            ),
         );
     }
 }

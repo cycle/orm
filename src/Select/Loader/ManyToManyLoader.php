@@ -49,7 +49,7 @@ class ManyToManyLoader extends JoinableLoader
         FactoryInterface $factory,
         string $name,
         string $target,
-        array $schema
+        array $schema,
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $name, $target, $schema);
         $this->pivot = new PivotLoader(
@@ -58,19 +58,10 @@ class ManyToManyLoader extends JoinableLoader
             $factory,
             'pivot',
             $schema[Relation::THROUGH_ENTITY],
-            $schema
+            $schema,
         );
         $this->options['where'] = $schema[Relation::WHERE] ?? [];
         $this->options['orderBy'] = $schema[Relation::ORDER_BY] ?? [];
-    }
-
-    /**
-     * Make sure that pivot loader is always carried with parent relation.
-     */
-    public function __clone()
-    {
-        parent::__clone();
-        $this->pivot = clone $this->pivot;
     }
 
     public function withContext(LoaderInterface $parent, array $options = []): static
@@ -82,7 +73,7 @@ class ManyToManyLoader extends JoinableLoader
             [
                 'load' => $loader->isLoaded(),
                 'method' => $options['method'] ?? self::JOIN,
-            ] + ($options['pivot'] ?? [])
+            ] + ($options['pivot'] ?? []),
         );
 
         return $loader;
@@ -124,61 +115,61 @@ class ManyToManyLoader extends JoinableLoader
 
         // Manually join pivoted table
         if ($this->isJoined()) {
-            $parentKeys = (array)$this->schema[Relation::INNER_KEY];
-            $throughOuterKeys = (array)$this->pivot->schema[Relation::THROUGH_OUTER_KEY];
+            $parentKeys = (array) $this->schema[Relation::INNER_KEY];
+            $throughOuterKeys = (array) $this->pivot->schema[Relation::THROUGH_OUTER_KEY];
             $parentPrefix = $this->parent->getAlias() . '.';
             $on = [];
-            foreach ((array)$this->pivot->schema[Relation::THROUGH_INNER_KEY] as $i => $key) {
+            foreach ((array) $this->pivot->schema[Relation::THROUGH_INNER_KEY] as $i => $key) {
                 $field = $pivotPrefix . $this->pivot->fieldAlias($key);
                 $on[$field] = $parentPrefix . $this->parent->fieldAlias($parentKeys[$i]);
             }
 
             $query->join(
                 $this->getJoinMethod(),
-                $this->pivot->getJoinTable()
+                $this->pivot->getJoinTable(),
             )->on($on);
 
             $on = [];
-            foreach ((array)$this->schema[Relation::OUTER_KEY] as $i => $key) {
+            foreach ((array) $this->schema[Relation::OUTER_KEY] as $i => $key) {
                 $field = $localPrefix . $this->fieldAlias($key);
                 $on[$field] = $pivotPrefix . $this->pivot->fieldAlias($throughOuterKeys[$i]);
             }
 
             $query->join(
                 $this->getJoinMethod(),
-                $this->getJoinTable()
+                $this->getJoinTable(),
             )->on($on);
         } elseif ($outerKeys !== []) {
             // reset all the columns when query is isolated (we have to do it manually
             // since underlying loader believes it's loaded)
             $query->columns([]);
 
-            $outerKeyList = (array)$this->schema[Relation::OUTER_KEY];
+            $outerKeyList = (array) $this->schema[Relation::OUTER_KEY];
             $on = [];
-            foreach ((array)$this->pivot->schema[Relation::THROUGH_OUTER_KEY] as $i => $key) {
+            foreach ((array) $this->pivot->schema[Relation::THROUGH_OUTER_KEY] as $i => $key) {
                 $field = $pivotPrefix . $this->pivot->fieldAlias($key);
                 $on[$field] = $localPrefix . $this->fieldAlias($outerKeyList[$i]);
             }
 
             $query->join(
                 $this->getJoinMethod(),
-                $this->pivot->getJoinTable()
+                $this->pivot->getJoinTable(),
             )->on($on);
 
             $fields = [];
-            foreach ((array)$this->pivot->schema[Relation::THROUGH_INNER_KEY] as $key) {
+            foreach ((array) $this->pivot->schema[Relation::THROUGH_INNER_KEY] as $key) {
                 $fields[] = $pivotPrefix . $this->pivot->fieldAlias($key);
             }
 
             if (\count($fields) === 1) {
-                $query->andWhere($fields[0], 'IN', new Parameter(array_column($outerKeys, key($outerKeys[0]))));
+                $query->andWhere($fields[0], 'IN', new Parameter(\array_column($outerKeys, \key($outerKeys[0]))));
             } else {
                 $query->andWhere(
-                    static function (SelectQuery $select) use ($outerKeys, $fields) {
+                    static function (SelectQuery $select) use ($outerKeys, $fields): void {
                         foreach ($outerKeys as $set) {
-                            $select->orWhere(array_combine($fields, array_values($set)));
+                            $select->orWhere(\array_combine($fields, \array_values($set)));
                         }
-                    }
+                    },
                 );
             }
         }
@@ -187,14 +178,14 @@ class ManyToManyLoader extends JoinableLoader
         $this->setWhere(
             $query,
             $this->isJoined() ? 'onWhere' : 'where',
-            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? [],
         );
 
         // user specified ORDER_BY rules
         $this->setOrderBy(
             $query,
             $this->getAlias(),
-            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []
+            $this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? [],
         );
 
         return parent::configureQuery($this->pivot->configureQuery($query));
@@ -206,6 +197,15 @@ class ManyToManyLoader extends JoinableLoader
         $node->joinNode('@', parent::createNode());
 
         return $node;
+    }
+
+    /**
+     * Make sure that pivot loader is always carried with parent relation.
+     */
+    public function __clone()
+    {
+        parent::__clone();
+        $this->pivot = clone $this->pivot;
     }
 
     protected function loadChild(AbstractNode $node, bool $includeRole = false): void
@@ -222,19 +222,20 @@ class ManyToManyLoader extends JoinableLoader
         SelectQuery $query,
         bool $minify = false,
         string $prefix = '',
-        bool $overwrite = false
+        bool $overwrite = false,
+        bool $addToGroup = false,
     ): SelectQuery {
         // columns are reset on earlier stage to allow pivot loader mount it's own aliases
-        return parent::mountColumns($query, $minify, $prefix, false);
+        return parent::mountColumns($query, $minify, $prefix, false, $addToGroup);
     }
 
     protected function initNode(): AbstractNode
     {
         return new SingularNode(
             $this->columnNames(),
-            (array)$this->define(SchemaInterface::PRIMARY_KEY),
-            (array)$this->schema[Relation::OUTER_KEY],
-            (array)$this->schema[Relation::THROUGH_OUTER_KEY]
+            (array) $this->define(SchemaInterface::PRIMARY_KEY),
+            (array) $this->schema[Relation::OUTER_KEY],
+            (array) $this->schema[Relation::THROUGH_OUTER_KEY],
         );
     }
 }

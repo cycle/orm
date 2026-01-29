@@ -12,6 +12,7 @@ use Cycle\ORM\Exception\SchemaException;
 final class Schema implements SchemaInterface
 {
     private array $aliases;
+
     /**
      * @var string[]
      *
@@ -30,23 +31,14 @@ final class Schema implements SchemaInterface
         [$this->schema, $this->aliases] = $this->normalize($schema);
     }
 
-    public static function __set_state(array $an_array): self
-    {
-        $schema = new self([]);
-        $schema->schema = $an_array['schema'];
-        $schema->aliases = $an_array['aliases'];
-
-        return $schema;
-    }
-
     public function getRoles(): array
     {
-        return array_keys($this->schema);
+        return \array_keys($this->schema);
     }
 
     public function getRelations(string $role): array
     {
-        return array_keys($this->define($role, self::RELATIONS));
+        return \array_keys($this->define($role, self::RELATIONS));
     }
 
     /**
@@ -154,6 +146,15 @@ final class Schema implements SchemaInterface
         return $this->subclasses[$parent] ?? [];
     }
 
+    public static function __set_state(array $an_array): self
+    {
+        $schema = new self([]);
+        $schema->schema = $an_array['schema'];
+        $schema->aliases = $an_array['aliases'];
+
+        return $schema;
+    }
+
     /**
      * Automatically replace class names with their aliases.
      *
@@ -170,14 +171,14 @@ final class Schema implements SchemaInterface
                 $item[self::ENTITY] = $key;
             }
 
-            if (class_exists($key)) {
+            if (\class_exists($key)) {
                 $role = $item[self::ROLE] ?? $key;
                 if ($role !== $key) {
                     $aliases[$key] = $role;
                 }
             }
 
-            if ($item[self::ENTITY] !== $role && class_exists($item[self::ENTITY])) {
+            if ($item[self::ENTITY] !== $role && \class_exists($item[self::ENTITY])) {
                 $aliases[$item[self::ENTITY]] = $role;
                 $this->classes[$role] = $item[self::ENTITY];
             }
@@ -189,7 +190,7 @@ final class Schema implements SchemaInterface
         // Normalize PARENT option
         foreach ($result as $role => &$item) {
             if (isset($item[self::PARENT])) {
-                if (class_exists($item[self::PARENT])) {
+                if (\class_exists($item[self::PARENT])) {
                     $parent = $item[self::PARENT];
                     while (isset($aliases[$parent])) {
                         $parent = $aliases[$parent];
@@ -206,7 +207,7 @@ final class Schema implements SchemaInterface
         foreach ($result as $role => $item) {
             if (isset($item[self::CHILDREN])) {
                 foreach ($item[self::CHILDREN] as $child) {
-                    if (isset($aliases[$child]) && class_exists($child)) {
+                    if (isset($aliases[$child]) && \class_exists($child)) {
                         $aliases[$aliases[$child]] = $role;
                     }
                     $aliases[$child] = $role;
@@ -217,9 +218,9 @@ final class Schema implements SchemaInterface
         // Normalize relation associations
         foreach ($result as &$item) {
             if (isset($item[self::RELATIONS])) {
-                $item[self::RELATIONS] = iterator_to_array($this->normalizeRelations(
+                $item[self::RELATIONS] = \iterator_to_array($this->normalizeRelations(
                     $item[self::RELATIONS],
-                    $aliases
+                    $aliases,
                 ));
             }
         }
@@ -265,34 +266,34 @@ final class Schema implements SchemaInterface
         foreach ($result as $role => $item) {
             foreach ($item[self::RELATIONS] ?? [] as $container => $relation) {
                 $target = $relation[Relation::TARGET];
-                if (!array_key_exists($target, $result)) {
+                if (!\array_key_exists($target, $result)) {
                     continue;
                 }
                 $targetSchema = $result[$target];
                 $targetRelations = $targetSchema[self::RELATIONS] ?? [];
                 $inversion = $relation[Relation::SCHEMA][Relation::INVERSION] ?? null;
                 if ($inversion !== null) {
-                    if (!array_key_exists($inversion, $targetRelations)) {
+                    if (!\array_key_exists($inversion, $targetRelations)) {
                         throw new SchemaException(
-                            sprintf(
+                            \sprintf(
                                 'Relation `%s` as inversion of `%s.%s` not found in the `%s` role.',
                                 $inversion,
                                 $role,
                                 $container,
-                                $target
-                            )
+                                $target,
+                            ),
                         );
                     }
                     $targetHandshake = $targetRelations[$inversion][Relation::SCHEMA][Relation::INVERSION] ?? null;
                     if ($targetHandshake !== null && $container !== $targetHandshake) {
                         throw new SchemaException(
-                            sprintf(
+                            \sprintf(
                                 'Relation `%s.%s` can\'t be inversion of `%s.%s` because they have different relation values.',
                                 $role,
                                 $container,
                                 $target,
                                 $inversion,
-                            )
+                            ),
                         );
                     }
                     $result[$target][self::RELATIONS][$inversion][Relation::SCHEMA][Relation::INVERSION] = $container;
@@ -315,7 +316,7 @@ final class Schema implements SchemaInterface
         string $role,
         string $container,
         array $relation,
-        array $targetRelations
+        array $targetRelations,
     ): ?string {
         $nullable = $relation[Relation::SCHEMA][Relation::NULLABLE] ?? null;
         /** @var callable $compareCallback */
@@ -360,8 +361,8 @@ final class Schema implements SchemaInterface
             return false;
         }
         // Same keys
-        if ((array)$schema[Relation::INNER_KEY] !== (array)$targetSchema[Relation::OUTER_KEY]
-            || (array)$schema[Relation::OUTER_KEY] !== (array)$targetSchema[Relation::INNER_KEY]) {
+        if ((array) $schema[Relation::INNER_KEY] !== (array) $targetSchema[Relation::OUTER_KEY]
+            || (array) $schema[Relation::OUTER_KEY] !== (array) $targetSchema[Relation::INNER_KEY]) {
             return false;
         }
         // Optional fields
@@ -374,12 +375,12 @@ final class Schema implements SchemaInterface
         $schema = $relation[Relation::SCHEMA];
         $targetSchema = $targetRelation[Relation::SCHEMA];
         // MTM connects with MTM only
-        if (!in_array($targetRelation[Relation::TYPE], [Relation::HAS_MANY, Relation::HAS_ONE], true)) {
+        if (!\in_array($targetRelation[Relation::TYPE], [Relation::HAS_MANY, Relation::HAS_ONE], true)) {
             return false;
         }
         // Same keys
-        if ((array)$schema[Relation::INNER_KEY] !== (array)$targetSchema[Relation::OUTER_KEY]
-            || (array)$schema[Relation::OUTER_KEY] !== (array)$targetSchema[Relation::INNER_KEY]) {
+        if ((array) $schema[Relation::INNER_KEY] !== (array) $targetSchema[Relation::OUTER_KEY]
+            || (array) $schema[Relation::OUTER_KEY] !== (array) $targetSchema[Relation::INNER_KEY]) {
             return false;
         }
         // Optional fields
@@ -391,7 +392,7 @@ final class Schema implements SchemaInterface
      */
     private function defineEntityClass(string $role): ?string
     {
-        if (array_key_exists($role, $this->classes)) {
+        if (\array_key_exists($role, $this->classes)) {
             return $this->classes[$role];
         }
         $rr = $this->resolveAlias($role) ?? $role;

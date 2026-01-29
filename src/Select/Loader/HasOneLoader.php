@@ -53,7 +53,7 @@ class HasOneLoader extends JoinableLoader
         $this->setWhere(
             $query,
             $this->isJoined() ? 'onWhere' : 'where',
-            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? []
+            $this->options['where'] ?? $this->schema[Relation::WHERE] ?? [],
         );
 
         return parent::configureQuery($query);
@@ -63,9 +63,9 @@ class HasOneLoader extends JoinableLoader
     {
         return new SingularNode(
             $this->columnNames(),
-            (array)$this->define(SchemaInterface::PRIMARY_KEY),
-            (array)$this->schema[Relation::OUTER_KEY],
-            (array)$this->schema[Relation::INNER_KEY]
+            (array) $this->define(SchemaInterface::PRIMARY_KEY),
+            (array) $this->schema[Relation::OUTER_KEY],
+            (array) $this->schema[Relation::INNER_KEY],
         );
     }
 }

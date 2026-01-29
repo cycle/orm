@@ -11,26 +11,6 @@ class PropertyMapTest extends TestCase
 {
     private PropertyMap $properties;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->properties = new PropertyMap('User', [
-            '' => [
-                'id' => 'id',
-                'username' => 'username',
-            ],
-            'Test\User\ExtendedUser' => [
-                'is_verified' => 'is_verified',
-                'has_avatar' => 'has_avatar',
-            ],
-            'Test\User\SuperUser' => [
-                'is_admin' => 'is_admin',
-                'is_blocked' => 'is_blocked',
-            ],
-        ]);
-    }
-
     public function testGetsPropertyClass(): void
     {
         $this->assertEquals('', $this->properties->getPropertyClass('id'));
@@ -63,5 +43,25 @@ class PropertyMapTest extends TestCase
     public function testGetsClass(): void
     {
         $this->assertEquals('User', $this->properties->getClass());
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->properties = new PropertyMap('User', [
+            '' => [
+                'id' => 'id',
+                'username' => 'username',
+            ],
+            'Test\User\ExtendedUser' => [
+                'is_verified' => 'is_verified',
+                'has_avatar' => 'has_avatar',
+            ],
+            'Test\User\SuperUser' => [
+                'is_admin' => 'is_admin',
+                'is_blocked' => 'is_blocked',
+            ],
+        ]);
     }
 }

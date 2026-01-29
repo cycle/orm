@@ -20,7 +20,7 @@ trait ScopeTrait
     /**
      * Associate scope with the selector.
      */
-    public function setScope(ScopeInterface $scope = null): self
+    public function setScope(?ScopeInterface $scope = null): self
     {
         $this->scope = $scope;
 

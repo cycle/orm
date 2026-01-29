@@ -12,6 +12,6 @@ enum TypeStringEnum: string
 
     public static function make(int|string $value): ?self
     {
-        return self::tryFrom((string)$value);
+        return self::tryFrom((string) $value);
     }
 }

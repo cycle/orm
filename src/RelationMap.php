@@ -25,8 +25,10 @@ final class RelationMap
 
     /** @var DependencyInterface[] */
     private array $dependencies = [];
+
     /** @var RelationInterface[] */
     private array $slaves = [];
+
     /** @var SameRowRelationInterface[] */
     private array $embedded = [];
 
@@ -83,39 +85,6 @@ final class RelationMap
         return $result;
     }
 
-    private function registerOuterRelation(string $role, string $container, array $relationSchema): void
-    {
-        // todo: it better to check instanceOf \Cycle\ORM\Relation\DependencyInterface instead of int
-        $relationType = $relationSchema[Relation::TYPE];
-        // skip dependencies
-        if ($relationType === Relation::BELONGS_TO || $relationType === Relation::REFERS_TO) {
-            return;
-        }
-        if ($relationType === Relation::MANY_TO_MANY) {
-            $handshaked = \is_string($relationSchema[Relation::SCHEMA][Relation::INVERSION] ?? null);
-            // Create ShadowHasMany
-            if (!$handshaked) {
-                $relation = new ShadowHasMany(
-                    $role . '.' . $container . ':' . $relationSchema[Relation::TARGET],
-                    $relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY],
-                    (array)$relationSchema[Relation::SCHEMA][Relation::OUTER_KEY],
-                    (array)$relationSchema[Relation::SCHEMA][Relation::THROUGH_OUTER_KEY]
-                );
-                $this->slaves[$relation->getName()] = $relation;
-            }
-            return;
-        }
-        if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {
-            // todo: find morphed collisions, decide handshake
-            $relation = new ShadowBelongsTo('~morphed~' . $container, $role, $relationSchema);
-            $this->dependencies[$relation->getName()] ??= $relation;
-            return;
-        }
-
-        $relation = new ShadowBelongsTo($container, $role, $relationSchema);
-        $this->dependencies[$relation->getName()] = $relation;
-    }
-
     public function hasDependencies(): bool
     {
         return $this->dependencies !== [];
@@ -137,7 +106,7 @@ final class RelationMap
     public function init(EntityFactoryInterface $factory, Node $node, array $data): array
     {
         foreach ($this->innerRelations as $name => $relation) {
-            if (!array_key_exists($name, $data)) {
+            if (!\array_key_exists($name, $data)) {
                 if ($node->hasRelation($name)) {
                     continue;
                 }
@@ -191,5 +160,38 @@ final class RelationMap
     public function getRelations(): array
     {
         return $this->innerRelations;
+    }
+
+    private function registerOuterRelation(string $role, string $container, array $relationSchema): void
+    {
+        // todo: it better to check instanceOf \Cycle\ORM\Relation\DependencyInterface instead of int
+        $relationType = $relationSchema[Relation::TYPE];
+        // skip dependencies
+        if ($relationType === Relation::BELONGS_TO || $relationType === Relation::REFERS_TO) {
+            return;
+        }
+        if ($relationType === Relation::MANY_TO_MANY) {
+            $handshaked = \is_string($relationSchema[Relation::SCHEMA][Relation::INVERSION] ?? null);
+            // Create ShadowHasMany
+            if (!$handshaked) {
+                $relation = new ShadowHasMany(
+                    $role . '.' . $container . ':' . $relationSchema[Relation::TARGET],
+                    $relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY],
+                    (array) $relationSchema[Relation::SCHEMA][Relation::OUTER_KEY],
+                    (array) $relationSchema[Relation::SCHEMA][Relation::THROUGH_OUTER_KEY],
+                );
+                $this->slaves[$relation->getName()] = $relation;
+            }
+            return;
+        }
+        if ($relationType === Relation::MORPHED_HAS_ONE || $relationType === Relation::MORPHED_HAS_MANY) {
+            // todo: find morphed collisions, decide handshake
+            $relation = new ShadowBelongsTo('~morphed~' . $container, $role, $relationSchema);
+            $this->dependencies[$relation->getName()] ??= $relation;
+            return;
+        }
+
+        $relation = new ShadowBelongsTo($container, $role, $relationSchema);
+        $this->dependencies[$relation->getName()] = $relation;
     }
 }

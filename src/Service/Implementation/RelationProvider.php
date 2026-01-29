@@ -19,8 +19,7 @@ final class RelationProvider implements RelationProviderInterface
 
     public function __construct(
         private ?ORMInterface $orm,
-    ) {
-    }
+    ) {}
 
     /**
      * Get relation map associated with the given class.

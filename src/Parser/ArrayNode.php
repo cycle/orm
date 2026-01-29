@@ -23,15 +23,12 @@ final class ArrayNode extends AbstractNode
         array $columns,
         array $primaryKeys,
         protected array $innerKeys,
-        ?array $outerKeys
+        ?array $outerKeys,
     ) {
         parent::__construct($columns, $outerKeys);
         $this->setDuplicateCriteria($primaryKeys);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function push(array &$data): void
     {
         if ($this->parent === null) {
@@ -49,7 +46,7 @@ final class ArrayNode extends AbstractNode
             $this->container,
             $this->indexName,
             $this->intersectData($this->innerKeys, $data),
-            $data
+            $data,
         );
     }
 }

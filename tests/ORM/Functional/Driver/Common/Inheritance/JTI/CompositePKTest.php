@@ -16,137 +16,48 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture\Programator;
 abstract class CompositePKTest extends SimpleCasesTest
 {
     protected const EMPLOYEE_DEFAULT_SORTING = ['id' => 'ASC', 'employee_id' => 'ASC'];
-    protected const
-        EMPLOYEE_1 = ['id' => 1, 'employee_id' => 2, 'name' => 'John', 'age' => 38];
-    protected const
-        EMPLOYEE_2 = ['id' => 2, 'employee_id' => 3, 'name' => 'Anton', 'age' => 35];
-    protected const
-        EMPLOYEE_3 = ['id' => 3, 'employee_id' => 4, 'name' => 'Kentarius', 'age' => 27];
-    protected const
-        EMPLOYEE_4 = ['id' => 4, 'employee_id' => 5, 'name' => 'Valeriy', 'age' => 32];
-    protected const
-        ENGINEER_2 = ['_type' => 'engineer', 'id' => 2, 'role_id' => 3, 'level' => 8, 'rank' => null];
-    protected const
-        ENGINEER_4 = ['_type' => 'engineer', 'id' => 4, 'role_id' => 5, 'level' => 10, 'rank' => null];
-    protected const
-        MANAGER_1 = ['_type' => 'manager', 'id' => 1, 'role_id' => 2, 'level' => null, 'rank' => 'top'];
-    protected const
-        MANAGER_3 = ['_type' => 'manager', 'id' => 3, 'role_id' => 4, 'level' => null, 'rank' => 'bottom'];
-    protected const
-        ENGINEER_2_PK = ['id' => 2, 'role_id' => 3];
-    protected const
-        EMPLOYEE_2_PK = ['id' => 2, 'employee_id' => 3];
-    protected const
-        PROGRAMATOR_2_PK = ['second_id' => 3, 'subrole_id' => 2];
-    protected const
-        PROGRAMATOR_2 = ['second_id' => 3, 'subrole_id' => 2, 'language' => 'php'];
-    protected const
-        PROGRAMATOR_4 = ['second_id' => 5, 'subrole_id' => 4, 'language' => 'go'];
-    protected const
-        EMPLOYEE_1_LOADED = self::EMPLOYEE_1;
-    protected const
-        EMPLOYEE_2_LOADED = self::EMPLOYEE_2;
-    protected const
-        EMPLOYEE_3_LOADED = self::EMPLOYEE_3;
-    protected const
-        EMPLOYEE_4_LOADED = self::EMPLOYEE_4;
-    protected const
-        ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
-    protected const
-        ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
-    protected const
-        PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
-    protected const
-        PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
-    protected const
-        MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
-    protected const
-        MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
-    protected const
-        EMPLOYEE_ALL_LOADED = [
-            self::EMPLOYEE_1_LOADED,
-            self::EMPLOYEE_2_LOADED,
-            self::EMPLOYEE_3_LOADED,
-            self::EMPLOYEE_4_LOADED,
-        ];
-    protected const
-        EMPLOYEE_INHERITED_LOADED = [
-            self::MANAGER_1_LOADED,
-            self::PROGRAMATOR_2_LOADED,
-            self::MANAGER_3_LOADED,
-            self::PROGRAMATOR_4_LOADED,
-        ];
-    protected const
-        ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
-    protected const
-        ENGINEER_INHERITED_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
-    protected const
-        PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
-    protected const
-        MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
-    protected const
-        // todo: remove when STI will support classless entities and Schema::CHILDREN's roles
+    protected const EMPLOYEE_1 = ['id' => 1, 'employee_id' => 2, 'name' => 'John', 'age' => 38];
+    protected const EMPLOYEE_2 = ['id' => 2, 'employee_id' => 3, 'name' => 'Anton', 'age' => 35];
+    protected const EMPLOYEE_3 = ['id' => 3, 'employee_id' => 4, 'name' => 'Kentarius', 'age' => 27];
+    protected const EMPLOYEE_4 = ['id' => 4, 'employee_id' => 5, 'name' => 'Valeriy', 'age' => 32];
+    protected const ENGINEER_2 = ['_type' => 'engineer', 'id' => 2, 'role_id' => 3, 'level' => 8, 'rank' => null];
+    protected const ENGINEER_4 = ['_type' => 'engineer', 'id' => 4, 'role_id' => 5, 'level' => 10, 'rank' => null];
+    protected const MANAGER_1 = ['_type' => 'manager', 'id' => 1, 'role_id' => 2, 'level' => null, 'rank' => 'top'];
+    protected const MANAGER_3 = ['_type' => 'manager', 'id' => 3, 'role_id' => 4, 'level' => null, 'rank' => 'bottom'];
+    protected const ENGINEER_2_PK = ['id' => 2, 'role_id' => 3];
+    protected const EMPLOYEE_2_PK = ['id' => 2, 'employee_id' => 3];
+    protected const PROGRAMATOR_2_PK = ['second_id' => 3, 'subrole_id' => 2];
+    protected const PROGRAMATOR_2 = ['second_id' => 3, 'subrole_id' => 2, 'language' => 'php'];
+    protected const PROGRAMATOR_4 = ['second_id' => 5, 'subrole_id' => 4, 'language' => 'go'];
+    protected const EMPLOYEE_1_LOADED = self::EMPLOYEE_1;
+    protected const EMPLOYEE_2_LOADED = self::EMPLOYEE_2;
+    protected const EMPLOYEE_3_LOADED = self::EMPLOYEE_3;
+    protected const EMPLOYEE_4_LOADED = self::EMPLOYEE_4;
+    protected const ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
+    protected const ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
+    protected const PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
+    protected const PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
+    protected const MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
+    protected const MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
+    protected const EMPLOYEE_ALL_LOADED = [
+        self::EMPLOYEE_1_LOADED,
+        self::EMPLOYEE_2_LOADED,
+        self::EMPLOYEE_3_LOADED,
+        self::EMPLOYEE_4_LOADED,
+    ];
+    protected const EMPLOYEE_INHERITED_LOADED = [
+        self::MANAGER_1_LOADED,
+        self::PROGRAMATOR_2_LOADED,
+        self::MANAGER_3_LOADED,
+        self::PROGRAMATOR_4_LOADED,
+    ];
+    protected const ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
+    protected const ENGINEER_INHERITED_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
+    protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
+    protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+    protected const // todo: remove when STI will support classless entities and Schema::CHILDREN's roles
         PROGRAMATOR_ROLE = Programator::class;
-    protected const
-        ENGINEER_ROLE = Engineer::class;
-
-    public function setUp(): void
-    {
-        JtiBaseTest::setUp();
-
-        $this->makeTable('employee', [
-            'id' => 'integer',
-            'employee_id' => 'integer',
-            'name_column' => 'string',
-            'age' => 'integer,nullable',
-        ], pk: ['id', 'employee_id']);
-        $this->makeIndex('employee', ['employee_id'], false);
-
-        $this->makeTable('role', [
-            'id' => 'integer',
-            'role_id' => 'integer',
-            '_type' => 'string',
-            'level' => 'integer,nullable',
-            'rank' => 'string,nullable',
-        ], fk: [
-            ['from' => ['id', 'role_id'], 'table' => 'employee', 'column' => ['id', 'employee_id']],
-        ], pk: ['id', 'role_id']);
-        $this->makeIndex('role', ['role_id', 'id'], true);
-
-        $this->makeTable('programator', [
-            'id' => 'integer',
-            'subrole_id' => 'integer',
-            'language' => 'string',
-        ], fk: [
-            ['from' => ['id', 'subrole_id'], 'table' => 'role', 'column' => ['role_id', 'id']],
-        ], pk: ['id', 'subrole_id']);
-
-        $this->getDatabase()->table('employee')->insertMultiple(
-            ['id', 'employee_id', 'name_column', 'age'],
-            [
-                self::EMPLOYEE_1,
-                self::EMPLOYEE_2,
-                self::EMPLOYEE_3,
-                self::EMPLOYEE_4,
-            ]
-        );
-        $this->getDatabase()->table('role')->insertMultiple(
-            ['_type', 'id', 'role_id', 'level', 'rank'],
-            [
-                self::MANAGER_1,
-                self::ENGINEER_2,
-                self::MANAGER_3,
-                self::ENGINEER_4,
-            ]
-        );
-        $this->getDatabase()->table('programator')->insertMultiple(
-            ['id', 'subrole_id', 'language'],
-            [
-                self::PROGRAMATOR_2,
-                self::PROGRAMATOR_4,
-            ]
-        );
-    }
+    protected const ENGINEER_ROLE = Engineer::class;
 
     public function testSelectEngineerAllDataWithInheritance(): void
     {
@@ -246,6 +157,64 @@ abstract class CompositePKTest extends SimpleCasesTest
         $this->assertSame('Merlin', $programator->name);
         $this->assertSame(50, $programator->level);
         $this->assertSame('VanillaJS', $programator->language);
+    }
+
+    public function setUp(): void
+    {
+        JtiBaseTest::setUp();
+
+        $this->makeTable('employee', [
+            'id' => 'integer',
+            'employee_id' => 'integer',
+            'name_column' => 'string',
+            'age' => 'integer,nullable',
+        ], pk: ['id', 'employee_id']);
+        $this->makeIndex('employee', ['employee_id'], false);
+
+        $this->makeTable('role', [
+            'id' => 'integer',
+            'role_id' => 'integer',
+            '_type' => 'string',
+            'level' => 'integer,nullable',
+            'rank' => 'string,nullable',
+        ], fk: [
+            ['from' => ['id', 'role_id'], 'table' => 'employee', 'column' => ['id', 'employee_id']],
+        ], pk: ['id', 'role_id']);
+        $this->makeIndex('role', ['role_id', 'id'], true);
+
+        $this->makeTable('programator', [
+            'id' => 'integer',
+            'subrole_id' => 'integer',
+            'language' => 'string',
+        ], fk: [
+            ['from' => ['id', 'subrole_id'], 'table' => 'role', 'column' => ['role_id', 'id']],
+        ], pk: ['id', 'subrole_id']);
+
+        $this->getDatabase()->table('employee')->insertMultiple(
+            ['id', 'employee_id', 'name_column', 'age'],
+            [
+                self::EMPLOYEE_1,
+                self::EMPLOYEE_2,
+                self::EMPLOYEE_3,
+                self::EMPLOYEE_4,
+            ],
+        );
+        $this->getDatabase()->table('role')->insertMultiple(
+            ['_type', 'id', 'role_id', 'level', 'rank'],
+            [
+                self::MANAGER_1,
+                self::ENGINEER_2,
+                self::MANAGER_3,
+                self::ENGINEER_4,
+            ],
+        );
+        $this->getDatabase()->table('programator')->insertMultiple(
+            ['id', 'subrole_id', 'language'],
+            [
+                self::PROGRAMATOR_2,
+                self::PROGRAMATOR_4,
+            ],
+        );
     }
 
     protected function getSchemaArray(): array

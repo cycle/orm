@@ -7,14 +7,12 @@ namespace Cycle\ORM\Reference;
 class Reference implements ReferenceInterface
 {
     private bool $loaded = false;
-
     private mixed $value;
 
     public function __construct(
         protected string $role,
-        protected array $scope
-    ) {
-    }
+        protected array $scope,
+    ) {}
 
     final public function getRole(): string
     {

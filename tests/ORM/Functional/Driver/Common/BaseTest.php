@@ -15,6 +15,7 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\RelationLoaderInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\TestLogger;
@@ -37,7 +38,6 @@ abstract class BaseTest extends TestCase
 
     // cross test driver cache
     public static $driverCache = [];
-
     protected static $lastORM;
 
     /** @var Driver */
@@ -57,60 +57,6 @@ abstract class BaseTest extends TestCase
 
     /** @var int */
     protected $numReads;
-
-    /**
-     * Init all we need.
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->getDriver()->rollbackTransaction();
-
-        $this->dbal = new DatabaseManager(new DatabaseConfig());
-        $this->dbal->addDatabase(
-            new Database(
-                'default',
-                '',
-                $this->getDriver()
-            )
-        );
-
-        $this->logger = new TestLogger();
-        $this->getDriver()->setLogger($this->logger);
-
-        if (self::$config['debug']) {
-            $this->logger->display();
-        }
-
-        $this->orm = new ORM(
-            (new Factory(
-                $this->dbal,
-                RelationConfig::getDefault(),
-                null,
-                new DoctrineCollectionFactory()
-            ))->withCollectionFactory('array', new ArrayCollectionFactory()),
-            new Schema([]),
-            $this->getCommandGenerator(),
-        );
-    }
-
-    /**
-     * Cleanup.
-     */
-    public function tearDown(): void
-    {
-        $this->assertClearState($this->orm);
-
-        $this->disableProfiling();
-        $this->dropDatabase($this->dbal->database('default'));
-        $this->orm = null;
-        $this->dbal = null;
-
-        if (\function_exists('gc_collect_cycles')) {
-            gc_collect_cycles();
-        }
-    }
 
     public function withSchema(SchemaInterface $schema): ORMInterface
     {
@@ -140,9 +86,6 @@ abstract class BaseTest extends TestCase
         $this->numWrites = $this->logger->countWriteQueries();
     }
 
-    /**
-     * @param int $numWrites
-     */
     public function assertNumWrites(int $numWrites): void
     {
         $queries = $this->logger->countWriteQueries() - $this->numWrites;
@@ -151,7 +94,7 @@ abstract class BaseTest extends TestCase
             $this->assertSame(
                 $numWrites,
                 $queries,
-                "Number of write SQL queries do not match, expected {$numWrites} got {$queries}."
+                "Number of write SQL queries do not match, expected {$numWrites} got {$queries}.",
             );
         }
     }
@@ -164,9 +107,6 @@ abstract class BaseTest extends TestCase
         $this->numReads = $this->logger->countReadQueries();
     }
 
-    /**
-     * @param int $numReads
-     */
     public function assertNumReads(int $numReads): void
     {
         $queries = $this->logger->countReadQueries() - $this->numReads;
@@ -175,23 +115,74 @@ abstract class BaseTest extends TestCase
             $this->assertSame(
                 $numReads,
                 $queries,
-                "Number of read SQL queries do not match, expected {$numReads} got {$queries}."
+                "Number of read SQL queries do not match, expected {$numReads} got {$queries}.",
             );
         }
     }
 
     /**
-     * @return Database
+     * Init all we need.
      */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->getDriver()->rollbackTransaction();
+
+        $this->dbal = new DatabaseManager(new DatabaseConfig());
+        $this->dbal->addDatabase(
+            new Database(
+                'default',
+                '',
+                $this->getDriver(),
+            ),
+        );
+
+        $this->logger = new TestLogger();
+        $this->getDriver()->setLogger($this->logger);
+
+        if (self::$config['debug']) {
+            $this->logger->display();
+        }
+
+        $this->orm = new ORM(
+            (new Factory(
+                $this->dbal,
+                RelationConfig::getDefault(),
+                null,
+                new DoctrineCollectionFactory(),
+            ))->withCollectionFactory('array', new ArrayCollectionFactory()),
+            new Schema([]),
+            $this->getCommandGenerator(),
+            options: (new \Cycle\ORM\Options())
+                ->withIgnoreUninitializedRelations(true)
+                ->withGroupByToDeduplicate(true),
+        );
+    }
+
+    /**
+     * Cleanup.
+     */
+    public function tearDown(): void
+    {
+        $this->assertClearState($this->orm);
+
+        $this->disableProfiling();
+        $this->dropDatabase($this->dbal->database('default'));
+        $this->orm = null;
+        $this->dbal = null;
+
+        if (\function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
+        }
+    }
+
     protected function getDatabase(): Database
     {
         return $this->dbal->database('default');
     }
 
-    /**
-     * @param Database|null $database
-     */
-    protected function dropDatabase(Database $database = null): void
+    protected function dropDatabase(?Database $database = null): void
     {
         if ($database === null) {
             return;
@@ -219,7 +210,7 @@ abstract class BaseTest extends TestCase
      */
     protected function enableProfiling(): void
     {
-        if (null !== $this->logger) {
+        if ($this->logger !== null) {
             $this->logger->display();
         }
     }
@@ -229,7 +220,7 @@ abstract class BaseTest extends TestCase
      */
     protected function disableProfiling(): void
     {
-        if (null !== $this->logger) {
+        if ($this->logger !== null) {
             $this->logger->hide();
         }
     }
@@ -277,7 +268,7 @@ abstract class BaseTest extends TestCase
                 $node->getRole(),
                 $orm->getMapper($entity)->extract($entity),
                 $node->getData(),
-                $rel->getValue($node)
+                $rel->getValue($node),
             );
 
             // all the states must be closed
@@ -292,14 +283,14 @@ abstract class BaseTest extends TestCase
         string $eName,
         array $entity,
         array $stateData,
-        array $relations
+        array $relations,
     ): void {
         foreach ($entity as $name => $eValue) {
             if (array_key_exists($name, $stateData)) {
                 $this->assertEquals(
                     $eValue,
                     $stateData[$name],
-                    "Entity and State are not in sync `{$eName}`.`{$name}`"
+                    "Entity and State are not in sync `{$eName}`.`{$name}`",
                 );
 
                 continue;
@@ -315,7 +306,7 @@ abstract class BaseTest extends TestCase
             $parentChain = [];
             do {
                 $parentChain[] = $parent;
-                $relationSchema = (array)$this->orm->getSchema()->define($parent, SchemaInterface::RELATIONS);
+                $relationSchema = (array) $this->orm->getSchema()->define($parent, SchemaInterface::RELATIONS);
                 if (array_key_exists($name, $relationSchema)) {
                     $relation = $relationSchema[$name];
                     break;
@@ -371,18 +362,18 @@ abstract class BaseTest extends TestCase
                 $this->assertEquals(
                     $rValue->getScope(),
                     $eValue->getScope(),
-                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference scope)"
+                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference scope)",
                 );
                 $this->assertEquals(
                     $rValue->getRole(),
                     $eValue->getRole(),
-                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference role)"
+                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference role)",
                 );
             } else {
                 $this->assertEquals(
                     $rValue,
                     $eValue,
-                    "Entity and State are not in sync `{$eName}`.`{$name}`"
+                    "Entity and State are not in sync `{$eName}`.`{$name}`",
                 );
             }
         }
@@ -398,5 +389,10 @@ abstract class BaseTest extends TestCase
     protected function getCommandGenerator(): ?Transaction\CommandGeneratorInterface
     {
         return null;
+    }
+
+    protected function bulkLoader(object ...$entities): RelationLoaderInterface
+    {
+        return (new Relation\BulkLoader($this->orm))->collect(...$entities);
     }
 }

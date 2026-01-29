@@ -17,8 +17,6 @@ use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use WeakMap;
-use WeakReference;
 
 abstract class MemoryTest extends BaseTest
 {
@@ -27,12 +25,6 @@ abstract class MemoryTest extends BaseTest
     private const ACTION_CLONE = 'clone';
     private const ACTION_UNSET = 'unset';
     private const ACTION_WITH = 'with';
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        // Load all relations instances
-    }
 
     // With `Collect Garbage Cycles`
 
@@ -77,7 +69,7 @@ abstract class MemoryTest extends BaseTest
         // Collect weak references
         $loadLinks and $map = $this->collectReferences($orm, $loadRoles);
         // Create main ORM reference
-        $link = WeakReference::create($orm);
+        $link = \WeakReference::create($orm);
 
         // Do main action
         switch ($action) {
@@ -97,6 +89,12 @@ abstract class MemoryTest extends BaseTest
         $this->assertTrue($link->get() === null);
     }
 
+    public function setUp(): void
+    {
+        parent::setUp();
+        // Load all relations instances
+    }
+
     // Support
 
     private function createORM(): ORM
@@ -105,9 +103,9 @@ abstract class MemoryTest extends BaseTest
         return new ORM(new Factory($this->dbal), $schema);
     }
 
-    private function collectReferences(ORMInterface $orm, bool $loadRoles): WeakMap
+    private function collectReferences(ORMInterface $orm, bool $loadRoles): \WeakMap
     {
-        $map = new WeakMap();
+        $map = new \WeakMap();
         $schema = $orm->getSchema();
         \assert($schema::class === Schema::class);
 

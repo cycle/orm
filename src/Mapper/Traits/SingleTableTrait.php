@@ -17,7 +17,7 @@ trait SingleTableTrait
     /**
      * Classname to represent entity.
      */
-    protected function resolveClass(array $data, string $role = null): string
+    protected function resolveClass(array $data, ?string $role = null): string
     {
         if ($role !== null && $role !== $this->role && $role !== $this->entity) {
             return $this->resolveChildClassByRole($role);
@@ -47,9 +47,9 @@ trait SingleTableTrait
     private function resolveChildClassByRole(string $role): string
     {
         $class = $this->schema->define($role, SchemaInterface::ENTITY);
-        if (!in_array($class, $this->children, true)) {
+        if (!\in_array($class, $this->children, true)) {
             throw new \InvalidArgumentException(
-                sprintf('Role `%s` does not have a child role `%s`.', $this->role, $role)
+                \sprintf('Role `%s` does not have a child role `%s`.', $this->role, $role),
             );
         }
         return $class;

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper\Proxy;
 
-use Closure;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClosureHydrator;
 use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
@@ -27,11 +26,11 @@ class ProxyEntityFactory
     private array $classProperties = [];
 
     private Instantiator $instantiator;
-    private Closure $initializer;
+    private \Closure $initializer;
 
     public function __construct(
         private ClosureHydrator $hydrator,
-        private ClassPropertiesExtractor $propertiesExtractor
+        private ClassPropertiesExtractor $propertiesExtractor,
     ) {
         $this->instantiator = new Instantiator();
         $this->initializer = static function (object $entity, array $properties): void {
@@ -59,7 +58,7 @@ class ProxyEntityFactory
 
         // init
         foreach ($scopes[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties() as $scope => $properties) {
-            Closure::bind($this->initializer, null, $scope === '' ? $class : $scope)($proxy, $properties);
+            \Closure::bind($this->initializer, null, $scope === '' ? $class : $scope)($proxy, $properties);
         }
 
         return $proxy;
@@ -73,7 +72,7 @@ class ProxyEntityFactory
     public function upgrade(
         RelationMap $relMap,
         object $entity,
-        array $data
+        array $data,
     ): object {
         $properties = $this->getEntityProperties($entity, $relMap);
 
@@ -82,7 +81,7 @@ class ProxyEntityFactory
             $relMap,
             $properties,
             $entity,
-            $data
+            $data,
         );
     }
 
@@ -93,13 +92,13 @@ class ProxyEntityFactory
      */
     public function extractRelations(RelationMap $relMap, object $entity): array
     {
-        if (!property_exists($entity, '__cycle_orm_rel_data')) {
-            return array_intersect_key($this->entityToArray($entity), $relMap->getRelations());
+        if (!\property_exists($entity, '__cycle_orm_rel_data')) {
+            return \array_intersect_key($this->entityToArray($entity), $relMap->getRelations());
         }
 
         $currentData = $entity->__cycle_orm_rel_data;
         foreach ($relMap->getRelations() as $key => $relation) {
-            if (!array_key_exists($key, $currentData)) {
+            if (!\array_key_exists($key, $currentData)) {
                 $arrayData ??= $this->entityToArray($entity);
 
                 if (\array_key_exists($key, $arrayData)) {
@@ -118,20 +117,20 @@ class ProxyEntityFactory
      */
     public function extractData(RelationMap $relMap, object $entity): array
     {
-        return array_diff_key($this->entityToArray($entity), $relMap->getRelations());
+        return \array_diff_key($this->entityToArray($entity), $relMap->getRelations());
     }
 
     private function entityToArray(object $entity): array
     {
         $result = [];
-        foreach ((array)$entity as $key => $value) {
-            $result[$key[0] === "\0" ? substr($key, strrpos($key, "\0", 1) + 1) : $key] = $value;
+        foreach ((array) $entity as $key => $value) {
+            $result[$key[0] === "\0" ? \substr($key, \strrpos($key, "\0", 1) + 1) : $key] = $value;
         }
 
         unset(
             $result['__cycle_orm_rel_map'],
             $result['__cycle_orm_rel_data'],
-            $result['__cycle_orm_relation_props']
+            $result['__cycle_orm_relation_props'],
         );
 
         return $result;
@@ -139,29 +138,29 @@ class ProxyEntityFactory
 
     private function defineClass(string $class): string
     {
-        if (!class_exists($class, true)) {
-            throw new \RuntimeException(sprintf(
+        if (!\class_exists($class, true)) {
+            throw new \RuntimeException(\sprintf(
                 'The entity `%s` class does not exist. Proxy factory can not create classless entities.',
-                $class
+                $class,
             ));
         }
 
-        if (array_key_exists($class, $this->classMap)) {
+        if (\array_key_exists($class, $this->classMap)) {
             return $this->classMap[$class];
         }
 
         $reflection = new \ReflectionClass($class);
         if ($reflection->isFinal()) {
-            throw new \RuntimeException(sprintf('The entity `%s` class is final and can\'t be extended.', $class));
+            throw new \RuntimeException(\sprintf('The entity `%s` class is final and can\'t be extended.', $class));
         }
         $className = "{$class} Cycle ORM Proxy";
         $this->classMap[$class] = $className;
 
-        if (!class_exists($className, false)) {
-            if (str_contains($className, '\\')) {
-                $pos = strrpos($className, '\\');
-                $namespaceStr = sprintf("namespace %s;\n", substr($className, 0, $pos));
-                $classNameStr = substr($className, $pos + 1);
+        if (!\class_exists($className, false)) {
+            if (\str_contains($className, '\\')) {
+                $pos = \strrpos($className, '\\');
+                $namespaceStr = \sprintf("namespace %s;\n", \substr($className, 0, $pos));
+                $classNameStr = \substr($className, $pos + 1);
             } else {
                 $namespaceStr = '';
                 $classNameStr = $className;
@@ -185,13 +184,12 @@ class ProxyEntityFactory
     /**
      * Gets property map (primitive fields, relations) for given Entity.
      *
-     * @throws \ReflectionException
-     *
      * @return PropertyMap[]
+     * @throws \ReflectionException
      */
     private function getEntityProperties(object $entity, RelationMap $relMap): array
     {
         return $this->classProperties[$entity::class] ??= $this->propertiesExtractor
-            ->extract($entity, array_keys($relMap->getRelations()));
+            ->extract($entity, \array_keys($relMap->getRelations()));
     }
 }

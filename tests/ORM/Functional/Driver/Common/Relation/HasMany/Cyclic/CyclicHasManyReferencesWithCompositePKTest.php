@@ -18,6 +18,30 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
 {
     use TableTrait;
 
+    public function testCreate(): void
+    {
+        $t = new Tenant();
+        $t->name = 'Google';
+
+        $p = new Preference();
+        $p->flag = true;
+        $p->option = 'option1';
+
+        $t->setPreference($p);
+        $p->tenant = $t;
+
+        $this->captureWriteQueries();
+        $this->save($t);
+        $this->assertNumWrites(3);
+
+        $this->assertNotNull($p->tenant_id);
+
+        // no changes!
+        $this->captureWriteQueries();
+        $this->save($t);
+        $this->assertNumWrites(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -148,29 +172,5 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
                 ],
             ],
         ]));
-    }
-
-    public function testCreate(): void
-    {
-        $t = new Tenant();
-        $t->name = 'Google';
-
-        $p = new Preference();
-        $p->flag = true;
-        $p->option = 'option1';
-
-        $t->setPreference($p);
-        $p->tenant = $t;
-
-        $this->captureWriteQueries();
-        $this->save($t);
-        $this->assertNumWrites(3);
-
-        $this->assertNotNull($p->tenant_id);
-
-        // no changes!
-        $this->captureWriteQueries();
-        $this->save($t);
-        $this->assertNumWrites(0);
     }
 }

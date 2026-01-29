@@ -20,9 +20,8 @@ final class MapperProvider implements MapperProviderInterface
 
     public function __construct(
         private ?ORMInterface $orm,
-        private FactoryInterface $factory
-    ) {
-    }
+        private FactoryInterface $factory,
+    ) {}
 
     public function getMapper(string $entity): MapperInterface
     {

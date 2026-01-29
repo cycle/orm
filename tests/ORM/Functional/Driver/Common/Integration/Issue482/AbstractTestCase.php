@@ -16,16 +16,6 @@ abstract class AbstractTestCase extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
-    public function setUp(): void
-    {
-        // Init DB
-        parent::setUp();
-        $this->makeTables();
-        $this->fillData();
-
-        $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
     public function testSelect(): void
     {
         $select = $this->orm->getRepository(Country::class)
@@ -70,10 +60,10 @@ abstract class AbstractTestCase extends BaseTest
             ],
             \array_column(
                 \array_merge(
-                    ...\array_column($data, 'translations')
+                    ...\array_column($data, 'translations'),
                 ),
-                'title'
-            )
+                'title',
+            ),
         );
 
         $all = $select->fetchAll();
@@ -89,14 +79,26 @@ abstract class AbstractTestCase extends BaseTest
                     self::assertCount(1, $c->translations);
                     return $c->translations[0]->title;
                 },
-                $all
-            )
+                $all,
+            ),
         );
     }
 
+    public function setUp(): void
+    {
+        // Init DB
+        parent::setUp();
+        $this->makeTables();
+        $this->fillData();
+
+        $this->loadSchema(__DIR__ . '/schema.php');
+    }
+
+    abstract protected function getExpectedSql(): string;
+
     private function assertExpectedSql(Select $select): void
     {
-        $actual = (string)$select->buildQuery();
+        $actual = (string) $select->buildQuery();
         $expected = $this->getExpectedSql();
         $this->assertSame(
             \array_map('trim', \explode("\n", $expected)),
@@ -170,6 +172,4 @@ abstract class AbstractTestCase extends BaseTest
             ],
         );
     }
-
-    abstract protected function getExpectedSql(): string;
 }

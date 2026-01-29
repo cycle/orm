@@ -64,7 +64,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         FactoryInterface $factory,
         protected string $name,
         string $target,
-        protected array $schema
+        protected array $schema,
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $target);
         $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
@@ -147,7 +147,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return;
         }
 
-        //Ensure all nested relations
+        // Ensure all nested relations
         $statement = $this->configureQuery($this->initQuery(), $references)->run();
 
         foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {
@@ -169,11 +169,16 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function isJoined(): bool
     {
+        /** It's impossible to join with {@see UpdateLoader} because it doesn't produce any SQL */
+        if ($this->parent instanceof UpdateLoader) {
+            return false;
+        }
+
         if (!empty($this->options['using'])) {
             return true;
         }
 
-        return in_array($this->getMethod(), [self::INLOAD, self::JOIN, self::LEFT_JOIN], true);
+        return \in_array($this->getMethod(), [self::INLOAD, self::JOIN, self::LEFT_JOIN], true);
     }
 
     /**
@@ -189,17 +194,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function isLoaded(): bool
     {
-        return $this->options['load'] || in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD], true);
-    }
-
-    protected function configureSubQuery(SelectQuery $query): SelectQuery
-    {
-        if (!$this->isJoined()) {
-            return $this->configureQuery($query);
-        }
-
-        $loader = new SubQueryLoader($this->ormSchema, $this->sourceProvider, $this->factory, $this, $this->options);
-        return $loader->configureQuery($query);
+        return $this->options['load'] || \in_array($this->getMethod(), [self::INLOAD, self::POSTLOAD], true);
     }
 
     /**
@@ -228,6 +223,16 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         }
 
         return parent::configureQuery($query);
+    }
+
+    protected function configureSubQuery(SelectQuery $query): SelectQuery
+    {
+        if (!$this->isJoined()) {
+            return $this->configureQuery($query);
+        }
+
+        $loader = new SubQueryLoader($this->ormSchema, $this->sourceProvider, $this->factory, $this, $this->options);
+        return $loader->configureQuery($query);
     }
 
     protected function applyScope(SelectQuery $query): SelectQuery
@@ -277,7 +282,8 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      * fetched from schema.
      *
      * Example:
-     * $this->getKey(Relation::OUTER_KEY);
+     *
+     *     $this->getKey(Relation::OUTER_KEY);
      */
     protected function localKey(string|int $key): ?string
     {

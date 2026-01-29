@@ -18,6 +18,142 @@ abstract class DeepEmbeddedTest extends BaseTest
 {
     use TableTrait;
 
+    public function testFetchData(): void
+    {
+        $selector = new Select($this->orm, Group::class);
+        $selector->load('users')->orderBy('id', 'ASC');
+
+        $this->assertSame(
+            [
+                [
+                    'id' => 1,
+                    'name' => 'first',
+                    'users' => [
+                        [
+                            'id' => 1,
+                            'group_id' => 1,
+                            'email' => 'hello@world.com',
+                            'balance' => 100.0,
+                            'credentials' => [
+                                'username' => 'user1',
+                                'password' => 'pass1',
+                            ],
+                        ],
+                        [
+                            'id' => 2,
+                            'group_id' => 1,
+                            'email' => 'another@world.com',
+                            'balance' => 200.0,
+                            'credentials' => [
+                                'username' => 'user2',
+                                'password' => 'pass2',
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'second',
+                    'users' => [
+                        [
+                            'id' => 3,
+                            'group_id' => 2,
+                            'email' => 'third@world.com',
+                            'balance' => 200.0,
+                            'credentials' => [
+                                'username' => 'user3',
+                                'password' => 'pass3',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            $selector->fetchData(),
+        );
+    }
+
+    public function testWithRelationIgnoreEager(): void
+    {
+        $selector = new Select($this->orm, Group::class);
+        $selector->with('users')->orderBy('id', 'ASC');
+
+        $this->assertSame(
+            [
+                [
+                    'id' => 1,
+                    'name' => 'first',
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'second',
+                ],
+            ],
+            $selector->fetchData(),
+        );
+
+        // only parent entity!
+        $this->assertCount(2, $selector->buildQuery()->getColumns());
+    }
+
+    public function testFetchDataViaJoin(): void
+    {
+        $selector = new Select($this->orm, Group::class);
+        $selector->with('users', ['as' => 'users'])
+            ->load('users', ['using' => 'users'])
+            ->orderBy('id', 'ASC')
+            ->orderBy('users.id', 'ASC');
+
+        $this->assertSame(
+            [
+                [
+                    'id' => 1,
+                    'name' => 'first',
+                    'users' => [
+                        [
+                            'id' => 1,
+                            'group_id' => 1,
+                            'email' => 'hello@world.com',
+                            'balance' => 100.0,
+                            'credentials' => [
+                                'username' => 'user1',
+                                'password' => 'pass1',
+                            ],
+                        ],
+                        [
+                            'id' => 2,
+                            'group_id' => 1,
+                            'email' => 'another@world.com',
+                            'balance' => 200.0,
+                            'credentials' => [
+                                'username' => 'user2',
+                                'password' => 'pass2',
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'second',
+                    'users' => [
+                        [
+                            'id' => 3,
+                            'group_id' => 2,
+                            'email' => 'third@world.com',
+                            'balance' => 200.0,
+                            'credentials' => [
+                                'username' => 'user3',
+                                'password' => 'pass3',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            $selector->fetchData(),
+        );
+
+        $this->assertCount(8, $selector->buildQuery()->getColumns());
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -27,7 +163,7 @@ abstract class DeepEmbeddedTest extends BaseTest
             [
                 'id' => 'primary',
                 'name' => 'string',
-            ]
+            ],
         );
 
         $this->makeTable(
@@ -39,7 +175,7 @@ abstract class DeepEmbeddedTest extends BaseTest
                 'balance' => 'float',
                 'creds_username' => 'string',
                 'creds_password' => 'string',
-            ]
+            ],
         );
 
         $this->getDatabase()->table('group')->insertMultiple(
@@ -47,7 +183,7 @@ abstract class DeepEmbeddedTest extends BaseTest
             [
                 ['first'],
                 ['second'],
-            ]
+            ],
         );
 
         $this->getDatabase()->table('user')->insertMultiple(
@@ -56,7 +192,7 @@ abstract class DeepEmbeddedTest extends BaseTest
                 ['hello@world.com', 1, 100, 'user1', 'pass1'],
                 ['another@world.com', 1, 200, 'user2', 'pass2'],
                 ['third@world.com', 2, 200, 'user3', 'pass3'],
-            ]
+            ],
         );
 
         $this->orm = $this->withSchema(
@@ -116,144 +252,8 @@ abstract class DeepEmbeddedTest extends BaseTest
                         Schema::TYPECAST => ['id' => 'int'],
                         Schema::RELATIONS => [],
                     ],
-                ]
-            )
+                ],
+            ),
         );
-    }
-
-    public function testFetchData(): void
-    {
-        $selector = new Select($this->orm, Group::class);
-        $selector->load('users')->orderBy('id', 'ASC');
-
-        $this->assertSame(
-            [
-                [
-                    'id' => 1,
-                    'name' => 'first',
-                    'users' => [
-                        [
-                            'id' => 1,
-                            'group_id' => 1,
-                            'email' => 'hello@world.com',
-                            'balance' => 100.0,
-                            'credentials' => [
-                                'username' => 'user1',
-                                'password' => 'pass1',
-                            ],
-                        ],
-                        [
-                            'id' => 2,
-                            'group_id' => 1,
-                            'email' => 'another@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user2',
-                                'password' => 'pass2',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'second',
-                    'users' => [
-                        [
-                            'id' => 3,
-                            'group_id' => 2,
-                            'email' => 'third@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user3',
-                                'password' => 'pass3',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            $selector->fetchData()
-        );
-    }
-
-    public function testWithRelationIgnoreEager(): void
-    {
-        $selector = new Select($this->orm, Group::class);
-        $selector->with('users')->orderBy('id', 'ASC');
-
-        $this->assertSame(
-            [
-                [
-                    'id' => 1,
-                    'name' => 'first',
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'second',
-                ],
-            ],
-            $selector->fetchData()
-        );
-
-        // only parent entity!
-        $this->assertCount(2, $selector->buildQuery()->getColumns());
-    }
-
-    public function testFetchDataViaJoin(): void
-    {
-        $selector = new Select($this->orm, Group::class);
-        $selector->with('users', ['as' => 'users'])
-                 ->load('users', ['using' => 'users'])
-                 ->orderBy('id', 'ASC')
-                 ->orderBy('users.id', 'ASC');
-
-        $this->assertSame(
-            [
-                [
-                    'id' => 1,
-                    'name' => 'first',
-                    'users' => [
-                        [
-                            'id' => 1,
-                            'group_id' => 1,
-                            'email' => 'hello@world.com',
-                            'balance' => 100.0,
-                            'credentials' => [
-                                'username' => 'user1',
-                                'password' => 'pass1',
-                            ],
-                        ],
-                        [
-                            'id' => 2,
-                            'group_id' => 1,
-                            'email' => 'another@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user2',
-                                'password' => 'pass2',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'second',
-                    'users' => [
-                        [
-                            'id' => 3,
-                            'group_id' => 2,
-                            'email' => 'third@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user3',
-                                'password' => 'pass3',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            $selector->fetchData()
-        );
-
-        $this->assertCount(8, $selector->buildQuery()->getColumns());
     }
 }

@@ -18,50 +18,12 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
 {
     protected const EMPLOYEE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager_with_credentials';
-
     protected const EMPLOYEE_1 = ['id' => 1, 'name' => 'John', 'age' => 38];
     protected const EMPLOYEE_2 = ['id' => 2, 'name' => 'Anton', 'age' => 35];
     protected const EMPLOYEE_3 = ['id' => 3, 'name' => 'Kentarius', 'age' => 27];
     protected const EMPLOYEE_4 = ['id' => 4, 'name' => 'Valeriy', 'age' => 32];
     protected const MANAGER_1 = ['id' => 1, 'rank' => 'top'];
     protected const MANAGER_3 = ['id' => 3, 'rank' => 'bottom'];
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('employee', [
-            'id' => 'integer',
-            'name' => 'string',
-            'age' => 'integer,nullable',
-        ], pk: ['id']);
-
-        $this->makeTable('manager_with_credentials', [
-            'id' => 'integer',
-            'rank' => 'string',
-            'creds_username' => 'string,nullable',
-            'creds_password' => 'string,nullable',
-        ], fk: [
-            'id' => ['table' => 'employee', 'column' => 'id'],
-        ], pk: ['id']);
-
-        $this->getDatabase()->table('employee')->insertMultiple(
-            array_keys(static::EMPLOYEE_1),
-            [
-                self::EMPLOYEE_1,
-                self::EMPLOYEE_2,
-                self::EMPLOYEE_3,
-                self::EMPLOYEE_4,
-            ]
-        );
-        $this->getDatabase()->table('manager_with_credentials')->insertMultiple(
-            array_keys(static::MANAGER_1),
-            [
-                self::MANAGER_1,
-                self::MANAGER_3,
-            ]
-        );
-    }
 
     /**
      * Parent's relation should be initialized
@@ -94,7 +56,7 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
     public function testInsertToCreatingNewEmbeddedObjectForJtiChildEntity(): void
     {
         $this->markTestSkipped(
-            'TODO: Must be fixed. When we create new embedded object, we should update entity\'s node in heap'
+            'TODO: Must be fixed. When we create new embedded object, we should update entity\'s node in heap',
         );
 
         /** @var ManagerWithCredentials $entity */
@@ -119,6 +81,43 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
 
         $this->assertSame('roquie', $entity->credentials->username);
         $this->assertSame('secret', $entity->credentials->password);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('employee', [
+            'id' => 'integer',
+            'name' => 'string',
+            'age' => 'integer,nullable',
+        ], pk: ['id']);
+
+        $this->makeTable('manager_with_credentials', [
+            'id' => 'integer',
+            'rank' => 'string',
+            'creds_username' => 'string,nullable',
+            'creds_password' => 'string,nullable',
+        ], fk: [
+            'id' => ['table' => 'employee', 'column' => 'id'],
+        ], pk: ['id']);
+
+        $this->getDatabase()->table('employee')->insertMultiple(
+            array_keys(static::EMPLOYEE_1),
+            [
+                self::EMPLOYEE_1,
+                self::EMPLOYEE_2,
+                self::EMPLOYEE_3,
+                self::EMPLOYEE_4,
+            ],
+        );
+        $this->getDatabase()->table('manager_with_credentials')->insertMultiple(
+            array_keys(static::MANAGER_1),
+            [
+                self::MANAGER_1,
+                self::MANAGER_3,
+            ],
+        );
     }
 
     protected function getSchemaArray(): array

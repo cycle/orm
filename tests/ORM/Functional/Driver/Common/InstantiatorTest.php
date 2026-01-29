@@ -19,6 +19,27 @@ abstract class InstantiatorTest extends BaseTest
 {
     use TableTrait;
 
+    public function testInitRelation(): void
+    {
+        $u = $this->orm->make(WithConstructor::class);
+        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
+        $this->assertNull($u->called);
+    }
+
+    public function testConstructor(): void
+    {
+        $u = new WithConstructor('email');
+
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+
+        $selector = new Select(clone $this->orm, 'user');
+        $u = $selector->fetchOne();
+
+        $this->assertSame('email', $u->email);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -69,26 +90,5 @@ abstract class InstantiatorTest extends BaseTest
                 Schema::SCOPE => SortByIDScope::class,
             ],
         ]));
-    }
-
-    public function testInitRelation(): void
-    {
-        $u = $this->orm->make(WithConstructor::class);
-        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
-        $this->assertNull($u->called);
-    }
-
-    public function testConstructor(): void
-    {
-        $u = new WithConstructor('email');
-
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-
-        $selector = new Select(clone $this->orm, 'user');
-        $u = $selector->fetchOne();
-
-        $this->assertSame('email', $u->email);
     }
 }

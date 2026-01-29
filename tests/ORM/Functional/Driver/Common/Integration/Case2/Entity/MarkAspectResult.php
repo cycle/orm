@@ -7,7 +7,6 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2\Entity;
 class MarkAspectResult
 {
     public Student $student;
-
     public MarkSubcriterionResult $markSubcriterionResult;
     public bool $marksRequiresAttention = false;
     public ?string $student_id = null;
@@ -15,6 +14,5 @@ class MarkAspectResult
 
     public function __construct(
         public ?string $id = null,
-    ) {
-    }
+    ) {}
 }

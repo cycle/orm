@@ -23,62 +23,6 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
 {
     use TableTrait;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->makeTable('tag', [
-            'id' => 'primary',
-            'name' => 'string',
-        ]);
-
-        $this->makeTable('tag_user_map', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'tag_id' => 'integer',
-            'as' => 'string,nullable',
-        ]);
-
-        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
-        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
-        $this->makeIndex('tag_user_map', ['user_id', 'tag_id'], true);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->getDatabase()->table('tag')->insertMultiple(
-            ['name'],
-            [
-                ['tag a'],
-                ['tag b'],
-                ['tag c'],
-            ]
-        );
-
-        $this->getDatabase()->table('tag_user_map')->insertMultiple(
-            ['user_id', 'tag_id', 'as'],
-            [
-                [1, 1, 'primary'],
-                [1, 2, 'secondary'],
-                [2, 3, 'primary'],
-            ]
-        );
-
-        $this->orm = $this->createOrm()
-            ->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
@@ -359,6 +303,62 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
         $this->assertSame('tag c', $user->tags[1]->name);
     }
 
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->makeTable('tag', [
+            'id' => 'primary',
+            'name' => 'string',
+        ]);
+
+        $this->makeTable('tag_user_map', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'tag_id' => 'integer',
+            'as' => 'string,nullable',
+        ]);
+
+        $this->makeFK('tag_user_map', 'user_id', 'user', 'id');
+        $this->makeFK('tag_user_map', 'tag_id', 'tag', 'id');
+        $this->makeIndex('tag_user_map', ['user_id', 'tag_id'], true);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->getDatabase()->table('tag')->insertMultiple(
+            ['name'],
+            [
+                ['tag a'],
+                ['tag b'],
+                ['tag c'],
+            ],
+        );
+
+        $this->getDatabase()->table('tag_user_map')->insertMultiple(
+            ['user_id', 'tag_id', 'as'],
+            [
+                [1, 1, 'primary'],
+                [1, 2, 'secondary'],
+                [2, 3, 'primary'],
+            ],
+        );
+
+        $this->orm = $this->createOrm()
+            ->withSchema(new Schema($this->getSchemaArray()));
+    }
+
     private function createOrm(): ORMInterface
     {
         return new ORM(
@@ -366,9 +366,9 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
                 $this->dbal,
                 RelationConfig::getDefault(),
                 null,
-                new \Cycle\ORM\Collection\ArrayCollectionFactory()
+                new \Cycle\ORM\Collection\ArrayCollectionFactory(),
             ),
-            new Schema([])
+            new Schema([]),
         );
     }
 

@@ -31,56 +31,13 @@ abstract class HasManyCollectionsTest extends BaseTest
      */
     private array $collectionFactory = [];
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->collectionFactory = [];
-
-        $this->makeTable('user', [
-            'id' => 'primary',
-            'email' => 'string',
-            'balance' => 'float',
-        ]);
-
-        $this->getDatabase()->table('user')->insertMultiple(
-            ['email', 'balance'],
-            [
-                ['hello@world.com', 100],
-                ['another@world.com', 200],
-            ]
-        );
-
-        $this->makeTable('comment', [
-            'id' => 'primary',
-            'user_id' => 'integer',
-            'level' => 'integer',
-            'message' => 'string',
-        ]);
-
-        $this->getDatabase()->table('comment')->insertMultiple(
-            ['user_id', 'level', 'message'],
-            [
-                [1, 1, 'msg 1'],
-                [1, 2, 'msg 2'],
-                [1, 3, 'msg 3'],
-                [1, 4, 'msg 4'],
-                [2, 1, 'msg 2.1'],
-                [2, 2, 'msg 2.2'],
-                [2, 3, 'msg 2.3'],
-            ]
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     /**
      * @dataProvider collectionTypesProvider
      */
     public function testCustomCollectionLoad(?string $factory, bool $lazy, string $class): void
     {
         $this->orm = $this->createOrm()->withSchema(
-            new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory))
+            new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory)),
         );
 
         $select = new Select($this->orm, User::class);
@@ -98,7 +55,7 @@ abstract class HasManyCollectionsTest extends BaseTest
     public function testCustomCollectionPersist(string $factory, string $type): void
     {
         $this->orm = $this->createOrm()->withSchema(
-            new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory))
+            new Schema($this->schemaWithCollectionType(User::class, 'comments', $factory)),
         );
         $comments = $this->collectionFactory[$factory]->collect([
             $this->orm->make(Comment::class, ['level' => 90, 'message' => 'test 90']),
@@ -157,6 +114,49 @@ abstract class HasManyCollectionsTest extends BaseTest
         ];
     }
 
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->collectionFactory = [];
+
+        $this->makeTable('user', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user')->insertMultiple(
+            ['email', 'balance'],
+            [
+                ['hello@world.com', 100],
+                ['another@world.com', 200],
+            ],
+        );
+
+        $this->makeTable('comment', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'level' => 'integer',
+            'message' => 'string',
+        ]);
+
+        $this->getDatabase()->table('comment')->insertMultiple(
+            ['user_id', 'level', 'message'],
+            [
+                [1, 1, 'msg 1'],
+                [1, 2, 'msg 2'],
+                [1, 3, 'msg 3'],
+                [1, 4, 'msg 4'],
+                [2, 1, 'msg 2.1'],
+                [2, 2, 'msg 2.2'],
+                [2, 3, 'msg 2.3'],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+    }
+
     private function createOrm(): ORMInterface
     {
         $this->collectionFactory['doctrine'] = new DoctrineCollectionFactory();
@@ -168,21 +168,21 @@ abstract class HasManyCollectionsTest extends BaseTest
                 $this->dbal,
                 RelationConfig::getDefault(),
                 null,
-                $this->collectionFactory['doctrine']
+                $this->collectionFactory['doctrine'],
             ))
                 ->withCollectionFactory(
                     'doctrine',
-                    $this->collectionFactory['doctrine']
+                    $this->collectionFactory['doctrine'],
                 )
                 ->withCollectionFactory(
                     'illuminate',
-                    $this->collectionFactory['illuminate']
+                    $this->collectionFactory['illuminate'],
                 )
                 ->withCollectionFactory(
                     'array',
-                    $this->collectionFactory['array']
+                    $this->collectionFactory['array'],
                 ),
-            new Schema([])
+            new Schema([]),
         );
     }
 
@@ -190,7 +190,7 @@ abstract class HasManyCollectionsTest extends BaseTest
         string $role,
         string $relation,
         ?string $collection,
-        array $schema = null
+        ?array $schema = null,
     ): array {
         $schema ??= $this->getSchemaArray();
         $schema[$role][Schema::RELATIONS][$relation][Relation::COLLECTION_TYPE] = $collection;

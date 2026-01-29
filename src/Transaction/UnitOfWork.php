@@ -137,6 +137,19 @@ final class UnitOfWork implements StateInterface
     }
 
     /**
+     * Check if there are pending changes in the unit of work.
+     *
+     * @return bool True if there are pending changes, false otherwise.
+     *         In case the transaction is finished, it will always return false.
+     *         In case the transaction is in process, it will always return true.
+     *         In case of failure, it will return true and pending changes can be retried.
+     */
+    public function hasPendingChanges(): bool
+    {
+        return isset($this->pool) && $this->pool->count() > 0;
+    }
+
+    /**
      * @throws TransactionException
      */
     private function checkActionPossibility(string $action): void
@@ -232,8 +245,8 @@ final class UnitOfWork implements StateInterface
         $deferred = false;
         $resolved = true;
         foreach ($map->getMasters() as $name => $relation) {
-            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
-            if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
+            $statusAfter = $statusBefore = $tuple->state->getRelationStatus($relation->getName());
+            if ($statusBefore === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }
 
@@ -242,10 +255,10 @@ final class UnitOfWork implements StateInterface
                 // Connected -> $parentNode->getRelationStatus()
                 // Disconnected -> WAIT if Tuple::STATUS_PREPARING
                 $relation->queue($this->pool, $tuple);
-                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
+                $statusAfter = $tuple->state->getRelationStatus($relation->getName());
             } else {
                 if ($tuple->status === Tuple::STATUS_PREPARING) {
-                    if ($relationStatus === RelationInterface::STATUS_PREPARE) {
+                    if ($statusAfter === RelationInterface::STATUS_PREPARE) {
                         $entityData ??= $tuple->mapper->fetchRelations($tuple->entity);
                         $relation->prepare(
                             $this->pool,
@@ -254,15 +267,17 @@ final class UnitOfWork implements StateInterface
                                 ? $entityData[$name]
                                 : ($this->ignoreUninitializedRelations ? SpecialValue::notSet() : null),
                         );
-                        $relationStatus = $tuple->state->getRelationStatus($relation->getName());
+                        $statusAfter = $tuple->state->getRelationStatus($relation->getName());
                     }
                 } else {
                     $relation->queue($this->pool, $tuple);
-                    $relationStatus = $tuple->state->getRelationStatus($relation->getName());
+                    $statusAfter = $tuple->state->getRelationStatus($relation->getName());
                 }
             }
-            $resolved = $resolved && $relationStatus >= RelationInterface::STATUS_DEFERRED;
-            $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
+
+            $statusAfter > $statusBefore and $this->pool->someHappens();
+            $resolved = $resolved && $statusAfter >= RelationInterface::STATUS_DEFERRED;
+            $deferred = $deferred || $statusAfter === RelationInterface::STATUS_DEFERRED;
         }
 
         // $tuple->waitKeys = array_unique(array_merge(...$waitKeys));
@@ -284,15 +299,15 @@ final class UnitOfWork implements StateInterface
             $relData = $tuple->mapper->fetchRelations($tuple->entity);
         }
         foreach ($map->getSlaves() as $name => $relation) {
-            $relationStatus = $tuple->state->getRelationStatus($relation->getName());
-            if (!$relation->isCascade() || $relationStatus === RelationInterface::STATUS_RESOLVED) {
+            $statusBefore = $statusAfter = $tuple->state->getRelationStatus($relation->getName());
+            if (!$relation->isCascade() || $statusAfter === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }
 
             $innerKeys = $relation->getInnerKeys();
             $isWaitingKeys = \array_intersect($innerKeys, $tuple->state->getWaitingFields(true)) !== [];
             $hasChangedKeys = \array_intersect($innerKeys, $changedFields) !== [];
-            if ($relationStatus === RelationInterface::STATUS_PREPARE) {
+            if ($statusAfter === RelationInterface::STATUS_PREPARE) {
                 $relData ??= $tuple->mapper->fetchRelations($tuple->entity);
                 $relation->prepare(
                     $this->pool,
@@ -302,21 +317,23 @@ final class UnitOfWork implements StateInterface
                         : ($this->ignoreUninitializedRelations ? SpecialValue::notSet() : null),
                     $isWaitingKeys || $hasChangedKeys,
                 );
-                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
+                $statusAfter = $tuple->state->getRelationStatus($relation->getName());
             }
 
-            if ($relationStatus !== RelationInterface::STATUS_PREPARE
-                && $relationStatus !== RelationInterface::STATUS_RESOLVED
+            if ($statusAfter !== RelationInterface::STATUS_PREPARE
+                && $statusAfter !== RelationInterface::STATUS_RESOLVED
                 && !$isWaitingKeys
                 && !$hasChangedKeys
                 && \count(\array_intersect($innerKeys, \array_keys($transactData))) === \count($innerKeys)
             ) {
                 // $child ??= $tuple->state->getRelation($name);
                 $relation->queue($this->pool, $tuple);
-                $relationStatus = $tuple->state->getRelationStatus($relation->getName());
+                $statusAfter = $tuple->state->getRelationStatus($relation->getName());
             }
-            $resolved = $resolved && $relationStatus === RelationInterface::STATUS_RESOLVED;
-            $deferred = $deferred || $relationStatus === RelationInterface::STATUS_DEFERRED;
+
+            $statusAfter > $statusBefore and $this->pool->someHappens();
+            $resolved = $resolved && $statusAfter === RelationInterface::STATUS_RESOLVED;
+            $deferred = $deferred || $statusAfter === RelationInterface::STATUS_DEFERRED;
         }
 
         return ($deferred ? self::RELATIONS_DEFERRED : 0) | ($resolved ? self::RELATIONS_RESOLVED : 0);
@@ -324,10 +341,11 @@ final class UnitOfWork implements StateInterface
 
     private function resolveSelfWithEmbedded(Tuple $tuple, RelationMap $map, bool $hasDeferredRelations): void
     {
-        if (!$map->hasEmbedded() && !$tuple->state->hasChanges()) {
-            $tuple->status = !$hasDeferredRelations
-                ? Tuple::STATUS_PROCESSED
-                : \max(Tuple::STATUS_DEFERRED, $tuple->status);
+        $hasChanges = $tuple->state->hasChanges();
+        if (!$hasChanges && !$map->hasEmbedded()) {
+            $tuple->status = $hasDeferredRelations
+                ? \max(Tuple::STATUS_DEFERRED_RESOLVED, $tuple->status)
+                : Tuple::STATUS_PROCESSED;
 
             return;
         }
@@ -337,19 +355,22 @@ final class UnitOfWork implements StateInterface
             // Not embedded but has changes
             $this->runCommand($command);
 
-            $tuple->status = $tuple->status <= Tuple::STATUS_PROPOSED && $hasDeferredRelations
-                ? Tuple::STATUS_DEFERRED
+            $tuple->status = $tuple->status <= Tuple::STATUS_PROPOSED_RESOLVED && $hasDeferredRelations
+                ? Tuple::STATUS_DEFERRED_RESOLVED
                 : Tuple::STATUS_PROCESSED;
 
             return;
         }
 
         $entityData = $tuple->mapper->extract($tuple->entity);
+        $chEmb = false;
         foreach ($map->getEmbedded() as $name => $relation) {
             $relationStatus = $tuple->state->getRelationStatus($relation->getName());
             if ($relationStatus === RelationInterface::STATUS_RESOLVED) {
                 continue;
             }
+
+            $chEmb = true;
             $tuple->state->setRelation($name, $entityData[$name] ?? null);
             // We can use class MergeCommand here
             $relation->queue(
@@ -358,11 +379,13 @@ final class UnitOfWork implements StateInterface
                 $command instanceof Sequence ? $command->getPrimaryCommand() : $command,
             );
         }
-        $this->runCommand($command);
+
+        // Run command if there are embedded changes or other changes
+        $chEmb || $hasChanges and $this->runCommand($command);
 
         $tuple->status = $tuple->status === Tuple::STATUS_PREPROCESSED || !$hasDeferredRelations
             ? Tuple::STATUS_PROCESSED
-            : \max(Tuple::STATUS_DEFERRED, $tuple->status);
+            : \max(Tuple::STATUS_DEFERRED_RESOLVED, $tuple->status);
     }
 
     private function resolveRelations(Tuple $tuple): void
@@ -375,9 +398,10 @@ final class UnitOfWork implements StateInterface
         $isDependenciesResolved = (bool) ($result & self::RELATIONS_RESOLVED);
         $deferred = (bool) ($result & self::RELATIONS_DEFERRED);
 
-        // Self
-        if ($deferred && $tuple->status < Tuple::STATUS_PROPOSED) {
-            $tuple->status = Tuple::STATUS_DEFERRED;
+        // If deferred relations found, mark self as deferred
+        if ($deferred) {
+            $tuple->status === Tuple::STATUS_PROPOSED_RESOLVED or $this->pool->someHappens();
+            $tuple->status = $isDependenciesResolved ? Tuple::STATUS_DEFERRED_RESOLVED : Tuple::STATUS_DEFERRED;
         }
 
         if ($isDependenciesResolved) {

@@ -37,28 +37,29 @@ trait ColumnsTrait
     /**
      * Set columns into SelectQuery.
      *
-     * @param bool        $minify    Minify column names (will work in case when query parsed in
-     *                               FETCH_NUM mode).
-     * @param string      $prefix    Prefix to be added for each column name.
-     * @param bool        $overwrite When set to true existed columns will be removed.
+     * @param bool $minify Minify column names (will work in case when query parsed in FETCH_NUM mode).
+     * @param string $prefix Prefix to be added for each column name.
+     * @param bool $overwrite When set to true existed columns will be removed.
+     * @param bool $addToGroup When set to true columns will be added to GROUP BY clause.
      */
     protected function mountColumns(
         SelectQuery $query,
         bool $minify = false,
         string $prefix = '',
         bool $overwrite = false,
+        bool $addToGroup = false,
     ): SelectQuery {
         $alias = $this->getAlias();
         $columns = $overwrite ? [] : $query->getColumns();
 
         foreach ($this->columns as $internal => $external) {
-            $name = $internal;
-            if ($minify) {
-                //Let's use column number instead of full name
-                $name = 'c' . \count($columns);
-            }
+            $name = $minify
+                // Let's use column number instead of full name
+                ? 'c' . \count($columns)
+                : $internal;
 
             $columns[] = "{$alias}.{$external} AS {$prefix}{$name}";
+            $addToGroup and $query->groupBy("{$alias}.{$external}");
         }
 
         return $query->columns($columns);
@@ -66,6 +67,8 @@ trait ColumnsTrait
 
     /**
      * Return original column names.
+     *
+     * @return non-empty-string[]
      */
     protected function columnNames(): array
     {

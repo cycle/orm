@@ -23,6 +23,7 @@ jobs:
           - "8.2"
           - "8.3"
           - "8.4"
+          - "8.5"
     steps:
       - name: Install ODBC driver.
         run: |
@@ -30,7 +31,7 @@ jobs:
           sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
       - name: 📦 Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
       - name: 🛠️ Setup DB services
         run: |
           cd tests
@@ -84,9 +85,10 @@ jobs:
           - "8.2"
           - "8.3"
           - "8.4"
+          - "8.5"
     steps:
       - name: 📦 Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
       - name: 🛠️ Setup DB services
         run: |
           cd tests

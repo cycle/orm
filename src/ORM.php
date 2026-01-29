@@ -176,7 +176,7 @@ final class ORM implements ORMInterface
             schema: $schema ?? $this->schema,
             commandGenerator: $this->commandGenerator,
             heap: $heap,
-            options: $options,
+            options: $options ?? $this->options,
         );
     }
 

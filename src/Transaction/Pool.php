@@ -191,6 +191,8 @@ final class Pool implements \Countable
                         $tuple->status = Tuple::STATUS_WAITED;
                     } elseif ($tuple->status === Tuple::STATUS_DEFERRED) {
                         $tuple->status = Tuple::STATUS_PROPOSED;
+                    } elseif ($tuple->status === Tuple::STATUS_DEFERRED_RESOLVED) {
+                        $tuple->status = Tuple::STATUS_PROPOSED_RESOLVED;
                     }
                     yield $entity => $tuple;
                     $this->trashIt($entity, $tuple, $this->storage);
@@ -208,6 +210,7 @@ final class Pool implements \Countable
                     $this->unprocessed = [];
                     continue;
                 }
+
                 if ($this->happens === 0 && (\count($pool) > 0 || $hasUnresolved)) {
                     throw new PoolException('Pool has gone into an infinite loop.');
                 }

@@ -223,9 +223,10 @@ class ManyToManyLoader extends JoinableLoader
         bool $minify = false,
         string $prefix = '',
         bool $overwrite = false,
+        bool $addToGroup = false,
     ): SelectQuery {
         // columns are reset on earlier stage to allow pivot loader mount it's own aliases
-        return parent::mountColumns($query, $minify, $prefix, false);
+        return parent::mountColumns($query, $minify, $prefix, false, $addToGroup);
     }
 
     protected function initNode(): AbstractNode

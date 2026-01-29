@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\BelongsTo;
 
+use Cycle\ORM\Options;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
@@ -64,5 +65,22 @@ abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
             ->load('user')
             ->fetchOne();
         $this->assertNull($profile->user);
+    }
+
+    /**
+     * If relation property was unset and IgnoreUninitializedRelations option is false - set to null
+     */
+    public function testUnsetPropertyWithoutIgnoreUninitializedRelations(): void
+    {
+        $this->orm = $this->orm->with(options: (new Options())->withIgnoreUninitializedRelations(false));
+        /** @var Profile $profile */
+        $profile = (new Select($this->orm, Profile::class))
+            ->wherePK(1)->load('user')->fetchOne();
+
+        unset($profile->user);
+
+        $this->captureWriteQueries();
+        $this->save($profile);
+        $this->assertNumWrites(1);
     }
 }

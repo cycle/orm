@@ -22,9 +22,11 @@ final class Tuple
     public const STATUS_WAITED = 2;
     public const STATUS_DEFERRED = 3;
     public const STATUS_PROPOSED = 4;
-    public const STATUS_PREPROCESSED = 5;
-    public const STATUS_PROCESSED = 6;
-    public const STATUS_UNPROCESSED = 7;
+    public const STATUS_DEFERRED_RESOLVED = 5;
+    public const STATUS_PROPOSED_RESOLVED = 6;
+    public const STATUS_PREPROCESSED = 7;
+    public const STATUS_PROCESSED = 8;
+    public const STATUS_UNPROCESSED = 9;
 
     public Node $node;
     public State $state;
@@ -46,6 +48,8 @@ final class Tuple
             self::STATUS_WAITED,
             self::STATUS_DEFERRED,
             self::STATUS_PROPOSED,
+            self::STATUS_DEFERRED_RESOLVED,
+            self::STATUS_PROPOSED_RESOLVED,
             self::STATUS_PREPROCESSED,
             self::STATUS_PROCESSED,
             self::STATUS_UNPROCESSED,

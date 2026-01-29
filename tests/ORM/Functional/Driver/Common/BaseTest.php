@@ -15,6 +15,7 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\RelationLoaderInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\TestLogger;
@@ -153,6 +154,9 @@ abstract class BaseTest extends TestCase
             ))->withCollectionFactory('array', new ArrayCollectionFactory()),
             new Schema([]),
             $this->getCommandGenerator(),
+            options: (new \Cycle\ORM\Options())
+                ->withIgnoreUninitializedRelations(true)
+                ->withGroupByToDeduplicate(true),
         );
     }
 
@@ -385,5 +389,10 @@ abstract class BaseTest extends TestCase
     protected function getCommandGenerator(): ?Transaction\CommandGeneratorInterface
     {
         return null;
+    }
+
+    protected function bulkLoader(object ...$entities): RelationLoaderInterface
+    {
+        return (new Relation\BulkLoader($this->orm))->collect(...$entities);
     }
 }

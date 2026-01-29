@@ -9,6 +9,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\ImagedInterface;
@@ -271,6 +272,24 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $this->assertNull($c->parent);
+    }
+
+    public function testUpdateRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<Image> $images */
+        $images = (new Select($this->orm, Image::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$images)->load('parent')->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        foreach ($images as $image) {
+            $this->assertNotNull($image->parent);
+        }
+        $this->assertNumReads(0);
     }
 
     public function setUp(): void

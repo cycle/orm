@@ -437,6 +437,52 @@ abstract class MorphedHasOneRelationTest extends BaseTest
         $this->assertSame('user-image.png', $p->image->url);
     }
 
+    public function testUpdateRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)->load('image')->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            $this->assertNotNull($user->image);
+        }
+        $this->assertNumReads(0);
+    }
+
+    public function testUpdateNestedRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)
+            ->load('posts.image')
+            ->run();
+        // Nested relation will be loaded using JOIN
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            $this->assertIsIterable($user->posts);
+            foreach ($user->posts as $post) {
+                // Post 4 doesn't have an image
+                if ($post->id !== 4) {
+                    $this->assertNotNull($post->image);
+                    $this->assertInstanceOf(\Cycle\ORM\Tests\Fixtures\Image::class, $post->image);
+                }
+            }
+        }
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();
@@ -525,6 +571,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
                         ],
                     ],
                 ],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                ],
             ],
             Post::class => [
                 Schema::ROLE => 'post',
@@ -546,6 +595,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
                         ],
                     ],
                 ],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                ],
             ],
             Image::class => [
                 Schema::ROLE => 'image',
@@ -556,6 +608,9 @@ abstract class MorphedHasOneRelationTest extends BaseTest
                 Schema::COLUMNS => ['id', 'parent_id', 'parent_type', 'url'],
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
+                Schema::TYPECAST => [
+                    'id' => 'int',
+                ],
             ],
         ];
     }

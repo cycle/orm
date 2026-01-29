@@ -675,6 +675,48 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNull($user->profile);
     }
 
+    public function testUpdateRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)->load('profile')->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->assertNotNull($users[0]->profile);
+        static::NULLABLE and $this->assertNull($users[1]->profile);
+        $this->assertNumReads(0);
+    }
+
+    public function testUpdateNestedRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<User> $users */
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$users)
+            ->load('profile.nested')
+            ->run();
+        // Nested relation should be loaded in one query
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            if ($user->id === 1) {
+                $this->assertNotNull($user->profile);
+                $this->assertNotNull($user->profile->nested);
+                $this->assertSame('nested-label', $user->profile->nested->label);
+            }
+        }
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

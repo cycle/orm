@@ -9,7 +9,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
-abstract class TestCase extends BaseTest
+abstract class CaseTest extends BaseTest
 {
     use IntegrationTestTrait;
     use TableTrait;

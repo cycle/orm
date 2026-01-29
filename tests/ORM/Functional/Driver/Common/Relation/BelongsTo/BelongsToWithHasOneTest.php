@@ -465,6 +465,28 @@ abstract class BelongsToWithHasOneTest extends BaseTest
         $this->assertSame('nested-label', $n->label);
     }
 
+    public function testUpdateNestedRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<Nested> $nested */
+        $nested = (new Select($this->orm, Nested::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$nested)
+            ->load('profile.user')
+            ->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        foreach ($nested as $item) {
+            $this->assertNotNull($item->profile);
+            $this->assertNotNull($item->profile->user);
+            $this->assertInstanceOf(User::class, $item->profile->user);
+        }
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

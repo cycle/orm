@@ -252,6 +252,41 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    public function testUpdateRelation(): void
+    {
+        // Prepare data
+        $u = new User();
+        $u->email = 'email@email.com';
+        $u->balance = 100;
+        $c1 = new Comment();
+        $c1->message = 'last comment';
+        $c2 = new Comment();
+        $c2->message = 'new last comment';
+        $u->addComment($c1);
+        $u->addComment($c2);
+        $u->lastComment = $c2;
+        $this->save($u);
+        $this->orm->getHeap()->clean();
+        $id = $u->id;
+        unset($u, $c1, $c2);
+
+        $this->captureReadQueries();
+        /** @var User $user */
+        $user = (new Select($this->orm, User::class))->wherePK($id)->fetchOne();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader($user)
+            ->load('lastComment')
+            ->load('comments')->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        $this->assertNotEmpty($user->comments);
+        $this->assertNotNull($user->lastComment);
+        $this->assertNumReads(0);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

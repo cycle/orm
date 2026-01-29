@@ -55,6 +55,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
             return;
         }
         $this->registerWaitingFields($tuple->state, false);
+
         if ($related instanceof ReferenceInterface) {
             $tuple->state->setRelationStatus($relName, RelationInterface::STATUS_DEFERRED);
             return;
@@ -98,6 +99,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
         if ($this->checkNullValue($tuple->node, $tuple->state, $related)) {
             return;
         }
+
         $rTuple = $pool->offsetGet($related);
         if ($rTuple === null) {
             if ($this->isCascade()) {
@@ -105,7 +107,7 @@ class RefersTo extends AbstractRelation implements DependencyInterface
                 $rTuple = $pool->attachStore($related, false, null, null, false);
             } elseif (
                 $tuple->state->getRelationStatus($relName) !== RelationInterface::STATUS_DEFERRED
-                || $tuple->status !== Tuple::STATUS_PROPOSED
+                || $tuple->status !== Tuple::STATUS_PROPOSED_RESOLVED
             ) {
                 $tuple->state->setRelationStatus($relName, RelationInterface::STATUS_DEFERRED);
                 return;

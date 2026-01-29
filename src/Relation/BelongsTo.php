@@ -122,7 +122,7 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
 
     private function shouldPull(Tuple $tuple, Tuple $rTuple): bool
     {
-        $minStatus = Tuple::STATUS_PREPROCESSED;
+        $minStatus = Tuple::STATUS_DEFERRED_RESOLVED;
         if ($this->inversion !== null) {
             $relName = $this->getTargetRelationName();
             if ($rTuple->state->getRelationStatus($relName) === RelationInterface::STATUS_RESOLVED) {

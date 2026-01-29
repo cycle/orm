@@ -147,7 +147,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
             return;
         }
 
-        //Ensure all nested relations
+        // Ensure all nested relations
         $statement = $this->configureQuery($this->initQuery(), $references)->run();
 
         foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {
@@ -169,6 +169,11 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     public function isJoined(): bool
     {
+        /** It's impossible to join with {@see UpdateLoader} because it doesn't produce any SQL */
+        if ($this->parent instanceof UpdateLoader) {
+            return false;
+        }
+
         if (!empty($this->options['using'])) {
             return true;
         }

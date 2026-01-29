@@ -400,7 +400,6 @@ abstract class BelongsToRelationTest extends BaseTest
      */
     public function testUnsetPropertyWithoutIgnoreUninitializedRelations(): void
     {
-        echo static::class;
         $this->orm = $this->orm->with(options: (new Options())->withIgnoreUninitializedRelations(false));
         /** @var Profile $profile */
         $profile = (new Select($this->orm, Profile::class))
@@ -415,6 +414,25 @@ abstract class BelongsToRelationTest extends BaseTest
         } finally {
             $this->assertNumWrites(0);
         }
+    }
+
+    public function testUpdateRelation(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<Profile> $profiles */
+        $profiles = (new Select($this->orm, Profile::class))->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $this->bulkLoader(...$profiles)->load('user')->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($profiles as $profile) {
+            $profile->user; // force loading
+            static::NULLABLE or $this->assertNotNull($profile->user);
+        }
+        $this->assertNumReads(0);
     }
 
     public function setUp(): void

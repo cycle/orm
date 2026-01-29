@@ -53,11 +53,10 @@ trait ColumnsTrait
         $columns = $overwrite ? [] : $query->getColumns();
 
         foreach ($this->columns as $internal => $external) {
-            $name = $internal;
-            if ($minify) {
-                //Let's use column number instead of full name
-                $name = 'c' . \count($columns);
-            }
+            $name = $minify
+                // Let's use column number instead of full name
+                ? 'c' . \count($columns)
+                : $internal;
 
             $columns[] = "{$alias}.{$external} AS {$prefix}{$name}";
             $addToGroup and $query->groupBy("{$alias}.{$external}");
@@ -68,6 +67,8 @@ trait ColumnsTrait
 
     /**
      * Return original column names.
+     *
+     * @return non-empty-string[]
      */
     protected function columnNames(): array
     {

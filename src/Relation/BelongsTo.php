@@ -140,6 +140,10 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         $noChanges = true;
         $toReference = [];
         foreach ($this->outerKeys as $i => $outerKey) {
+            if (!\array_key_exists($outerKey, $newData)) {
+                continue;
+            }
+
             $innerKey = $this->innerKeys[$i];
             if (!\array_key_exists($innerKey, $oldData) || $oldData[$innerKey] !== $newData[$outerKey]) {
                 return true;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Schema\GeneratedField;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
@@ -25,7 +26,7 @@ return [
         ],
         Schema::RELATIONS => [
             'user' => [
-                Relation::TYPE => Relation::BELONGS_TO,
+                Relation::TYPE => Relation::REFERS_TO,
                 Relation::TARGET => 'user',
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
@@ -42,7 +43,7 @@ return [
                 Relation::LOAD => Relation::LOAD_PROMISE,
                 Relation::SCHEMA => [
                     Relation::CASCADE => true,
-                    Relation::NULLABLE => false,
+                    Relation::NULLABLE => false, // The reason for the issue
                     Relation::WHERE => [],
                     Relation::ORDER_BY => [],
                     Relation::INNER_KEY => ['id'],
@@ -57,5 +58,8 @@ return [
             'user_id' => 'int',
         ],
         Schema::SCHEMA => [],
+        Schema::GENERATED_FIELDS => [
+            'id' => GeneratedField::ON_INSERT,
+        ],
     ],
 ];

@@ -9,6 +9,8 @@ class User
     public const ROLE = 'user';
 
     public ?int $id = null;
+    public ?int $user_id = null;
+
     public ?self $user = null;
     public iterable $users = [];
 }

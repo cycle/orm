@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue489;
 
-use Cycle\ORM\EntityManager;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue489\Entity\User;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
@@ -18,14 +17,7 @@ abstract class CaseTest extends BaseTest
     public function testSave(): void
     {
         $this->captureWriteQueries();
-        $em = new EntityManager($this->orm);
-
-        $user = new User();
-
-        $em->persist($user);
-        $em->run();
-
-        // Check write queries count
+        $this->save(new User());
         $this->assertNumWrites(1);
     }
 
@@ -43,7 +35,7 @@ abstract class CaseTest extends BaseTest
         // Make tables
         $this->makeTable(User::ROLE, [
             'id' => 'primary', // autoincrement
-            'user_id' => 'int',
+            'user_id' => 'int,nullable',
         ]);
         $this->makeFK(User::ROLE, 'user_id', User::ROLE, 'id', 'CASCADE', 'CASCADE');
     }

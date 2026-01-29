@@ -137,6 +137,19 @@ final class UnitOfWork implements StateInterface
     }
 
     /**
+     * Check if there are pending changes in the unit of work.
+     *
+     * @return bool True if there are pending changes, false otherwise.
+     *         In case the transaction is finished, it will always return false.
+     *         In case the transaction is in process, it will always return true.
+     *         In case of failure, it will return true and pending changes can be retried.
+     */
+    public function hasPendingChanges(): bool
+    {
+        return isset($this->pool) && $this->pool->count() > 0;
+    }
+
+    /**
      * @throws TransactionException
      */
     private function checkActionPossibility(string $action): void

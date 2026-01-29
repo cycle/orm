@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.10.1@f9fd6bc117e9ce1e854c2ed6777e7135aaa4966b">
+<files psalm-version="6.14.3@d0b040a91f280f071c1abcb1b77ce3822058725a">
   <file src="src/Collection/ArrayCollectionFactory.php">
     <DocblockTypeContradiction>
       <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
@@ -30,9 +30,6 @@
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$data->getContext()]]></code>
     </MixedArgumentTypeCoercion>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PropertyTypeCoercion>
       <code><![CDATA[$class === Collection::class ? ArrayCollection::class : $class]]></code>
     </PropertyTypeCoercion>
@@ -41,9 +38,6 @@
     </TypeDoesNotContainType>
   </file>
   <file src="src/Collection/IlluminateCollectionFactory.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PropertyTypeCoercion>
       <code><![CDATA[$class]]></code>
     </PropertyTypeCoercion>
@@ -65,9 +59,6 @@
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$data->getContext()]]></code>
     </MixedArgumentTypeCoercion>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PropertyTypeCoercion>
       <code><![CDATA[$class === CollectionInterface::class ? Collection::class : $class]]></code>
     </PropertyTypeCoercion>
@@ -101,9 +92,6 @@
     <ParamNameMismatch>
       <code><![CDATA[$elements]]></code>
     </ParamNameMismatch>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[createFrom]]></code>
-    </PossiblyUnusedMethod>
     <TooManyTemplateParams>
       <code><![CDATA[LoophpPivotedCollection]]></code>
     </TooManyTemplateParams>
@@ -121,11 +109,6 @@
     <MoreSpecificImplementedParamType>
       <code><![CDATA[$elements]]></code>
     </MoreSpecificImplementedParamType>
-  </file>
-  <file src="src/Collection/Pivoted/PivotedCollectionInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[setPivot]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Collection/Pivoted/PivotedStorage.php">
     <ClassMustBeFinal>
@@ -165,9 +148,6 @@
     <PossiblyNullReference>
       <code><![CDATA[mapColumns]]></code>
     </PossiblyNullReference>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[register]]></code>
-    </PossiblyUnusedMethod>
     <RedundantCondition>
       <code><![CDATA[$this->mapper->cast([$field => $insertID])[$field]]]></code>
     </RedundantCondition>
@@ -190,12 +170,6 @@
       <code><![CDATA[$this->table]]></code>
     </PossiblyNullArgument>
   </file>
-  <file src="src/Command/ScopeCarrierInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getAffectedRows]]></code>
-      <code><![CDATA[getScope]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="src/Command/Special/MergeCommand.php">
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
@@ -208,9 +182,6 @@
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getCommands]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Command/Special/WrappedCommand.php">
     <ArgumentTypeCoercion>
@@ -228,13 +199,6 @@
       <code><![CDATA[\Closure::bind($this->afterExecute, null, static::class)($this->command)]]></code>
       <code><![CDATA[\Closure::bind($this->beforeExecute, null, static::class)($this->command)]]></code>
     </PossiblyNullFunctionCall>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[createInsert]]></code>
-      <code><![CDATA[createUpdate]]></code>
-      <code><![CDATA[getCommand]]></code>
-      <code><![CDATA[withAfterExecution]]></code>
-      <code><![CDATA[wrapCommand]]></code>
-    </PossiblyUnusedMethod>
     <UnsafeInstantiation>
       <code><![CDATA[new static($command)]]></code>
     </UnsafeInstantiation>
@@ -259,11 +223,6 @@
       <code><![CDATA[$name]]></code>
       <code><![CDATA[$name]]></code>
     </MixedAssignment>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__toError]]></code>
-      <code><![CDATA[__toError]]></code>
-      <code><![CDATA[__toError]]></code>
-    </PossiblyUnusedMethod>
     <RedundantCondition>
       <code><![CDATA[$this->waitScope]]></code>
     </RedundantCondition>
@@ -299,20 +258,11 @@
     <InvalidThrow>
       <code><![CDATA[throw $state->getLastError()]]></code>
     </InvalidThrow>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PropertyNotSetInConstructor>
       <code><![CDATA[$unitOfWork]]></code>
     </PropertyNotSetInConstructor>
   </file>
   <file src="src/EntityManagerInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[delete]]></code>
-      <code><![CDATA[persist]]></code>
-      <code><![CDATA[persistState]]></code>
-      <code><![CDATA[run]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[static]]></code>
     </PossiblyUnusedReturnValue>
@@ -516,15 +466,6 @@
       <code><![CDATA[$class]]></code>
       <code><![CDATA[$e->getCode()]]></code>
     </PossiblyInvalidArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="src/FactoryInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[withCollectionFactory]]></code>
-      <code><![CDATA[withDefaultSchemaClasses]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Heap/Heap.php">
     <InvalidNullableReturnType>
@@ -650,10 +591,6 @@
       <code><![CDATA[$value]]></code>
       <code><![CDATA[$value]]></code>
     </MixedAssignment>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[hasValue]]></code>
-      <code><![CDATA[isReady]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Heap/Traits/WaitFieldTrait.php">
     <RiskyTruthyFalsyComparison>
@@ -698,9 +635,6 @@
     <MixedReturnTypeCoercion>
       <code><![CDATA[\Generator<array, array-key|TEntity, mixed, void>]]></code>
     </MixedReturnTypeCoercion>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[createWithOrm]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Mapper/ClasslessMapper.php">
     <ArgumentTypeCoercion>
@@ -764,9 +698,6 @@
       <code><![CDATA[$this->discriminator]]></code>
       <code><![CDATA[$this->entity]]></code>
     </MixedAssignment>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Mapper/Proxy/ClasslessProxyFactory.php">
     <ClassMustBeFinal>
@@ -902,10 +833,6 @@
       <code><![CDATA[$class]]></code>
       <code><![CDATA[?string]]></code>
     </MixedReturnTypeCoercion>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getClass]]></code>
-      <code><![CDATA[isPublicProperty]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Mapper/Proxy/ProxyEntityFactory.php">
     <ArgumentTypeCoercion>
@@ -963,9 +890,6 @@
     <PossiblyNullFunctionCall>
       <code><![CDATA[\Closure::bind($this->initializer, null, $scope === '' ? $class : $scope)($proxy, $properties)]]></code>
     </PossiblyNullFunctionCall>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[object]]></code>
     </PossiblyUnusedReturnValue>
@@ -1032,10 +956,6 @@
     <MixedReturnStatement>
       <code><![CDATA[$this->entityFactory->make($role, $data, $status, $typecast)]]></code>
     </MixedReturnStatement>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[prepareServices]]></code>
-      <code><![CDATA[withFactory]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/ORMInterface.php">
     <ImplementedReturnTypeMismatch>
@@ -1196,9 +1116,6 @@
       <code><![CDATA[$this->lastItemKeys[$index]]]></code>
       <code><![CDATA[$value]]></code>
     </MixedReturnStatement>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getItems]]></code>
-    </PossiblyUnusedMethod>
     <UnsupportedPropertyReferenceUsage>
       <code><![CDATA[$pool = &$this->data[$index]]]></code>
     </UnsupportedPropertyReferenceUsage>
@@ -1288,9 +1205,6 @@
     <MixedArgument>
       <code><![CDATA[$this->origin->getValue()]]></code>
     </MixedArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[fetch]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Reference/Reference.php">
     <ClassMustBeFinal>
@@ -1378,9 +1292,6 @@
     <PossiblyInvalidClone>
       <code><![CDATA[clone $this->resolve($related, true)]]></code>
     </PossiblyInvalidClone>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[empty($value)]]></code>
     </RiskyTruthyFalsyComparison>
@@ -1389,9 +1300,6 @@
     <ArgumentTypeCoercion>
       <code><![CDATA[$this->target]]></code>
     </ArgumentTypeCoercion>
-    <InvalidArgument>
-      <code><![CDATA[$related]]></code>
-    </InvalidArgument>
     <MixedArgument>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$item]]></code>
@@ -1436,6 +1344,7 @@
     </MixedReturnStatement>
     <PossiblyNullArgument>
       <code><![CDATA[$original]]></code>
+      <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
     </PossiblyNullArgument>
     <PossiblyNullIterator>
@@ -1600,9 +1509,6 @@
     <PossiblyNullPropertyFetch>
       <code><![CDATA[$pTuple->state]]></code>
     </PossiblyNullPropertyFetch>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedProperty>
       <code><![CDATA[$throughOuterKeys]]></code>
     </PossiblyUnusedProperty>
@@ -1637,9 +1543,6 @@
       <code><![CDATA[$target]]></code>
       <code><![CDATA[$this->morphKey]]></code>
     </MixedAssignment>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Relation/Morphed/MorphedHasMany.php">
     <ClassMustBeFinal>
@@ -1648,9 +1551,6 @@
     <MixedAssignment>
       <code><![CDATA[$this->morphKey]]></code>
     </MixedAssignment>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Relation/Morphed/MorphedHasOne.php">
     <ClassMustBeFinal>
@@ -1666,9 +1566,6 @@
     <PossiblyNullOperand>
       <code><![CDATA[parent::getReferenceScope($node)]]></code>
     </PossiblyNullOperand>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Relation/RefersTo.php">
     <ClassMustBeFinal>
@@ -1685,14 +1582,6 @@
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
     </MixedAssignment>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="src/Relation/RelationInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getTarget]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Relation/ShadowBelongsTo.php">
     <ClassMustBeFinal>
@@ -1828,11 +1717,6 @@
     <UnusedParam>
       <code><![CDATA[$outerRelations]]></code>
     </UnusedParam>
-  </file>
-  <file src="src/RepositoryInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[findAll]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Schema.php">
     <DocblockTypeContradiction>
@@ -2060,11 +1944,6 @@
       <code><![CDATA[?string]]></code>
       <code><![CDATA[array]]></code>
     </MixedReturnTypeCoercion>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getInnerRelations]]></code>
-      <code><![CDATA[getOuterRelations]]></code>
-      <code><![CDATA[toArray]]></code>
-    </PossiblyUnusedMethod>
     <UnsupportedReferenceUsage>
       <code><![CDATA[$this->subclasses[$item[self::PARENT]][$role] = &$this->subclasses[$role]]]></code>
     </UnsupportedReferenceUsage>
@@ -2149,11 +2028,6 @@
     <PossiblyInvalidArgument>
       <code><![CDATA[$node->getResult()]]></code>
     </PossiblyInvalidArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getBuilder]]></code>
-      <code><![CDATA[loadSubclasses]]></code>
-      <code><![CDATA[sqlStatement]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Select/AbstractLoader.php">
     <MixedArgument>
@@ -2197,10 +2071,6 @@
     <PossiblyInvalidCast>
       <code><![CDATA[$relation]]></code>
     </PossiblyInvalidCast>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getSource]]></code>
-      <code><![CDATA[loadIerarchy]]></code>
-    </PossiblyUnusedMethod>
     <TooManyArguments>
       <code><![CDATA[loadChain]]></code>
       <code><![CDATA[loadRelation]]></code>
@@ -2253,10 +2123,6 @@
     <PossiblyNullReference>
       <code><![CDATA[getAlias]]></code>
     </PossiblyNullReference>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[configureSubQuery]]></code>
-      <code><![CDATA[parentKey]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Select/Loader/BelongsToLoader.php">
     <ClassMustBeFinal>
@@ -2290,9 +2156,6 @@
       <code><![CDATA[getTarget]]></code>
       <code><![CDATA[isLoaded]]></code>
     </PossiblyNullReference>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <UndefinedInterfaceMethod>
       <code><![CDATA[isLoaded]]></code>
     </UndefinedInterfaceMethod>
@@ -2427,9 +2290,6 @@
     <MixedReturnStatement>
       <code><![CDATA[$this->define(SchemaInterface::TABLE)]]></code>
     </MixedReturnStatement>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getTable]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Select/Loader/SubQueryLoader.php">
     <MixedArgument>
@@ -2495,10 +2355,6 @@
     <PossiblyUndefinedMethod>
       <code><![CDATA[getParentLoader]]></code>
     </PossiblyUndefinedMethod>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getLoader]]></code>
-      <code><![CDATA[with]]></code>
-    </PossiblyUnusedMethod>
     <RiskyTruthyFalsyComparison>
       <code><![CDATA[\strpos($name, '(')]]></code>
     </RiskyTruthyFalsyComparison>
@@ -2513,10 +2369,6 @@
     <MixedArgument>
       <code><![CDATA[$id]]></code>
     </MixedArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-      <code><![CDATA[forUpdate]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Select/RootLoader.php">
     <ImpureMethodCall>
@@ -2688,13 +2540,6 @@
     <MixedAssignment>
       <code><![CDATA[$role]]></code>
     </MixedAssignment>
-    <MixedPropertyTypeCoercion>
-      <code><![CDATA[$this->repositories]]></code>
-    </MixedPropertyTypeCoercion>
-    <MixedReturnTypeCoercion>
-      <code><![CDATA[$this->repositories[$entity] = $this->factory->repository($this->orm, $this->schema, $entity, $select)]]></code>
-      <code><![CDATA[RepositoryInterface]]></code>
-    </MixedReturnTypeCoercion>
   </file>
   <file src="src/Service/Implementation/RoleResolver.php">
     <LessSpecificReturnStatement>
@@ -2774,18 +2619,10 @@
     <PossiblyNullReference>
       <code><![CDATA[getDriver]]></code>
     </PossiblyNullReference>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[outerTransaction]]></code>
-    </PossiblyUnusedMethod>
     <UnnecessaryVarAnnotation>
       <code><![CDATA[DriverInterface]]></code>
       <code><![CDATA[DriverInterface]]></code>
     </UnnecessaryVarAnnotation>
-  </file>
-  <file src="src/Transaction/StateInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[retry]]></code>
-    </PossiblyUnusedMethod>
   </file>
   <file src="src/Transaction/Tuple.php">
     <PropertyNotSetInConstructor>
@@ -2831,13 +2668,5 @@
     <UnnecessaryVarAnnotation>
       <code><![CDATA[Tuple]]></code>
     </UnnecessaryVarAnnotation>
-  </file>
-  <file src="src/TransactionInterface.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[delete]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[self]]></code>
-    </PossiblyUnusedReturnValue>
   </file>
 </files>

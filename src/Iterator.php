@@ -13,7 +13,7 @@ use IteratorAggregate;
 /**
  * Iterates over given data-set and instantiates objects.
  *
- * @template TEntity of object
+ * @template TEntity
  *
  * @template-implements IteratorAggregate<array-key|array, TEntity>
  */
@@ -30,8 +30,12 @@ final class Iterator implements \IteratorAggregate
     ) {}
 
     /**
-     * @param class-string<TEntity>|string $class
+     * @template TE
+     *
+     * @param class-string<TE>|string $class
      * @param iterable<array-key, array> $source
+     *
+     * @return self<TE>
      */
     public static function createWithOrm(
         ORMInterface $orm,

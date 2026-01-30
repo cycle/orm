@@ -29,6 +29,11 @@ class User implements ImagedInterface
     public $lastComment;
 
     /**
+     * @var Comment|null
+     */
+    public $firstComment;
+
+    /**
      * @var Collection|Comment[]
      */
     public $comments;

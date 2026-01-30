@@ -191,10 +191,11 @@ final class RelationMap
             return;
         }
 
-        if (isset($relationSchema[Relation::SCHEMA][Relation::INVERSION])) {
-            // handshaked relation, skip
-            return;
-        }
+        /** @see \Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue489\CaseTest */
+        // if (isset($relationSchema[Relation::SCHEMA][Relation::INVERSION])) {
+        //     // handshaked relation, skip
+        //     return;
+        // }
 
         $relation = new ShadowBelongsTo($container, $role, $relationSchema);
         $this->dependencies[$relation->getName()] = $relation;

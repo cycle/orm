@@ -1,0 +1,48 @@
+# Data Mapping System - Mappers, Typecasting, and Entity Hydration
+# This covers how entities are mapped to/from database records and data transformation
+
+documents:
+  - description: Data mapping system including mappers, typecasting, and entity hydration
+    outputPath: project/mapping-system.md
+    sources:
+      - type: text
+        content: |
+          # Data Mapping System
+
+          This document covers the data mapping layer of Cycle ORM, including how entities are converted to/from database records, typecasting mechanisms, proxy generation, and entity hydration strategies.
+
+      - type: file
+        description: Core mapper implementations
+        sourcePaths: src/Mapper
+        filePattern: "*.php"
+        notPath:
+          - src/Mapper/Proxy/
+          - src/Mapper/Traits/
+
+      - type: file
+        description: Proxy system for lazy loading and entity decoration
+        sourcePaths: src/Mapper/Proxy
+        filePattern: "*.php"
+        notPath:
+          - src/Mapper/Proxy/Hydrator/
+
+      - type: file
+        description: Hydration system for efficient entity creation
+        sourcePaths: src/Mapper/Proxy/Hydrator
+        filePattern: "*.php"
+
+      - type: file
+        description: Parser and typecasting system
+        sourcePaths: src/Parser
+        filePattern: "*.php"
+        notPath:
+          - src/Parser/Abstract*.php
+          - src/Parser/Traits/
+
+      - type: tree
+        description: Mapping system structure
+        sourcePaths:
+          - src/Mapper
+          - src/Parser
+        maxDepth: 3
+        includeFiles: true

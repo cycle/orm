@@ -1,0 +1,84 @@
+# Cycle ORM Context Configuration
+# Main configuration file with project overview and references to detailed component documentation
+
+# Cycle ORM is a powerful PHP Object-Relational Mapping (ORM) library that provides a comprehensive
+# solution for database interactions with a focus on performance, flexibility, and developer experience.
+
+import:
+  - path: context/core-architecture.yaml
+    description: Core interfaces and architectural contracts that define the ORM foundation
+  - path: context/entity-management.yaml
+    description: Entity lifecycle management, heap system, and ORM facade
+  - path: context/mapping-system.yaml
+    description: Data mapping, typecasting, proxy generation, and entity hydration
+  - path: context/relation-system.yaml
+    description: Complete relationship system including all relation types and references
+  - path: context/query-system.yaml
+    description: Query building, data loading strategies, and repository pattern
+  - path: context/transaction-system.yaml
+    description: Transaction management, command pattern, and Unit of Work implementation
+  - path: context/collections-and-factory.yaml
+    description: Collection management and dependency injection container system
+  - path: context/schema-and-config.yaml
+    description: Schema definitions, configuration management, and supporting utilities
+  - path: context/traits-and-utilities.yaml
+    description: Shared traits and utility components used across the ORM system
+
+documents:
+  - description: Cycle ORM project overview with complete architecture summary
+    outputPath: project/overview.md
+    sources:
+      - type: text
+        content: |
+          # Cycle ORM - Project Overview
+
+          Cycle ORM is a powerful PHP Object-Relational Mapping (ORM) library that provides a comprehensive solution for database interactions with a focus on performance, flexibility, and developer experience.
+
+          ## Key Features
+          - **Entity Management**: Complete entity lifecycle management with heap-based tracking
+          - **Flexible Relations**: Support for all relationship types including polymorphic relations
+          - **Query Builder**: Powerful and flexible query building capabilities
+          - **Transaction Management**: Robust transaction handling with Unit of Work pattern
+          - **Collection Support**: Multiple collection implementations (Doctrine, Laravel, etc.)
+          - **Lazy Loading**: Efficient lazy loading with proxy objects
+          - **Schema Management**: Comprehensive schema definition and management
+
+          ## Architecture Principles
+          - **Interface-Driven Design**: Heavy use of interfaces for flexibility and testability
+          - **Dependency Injection**: Built-in factory and DI container system
+          - **Command Pattern**: Database operations handled through command objects
+          - **Repository Pattern**: Clean data access layer abstraction
+          - **Heap Pattern**: Efficient entity tracking and identity management
+
+          ## Component Documentation
+
+          This project is organized into several functional components, each documented separately:
+
+          - **Core Architecture**: Fundamental interfaces and contracts ([core-architecture.md](core-architecture.md))
+          - **Entity Management**: ORM facade and entity lifecycle ([entity-management.md](entity-management.md))
+          - **Data Mapping**: Mappers, typecasting, and hydration ([mapping-system.md](mapping-system.md))
+          - **Relations**: All relationship types and references ([relation-system.md](relation-system.md))
+          - **Query System**: Query building and data loading ([query-system.md](query-system.md))
+          - **Transactions**: Command pattern and persistence ([transaction-system.md](transaction-system.md))
+          - **Collections**: Collection management and DI ([collections-and-factory.md](collections-and-factory.md))
+          - **Schema**: Configuration and metadata ([schema-and-config.md](schema-and-config.md))
+          - **Utilities**: Shared traits and helpers ([traits-and-utilities.md](traits-and-utilities.md))
+
+      - type: tree
+        description: Complete project structure with component descriptions
+        sourcePaths: src
+        maxDepth: 3
+        includeFiles: true
+        showSize: true
+        dirContext:
+          src/Collection: "Collection management and factory implementations"
+          src/Command: "Command pattern for database operations"
+          src/Exception: "Exception hierarchy for error handling"
+          src/Heap: "Entity tracking and identity management"
+          src/Mapper: "Data mapping and entity hydration"
+          src/Parser: "Data parsing and typecasting"
+          src/Relation: "Entity relationship implementations"
+          src/Reference: "Lazy loading and reference management"
+          src/Select: "Query building and data loading"
+          src/Service: "Service layer implementations"
+          src/Transaction: "Transaction management and Unit of Work"

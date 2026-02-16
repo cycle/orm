@@ -1,0 +1,46 @@
+# Core Architecture - Interfaces and Contracts
+# This document covers the fundamental interfaces and contracts that define the ORM architecture
+
+documents:
+  - description: Core ORM interfaces and base contracts that define the architecture
+    outputPath: project/core-architecture.md
+    sources:
+      - type: text
+        content: |
+          # Cycle ORM - Core Architecture
+
+          This document provides an overview of the core interfaces and architectural contracts that define how Cycle ORM operates. These interfaces establish the foundation for all ORM functionality including entity management, data mapping, querying, and transactions.
+
+      - type: file
+        description: Core interfaces and base classes
+        sourcePaths: src
+        filePattern:
+          - "*Interface.php"
+        path:
+          - src/*Interface.php
+          - src/*/
+        notPath:
+          - src/Exception/
+          - src/Parser/Traits/
+          - src/Command/Traits/
+          - src/Heap/Traits/
+          - src/Mapper/Traits/
+          - src/Relation/Traits/
+          - src/Select/Traits/
+
+      - type: file
+        description: Abstract base classes that implement core patterns
+        sourcePaths: src
+        filePattern: "Abstract*.php"
+        path:
+          - src/Parser/Abstract*.php
+          - src/Relation/Abstract*.php
+          - src/Select/Abstract*.php
+
+      - type: tree
+        description: Core architecture overview
+        sourcePaths: src
+        filePattern: "*Interface.php"
+        maxDepth: 2
+        includeFiles: true
+        showSize: false

@@ -1,0 +1,46 @@
+# Relation System - Entity Relationships and References
+# This covers all types of entity relationships and reference handling
+
+documents:
+  - description: Complete relation system including all relationship types and reference management
+    outputPath: project/relation-system.md
+    sources:
+      - type: text
+        content: |
+          # Relation System
+
+          This document covers the comprehensive relationship system in Cycle ORM, including all relationship types (HasOne, HasMany, BelongsTo, ManyToMany, etc.), morphed relationships, embedded objects, and reference management.
+
+      - type: file
+        description: Core relation classes and relationship map
+        sourcePaths: src
+        filePattern:
+          - "Relation.php"
+          - "RelationMap.php"
+
+      - type: file
+        description: All relationship implementations
+        sourcePaths: src/Relation
+        filePattern: "*.php"
+        notPath:
+          - src/Relation/Abstract*.php
+          - src/Relation/Traits/
+          - src/Relation/Morphed/
+
+      - type: file
+        description: Morphed (polymorphic) relationships
+        sourcePaths: src/Relation/Morphed
+        filePattern: "*.php"
+
+      - type: file
+        description: Reference system for lazy loading
+        sourcePaths: src/Reference
+        filePattern: "*.php"
+
+      - type: tree
+        description: Relation system structure
+        sourcePaths:
+          - src/Relation
+          - src/Reference
+        maxDepth: 2
+        includeFiles: true

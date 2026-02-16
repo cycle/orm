@@ -1,0 +1,55 @@
+# Schema and Configuration System - Metadata and Configuration Management
+# This covers schema definitions, configuration, and supporting utilities
+
+documents:
+  - description: Schema definition and configuration management system
+    outputPath: project/schema-and-config.md
+    sources:
+      - type: text
+        content: |
+          # Schema and Configuration System
+
+          This document covers the schema definition and configuration system in Cycle ORM, including entity schema management, configuration classes, exception handling, and supporting utilities like iterators and options.
+
+      - type: file
+        description: Core schema implementation
+        sourcePaths: src
+        filePattern: "Schema.php"
+
+      - type: file
+        description: Schema-related classes and generated field definitions
+        sourcePaths: src/Schema
+        filePattern: "*.php"
+
+      - type: file
+        description: Configuration management
+        sourcePaths: src/Config
+        filePattern: "*.php"
+
+      - type: file
+        description: Exception hierarchy
+        sourcePaths: src/Exception
+        filePattern: "*.php"
+        notPath:
+          - src/Exception/Relation/
+
+      - type: file
+        description: Relation-specific exceptions
+        sourcePaths: src/Exception/Relation
+        filePattern: "*.php"
+
+      - type: file
+        description: Supporting utilities
+        sourcePaths: src
+        filePattern:
+          - "Iterator.php"
+          - "Options.php"
+
+      - type: tree
+        description: Schema and configuration structure
+        sourcePaths:
+          - src/Schema
+          - src/Config
+          - src/Exception
+        maxDepth: 2
+        includeFiles: true

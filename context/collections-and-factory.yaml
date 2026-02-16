@@ -1,0 +1,35 @@
+# Collections and Factory System - Collection Management and DI Container
+# This covers collection factories, pivoted collections, and the main factory/DI system
+
+documents:
+  - description: Collection management and factory system for dependency injection and object creation
+    outputPath: project/collections-and-factory.md
+    sources:
+      - type: text
+        content: |
+          # Collections and Factory System
+
+          This document covers the collection management system and factory/DI container in Cycle ORM, including various collection implementations, pivoted collections for many-to-many relationships, and the main factory system for object creation and dependency injection.
+
+      - type: file
+        description: Main factory and DI container
+        sourcePaths: src
+        filePattern: "Factory.php"
+
+      - type: file
+        description: Collection factory implementations
+        sourcePaths: src/Collection
+        filePattern: "*.php"
+        notPath:
+          - src/Collection/Pivoted/
+
+      - type: file
+        description: Pivoted collection system for many-to-many relationships
+        sourcePaths: src/Collection/Pivoted
+        filePattern: "*.php"
+
+      - type: tree
+        description: Collections and factory structure
+        sourcePaths: src/Collection
+        maxDepth: 2
+        includeFiles: true

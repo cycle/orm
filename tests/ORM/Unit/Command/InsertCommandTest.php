@@ -80,7 +80,7 @@ class InsertCommandTest extends TestCase
     {
         $class = new \ReflectionClass($this->cmd);
         $property = $class->getProperty('pkColumn');
-        $property->setAccessible(true);
+        PHP_VERSION_ID < 80100 and $property->setAccessible(true);
         $property->setValue($this->cmd, null);
 
         $table = 'table';

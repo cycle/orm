@@ -122,7 +122,7 @@ class LoophpCollectionFactoryTest extends BaseTest
     {
         $factory = $this->getFactory();
         $ref = new \ReflectionProperty($factory, 'decoratorExists');
-        $ref->setAccessible(true);
+        PHP_VERSION_ID < 80100 and $ref->setAccessible(true);
         $ref->setValue($factory, false);
 
         $collection = $factory->collect(new PivotedStorage($array = [

@@ -256,9 +256,7 @@ abstract class BaseTest extends TestCase
         $r = new \ReflectionClass(Node::class);
 
         $rel = $r->getProperty('relations');
-        if (PHP_VERSION_ID < 80100) {
-            $rel->setAccessible(true);
-        }
+        PHP_VERSION_ID < 80100 and $rel->setAccessible(true);
 
         $heap = $orm->getHeap();
         foreach ($heap as $entity) {

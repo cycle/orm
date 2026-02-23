@@ -32,7 +32,10 @@ class ClassPropertiesExtractor
             $className = $property->getDeclaringClass()->getName();
             $propertyName = $property->getName();
 
-            $class = $property->isPublic() ? PropertyMap::PUBLIC_CLASS : $className;
+            $class = $property->isPublic() && !$this->hasRestrictedSet($property)
+                ? PropertyMap::PUBLIC_CLASS
+                : $className;
+
             if (\in_array($propertyName, $relations, true)) {
                 $relationProperties[$class][$propertyName] = $propertyName;
             } else {
@@ -44,6 +47,23 @@ class ClassPropertiesExtractor
             self::KEY_FIELDS => new PropertyMap($reflection->getName(), $classProperties),
             self::KEY_RELATIONS => new PropertyMap($reflection->getName(), $relationProperties),
         ];
+    }
+
+    /**
+     * Check if a property has restricted (private or protected) set visibility.
+     *
+     * PHP 8.4 asymmetric visibility: `private(set)` properties return true for
+     * isPublic() (read visibility) but cannot be assigned from outside the class.
+     * ClosureHydrator skips PUBLIC_CLASS properties and the fallback `@$entity->$prop = $value`
+     * silently fails because set visibility is private.
+     */
+    private function hasRestrictedSet(\ReflectionProperty $property): bool
+    {
+        if (\PHP_VERSION_ID < 80400) {
+            return false;
+        }
+
+        return $property->isPrivateSet() || $property->isProtectedSet();
     }
 
     /**

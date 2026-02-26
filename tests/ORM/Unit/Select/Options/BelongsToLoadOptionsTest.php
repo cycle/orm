@@ -72,10 +72,7 @@ final class BelongsToLoadOptionsTest extends TestCase
         $options = new BelongsToLoadOptions();
 
         $this->assertSame([
-            'where' => null,
             'method' => LoadMethod::OuterQuery->value,
-            'as' => null,
-            'using' => null,
             'scope' => true,
             'minify' => true,
         ], $options->toArray());

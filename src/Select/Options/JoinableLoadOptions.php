@@ -28,6 +28,8 @@ class JoinableLoadOptions extends LoadOptions
 
         /**
          * When true, loader column aliases will be minified in SQL output.
+         * @note Intended for debugging purposes. Use with caution: disabling minification
+         *       may cause column name conflicts between different relations.
          */
         bool $minify = true,
 
@@ -48,10 +50,10 @@ class JoinableLoadOptions extends LoadOptions
 
     public function toArray(): array
     {
-        return [
-            'method' => $this->method->value,
+        return \array_filter([
+            'method' => $this->method?->value,
             'as' => $this->as,
             'using' => $this->using,
-        ] + parent::toArray();
+        ]) + parent::toArray();
     }
 }

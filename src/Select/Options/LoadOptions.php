@@ -22,6 +22,8 @@ class LoadOptions
 
         /**
          * When true, loader column aliases will be minified in SQL output.
+         * @note Intended for debugging purposes. Use with caution: disabling minification
+         *       may cause column name conflicts between different relations.
          */
         public bool $minify = true,
     ) {}

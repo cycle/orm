@@ -27,6 +27,8 @@ final class HasManyLoadOptions extends JoinableLoadOptions
 
         /**
          * When true, loader column aliases will be minified in SQL output.
+         * @note Intended for debugging purposes. Use with caution: disabling minification
+         *       may cause column name conflicts between different relations.
          */
         bool $minify = true,
 
@@ -57,9 +59,9 @@ final class HasManyLoadOptions extends JoinableLoadOptions
 
     public function toArray(): array
     {
-        return [
+        return \array_filter([
             'where' => $this->where,
             'orderBy' => $this->orderBy,
-        ] + parent::toArray();
+        ]) + parent::toArray();
     }
 }

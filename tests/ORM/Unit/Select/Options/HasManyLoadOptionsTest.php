@@ -77,11 +77,7 @@ final class HasManyLoadOptionsTest extends TestCase
         $options = new HasManyLoadOptions();
 
         $this->assertSame([
-            'where' => null,
-            'orderBy' => null,
             'method' => LoadMethod::OuterQuery->value,
-            'as' => null,
-            'using' => null,
             'scope' => true,
             'minify' => true,
         ], $options->toArray());

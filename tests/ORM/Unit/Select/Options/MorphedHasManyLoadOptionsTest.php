@@ -77,11 +77,7 @@ final class MorphedHasManyLoadOptionsTest extends TestCase
         $options = new MorphedHasManyLoadOptions();
 
         $this->assertSame([
-            'where' => null,
-            'orderBy' => null,
             'method' => LoadMethod::OuterQuery->value,
-            'as' => null,
-            'using' => null,
             'scope' => true,
             'minify' => true,
         ], $options->toArray());

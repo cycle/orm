@@ -85,11 +85,7 @@ final class HasOneLoadOptionsTest extends TestCase
         $options = new HasOneLoadOptions();
 
         $this->assertSame([
-            'where' => null,
-            'orderBy' => null,
             'method' => LoadMethod::SingleQuery->value,
-            'as' => null,
-            'using' => null,
             'scope' => true,
             'minify' => true,
         ], $options->toArray());

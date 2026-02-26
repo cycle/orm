@@ -15,6 +15,7 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\Traits\OrderByTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
 
@@ -81,10 +82,14 @@ class ManyToManyLoader extends JoinableLoader
 
     public function loadRelation(
         string|LoaderInterface $relation,
-        array $options,
+        LoadOptions|array $options,
         bool $join = false,
         bool $load = false,
     ): LoaderInterface {
+        if ($options instanceof LoadOptions) {
+            $options = $options->toArray();
+        }
+
         if ($relation === '@' || $relation === '@.@') {
             unset($options['method']);
             if ($options !== []) {

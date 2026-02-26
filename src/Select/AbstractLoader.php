@@ -10,6 +10,7 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
@@ -150,10 +151,14 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function loadRelation(
         string|LoaderInterface $relation,
-        array $options,
+        LoadOptions|array $options,
         bool $join = false,
         bool $load = false,
     ): LoaderInterface {
+        if ($options instanceof LoadOptions) {
+            $options = $options->toArray();
+        }
+
         if ($relation instanceof ParentLoader) {
             return $this->inherit = $relation->withContext($this);
         }

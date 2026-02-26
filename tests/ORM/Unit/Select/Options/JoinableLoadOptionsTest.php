@@ -124,8 +124,6 @@ final class JoinableLoadOptionsTest extends TestCase
 
         $this->assertSame([
             'method' => LoadMethod::OuterQuery->value,
-            'as' => null,
-            'using' => null,
             'scope' => true,
             'minify' => true,
         ], $options->toArray());

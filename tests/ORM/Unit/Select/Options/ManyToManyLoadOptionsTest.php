@@ -89,12 +89,7 @@ final class ManyToManyLoadOptionsTest extends TestCase
         $options = new ManyToManyLoadOptions();
 
         $this->assertSame([
-            'where' => null,
-            'orderBy' => null,
-            'pivot' => null,
             'method' => LoadMethod::OuterQuery->value,
-            'as' => null,
-            'using' => null,
             'scope' => true,
             'minify' => true,
         ], $options->toArray());

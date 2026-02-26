@@ -7,6 +7,7 @@ namespace Cycle\ORM;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
@@ -230,7 +231,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *
      * @return static<TEntity>
      */
-    public function load(string|array $relation, array $options = []): self
+    public function load(array|string $relation, LoadOptions|array $options = []): self
     {
         if (\is_string($relation)) {
             $this->loader->loadRelation($relation, $options, false, true);
@@ -244,7 +245,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
                 $this->load($subOption, $options);
             } else {
                 // multiple relations or relation with addition load options
-                $this->load($name, $subOption + $options);
+                $this->load($name, $subOption + $mergeOptions);
             }
         }
 

@@ -59,4 +59,13 @@ final class ManyToManyLoadOptions extends JoinableLoadOptions
     ) {
         parent::__construct($method, $scope, $minify, $as, $using);
     }
+
+    public function toArray(): array
+    {
+        return [
+            'where' => $this->where,
+            'orderBy' => $this->orderBy,
+            'pivot' => $this->pivot,
+        ] + parent::toArray();
+    }
 }

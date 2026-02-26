@@ -8,9 +8,15 @@ use Cycle\ORM\Select\JoinableLoader;
 
 enum JoinMethod: int
 {
-    /** INNER JOIN */
-    case InnerJoin = JoinableLoader::JOIN;
+    /**
+     * INNER JOIN
+     * @see JoinableLoader::JOIN
+     */
+    case InnerJoin = 3;
 
-    /** LEFT JOIN */
-    case LeftJoin = JoinableLoader::LEFT_JOIN;
+    /**
+     * LEFT JOIN
+     * @see JoinableLoader::LEFT_JOIN
+     */
+    case LeftJoin = 4;
 }

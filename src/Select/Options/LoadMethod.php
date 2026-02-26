@@ -8,9 +8,15 @@ use Cycle\ORM\Select;
 
 enum LoadMethod: int
 {
-    /** Load relation data within the same query using JOIN */
-    case SingleQuery = Select::SINGLE_QUERY;
+    /**
+     * Load relation data within the same query using JOIN
+     * @see Select::SINGLE_QUERY
+     */
+    case SingleQuery = 1;
 
-    /** Load related data using a separate query */
-    case OuterQuery = Select::OUTER_QUERY;
+    /**
+     * Load related data using a separate query
+     * @see Select::OUTER_QUERY
+     */
+    case OuterQuery = 2;
 }

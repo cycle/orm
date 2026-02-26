@@ -25,4 +25,12 @@ class LoadOptions
          */
         public bool $minify = true,
     ) {}
+
+    public function toArray(): array
+    {
+        return [
+            'scope' => $this->scope,
+            'minify' => $this->minify,
+        ];
+    }
 }

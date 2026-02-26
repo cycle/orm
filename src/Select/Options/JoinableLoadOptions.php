@@ -45,4 +45,13 @@ class JoinableLoadOptions extends LoadOptions
     ) {
         parent::__construct($scope, $minify);
     }
+
+    public function toArray(): array
+    {
+        return [
+            'method' => $this->method->value,
+            'as' => $this->as,
+            'using' => $this->using,
+        ] + parent::toArray();
+    }
 }

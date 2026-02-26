@@ -57,4 +57,12 @@ final class MorphedHasManyLoadOptions extends JoinableLoadOptions
     ) {
         parent::__construct($method, $scope, $minify, $as, $using);
     }
+
+    public function toArray(): array
+    {
+        return [
+            'where' => $this->where,
+            'orderBy' => $this->orderBy,
+        ] + parent::toArray();
+    }
 }

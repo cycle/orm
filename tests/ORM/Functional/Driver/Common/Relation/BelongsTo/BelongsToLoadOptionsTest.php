@@ -149,10 +149,10 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
         ]);
 
         $this->getDatabase()->table('user_archive')->insertMultiple(
-            ['id', 'email', 'balance'],
+            ['email', 'balance'],
             [
-                [1, 'archived@world.com', 999],
-                [2, 'archived2@world.com', 888],
+                ['archived@world.com', 999],
+                ['archived2@world.com', 888],
             ],
         );
 

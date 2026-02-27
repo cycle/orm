@@ -210,14 +210,14 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
         ]);
 
         $this->getDatabase()->table('tag_archive')->insertMultiple(
-            ['id', 'name', 'level'],
+            ['name', 'level'],
             [
-                [1, 'archived a', 1],
-                [2, 'archived b', 2],
-                [3, 'archived c', 3],
-                [4, 'archived d', 4],
-                [5, 'archived e', 5],
-                [6, 'archived f', 6],
+                ['archived a', 1],
+                ['archived b', 2],
+                ['archived c', 3],
+                ['archived d', 4],
+                ['archived e', 5],
+                ['archived f', 6],
             ],
         );
 

@@ -88,6 +88,7 @@ abstract class AbstractLoader implements LoaderInterface
 
     /** @var non-empty-string */
     protected string $table;
+
     protected SourceInterface $source;
 
     public function __construct(

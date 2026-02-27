@@ -12,5 +12,7 @@ name: MySQL
 jobs:
   phpunit:
     uses: cycle/gh-actions/.github/workflows/db-mysql.yml@master
+    with:
+      php: '["8.1","8.2","8.3","8.4","8.5"]'
 
 ...

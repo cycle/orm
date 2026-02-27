@@ -178,54 +178,55 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     }
 
     /**
-     * Request primary selector loader to pre-load relation name. Any type of loader can be used
-     * for data pre-loading. ORM loaders by default will select the most efficient way to load
-     * related data which might include additional select query or left join. Loaded data will
-     * automatically pre-populate record relations. You can specify nested relations using "."
-     * separator.
+     * Pre-load related data for the given relation(s).
      *
-     * Examples:
+     * The loader automatically selects the most efficient strategy (additional query or JOIN).
+     * Loaded data is populated into entity relations. Use "." to specify nested relations.
      *
-     *     // Select users and load their comments (will cast 2 queries, HAS_MANY comments)
-     *     User::find()->with('comments');
+     * Use typed DTO options for a safe, discoverable API:
      *
-     *     // You can load chain of relations - select user and load their comments and post related to comment
-     *     User::find()->with('comments.post');
+     *     use Cycle\ORM\Select\Options\HasManyLoadOptions;
+     *     use Cycle\ORM\Select\Options\LoadMethod;
      *
-     *     // We can also specify custom where conditions on data loading, let's load only public comments.
-     *     User::find()->load('comments', [
-     *         'where' => ['{@}.status' => 'public']
-     *     ]);
+     *     // Load comments using a separate query (default for HasMany)
+     *     $select->load('comments', new HasManyLoadOptions());
      *
-     * Please note using "{@}" column name, this placeholder is required to prevent collisions and
-     * it will be automatically replaced with valid table alias of pre-loaded comments table.
+     *     // Force loading within the same query via JOIN
+     *     $select->load('comments', new HasManyLoadOptions(
+     *         method: LoadMethod::SingleQuery,
+     *     ));
      *
-     *     // In case where your loaded relation is MANY_TO_MANY you can also specify pivot table
-     *     // conditions, let's pre-load all approved user tags, we can use same placeholder for pivot
-     *     // table alias
-     *     User::find()->load('tags', [
-     *          'wherePivot' => ['{@}.approved' => true]
-     *     ]);
+     *     // Custom WHERE / ORDER BY
+     *     $select->load('comments', new HasManyLoadOptions(
+     *         where: ['@.status' => 'public'],
+     *         orderBy: ['@.created_at' => 'DESC'],
+     *     ));
      *
-     *     // In most of cases you don't need to worry about how data was loaded, using external query
-     *     // or left join, however if you want to change such behaviour you can force load method
-     *     // using {@see Select::SINGLE_QUERY}
-     *     User::find()->load('tags', [
-     *          'method'     => Select::SINGLE_QUERY,
-     *          'wherePivot' => ['{@}.approved' => true]
-     *     ]);
+     *     // Load from an archive table
+     *     $select->load('comments', new HasManyLoadOptions(
+     *         table: 'comment_archive',
+     *     ));
      *
-     * Attention, you will not be able to correctly paginate in this case and only ORM loaders
-     * support different loading types.
+     * Available DTO classes (one per relation type):
+     * - {@see \Cycle\ORM\Select\Options\HasOneLoadOptions}
+     * - {@see \Cycle\ORM\Select\Options\HasManyLoadOptions}
+     * - {@see \Cycle\ORM\Select\Options\BelongsToLoadOptions}
+     * - {@see \Cycle\ORM\Select\Options\ManyToManyLoadOptions}
+     * - {@see \Cycle\ORM\Select\Options\MorphedHasOneLoadOptions}
+     * - {@see \Cycle\ORM\Select\Options\MorphedHasManyLoadOptions}
+     * - {@see \Cycle\ORM\Select\Options\BelongsToMorphedLoadOptions}
      *
-     * You can specify multiple loaders using array as first argument.
+     * Raw array options are still supported for backwards compatibility:
      *
-     * Example:
+     *     $select->load('comments', ['where' => ['@.status' => 'public']]);
      *
-     *     User::find()->load(['posts', 'comments', 'profile']);
+     * Multiple relations can be loaded at once. The second argument applies
+     * shared options to every relation in the list:
      *
-     * Attention, consider disabling entity map if you want to use recursive loading (i.e
-     * post.tags.posts), but first think why you even need recursive relation loading.
+     *     $select->load(['posts', 'comments', 'profile']);
+     *     $select->load(['posts', 'comments'], new JoinableLoadOptions(
+     *         method: LoadMethod::SingleQuery,
+     *     ));
      *
      * @see with()
      *

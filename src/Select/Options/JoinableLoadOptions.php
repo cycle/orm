@@ -44,8 +44,15 @@ class JoinableLoadOptions extends LoadOptions
          * as the data source instead of generating a new JOIN or query.
          */
         public ?string $using = null,
+
+        /**
+         * Override the table name for loading related entities.
+         *
+         * @var non-empty-string|null
+         */
+        ?string $table = null,
     ) {
-        parent::__construct($scope, $minify);
+        parent::__construct($scope, $minify, $table);
     }
 
     public function toArray(): array

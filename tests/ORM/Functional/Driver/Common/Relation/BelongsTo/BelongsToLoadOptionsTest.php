@@ -140,6 +140,32 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
         $this->assertSame('another@world.com', $res[2]->user->email);
     }
 
+    public function testLoadFromArchiveTable(): void
+    {
+        $this->makeTable('user_archive', [
+            'id' => 'primary',
+            'email' => 'string',
+            'balance' => 'float',
+        ]);
+
+        $this->getDatabase()->table('user_archive')->insertMultiple(
+            ['id', 'email', 'balance'],
+            [
+                [1, 'archived@world.com', 999],
+                [2, 'archived2@world.com', 888],
+            ],
+        );
+
+        $res = (new Select($this->orm, Profile::class))->load('user', new BelongsToLoadOptions(
+            table: 'user_archive',
+        ))->orderBy('profile.id')->fetchAll();
+
+        $this->assertCount(3, $res);
+        $this->assertSame('archived@world.com', $res[0]->user->email);
+        $this->assertSame('archived2@world.com', $res[1]->user->email);
+        $this->assertSame('archived2@world.com', $res[2]->user->email);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

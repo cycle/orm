@@ -48,7 +48,7 @@ final class RootLoader extends AbstractLoader
     ) {
         parent::__construct($ormSchema, $sourceProvider, $factory, $target);
         $this->query = $this->source->getDatabase()->select()->from(
-            \sprintf('%s AS %s', $this->source->getTable(), $this->getAlias()),
+            \sprintf('%s AS %s', $this->table, $this->getAlias()),
         );
         $this->columns = $this->normalizeColumns($this->define(SchemaInterface::COLUMNS));
 

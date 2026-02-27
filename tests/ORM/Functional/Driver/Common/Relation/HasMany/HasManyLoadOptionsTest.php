@@ -227,6 +227,42 @@ abstract class HasManyLoadOptionsTest extends BaseTest
         $this->assertCount(3, $b->comments);
     }
 
+    public function testLoadFromArchiveTable(): void
+    {
+        // Create archive table with the same structure as comment
+        $this->makeTable('comment_archive', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'level' => 'integer',
+            'message' => 'string',
+        ]);
+
+        $this->getDatabase()->table('comment_archive')->insertMultiple(
+            ['user_id', 'level', 'message'],
+            [
+                [1, 10, 'archived 1'],
+                [1, 20, 'archived 2'],
+                [2, 10, 'archived 2.1'],
+            ],
+        );
+
+        $this->orm = $this->withCommentsSchema([]);
+
+        // Load from archive table instead of default "comment" table
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments', new HasManyLoadOptions(
+            table: 'comment_archive',
+            orderBy: ['@.level' => 'ASC'],
+        ))->orderBy('user.id')->fetchAll();
+
+        // Data should come from archive, not from the main comment table
+        $this->assertCount(2, $a->comments);
+        $this->assertCount(1, $b->comments);
+
+        $this->assertSame('archived 1', $a->comments[0]->message);
+        $this->assertSame('archived 2', $a->comments[1]->message);
+        $this->assertSame('archived 2.1', $b->comments[0]->message);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

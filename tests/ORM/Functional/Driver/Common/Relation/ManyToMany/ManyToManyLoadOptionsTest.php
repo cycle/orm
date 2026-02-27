@@ -201,6 +201,47 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
         $this->assertCount(3, $b->tags);
     }
 
+    public function testLoadFromArchiveTable(): void
+    {
+        $this->makeTable('tag_archive', [
+            'id' => 'primary',
+            'level' => 'integer',
+            'name' => 'string',
+        ]);
+
+        $this->getDatabase()->table('tag_archive')->insertMultiple(
+            ['id', 'name', 'level'],
+            [
+                [1, 'archived a', 1],
+                [2, 'archived b', 2],
+                [3, 'archived c', 3],
+                [4, 'archived d', 4],
+                [5, 'archived e', 5],
+                [6, 'archived f', 6],
+            ],
+        );
+
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'ASC']],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('tags', new ManyToManyLoadOptions(
+            table: 'tag_archive',
+        ))->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(4, $a->tags);
+        $this->assertCount(3, $b->tags);
+
+        $this->assertSame('archived a', $a->tags[0]->name);
+        $this->assertSame('archived b', $a->tags[1]->name);
+        $this->assertSame('archived d', $a->tags[2]->name);
+        $this->assertSame('archived e', $a->tags[3]->name);
+
+        $this->assertSame('archived c', $b->tags[0]->name);
+        $this->assertSame('archived d', $b->tags[1]->name);
+        $this->assertSame('archived f', $b->tags[2]->name);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

@@ -178,6 +178,40 @@ abstract class MorphedHasManyLoadOptionsTest extends BaseTest
         $this->assertCount(3, $b->comments);
     }
 
+    public function testLoadFromArchiveTable(): void
+    {
+        $this->makeTable('comment_archive', [
+            'id' => 'primary',
+            'parent_id' => 'integer',
+            'parent_type' => 'string',
+            'level' => 'int',
+            'message' => 'string',
+        ]);
+
+        $this->getDatabase()->table('comment_archive')->insertMultiple(
+            ['parent_id', 'parent_type', 'level', 'message'],
+            [
+                [1, 'user', 1, 'archived 1'],
+                [1, 'user', 2, 'archived 2'],
+                [2, 'user', 1, 'archived 2.1'],
+            ],
+        );
+
+        $this->orm = $this->withCommentsSchema([]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('comments', new MorphedHasManyLoadOptions(
+            table: 'comment_archive',
+            orderBy: ['@.level' => 'ASC'],
+        ))->orderBy('user.id')->fetchAll();
+
+        $this->assertCount(2, $a->comments);
+        $this->assertCount(1, $b->comments);
+
+        $this->assertSame('archived 1', $a->comments[0]->message);
+        $this->assertSame('archived 2', $a->comments[1]->message);
+        $this->assertSame('archived 2.1', $b->comments[0]->message);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

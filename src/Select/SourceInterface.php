@@ -18,6 +18,7 @@ interface SourceInterface
 
     /**
      * Get table associated with the entity.
+     * @return non-empty-string
      */
     public function getTable(): string;
 

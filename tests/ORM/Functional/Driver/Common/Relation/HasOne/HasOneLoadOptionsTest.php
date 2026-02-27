@@ -154,6 +154,33 @@ abstract class HasOneLoadOptionsTest extends BaseTest
         $this->assertSame('msg 2.1', $b->firstComment->message);
     }
 
+    public function testLoadFromArchiveTable(): void
+    {
+        $this->makeTable('comment_archive', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'level' => 'integer',
+            'message' => 'string',
+        ]);
+
+        $this->getDatabase()->table('comment_archive')->insertMultiple(
+            ['user_id', 'level', 'message'],
+            [
+                [1, 1, 'archived 1'],
+                [2, 1, 'archived 2.1'],
+            ],
+        );
+
+        $this->orm = $this->withCommentsSchema([]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('firstComment', new HasOneLoadOptions(
+            table: 'comment_archive',
+        ))->orderBy('user.id')->fetchAll();
+
+        $this->assertSame('archived 1', $a->firstComment->message);
+        $this->assertSame('archived 2.1', $b->firstComment->message);
+    }
+
     public function setUp(): void
     {
         parent::setUp();

@@ -50,8 +50,16 @@ final class BelongsToLoadOptions extends JoinableLoadOptions
          * Additional WHERE conditions for the relation query.
          */
         public ?array $where = null,
+
+        /**
+         * Override the table name for loading related entities.
+         * Useful for loading data from archive tables or alternative storage.
+         *
+         * @var non-empty-string|null
+         */
+        ?string $table = null,
     ) {
-        parent::__construct($method, $scope, $minify, $as, $using);
+        parent::__construct($method, $scope, $minify, $as, $using, $table);
     }
 
     public function toArray(): array

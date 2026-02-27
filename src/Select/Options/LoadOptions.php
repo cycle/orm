@@ -26,13 +26,23 @@ class LoadOptions
          *       may cause column name conflicts between different relations.
          */
         public bool $minify = true,
+
+        /**
+         * Override the table name for loading related entities.
+         * Useful for loading data from archive tables or alternative storage.
+         *
+         * @var non-empty-string|null
+         */
+        public ?string $table = null,
     ) {}
 
     public function toArray(): array
     {
-        return [
+        $result = [
             'scope' => $this->scope,
             'minify' => $this->minify,
         ];
+        $this->table === null or $result['table'] = $this->table;
+        return $result;
     }
 }

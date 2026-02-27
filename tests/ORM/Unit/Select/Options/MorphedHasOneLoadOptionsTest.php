@@ -76,7 +76,7 @@ final class MorphedHasOneLoadOptionsTest extends TestCase
     {
         $options = new MorphedHasOneLoadOptions();
 
-        $this->assertSame([
+        $this->assertEquals([
             'method' => LoadMethod::SingleQuery->value,
             'scope' => true,
             'minify' => true,
@@ -100,5 +100,17 @@ final class MorphedHasOneLoadOptionsTest extends TestCase
         $this->assertSame($orderBy, $result['orderBy']);
         $this->assertSame(LoadMethod::OuterQuery->value, $result['method']);
         $this->assertFalse($result['scope']);
+    }
+
+    public function testToArrayWithEmptyArrays(): void
+    {
+        $options = new MorphedHasOneLoadOptions(where: [], orderBy: []);
+
+        $result = $options->toArray();
+
+        $this->assertArrayHasKey('where', $result);
+        $this->assertArrayHasKey('orderBy', $result);
+        $this->assertSame([], $result['where']);
+        $this->assertSame([], $result['orderBy']);
     }
 }

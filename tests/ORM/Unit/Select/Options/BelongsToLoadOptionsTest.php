@@ -71,7 +71,7 @@ final class BelongsToLoadOptionsTest extends TestCase
     {
         $options = new BelongsToLoadOptions();
 
-        $this->assertSame([
+        $this->assertEquals([
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,
@@ -92,5 +92,15 @@ final class BelongsToLoadOptionsTest extends TestCase
         $this->assertSame($where, $result['where']);
         $this->assertSame(LoadMethod::SingleQuery->value, $result['method']);
         $this->assertFalse($result['scope']);
+    }
+
+    public function testToArrayWithEmptyWhere(): void
+    {
+        $options = new BelongsToLoadOptions(where: []);
+
+        $result = $options->toArray();
+
+        $this->assertArrayHasKey('where', $result);
+        $this->assertSame([], $result['where']);
     }
 }

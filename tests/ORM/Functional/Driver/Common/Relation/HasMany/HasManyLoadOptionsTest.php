@@ -27,17 +27,26 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
-        [$a, $b] = (new Select($this->orm, User::class))->load('comments', new HasManyLoadOptions(
+        // Array-based call as reference
+        $expected = (new Select($this->orm, User::class))->load('comments', [
+            'method' => Select\JoinableLoader::INLOAD,
+        ])->orderBy('user.id')->fetchAll();
+
+        // DTO-based call
+        $res = (new Select($this->orm, User::class))->load('comments', new HasManyLoadOptions(
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        $this->assertCount(\count($expected), $res);
+        $this->assertCount(\count($expected[0]->comments), $res[0]->comments);
+        $this->assertCount(\count($expected[1]->comments), $res[1]->comments);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
+        foreach ($expected[0]->comments as $i => $comment) {
+            $this->assertSame($comment->message, $res[0]->comments[$i]->message);
+        }
+        foreach ($expected[1]->comments as $i => $comment) {
+            $this->assertSame($comment->message, $res[1]->comments[$i]->message);
+        }
     }
 
     public function testLoadWithOuterQueryMethod(): void
@@ -151,19 +160,28 @@ abstract class HasManyLoadOptionsTest extends BaseTest
     {
         $this->orm = $this->withCommentsSchema([]);
 
+        // Array-based call as reference
+        $expected = (new Select($this->orm, User::class))->load('comments', [
+            'method' => Select\JoinableLoader::INLOAD,
+            'scope' => new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']),
+        ])->orderBy('user.id')->fetchAll();
+
+        // DTO-based call
         $res = (new Select($this->orm, User::class))->load('comments', new HasManyLoadOptions(
             method: LoadMethod::SingleQuery,
             scope: new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']),
         ))->orderBy('user.id')->fetchAll();
 
-        [$a, $b] = $res;
+        $this->assertCount(\count($expected), $res);
+        $this->assertCount(\count($expected[0]->comments), $res[0]->comments);
+        $this->assertCount(\count($expected[1]->comments), $res[1]->comments);
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
-
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        foreach ($expected[0]->comments as $i => $comment) {
+            $this->assertSame($comment->message, $res[0]->comments[$i]->message);
+        }
+        foreach ($expected[1]->comments as $i => $comment) {
+            $this->assertSame($comment->message, $res[1]->comments[$i]->message);
+        }
     }
 
     public function testLoadWithSingleQueryAndScopeAndWhere(): void

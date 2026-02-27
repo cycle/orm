@@ -50,10 +50,10 @@ class JoinableLoadOptions extends LoadOptions
 
     public function toArray(): array
     {
-        return \array_filter([
-            'method' => $this->method?->value,
-            'as' => $this->as,
-            'using' => $this->using,
-        ]) + parent::toArray();
+        $result = parent::toArray();
+        $this->method === null or $result['method'] = $this->method->value;
+        $this->as === null or $result['as'] = $this->as;
+        $this->using === null or $result['using'] = $this->using;
+        return $result;
     }
 }

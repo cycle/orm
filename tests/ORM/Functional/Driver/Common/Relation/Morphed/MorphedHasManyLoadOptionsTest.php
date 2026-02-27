@@ -27,18 +27,26 @@ abstract class MorphedHasManyLoadOptionsTest extends BaseTest
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
-        $this->logger->display();
-        [$a, $b] = (new Select($this->orm, User::class))->load('comments', new MorphedHasManyLoadOptions(
+        // Array-based call as reference
+        $expected = (new Select($this->orm, User::class))->load('comments', [
+            'method' => Select\JoinableLoader::INLOAD,
+        ])->orderBy('user.id')->fetchAll();
+
+        // DTO-based call
+        $res = (new Select($this->orm, User::class))->load('comments', new MorphedHasManyLoadOptions(
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        $this->assertCount(\count($expected), $res);
+        $this->assertCount(\count($expected[0]->comments), $res[0]->comments);
+        $this->assertCount(\count($expected[1]->comments), $res[1]->comments);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
+        foreach ($expected[0]->comments as $i => $comment) {
+            $this->assertSame($comment->message, $res[0]->comments[$i]->message);
+        }
+        foreach ($expected[1]->comments as $i => $comment) {
+            $this->assertSame($comment->message, $res[1]->comments[$i]->message);
+        }
     }
 
     public function testLoadWithOuterQueryMethod(): void

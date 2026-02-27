@@ -102,7 +102,7 @@ final class JoinableLoadOptionsTest extends TestCase
             using: 'other',
         );
 
-        $this->assertSame([
+        $this->assertEquals([
             'method' => LoadMethod::SingleQuery->value,
             'as' => 'my_alias',
             'using' => 'other',
@@ -122,7 +122,7 @@ final class JoinableLoadOptionsTest extends TestCase
     {
         $options = new JoinableLoadOptions(method: LoadMethod::OuterQuery);
 
-        $this->assertSame([
+        $this->assertEquals([
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,

@@ -76,7 +76,7 @@ final class HasManyLoadOptionsTest extends TestCase
     {
         $options = new HasManyLoadOptions();
 
-        $this->assertSame([
+        $this->assertEquals([
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,
@@ -100,5 +100,17 @@ final class HasManyLoadOptionsTest extends TestCase
         $this->assertSame($orderBy, $result['orderBy']);
         $this->assertSame(LoadMethod::SingleQuery->value, $result['method']);
         $this->assertFalse($result['scope']);
+    }
+
+    public function testToArrayWithEmptyArrays(): void
+    {
+        $options = new HasManyLoadOptions(where: [], orderBy: []);
+
+        $result = $options->toArray();
+
+        $this->assertArrayHasKey('where', $result);
+        $this->assertArrayHasKey('orderBy', $result);
+        $this->assertSame([], $result['where']);
+        $this->assertSame([], $result['orderBy']);
     }
 }

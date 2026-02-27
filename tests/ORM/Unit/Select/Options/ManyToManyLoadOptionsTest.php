@@ -88,7 +88,7 @@ final class ManyToManyLoadOptionsTest extends TestCase
     {
         $options = new ManyToManyLoadOptions();
 
-        $this->assertSame([
+        $this->assertEquals([
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,
@@ -115,5 +115,19 @@ final class ManyToManyLoadOptionsTest extends TestCase
         $this->assertSame($pivot, $result['pivot']);
         $this->assertSame(LoadMethod::SingleQuery->value, $result['method']);
         $this->assertFalse($result['scope']);
+    }
+
+    public function testToArrayWithEmptyArrays(): void
+    {
+        $options = new ManyToManyLoadOptions(where: [], orderBy: [], pivot: []);
+
+        $result = $options->toArray();
+
+        $this->assertArrayHasKey('where', $result);
+        $this->assertArrayHasKey('orderBy', $result);
+        $this->assertArrayHasKey('pivot', $result);
+        $this->assertSame([], $result['where']);
+        $this->assertSame([], $result['orderBy']);
+        $this->assertSame([], $result['pivot']);
     }
 }

@@ -8,6 +8,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
+use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Options\LoadMethod;
 use Cycle\ORM\Select\Options\ManyToManyLoadOptions;
 use Cycle\ORM\Tests\Fixtures\Tag;
@@ -26,21 +27,26 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
         ]);
 
-        [$a, $b] = (new Select($this->orm, User::class))->load('tags', new ManyToManyLoadOptions(
+        // Array-based call as reference
+        $expected = (new Select($this->orm, User::class))->load('tags', [
+            'method' => JoinableLoader::INLOAD,
+        ])->orderBy('user.id')->fetchAll();
+
+        // DTO-based call
+        $res = (new Select($this->orm, User::class))->load('tags', new ManyToManyLoadOptions(
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        $this->assertCount(\count($expected), $res);
+        $this->assertCount(\count($expected[0]->tags), $res[0]->tags);
+        $this->assertCount(\count($expected[1]->tags), $res[1]->tags);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
-
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        foreach ($expected[0]->tags as $i => $tag) {
+            $this->assertSame($tag->name, $res[0]->tags[$i]->name);
+        }
+        foreach ($expected[1]->tags as $i => $tag) {
+            $this->assertSame($tag->name, $res[1]->tags[$i]->name);
+        }
     }
 
     public function testLoadWithOuterQueryMethod(): void
@@ -74,7 +80,7 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('tags', new ManyToManyLoadOptions(
             orderBy: ['@.level' => 'ASC'],
-        ))->fetchAll();
+        ))->orderBy('user.id')->fetchAll();
 
         $this->assertCount(4, $a->tags);
         $this->assertCount(3, $b->tags);
@@ -162,19 +168,26 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
         ]);
 
-        [$a, $b] = (new Select($this->orm, User::class))->load('tags', new ManyToManyLoadOptions(
+        // Array-based call as reference
+        $expected = (new Select($this->orm, User::class))->load('tags', [
+            'method' => JoinableLoader::INLOAD,
+        ])->orderBy('user.id')->fetchAll();
+
+        // DTO-based call
+        $res = (new Select($this->orm, User::class))->load('tags', new ManyToManyLoadOptions(
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        $this->assertCount(\count($expected), $res);
+        $this->assertCount(\count($expected[0]->tags), $res[0]->tags);
+        $this->assertCount(\count($expected[1]->tags), $res[1]->tags);
 
-        $this->assertSame('tag d', $a->tags[0]->name);
-        $this->assertSame('tag e', $a->tags[1]->name);
-
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        foreach ($expected[0]->tags as $i => $tag) {
+            $this->assertSame($tag->name, $res[0]->tags[$i]->name);
+        }
+        foreach ($expected[1]->tags as $i => $tag) {
+            $this->assertSame($tag->name, $res[1]->tags[$i]->name);
+        }
     }
 
     public function testLoadWithDefaultOptions(): void

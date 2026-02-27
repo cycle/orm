@@ -56,8 +56,8 @@ final class BelongsToLoadOptions extends JoinableLoadOptions
 
     public function toArray(): array
     {
-        return \array_filter([
-            'where' => $this->where,
-        ]) + parent::toArray();
+        $result = parent::toArray();
+        $this->where === null or $result['where'] = $this->where;
+        return $result;
     }
 }

@@ -62,9 +62,9 @@ final class MorphedHasManyLoadOptions extends JoinableLoadOptions
 
     public function toArray(): array
     {
-        return \array_filter([
-            'where' => $this->where,
-            'orderBy' => $this->orderBy,
-        ]) + parent::toArray();
+        $result = parent::toArray();
+        $this->where === null or $result['where'] = $this->where;
+        $this->orderBy === null or $result['orderBy'] = $this->orderBy;
+        return $result;
     }
 }

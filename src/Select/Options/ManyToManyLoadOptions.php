@@ -64,10 +64,10 @@ final class ManyToManyLoadOptions extends JoinableLoadOptions
 
     public function toArray(): array
     {
-        return \array_filter([
-            'where' => $this->where,
-            'orderBy' => $this->orderBy,
-            'pivot' => $this->pivot,
-        ]) + parent::toArray();
+        $result = parent::toArray();
+        $this->where === null or $result['where'] = $this->where;
+        $this->orderBy === null or $result['orderBy'] = $this->orderBy;
+        $this->pivot === null or $result['pivot'] = $this->pivot;
+        return $result;
     }
 }

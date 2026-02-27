@@ -245,7 +245,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
                 $this->load($subOption, $options);
             } else {
                 // multiple relations or relation with addition load options
-                $this->load($name, $subOption + $mergeOptions);
+                $this->load($name, $subOption);
             }
         }
 

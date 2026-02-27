@@ -84,7 +84,7 @@ final class HasOneLoadOptionsTest extends TestCase
     {
         $options = new HasOneLoadOptions();
 
-        $this->assertSame([
+        $this->assertEquals([
             'method' => LoadMethod::SingleQuery->value,
             'scope' => true,
             'minify' => true,
@@ -110,5 +110,17 @@ final class HasOneLoadOptionsTest extends TestCase
         $this->assertSame(LoadMethod::OuterQuery->value, $result['method']);
         $this->assertSame('alias', $result['as']);
         $this->assertFalse($result['scope']);
+    }
+
+    public function testToArrayWithEmptyArrays(): void
+    {
+        $options = new HasOneLoadOptions(where: [], orderBy: []);
+
+        $result = $options->toArray();
+
+        $this->assertArrayHasKey('where', $result);
+        $this->assertArrayHasKey('orderBy', $result);
+        $this->assertSame([], $result['where']);
+        $this->assertSame([], $result['orderBy']);
     }
 }

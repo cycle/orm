@@ -51,7 +51,7 @@ final class SubQueryLoader extends JoinableLoader
         $queryColumns = $query->getColumns();
 
         $body = $this->loader->source->getDatabase()->select()->from(
-            \sprintf('%s AS %s', $this->loader->source->getTable(), $lAlias),
+            \sprintf('%s AS %s', $this->table, $lAlias),
         )->columns($queryColumns);
         $body = $this->loader->configureQuery($body);
         $bodyColumns = \array_slice($body->getColumns(), \count($queryColumns));

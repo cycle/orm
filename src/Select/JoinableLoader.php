@@ -312,7 +312,7 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
      */
     protected function getJoinTable(): string
     {
-        return "{$this->define(SchemaInterface::TABLE)} AS {$this->getAlias()}";
+        return "{$this->table} AS {$this->getAlias()}";
     }
 
     private function makeQueryBuilder(SelectQuery $query): QueryBuilder

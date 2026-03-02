@@ -10,6 +10,7 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
@@ -85,6 +86,9 @@ abstract class AbstractLoader implements LoaderInterface
      */
     protected array $children;
 
+    /** @var non-empty-string */
+    protected string $table;
+
     protected SourceInterface $source;
 
     public function __construct(
@@ -99,6 +103,7 @@ abstract class AbstractLoader implements LoaderInterface
     ) {
         $this->children = $this->ormSchema->getInheritedRoles($target);
         $this->source = $this->sourceProvider->getSource($target);
+        $this->table = $this->source->getTable();
     }
 
     public function isHierarchical(): bool
@@ -150,10 +155,14 @@ abstract class AbstractLoader implements LoaderInterface
      */
     public function loadRelation(
         string|LoaderInterface $relation,
-        array $options,
+        LoadOptions|array $options,
         bool $join = false,
         bool $load = false,
     ): LoaderInterface {
+        if ($options instanceof LoadOptions) {
+            $options = $options->toArray();
+        }
+
         if ($relation instanceof ParentLoader) {
             return $this->inherit = $relation->withContext($this);
         }
@@ -204,6 +213,11 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         try {
+            if (isset($options['table'])) {
+                $table = $options['table'];
+                unset($options['table']);
+            }
+
             // Creating new loader.
             $loader = $this->factory->loader(
                 $this->ormSchema,
@@ -211,6 +225,9 @@ abstract class AbstractLoader implements LoaderInterface
                 $this->target,
                 $relation,
             );
+
+            // Apply table name if provided
+            isset($table) && $loader instanceof self and $loader->table = $table;
         } catch (SchemaException | FactoryException $e) {
             if ($this->inherit instanceof self) {
                 return $this->inherit->loadRelation($relation, $options, $join, $load, $alias);
@@ -222,7 +239,8 @@ abstract class AbstractLoader implements LoaderInterface
             );
         }
 
-        return $loaders[$alias] = $loader->withContext($this, $options);
+        $loader = $loader->withContext($this, $options);
+        return $loaders[$alias] = $loader;
     }
 
     public function createNode(): AbstractNode
@@ -259,6 +277,13 @@ abstract class AbstractLoader implements LoaderInterface
     public function getSource(): SourceInterface
     {
         return $this->source;
+    }
+
+    public function withSource(SourceInterface $source): static
+    {
+        $clone = clone $this;
+        $clone->source = $source;
+        return $clone;
     }
 
     /**

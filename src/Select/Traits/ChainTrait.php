@@ -7,6 +7,7 @@ namespace Cycle\ORM\Select\Traits;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\LoaderInterface;
+use Cycle\ORM\Select\Options\LoadOptions;
 
 /**
  * @internal
@@ -15,7 +16,7 @@ trait ChainTrait
 {
     abstract public function loadRelation(
         string|LoaderInterface $relation,
-        array $options,
+        LoadOptions|array $options,
         bool $join = false,
         bool $load = false,
     ): LoaderInterface;

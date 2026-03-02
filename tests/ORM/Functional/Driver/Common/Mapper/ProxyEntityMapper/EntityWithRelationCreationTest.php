@@ -22,7 +22,7 @@ class EntityWithRelationCreationTest extends BaseMapperTest
         $refl = new \ReflectionClass(EntityWithRelationCreationAbstractUser::class);
 
         $profileProperty = $refl->getProperty('profile');
-        $profileProperty->setAccessible(true);
+        PHP_VERSION_ID < 80100 and $profileProperty->setAccessible(true);
 
         $this->assertFalse($profileProperty->isInitialized($emptyObject));
         $this->assertEquals(123, $emptyObject->id);

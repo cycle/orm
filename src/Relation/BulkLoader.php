@@ -83,7 +83,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
             $n = $heap->get($entity) ?? throw new \LogicException("Entity node not found in the heap.");
             // Use Node data to load relations instead of actual entity data
             // to avoid inconsistent state in the Heap
-            $data = $n->getData();
+            $data = $mapper->uncast($n->getData());
             $this->indexEntity($n, $pk, $data, $entity);
             $node->push($data);
             unset($data);

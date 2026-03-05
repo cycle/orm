@@ -210,7 +210,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      * Available DTO classes (one per relation type):
      * - {@see \Cycle\ORM\Select\Options\HasOneLoadOptions}
      * - {@see \Cycle\ORM\Select\Options\HasManyLoadOptions}
-     * - {@see \Cycle\ORM\Select\Options\BelongsToLoadOptions}
+     * - {@see \Cycle\ORM\Select\Options\BelongsToLoadOptions} applicable for both Belongs To and Refers To relations
      * - {@see \Cycle\ORM\Select\Options\ManyToManyLoadOptions}
      * - {@see \Cycle\ORM\Select\Options\MorphedHasOneLoadOptions}
      * - {@see \Cycle\ORM\Select\Options\MorphedHasManyLoadOptions}

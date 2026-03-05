@@ -6,7 +6,6 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\Morphed;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Options;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -325,7 +324,6 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $schemaArray = $this->getNullableMorphedSchemaArray();
         $this->orm = $this->orm->with(
             schema: new Schema($schemaArray),
-            options: (new Options())->withIgnoreUninitializedRelations(true),
         );
 
         /** @var Image $c */
@@ -345,7 +343,6 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $schemaArray = $this->getNullableMorphedSchemaArray();
         $this->orm = $this->orm->with(
             schema: new Schema($schemaArray),
-            options: (new Options())->withIgnoreUninitializedRelations(true),
         );
 
         $c = new Image();

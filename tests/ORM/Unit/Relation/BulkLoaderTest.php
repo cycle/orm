@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Unit\Relation;
 
 use Cycle\ORM\Factory;
+use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
+use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Relation\RelationLoaderInterface;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Fixtures\OneWayUuidTypecast;
 use Cycle\ORM\Tests\Fixtures\Profile;
+use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
 use PHPUnit\Framework\TestCase;
 
 class BulkLoaderTest extends TestCase
@@ -200,6 +204,74 @@ class BulkLoaderTest extends TestCase
         $result = $loader->load('profile', ['where' => ['id' => 1]]);
 
         $this->assertSame($loader, $result);
+    }
+
+    /**
+     * BulkLoader should handle Stringable PK values when typecast is one-directional.
+     *
+     * Scenario: OneWayUuidTypecast implements only CastableInterface (cast: string→UuidPrimaryKey),
+     * but NOT UncastableInterface. So mapper->uncast() returns data with UuidPrimaryKey objects.
+     * BulkLoader::indexEntity() must handle Stringable objects instead of rejecting them via is_scalar().
+     */
+    public function testRunWithStringablePkAndOneWayTypecast(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $schema = new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::TYPECAST => ['id' => 'uuid'],
+                Schema::TYPECAST_HANDLER => OneWayUuidTypecast::class,
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'profile' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
+                ],
+            ],
+            Profile::class => [
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]);
+
+        $orm = new ORM(
+            new Factory($this->createMock(\Cycle\Database\DatabaseProviderInterface::class)),
+            $schema,
+        );
+
+        $entity = new User();
+
+        // Simulate entity loaded from DB: typecast converted string PK to UuidPrimaryKey (Stringable),
+        // but uncast won't convert it back because OneWayUuidTypecast has no UncastableInterface.
+        $uuid = new UuidPrimaryKey('550e8400-e29b-41d4-a716-446655440001');
+        $node = new Node(Node::MANAGED, [
+            'id' => $uuid,
+            'email' => 'test@test.com',
+            'balance' => 100,
+        ], 'user');
+        $orm->getHeap()->attach($entity, $node);
+
+        $loader = (new BulkLoader($orm))->collect($entity);
+        $loader->load('profile');
+        $loader->run();
     }
 
     private function createORM(): ORM

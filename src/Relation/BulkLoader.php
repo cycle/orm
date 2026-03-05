@@ -126,7 +126,11 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
         $pool = &$this->index;
         foreach ($keys as $k) {
             $keyValue = $data[$k] ?? throw new \LogicException("Bulk loader cannot get the value for the key `$k`.");
-            \is_scalar($keyValue) or throw new \InvalidArgumentException("Invalid value on the key `$k`.");
+            \is_scalar($keyValue) or $keyValue instanceof \Stringable
+                ? ($keyValue = (string) $keyValue)
+                : throw new \InvalidArgumentException(
+                    "Invalid value on the key `$k`. Expected scalar, got " . \get_debug_type($keyValue) . ".",
+                );
 
             \array_key_exists($keyValue, $pool) or $pool[$keyValue] = [];
             $pool = &$pool[$keyValue];
@@ -148,7 +152,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     {
         $result = $this->index;
         foreach ($pk as $k) {
-            $result = $result[$data[$k]] ?? throw new \LogicException('Cannot find indexed entity.');
+            $result = $result[(string) $data[$k]] ?? throw new \LogicException('Cannot find indexed entity.');
         }
 
         return $result;

@@ -290,6 +290,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
         $this->assertSame('user', $row[0]['parent_type']);
         $this->assertNotNull($row[0]['parent_id']);
+        $this->save($c);
 
         $c->parent = null;
         $this->save($c);
@@ -319,7 +320,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertNull($row[0]['parent_type'], 'parent_type should be NULL for entity without parent');
     }
 
-    public function testCreateWithoutRelatedButSetMorphTypeManually(): void
+    public function testUsingFactoryCreateWithoutRelatedButSetMorphTypeManually(): void
     {
         $schemaArray = $this->getNullableMorphedSchemaArray();
         $this->orm = $this->orm->with(
@@ -329,6 +330,25 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
 
         /** @var Image $c */
         $c = $this->orm->make(Image::class);
+        $c->url = 'no-parent.png';
+        $c->parentType = 'user';
+
+        $this->save($c);
+
+        $row = $this->getDatabase()->table('image')->select()->where('id', $c->id)->fetchAll();
+        $this->assertNull($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
+        $this->assertSame('user', $row[0]['parent_type'], 'parent_type should be NULL for entity without parent');
+    }
+
+    public function testCreateWithoutRelatedButSetMorphTypeManually(): void
+    {
+        $schemaArray = $this->getNullableMorphedSchemaArray();
+        $this->orm = $this->orm->with(
+            schema: new Schema($schemaArray),
+            options: (new Options())->withIgnoreUninitializedRelations(true),
+        );
+
+        $c = new Image();
         $c->url = 'no-parent.png';
         $c->parentType = 'user';
 

@@ -68,8 +68,11 @@ class BelongsToMorphed extends BelongsTo
 
     protected function setNullFromRelated(Tuple $tuple, bool $isPreparing): void
     {
-        // Set morph key to null
-        $tuple->state->register($this->morphKey, null);
+        if ($tuple->node->getRelation($this->getName()) !== null) {
+            // Set morph key to null if the relation was changed to null
+            $tuple->state->register($this->morphKey, null);
+        }
+
         parent::setNullFromRelated($tuple, $isPreparing);
     }
 }

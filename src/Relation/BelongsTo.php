@@ -91,6 +91,10 @@ class BelongsTo extends AbstractRelation implements DependencyInterface
         if ($related instanceof ReferenceInterface && $related->hasValue()) {
             $related = $related->getValue();
             $state->setRelation($relName, $related);
+            if ($related === null) {
+                $state->setRelationStatus($this->getName(), RelationInterface::STATUS_RESOLVED);
+                return;
+            }
         }
         if ($related === null) {
             $this->setNullFromRelated($tuple, false);

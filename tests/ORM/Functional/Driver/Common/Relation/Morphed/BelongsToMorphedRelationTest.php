@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\Morphed;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Options;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -316,6 +317,26 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $row = $this->getDatabase()->table('image')->select()->where('id', 6)->fetchAll();
         $this->assertNull($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
         $this->assertNull($row[0]['parent_type'], 'parent_type should be NULL for entity without parent');
+    }
+
+    public function testCreateWithoutRelatedButSetMorphTypeManually(): void
+    {
+        $schemaArray = $this->getNullableMorphedSchemaArray();
+        $this->orm = $this->orm->with(
+            schema: new Schema($schemaArray),
+            options: (new Options())->withIgnoreUninitializedRelations(true),
+        );
+
+        /** @var Image $c */
+        $c = $this->orm->make(Image::class);
+        $c->url = 'no-parent.png';
+        $c->parentType = 'user';
+
+        $this->save($c);
+
+        $row = $this->getDatabase()->table('image')->select()->where('id', $c->id)->fetchAll();
+        $this->assertNull($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
+        $this->assertSame('user', $row[0]['parent_type'], 'parent_type should be NULL for entity without parent');
     }
 
     public function testUpdateRelation(): void

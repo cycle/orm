@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\SchemaInterface;
@@ -22,6 +23,9 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
 
     private UpdateLoader $loader;
     private array $index = [];
+
+    /** @var list<non-empty-string> Keys matter for relations */
+    private array $keys = [];
 
     public function __construct(
         private ORMInterface $orm,
@@ -65,6 +69,12 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     public function load(string $relation, array $options = []): static
     {
         $this->loader->loadRelation($relation, $options, load: true);
+
+        $role = $this->loader->getTarget();
+        $relMap = $this->orm->getRelationMap($role);
+        $r = $relMap->getRelations()[$relation];
+        $this->keys = \array_merge($this->keys, $r->getInnerKeys());
+
         return $this;
     }
 
@@ -78,12 +88,13 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
         $relations = $relMap->getRelations();
         $heap = $this->orm->getHeap();
         $factory = $this->orm->getService(EntityFactoryInterface::class);
+        $keys = \array_unique(\array_merge($this->keys, $pk));
 
         foreach ($this->entities as $entity) {
             $n = $heap->get($entity) ?? throw new \LogicException("Entity node not found in the heap.");
             // Use Node data to load relations instead of actual entity data
             // to avoid inconsistent state in the Heap
-            $data = $mapper->uncast($n->getData());
+            $data = self::normalizeKeys($mapper->uncast($n->getData()), $keys);
             $this->indexEntity($n, $pk, $data, $entity);
             $node->push($data);
             unset($data);
@@ -125,12 +136,11 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     {
         $pool = &$this->index;
         foreach ($keys as $k) {
-            $keyValue = $data[$k] ?? throw new \LogicException("Bulk loader cannot get the value for the key `$k`.");
-            \is_scalar($keyValue) or $keyValue instanceof \Stringable
-                ? ($keyValue = (string) $keyValue)
-                : throw new \InvalidArgumentException(
-                    "Invalid value on the key `$k`. Expected scalar, got " . \get_debug_type($keyValue) . ".",
-                );
+            $keyValue = $data[$k];
+            \is_scalar($keyValue) or throw new \InvalidArgumentException(
+                "Invalid value on the primary key `$k`. Expected scalar, got " . \get_debug_type($keyValue) . ".",
+            );
+            $pk[$k] = $keyValue;
 
             \array_key_exists($keyValue, $pool) or $pool[$keyValue] = [];
             $pool = &$pool[$keyValue];
@@ -138,6 +148,25 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
 
 
         $pool = [$entity, $node];
+    }
+
+    /**
+     * Normalize data by provided keys.
+     * Only keys matter for relations loading, so unnecessary data will be filtered out.
+     *
+     * @param non-empty-array<non-empty-string> $keys
+     * @return non-empty-array<non-empty-string, mixed>
+     */
+    private static function normalizeKeys(array $data, array $keys): array
+    {
+        $result = [];
+        foreach ($keys as $k) {
+            \array_key_exists($k, $data) or throw new \LogicException(
+                "Bulk loader cannot get the value for the key `$k`.",
+            );
+            $result[$k] = Node::convertToSolid($data[$k]);
+        }
+        return $result;
     }
 
     /**
@@ -152,7 +181,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     {
         $result = $this->index;
         foreach ($pk as $k) {
-            $result = $result[(string) $data[$k]] ?? throw new \LogicException('Cannot find indexed entity.');
+            $result = $result[$data[$k]] ?? throw new \LogicException('Cannot find indexed entity.');
         }
 
         return $result;

@@ -47,13 +47,15 @@ final class Node
      */
     public static function convertToSolid(mixed $value): mixed
     {
-        if (!\is_object($value)) {
-            return $value;
-        }
-        if ($value instanceof \DateTimeInterface) {
-            return $value instanceof \DateTimeImmutable ? $value : \DateTimeImmutable::createFromInterface($value);
-        }
-        return $value instanceof \Stringable ? $value->__toString() : $value;
+        return match (true) {
+            !\is_object($value) => $value,
+            $value instanceof ValueInterface => $value->rawValue(),
+            $value instanceof \DateTimeInterface => $value instanceof \DateTimeImmutable
+                ? $value
+                : \DateTimeImmutable::createFromInterface($value),
+            $value instanceof \Stringable => $value->__toString(),
+            default => $value,
+        };
     }
 
     public static function compare(mixed $a, mixed $b): int

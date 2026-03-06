@@ -8,6 +8,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\UpdateLoader;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
@@ -34,7 +35,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     {
         if ($entities === []) {
             return new class implements RelationLoaderInterface {
-                public function load(string $relation, array $options = []): static
+                public function load(string $relation, LoadOptions|array $options = []): static
                 {
                     return $this;
                 }
@@ -65,7 +66,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
         return $clone;
     }
 
-    public function load(string $relation, array $options = []): static
+    public function load(string $relation, LoadOptions|array $options = []): static
     {
         $this->loader->loadRelation($relation, $options, load: true);
 

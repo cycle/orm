@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Select;
+use Cycle\ORM\Select\Options\LoadOptions;
 
 /**
  * Relations loader
@@ -23,11 +24,11 @@ interface RelationLoaderInterface
      * Define relation to be loaded.
      *
      * @param non-empty-string $relation Relation name
-     * @param array $options Relation loading options
+     * @param LoadOptions|array $options Relation loading options
      *
-     * @see Select::load() for available options\
+     * @see Select::load() for available options
      */
-    public function load(string $relation, array $options = []): static;
+    public function load(string $relation, LoadOptions|array $options = []): static;
 
     /**
      * Execute relation loading for all collected entities.

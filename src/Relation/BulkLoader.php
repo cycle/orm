@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Relation;
 
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\SchemaInterface;
@@ -127,6 +126,25 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     }
 
     /**
+     * Normalize data by provided keys.
+     * Only keys matter for relations loading, so unnecessary data will be filtered out.
+     *
+     * @param non-empty-array<non-empty-string> $keys
+     * @return non-empty-array<non-empty-string, mixed>
+     */
+    private static function normalizeKeys(array $data, array $keys): array
+    {
+        $result = [];
+        foreach ($keys as $k) {
+            \array_key_exists($k, $data) or throw new \LogicException(
+                "Bulk loader cannot get the value for the key `$k`.",
+            );
+            $result[$k] = Node::convertToSolid($data[$k]);
+        }
+        return $result;
+    }
+
+    /**
      * Index entity by provided keys and data.
      *
      * @param non-empty-array<non-empty-string> $keys
@@ -148,25 +166,6 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
 
 
         $pool = [$entity, $node];
-    }
-
-    /**
-     * Normalize data by provided keys.
-     * Only keys matter for relations loading, so unnecessary data will be filtered out.
-     *
-     * @param non-empty-array<non-empty-string> $keys
-     * @return non-empty-array<non-empty-string, mixed>
-     */
-    private static function normalizeKeys(array $data, array $keys): array
-    {
-        $result = [];
-        foreach ($keys as $k) {
-            \array_key_exists($k, $data) or throw new \LogicException(
-                "Bulk loader cannot get the value for the key `$k`.",
-            );
-            $result[$k] = Node::convertToSolid($data[$k]);
-        }
-        return $result;
     }
 
     /**

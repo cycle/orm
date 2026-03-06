@@ -27,13 +27,13 @@ class ValueInterfaceUuid implements ValueInterface, \Stringable
         return \PDO::PARAM_STR;
     }
 
-    public function __toString(): string
-    {
-        return 'urn:uuid:' . $this->value;
-    }
-
     public function toString(): string
     {
         return $this->value;
+    }
+
+    public function __toString(): string
+    {
+        return 'urn:uuid:' . $this->value;
     }
 }

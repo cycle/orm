@@ -10,12 +10,12 @@ class StringableUuid implements \Stringable
         private readonly string $value,
     ) {}
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }
 
-    public function toString(): string
+    public function __toString(): string
     {
         return $this->value;
     }

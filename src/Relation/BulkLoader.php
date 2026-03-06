@@ -23,6 +23,9 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     private UpdateLoader $loader;
     private array $index = [];
 
+    /** @var list<non-empty-string> Keys matter for relations */
+    private array $keys = [];
+
     public function __construct(
         private ORMInterface $orm,
     ) {}
@@ -65,6 +68,14 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     public function load(string $relation, array $options = []): static
     {
         $this->loader->loadRelation($relation, $options, load: true);
+
+        // Determine inner keys for the relation
+        $role = $this->loader->getTarget();
+        $relMap = $this->orm->getRelationMap($role);
+        $parentRel = \explode('.', $relation, 2)[0];
+        $r = $relMap->getRelations()[$parentRel];
+        $this->keys = \array_merge($this->keys, $r->getInnerKeys());
+
         return $this;
     }
 
@@ -78,12 +89,14 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
         $relations = $relMap->getRelations();
         $heap = $this->orm->getHeap();
         $factory = $this->orm->getService(EntityFactoryInterface::class);
+        $keys = \array_unique(\array_merge($this->keys, $pk));
 
         foreach ($this->entities as $entity) {
             $n = $heap->get($entity) ?? throw new \LogicException("Entity node not found in the heap.");
             // Use Node data to load relations instead of actual entity data
             // to avoid inconsistent state in the Heap
             $data = $mapper->uncast($n->getData());
+            self::normalizeKeys($data, $keys);
             $this->indexEntity($n, $pk, $data, $entity);
             $node->push($data);
             unset($data);
@@ -116,6 +129,21 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     }
 
     /**
+     * Normalize data by provided keys.
+     *
+     * @param non-empty-array<non-empty-string> $keys
+     */
+    private static function normalizeKeys(array &$data, array $keys): void
+    {
+        foreach ($keys as $k) {
+            \array_key_exists($k, $data) or throw new \LogicException(
+                "Bulk loader cannot get the value for the key `$k`.",
+            );
+            $data[$k] = Node::convertToSolid($data[$k]);
+        }
+    }
+
+    /**
      * Index entity by provided keys and data.
      *
      * @param non-empty-array<non-empty-string> $keys
@@ -125,12 +153,11 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     {
         $pool = &$this->index;
         foreach ($keys as $k) {
-            $keyValue = $data[$k] ?? throw new \LogicException("Bulk loader cannot get the value for the key `$k`.");
-            \is_scalar($keyValue) or $keyValue instanceof \Stringable
-                ? ($keyValue = (string) $keyValue)
-                : throw new \InvalidArgumentException(
-                    "Invalid value on the key `$k`. Expected scalar, got " . \get_debug_type($keyValue) . ".",
-                );
+            $keyValue = $data[$k];
+            \is_scalar($keyValue) or throw new \InvalidArgumentException(
+                "Invalid value on the primary key `$k`. Expected scalar, got " . \get_debug_type($keyValue) . ".",
+            );
+            $pk[$k] = $keyValue;
 
             \array_key_exists($keyValue, $pool) or $pool[$keyValue] = [];
             $pool = &$pool[$keyValue];
@@ -152,7 +179,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     {
         $result = $this->index;
         foreach ($pk as $k) {
-            $result = $result[(string) $data[$k]] ?? throw new \LogicException('Cannot find indexed entity.');
+            $result = $result[$data[$k]] ?? throw new \LogicException('Cannot find indexed entity.');
         }
 
         return $result;

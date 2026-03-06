@@ -27,15 +27,11 @@ abstract class UUIDTest extends BaseTest
         $e->balance = 300;
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(1);
 
         $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
+        $this->save($e);
         $this->assertNumWrites(0);
 
         $this->assertEquals(1, $e->id);

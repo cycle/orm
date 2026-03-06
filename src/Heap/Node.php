@@ -88,8 +88,8 @@ final class Node
             }
             // Object and string/int
             if ($ta[1] === 'string' || $ta[0] === 'integer') {
-                $a = $a instanceof \Stringable ? $a->__toString() : (string) $a;
-                $b = $b instanceof \Stringable ? $b->__toString() : (string) $b;
+                $a = (string) self::convertToSolid($a);
+                $b = (string) self::convertToSolid($b);
                 return $a <=> $b;
             }
             return -1;

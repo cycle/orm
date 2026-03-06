@@ -69,9 +69,11 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     {
         $this->loader->loadRelation($relation, $options, load: true);
 
+        // Determine inner keys for the relation
         $role = $this->loader->getTarget();
         $relMap = $this->orm->getRelationMap($role);
-        $r = $relMap->getRelations()[$relation];
+        $parentRel = \explode('.', $relation, 2)[0];
+        $r = $relMap->getRelations()[$parentRel];
         $this->keys = \array_merge($this->keys, $r->getInnerKeys());
 
         return $this;
@@ -93,7 +95,8 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
             $n = $heap->get($entity) ?? throw new \LogicException("Entity node not found in the heap.");
             // Use Node data to load relations instead of actual entity data
             // to avoid inconsistent state in the Heap
-            $data = self::normalizeKeys($mapper->uncast($n->getData()), $keys);
+            $data = $mapper->uncast($n->getData());
+            self::normalizeKeys($data, $keys);
             $this->indexEntity($n, $pk, $data, $entity);
             $node->push($data);
             unset($data);
@@ -127,21 +130,17 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
 
     /**
      * Normalize data by provided keys.
-     * Only keys matter for relations loading, so unnecessary data will be filtered out.
      *
      * @param non-empty-array<non-empty-string> $keys
-     * @return non-empty-array<non-empty-string, mixed>
      */
-    private static function normalizeKeys(array $data, array $keys): array
+    private static function normalizeKeys(array &$data, array $keys): void
     {
-        $result = [];
         foreach ($keys as $k) {
             \array_key_exists($k, $data) or throw new \LogicException(
                 "Bulk loader cannot get the value for the key `$k`.",
             );
-            $result[$k] = Node::convertToSolid($data[$k]);
+            $data[$k] = Node::convertToSolid($data[$k]);
         }
-        return $result;
     }
 
     /**

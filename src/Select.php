@@ -23,7 +23,6 @@ use Spiral\Pagination\PaginableInterface;
  * Trait provides the ability to transparently configure underlying loader query.
  *
  * @method $this distinct()
- * @method $this where(...$args)
  * @method $this andWhere(...$args);
  * @method $this orWhere(...$args);
  * @method $this having(...$args);
@@ -136,6 +135,84 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         return \count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
             : $this->__call('where', [$pk, \current($ids)]);
+    }
+
+    /**
+     * Add a WHERE condition to the query. Supports multiple calling conventions.
+     *
+     * Simple equality and comparison:
+     *
+     *     // Equality (column, value)
+     *     $select->where('id', 2);
+     *     $select->where('status', 'active');
+     *     // Operator comparison (column, operator, value)
+     *     $select->where('level', '>=', 10);
+     *     $select->where('deleted_at', '=', null);
+     *     $select->where('name', 'LIKE', '%john%');
+     *     // BETWEEN (column, 'between', from, to)
+     *     $select->where('comments.id', 'between', 1, 4);
+     *
+     * Array syntax allows multiple conditions (AND by default):
+     *
+     *     // Simple equalities
+     *     $select->where(['id' => 2]);
+     *     $select->where(['key1' => 1, 'key2' => 2]);
+     *     // IN clause using Parameter
+     *     $select->where(['id' => new Parameter([1, 2])]);
+     *     // Operator syntax
+     *     $select->where(['id' => ['>' => 0, '<' => 3]]);
+     *     $select->where(['comments.id' => ['between' => [1, 4]]]);
+     *
+     * Logical grouping with "@or" / "@AND":
+     *
+     *     $select->where([
+     *         "@or" => [
+     *             ['comments.message' => 'msg 1'],
+     *             ['comments.message' => 'msg 3'],
+     *         ],
+     *     ]);
+     *
+     *     $select->where([
+     *         "@AND" => [
+     *             ['name' => 'Valeriy'],
+     *             ['level' => ['>=' => 10]],
+     *         ],
+     *     ]);
+     *
+     * Closure for nested or complex conditions:
+     *
+     *     $select->where(function (\Cycle\ORM\Select\QueryBuilder $q): void {
+     *         $q->where('id', 2);
+     *     });
+     *
+     *     // Combining AND / OR inside a closure
+     *     $select->where(function (\Cycle\ORM\Select\QueryBuilder $q): void {
+     *         $q->where('comments.message', 'msg 3')
+     *           ->orWhere(function (\Cycle\ORM\Select\QueryBuilder $q): void {
+     *               $q->where('id', 1);
+     *           });
+     *     });
+     *
+     * Raw SQL fragments and expressions:
+     *
+     *     // Fragment with bound parameters
+     *     $select->where(new \Cycle\Database\Injection\Fragment('fp.filter_id = ?', 5));
+     *     // Expression as a value
+     *     $select->where('comments.id', new \Cycle\Database\Injection\Expression('user.id'));
+     *
+     * When used with relations joined via {@see with()}, prefix columns with the relation alias:
+     *
+     *     $select->with('comments')->where('comments.approved', true);
+     *     $select->with('posts.comments')->where('posts_comments.approved', true);
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value), (array), (closure), (Fragment)]
+     *
+     * @return static<TEntity>
+     */
+    public function where(mixed ...$args): static
+    {
+        $this->builder->where(...$args);
+        return $this;
     }
 
     /**

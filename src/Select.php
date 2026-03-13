@@ -23,9 +23,6 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method $this having(...$args);
- * @method $this andHaving(...$args);
- * @method $this orHaving(...$args);
  * @method $this orderBy($expression, $direction = 'ASC');
  * @method $this forUpdate()
  * @method $this whereJson(string $path, mixed $value)
@@ -292,6 +289,57 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function orWhere(mixed ...$args): static
     {
         $this->builder->orWhere(...$args);
+        return $this;
+    }
+
+    /**
+     * Add a HAVING condition to the query. Typically used with {@see SelectQuery::groupBy()}
+     * to filter aggregated results.
+     *
+     *     $select->having('COUNT(comments.id)', '>', 5);
+     *     $select->having(['COUNT(id)' => ['>=' => 10]]);
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value), (array), (closure)]
+     *
+     * @return static<TEntity>
+     */
+    public function having(mixed ...$args): static
+    {
+        $this->builder->having(...$args);
+        return $this;
+    }
+
+    /**
+     * Add an AND HAVING condition to the query.
+     *
+     *     $select->having('COUNT(id)', '>', 5)->andHaving('SUM(balance)', '<', 1000);
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value), (array), (closure)]
+     *
+     * @return static<TEntity>
+     *
+     * @see having()
+     */
+    public function andHaving(mixed ...$args): static
+    {
+        $this->builder->andHaving(...$args);
+        return $this;
+    }
+
+    /**
+     * Add an OR HAVING condition to the query.
+     *
+     *     $select->having('COUNT(id)', '>', 10)->orHaving('SUM(balance)', '>', 1000);
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value), (array), (closure)]
+     *
+     * @return static<TEntity>
+     *
+     * @see having()
+     */
+    public function orHaving(mixed ...$args): static
+    {
+        $this->builder->orHaving(...$args);
         return $this;
     }
 

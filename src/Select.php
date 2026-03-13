@@ -23,7 +23,6 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method $this distinct()
  * @method $this andWhere(...$args);
  * @method $this orWhere(...$args);
  * @method $this having(...$args);
@@ -112,6 +111,19 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function from(string $table): static
     {
         $this->loader->getQuery()->from(\sprintf('%s AS %s', $table, $this->loader->getAlias()));
+        return $this;
+    }
+
+    /**
+     * Mark query to return only distinct results.
+     *
+     *     $select->distinct()->fetchAll();
+     *
+     * @return static<TEntity>
+     */
+    public function distinct(): static
+    {
+        $this->builder->distinct();
         return $this;
     }
 

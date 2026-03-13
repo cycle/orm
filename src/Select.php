@@ -24,7 +24,6 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method $this forUpdate()
  * @method $this whereJson(string $path, mixed $value)
  * @method $this orWhereJson(string $path, mixed $value)
  * @method $this whereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
@@ -366,6 +365,22 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function orderBy(string|FragmentInterface|array $expression, ?string $direction = 'ASC'): static
     {
         $this->builder->orderBy($expression, $direction);
+        return $this;
+    }
+
+    /**
+     * Add a FOR UPDATE lock to the query. Selected rows will be locked for the duration
+     * of the current transaction, preventing other transactions from modifying them.
+     *
+     *     // Inside a transaction
+     *     $user = $select->where('id', 1)->forUpdate()->fetchOne();
+     *     $user->balance -= 100;
+     *
+     * @return static<TEntity>
+     */
+    public function forUpdate(): static
+    {
+        $this->builder->forUpdate();
         return $this;
     }
 

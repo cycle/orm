@@ -6,7 +6,6 @@ namespace Cycle\ORM;
 
 use Cycle\Database\Injection\FragmentInterface;
 use Cycle\Database\Injection\Parameter;
-use Cycle\Database\Injection\SubQuery;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\Options\LoadOptions;
@@ -23,11 +22,6 @@ use Spiral\Pagination\PaginableInterface;
  * Query builder and entity selector. Mocks SelectQuery. Attention, Selector does not mount RootLoader scope by default.
  *
  * Trait provides the ability to transparently configure underlying loader query.
- *
- * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
- * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
- * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
- * @method mixed sum($identifier) Perform aggregation (SUM) based on column or expression value.
  *
  * @template-covariant TEntity of object
  */
@@ -551,7 +545,69 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
                 : \sprintf('DISTINCT(%s)', \reset($pk));
         }
 
-        return (int) $this->__call('count', [$column]);
+        return (int) $this->builder->withQuery(
+            $this->buildQuery(),
+        )->count($column);
+    }
+
+    /**
+     * Perform AVG aggregation on the given column or expression.
+     *
+     *     $avgBalance = $select->avg('balance');
+     *     $avgScore = $select->where('status', 'active')->avg('score');
+     *
+     * @param non-empty-string $identifier Column or expression to aggregate.
+     */
+    public function avg(string $identifier): mixed
+    {
+        return $this->builder->withQuery(
+            $this->buildQuery(),
+        )->avg($identifier);
+    }
+
+    /**
+     * Perform MIN aggregation on the given column or expression.
+     *
+     *     $minBalance = $select->min('balance');
+     *     $minPrice = $select->where('active', true)->min('price');
+     *
+     * @param non-empty-string $identifier Column or expression to aggregate.
+     */
+    public function min(string $identifier): mixed
+    {
+        return $this->builder->withQuery(
+            $this->buildQuery(),
+        )->min($identifier);
+    }
+
+    /**
+     * Perform MAX aggregation on the given column or expression.
+     *
+     *     $maxBalance = $select->max('balance');
+     *     $maxLevel = $select->where('role', 'admin')->max('level');
+     *
+     * @param non-empty-string $identifier Column or expression to aggregate.
+     */
+    public function max(string $identifier): mixed
+    {
+        return $this->builder->withQuery(
+            $this->buildQuery(),
+        )->max($identifier);
+    }
+
+    /**
+     * Perform SUM aggregation on the given column or expression.
+     *
+     *     $totalBalance = $select->sum('balance');
+     *     $totalSpent = $select->where('year', 2025)->sum('amount');
+     *
+     * @param non-empty-string $identifier Column or expression to aggregate.
+     */
+    public function sum(string $identifier): mixed
+    {
+        return $this->builder->withQuery(
+            $this->buildQuery(),
+        )->sum($identifier);
     }
 
     /**
@@ -846,13 +902,6 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      */
     public function __call(string $name, array $arguments): mixed
     {
-        if (\in_array(\strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM', 'COUNT'])) {
-            // aggregations
-            return $this->builder->withQuery(
-                $this->buildQuery(),
-            )->__call($name, $arguments);
-        }
-
         $result = $this->builder->__call($name, $arguments);
         if ($result instanceof QueryBuilder) {
             return $this;

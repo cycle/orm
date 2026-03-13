@@ -24,18 +24,6 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method $this whereJson(string $path, mixed $value)
- * @method $this orWhereJson(string $path, mixed $value)
- * @method $this whereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
- * @method $this orWhereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true)
- * @method $this whereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
- * @method $this orWhereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true)
- * @method $this whereJsonContainsKey(string $path)
- * @method $this orWhereJsonContainsKey(string $path)
- * @method $this whereJsonDoesntContainKey(string $path)
- * @method $this orWhereJsonDoesntContainKey(string $path)
- * @method $this whereJsonLength(string $path, int $length, string $operator = '=')
- * @method $this orWhereJsonLength(string $path, int $length, string $operator = '=')
  * @method mixed avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method mixed min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method mixed max($identifier) Perform aggregation (MAX) based on column or expression value.
@@ -381,6 +369,171 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function forUpdate(): static
     {
         $this->builder->forUpdate();
+        return $this;
+    }
+
+    /**
+     * Filter by JSON field value using exact match.
+     *
+     *     $select->whereJson('settings->theme', 'dark');
+     *     $select->whereJson('meta->score', 10);
+     *
+     * @return static<TEntity>
+     */
+    public function whereJson(string $path, mixed $value): static
+    {
+        $this->builder->whereJson($path, $value);
+        return $this;
+    }
+
+    /**
+     * OR version of {@see whereJson()}.
+     *
+     *     $select->whereJson('settings->theme', 'dark')
+     *         ->orWhereJson('settings->theme', 'light');
+     *
+     * @return static<TEntity>
+     */
+    public function orWhereJson(string $path, mixed $value): static
+    {
+        $this->builder->orWhereJson($path, $value);
+        return $this;
+    }
+
+    /**
+     * Filter rows where a JSON array or object contains the given value.
+     *
+     *     $select->whereJsonContains('tags', 'php');
+     *     $select->whereJsonContains('meta->roles', 'admin');
+     *
+     * @return static<TEntity>
+     */
+    public function whereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true): static
+    {
+        $this->builder->whereJsonContains($path, $value, $encode, $validate);
+        return $this;
+    }
+
+    /**
+     * OR version of {@see whereJsonContains()}.
+     *
+     *     $select->whereJsonContains('tags', 'php')
+     *         ->orWhereJsonContains('tags', 'go');
+     *
+     * @return static<TEntity>
+     */
+    public function orWhereJsonContains(string $path, mixed $value, bool $encode = true, bool $validate = true): static
+    {
+        $this->builder->orWhereJsonContains($path, $value, $encode, $validate);
+        return $this;
+    }
+
+    /**
+     * Filter rows where a JSON array or object does NOT contain the given value.
+     *
+     *     $select->whereJsonDoesntContain('tags', 'deprecated');
+     *
+     * @return static<TEntity>
+     */
+    public function whereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true): static
+    {
+        $this->builder->whereJsonDoesntContain($path, $value, $encode, $validate);
+        return $this;
+    }
+
+    /**
+     * OR version of {@see whereJsonDoesntContain()}.
+     *
+     *     $select->whereJsonDoesntContain('tags', 'a')
+     *         ->orWhereJsonDoesntContain('tags', 'b');
+     *
+     * @return static<TEntity>
+     */
+    public function orWhereJsonDoesntContain(string $path, mixed $value, bool $encode = true, bool $validate = true): static
+    {
+        $this->builder->orWhereJsonDoesntContain($path, $value, $encode, $validate);
+        return $this;
+    }
+
+    /**
+     * Filter rows where a key exists in a JSON object.
+     *
+     *     $select->whereJsonContainsKey('settings->notifications');
+     *
+     * @return static<TEntity>
+     */
+    public function whereJsonContainsKey(string $path): static
+    {
+        $this->builder->whereJsonContainsKey($path);
+        return $this;
+    }
+
+    /**
+     * OR version of {@see whereJsonContainsKey()}.
+     *
+     *     $select->whereJsonContainsKey('settings->email')
+     *         ->orWhereJsonContainsKey('settings->sms');
+     *
+     * @return static<TEntity>
+     */
+    public function orWhereJsonContainsKey(string $path): static
+    {
+        $this->builder->orWhereJsonContainsKey($path);
+        return $this;
+    }
+
+    /**
+     * Filter rows where a key does NOT exist in a JSON object.
+     *
+     *     $select->whereJsonDoesntContainKey('settings->legacy_flag');
+     *
+     * @return static<TEntity>
+     */
+    public function whereJsonDoesntContainKey(string $path): static
+    {
+        $this->builder->whereJsonDoesntContainKey($path);
+        return $this;
+    }
+
+    /**
+     * OR version of {@see whereJsonDoesntContainKey()}.
+     *
+     *     $select->whereJsonDoesntContainKey('settings->a')
+     *         ->orWhereJsonDoesntContainKey('settings->b');
+     *
+     * @return static<TEntity>
+     */
+    public function orWhereJsonDoesntContainKey(string $path): static
+    {
+        $this->builder->orWhereJsonDoesntContainKey($path);
+        return $this;
+    }
+
+    /**
+     * Filter rows by the length of a JSON array.
+     *
+     *     $select->whereJsonLength('tags', 3);
+     *     $select->whereJsonLength('tags', 5, '>');
+     *
+     * @return static<TEntity>
+     */
+    public function whereJsonLength(string $path, int $length, string $operator = '='): static
+    {
+        $this->builder->whereJsonLength($path, $length, $operator);
+        return $this;
+    }
+
+    /**
+     * OR version of {@see whereJsonLength()}.
+     *
+     *     $select->whereJsonLength('tags', 0)
+     *         ->orWhereJsonLength('roles', 0);
+     *
+     * @return static<TEntity>
+     */
+    public function orWhereJsonLength(string $path, int $length, string $operator = '='): static
+    {
+        $this->builder->orWhereJsonLength($path, $length, $operator);
         return $this;
     }
 

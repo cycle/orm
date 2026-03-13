@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM;
 
 use Cycle\Database\Injection\Parameter;
+use Cycle\Database\Injection\SubQuery;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\Options\LoadOptions;
@@ -86,6 +87,32 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
             $orm->resolveRole($role),
         );
         $this->builder = new QueryBuilder($this->loader->getQuery(), $this->loader);
+    }
+
+    /**
+     * Override the source table for the query. Useful when the entity schema points to one table
+     * but at runtime you need to read from a different one (e.g. an archive or partition).
+     *
+     * The entity mapping, column aliases and relations remain unchanged — only the
+     * FROM clause is replaced:
+     *
+     *     // Read users from an archive table instead of the default one
+     *     $select->from('user_archive')->where('id', 1)->fetchOne();
+     *
+     *     // Combine with relations — comments are still loaded from their own table
+     *     $select->from('user_archive')
+     *         ->load('comments')
+     *         ->orderBy('id')
+     *         ->fetchAll();
+     *
+     * @param non-empty-string $table
+     *
+     * @return static<TEntity>
+     */
+    public function from(string $table): static
+    {
+        $this->loader->getQuery()->from(\sprintf('%s AS %s', $table, $this->loader->getAlias()));
+        return $this;
     }
 
     /**

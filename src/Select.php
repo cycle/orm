@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\Injection\FragmentInterface;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Injection\SubQuery;
 use Cycle\Database\Query\SelectQuery;
@@ -23,7 +24,6 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method $this orderBy($expression, $direction = 'ASC');
  * @method $this forUpdate()
  * @method $this whereJson(string $path, mixed $value)
  * @method $this orWhereJson(string $path, mixed $value)
@@ -340,6 +340,32 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function orHaving(mixed ...$args): static
     {
         $this->builder->orHaving(...$args);
+        return $this;
+    }
+
+    /**
+     * Sort results by column, expression or multiple columns at once.
+     *
+     *     $select->orderBy('id');
+     *     $select->orderBy('created_at', 'DESC');
+     *
+     *     // Multiple columns
+     *     $select->orderBy([
+     *         'id' => 'ASC',
+     *         'name' => 'DESC',
+     *     ]);
+     *
+     *     // Raw expression (direction is ignored)
+     *     $select->orderBy(new \Cycle\Database\Injection\Fragment('RAND()'));
+     *
+     * @param non-empty-string|FragmentInterface|array<non-empty-string, non-empty-string> $expression
+     * @param 'ASC'|'DESC'|null $direction Sorting direction, default ASC.
+     *
+     * @return static<TEntity>
+     */
+    public function orderBy(string|FragmentInterface|array $expression, ?string $direction = 'ASC'): static
+    {
+        $this->builder->orderBy($expression, $direction);
         return $this;
     }
 

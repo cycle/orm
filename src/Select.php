@@ -23,7 +23,6 @@ use Spiral\Pagination\PaginableInterface;
  *
  * Trait provides the ability to transparently configure underlying loader query.
  *
- * @method $this orWhere(...$args);
  * @method $this having(...$args);
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
@@ -269,6 +268,30 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     public function andWhere(mixed ...$args): static
     {
         $this->builder->andWhere(...$args);
+        return $this;
+    }
+
+    /**
+     * Add an OR WHERE condition to the query. Accepts the same arguments as {@see where()},
+     * but uses OR conjunction.
+     *
+     *     $select->where('id', 1)->orWhere('id', 2);
+     *
+     *     // Closure for grouped OR conditions
+     *     $select->where('status', 'active')->orWhere(function (\Cycle\ORM\Select\QueryBuilder $q): void {
+     *         $q->where('role', 'admin')
+     *           ->where('balance', '>', 0);
+     *     });
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value), (array), (closure), (Fragment)]
+     *
+     * @return static<TEntity>
+     *
+     * @see where()
+     */
+    public function orWhere(mixed ...$args): static
+    {
+        $this->builder->orWhere(...$args);
         return $this;
     }
 

@@ -12,6 +12,8 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Relation\RelationLoaderInterface;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select\Options\HasOneLoadOptions;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Tests\Fixtures\OneWayUuidTypecast;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
@@ -204,6 +206,53 @@ class BulkLoaderTest extends TestCase
         $result = $loader->load('profile', ['where' => ['id' => 1]]);
 
         $this->assertSame($loader, $result);
+    }
+
+    /**
+     * Test load with LoadOptions DTO
+     */
+    public function testLoadWithLoadOptionsDTO(): void
+    {
+        $orm = $this->createORM();
+
+        $entity = new User();
+        $loader = new BulkLoader($orm);
+        $loader = $loader->collect($entity);
+        $result = $loader->load('profile', new LoadOptions());
+
+        $this->assertSame($loader, $result);
+    }
+
+    /**
+     * Test load with HasOneLoadOptions DTO
+     */
+    public function testLoadWithHasOneLoadOptionsDTO(): void
+    {
+        $orm = $this->createORM();
+
+        $entity = new User();
+        $loader = new BulkLoader($orm);
+        $loader = $loader->collect($entity);
+        $result = $loader->load('profile', new HasOneLoadOptions(
+            where: ['id' => 1],
+        ));
+
+        $this->assertSame($loader, $result);
+    }
+
+    /**
+     * Test empty collect returns loader that accepts LoadOptions DTO
+     */
+    public function testEmptyCollectLoadAcceptsLoadOptionsDTO(): void
+    {
+        $orm = $this->createORM();
+        $loader = (new BulkLoader($orm))->collect();
+
+        self::assertInstanceOf(RelationLoaderInterface::class, $loader);
+        $result = $loader->load('profile', new HasOneLoadOptions());
+        self::assertSame($loader, $result);
+
+        $loader->run();
     }
 
     /**

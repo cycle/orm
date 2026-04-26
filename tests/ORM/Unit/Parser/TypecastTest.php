@@ -212,6 +212,11 @@ class TypecastTest extends TestCase
         $this->assertSame(1917, $data['foo']);
         $this->assertSame('string', $data['bar']);
         $this->assertSame(3.14, $data['baz']);
+
+        $val = $this->typecast->uncast($data);
+        self::assertSame("1917", $val['foo']);
+        self::assertSame('"string"', $val['bar']);
+        self::assertSame("3.14", $val['baz']);
     }
 
     public function testUncast(): void

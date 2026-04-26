@@ -184,7 +184,7 @@ class TypecastTest extends TestCase
         );
     }
 
-    public function testCastJsonValue(): void
+    public function testCastJsonArrayValue(): void
     {
         $this->typecast->setRules(['foo' => 'json', 'baz' => 'json']);
 
@@ -197,6 +197,21 @@ class TypecastTest extends TestCase
         $this->assertSame(['foo' => 'bar'], $data['foo']);
         $this->assertSame(\json_encode(['bar' => 'baz']), $data['bar']);
         $this->assertNull($data['baz']);
+    }
+
+    public function testCastJsonScalarValue(): void
+    {
+        $this->typecast->setRules(['foo' => 'json', 'bar' => 'json', 'baz' => 'json']);
+
+        $data = $this->typecast->cast([
+            'foo' => \json_encode(1917, \JSON_THROW_ON_ERROR),
+            'bar' => \json_encode('string', \JSON_THROW_ON_ERROR),
+            'baz' => \json_encode(3.14, \JSON_THROW_ON_ERROR),
+        ]);
+
+        $this->assertSame(1917, $data['foo']);
+        $this->assertSame('string', $data['bar']);
+        $this->assertSame(3.14, $data['baz']);
     }
 
     public function testUncast(): void

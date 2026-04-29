@@ -71,7 +71,8 @@ final class Typecast implements CastableInterface, UncastableInterface
                         $value,
                         $this->database->getDriver()->getTimezone(),
                     ),
-                    'json' => static fn(mixed $value): array => \json_decode(
+                    // Mostly an array, but can also be a scalar type.
+                    'json' => static fn(mixed $value): mixed => \json_decode(
                         $value,
                         true,
                         512,

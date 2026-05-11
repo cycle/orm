@@ -20,19 +20,6 @@ abstract class CursorTest extends BaseTest
 {
     use TableTrait;
 
-    /**
-     * MVP: cursor is Postgres-only. On other drivers the underlying DBAL stream() throws,
-     * and there is nothing meaningful to assert beyond that — the negative case is already
-     * covered by cycle/database's own functional suite. This guard keeps the suite green
-     * on sqlite/mysql/sqlserver while still exercising the Postgres path.
-     */
-    protected function skipUnlessPostgres(): void
-    {
-        if (static::DRIVER !== 'postgres') {
-            $this->markTestSkipped('Cursor mode is only supported on Postgres in the MVP.');
-        }
-    }
-
     public function testCursorYieldsAllRowsInOrder(): void
     {
         $this->skipUnlessPostgres();
@@ -520,6 +507,19 @@ abstract class CursorTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
+    }
+
+    /**
+     * MVP: cursor is Postgres-only. On other drivers the underlying DBAL stream() throws,
+     * and there is nothing meaningful to assert beyond that — the negative case is already
+     * covered by cycle/database's own functional suite. This guard keeps the suite green
+     * on sqlite/mysql/sqlserver while still exercising the Postgres path.
+     */
+    protected function skipUnlessPostgres(): void
+    {
+        if (static::DRIVER !== 'postgres') {
+            $this->markTestSkipped('Cursor mode is only supported on Postgres in the MVP.');
+        }
     }
 
     private function fillCommentsForUsers(array $userIdToCount): void

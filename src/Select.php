@@ -969,45 +969,6 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     }
 
     /**
-     * Build a closure that pulls the root primary key value out of a FETCH_NUM row
-     * produced by the cursor query. For composite PKs, the values are joined with a
-     * NUL separator into a single comparable string.
-     *
-     * @return \Closure(array): (int|string|float|null)
-     */
-    private function buildPkExtractor(): \Closure
-    {
-        $columnNames = $this->loader->getColumnNames();
-        $pkFields = $this->loader->getPrimaryFields();
-
-        $positions = [];
-        foreach ($pkFields as $field) {
-            $idx = \array_search($field, $columnNames, true);
-            if ($idx === false) {
-                throw new \LogicException(\sprintf(
-                    'Cursor cannot locate primary key column `%s` among root loader columns [%s].',
-                    $field,
-                    \implode(', ', $columnNames),
-                ));
-            }
-            $positions[] = $idx;
-        }
-
-        if (\count($positions) === 1) {
-            $p = $positions[0];
-            return static fn(array $row): int|string|float|null => $row[$p];
-        }
-
-        return static function (array $row) use ($positions): string {
-            $parts = [];
-            foreach ($positions as $i) {
-                $parts[] = (string) $row[$i];
-            }
-            return \implode("\0", $parts);
-        };
-    }
-
-    /**
      * Load data tree from database and linked loaders in a form of array.
      *
      * @return array<array-key, array<non-empty-string, mixed>>
@@ -1079,6 +1040,45 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         $node = $self->loader->createNode();
         $self->loader->loadData($node, $addRole);
         return $node->getResult();
+    }
+
+    /**
+     * Build a closure that pulls the root primary key value out of a FETCH_NUM row
+     * produced by the cursor query. For composite PKs, the values are joined with a
+     * NUL separator into a single comparable string.
+     *
+     * @return \Closure(array): (int|string|float|null)
+     */
+    private function buildPkExtractor(): \Closure
+    {
+        $columnNames = $this->loader->getColumnNames();
+        $pkFields = $this->loader->getPrimaryFields();
+
+        $positions = [];
+        foreach ($pkFields as $field) {
+            $idx = \array_search($field, $columnNames, true);
+            if ($idx === false) {
+                throw new \LogicException(\sprintf(
+                    'Cursor cannot locate primary key column `%s` among root loader columns [%s].',
+                    $field,
+                    \implode(', ', $columnNames),
+                ));
+            }
+            $positions[] = $idx;
+        }
+
+        if (\count($positions) === 1) {
+            $p = $positions[0];
+            return static fn(array $row): int|string|float|null => $row[$p];
+        }
+
+        return static function (array $row) use ($positions): string {
+            $parts = [];
+            foreach ($positions as $i) {
+                $parts[] = (string) $row[$i];
+            }
+            return \implode("\0", $parts);
+        };
     }
 
     /**

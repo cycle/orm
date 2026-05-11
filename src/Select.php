@@ -7,6 +7,7 @@ namespace Cycle\ORM;
 use Cycle\Database\Injection\FragmentInterface;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
+use Cycle\Database\StatementInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Service\EntityFactoryInterface;
@@ -865,6 +866,88 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
             $findInHeap,
             typecast: true,
         );
+    }
+
+    /**
+     * Stream entities from the database using a server-side cursor.
+     *
+     * The returned generator pulls rows lazily, hydrates them into entities, and
+     * yields one entity at a time. Memory usage is bound by `$chunkSize` plus the
+     * heap (which the caller is responsible for clearing between batches via
+     * `$orm->getHeap()->clean()` if needed).
+     *
+     * Requirements and limits (MVP):
+     * - Only Postgres is supported on the DBAL side. Other drivers throw a
+     *   {@see \Cycle\Database\Exception\DriverException}.
+     * - An active transaction is required on the underlying database before iteration
+     *   starts. Wrap the iteration in `$database->transaction(...)` or call
+     *   `beginTransaction()` before iterating.
+     * - Relations are not yet supported: any `load()`, `with()`, eager-loaded
+     *   schema relations, or hierarchical (JTI/STI) entities cause a
+     *   {@see \LogicException} when the generator is first iterated.
+     *
+     * @param int<1, max> $chunkSize Number of rows fetched per round-trip; also the
+     *        batch size used to flush the parser node and avoid unbounded growth.
+     *
+     * @return \Generator<int, TEntity>
+     */
+    public function cursor(int $chunkSize = 1000): \Generator
+    {
+        $this->assertCursorCompatible();
+
+        $query = $this->buildQuery();
+        $database = $this->loader->getSource()->getDatabase();
+        $role = $this->loader->getTarget();
+        $loader = $this->loader;
+
+        $rows = static function () use ($database, $query, $chunkSize, $loader): \Generator {
+            $node = $loader->createNode();
+            $count = 0;
+            foreach ($database->stream($query, $chunkSize, StatementInterface::FETCH_NUM) as $row) {
+                $node->parseRow(0, $row);
+                if (++$count >= $chunkSize) {
+                    yield from $node->getResult();
+                    $node = $loader->createNode();
+                    $count = 0;
+                }
+            }
+            if ($count > 0) {
+                yield from $node->getResult();
+            }
+        };
+
+        yield from Iterator::createWithServices(
+            $this->heap,
+            $this->schema,
+            $this->entityFactory,
+            $role,
+            $rows(),
+            findInHeap: false,
+            typecast: true,
+        );
+    }
+
+    private function assertCursorCompatible(): void
+    {
+        if ($this->loader->getLoadedRelations() !== []) {
+            throw new \LogicException(
+                'Cursor mode does not support relations yet. '
+                . 'Remove load() calls and eager-loaded relations from the entity schema.',
+            );
+        }
+
+        if ($this->loader->getJoinedLoaders() !== []) {
+            throw new \LogicException(
+                'Cursor mode does not support with()-joined relations yet.',
+            );
+        }
+
+        if ($this->loader->isHierarchical()) {
+            throw new \LogicException(
+                'Cursor mode does not support hierarchical entities (JTI/STI) yet. '
+                . 'Disable subclass loading with loadSubclasses(false) and avoid parent inheritance.',
+            );
+        }
     }
 
     /**

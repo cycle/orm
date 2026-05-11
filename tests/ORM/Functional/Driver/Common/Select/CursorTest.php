@@ -12,6 +12,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
+use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
@@ -132,6 +133,29 @@ abstract class CursorTest extends BaseTest
         });
     }
 
+    public function testCursorReturnsHeapAttachedInstanceForDuplicatePk(): void
+    {
+        $this->skipUnlessPostgres();
+        $this->fillUsers(3);
+
+        // Pre-load user 2 — it's now attached to the heap.
+        $pre = (new Select($this->orm, User::class))->wherePK(2)->fetchOne();
+        $this->assertNotNull($pre);
+
+        $fromCursor = $this->getDatabase()->transaction(function () {
+            $found = null;
+            foreach ((new Select($this->orm, User::class))->orderBy('id')->cursor(10) as $user) {
+                if ($user->id === 2) {
+                    $found = $user;
+                    break;
+                }
+            }
+            return $found;
+        });
+
+        $this->assertSame($pre, $fromCursor, 'Cursor must reuse the heap-attached instance for duplicate PKs');
+    }
+
     public function testCursorAllowsHeapCleanBetweenChunks(): void
     {
         $this->skipUnlessPostgres();
@@ -215,37 +239,183 @@ abstract class CursorTest extends BaseTest
         $this->assertSame(50, $result['total']);
     }
 
-    public function testCursorRejectsLoadedRelation(): void
+    public function testCursorPostloadHasMany(): void
     {
         $this->skipUnlessPostgres();
+        $this->fillUsers(3);
+        $this->fillCommentsForUsers([1 => 4, 2 => 3, 3 => 0]);
 
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessageMatches('/relations/i');
-
-        $this->getDatabase()->transaction(function (): void {
+        $byUser = $this->getDatabase()->transaction(function (): array {
+            $out = [];
             $cursor = (new Select($this->orm, User::class))
                 ->load('comments')
-                ->cursor(10);
-            foreach ($cursor as $_) {
-                // never reached — generator throws on first iteration
+                ->orderBy('id')
+                ->cursor(2);
+            foreach ($cursor as $user) {
+                $out[$user->id] = \array_map(fn($c) => $c->message, \iterator_to_array((function () use ($user) {
+                    foreach ($user->comments as $c) {
+                        yield $c;
+                    }
+                })()));
             }
+            return $out;
         });
+
+        $this->assertSame(['msg 1-1', 'msg 1-2', 'msg 1-3', 'msg 1-4'], $byUser[1]);
+        $this->assertSame(['msg 2-1', 'msg 2-2', 'msg 2-3'], $byUser[2]);
+        $this->assertSame([], $byUser[3]);
     }
 
-    public function testCursorRejectsWithJoinedRelation(): void
+    public function testCursorInlineHasOne(): void
     {
         $this->skipUnlessPostgres();
+        $this->fillUsers(3);
+        $this->fillProfileForUsers([1 => 'profile-1.png', 3 => 'profile-3.png']);
 
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessageMatches('/with\(\)/i');
-
-        $this->getDatabase()->transaction(function (): void {
+        $images = $this->getDatabase()->transaction(function (): array {
+            $out = [];
             $cursor = (new Select($this->orm, User::class))
-                ->with('comments')
-                ->cursor(10);
-            foreach ($cursor as $_) {
+                ->load('profile', ['method' => Select::SINGLE_QUERY])
+                ->orderBy('id')
+                ->cursor(2);
+            foreach ($cursor as $user) {
+                $out[$user->id] = $user->profile?->image;
             }
+            return $out;
         });
+
+        $this->assertSame(['profile-1.png', null, 'profile-3.png'], \array_values($images));
+    }
+
+    public function testCursorInlineBelongsTo(): void
+    {
+        $this->skipUnlessPostgres();
+        $this->fillUsers(2);
+        $this->fillCommentsForUsers([1 => 2, 2 => 1]);
+
+        $rows = $this->getDatabase()->transaction(function (): array {
+            $out = [];
+            $cursor = (new Select($this->orm, Comment::class))
+                ->load('user', ['method' => Select::SINGLE_QUERY])
+                ->orderBy('id')
+                ->cursor(2);
+            foreach ($cursor as $comment) {
+                $out[] = [$comment->message, $comment->user->id, $comment->user->email];
+            }
+            return $out;
+        });
+
+        $this->assertSame(
+            [
+                ['msg 1-1', 1, 'user-1@example.com'],
+                ['msg 1-2', 1, 'user-1@example.com'],
+                ['msg 2-1', 2, 'user-2@example.com'],
+            ],
+            $rows,
+        );
+    }
+
+    public function testCursorAllowsWithOnNonMultiplyingRelation(): void
+    {
+        $this->skipUnlessPostgres();
+        $this->fillUsers(2);
+        $this->fillCommentsForUsers([1 => 2, 2 => 1]);
+
+        $messages = $this->getDatabase()->transaction(function (): array {
+            $cursor = (new Select($this->orm, Comment::class))
+                ->with('user')
+                ->where('user.id', 2)
+                ->orderBy('comment.id')
+                ->cursor(10);
+            $out = [];
+            foreach ($cursor as $comment) {
+                $out[] = $comment->message;
+            }
+            return $out;
+        });
+
+        $this->assertSame(['msg 2-1'], $messages);
+    }
+
+    public function testCursorInlineHasManySingleQuery(): void
+    {
+        $this->skipUnlessPostgres();
+        $this->fillUsers(3);
+        $this->fillCommentsForUsers([1 => 4, 2 => 3, 3 => 0]);
+
+        $byUser = $this->getDatabase()->transaction(function (): array {
+            $out = [];
+            $cursor = (new Select($this->orm, User::class))
+                ->load('comments', ['method' => Select::SINGLE_QUERY])
+                ->cursor(10);
+            foreach ($cursor as $user) {
+                $out[$user->id] = \array_map(fn($c) => $c->message, (function () use ($user) {
+                    $r = [];
+                    foreach ($user->comments as $c) {
+                        $r[] = $c;
+                    }
+                    return $r;
+                })());
+            }
+            return $out;
+        });
+
+        $this->assertSame(['msg 1-1', 'msg 1-2', 'msg 1-3', 'msg 1-4'], $byUser[1]);
+        $this->assertSame(['msg 2-1', 'msg 2-2', 'msg 2-3'], $byUser[2]);
+        $this->assertSame([], $byUser[3]);
+    }
+
+    public function testCursorInlineHasManyAcrossChunkBoundary(): void
+    {
+        $this->skipUnlessPostgres();
+        // 3 parents straddle a chunk boundary; user_2 has more children than fit in one chunk.
+        $this->fillUsers(3);
+        $this->fillCommentsForUsers([1 => 2, 2 => 10, 3 => 1]);
+
+        $byUser = $this->getDatabase()->transaction(function (): array {
+            $out = [];
+            $cursor = (new Select($this->orm, User::class))
+                ->load('comments', ['method' => Select::SINGLE_QUERY])
+                ->cursor(2); // chunk = 2 parents → users [1,2] / [3]
+            foreach ($cursor as $user) {
+                $msgs = [];
+                foreach ($user->comments as $c) {
+                    $msgs[] = $c->message;
+                }
+                $out[$user->id] = $msgs;
+            }
+            return $out;
+        });
+
+        $this->assertCount(2, $byUser[1]);
+        $this->assertCount(10, $byUser[2]);
+        $this->assertCount(1, $byUser[3]);
+        $this->assertSame('msg 2-10', $byUser[2][9]);
+    }
+
+    public function testCursorInlineHasManyDoesNotDuplicateParents(): void
+    {
+        $this->skipUnlessPostgres();
+        $this->fillUsers(5);
+        $this->fillCommentsForUsers([1 => 3, 2 => 4, 3 => 2, 4 => 5, 5 => 1]);
+
+        $count = $this->getDatabase()->transaction(function (): int {
+            $seen = [];
+            $cursor = (new Select($this->orm, User::class))
+                ->load('comments', ['method' => Select::SINGLE_QUERY])
+                ->cursor(2);
+            foreach ($cursor as $user) {
+                $this->assertArrayNotHasKey(
+                    $user->id,
+                    $seen,
+                    "User id={$user->id} was yielded more than once",
+                );
+                $seen[$user->id] = true;
+            }
+            return \count($seen);
+        });
+
+        $this->assertSame(5, $count);
     }
 
     public function testCursorOnNonPostgresThrows(): void
@@ -280,6 +450,12 @@ abstract class CursorTest extends BaseTest
             'message' => 'string',
         ]);
 
+        $this->makeTable('profile', [
+            'id' => 'primary',
+            'user_id' => 'integer',
+            'image' => 'string',
+        ]);
+
         $this->orm = $this->withSchema(new Schema([
             User::class => [
                 Schema::ROLE => 'user',
@@ -300,6 +476,16 @@ abstract class CursorTest extends BaseTest
                             Relation::OUTER_KEY => 'user_id',
                         ],
                     ],
+                    'profile' => [
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::NULLABLE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
+                        ],
+                    ],
                 ],
             ],
             Comment::class => [
@@ -311,9 +497,53 @@ abstract class CursorTest extends BaseTest
                 Schema::COLUMNS => ['id', 'user_id', 'message'],
                 Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int'],
                 Schema::SCHEMA => [],
+                Schema::RELATIONS => [
+                    'user' => [
+                        Relation::TYPE => Relation::BELONGS_TO,
+                        Relation::TARGET => User::class,
+                        Relation::SCHEMA => [
+                            Relation::INNER_KEY => 'user_id',
+                            Relation::OUTER_KEY => 'id',
+                        ],
+                    ],
+                ],
+            ],
+            Profile::class => [
+                Schema::ROLE => 'profile',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'profile',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'user_id', 'image'],
+                Schema::TYPECAST => ['id' => 'int', 'user_id' => 'int'],
+                Schema::SCHEMA => [],
                 Schema::RELATIONS => [],
             ],
         ]));
+    }
+
+    private function fillCommentsForUsers(array $userIdToCount): void
+    {
+        $rows = [];
+        foreach ($userIdToCount as $userId => $count) {
+            for ($i = 1; $i <= $count; $i++) {
+                $rows[] = [$userId, "msg {$userId}-{$i}"];
+            }
+        }
+        if ($rows !== []) {
+            $this->getDatabase()->table('comment')->insertMultiple(['user_id', 'message'], $rows);
+        }
+    }
+
+    private function fillProfileForUsers(array $userIdToImage): void
+    {
+        $rows = [];
+        foreach ($userIdToImage as $userId => $image) {
+            $rows[] = [$userId, $image];
+        }
+        if ($rows !== []) {
+            $this->getDatabase()->table('profile')->insertMultiple(['user_id', 'image'], $rows);
+        }
     }
 
     private function fillUsers(int $count): void

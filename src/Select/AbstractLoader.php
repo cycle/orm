@@ -305,17 +305,6 @@ abstract class AbstractLoader implements LoaderInterface
     }
 
     /**
-     * Returns all loaders that load data for relations of the current loader
-     * (both inline-joined and post-loaded).
-     *
-     * @return LoaderInterface[]
-     */
-    public function getLoadedRelations(): array
-    {
-        return $this->load;
-    }
-
-    /**
      * Indicates that loader loads data.
      */
     abstract public function isLoaded(): bool;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\Driver\CursorOptions;
 use Cycle\Database\Injection\FragmentInterface;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
@@ -890,13 +891,23 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      * scatter is not auto-fixed — order by parent columns instead.
      *
      * Requirements:
-     * - Only Postgres is supported on the DBAL side. Other drivers throw a
-     *   {@see \Cycle\Database\Exception\DriverException}.
+     * - The underlying driver must implement {@see \Cycle\Database\Driver\CursorableInterface}
+     *   (Postgres, SQLite, SQL Server). Other drivers throw a {@see \Cycle\Database\Exception\DriverException}.
      * - An active transaction is required on the underlying database before
      *   iteration starts.
      *
      * @param int<1, max> $chunkSize Maximum number of distinct parent entities
-     *        per chunk; also the FETCH FORWARD size for the underlying cursor.
+     *        per chunk. Controls when the ORM flushes the parser node and yields
+     *        a batch of hydrated entities. This is **independent** of any
+     *        DBAL-level chunk knob (e.g. Postgres `FETCH FORWARD N`), which is
+     *        configured via `$options`.
+     * @param CursorOptions|null $options Driver-specific cursor configuration forwarded
+     *        to {@see \Cycle\Database\Database::cursor()}. Use driver-specific subclasses
+     *        ({@see \Cycle\Database\Driver\Postgres\PostgresCursorOptions},
+     *        {@see \Cycle\Database\Driver\SQLServer\SQLServerCursorOptions}) to tune
+     *        Postgres FETCH FORWARD size, WITH HOLD, SQL Server cursor type, etc.
+     *        Row fetch mode is forced to `FETCH_NUM` internally — the parser expects
+     *        positional rows.
      *
      * Entity identity: if a yielded row corresponds to a PK already attached to the
      * heap, the same instance is returned. Fresh data from the current row is merged
@@ -905,7 +916,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *
      * @return \Generator<int, TEntity>
      */
-    public function cursor(int $chunkSize = 1000): \Generator
+    public function cursor(int $chunkSize = 1000, CursorOptions $options = new CursorOptions()): \Generator
     {
         $query = $this->buildQuery();
 
@@ -922,13 +933,13 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         $loader = $this->loader;
         $extractPk = $this->buildPkExtractor();
 
-        $rows = static function () use ($database, $query, $chunkSize, $loader, $extractPk): \Generator {
+        $rows = static function () use ($database, $query, $chunkSize, $loader, $extractPk, $options): \Generator {
             $node = $loader->createNode();
             $lastPk = null;
             $hasLast = false;
             $parentCount = 0;
 
-            foreach ($database->stream($query, $chunkSize, StatementInterface::FETCH_NUM) as $row) {
+            foreach ($database->cursor($query, $options, StatementInterface::FETCH_NUM) as $row) {
                 $rowPk = $extractPk($row);
 
                 if (!$hasLast || $rowPk !== $lastPk) {

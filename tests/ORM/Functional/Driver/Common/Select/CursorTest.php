@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Select;
 
+use Cycle\Database\Driver\CursorableInterface;
 use Cycle\Database\Exception\DriverException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -15,14 +16,15 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\ORM\Tests\Util\DontGenerateAttribute;
 
+#[DontGenerateAttribute]
 abstract class CursorTest extends BaseTest
 {
     use TableTrait;
 
     public function testCursorYieldsAllRowsInOrder(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(7);
 
         $emails = $this->getDatabase()->transaction(function (): array {
@@ -41,7 +43,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorChunkSmallerThanTotal(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(25);
 
         $count = $this->getDatabase()->transaction(function (): int {
@@ -57,7 +58,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorChunkExactlyMatchesTotal(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(10);
 
         $count = $this->getDatabase()->transaction(function (): int {
@@ -73,7 +73,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorOnEmptyTable(): void
     {
-        $this->skipUnlessPostgres();
 
         $items = $this->getDatabase()->transaction(function (): array {
             $out = [];
@@ -88,7 +87,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorTypecastsScalars(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(1);
 
         $this->getDatabase()->transaction(function (): void {
@@ -102,7 +100,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorRegistersEntitiesInHeap(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(3);
 
         $this->getDatabase()->transaction(function (): void {
@@ -122,7 +119,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorReturnsHeapAttachedInstanceForDuplicatePk(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(3);
 
         // Pre-load user 2 — it's now attached to the heap.
@@ -145,7 +141,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorAllowsHeapCleanBetweenChunks(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(20);
 
         $this->getDatabase()->transaction(function (): void {
@@ -172,7 +167,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorRequiresActiveTransaction(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(2);
 
         $this->expectException(DriverException::class);
@@ -185,7 +179,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorRespectsWhereAndOrderBy(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(10);
 
         $ids = $this->getDatabase()->transaction(function (): array {
@@ -206,7 +199,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorSupportsEarlyBreak(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(50);
 
         $result = $this->getDatabase()->transaction(function (): array {
@@ -228,7 +220,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorPostloadHasMany(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(3);
         $this->fillCommentsForUsers([1 => 4, 2 => 3, 3 => 0]);
 
@@ -255,7 +246,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorInlineHasOne(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(3);
         $this->fillProfileForUsers([1 => 'profile-1.png', 3 => 'profile-3.png']);
 
@@ -276,7 +266,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorInlineBelongsTo(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(2);
         $this->fillCommentsForUsers([1 => 2, 2 => 1]);
 
@@ -304,7 +293,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorAllowsWithOnNonMultiplyingRelation(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(2);
         $this->fillCommentsForUsers([1 => 2, 2 => 1]);
 
@@ -326,7 +314,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorInlineHasManySingleQuery(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(3);
         $this->fillCommentsForUsers([1 => 4, 2 => 3, 3 => 0]);
 
@@ -354,7 +341,6 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorInlineHasManyAcrossChunkBoundary(): void
     {
-        $this->skipUnlessPostgres();
         // 3 parents straddle a chunk boundary; user_2 has more children than fit in one chunk.
         $this->fillUsers(3);
         $this->fillCommentsForUsers([1 => 2, 2 => 10, 3 => 1]);
@@ -362,7 +348,10 @@ abstract class CursorTest extends BaseTest
         $byUser = $this->getDatabase()->transaction(function (): array {
             $out = [];
             $cursor = (new Select($this->orm, User::class))
-                ->load('comments', ['method' => Select::SINGLE_QUERY])
+                ->load('comments', [
+                    'method' => Select::SINGLE_QUERY,
+                    'orderBy' => ['@.id' => 'ASC'],
+                ])
                 ->cursor(2); // chunk = 2 parents → users [1,2] / [3]
             foreach ($cursor as $user) {
                 $msgs = [];
@@ -377,12 +366,12 @@ abstract class CursorTest extends BaseTest
         $this->assertCount(2, $byUser[1]);
         $this->assertCount(10, $byUser[2]);
         $this->assertCount(1, $byUser[3]);
+        $this->assertSame('msg 2-1', $byUser[2][0]);
         $this->assertSame('msg 2-10', $byUser[2][9]);
     }
 
     public function testCursorInlineHasManyDoesNotDuplicateParents(): void
     {
-        $this->skipUnlessPostgres();
         $this->fillUsers(5);
         $this->fillCommentsForUsers([1 => 3, 2 => 4, 3 => 2, 4 => 5, 5 => 1]);
 
@@ -405,10 +394,10 @@ abstract class CursorTest extends BaseTest
         $this->assertSame(5, $count);
     }
 
-    public function testCursorOnNonPostgresThrows(): void
+    public function testCursorOnNonCursorableDriverThrows(): void
     {
-        if (static::DRIVER === 'postgres') {
-            $this->markTestSkipped('Postgres supports cursors — covered by other tests.');
+        if ($this->getDatabase()->getDriver() instanceof CursorableInterface) {
+            $this->markTestSkipped('Driver supports cursors — covered by other tests.');
         }
         $this->fillUsers(1);
 
@@ -507,19 +496,6 @@ abstract class CursorTest extends BaseTest
                 Schema::RELATIONS => [],
             ],
         ]));
-    }
-
-    /**
-     * MVP: cursor is Postgres-only. On other drivers the underlying DBAL stream() throws,
-     * and there is nothing meaningful to assert beyond that — the negative case is already
-     * covered by cycle/database's own functional suite. This guard keeps the suite green
-     * on sqlite/mysql/sqlserver while still exercising the Postgres path.
-     */
-    protected function skipUnlessPostgres(): void
-    {
-        if (static::DRIVER !== 'postgres') {
-            $this->markTestSkipped('Cursor mode is only supported on Postgres in the MVP.');
-        }
     }
 
     private function fillCommentsForUsers(array $userIdToCount): void

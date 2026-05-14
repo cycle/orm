@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Select;
 
-use Cycle\Database\Driver\CursorableInterface;
+use Cycle\Database\Driver\CursorInterface;
 use Cycle\Database\Exception\DriverException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -396,7 +396,7 @@ abstract class CursorTest extends BaseTest
 
     public function testCursorOnNonCursorableDriverThrows(): void
     {
-        if ($this->getDatabase()->getDriver() instanceof CursorableInterface) {
+        if ($this->getDatabase()->getDriver() instanceof CursorInterface) {
             $this->markTestSkipped('Driver supports cursors — covered by other tests.');
         }
         $this->fillUsers(1);

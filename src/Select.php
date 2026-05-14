@@ -891,7 +891,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      * scatter is not auto-fixed — order by parent columns instead.
      *
      * Requirements:
-     * - The underlying driver must implement {@see \Cycle\Database\Driver\CursorableInterface}
+     * - The underlying driver must implement {@see \Cycle\Database\Driver\CursorInterface}
      *   (Postgres, SQLite, SQL Server). Other drivers throw a {@see \Cycle\Database\Exception\DriverException}.
      * - An active transaction is required on the underlying database before
      *   iteration starts.

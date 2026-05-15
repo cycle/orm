@@ -103,6 +103,20 @@ final class RootLoader extends AbstractLoader
     }
 
     /**
+     * Return the ordered list of column names produced by the root loader's
+     * SELECT clause. Positions in this list correspond to positions in a
+     * FETCH_NUM row from {@see buildQuery()} — useful for callers that want
+     * to inspect raw rows before they reach the parser (e.g. cursor-based
+     * streaming with parent-boundary chunking).
+     *
+     * @return non-empty-string[]
+     */
+    public function getColumnNames(): array
+    {
+        return $this->columnNames();
+    }
+
+    /**
      * Compile query with all needed conditions, columns and etc.
      */
     public function buildQuery(): SelectQuery
@@ -114,13 +128,38 @@ final class RootLoader extends AbstractLoader
     {
         $statement = $this->buildQuery()->run();
 
-        foreach ($statement->fetchAll(StatementInterface::FETCH_NUM) as $row) {
-            $node->parseRow(0, $row);
-        }
+        $this->parseRows($node, $statement->fetchAll(StatementInterface::FETCH_NUM));
 
         $statement->close();
 
-        // loading child datasets
+        $this->loadChildren($node, $includeRole);
+    }
+
+    /**
+     * Push a batch of raw rows through the parser into the given node.
+     *
+     * Separated from {@see loadData()} so callers that produce their own row stream
+     * (e.g. cursor-based streaming) can reuse the parsing step independently of
+     * query execution and child-loader orchestration.
+     *
+     * @param iterable<array<int, mixed>> $rows Rows in FETCH_NUM (positional) shape.
+     */
+    public function parseRows(AbstractNode $node, iterable $rows): void
+    {
+        foreach ($rows as $row) {
+            $node->parseRow(0, $row);
+        }
+    }
+
+    /**
+     * Run all child loaders (POSTLOAD relations, inheritance) against the given node.
+     *
+     * Designed to be called after {@see parseRows()} on a node that already holds
+     * the parent rows of a chunk. Child loaders aggregate parent keys from the node's
+     * index and issue their own queries.
+     */
+    public function loadChildren(AbstractNode $node, bool $includeRole = false): void
+    {
         foreach ($this->load as $relation => $loader) {
             $loader->loadData($node->getNode($relation), $includeRole);
         }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM;
 
+use Cycle\Database\Driver\CursorOptions;
 use Cycle\Database\Injection\FragmentInterface;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
+use Cycle\Database\StatementInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Service\EntityFactoryInterface;
@@ -868,6 +870,116 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
     }
 
     /**
+     * Stream entities from the database using a server-side cursor.
+     *
+     * The returned generator pulls rows lazily, hydrates them into entities, and
+     * yields one entity at a time. Memory usage is bound by `$chunkSize` parents
+     * plus the heap (which the caller is responsible for clearing between batches
+     * via `$orm->getHeap()->clean()` if needed).
+     *
+     * Chunking happens at **parent boundaries**, not strict row counts. When a
+     * relation is loaded inline and multiplies rows (HAS_MANY / MANY_TO_MANY), one
+     * parent corresponds to several rows. A chunk is closed only when a new parent
+     * PK appears in the stream, so a parent's full set of joined rows is never
+     * split. A chunk may therefore contain more than `$chunkSize` rows when
+     * children are present, but never more than `$chunkSize` distinct parents.
+     *
+     * For correctness with inline HAS_MANY / MANY_TO_MANY, rows of the same parent
+     * must arrive contiguously. The cursor appends the root primary key to the
+     * query's ORDER BY clause to guarantee this in the common case (no ORDER BY,
+     * or ORDER BY on parent columns). If you order by a joined child column, the
+     * scatter is not auto-fixed — order by parent columns instead.
+     *
+     * Requirements:
+     * - The underlying driver must implement {@see \Cycle\Database\Driver\CursorInterface}
+     *   (Postgres, SQLite, SQL Server). Other drivers throw a {@see \Cycle\Database\Exception\DriverException}.
+     * - An active transaction is required on the underlying database before
+     *   iteration starts.
+     *
+     * @param int<1, max> $chunkSize Maximum number of distinct parent entities
+     *        per chunk. Controls when the ORM flushes the parser node and yields
+     *        a batch of hydrated entities. This is **independent** of any
+     *        DBAL-level chunk knob (e.g. Postgres `FETCH FORWARD N`), which is
+     *        configured via `$options`.
+     * @param CursorOptions|null $options Driver-specific cursor configuration forwarded
+     *        to {@see \Cycle\Database\Database::cursor()}. Use driver-specific subclasses
+     *        ({@see \Cycle\Database\Driver\Postgres\PostgresCursorOptions},
+     *        {@see \Cycle\Database\Driver\SQLServer\SQLServerCursorOptions}) to tune
+     *        Postgres FETCH FORWARD size, WITH HOLD, SQL Server cursor type, etc.
+     *        Row fetch mode is forced to `FETCH_NUM` internally — the parser expects
+     *        positional rows.
+     *
+     * Entity identity: if a yielded row corresponds to a PK already attached to the
+     * heap, the same instance is returned. Fresh data from the current row is merged
+     * into previously-unresolved relations ({@see \Cycle\ORM\Reference\ReferenceInterface})
+     * via {@see EntityFactoryInterface::make()}.
+     *
+     * @return \Generator<int, TEntity>
+     */
+    public function cursor(int $chunkSize = 1000, CursorOptions $options = new CursorOptions()): \Generator
+    {
+        $query = $this->buildQuery();
+
+        // Append root PK to ORDER BY so rows for the same parent stay contiguous
+        // in the stream. PK is unique, so appending it never alters an existing
+        // user-defined order — it only resolves ties.
+        $pk = $this->loader->getPK();
+        foreach ((array) $pk as $column) {
+            $query->orderBy($column);
+        }
+
+        $database = $this->loader->getSource()->getDatabase();
+        $role = $this->loader->getTarget();
+        $loader = $this->loader;
+        $extractPk = $this->buildPkExtractor();
+
+        $rows = static function () use ($database, $query, $chunkSize, $loader, $extractPk, $options): \Generator {
+            $node = $loader->createNode();
+            $lastPk = null;
+            $hasLast = false;
+            $parentCount = 0;
+
+            foreach ($database->cursor($query, $options, StatementInterface::FETCH_NUM) as $row) {
+                $rowPk = $extractPk($row);
+
+                if (!$hasLast || $rowPk !== $lastPk) {
+                    if ($parentCount >= $chunkSize) {
+                        // Current row starts a new parent; previous chunk is fully complete.
+                        $loader->loadChildren($node, true);
+                        yield from $node->getResult();
+                        $node = $loader->createNode();
+                        $parentCount = 0;
+                    }
+                    $parentCount++;
+                    $lastPk = $rowPk;
+                    $hasLast = true;
+                }
+
+                $node->parseRow(0, $row);
+            }
+
+            if ($parentCount > 0) {
+                $loader->loadChildren($node, true);
+                yield from $node->getResult();
+            }
+        };
+
+        yield from Iterator::createWithServices(
+            $this->heap,
+            $this->schema,
+            $this->entityFactory,
+            $role,
+            $rows(),
+            // Hardcoded false — do NOT expose as a parameter. Iterator's findInHeap=true
+            // takes a fast path that returns heap-attached entities untouched, skipping
+            // the merge of fresh row data into previously-unresolved Reference relations.
+            // For cursor streaming we always want the latest row to be merged in.
+            findInHeap: false,
+            typecast: true,
+        );
+    }
+
+    /**
      * Load data tree from database and linked loaders in a form of array.
      *
      * @return array<array-key, array<non-empty-string, mixed>>
@@ -939,6 +1051,45 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
         $node = $self->loader->createNode();
         $self->loader->loadData($node, $addRole);
         return $node->getResult();
+    }
+
+    /**
+     * Build a closure that pulls the root primary key value out of a FETCH_NUM row
+     * produced by the cursor query. For composite PKs, the values are joined with a
+     * NUL separator into a single comparable string.
+     *
+     * @return \Closure(array): (int|string|float|null)
+     */
+    private function buildPkExtractor(): \Closure
+    {
+        $columnNames = $this->loader->getColumnNames();
+        $pkFields = $this->loader->getPrimaryFields();
+
+        $positions = [];
+        foreach ($pkFields as $field) {
+            $idx = \array_search($field, $columnNames, true);
+            if ($idx === false) {
+                throw new \LogicException(\sprintf(
+                    'Cursor cannot locate primary key column `%s` among root loader columns [%s].',
+                    $field,
+                    \implode(', ', $columnNames),
+                ));
+            }
+            $positions[] = $idx;
+        }
+
+        if (\count($positions) === 1) {
+            $p = $positions[0];
+            return static fn(array $row): int|string|float|null => $row[$p];
+        }
+
+        return static function (array $row) use ($positions): string {
+            $parts = [];
+            foreach ($positions as $i) {
+                $parts[] = (string) $row[$i];
+            }
+            return \implode("\0", $parts);
+        };
     }
 
     /**

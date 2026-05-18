@@ -15,8 +15,15 @@ class LoadOptions
         /**
          * Scope applied to the relation query.
          * - `true` — use the default scope from the source (default)
-         * - `false` — disable scope
+         * - `false` — disable scope (e.g. to include soft-deleted rows)
          * - `ScopeInterface` — use a custom scope instance
+         *
+         * Example:
+         *
+         *      scope: true                                             // default source scope
+         *      scope: false                                            // disable scope entirely
+         *      scope: new NotDeletedScope()                            // any ScopeInterface
+         *      scope: new QueryScope(['@.active' => true])             // ad-hoc inline scope
          */
         public ScopeInterface|bool $scope = true,
 
@@ -30,6 +37,10 @@ class LoadOptions
         /**
          * Override the table name for loading related entities.
          * Useful for loading data from archive tables or alternative storage.
+         *
+         * Example:
+         *
+         *      table: 'user_archive'    // load from `user_archive` instead of the schema-defined table
          *
          * @var non-empty-string|null
          */

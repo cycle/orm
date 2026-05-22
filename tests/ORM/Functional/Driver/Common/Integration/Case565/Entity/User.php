@@ -11,7 +11,6 @@ class User
     public ?int $id = null;
     public string $email = '';
     public float $balance = 0.0;
-
     public ?UserCredentials $credentials = null;
     public ?UserProfile $profile = null;
 

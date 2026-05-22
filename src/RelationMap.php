@@ -20,16 +20,16 @@ use Cycle\ORM\Service\EntityFactoryInterface;
  */
 final class RelationMap
 {
-    /** @var ActiveRelationInterface[] */
+    /** @var array<non-empty-string, ActiveRelationInterface> */
     private array $innerRelations;
 
-    /** @var DependencyInterface[] */
+    /** @var array<non-empty-string, DependencyInterface> */
     private array $dependencies = [];
 
-    /** @var RelationInterface[] */
+    /** @var array<non-empty-string, RelationInterface> */
     private array $slaves = [];
 
-    /** @var SameRowRelationInterface[] */
+    /** @var array<non-empty-string, SameRowRelationInterface> */
     private array $embedded = [];
 
     private function __construct(array $innerRelations, array $outerRelations)
@@ -155,7 +155,7 @@ final class RelationMap
     }
 
     /**
-     * @return ActiveRelationInterface[]
+     * @return array<non-empty-string, ActiveRelationInterface>
      */
     public function getRelations(): array
     {

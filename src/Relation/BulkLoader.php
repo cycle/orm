@@ -170,6 +170,21 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     }
 
     /**
+     * Normalize data by provided keys.
+     *
+     * @param non-empty-array<non-empty-string> $keys
+     */
+    private static function normalizeKeys(array &$data, array $keys): void
+    {
+        foreach ($keys as $k) {
+            \array_key_exists($k, $data) or throw new \LogicException(
+                "Bulk loader cannot get the value for the key `$k`.",
+            );
+            $data[$k] = Node::convertToSolid($data[$k]);
+        }
+    }
+
+    /**
      * Warm the heap with embedded entities in a single batch query.
      *
      * All embedded roles share the parent's table, so one Select on the parent role with every
@@ -186,21 +201,6 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
             $select->load($name);
         }
         $select->wherePK(...$ids)->fetchAll();
-    }
-
-    /**
-     * Normalize data by provided keys.
-     *
-     * @param non-empty-array<non-empty-string> $keys
-     */
-    private static function normalizeKeys(array &$data, array $keys): void
-    {
-        foreach ($keys as $k) {
-            \array_key_exists($k, $data) or throw new \LogicException(
-                "Bulk loader cannot get the value for the key `$k`.",
-            );
-            $data[$k] = Node::convertToSolid($data[$k]);
-        }
     }
 
     /**

@@ -28,7 +28,11 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     /** @var list<non-empty-string> Keys matter for relations */
     private array $keys = [];
 
-    /** @var array<non-empty-string, SameRowRelationInterface> Embedded (same-row) relations to load */
+    /**
+     * Embedded (same-row) relations to load, keyed by relation name.
+     *
+     * @var array<non-empty-string, array{SameRowRelationInterface, LoadOptions|array}>
+     */
     private array $embedded = [];
 
     public function __construct(
@@ -83,9 +87,10 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
         $this->keys = \array_merge($this->keys, $r->getInnerKeys());
 
         // Same-row (embedded) relations aren't fed by the joined loader tree because
-        // UpdateLoader doesn't issue a parent SELECT. Track them for a batched fetch in run().
+        // UpdateLoader doesn't issue a parent SELECT. Track them — together with the user-provided
+        // load options — for a batched fetch in run().
         if ($r instanceof SameRowRelationInterface) {
-            $this->embedded[$parentRel] = $r;
+            $this->embedded[$parentRel] = [$r, $options];
         }
 
         return $this;
@@ -148,7 +153,7 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
             }
 
             // Resolve each tracked embedded reference; values come from the heap warmed above.
-            foreach ($this->embedded as $name => $relation) {
+            foreach ($this->embedded as $name => [$relation, $_]) {
                 $ref = $fetched[$name] ?? null;
                 if (!$ref instanceof ReferenceInterface) {
                     continue;
@@ -197,8 +202,8 @@ final class BulkLoader implements BulkLoaderInterface, RelationLoaderInterface
     private function loadEmbedded(array $ids): void
     {
         $select = new Select($this->orm, $this->loader->getTarget());
-        foreach ($this->embedded as $name => $_) {
-            $select->load($name);
+        foreach ($this->embedded as $name => [$_, $options]) {
+            $select->load($name, $options);
         }
         $select->wherePK(...$ids)->fetchAll();
     }

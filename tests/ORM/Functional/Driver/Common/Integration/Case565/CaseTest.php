@@ -8,6 +8,7 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\IntegrationTestTrait;
 use Cycle\ORM\Tests\Traits\TableTrait;
@@ -190,6 +191,26 @@ abstract class CaseTest extends BaseTest
 
         $this->assertSame('hello@world.com', $user->email);
         $this->assertInstanceOf(Entity\UserCredentials::class, $user->credentials);
+    }
+
+    public function testBulkLoadEmbeddedAcceptsLoadOptionsDTO(): void
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+
+        /** @var array<Entity\User> $users */
+        $users = (new Select($this->orm, Entity\User::class))
+            ->orderBy('id')
+            ->fetchAll();
+
+        // The LoadOptions DTO must travel through BulkLoader::load() into the embedded
+        // batch Select without exceptions or behavioural regressions.
+        (new BulkLoader($this->orm))
+            ->collect(...$users)
+            ->load('credentials', new LoadOptions(minify: false))
+            ->run();
+
+        $this->assertSame('user1', $users[0]->credentials->username);
+        $this->assertSame('user2', $users[1]->credentials->username);
     }
 
     public function testBulkLoadEmbeddedWithCompositePk(): void

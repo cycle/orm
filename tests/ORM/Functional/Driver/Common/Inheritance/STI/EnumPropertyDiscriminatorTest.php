@@ -16,7 +16,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Inheritance\Fixture\WorkerWithKind;
 /**
  * STI scenario where the entity exposes the discriminator as a BackedEnum-typed property
  * (so `extractData` returns an enum case in the discriminator slot). Exercises the
- * scalarization branch in `Mapper::fetchFields`.
+ * enum -> scalar conversion performed by the BackedEnum uncaster in {@see \Cycle\ORM\Parser\Typecast::uncast()}.
  */
 abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
 {
@@ -46,7 +46,7 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
     public function testInsertBaseWithEnumPropertyWritesScalar(): void
     {
         // Base entity does NOT match any child in CHILDREN -> getDiscriminatorValues() returns [].
-        // The only thing that scalarizes the enum from $entity->type is the fetchFields() branch.
+        // The enum on $entity->type is converted to a scalar by the BackedEnum uncaster in Typecast::uncast().
         $worker = new WorkerWithKind();
         $worker->type = EmployeeType::Employee;
         $worker->name = 'Plain Worker';

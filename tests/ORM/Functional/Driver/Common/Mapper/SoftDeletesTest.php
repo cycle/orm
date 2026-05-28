@@ -129,24 +129,6 @@ abstract class SoftDeletesTest extends BaseTest
         $this->assertSame('bob@test.com', $rows[0]->email);
     }
 
-    private function seedAliceDeletedAndBobAlive(): void
-    {
-        $alice = new User();
-        $alice->email = 'alice@test.com';
-        $alice->balance = 100;
-
-        $bob = new User();
-        $bob->email = 'bob@test.com';
-        $bob->balance = 200;
-
-        (new Transaction($this->orm))->persist($alice)->persist($bob)->run();
-
-        // Soft-delete Alice; Bob stays alive.
-        $orm = $this->orm->withHeap(new Heap());
-        $alice = (new Select($orm, User::class))->wherePK(1)->fetchOne();
-        (new Transaction($orm))->delete($alice)->run();
-    }
-
     public function setUp(): void
     {
         parent::setUp();
@@ -176,5 +158,23 @@ abstract class SoftDeletesTest extends BaseTest
                 Schema::SCOPE => NotDeletedScope::class,
             ],
         ]));
+    }
+
+    private function seedAliceDeletedAndBobAlive(): void
+    {
+        $alice = new User();
+        $alice->email = 'alice@test.com';
+        $alice->balance = 100;
+
+        $bob = new User();
+        $bob->email = 'bob@test.com';
+        $bob->balance = 200;
+
+        (new Transaction($this->orm))->persist($alice)->persist($bob)->run();
+
+        // Soft-delete Alice; Bob stays alive.
+        $orm = $this->orm->withHeap(new Heap());
+        $alice = (new Select($orm, User::class))->wherePK(1)->fetchOne();
+        (new Transaction($orm))->delete($alice)->run();
     }
 }

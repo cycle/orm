@@ -23,22 +23,6 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
     protected const WORKER_ROLE = 'worker';
     protected const BOSS_ROLE = 'boss';
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('worker_table', [
-            'type' => 'string,nullable',
-            'id' => 'primary',
-            'name' => 'string',
-            'email' => 'string',
-            'age' => 'int',
-            'level' => 'int,nullable',
-        ]);
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     public function testInsertChildWritesScalarDespiteEnumOnProperty(): void
     {
         $boss = new BossWithKind();
@@ -119,6 +103,22 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
         $this->captureWriteQueries();
         $this->save($loaded);
         $this->assertNumWrites(0);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('worker_table', [
+            'type' => 'string,nullable',
+            'id' => 'primary',
+            'name' => 'string',
+            'email' => 'string',
+            'age' => 'int',
+            'level' => 'int,nullable',
+        ]);
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     protected function getSchemaArray(): array

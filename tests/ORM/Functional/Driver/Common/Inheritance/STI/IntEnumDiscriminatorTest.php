@@ -18,29 +18,6 @@ abstract class IntEnumDiscriminatorTest extends StiBaseTest
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('employee_table', [
-            'kind' => 'int,nullable',
-            'id' => 'primary',
-            'name' => 'string',
-            'email' => 'string',
-            'age' => 'int',
-        ]);
-
-        $this->getDatabase()->table('employee_table')->insertMultiple(
-            ['kind', 'name', 'email', 'age'],
-            [
-                ['kind' => EmployeeKind::Manager->value, 'name' => 'John', 'email' => 'j@x', 'age' => 38],
-                ['kind' => EmployeeKind::Employee->value, 'name' => 'Anton', 'email' => 'a@x', 'age' => 35],
-            ],
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     public function testChildClassResolvedFromIntScalarInDatabase(): void
     {
         [$first, $second] = (new Select($this->orm, Employee::class))->orderBy('id')->fetchAll();
@@ -92,6 +69,29 @@ abstract class IntEnumDiscriminatorTest extends StiBaseTest
             ->fetchOne();
 
         $this->assertInstanceOf(Manager::class, $loaded);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('employee_table', [
+            'kind' => 'int,nullable',
+            'id' => 'primary',
+            'name' => 'string',
+            'email' => 'string',
+            'age' => 'int',
+        ]);
+
+        $this->getDatabase()->table('employee_table')->insertMultiple(
+            ['kind', 'name', 'email', 'age'],
+            [
+                ['kind' => EmployeeKind::Manager->value, 'name' => 'John', 'email' => 'j@x', 'age' => 38],
+                ['kind' => EmployeeKind::Employee->value, 'name' => 'Anton', 'email' => 'a@x', 'age' => 35],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     protected function getSchemaArray(): array

@@ -20,29 +20,6 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
 
     protected static string $discriminator = 'discriminator_value';
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->makeTable('employee_table', [
-            static::$discriminator => 'string,nullable',
-            'id' => 'primary',
-            'name' => 'string',
-            'email' => 'string',
-            'age' => 'int',
-        ]);
-
-        $this->getDatabase()->table('employee_table')->insertMultiple(
-            [static::$discriminator, 'name', 'email', 'age'],
-            [
-                ['_type' => 'manager', 'name' => 'John', 'email' => 'captain@black.sea', 'age' => 38],
-                ['_type' => 'employee', 'name' => 'Anton', 'email' => 'antonio@mail.org', 'age' => 35],
-            ],
-        );
-
-        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
-    }
-
     public function testChildClassResolvedFromScalarInDatabase(): void
     {
         $selector = new Select($this->orm, Employee::class);
@@ -136,6 +113,29 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
 
         $this->assertSame('manager', $row[static::$discriminator]);
         $this->assertSame('Renamed', $row['name']);
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->makeTable('employee_table', [
+            static::$discriminator => 'string,nullable',
+            'id' => 'primary',
+            'name' => 'string',
+            'email' => 'string',
+            'age' => 'int',
+        ]);
+
+        $this->getDatabase()->table('employee_table')->insertMultiple(
+            [static::$discriminator, 'name', 'email', 'age'],
+            [
+                ['_type' => 'manager', 'name' => 'John', 'email' => 'captain@black.sea', 'age' => 38],
+                ['_type' => 'employee', 'name' => 'Anton', 'email' => 'antonio@mail.org', 'age' => 35],
+            ],
+        );
+
+        $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
     }
 
     protected function getSchemaArray(): array

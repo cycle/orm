@@ -204,6 +204,9 @@ final class QueryBuilder
                 case 'andwhere':
                     $call = 'and' . \ucfirst($this->forward);
                     break;
+                case 'wrapwhere':
+                    $call = 'wrap' . \ucfirst($this->forward);
+                    break;
             }
         }
 

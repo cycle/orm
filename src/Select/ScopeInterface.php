@@ -15,8 +15,9 @@ namespace Cycle\ORM\Select;
  *
  * The {@see apply()} method receives a {@see QueryBuilder} that proxies the
  * underlying query. For scopes attached to joined loaders the builder forwards
- * `where*` calls to the JOIN ON tokens (`onWhere`) rather than the top-level
- * WHERE — handle accordingly.
+ * `where*` and `wrapWhere()` calls to JOIN ON tokens (`onWhere`/`wrapOnWhere`)
+ * rather than the top-level WHERE — the recommended pattern below applies
+ * uniformly in both cases.
  *
  * ## Registering a scope
  *

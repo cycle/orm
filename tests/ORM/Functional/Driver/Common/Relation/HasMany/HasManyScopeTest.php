@@ -465,7 +465,7 @@ abstract class HasManyScopeTest extends BaseTest
                     //   ≡ (join_key AND level = 1) OR (message = 'msg 4' AND level >= 2)
                     // The first OR-arm ignores `level >= 2` — scope bypassed.
                     $q->where('@.level', 1)
-                      ->orWhere('@.message', 'msg 4');
+                        ->orWhere('@.message', 'msg 4');
                 },
             ])
             ->orderBy('user.id')
@@ -500,7 +500,7 @@ abstract class HasManyScopeTest extends BaseTest
                 'method' => JoinableLoader::INLOAD,
                 'load' => static function (Select\QueryBuilder $q): void {
                     $q->where('@.level', 1)
-                      ->orWhere('@.message', 'msg 4');
+                        ->orWhere('@.message', 'msg 4');
                 },
             ])
             ->orderBy('user.id')
@@ -559,20 +559,6 @@ abstract class HasManyScopeTest extends BaseTest
         (new Select($this->orm, User::class))->load('comments', [
             'method' => JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function extractMessages(iterable $comments): array
-    {
-        $messages = [];
-        foreach ($comments as $comment) {
-            $messages[] = $comment->message;
-        }
-        \sort($messages);
-
-        return $messages;
     }
 
     public function setUp(): void
@@ -658,5 +644,19 @@ abstract class HasManyScopeTest extends BaseTest
                 Schema::RELATIONS => [],
             ] + $eSchema,
         ]));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function extractMessages(iterable $comments): array
+    {
+        $messages = [];
+        foreach ($comments as $comment) {
+            $messages[] = $comment->message;
+        }
+        \sort($messages);
+
+        return $messages;
     }
 }

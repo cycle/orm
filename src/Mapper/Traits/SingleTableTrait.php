@@ -24,7 +24,11 @@ trait SingleTableTrait
         }
         $class = $this->entity;
         if ($this->children !== [] && isset($data[$this->discriminator])) {
-            $class = $this->children[$data[$this->discriminator]] ?? $this->entity;
+            $key = $data[$this->discriminator];
+            if ($key instanceof \BackedEnum) {
+                $key = $key->value;
+            }
+            $class = $this->children[$key] ?? $this->entity;
         }
 
         return $class;

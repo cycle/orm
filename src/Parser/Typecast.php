@@ -106,6 +106,10 @@ final class Typecast implements CastableInterface, UncastableInterface
                         ? $rule::tryFrom((int) $value)
                         : null;
 
+                $this->uncasters[$key] = static fn(mixed $value): mixed => $value instanceof \BackedEnum
+                    ? $value->value
+                    : $value;
+
                 unset($rules[$key]);
                 continue;
             }

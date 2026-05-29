@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.14.3@d0b040a91f280f071c1abcb1b77ce3822058725a">
+<files psalm-version="6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac">
   <file src="src/Collection/ArrayCollectionFactory.php">
     <DocblockTypeContradiction>
       <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
@@ -244,12 +244,6 @@
     <InvalidPropertyAssignmentValue>
       <code><![CDATA[$this->waitScope]]></code>
     </InvalidPropertyAssignmentValue>
-  </file>
-  <file src="src/Config/RelationConfig.php">
-    <TooManyArguments>
-      <code><![CDATA[new Autowire($loader)]]></code>
-      <code><![CDATA[new Autowire($relation)]]></code>
-    </TooManyArguments>
   </file>
   <file src="src/EntityManager.php">
     <ClassMustBeFinal>
@@ -658,7 +652,6 @@
   <file src="src/Mapper/DatabaseMapper.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$role]]></code>
-      <code><![CDATA[$this->source->getTable()]]></code>
       <code><![CDATA[\count($this->primaryColumns) === 1 ? $this->primaryColumns[0] : null]]></code>
     </ArgumentTypeCoercion>
     <MixedArgument>
@@ -790,6 +783,9 @@
     <MixedArrayOffset>
       <code><![CDATA[$relMap->getRelations()[$property]]]></code>
     </MixedArrayOffset>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$relMap->getRelations()[$property]]]></code>
+    </MixedArrayTypeCoercion>
     <MixedAssignment>
       <code><![CDATA[$property]]></code>
       <code><![CDATA[$property]]></code>
@@ -865,7 +861,6 @@
       <code><![CDATA[$key]]></code>
       <code><![CDATA[$properties]]></code>
       <code><![CDATA[$scope === '' ? $class : $scope]]></code>
-      <code><![CDATA[\array_keys($relMap->getRelations())]]></code>
     </MixedArgumentTypeCoercion>
     <MixedAssignment>
       <code><![CDATA[$currentData]]></code>
@@ -921,12 +916,16 @@
   </file>
   <file src="src/Mapper/Traits/SingleTableTrait.php">
     <MixedArrayOffset>
-      <code><![CDATA[$this->children[$data[$this->discriminator]]]]></code>
+      <code><![CDATA[$this->children[$key]]]></code>
     </MixedArrayOffset>
+    <MixedArrayTypeCoercion>
+      <code><![CDATA[$this->children[$key]]]></code>
+    </MixedArrayTypeCoercion>
     <MixedAssignment>
       <code><![CDATA[$childClass]]></code>
       <code><![CDATA[$class]]></code>
       <code><![CDATA[$class]]></code>
+      <code><![CDATA[$key]]></code>
     </MixedAssignment>
   </file>
   <file src="src/MapperInterface.php">
@@ -1202,26 +1201,6 @@
       <code><![CDATA[$this->casters]]></code>
       <code><![CDATA[$this->casters]]></code>
     </MixedPropertyTypeCoercion>
-    <MixedReturnStatement>
-      <code><![CDATA[\is_int($value) || \is_string($value) && \preg_match('/^\\d++$/', $value) === 1
-                        ? $rule::tryFrom((int) $value)
-                        : null]]></code>
-      <code><![CDATA[\is_int($value) || \is_string($value) && \preg_match('/^\\d++$/', $value) === 1
-                        ? $rule::tryFrom((int) $value)
-                        : null]]></code>
-      <code><![CDATA[\is_string($value) || \is_numeric($value)
-                        ? $rule::tryFrom((string) $value)
-                        : null]]></code>
-      <code><![CDATA[\is_string($value) || \is_numeric($value)
-                        ? $rule::tryFrom((string) $value)
-                        : null]]></code>
-      <code><![CDATA[\json_decode(
-                        $value,
-                        true,
-                        512,
-                        \JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
-                    )]]></code>
-    </MixedReturnStatement>
     <PossiblyInvalidArgument>
       <code><![CDATA[$e->getCode()]]></code>
       <code><![CDATA[$e->getCode()]]></code>
@@ -1248,6 +1227,9 @@
     </ClassMustBeFinal>
   </file>
   <file src="src/Relation/AbstractRelation.php">
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->innerKeys]]></code>
+    </LessSpecificReturnStatement>
     <MixedArgument>
       <code><![CDATA[$role]]></code>
     </MixedArgument>
@@ -1264,6 +1246,9 @@
       <code><![CDATA[$this->schema[Relation::CASCADE] ?? false]]></code>
       <code><![CDATA[$this->schema[Relation::CASCADE] ?? false]]></code>
     </MixedReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[array]]></code>
+    </MoreSpecificReturnType>
     <PossiblyNullArgument>
       <code><![CDATA[$role]]></code>
     </PossiblyNullArgument>
@@ -1288,6 +1273,7 @@
   </file>
   <file src="src/Relation/BulkLoader.php">
     <ArgumentTypeCoercion>
+      <code><![CDATA[$ids]]></code>
       <code><![CDATA[$role]]></code>
     </ArgumentTypeCoercion>
     <DocblockTypeContradiction>
@@ -1302,14 +1288,24 @@
     </MixedArgument>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$data]]></code>
+      <code><![CDATA[$ids]]></code>
+      <code><![CDATA[$keys]]></code>
       <code><![CDATA[$pk]]></code>
       <code><![CDATA[$pk]]></code>
     </MixedArgumentTypeCoercion>
     <MixedArrayAccess>
       <code><![CDATA[$result[$data[$k]]]]></code>
     </MixedArrayAccess>
+    <MixedArrayAssignment>
+      <code><![CDATA[$pk[$k]]]></code>
+    </MixedArrayAssignment>
+    <MixedArrayOffset>
+      <code><![CDATA[$data[$pk[0]]]]></code>
+    </MixedArrayOffset>
     <MixedAssignment>
       <code><![CDATA[$data]]></code>
+      <code><![CDATA[$data[$k]]]></code>
+      <code><![CDATA[$ids[]]]></code>
       <code><![CDATA[$overwrite[$name]]]></code>
       <code><![CDATA[$result]]></code>
       <code><![CDATA[$result]]></code>
@@ -1317,6 +1313,12 @@
     <MixedReturnStatement>
       <code><![CDATA[$result]]></code>
     </MixedReturnStatement>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$options]]></code>
+    </PossiblyInvalidArgument>
+    <PossiblyUndefinedVariable>
+      <code><![CDATA[$pk]]></code>
+    </PossiblyUndefinedVariable>
     <PropertyNotSetInConstructor>
       <code><![CDATA[$loader]]></code>
     </PropertyNotSetInConstructor>
@@ -1334,6 +1336,9 @@
       <code><![CDATA[$this->target]]></code>
       <code><![CDATA[$this->target]]></code>
     </ArgumentTypeCoercion>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->primaryKeys]]></code>
+    </LessSpecificReturnStatement>
     <MixedArgument>
       <code><![CDATA[$related]]></code>
     </MixedArgument>
@@ -1366,6 +1371,9 @@
             : $this->mapperProvider->getMapper($this->target)->cast($data)]]></code>
       <code><![CDATA[?array]]></code>
     </MixedReturnTypeCoercion>
+    <MoreSpecificReturnType>
+      <code><![CDATA[array]]></code>
+    </MoreSpecificReturnType>
     <PossiblyInvalidClone>
       <code><![CDATA[clone $this->resolve($related, true)]]></code>
     </PossiblyInvalidClone>
@@ -1386,6 +1394,7 @@
       <code><![CDATA[$original]]></code>
       <code><![CDATA[$role]]></code>
       <code><![CDATA[$this->schema[Relation::COLLECTION_TYPE] ?? null]]></code>
+      <code><![CDATA[$this->schema[Relation::ORDER_BY] ?? []]]></code>
       <code><![CDATA[$this->schema[Relation::WHERE] ?? []]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
@@ -1664,6 +1673,9 @@
     <ClassMustBeFinal>
       <code><![CDATA[ShadowBelongsTo]]></code>
     </ClassMustBeFinal>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->innerKeys]]></code>
+    </LessSpecificReturnStatement>
     <MixedArgument>
       <code><![CDATA[$key]]></code>
     </MixedArgument>
@@ -1677,11 +1689,17 @@
     <MixedOperand>
       <code><![CDATA[$schema[Relation::TARGET]]]></code>
     </MixedOperand>
+    <MoreSpecificReturnType>
+      <code><![CDATA[array]]></code>
+    </MoreSpecificReturnType>
   </file>
   <file src="src/Relation/ShadowHasMany.php">
     <ClassMustBeFinal>
       <code><![CDATA[ShadowHasMany]]></code>
     </ClassMustBeFinal>
+    <LessSpecificImplementedReturnType>
+      <code><![CDATA[string[]]]></code>
+    </LessSpecificImplementedReturnType>
     <MixedArgument>
       <code><![CDATA[$item]]></code>
       <code><![CDATA[$related]]></code>
@@ -1738,9 +1756,6 @@
       <code><![CDATA[$relationSchema[Relation::SCHEMA][Relation::THROUGH_ENTITY]]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
-      <code><![CDATA[$name]]></code>
-      <code><![CDATA[$name]]></code>
-      <code><![CDATA[$name]]></code>
       <code><![CDATA[$outerRole]]></code>
       <code><![CDATA[(array) $relationSchema[Relation::SCHEMA][Relation::OUTER_KEY]]]></code>
       <code><![CDATA[(array) $relationSchema[Relation::SCHEMA][Relation::THROUGH_OUTER_KEY]]]></code>
@@ -1775,12 +1790,18 @@
     </MixedOperand>
     <MixedPropertyTypeCoercion>
       <code><![CDATA[$innerRelations]]></code>
+      <code><![CDATA[$this->dependencies]]></code>
+      <code><![CDATA[$this->embedded]]></code>
       <code><![CDATA[$this->slaves]]></code>
     </MixedPropertyTypeCoercion>
-    <MixedReturnTypeCoercion>
+    <PossiblyInvalidArrayOffset>
+      <code><![CDATA[$this->dependencies[$relation->getName()]]]></code>
+    </PossiblyInvalidArrayOffset>
+    <PropertyTypeCoercion>
       <code><![CDATA[$this->dependencies]]></code>
-      <code><![CDATA[array<string, DependencyInterface>]]></code>
-    </MixedReturnTypeCoercion>
+      <code><![CDATA[$this->dependencies]]></code>
+      <code><![CDATA[$this->slaves]]></code>
+    </PropertyTypeCoercion>
     <UndefinedInterfaceMethod>
       <code><![CDATA[getInnerRelations]]></code>
       <code><![CDATA[getInnerRelations]]></code>
@@ -2038,6 +2059,7 @@
   <file src="src/Select.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$ids]]></code>
+      <code><![CDATA[$role]]></code>
       <code><![CDATA[$this->loader->getTarget()]]></code>
       <code><![CDATA[$this->loader->getTarget()]]></code>
       <code><![CDATA[$this->loader->getTarget()]]></code>
@@ -2049,21 +2071,28 @@
       <code><![CDATA[\iterator_to_array($this->getIterator(), false)]]></code>
     </InvalidReturnStatement>
     <InvalidReturnType>
+      <code><![CDATA[\Generator<int, TEntity>]]></code>
       <code><![CDATA[list<TEntity>]]></code>
     </InvalidReturnType>
     <InvalidTemplateParam>
       <code><![CDATA[Iterator<TEntity>]]></code>
     </InvalidTemplateParam>
+    <MismatchingDocblockParamType>
+      <code><![CDATA[CursorOptions|null]]></code>
+    </MismatchingDocblockParamType>
     <MissingTemplateParam>
       <code><![CDATA[\IteratorAggregate]]></code>
     </MissingTemplateParam>
     <MixedArgument>
+      <code><![CDATA[$row]]></code>
+      <code><![CDATA[$row]]></code>
       <code><![CDATA[$subOption]]></code>
-      <code><![CDATA[$subOption + $options]]></code>
+      <code><![CDATA[$subOption]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$name]]></code>
       <code><![CDATA[$name]]></code>
+      <code><![CDATA[$rows()]]></code>
     </MixedArgumentTypeCoercion>
     <MixedArrayTypeCoercion>
       <code><![CDATA[$pk[$key]]]></code>
@@ -2071,15 +2100,14 @@
     <MixedAssignment>
       <code><![CDATA[$prepared[$index][$key]]]></code>
       <code><![CDATA[$result]]></code>
+      <code><![CDATA[$row]]></code>
       <code><![CDATA[$subOption]]></code>
       <code><![CDATA[$subOption]]></code>
       <code><![CDATA[$value]]></code>
       <code><![CDATA[$values]]></code>
     </MixedAssignment>
-    <MixedOperand>
-      <code><![CDATA[$subOption]]></code>
-    </MixedOperand>
     <MixedReturnStatement>
+      <code><![CDATA[$row[$p]]]></code>
       <code><![CDATA[$this->entityFactory->make($this->loader->getTarget(), $data[0], Node::MANAGED, typecast: true)]]></code>
       <code><![CDATA[\count($ids) > 1
             ? $this->__call('where', [$pk, new Parameter($ids)])
@@ -2101,6 +2129,15 @@
       <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
       <code><![CDATA[array<array-key, array<non-empty-string, mixed>>]]></code>
     </MixedReturnTypeCoercion>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$options]]></code>
+    </PossiblyInvalidArgument>
+    <UndefinedInterfaceMethod>
+      <code><![CDATA[cursor]]></code>
+    </UndefinedInterfaceMethod>
+    <UndefinedMagicMethod>
+      <code><![CDATA[count]]></code>
+    </UndefinedMagicMethod>
   </file>
   <file src="src/Select/AbstractLoader.php">
     <MixedArgument>
@@ -2127,12 +2164,14 @@
     </MixedArrayTypeCoercion>
     <MixedAssignment>
       <code><![CDATA[$alias]]></code>
+      <code><![CDATA[$loader->table]]></code>
       <code><![CDATA[$options['load']]]></code>
       <code><![CDATA[$parent]]></code>
       <code><![CDATA[$query]]></code>
       <code><![CDATA[$relation]]></code>
       <code><![CDATA[$relations]]></code>
       <code><![CDATA[$schema]]></code>
+      <code><![CDATA[$table]]></code>
     </MixedAssignment>
     <MixedReturnStatement>
       <code><![CDATA[$query]]></code>
@@ -2141,6 +2180,9 @@
     <MixedReturnTypeCoercion>
       <code><![CDATA[iterable<non-empty-string>]]></code>
     </MixedReturnTypeCoercion>
+    <MoreSpecificImplementedParamType>
+      <code><![CDATA[$options]]></code>
+    </MoreSpecificImplementedParamType>
     <PossiblyInvalidArgument>
       <code><![CDATA[$relation]]></code>
     </PossiblyInvalidArgument>
@@ -2151,6 +2193,9 @@
       <code><![CDATA[loadChain]]></code>
       <code><![CDATA[loadRelation]]></code>
     </TooManyArguments>
+    <TypeDoesNotContainType>
+      <code><![CDATA[$options instanceof LoadOptions]]></code>
+    </TypeDoesNotContainType>
     <UndefinedInterfaceMethod>
       <code><![CDATA[configureSubQuery]]></code>
     </UndefinedInterfaceMethod>
@@ -2245,6 +2290,7 @@
   </file>
   <file src="src/Select/Loader/HasOneLoader.php">
     <MixedArgument>
+      <code><![CDATA[$this->options['orderBy'] ?? $this->schema[Relation::ORDER_BY] ?? []]]></code>
       <code><![CDATA[$this->options['where'] ?? $this->schema[Relation::WHERE] ?? []]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
@@ -2309,6 +2355,9 @@
     <PossiblyNullReference>
       <code><![CDATA[getAlias]]></code>
     </PossiblyNullReference>
+    <TypeDoesNotContainType>
+      <code><![CDATA[$options instanceof LoadOptions]]></code>
+    </TypeDoesNotContainType>
   </file>
   <file src="src/Select/Loader/Morphed/BelongsToMorphedLoader.php">
     <InvalidArrayOffset>
@@ -2350,6 +2399,7 @@
       <code><![CDATA[$this->fieldAlias($this->outerKey[$i])]]></code>
     </PossiblyNullOperand>
     <PropertyNotSetInConstructor>
+      <code><![CDATA[BelongsToMorphedLoader]]></code>
       <code><![CDATA[BelongsToMorphedLoader]]></code>
       <code><![CDATA[BelongsToMorphedLoader]]></code>
       <code><![CDATA[BelongsToMorphedLoader]]></code>
@@ -2455,6 +2505,11 @@
       <code><![CDATA[(array) $this->schema[Relation::OUTER_KEY]]]></code>
     </MixedArgumentTypeCoercion>
   </file>
+  <file src="src/Select/Options/JoinableLoadOptions.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$table]]></code>
+    </ArgumentTypeCoercion>
+  </file>
   <file src="src/Select/QueryBuilder.php">
     <MissingClosureParamType>
       <code><![CDATA[$q]]></code>
@@ -2496,6 +2551,9 @@
     <MixedArgument>
       <code><![CDATA[$id]]></code>
     </MixedArgument>
+    <MixedArgumentTypeCoercion>
+      <code><![CDATA[$orderBy]]></code>
+    </MixedArgumentTypeCoercion>
   </file>
   <file src="src/Select/RootLoader.php">
     <ArgumentTypeCoercion>
@@ -2510,23 +2568,30 @@
       <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
     </LessSpecificReturnStatement>
     <MixedArgument>
-      <code><![CDATA[$row]]></code>
       <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$relation]]></code>
       <code><![CDATA[(array) $this->define(SchemaInterface::PRIMARY_KEY)]]></code>
     </MixedArgumentTypeCoercion>
-    <MixedAssignment>
-      <code><![CDATA[$row]]></code>
-    </MixedAssignment>
     <MoreSpecificReturnType>
       <code><![CDATA[list<non-empty-string>]]></code>
     </MoreSpecificReturnType>
+    <PossiblyInvalidArgument>
+      <code><![CDATA[$statement->fetchAll(StatementInterface::FETCH_NUM)]]></code>
+    </PossiblyInvalidArgument>
     <PossiblyNullOperand>
       <code><![CDATA[$this->fieldAlias($key)]]></code>
       <code><![CDATA[$this->fieldAlias($pk)]]></code>
     </PossiblyNullOperand>
+  </file>
+  <file src="src/Select/Source.php">
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->table]]></code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[string]]></code>
+    </MoreSpecificReturnType>
   </file>
   <file src="src/Select/Traits/ChainTrait.php">
     <PossiblyFalseArgument>

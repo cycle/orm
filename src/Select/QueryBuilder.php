@@ -16,6 +16,7 @@ use Cycle\Database\Query\SelectQuery;
  * @method QueryBuilder where(...$args);
  * @method QueryBuilder andWhere(...$args);
  * @method QueryBuilder orWhere(...$args);
+ * @method QueryBuilder wrapWhere()
  * @method QueryBuilder having(...$args);
  * @method QueryBuilder andHaving(...$args);
  * @method QueryBuilder orHaving(...$args);
@@ -202,6 +203,9 @@ final class QueryBuilder
                     break;
                 case 'andwhere':
                     $call = 'and' . \ucfirst($this->forward);
+                    break;
+                case 'wrapwhere':
+                    $call = 'wrap' . \ucfirst($this->forward);
                     break;
             }
         }

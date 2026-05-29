@@ -15,6 +15,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Fixtures\WrappedQueryScope;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\Database\Exception\StatementException;
 
@@ -442,6 +443,109 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
     }
 
+    /**
+     * Documents the historical bug: when a joined-loader scope adds a plain top-level
+     * condition (no wrapWhere), an adversarial `orWhere` injected via the 'load' option
+     * bypasses the scope due to AND-over-OR precedence inside the JOIN's ON clause.
+     */
+    public function testInloadJoinedScopeWithoutWrapWhereIsBypassedByAdversarialOrLoad(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            // Plain QueryScope — adds `level >= 2` as a flat AND token, no wrap.
+            Schema::SCOPE => new Select\QueryScope(['@.level' => ['>=' => 2]]),
+        ]);
+
+        $res = (new Select($this->orm, User::class))
+            ->load('comments', [
+                'method' => JoinableLoader::INLOAD,
+                'load' => static function (Select\QueryBuilder $q): void {
+                    // top-level ON-condition WHERE + OR — the scope's AND lands at the
+                    // tail of the same flat token list:
+                    //   ON join_key AND level = 1 OR message = 'msg 4' AND level >= 2
+                    //   ≡ (join_key AND level = 1) OR (message = 'msg 4' AND level >= 2)
+                    // The first OR-arm ignores `level >= 2` — scope bypassed.
+                    $q->where('@.level', 1)
+                        ->orWhere('@.message', 'msg 4');
+                },
+            ])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        [$userA, $userB] = $res;
+
+        // User A: msg 1 (level=1) sneaks through the first OR-arm; msg 4 matches the
+        // second arm legitimately.
+        $this->assertCount(2, $userA->comments);
+        $aMessages = $this->extractMessages($userA->comments);
+        $this->assertSame(['msg 1', 'msg 4'], $aMessages);
+
+        // User B: msg 2.1 (level=1) sneaks through the first arm — scope leaks again.
+        $this->assertCount(1, $userB->comments);
+        $this->assertSame('msg 2.1', $userB->comments[0]->message);
+    }
+
+    /**
+     * Companion to the test above: with {@see WrappedQueryScope} (calls wrapWhere() first),
+     * QueryBuilder::targetFunc() forwards the wrap to `wrapOnWhere` on the JOIN's ON tokens,
+     * enclosing the user's OR group. The scope's `level >= 2` condition stays effective.
+     */
+    public function testInloadJoinedScopeWithWrapWhereProtectsAgainstAdversarialOrLoad(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Schema::SCOPE => new WrappedQueryScope(['@.level' => ['>=' => 2]]),
+        ]);
+
+        $res = (new Select($this->orm, User::class))
+            ->load('comments', [
+                'method' => JoinableLoader::INLOAD,
+                'load' => static function (Select\QueryBuilder $q): void {
+                    $q->where('@.level', 1)
+                        ->orWhere('@.message', 'msg 4');
+                },
+            ])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        [$userA, $userB] = $res;
+
+        // ON ((join_key AND level = 1) OR message = 'msg 4') AND level >= 2
+        // User A: only msg 4 (level = 4) matches the OR group AND scope.
+        $this->assertCount(1, $userA->comments);
+        $this->assertSame('msg 4', $userA->comments[0]->message);
+
+        // User B: no comment satisfies both the OR group and `level >= 2`.
+        $this->assertCount(0, $userB->comments);
+    }
+
+    /**
+     * Sanity check: a wrap-aware scope works correctly in plain INLOAD joining without
+     * any adversarial conditions — wrapWhere() on empty ON tokens is a no-op and the
+     * scope adds its condition at the top level of the JOIN's ON clause.
+     */
+    public function testInloadJoinedScopeWithWrapWhereWithoutAdversarialLoad(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Schema::SCOPE => new WrappedQueryScope(['@.level' => ['>=' => 3]]),
+        ]);
+
+        $res = (new Select($this->orm, User::class))
+            ->load('comments', [
+                'method' => JoinableLoader::INLOAD,
+            ])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        [$userA, $userB] = $res;
+
+        // Only level >= 3 comments survive: msg 3, msg 4, msg 2.3
+        $this->assertCount(2, $userA->comments);
+        $aMessages = $this->extractMessages($userA->comments);
+        $this->assertSame(['msg 3', 'msg 4'], $aMessages);
+
+        $this->assertCount(1, $userB->comments);
+        $this->assertSame('msg 2.3', $userB->comments[0]->message);
+    }
+
     public function testInvalidOrderBy(): void
     {
         $this->expectException(StatementException::class);
@@ -540,5 +644,19 @@ abstract class HasManyScopeTest extends BaseTest
                 Schema::RELATIONS => [],
             ] + $eSchema,
         ]));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function extractMessages(iterable $comments): array
+    {
+        $messages = [];
+        foreach ($comments as $comment) {
+            $messages[] = $comment->message;
+        }
+        \sort($messages);
+
+        return $messages;
     }
 }

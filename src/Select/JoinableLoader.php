@@ -109,15 +109,20 @@ abstract class JoinableLoader extends AbstractLoader implements JoinableInterfac
         //Calculate table alias
         $loader->options['as'] = $loader->calculateAlias($parent);
 
-        if (\array_key_exists('scope', $options)) {
-            if ($loader->options['scope'] instanceof ScopeInterface) {
-                $loader->setScope($loader->options['scope']);
-            } elseif (\is_string($loader->options['scope'])) {
-                $loader->setScope($this->factory->make($loader->options['scope']));
-            }
-        } else {
-            $loader->setScope($this->source->getScope());
-        }
+        // Derive the scope from the persisted `scope` option rather than from the presence of
+        // the `scope` key in the passed `$options`. The option survives cloning (see the
+        // `$options + $this->options` merge above and AbstractLoader::__clone()), whereas the
+        // argument does not — re-parenting during a clone calls withContext() with no options,
+        // which previously dropped any override back to the source scope.
+        $scope = $loader->options['scope'] ?? true;
+        $loader->setScope(match (true) {
+            $scope instanceof ScopeInterface => $scope,
+            \is_string($scope) => $this->factory->make($scope),
+            // false/null explicitly disable the scope for this relation
+            $scope === false, $scope === null => null,
+            // true (the default) means: use the relation source's scope
+            default => $this->source->getScope(),
+        });
 
         if (!$loader->eagerLoaded && $loader->isLoaded()) {
             $loader->eagerLoaded = true;

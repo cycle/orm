@@ -545,6 +545,84 @@ abstract class HasManyScopeTest extends BaseTest
         $this->assertSame('msg 2.3', $userB->comments[0]->message);
     }
 
+    /**
+     * Regression: an override scope passed to load() (here `scope: false`, disabling the
+     * relation's source scope) must survive a clone of the Select. fetchAll() does not clone
+     * for a POSTLOAD relation, so it already worked; cloning re-parents the loader tree via
+     * AbstractLoader::__clone() → JoinableLoader::withContext() with empty options, whose
+     * `else` branch used to blindly re-apply the source scope, dropping the override.
+     */
+    public function testDisabledRelationScopeSurvivesClone(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            // Source scope on Comment: only level >= 2 (drops 'msg 1' and 'msg 2.1').
+            Schema::SCOPE => new Select\QueryScope(['@.level' => ['>=' => 2]]),
+        ]);
+
+        $select = (new Select($this->orm, User::class))
+            ->load('comments', ['scope' => false])
+            ->orderBy('user.id');
+
+        // Clone before executing anything so neither result is served from the heap.
+        $clone = clone $select;
+
+        // Baseline (no clone): override works, all comments are loaded.
+        [$a, $b] = $select->fetchAll();
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+
+        // Drop identity map so the cloned query re-reads comments from the database
+        // instead of returning the already-hydrated User instances above.
+        $this->orm->getHeap()->clean();
+
+        // The clone must preserve the disabled scope.
+        [$a, $b] = $clone->fetchAll();
+        $this->assertCount(4, $a->comments);
+        $this->assertCount(3, $b->comments);
+    }
+
+    /**
+     * Regression: fetchOne() internally does `(clone $this)->where(...)->limit(1)`, so the
+     * `scope: false` override must reach the cloned loader. Before the fix the source scope
+     * (level >= 2) leaked back in and 'msg 1' was filtered out.
+     */
+    public function testFetchOneKeepsDisabledRelationScope(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Schema::SCOPE => new Select\QueryScope(['@.level' => ['>=' => 2]]),
+        ]);
+
+        $user = (new Select($this->orm, User::class))
+            ->load('comments', ['scope' => false])
+            ->wherePK(1)
+            ->fetchOne();
+
+        $this->assertNotNull($user);
+        $this->assertCount(4, $user->comments);
+    }
+
+    /**
+     * Regression: a custom override scope (not just `false`) must also survive the fetchOne()
+     * clone. Here load() overrides the source scope (level >= 2) with a stricter one
+     * (level >= 3). Before the fix the clone reset it back to the source scope, yielding 3
+     * comments instead of 2.
+     */
+    public function testFetchOneKeepsCustomRelationScopeOverride(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Schema::SCOPE => new Select\QueryScope(['@.level' => ['>=' => 2]]),
+        ]);
+
+        $user = (new Select($this->orm, User::class))
+            ->load('comments', ['scope' => new Select\QueryScope(['@.level' => ['>=' => 3]])])
+            ->wherePK(1)
+            ->fetchOne();
+
+        $this->assertNotNull($user);
+        // level 3 and 4 only.
+        $this->assertCount(2, $user->comments);
+    }
+
     public function testInvalidOrderBy(): void
     {
         $this->expectException(StatementException::class);

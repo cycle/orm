@@ -15,7 +15,6 @@ use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Fixtures\WrappedQueryScope;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\Database\Exception\StatementException;
 
@@ -485,14 +484,14 @@ abstract class HasManyScopeTest extends BaseTest
     }
 
     /**
-     * Companion to the test above: with {@see WrappedQueryScope} (calls wrapWhere() first),
+     * Companion to the test above: with `QueryScope(..., wrapWhere: true)`,
      * QueryBuilder::targetFunc() forwards the wrap to `wrapOnWhere` on the JOIN's ON tokens,
      * enclosing the user's OR group. The scope's `level >= 2` condition stays effective.
      */
     public function testInloadJoinedScopeWithWrapWhereProtectsAgainstAdversarialOrLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new WrappedQueryScope(['@.level' => ['>=' => 2]]),
+            Schema::SCOPE => new Select\QueryScope(['@.level' => ['>=' => 2]], wrapWhere: true),
         ]);
 
         $res = (new Select($this->orm, User::class))
@@ -525,7 +524,7 @@ abstract class HasManyScopeTest extends BaseTest
     public function testInloadJoinedScopeWithWrapWhereWithoutAdversarialLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
-            Schema::SCOPE => new WrappedQueryScope(['@.level' => ['>=' => 3]]),
+            Schema::SCOPE => new Select\QueryScope(['@.level' => ['>=' => 3]], wrapWhere: true),
         ]);
 
         $res = (new Select($this->orm, User::class))

@@ -55,6 +55,42 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
         $this->assertSame($a->id, $a->parent->parent->id);
     }
 
+    /**
+     * The relation is loaded lazily: a self-reference resolves to the already-loaded entity
+     * straight from the heap, without issuing an extra query.
+     */
+    public function testLazyLoadSelfReferenceResolvesFromHeap(): void
+    {
+        $a = $this->orm->getRepository(EntityA::class)->findByPK(1);
+        // Not resolved yet — the relation is a promise reference.
+        $this->assertInstanceOf(ReferenceInterface::class, $this->extractEntity($a)['parent']);
+
+        $this->captureReadQueries();
+        $this->assertSame($a, $a->parent);
+        $this->assertNumReads(0);
+    }
+
+    /**
+     * Lazy loading across a morphed cycle: resolving the parent that is not in the heap costs
+     * exactly one query, while the back-reference is taken from the heap for free.
+     */
+    public function testLazyLoadCycleTwoEntities(): void
+    {
+        $a = $this->orm->getRepository(EntityA::class)->findByPK(2);
+        $this->assertInstanceOf(ReferenceInterface::class, $this->extractEntity($a)['parent']);
+
+        // entity_b #1 is not in the heap yet -> exactly one lazy query.
+        $this->captureReadQueries();
+        $b = $a->parent;
+        $this->assertInstanceOf(EntityB::class, $b);
+        $this->assertNumReads(1);
+
+        // The back-reference entity_a #2 is already in the heap -> no extra query.
+        $this->captureReadQueries();
+        $this->assertSame($a, $b->parent);
+        $this->assertNumReads(0);
+    }
+
     public function testSetSelfReferenceToNull(): void
     {
         $a = $this->orm->getRepository(EntityA::class)->findByPK(1);

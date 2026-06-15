@@ -10,6 +10,7 @@ use Cycle\ORM\Options;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityA;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityB;
@@ -88,6 +89,48 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
         // The back-reference entity_a #2 is already in the heap -> no extra query.
         $this->captureReadQueries();
         $this->assertSame($a, $b->parent);
+        $this->assertNumReads(0);
+    }
+
+    /**
+     * Eager loading via Select::load(): one level of the morphed relation is resolved up front
+     * (one query per distinct morph role), so accessing the parent afterwards costs no queries.
+     */
+    public function testEagerLoadParent(): void
+    {
+        /** @var list<EntityA> $all */
+        $all = (new Select($this->orm, EntityA::class))
+            ->load('parent')
+            ->orderBy('entity_a.id')
+            ->fetchAll();
+
+        $this->captureReadQueries();
+        // #1 references itself, #2 references entity_b #1 — both already loaded.
+        $this->assertInstanceOf(EntityA::class, $all[0]->parent);
+        $this->assertSame($all[0], $all[0]->parent);
+        $this->assertInstanceOf(EntityB::class, $all[1]->parent);
+        $this->assertSame('b-1', $all[1]->parent->name);
+        $this->assertNumReads(0);
+    }
+
+    /**
+     * The morphed relation can be eagerly loaded for a batch of already-fetched entities through
+     * the BulkLoader. After that, accessing the parent issues no extra queries.
+     */
+    public function testBulkLoadParent(): void
+    {
+        $this->captureReadQueries();
+        /** @var list<EntityA> $all */
+        $all = (new Select($this->orm, EntityA::class))->orderBy('entity_a.id')->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->bulkLoader(...$all)->load('parent')->run();
+
+        $this->captureReadQueries();
+        $this->assertInstanceOf(EntityA::class, $all[0]->parent);
+        $this->assertSame($all[0], $all[0]->parent);
+        $this->assertInstanceOf(EntityB::class, $all[1]->parent);
+        $this->assertSame('b-1', $all[1]->parent->name);
         $this->assertNumReads(0);
     }
 

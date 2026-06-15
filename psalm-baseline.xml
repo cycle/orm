@@ -1653,10 +1653,22 @@
       <code><![CDATA[parent::getReferenceScope($node)]]></code>
     </PossiblyNullOperand>
   </file>
-  <file src="src/Relation/RefersTo.php">
+  <file src="src/Relation/Morphed/RefersToMorphed.php">
     <ClassMustBeFinal>
-      <code><![CDATA[RefersTo]]></code>
+      <code><![CDATA[RefersToMorphed]]></code>
     </ClassMustBeFinal>
+    <MixedArgument>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+    </MixedArgument>
+    <MixedAssignment>
+      <code><![CDATA[$related]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$this->morphKey]]></code>
+    </MixedAssignment>
+  </file>
+  <file src="src/Relation/RefersTo.php">
     <MixedArgument>
       <code><![CDATA[$related]]></code>
       <code><![CDATA[$related]]></code>
@@ -2217,14 +2229,22 @@
     <MixedArgument>
       <code><![CDATA[$row]]></code>
       <code><![CDATA[$this->define(SchemaInterface::COLUMNS)]]></code>
-      <code><![CDATA[$this->factory->make($loader->options['scope'])]]></code>
       <code><![CDATA[$this->options['minify']]]></code>
       <code><![CDATA[$this->options['minify']]]></code>
       <code><![CDATA[$this->schema[$key]]]></code>
       <code><![CDATA[$this->schema[$key]]]></code>
+      <code><![CDATA[match (true) {
+            $scope instanceof ScopeInterface => $scope,
+            \is_string($scope) => $this->factory->make($scope),
+            // false/null explicitly disable the scope for this relation
+            $scope === false, $scope === null => null,
+            // true (the default) means: use the relation source's scope
+            default => $this->source->getScope(),
+        }]]></code>
     </MixedArgument>
     <MixedAssignment>
       <code><![CDATA[$row]]></code>
+      <code><![CDATA[$scope]]></code>
     </MixedAssignment>
     <MixedReturnStatement>
       <code><![CDATA[$this->options['as']]]></code>

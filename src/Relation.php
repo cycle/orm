@@ -29,6 +29,7 @@ final class Relation
     // Morphed relations
     public const BELONGS_TO_MORPHED = 20;
     public const MORPHED_HAS_ONE = 21;
+    public const REFERS_TO_MORPHED = 22;
     public const MORPHED_HAS_MANY = 23;
 
     // Custom morph key

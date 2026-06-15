@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\Morphed;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\Options;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
@@ -372,6 +373,47 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
             $this->assertNotNull($image->parent);
         }
         $this->assertNumReads(0);
+    }
+
+    /**
+     * With ignoreUninitializedRelations = true (BaseTest default) unsetting the relation property
+     * must leave both the outer key and the morph key untouched.
+     */
+    public function testUnsetParentKeepsMorphWhenIgnoringUninitialized(): void
+    {
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $this->assertInstanceOf(User::class, $c->parent);
+        unset($c->parent);
+
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
+
+        $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
+        $this->assertSame('1', (string) $row[0]['parent_id']);
+        $this->assertSame('user', $row[0]['parent_type']);
+    }
+
+    /**
+     * With ignoreUninitializedRelations = false an unset relation is treated as null, so both the
+     * outer key and the morph key must be cleared.
+     */
+    public function testUnsetParentClearsMorphWithoutIgnoreUninitialized(): void
+    {
+        $this->orm = $this->withSchema(new Schema($this->getNullableMorphedSchemaArray()))
+            ->with(options: (new Options())->withIgnoreUninitializedRelations(false));
+
+        $c = $this->orm->getRepository(Image::class)->findByPK(1);
+        $this->assertInstanceOf(User::class, $c->parent);
+        unset($c->parent);
+
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(1);
+
+        $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
+        $this->assertNull($row[0]['parent_id'], 'parent_id should be NULL when the unset relation is treated as null');
+        $this->assertNull($row[0]['parent_type'], 'parent_type should be NULL when the unset relation is treated as null');
     }
 
     public function setUp(): void

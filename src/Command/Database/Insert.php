@@ -106,22 +106,28 @@ final class Insert extends StoreCommand
             $returningFields[$this->primaryKeys[0]] ??= $this->pkColumn;
         }
 
+        $returning = [];
         if ($insert instanceof ReturningInterface && $returningFields !== []) {
-            // Map generated fields to columns
-            $returning = $this->mapper->mapColumns($returningFields);
+            // Map generated fields to columns. Fields that are not declared in the schema columns
+            // are dropped from $returningFields by reference, so both arrays stay aligned.
+            $columns = $this->mapper->mapColumns($returningFields);
             // Array of [field name => column name]
-            $returning = \array_combine(\array_keys($returningFields), \array_keys($returning));
+            $returning = \array_combine(\array_keys($returningFields), \array_keys($columns));
 
-            $insert->returning(...\array_values($returning));
+            if ($returning !== []) {
+                $insert->returning(...\array_values($returning));
+            }
+        }
+
+        if ($returning !== []) {
+            // A non-empty returning list can only be built through the mapper above.
+            \assert($this->mapper !== null);
 
             $insertID = $insert->run();
 
             if (\count($returning) === 1) {
                 $field = \array_key_first($returning);
-                $state->register(
-                    $field,
-                    $this->mapper === null ? $insertID : $this->mapper->cast([$field => $insertID])[$field],
-                );
+                $state->register($field, $this->mapper->cast([$field => $insertID])[$field]);
             } else {
                 foreach ($this->mapper->cast($insertID) as $field => $value) {
                     $state->register($field, $value);

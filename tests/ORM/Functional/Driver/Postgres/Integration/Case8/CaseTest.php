@@ -18,6 +18,7 @@ class CaseTest extends CommonClass
 
     /** UUID below the partition boundary `8000...` => lands in `event_p0`. */
     private const PARENT_LOW = '01000000-0000-7000-8000-000000000000';
+
     /** UUID at/above the partition boundary `8000...` => lands in `event_p1`. */
     private const PARENT_HIGH = 'f1000000-0000-7000-8000-000000000000';
 
@@ -49,6 +50,15 @@ class CaseTest extends CommonClass
         $this->assertSame(2, $db->table('event')->select()->count());
     }
 
+    public function tearDown(): void
+    {
+        // Drop the partitioned table (and its partitions + owned sequence) before BaseTest's
+        // introspection-based cleanup runs, which does not handle partitioned tables.
+        $this->getDatabase()->execute('DROP TABLE IF EXISTS event CASCADE');
+
+        parent::tearDown();
+    }
+
     protected function createEventTable(): void
     {
         $db = $this->getDatabase();
@@ -73,14 +83,5 @@ class CaseTest extends CommonClass
             "CREATE TABLE event_p1 PARTITION OF event "
             . "FOR VALUES FROM ('80000000-0000-0000-0000-000000000000') TO (MAXVALUE)",
         );
-    }
-
-    public function tearDown(): void
-    {
-        // Drop the partitioned table (and its partitions + owned sequence) before BaseTest's
-        // introspection-based cleanup runs, which does not handle partitioned tables.
-        $this->getDatabase()->execute('DROP TABLE IF EXISTS event CASCADE');
-
-        parent::tearDown();
     }
 }

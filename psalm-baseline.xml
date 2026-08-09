@@ -148,12 +148,6 @@
     <PossiblyNullReference>
       <code><![CDATA[mapColumns]]></code>
     </PossiblyNullReference>
-    <RedundantCondition>
-      <code><![CDATA[$this->mapper->cast([$field => $insertID])[$field]]]></code>
-    </RedundantCondition>
-    <TypeDoesNotContainNull>
-      <code><![CDATA[$this->mapper === null]]></code>
-    </TypeDoesNotContainNull>
   </file>
   <file src="src/Command/Database/Update.php">
     <MixedArgument>

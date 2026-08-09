@@ -46,8 +46,9 @@ use Cycle\ORM\Tests\Util\DontGenerateAttribute;
  *    `RETURNING`.
  *
  * Therefore this case is bound to drivers that implement
- * {@see \Cycle\Database\Query\ReturningInterface} (PostgreSQL, SQL Server). On MySQL/SQLite the
- * generated `id` of a composite key would not be returned, so the test self-skips in {@see setUp()}.
+ * {@see \Cycle\Database\Query\ReturningInterface} (PostgreSQL, SQL Server, SQLite since
+ * cycle/database 2.22). On MySQL the generated `id` of a composite key would not be returned, so
+ * the test self-skips in {@see checkDriverSupport()}.
  *
  * # Mapping gotcha
  *
@@ -61,6 +62,8 @@ use Cycle\ORM\Tests\Util\DontGenerateAttribute;
  * @see Entity\Event The mapped entity.
  * @see \Cycle\ORM\Tests\Functional\Driver\Postgres\Integration\Case8\CaseTest
  *      The PostgreSQL variant that runs the same assertions against a real RANGE-partitioned table.
+ * @see \Cycle\ORM\Tests\Functional\Driver\SQLite\Integration\Case8\CaseTest
+ *      The SQLite variant, where the composite key needs a different table layout.
  */
 #[DontGenerateAttribute]
 abstract class CaseTest extends BaseTest
@@ -70,6 +73,7 @@ abstract class CaseTest extends BaseTest
 
     /** Two UUID7 values sharing the same time prefix — i.e. the same logical "parent" / partition. */
     private const PARENT_A = '0191b6e0-0000-7000-8000-000000000001';
+
     private const PARENT_B = '0191b6e0-0000-7000-8000-000000000002';
 
     /**
@@ -140,14 +144,23 @@ abstract class CaseTest extends BaseTest
     {
         parent::setUp();
 
-        // The generated value of a composite key can only be returned by drivers supporting RETURNING.
-        if (!\in_array(static::DRIVER, ['postgres', 'sqlserver'], true)) {
-            $this->markTestSkipped(\sprintf('Driver `%s` does not support RETURNING.', static::DRIVER));
-        }
+        $this->checkDriverSupport();
 
         $this->createEventTable();
 
         $this->loadSchema(__DIR__ . '/schema.php');
+    }
+
+    /**
+     * The generated value of a composite key can only be returned by drivers whose insert query
+     * implements {@see \Cycle\Database\Query\ReturningInterface}. Drivers that emulate the scenario
+     * differently may override this method.
+     */
+    protected function checkDriverSupport(): void
+    {
+        if (!\in_array(static::DRIVER, ['postgres', 'sqlserver', 'sqlite'], true)) {
+            $this->markTestSkipped(\sprintf('Driver `%s` does not support RETURNING.', static::DRIVER));
+        }
     }
 
     /**

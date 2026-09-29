@@ -57,6 +57,9 @@
         "spiral/tokenizer": "^2.8 || ^3.0",
         "vimeo/psalm": "^6.0"
     },
+    "suggest": {
+        "llm/skills": "To sync the cycle-orm AI skill into your project"
+    },
     "autoload": {
         "psr-4": {
             "Cycle\\ORM\\": "src/"
@@ -73,6 +76,15 @@
     "extra": {
         "branch-alias": {
             "dev-2.x": "2.x-dev"
+        },
+        "skills": {
+            "sources": [
+                {
+                    "from": "github",
+                    "package": "cycle/skills",
+                    "skills": ["cycle-orm"]
+                }
+            ]
         }
     },
     "scripts": {

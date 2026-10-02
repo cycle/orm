@@ -242,13 +242,18 @@ class HasMany extends AbstractRelation
      */
     protected function calcDeleted(iterable $related, iterable $original): array
     {
-        $related = $this->extract($related);
-        $original = $this->extract($original);
-        return \array_udiff(
-            $original ?? [],
-            $related,
-            // static fn(object $a, object $b): int => strcmp(spl_object_hash($a), spl_object_hash($b))
-            static fn(object $a, object $b): int => (int) ($a === $b) - 1,
-        );
+        $relatedIds = [];
+        foreach ($this->extract($related) as $item) {
+            $relatedIds[\spl_object_id($item)] = true;
+        }
+
+        $deleted = [];
+        foreach ($this->extract($original) as $item) {
+            if (!isset($relatedIds[\spl_object_id($item)])) {
+                $deleted[] = $item;
+            }
+        }
+
+        return $deleted;
     }
 }

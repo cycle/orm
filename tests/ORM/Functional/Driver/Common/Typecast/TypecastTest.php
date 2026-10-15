@@ -16,6 +16,7 @@ use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book2;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookStates;
+use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\CallableWithArguments;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\IDCaster;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\JsonTypecast;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\ParentTypecast;
@@ -27,6 +28,14 @@ use Cycle\ORM\Tests\Traits\TableTrait;
 abstract class TypecastTest extends BaseTest
 {
     use TableTrait;
+
+    public static function callableArgumentTypes(): iterable
+    {
+        yield 'typed' => ['typed', [3], 'hello@world.com:3'];
+        yield 'untyped' => ['untyped', [3], 'hello@world.com:3'];
+        yield 'union' => ['union', [3], 'hello@world.com:3'];
+        yield 'single parameter' => ['single', [], 'hello@world.com'];
+    }
 
     // Insert command
 
@@ -145,6 +154,20 @@ abstract class TypecastTest extends BaseTest
 
         $this->assertSame('uuid', $book2->id);
         $this->assertNull($book2->title);
+    }
+
+    /**
+     * @dataProvider callableArgumentTypes
+     */
+    public function testLoadWithCallableArguments(string $method, array $args, string $expected): void
+    {
+        $schema = $this->orm->getSchema()->toArray();
+        $schema['user'][SchemaInterface::TYPECAST]['email'] = [CallableWithArguments::class, $method, $args];
+        $this->orm = $this->withSchema(new Schema($schema));
+
+        $user = $this->orm->getRepository(User::class)->findByPK(1);
+
+        $this->assertSame($expected, $user->email);
     }
 
     // Select

@@ -20,7 +20,7 @@ objects, support annotation declarations, and proxies via extensions.
 ## Features
 
 - ORM with has-one, has-many, many-through-many and polymorphic relations
-- Plain Old PHP objects, [AR](https://github.com/https://github.com/cycle/active-record), Custom objects
+- Plain Old PHP objects, [AR](https://github.com/cycle/active-record), Custom objects
   or [same entity type for multiple repositories](https://github.com/cycle/orm/tree/2.x/tests/ORM/Functional/Driver/Common/Classless)
 - eager and lazy loading, query builder with multiple fetch strategies
 - embedded entities, lazy/eager loaded embedded partials

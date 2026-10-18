@@ -175,11 +175,10 @@ final class Factory implements FactoryInterface
             return $this->collectionFactoryAlias[$name];
         }
         // Find by interface
-        if (\class_exists($name)) {
-            foreach ($this->collectionFactoryInterface as $interface => $factory) {
-                if (\is_subclass_of($name, $interface, true)) {
-                    return $this->collectionFactoryAlias[$name] = $factory->withCollectionClass($name);
-                }
+        foreach ($this->collectionFactoryInterface as $interface => $factory) {
+            if (\is_a($name, $interface, true)) {
+                /** @var class-string $name */
+                return $this->collectionFactoryAlias[$name] = $factory->withCollectionClass($name);
             }
         }
         return $this->collectionFactoryAlias[$name] = $this->factory->make($name);
